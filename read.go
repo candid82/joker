@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"unicode"
+	"unicode/utf8"
 )
 
 type (
 	Object    interface{}
+	Keyword   string
+	Symbol    string
 	ReadError struct {
 		msg string
 	}
@@ -125,18 +129,10 @@ func readCharacter(s io.RuneScanner) (Object, error) {
 	return r, nil
 }
 
-func readNumber(s io.RuneScanner) (Object, error) {
-	n, sign, fraction, isDouble := 0, 1, 0.0, false
+func readNumber(s io.RuneScanner, sign int) (Object, error) {
+	n, fraction, isDouble := 0, 0.0, false
 	d, _, err := s.ReadRune()
 	if err != nil {
-		return nil, err
-	}
-	if d == '-' {
-		sign = -1
-	} else {
-		s.UnreadRune()
-	}
-	if d, _, err = s.ReadRune(); err != nil {
 		return nil, err
 	}
 	for unicode.IsDigit(d) {
@@ -169,6 +165,58 @@ func readNumber(s io.RuneScanner) (Object, error) {
 	return sign * n, nil
 }
 
+func isSymbolInitial(r rune) bool {
+	switch r {
+	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&':
+		return true
+	}
+	return unicode.IsLetter(r)
+}
+
+func isSymbolRune(r rune) bool {
+	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#'
+}
+
+func readSymbol(s io.RuneScanner, first rune) (Object, error) {
+	var b bytes.Buffer
+	b.WriteRune(first)
+	var lastAdded rune
+	r, _, err := s.ReadRune()
+	if err != nil {
+		return nil, err
+	}
+	for isSymbolRune(r) {
+		if r == ':' {
+			if b.Len() > 1 && lastAdded == ':' {
+				return nil, ReadError{msg: "Invalid use of ':' in symbol name"}
+			}
+		}
+		b.WriteRune(r)
+		lastAdded = r
+		if r, _, err = s.ReadRune(); err != nil {
+			return nil, err
+		}
+	}
+	if lastAdded == ':' {
+		return nil, ReadError{msg: "Invalid use of ':' in symbol name"}
+	}
+	s.UnreadRune()
+	str := b.String()
+	switch {
+	case str == "nil":
+		return nil, nil
+	case str == "true":
+		return true, nil
+	case str == "false":
+		return false, nil
+	default:
+		if r, _ = utf8.DecodeRuneInString(str); r == ':' {
+			return Keyword(str), nil
+		}
+		return Symbol(str), nil
+	}
+}
+
 func Read(s io.RuneScanner) (Object, error) {
 	eatWhitespace(s)
 	r, _, err := s.ReadRune()
@@ -180,7 +228,15 @@ func Read(s io.RuneScanner) (Object, error) {
 		return readCharacter(s)
 	case unicode.IsDigit(r):
 		s.UnreadRune()
-		return readNumber(s)
+		return readNumber(s, 1)
+	case r == '-':
+		if r, _, err = peekRune(s); err != nil {
+			return nil, err
+		}
+		if unicode.IsDigit(r) {
+			return readNumber(s, -1)
+		}
+		return readSymbol(s, '-')
 	}
 	return nil, ReadError{msg: fmt.Sprintf("Unexpected %v", r)}
 }
