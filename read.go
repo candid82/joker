@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"unicode"
-	"unicode/utf8"
 )
 
 type (
@@ -209,12 +208,43 @@ func readSymbol(s io.RuneScanner, first rune) (Object, error) {
 		return true, nil
 	case str == "false":
 		return false, nil
+	case first == ':':
+		return Keyword(str), nil
 	default:
-		if r, _ = utf8.DecodeRuneInString(str); r == ':' {
-			return Keyword(str), nil
-		}
 		return Symbol(str), nil
 	}
+}
+
+func readString(s io.RuneReader) (Object, error) {
+	var b bytes.Buffer
+	r, _, err := s.ReadRune()
+	if err != nil {
+		return nil, err
+	}
+	for r != '"' {
+		if r == '\\' {
+			if r, _, err = s.ReadRune(); err != nil {
+				return nil, err
+			}
+			switch r {
+			case 'n':
+				r = '\n'
+			case 't':
+				r = '\t'
+			case 'r':
+				r = '\r'
+			case 'b':
+				r = '\b'
+			case 'f':
+				r = '\f'
+			}
+		}
+		b.WriteRune(r)
+		if r, _, err = s.ReadRune(); err != nil {
+			return nil, err
+		}
+	}
+	return b.String(), nil
 }
 
 func Read(s io.RuneScanner) (Object, error) {
@@ -237,6 +267,10 @@ func Read(s io.RuneScanner) (Object, error) {
 			return readNumber(s, -1)
 		}
 		return readSymbol(s, '-')
+	case isSymbolInitial(r):
+		return readSymbol(s, r)
+	case r == '"':
+		return readString(s)
 	}
 	return nil, ReadError{msg: fmt.Sprintf("Unexpected %v", r)}
 }
