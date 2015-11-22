@@ -14,14 +14,42 @@ type (
 	ReadError struct {
 		msg string
 	}
+	Reader struct {
+		scanner io.RuneScanner
+		line    int
+		column  int
+		isEof   bool
+	}
 )
 
-func peekRune(s io.RuneScanner) (rune, int, error) {
-	r, i, err := s.ReadRune()
-	if err == nil {
-		s.UnreadRune()
+const EOF = -1
+
+func (reader *Reader) Get() rune {
+	r, _, err := reader.scanner.ReadRune()
+	switch {
+	case err == io.EOF:
+		reader.isEof = true
+		return EOF
+	case err != nil:
+		panic(err)
+	default:
+		return r
 	}
-	return r, i, err
+}
+
+func (reader *Reader) Unget() {
+	if reader.isEof {
+		return
+	}
+	if err := reader.scanner.UnreadRune(); err != nil {
+		panic(err)
+	}
+}
+
+func (reader *Reader) Peek() rune {
+	r := reader.Get()
+	reader.Unget()
+	return r
 }
 
 func (err ReadError) Error() string {
@@ -30,134 +58,116 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';':
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF:
 		return true
 	}
 	return unicode.IsSpace(r)
 }
 
-func eatString(s io.RuneScanner, str string) error {
+func eatString(reader *Reader, str string) error {
 	for _, sr := range str {
-		r, _, err := s.ReadRune()
-		if err != nil {
-			return err
-		}
-		if r != sr {
+		if r := reader.Get(); r != sr {
 			return ReadError{msg: fmt.Sprintf("Unexpected character %U", r)}
 		}
 	}
 	return nil
 }
 
-func peekExpectedDelimiter(s io.RuneScanner) error {
-	r, _, err := peekRune(s)
-	if err != nil {
-		return err
-	}
+func peekExpectedDelimiter(reader *Reader) error {
+	r := reader.Peek()
 	if !isDelimiter(r) {
 		return ReadError{msg: "Character not followed by delimiter"}
 	}
 	return nil
 }
 
-func readSpecialCharacter(s io.RuneScanner, ending string, r rune) (Object, error) {
-	err := eatString(s, ending)
-	if err != nil {
+func readSpecialCharacter(reader *Reader, ending string, r rune) (Object, error) {
+	if err := eatString(reader, ending); err != nil {
 		return nil, err
 	}
-	err = peekExpectedDelimiter(s)
-	if err != nil {
+	if err := peekExpectedDelimiter(reader); err != nil {
 		return nil, err
 	}
 	return r, nil
 }
 
-func eatWhitespace(s io.RuneScanner) {
-	r, _, err := s.ReadRune()
-	for err == nil {
+func eatWhitespace(reader *Reader) {
+	r := reader.Get()
+	for r != EOF {
 		if unicode.IsSpace(r) {
-			r, _, err = s.ReadRune()
+			r = reader.Get()
 			continue
 		}
 		if r == ';' {
-			for r != '\n' && err == nil {
-				r, _, err = s.ReadRune()
+			for r != '\n' && r != EOF {
+				r = reader.Get()
 			}
-			r, _, err = s.ReadRune()
+			r = reader.Get()
 			continue
 		}
-		s.UnreadRune()
+		reader.Unget()
 		break
 	}
 }
 
-func readCharacter(s io.RuneScanner) (Object, error) {
-	r, _, err := s.ReadRune()
-	if err != nil {
+func readCharacter(reader *Reader) (Object, error) {
+	r := reader.Get()
+	if r == EOF {
 		return nil, ReadError{msg: "Incomplete character literal"}
 	}
 	switch r {
 	case 's':
-		if next, _, err := peekRune(s); err == nil && next == 'p' {
-			return readSpecialCharacter(s, "pace", ' ')
+		if reader.Peek() == 'p' {
+			return readSpecialCharacter(reader, "pace", ' ')
 		}
 	case 'n':
-		if next, _, err := peekRune(s); err == nil && next == 'e' {
-			return readSpecialCharacter(s, "ewline", '\n')
+		if reader.Peek() == 'e' {
+			return readSpecialCharacter(reader, "ewline", '\n')
 		}
 	case 't':
-		if next, _, err := peekRune(s); err == nil && next == 'a' {
-			return readSpecialCharacter(s, "ab", '\t')
+		if reader.Peek() == 'a' {
+			return readSpecialCharacter(reader, "ab", '\t')
 		}
 	case 'f':
-		if next, _, err := peekRune(s); err == nil && next == 'o' {
-			return readSpecialCharacter(s, "ormfeed", '\f')
+		if reader.Peek() == 'o' {
+			return readSpecialCharacter(reader, "ormfeed", '\f')
 		}
 	case 'b':
-		if next, _, err := peekRune(s); err == nil && next == 'a' {
-			return readSpecialCharacter(s, "ackspace", '\b')
+		if reader.Peek() == 'a' {
+			return readSpecialCharacter(reader, "ackspace", '\b')
 		}
 	case 'r':
-		if next, _, err := peekRune(s); err == nil && next == 'e' {
-			return readSpecialCharacter(s, "eturn", '\r')
+		if reader.Peek() == 'e' {
+			return readSpecialCharacter(reader, "eturn", '\r')
 		}
 	}
-	if err = peekExpectedDelimiter(s); err != nil {
+	if err := peekExpectedDelimiter(reader); err != nil {
 		return nil, err
 	}
 	return r, nil
 }
 
-func readNumber(s io.RuneScanner, sign int) (Object, error) {
+func readNumber(reader *Reader, sign int) (Object, error) {
 	n, fraction, isDouble := 0, 0.0, false
-	d, _, err := s.ReadRune()
-	if err != nil {
-		return nil, err
-	}
+	d := reader.Get()
 	for unicode.IsDigit(d) {
 		n = n*10 + int(d-'0')
-		if d, _, err = s.ReadRune(); err != nil {
-			return nil, err
-		}
+		d = reader.Get()
 	}
 	if d == '.' {
 		isDouble = true
 		weight := 10.0
-		if d, _, err = s.ReadRune(); err != nil {
-			return nil, err
-		}
+		d = reader.Get()
 		for unicode.IsDigit(d) {
 			fraction += float64(d-'0') / weight
 			weight *= 10
-			if d, _, err = s.ReadRune(); err != nil {
-				return nil, err
-			}
+			d = reader.Get()
 		}
 	}
 	if !isDelimiter(d) {
 		return nil, ReadError{msg: "Number not followed by delimiter"}
 	}
-	s.UnreadRune()
+	reader.Unget()
 	if isDouble {
 		return float64(sign) * (float64(n) + fraction), nil
 	}
@@ -176,14 +186,11 @@ func isSymbolRune(r rune) bool {
 	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#'
 }
 
-func readSymbol(s io.RuneScanner, first rune) (Object, error) {
+func readSymbol(reader *Reader, first rune) (Object, error) {
 	var b bytes.Buffer
 	b.WriteRune(first)
 	var lastAdded rune
-	r, _, err := s.ReadRune()
-	if err != nil {
-		return nil, err
-	}
+	r := reader.Get()
 	for isSymbolRune(r) {
 		if r == ':' {
 			if b.Len() > 1 && lastAdded == ':' {
@@ -192,14 +199,12 @@ func readSymbol(s io.RuneScanner, first rune) (Object, error) {
 		}
 		b.WriteRune(r)
 		lastAdded = r
-		if r, _, err = s.ReadRune(); err != nil {
-			return nil, err
-		}
+		r = reader.Get()
 	}
 	if lastAdded == ':' {
 		return nil, ReadError{msg: "Invalid use of ':' in symbol name"}
 	}
-	s.UnreadRune()
+	reader.Unget()
 	str := b.String()
 	switch {
 	case str == "nil":
@@ -215,17 +220,12 @@ func readSymbol(s io.RuneScanner, first rune) (Object, error) {
 	}
 }
 
-func readString(s io.RuneReader) (Object, error) {
+func readString(reader *Reader) (Object, error) {
 	var b bytes.Buffer
-	r, _, err := s.ReadRune()
-	if err != nil {
-		return nil, err
-	}
+	r := reader.Get()
 	for r != '"' {
 		if r == '\\' {
-			if r, _, err = s.ReadRune(); err != nil {
-				return nil, err
-			}
+			r = reader.Get()
 			switch r {
 			case 'n':
 				r = '\n'
@@ -239,38 +239,41 @@ func readString(s io.RuneReader) (Object, error) {
 				r = '\f'
 			}
 		}
-		b.WriteRune(r)
-		if r, _, err = s.ReadRune(); err != nil {
-			return nil, err
+		if r == EOF {
+			return nil, ReadError{msg: "Non-terminated string literal"}
 		}
+		b.WriteRune(r)
+		r = reader.Get()
 	}
 	return b.String(), nil
 }
 
-func Read(s io.RuneScanner) (Object, error) {
-	eatWhitespace(s)
-	r, _, err := s.ReadRune()
-	if err != nil {
-		return nil, err
-	}
+func Read(reader *Reader) (Object, error) {
+	eatWhitespace(reader)
+	r := reader.Get()
 	switch {
 	case r == '\\':
-		return readCharacter(s)
+		return readCharacter(reader)
 	case unicode.IsDigit(r):
-		s.UnreadRune()
-		return readNumber(s, 1)
+		reader.Unget()
+		return readNumber(reader, 1)
 	case r == '-':
-		if r, _, err = peekRune(s); err != nil {
-			return nil, err
+		if unicode.IsDigit(reader.Peek()) {
+			return readNumber(reader, -1)
 		}
-		if unicode.IsDigit(r) {
-			return readNumber(s, -1)
-		}
-		return readSymbol(s, '-')
+		return readSymbol(reader, '-')
 	case isSymbolInitial(r):
-		return readSymbol(s, r)
+		return readSymbol(reader, r)
 	case r == '"':
-		return readString(s)
+		return readString(reader)
 	}
 	return nil, ReadError{msg: fmt.Sprintf("Unexpected %v", r)}
+}
+
+func TryRead(reader *Reader) (Object, error) {
+	eatWhitespace(reader)
+	if reader.Peek() == EOF {
+		return nil, io.EOF
+	}
+	return Read(reader)
 }
