@@ -12,17 +12,32 @@ type (
 	Keyword   string
 	Symbol    string
 	ReadError struct {
-		msg string
+		msg    string
+		line   int
+		column int
 	}
 	Reader struct {
-		scanner io.RuneScanner
-		line    int
-		column  int
-		isEof   bool
+		scanner        io.RuneScanner
+		line           int
+		prevLineLength int
+		column         int
+		isEof          bool
 	}
 )
 
 const EOF = -1
+
+func MakeReadError(reader *Reader, msg string) ReadError {
+	return ReadError{
+		line:   reader.line,
+		column: reader.column,
+		msg:    msg,
+	}
+}
+
+func NewReader(scanner io.RuneScanner) *Reader {
+	return &Reader{line: 1, scanner: scanner}
+}
 
 func (reader *Reader) Get() rune {
 	r, _, err := reader.scanner.ReadRune()
@@ -32,7 +47,13 @@ func (reader *Reader) Get() rune {
 		return EOF
 	case err != nil:
 		panic(err)
+	case r == '\n':
+		reader.line++
+		reader.prevLineLength = reader.column
+		reader.column = 0
+		return r
 	default:
+		reader.column++
 		return r
 	}
 }
@@ -44,6 +65,12 @@ func (reader *Reader) Unget() {
 	if err := reader.scanner.UnreadRune(); err != nil {
 		panic(err)
 	}
+	if reader.column == 0 {
+		reader.line--
+		reader.column = reader.prevLineLength
+	} else {
+		reader.column--
+	}
 }
 
 func (reader *Reader) Peek() rune {
@@ -53,7 +80,7 @@ func (reader *Reader) Peek() rune {
 }
 
 func (err ReadError) Error() string {
-	return err.msg
+	return fmt.Sprintf("stdin:%d:%d: %s", err.line, err.column, err.msg)
 }
 
 func isDelimiter(r rune) bool {
@@ -67,7 +94,7 @@ func isDelimiter(r rune) bool {
 func eatString(reader *Reader, str string) error {
 	for _, sr := range str {
 		if r := reader.Get(); r != sr {
-			return ReadError{msg: fmt.Sprintf("Unexpected character %U", r)}
+			return MakeReadError(reader, fmt.Sprintf("Unexpected character %U", r))
 		}
 	}
 	return nil
@@ -76,7 +103,7 @@ func eatString(reader *Reader, str string) error {
 func peekExpectedDelimiter(reader *Reader) error {
 	r := reader.Peek()
 	if !isDelimiter(r) {
-		return ReadError{msg: "Character not followed by delimiter"}
+		return MakeReadError(reader, "Character not followed by delimiter")
 	}
 	return nil
 }
@@ -113,7 +140,7 @@ func eatWhitespace(reader *Reader) {
 func readCharacter(reader *Reader) (Object, error) {
 	r := reader.Get()
 	if r == EOF {
-		return nil, ReadError{msg: "Incomplete character literal"}
+		return nil, MakeReadError(reader, "Incomplete character literal")
 	}
 	switch r {
 	case 's':
@@ -165,7 +192,7 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 		}
 	}
 	if !isDelimiter(d) {
-		return nil, ReadError{msg: "Number not followed by delimiter"}
+		return nil, MakeReadError(reader, "Number not followed by delimiter")
 	}
 	reader.Unget()
 	if isDouble {
@@ -194,7 +221,7 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 	for isSymbolRune(r) {
 		if r == ':' {
 			if b.Len() > 1 && lastAdded == ':' {
-				return nil, ReadError{msg: "Invalid use of ':' in symbol name"}
+				return nil, MakeReadError(reader, "Invalid use of ':' in symbol name")
 			}
 		}
 		b.WriteRune(r)
@@ -202,7 +229,7 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 		r = reader.Get()
 	}
 	if lastAdded == ':' {
-		return nil, ReadError{msg: "Invalid use of ':' in symbol name"}
+		return nil, MakeReadError(reader, "Invalid use of ':' in symbol name")
 	}
 	reader.Unget()
 	str := b.String()
@@ -240,7 +267,7 @@ func readString(reader *Reader) (Object, error) {
 			}
 		}
 		if r == EOF {
-			return nil, ReadError{msg: "Non-terminated string literal"}
+			return nil, MakeReadError(reader, "Non-terminated string literal")
 		}
 		b.WriteRune(r)
 		r = reader.Get()
@@ -267,7 +294,7 @@ func Read(reader *Reader) (Object, error) {
 	case r == '"':
 		return readString(reader)
 	}
-	return nil, ReadError{msg: fmt.Sprintf("Unexpected %v", r)}
+	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %v", r))
 }
 
 func TryRead(reader *Reader) (Object, error) {
