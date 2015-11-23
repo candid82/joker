@@ -19,7 +19,7 @@ func main() {
 		case err != nil:
 			fmt.Println("Error: ", err)
 		default:
-			fmt.Printf("%v\n", obj)
+			fmt.Println(obj.ToString(false))
 		}
 	}
 }

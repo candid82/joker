@@ -8,9 +8,16 @@ import (
 )
 
 type (
-	Object    interface{}
+	Object interface {
+		ToString(escape bool) string
+	}
+	Char      rune
+	Double    float64
+	Int       int
+	Bool      bool
 	Keyword   string
 	Symbol    string
+	String    string
 	ReadError struct {
 		msg    string
 		line   int
@@ -26,6 +33,34 @@ type (
 )
 
 const EOF = -1
+
+func (c Char) ToString(escape bool) string {
+	return fmt.Sprintf("%c", c)
+}
+
+func (d Double) ToString(escape bool) string {
+	return fmt.Sprintf("%f", float64(d))
+}
+
+func (i Int) ToString(escape bool) string {
+	return fmt.Sprintf("%d", int(i))
+}
+
+func (b Bool) ToString(escape bool) string {
+	return fmt.Sprintf("%b", bool(b))
+}
+
+func (k Keyword) ToString(escape bool) string {
+	return string(k)
+}
+
+func (s Symbol) ToString(escape bool) string {
+	return string(s)
+}
+
+func (s String) ToString(escape bool) string {
+	return string(s)
+}
 
 func MakeReadError(reader *Reader, msg string) ReadError {
 	return ReadError{
@@ -115,7 +150,7 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) (Object, error)
 	if err := peekExpectedDelimiter(reader); err != nil {
 		return nil, err
 	}
-	return r, nil
+	return Char(r), nil
 }
 
 func eatWhitespace(reader *Reader) {
@@ -171,7 +206,7 @@ func readCharacter(reader *Reader) (Object, error) {
 	if err := peekExpectedDelimiter(reader); err != nil {
 		return nil, err
 	}
-	return r, nil
+	return Char(r), nil
 }
 
 func readNumber(reader *Reader, sign int) (Object, error) {
@@ -196,9 +231,9 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 	}
 	reader.Unget()
 	if isDouble {
-		return float64(sign) * (float64(n) + fraction), nil
+		return Double(float64(sign) * (float64(n) + fraction)), nil
 	}
-	return sign * n, nil
+	return Int(sign * n), nil
 }
 
 func isSymbolInitial(r rune) bool {
@@ -237,9 +272,9 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 	case str == "nil":
 		return nil, nil
 	case str == "true":
-		return true, nil
+		return Bool(true), nil
 	case str == "false":
-		return false, nil
+		return Bool(false), nil
 	case first == ':':
 		return Keyword(str), nil
 	default:
@@ -272,7 +307,28 @@ func readString(reader *Reader) (Object, error) {
 		b.WriteRune(r)
 		r = reader.Get()
 	}
-	return b.String(), nil
+	return String(b.String()), nil
+}
+
+func readList(reader *Reader) (Object, error) {
+	s := make([]Object, 0, 10)
+	eatWhitespace(reader)
+	r := reader.Peek()
+	for r != ')' {
+		obj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		s = append(s, obj)
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	list := EmptyList
+	for i := len(s) - 1; i >= 0; i-- {
+		list = list.Cons(s[i])
+	}
+	return list, nil
 }
 
 func Read(reader *Reader) (Object, error) {
@@ -293,6 +349,8 @@ func Read(reader *Reader) (Object, error) {
 		return readSymbol(reader, r)
 	case r == '"':
 		return readString(reader)
+	case r == '(':
+		return readList(reader)
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %v", r))
 }
