@@ -331,6 +331,23 @@ func readList(reader *Reader) (Object, error) {
 	return list, nil
 }
 
+func readVector(reader *Reader) (Object, error) {
+	result := EmptyVector
+	eatWhitespace(reader)
+	r := reader.Peek()
+	for r != ']' {
+		obj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		result = result.conj(obj)
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	return result, nil
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -351,6 +368,8 @@ func Read(reader *Reader) (Object, error) {
 		return readString(reader)
 	case r == '(':
 		return readList(reader)
+	case r == '[':
+		return readVector(reader)
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %v", r))
 }
