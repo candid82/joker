@@ -63,7 +63,7 @@ func (i Int) Equal(other interface{}) bool {
 }
 
 func (b Bool) ToString(escape bool) string {
-	return fmt.Sprintf("%b", bool(b))
+	return fmt.Sprintf("%t", bool(b))
 }
 
 func (b Bool) Equal(other interface{}) bool {
@@ -270,14 +270,14 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 
 func isSymbolInitial(r rune) bool {
 	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&':
+	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.':
 		return true
 	}
 	return unicode.IsLetter(r)
 }
 
 func isSymbolRune(r rune) bool {
-	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#'
+	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/'
 }
 
 func readSymbol(reader *Reader, first rune) (Object, error) {
@@ -295,8 +295,8 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 		lastAdded = r
 		r = reader.Get()
 	}
-	if lastAdded == ':' {
-		return nil, MakeReadError(reader, "Invalid use of ':' in symbol name")
+	if lastAdded == ':' || lastAdded == '/' {
+		return nil, MakeReadError(reader, fmt.Sprintf("Invalid use of %c in symbol name", lastAdded))
 	}
 	reader.Unget()
 	str := b.String()
@@ -403,6 +403,31 @@ func readMap(reader *Reader) (Object, error) {
 	return m, nil
 }
 
+func makeQuote(obj Object) Object {
+	return EmptyList.Cons(obj).Cons(Symbol("quote"))
+}
+
+func readMeta(reader *Reader) (*ArrayMap, error) {
+	obj, err := Read(reader)
+	if err != nil {
+		return nil, err
+	}
+	switch m := obj.(type) {
+	case *ArrayMap:
+		return m, nil
+	case String, Symbol:
+		return &ArrayMap{arr: []Object{Keyword(":tag"), obj}}, nil
+	case Keyword:
+		return &ArrayMap{arr: []Object{obj, Bool(true)}}, nil
+	default:
+		return nil, MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map")
+	}
+}
+
+func makeWithMeta(obj Object, meta *ArrayMap) Object {
+	return EmptyList.Cons(meta).Cons(obj).Cons(Symbol("with-meta"))
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -427,8 +452,26 @@ func Read(reader *Reader) (Object, error) {
 		return readVector(reader)
 	case r == '{':
 		return readMap(reader)
+	case r == '/' && isDelimiter(reader.Peek()):
+		return Symbol("/"), nil
+	case r == '\'':
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return makeQuote(nextObj), nil
+	case r == '^':
+		meta, err := readMeta(reader)
+		if err != nil {
+			return nil, err
+		}
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return makeWithMeta(nextObj, meta), nil
 	}
-	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %v", r))
+	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
 }
 
 func TryRead(reader *Reader) (Object, error) {
