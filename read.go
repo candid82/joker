@@ -8,7 +8,11 @@ import (
 )
 
 type (
+	Equality interface {
+		Equal(interface{}) bool
+	}
 	Object interface {
+		Equality
 		ToString(escape bool) string
 	}
 	Char      rune
@@ -38,28 +42,56 @@ func (c Char) ToString(escape bool) string {
 	return fmt.Sprintf("%c", c)
 }
 
+func (c Char) Equal(other interface{}) bool {
+	return c == other
+}
+
 func (d Double) ToString(escape bool) string {
 	return fmt.Sprintf("%f", float64(d))
+}
+
+func (d Double) Equal(other interface{}) bool {
+	return d == other
 }
 
 func (i Int) ToString(escape bool) string {
 	return fmt.Sprintf("%d", int(i))
 }
 
+func (i Int) Equal(other interface{}) bool {
+	return i == other
+}
+
 func (b Bool) ToString(escape bool) string {
 	return fmt.Sprintf("%b", bool(b))
+}
+
+func (b Bool) Equal(other interface{}) bool {
+	return b == other
 }
 
 func (k Keyword) ToString(escape bool) string {
 	return string(k)
 }
 
+func (k Keyword) Equal(other interface{}) bool {
+	return k == other
+}
+
 func (s Symbol) ToString(escape bool) string {
 	return string(s)
 }
 
+func (s Symbol) Equal(other interface{}) bool {
+	return s == other
+}
+
 func (s String) ToString(escape bool) string {
 	return string(s)
+}
+
+func (s String) Equal(other interface{}) bool {
+	return s == other
 }
 
 func MakeReadError(reader *Reader, msg string) ReadError {
@@ -348,6 +380,29 @@ func readVector(reader *Reader) (Object, error) {
 	return result, nil
 }
 
+func readMap(reader *Reader) (Object, error) {
+	m := EmptyArrayMap()
+	eatWhitespace(reader)
+	r := reader.Peek()
+	for r != '}' {
+		key, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		value, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		if !m.Add(key, value) {
+			return nil, MakeReadError(reader, "Duplicate key "+key.ToString(false))
+		}
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	return m, nil
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -370,6 +425,8 @@ func Read(reader *Reader) (Object, error) {
 		return readList(reader)
 	case r == '[':
 		return readVector(reader)
+	case r == '{':
+		return readMap(reader)
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %v", r))
 }

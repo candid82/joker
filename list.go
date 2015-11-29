@@ -39,4 +39,26 @@ func (list *List) ToString(escape bool) string {
 	return b.String()
 }
 
+func (list *List) Equal(other interface{}) bool {
+	switch otherList := other.(type) {
+	case *List:
+		if list == otherList {
+			return true
+		}
+		if list.count != otherList.count {
+			return false
+		}
+		for list.count > 0 {
+			if !list.first.Equal(otherList.first) {
+				return false
+			}
+			list = list.rest
+			otherList = otherList.rest
+		}
+		return true
+	default:
+		return false
+	}
+}
+
 var EmptyList = NewList(nil, nil)

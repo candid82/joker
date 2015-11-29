@@ -110,6 +110,26 @@ func (v *Vector) ToString(escape bool) string {
 	return b.String()
 }
 
+func (v *Vector) Equal(other interface{}) bool {
+	switch otherVector := other.(type) {
+	case *Vector:
+		if v == otherVector {
+			return true
+		}
+		if v.count != otherVector.count {
+			return false
+		}
+		for i := 0; i < v.count-1; i++ {
+			if v.at(i) != otherVector.at(i) {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,
