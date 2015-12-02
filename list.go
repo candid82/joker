@@ -39,7 +39,7 @@ func (list *List) ToString(escape bool) string {
 	return b.String()
 }
 
-func (list *List) Equal(other interface{}) bool {
+func (list *List) Equals(other interface{}) bool {
 	switch otherList := other.(type) {
 	case *List:
 		if list == otherList {
@@ -49,7 +49,7 @@ func (list *List) Equal(other interface{}) bool {
 			return false
 		}
 		for list.count > 0 {
-			if !list.first.Equal(otherList.first) {
+			if !list.first.Equals(otherList.first) {
 				return false
 			}
 			list = list.rest

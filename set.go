@@ -40,10 +40,10 @@ func (set *Set) ToString(escape bool) string {
 	return b.String()
 }
 
-func (set *Set) Equal(other interface{}) bool {
+func (set *Set) Equals(other interface{}) bool {
 	switch otherSet := other.(type) {
 	case *Set:
-		return set.m.Equal(otherSet.m)
+		return set.m.Equals(otherSet.m)
 	default:
 		return false
 	}

@@ -9,7 +9,7 @@ import (
 
 type (
 	Equality interface {
-		Equal(interface{}) bool
+		Equals(interface{}) bool
 	}
 	Object interface {
 		Equality
@@ -42,7 +42,7 @@ func (c Char) ToString(escape bool) string {
 	return fmt.Sprintf("%c", c)
 }
 
-func (c Char) Equal(other interface{}) bool {
+func (c Char) Equals(other interface{}) bool {
 	return c == other
 }
 
@@ -50,7 +50,7 @@ func (d Double) ToString(escape bool) string {
 	return fmt.Sprintf("%f", float64(d))
 }
 
-func (d Double) Equal(other interface{}) bool {
+func (d Double) Equals(other interface{}) bool {
 	return d == other
 }
 
@@ -58,7 +58,7 @@ func (i Int) ToString(escape bool) string {
 	return fmt.Sprintf("%d", int(i))
 }
 
-func (i Int) Equal(other interface{}) bool {
+func (i Int) Equals(other interface{}) bool {
 	return i == other
 }
 
@@ -66,7 +66,7 @@ func (b Bool) ToString(escape bool) string {
 	return fmt.Sprintf("%t", bool(b))
 }
 
-func (b Bool) Equal(other interface{}) bool {
+func (b Bool) Equals(other interface{}) bool {
 	return b == other
 }
 
@@ -74,7 +74,7 @@ func (k Keyword) ToString(escape bool) string {
 	return string(k)
 }
 
-func (k Keyword) Equal(other interface{}) bool {
+func (k Keyword) Equals(other interface{}) bool {
 	return k == other
 }
 
@@ -82,7 +82,7 @@ func (s Symbol) ToString(escape bool) string {
 	return string(s)
 }
 
-func (s Symbol) Equal(other interface{}) bool {
+func (s Symbol) Equals(other interface{}) bool {
 	return s == other
 }
 
@@ -90,7 +90,7 @@ func (s String) ToString(escape bool) string {
 	return string(s)
 }
 
-func (s String) Equal(other interface{}) bool {
+func (s String) Equals(other interface{}) bool {
 	return s == other
 }
 

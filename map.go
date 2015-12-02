@@ -12,7 +12,7 @@ type (
 
 func (m *ArrayMap) indexOf(key Object) int {
 	for i := 0; i < len(m.arr); i += 2 {
-		if m.arr[i].Equal(key) {
+		if m.arr[i].Equals(key) {
 			return i
 		}
 	}
@@ -62,7 +62,7 @@ func (m *ArrayMap) Without(key Object) *ArrayMap {
 	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
 	var i, j int
 	for i, j = 0, 0; i < len(m.arr); i += 2 {
-		if m.arr[i].Equal(key) {
+		if m.arr[i].Equals(key) {
 			continue
 		}
 		result.arr[j] = m.arr[i]
@@ -97,7 +97,7 @@ func (m *ArrayMap) ToString(escape bool) string {
 	return b.String()
 }
 
-func (m *ArrayMap) Equal(other interface{}) bool {
+func (m *ArrayMap) Equals(other interface{}) bool {
 	switch otherMap := other.(type) {
 	case *ArrayMap:
 		if m == otherMap {

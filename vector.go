@@ -110,7 +110,7 @@ func (v *Vector) ToString(escape bool) string {
 	return b.String()
 }
 
-func (v *Vector) Equal(other interface{}) bool {
+func (v *Vector) Equals(other interface{}) bool {
 	switch otherVector := other.(type) {
 	case *Vector:
 		if v == otherVector {
