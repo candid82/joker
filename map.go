@@ -58,6 +58,23 @@ func (m *ArrayMap) Assoc(key Object, value Object) *ArrayMap {
 	return &result
 }
 
+func (m *ArrayMap) Without(key Object) *ArrayMap {
+	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
+	var i, j int
+	for i, j = 0, 0; i < len(m.arr); i += 2 {
+		if m.arr[i].Equal(key) {
+			continue
+		}
+		result.arr[j] = m.arr[i]
+		result.arr[j+1] = m.arr[i+1]
+		j += 2
+	}
+	if i != j {
+		result.arr = result.arr[:j]
+	}
+	return &result
+}
+
 func EmptyArrayMap() *ArrayMap {
 	return &ArrayMap{}
 }

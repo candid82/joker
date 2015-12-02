@@ -403,6 +403,25 @@ func readMap(reader *Reader) (Object, error) {
 	return m, nil
 }
 
+func readSet(reader *Reader) (Object, error) {
+	set := EmptySet()
+	eatWhitespace(reader)
+	r := reader.Peek()
+	for r != '}' {
+		obj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		if !set.Add(obj) {
+			return nil, MakeReadError(reader, "Duplicate key "+obj.ToString(false))
+		}
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	return set, nil
+}
+
 func makeQuote(obj Object) Object {
 	return EmptyList.Cons(obj).Cons(Symbol("quote"))
 }
@@ -452,6 +471,9 @@ func Read(reader *Reader) (Object, error) {
 		return readVector(reader)
 	case r == '{':
 		return readMap(reader)
+	case r == '#' && reader.Peek() == '{':
+		reader.Get()
+		return readSet(reader)
 	case r == '/' && isDelimiter(reader.Peek()):
 		return Symbol("/"), nil
 	case r == '\'':
