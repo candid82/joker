@@ -26,6 +26,15 @@ func readFile(filename string) {
 	}
 }
 
+func skipRestOfLine(reader *Reader) {
+	for {
+		switch reader.Get() {
+		case EOF, '\n':
+			return
+		}
+	}
+}
+
 func repl() {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
 	reader := NewReader(bufio.NewReader(os.Stdin))
@@ -37,6 +46,7 @@ func repl() {
 			return
 		case err != nil:
 			fmt.Fprintln(os.Stderr, "Error: ", err)
+			skipRestOfLine(reader)
 		default:
 			fmt.Println(obj.ToString(false))
 		}
