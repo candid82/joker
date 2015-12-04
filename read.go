@@ -492,6 +492,10 @@ func Read(reader *Reader) (Object, error) {
 			return nil, err
 		}
 		return makeWithMeta(nextObj, meta), nil
+	case r == '#' && reader.Peek() == '_':
+		reader.Get()
+		Read(reader)
+		return Read(reader)
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
 }
