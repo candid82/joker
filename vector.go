@@ -133,6 +133,6 @@ func (v *Vector) Equals(other interface{}) bool {
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,
-	root:  make([]interface{}, 0, 32),
+	root:  make([]interface{}, 32),
 	tail:  make([]interface{}, 0, 32),
 }
