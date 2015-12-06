@@ -52,7 +52,7 @@ func newPath(level uint, node []interface{}) []interface{} {
 	if level == 0 {
 		return node
 	}
-	result := make([]interface{}, 1, 32)
+	result := make([]interface{}, 32)
 	result[0] = newPath(level-5, node)
 	return result
 }
@@ -64,9 +64,8 @@ func (v *Vector) pushTail(level uint, parent []interface{}, tailNode []interface
 	if level == 5 {
 		nodeToInsert = tailNode
 	} else {
-		child := parent[subidx].([]interface{})
-		if child != nil {
-			nodeToInsert = v.pushTail(level-5, child, tailNode)
+		if parent[subidx] != nil {
+			nodeToInsert = v.pushTail(level-5, parent[subidx].([]interface{}), tailNode)
 		} else {
 			nodeToInsert = newPath(level-5, tailNode)
 		}
@@ -84,7 +83,7 @@ func (v *Vector) conj(obj Object) *Vector {
 	var newRoot []interface{}
 	newShift := v.shift
 	if (v.count >> 5) > (1 << v.shift) {
-		newRoot = make([]interface{}, 2, 32)
+		newRoot = make([]interface{}, 32)
 		newRoot[0] = v.root
 		newRoot[1] = newPath(v.shift, v.tail)
 		newShift += 5
