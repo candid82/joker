@@ -38,6 +38,11 @@ type (
 
 const EOF = -1
 
+var (
+	ARGS   map[int]Symbol
+	GENSYM int
+)
+
 func (c Char) ToString(escape bool) string {
 	return fmt.Sprintf("%c", c)
 }
@@ -270,7 +275,7 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 
 func isSymbolInitial(r rune) bool {
 	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.':
+	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.', '%':
 		return true
 	}
 	return unicode.IsLetter(r)
@@ -447,6 +452,81 @@ func makeWithMeta(obj Object, meta *ArrayMap) Object {
 	return EmptyList.Cons(meta).Cons(obj).Cons(Symbol("with-meta"))
 }
 
+func fillInMissingArgs(args map[int]Symbol) {
+	max := 0
+	for k := range args {
+		if k > max {
+			max = k
+		}
+	}
+	for i := 1; i < max; i++ {
+		if _, ok := args[i]; !ok {
+			args[i] = makeSymbol("p")
+		}
+	}
+}
+
+func makeFnForm(args map[int]Symbol, body Object) Object {
+	fillInMissingArgs(args)
+	a := make([]Symbol, len(args))
+	for key, value := range args {
+		if key != -1 {
+			a[key-1] = value
+		}
+	}
+	if v, ok := args[-1]; ok {
+		a[len(args)-1] = Symbol("&")
+		a = append(a, v)
+	}
+	argVector := EmptyVector
+	for _, v := range a {
+		argVector = argVector.conj(v)
+	}
+	return EmptyList.Cons(body).Cons(argVector).Cons(Symbol("fn"))
+}
+
+func isTerminatingMacro(r rune) bool {
+	switch r {
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', '%':
+		return true
+	default:
+		return false
+	}
+}
+
+func makeSymbol(prefix string) Symbol {
+	GENSYM++
+	return Symbol(fmt.Sprintf("%s__%d#", prefix, GENSYM))
+}
+
+func registerArg(index int) Symbol {
+	if s, ok := ARGS[index]; ok {
+		return s
+	}
+	ARGS[index] = makeSymbol("p")
+	return ARGS[index]
+}
+
+func readArgSymbol(reader *Reader) (Object, error) {
+	r := reader.Peek()
+	if unicode.IsSpace(r) || isTerminatingMacro(r) {
+		return registerArg(1), nil
+	}
+	obj, err := Read(reader)
+	if err != nil {
+		return nil, err
+	}
+	if obj.Equals(Symbol("&")) {
+		return registerArg(-1), nil
+	}
+	switch n := obj.(type) {
+	case Int:
+		return registerArg(int(n)), nil
+	default:
+		return nil, MakeReadError(reader, "Arg literal must be %, %& or %integer")
+	}
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -461,6 +541,8 @@ func Read(reader *Reader) (Object, error) {
 			return readNumber(reader, -1)
 		}
 		return readSymbol(reader, '-')
+	case r == '%' && ARGS != nil:
+		return readArgSymbol(reader)
 	case isSymbolInitial(r):
 		return readSymbol(reader, r)
 	case r == '"':
@@ -496,6 +578,15 @@ func Read(reader *Reader) (Object, error) {
 		reader.Get()
 		Read(reader)
 		return Read(reader)
+	case r == '#' && reader.Peek() == '(':
+		ARGS = make(map[int]Symbol)
+		fn, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		res := makeFnForm(ARGS, fn)
+		ARGS = nil
+		return res, nil
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
 }
