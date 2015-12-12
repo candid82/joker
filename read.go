@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"unicode"
+	"unicode/utf8"
 )
 
 type (
@@ -427,8 +428,8 @@ func readSet(reader *Reader) (Object, error) {
 	return set, nil
 }
 
-func makeQuote(obj Object) Object {
-	return EmptyList.Cons(obj).Cons(Symbol("quote"))
+func makeQuote(obj Object, quote Symbol) Object {
+	return EmptyList.Cons(obj).Cons(quote)
 }
 
 func readMeta(reader *Reader) (*ArrayMap, error) {
@@ -527,6 +528,39 @@ func readArgSymbol(reader *Reader) (Object, error) {
 	}
 }
 
+func isSelfEvaluating(obj Object) bool {
+	if obj == EmptyList {
+		return true
+	}
+	switch obj.(type) {
+	case Bool, Double, Int, Char, Keyword, String:
+		return true
+	default:
+		return false
+	}
+}
+
+func makeSyntaxQuote(obj Object, env map[Symbol]Symbol) (Object, error) {
+	if isSelfEvaluating(obj) {
+		return obj, nil
+	}
+	switch s := obj.(type) {
+	case Symbol:
+		str := string(s)
+		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
+			sym, ok := env[s]
+			if !ok {
+				sym = makeSymbol(str[:len(str)-1])
+				env[s] = sym
+			}
+			obj = sym
+		}
+		return makeQuote(obj, Symbol("quote")), nil
+	default:
+		return obj, nil
+	}
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -563,7 +597,27 @@ func Read(reader *Reader) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		return makeQuote(nextObj), nil
+		return makeQuote(nextObj, Symbol("quote")), nil
+	case r == '~':
+		if reader.Peek() == '@' {
+			reader.Get()
+			nextObj, err := Read(reader)
+			if err != nil {
+				return nil, err
+			}
+			return makeQuote(nextObj, Symbol("unquote-splicing")), nil
+		}
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return makeQuote(nextObj, Symbol("unquote")), nil
+	case r == '`':
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol))
 	case r == '^':
 		meta, err := readMeta(reader)
 		if err != nil {
