@@ -1,9 +1,5 @@
 package main
 
-import (
-	"bytes"
-)
-
 type List struct {
 	first Object
 	rest  *List
@@ -21,44 +17,52 @@ func NewList(first Object, rest *List) *List {
 	return &result
 }
 
-func (list *List) Cons(obj Object) *List {
+func NewListFrom(objs ...Object) *List {
+	res := EmptyList
+	for i := len(objs) - 1; i >= 0; i-- {
+		res = res.Conj(objs[i])
+	}
+	return res
+}
+
+func (list *List) Conj(obj Object) *List {
 	return NewList(obj, list)
 }
 
 func (list *List) ToString(escape bool) string {
-	var b bytes.Buffer
-	b.WriteRune('(')
-	for list.count > 0 {
-		b.WriteString(list.first.ToString(escape))
-		list = list.rest
-		if list.count > 0 {
-			b.WriteRune(' ')
-		}
-	}
-	b.WriteRune(')')
-	return b.String()
+	return SeqToString(list, escape)
 }
 
 func (list *List) Equals(other interface{}) bool {
-	switch otherList := other.(type) {
-	case *List:
-		if list == otherList {
-			return true
-		}
-		if list.count != otherList.count {
-			return false
-		}
-		for list.count > 0 {
-			if !list.first.Equals(otherList.first) {
-				return false
-			}
-			list = list.rest
-			otherList = otherList.rest
-		}
+	if list == other {
 		return true
+	}
+	switch s := other.(type) {
+	case Sequenceable:
+		return SeqsEqual(list, s.Seq())
 	default:
 		return false
 	}
+}
+
+func (list *List) First() Object {
+	return list.first
+}
+
+func (list *List) Rest() Seq {
+	return list.rest
+}
+
+func (list *List) IsEmpty() bool {
+	return list.count == 0
+}
+
+func (list *List) Cons(obj Object) Seq {
+	return list.Conj(obj)
+}
+
+func (list *List) Seq() Seq {
+	return list
 }
 
 var EmptyList = NewList(nil, nil)

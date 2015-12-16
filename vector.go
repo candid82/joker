@@ -11,6 +11,10 @@ type (
 		count int
 		shift uint
 	}
+	VectorSeq struct {
+		vector *Vector
+		index  int
+	}
 	IndexError struct {
 		index int
 		count int
@@ -127,6 +131,45 @@ func (v *Vector) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (vseq *VectorSeq) Equals(other interface{}) bool {
+	if vseq == other {
+		return true
+	}
+	switch s := other.(type) {
+	case Sequenceable:
+		return SeqsEqual(vseq, s.Seq())
+	default:
+		return false
+	}
+}
+
+func (vseq *VectorSeq) ToString(escape bool) string {
+	return SeqToString(vseq, escape)
+}
+
+func (vseq *VectorSeq) First() Object {
+	return vseq.vector.at(vseq.index)
+}
+
+func (vseq *VectorSeq) Rest() Seq {
+	if vseq.index+1 < vseq.vector.count {
+		return &VectorSeq{vector: vseq.vector, index: vseq.index + 1}
+	}
+	return EmptyList
+}
+
+func (vseq *VectorSeq) IsEmpty() bool {
+	return vseq.index >= vseq.vector.count
+}
+
+func (vseq *VectorSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: vseq}
+}
+
+func (v *Vector) Seq() Seq {
+	return &VectorSeq{vector: v, index: 0}
 }
 
 var EmptyVector = &Vector{

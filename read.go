@@ -364,7 +364,7 @@ func readList(reader *Reader) (Object, error) {
 	reader.Get()
 	list := EmptyList
 	for i := len(s) - 1; i >= 0; i-- {
-		list = list.Cons(s[i])
+		list = list.Conj(s[i])
 	}
 	return list, nil
 }
@@ -540,7 +540,33 @@ func isSelfEvaluating(obj Object) bool {
 	}
 }
 
-func makeSyntaxQuote(obj Object, env map[Symbol]Symbol) (Object, error) {
+func isCall(obj Object, name Symbol) bool {
+	switch seq := obj.(type) {
+	case Seq:
+		return seq.First().Equals(name)
+	default:
+		return false
+	}
+}
+
+func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) (Seq, error) {
+	res := EmptyVector
+	for iter := iter(seq); iter.HasNext(); {
+		obj := iter.Next()
+		if isCall(obj, Symbol("unquote-splicing")) {
+			res = res.conj(obj.(Seq).Rest().First())
+		} else {
+			q, err := makeSyntaxQuote(obj, env, reader)
+			if err != nil {
+				return nil, err
+			}
+			res = res.conj(NewListFrom(Symbol("list"), q))
+		}
+	}
+	return res.Seq(), nil
+}
+
+func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) (Object, error) {
 	if isSelfEvaluating(obj) {
 		return obj, nil
 	}
@@ -556,6 +582,27 @@ func makeSyntaxQuote(obj Object, env map[Symbol]Symbol) (Object, error) {
 			obj = sym
 		}
 		return makeQuote(obj, Symbol("quote")), nil
+	case Seq:
+		if isCall(obj, Symbol("unquote")) {
+			return Second(s), nil
+		}
+		if isCall(obj, Symbol("unquote-splicing")) {
+			return nil, MakeReadError(reader, "Splice not in list")
+		}
+		q, err := syntaxQuoteSeq(s, env, reader)
+		if err != nil {
+			return nil, err
+		}
+		concat := q.Cons(Symbol("concat"))
+		return NewListFrom(Symbol("seq"), concat), nil
+	case *Vector:
+		q, err := syntaxQuoteSeq(s.Seq(), env, reader)
+		if err != nil {
+			return nil, err
+		}
+		concat := q.Cons(Symbol("concat"))
+		seqList := NewListFrom(Symbol("seq"), concat)
+		return NewListFrom(Symbol("vector"), seqList).Cons(Symbol("apply")), nil
 	default:
 		return obj, nil
 	}
@@ -617,7 +664,7 @@ func Read(reader *Reader) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol))
+		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol), reader)
 	case r == '^':
 		meta, err := readMeta(reader)
 		if err != nil {
