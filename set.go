@@ -48,3 +48,7 @@ func (set *Set) Equals(other interface{}) bool {
 		return false
 	}
 }
+
+func (set *Set) Seq() Seq {
+	return set.m.Keys()
+}

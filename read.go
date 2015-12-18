@@ -566,6 +566,19 @@ func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) (Seq, error)
 	return res.Seq(), nil
 }
 
+func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol) (Object, error) {
+	q, err := syntaxQuoteSeq(seq, env, reader)
+	if err != nil {
+		return nil, err
+	}
+	concat := q.Cons(Symbol("concat"))
+	seqList := NewListFrom(Symbol("seq"), concat)
+	if ctor == Symbol("") {
+		return seqList, nil
+	}
+	return NewListFrom(ctor, seqList).Cons(Symbol("apply")), nil
+}
+
 func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) (Object, error) {
 	if isSelfEvaluating(obj) {
 		return obj, nil
@@ -589,20 +602,13 @@ func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) (Object,
 		if isCall(obj, Symbol("unquote-splicing")) {
 			return nil, MakeReadError(reader, "Splice not in list")
 		}
-		q, err := syntaxQuoteSeq(s, env, reader)
-		if err != nil {
-			return nil, err
-		}
-		concat := q.Cons(Symbol("concat"))
-		return NewListFrom(Symbol("seq"), concat), nil
+		return syntaxQuoteColl(s, env, reader, Symbol(""))
 	case *Vector:
-		q, err := syntaxQuoteSeq(s.Seq(), env, reader)
-		if err != nil {
-			return nil, err
-		}
-		concat := q.Cons(Symbol("concat"))
-		seqList := NewListFrom(Symbol("seq"), concat)
-		return NewListFrom(Symbol("vector"), seqList).Cons(Symbol("apply")), nil
+		return syntaxQuoteColl(s.Seq(), env, reader, Symbol("vector"))
+	case *ArrayMap:
+		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, Symbol("hash-map"))
+	case *Set:
+		return syntaxQuoteColl(s.Seq(), env, reader, Symbol("hash-set"))
 	default:
 		return obj, nil
 	}

@@ -19,6 +19,10 @@ func (m *ArrayMap) indexOf(key Object) int {
 	return -1
 }
 
+func ArraySeqFromArrayMap(m *ArrayMap) *ArraySeq {
+	return &ArraySeq{arr: m.arr}
+}
+
 func (m *ArrayMap) Get(key Object) (bool, Object) {
 	i := m.indexOf(key)
 	if i != -1 {
@@ -73,6 +77,15 @@ func (m *ArrayMap) Without(key Object) *ArrayMap {
 		result.arr = result.arr[:j]
 	}
 	return &result
+}
+
+func (m *ArrayMap) Keys() Seq {
+	mlen := len(m.arr) / 2
+	res := make([]Object, mlen)
+	for i := 0; i < mlen; i++ {
+		res[i] = m.arr[i*2]
+	}
+	return &ArraySeq{arr: res}
 }
 
 func EmptyArrayMap() *ArrayMap {

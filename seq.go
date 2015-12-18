@@ -22,7 +22,46 @@ type (
 		first Object
 		rest  Seq
 	}
+	ArraySeq struct {
+		arr   []Object
+		index int
+	}
 )
+
+func (seq *ArraySeq) Equals(other interface{}) bool {
+	if seq == other {
+		return true
+	}
+	switch s := other.(type) {
+	case Sequenceable:
+		return SeqsEqual(seq, s.Seq())
+	default:
+		return false
+	}
+}
+
+func (seq *ArraySeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *ArraySeq) First() Object {
+	return seq.arr[seq.index]
+}
+
+func (seq *ArraySeq) Rest() Seq {
+	if seq.index+1 < len(seq.arr) {
+		return &ArraySeq{index: seq.index + 1, arr: seq.arr}
+	}
+	return EmptyList
+}
+
+func (seq *ArraySeq) IsEmpty() bool {
+	return false
+}
+
+func (seq *ArraySeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
 
 func SeqsEqual(seq1, seq2 Seq) bool {
 	iter2 := iter(seq2)
