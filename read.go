@@ -550,20 +550,20 @@ func isCall(obj Object, name Symbol) bool {
 }
 
 func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) (Seq, error) {
-	res := EmptyVector
+	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
 		obj := iter.Next()
 		if isCall(obj, Symbol("unquote-splicing")) {
-			res = res.conj(obj.(Seq).Rest().First())
+			res = append(res, obj.(Seq).Rest().First())
 		} else {
 			q, err := makeSyntaxQuote(obj, env, reader)
 			if err != nil {
 				return nil, err
 			}
-			res = res.conj(NewListFrom(Symbol("list"), q))
+			res = append(res, NewListFrom(Symbol("list"), q))
 		}
 	}
-	return res.Seq(), nil
+	return &ArraySeq{arr: res}, nil
 }
 
 func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol) (Object, error) {
