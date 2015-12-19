@@ -721,6 +721,12 @@ func Read(reader *Reader) (Object, error) {
 			return nil, err
 		}
 		return makeQuote(nextObj, Symbol("quote")), nil
+	case r == '@':
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return NewListFrom(Symbol("deref"), nextObj), nil
 	case r == '~':
 		if reader.Peek() == '@' {
 			reader.Get()
