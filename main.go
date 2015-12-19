@@ -48,7 +48,7 @@ func repl() {
 			fmt.Fprintln(os.Stderr, "Error: ", err)
 			skipRestOfLine(reader)
 		default:
-			fmt.Println(obj.ToString(false))
+			fmt.Println(obj.ToString(true))
 		}
 	}
 }

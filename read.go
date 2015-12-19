@@ -23,6 +23,7 @@ type (
 	Keyword   string
 	Symbol    string
 	String    string
+	Regex     string
 	ReadError struct {
 		msg    string
 		line   int
@@ -84,6 +85,17 @@ func (k Keyword) Equals(other interface{}) bool {
 	return k == other
 }
 
+func (rx Regex) ToString(escape bool) string {
+	if escape {
+		return "#" + escapeString(string(rx))
+	}
+	return "#" + string(rx)
+}
+
+func (rx Regex) Equals(other interface{}) bool {
+	return rx == other
+}
+
 func (s Symbol) ToString(escape bool) string {
 	return string(s)
 }
@@ -93,11 +105,41 @@ func (s Symbol) Equals(other interface{}) bool {
 }
 
 func (s String) ToString(escape bool) string {
+	if escape {
+		return escapeString(string(s))
+	}
 	return string(s)
 }
 
 func (s String) Equals(other interface{}) bool {
 	return s == other
+}
+
+func escapeString(str string) string {
+	var b bytes.Buffer
+	b.WriteRune('"')
+	for _, r := range str {
+		switch r {
+		case '"':
+			b.WriteString("\\\"")
+		case '\\':
+			b.WriteString("\\\\")
+		case '\t':
+			b.WriteString("\\t")
+		case '\r':
+			b.WriteString("\\r")
+		case '\n':
+			b.WriteString("\\n")
+		case '\f':
+			b.WriteString("\\f")
+		case '\b':
+			b.WriteString("\\b")
+		default:
+			b.WriteRune(r)
+		}
+	}
+	b.WriteRune('"')
+	return b.String()
 }
 
 func MakeReadError(reader *Reader, msg string) ReadError {
@@ -320,7 +362,7 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 	}
 }
 
-func readString(reader *Reader) (Object, error) {
+func readString(reader *Reader, isRegex bool) (Object, error) {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
@@ -344,6 +386,9 @@ func readString(reader *Reader) (Object, error) {
 		}
 		b.WriteRune(r)
 		r = reader.Get()
+	}
+	if isRegex {
+		return Regex(b.String()), nil
 	}
 	return String(b.String()), nil
 }
@@ -633,13 +678,16 @@ func Read(reader *Reader) (Object, error) {
 	case isSymbolInitial(r):
 		return readSymbol(reader, r)
 	case r == '"':
-		return readString(reader)
+		return readString(reader, false)
 	case r == '(':
 		return readList(reader)
 	case r == '[':
 		return readVector(reader)
 	case r == '{':
 		return readMap(reader)
+	case r == '#' && reader.Peek() == '"':
+		reader.Get()
+		return readString(reader, true)
 	case r == '#' && reader.Peek() == '{':
 		reader.Get()
 		return readSet(reader)
