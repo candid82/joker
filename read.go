@@ -222,7 +222,7 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';', EOF:
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',':
 		return true
 	}
 	return unicode.IsSpace(r)
@@ -258,7 +258,7 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) (Object, error)
 func eatWhitespace(reader *Reader) {
 	r := reader.Get()
 	for r != EOF {
-		if unicode.IsSpace(r) {
+		if unicode.IsSpace(r) || r == ',' {
 			r = reader.Get()
 			continue
 		}
