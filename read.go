@@ -46,7 +46,10 @@ var (
 )
 
 func (c Char) ToString(escape bool) string {
-	return fmt.Sprintf("%c", c)
+	if escape {
+		return escapeRune(rune(c))
+	}
+	return string(c)
 }
 
 func (c Char) Equals(other interface{}) bool {
@@ -113,6 +116,25 @@ func (s String) ToString(escape bool) string {
 
 func (s String) Equals(other interface{}) bool {
 	return s == other
+}
+
+func escapeRune(r rune) string {
+	switch r {
+	case ' ':
+		return "\\space"
+	case '\n':
+		return "\\newline"
+	case '\t':
+		return "\\tab"
+	case '\r':
+		return "\\return"
+	case '\b':
+		return "\\backspace"
+	case '\f':
+		return "\\formfeed"
+	default:
+		return "\\" + string(r)
+	}
 }
 
 func escapeString(str string) string {
