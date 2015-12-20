@@ -36,6 +36,7 @@ type (
 		column         int
 		isEof          bool
 	}
+	ReadFunc func(reader *Reader) (Object, error)
 )
 
 const EOF = -1
@@ -44,6 +45,17 @@ var (
 	ARGS   map[int]Symbol
 	GENSYM int
 )
+
+func readStub(reader *Reader) (Object, error) {
+	return Read(reader)
+}
+
+var DATA_READERS = map[Symbol]ReadFunc{}
+
+func init() {
+	DATA_READERS[Symbol("inst")] = readStub
+	DATA_READERS[Symbol("uuid")] = readStub
+}
 
 func (c Char) ToString(escape bool) string {
 	if escape {
@@ -681,6 +693,23 @@ func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) (Object,
 	}
 }
 
+func readTagged(reader *Reader) (Object, error) {
+	obj, err := Read(reader)
+	if err != nil {
+		return nil, err
+	}
+	switch s := obj.(type) {
+	case Symbol:
+		readFunc := DATA_READERS[s]
+		if readFunc == nil {
+			return nil, MakeReadError(reader, "No reader function for tag "+string(s))
+		}
+		return readFunc(reader)
+	default:
+		return nil, MakeReadError(reader, "Reader tag must be a symbol")
+	}
+}
+
 func readDispatch(reader *Reader) (Object, error) {
 	r := reader.Get()
 	switch r {
@@ -710,7 +739,8 @@ func readDispatch(reader *Reader) (Object, error) {
 		ARGS = nil
 		return res, nil
 	}
-	return nil, MakeReadError(reader, "No reader function for tag "+string(r))
+	reader.Unget()
+	return readTagged(reader)
 }
 
 func readWithMeta(reader *Reader) (Object, error) {
