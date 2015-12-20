@@ -681,6 +681,50 @@ func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) (Object,
 	}
 }
 
+func readDispatch(reader *Reader) (Object, error) {
+	r := reader.Get()
+	switch r {
+	case '"':
+		return readString(reader, true)
+	case '\'':
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return NewListFrom(Symbol("var"), nextObj), nil
+	case '^':
+		return readWithMeta(reader)
+	case '{':
+		return readSet(reader)
+	case '_':
+		Read(reader)
+		return Read(reader)
+	case '(':
+		reader.Unget()
+		ARGS = make(map[int]Symbol)
+		fn, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		res := makeFnForm(ARGS, fn)
+		ARGS = nil
+		return res, nil
+	}
+	return nil, MakeReadError(reader, "No reader function for tag "+string(r))
+}
+
+func readWithMeta(reader *Reader) (Object, error) {
+	meta, err := readMeta(reader)
+	if err != nil {
+		return nil, err
+	}
+	nextObj, err := Read(reader)
+	if err != nil {
+		return nil, err
+	}
+	return makeWithMeta(nextObj, meta), nil
+}
+
 func Read(reader *Reader) (Object, error) {
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -707,19 +751,6 @@ func Read(reader *Reader) (Object, error) {
 		return readVector(reader)
 	case r == '{':
 		return readMap(reader)
-	case r == '#' && reader.Peek() == '"':
-		reader.Get()
-		return readString(reader, true)
-	case r == '#' && reader.Peek() == '\'':
-		reader.Get()
-		nextObj, err := Read(reader)
-		if err != nil {
-			return nil, err
-		}
-		return NewListFrom(Symbol("var"), nextObj), nil
-	case r == '#' && reader.Peek() == '{':
-		reader.Get()
-		return readSet(reader)
 	case r == '/' && isDelimiter(reader.Peek()):
 		return Symbol("/"), nil
 	case r == '\'':
@@ -755,28 +786,9 @@ func Read(reader *Reader) (Object, error) {
 		}
 		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol), reader)
 	case r == '^':
-		meta, err := readMeta(reader)
-		if err != nil {
-			return nil, err
-		}
-		nextObj, err := Read(reader)
-		if err != nil {
-			return nil, err
-		}
-		return makeWithMeta(nextObj, meta), nil
-	case r == '#' && reader.Peek() == '_':
-		reader.Get()
-		Read(reader)
-		return Read(reader)
-	case r == '#' && reader.Peek() == '(':
-		ARGS = make(map[int]Symbol)
-		fn, err := Read(reader)
-		if err != nil {
-			return nil, err
-		}
-		res := makeFnForm(ARGS, fn)
-		ARGS = nil
-		return res, nil
+		return readWithMeta(reader)
+	case r == '#':
+		return readDispatch(reader)
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
 }
