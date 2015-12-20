@@ -710,6 +710,13 @@ func Read(reader *Reader) (Object, error) {
 	case r == '#' && reader.Peek() == '"':
 		reader.Get()
 		return readString(reader, true)
+	case r == '#' && reader.Peek() == '\'':
+		reader.Get()
+		nextObj, err := Read(reader)
+		if err != nil {
+			return nil, err
+		}
+		return NewListFrom(Symbol("var"), nextObj), nil
 	case r == '#' && reader.Peek() == '{':
 		reader.Get()
 		return readSet(reader)
