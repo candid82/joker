@@ -56,7 +56,7 @@ func (seq *ArraySeq) Rest() Seq {
 }
 
 func (seq *ArraySeq) IsEmpty() bool {
-	return false
+	return seq.index >= len(seq.arr)
 }
 
 func (seq *ArraySeq) Cons(obj Object) Seq {

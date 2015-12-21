@@ -352,7 +352,7 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 
 func isSymbolInitial(r rune) bool {
 	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.', '%':
+	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.', '%', '$':
 		return true
 	}
 	return unicode.IsLetter(r)

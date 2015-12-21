@@ -161,7 +161,7 @@ func (vseq *VectorSeq) Rest() Seq {
 }
 
 func (vseq *VectorSeq) IsEmpty() bool {
-	return false
+	return vseq.index >= vseq.vector.count
 }
 
 func (vseq *VectorSeq) Cons(obj Object) Seq {
