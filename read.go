@@ -29,13 +29,6 @@ type (
 		line   int
 		column int
 	}
-	Reader struct {
-		scanner        io.RuneScanner
-		line           int
-		prevLineLength int
-		column         int
-		isEof          bool
-	}
 	ReadFunc func(reader *Reader) (Object, error)
 )
 
@@ -184,50 +177,6 @@ func MakeReadError(reader *Reader, msg string) ReadError {
 	}
 }
 
-func NewReader(scanner io.RuneScanner) *Reader {
-	return &Reader{line: 1, scanner: scanner}
-}
-
-func (reader *Reader) Get() rune {
-	r, _, err := reader.scanner.ReadRune()
-	switch {
-	case err == io.EOF:
-		reader.isEof = true
-		return EOF
-	case err != nil:
-		panic(err)
-	case r == '\n':
-		reader.line++
-		reader.prevLineLength = reader.column
-		reader.column = 0
-		return r
-	default:
-		reader.column++
-		return r
-	}
-}
-
-func (reader *Reader) Unget() {
-	if reader.isEof {
-		return
-	}
-	if err := reader.scanner.UnreadRune(); err != nil {
-		panic(err)
-	}
-	if reader.column == 0 {
-		reader.line--
-		reader.column = reader.prevLineLength
-	} else {
-		reader.column--
-	}
-}
-
-func (reader *Reader) Peek() rune {
-	r := reader.Get()
-	reader.Unget()
-	return r
-}
-
 func (err ReadError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.line, err.column, err.msg)
 }
@@ -274,10 +223,16 @@ func eatWhitespace(reader *Reader) {
 			r = reader.Get()
 			continue
 		}
-		if r == ';' {
+		if r == ';' || (r == '#' && reader.Peek() == '!') {
 			for r != '\n' && r != EOF {
 				r = reader.Get()
 			}
+			r = reader.Get()
+			continue
+		}
+		if r == '#' && reader.Peek() == '_' {
+			reader.Get()
+			Read(reader)
 			r = reader.Get()
 			continue
 		}
@@ -725,9 +680,6 @@ func readDispatch(reader *Reader) (Object, error) {
 		return readWithMeta(reader)
 	case '{':
 		return readSet(reader)
-	case '_':
-		Read(reader)
-		return Read(reader)
 	case '(':
 		reader.Unget()
 		ARGS = make(map[int]Symbol)
