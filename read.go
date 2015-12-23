@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/big"
 	"unicode"
 	"unicode/utf8"
 )
@@ -19,6 +20,7 @@ type (
 	Char      rune
 	Double    float64
 	Int       int
+	BigInt    big.Int
 	Bool      bool
 	Keyword   string
 	Symbol    string
@@ -48,6 +50,24 @@ var DATA_READERS = map[Symbol]ReadFunc{}
 func init() {
 	DATA_READERS[Symbol("inst")] = readStub
 	DATA_READERS[Symbol("uuid")] = readStub
+}
+
+func (bi *BigInt) ToString(escape bool) string {
+	return (*big.Int)(bi).String()
+}
+
+func (bi *BigInt) Equals(other interface{}) bool {
+	if bi == other {
+		return true
+	}
+	switch b := other.(type) {
+	case *BigInt:
+		return ((*big.Int)(bi)).Cmp((*big.Int)(b)) == 0
+	case Int:
+		bi2 := big.NewInt(int64(b))
+		return ((*big.Int)(bi)).Cmp(bi2) == 0
+	}
+	return false
 }
 
 func (c Char) ToString(escape bool) string {
@@ -183,7 +203,7 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',':
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',', '\\':
 		return true
 	}
 	return unicode.IsSpace(r)
@@ -279,19 +299,19 @@ func readCharacter(reader *Reader) (Object, error) {
 }
 
 func readNumber(reader *Reader, sign int) (Object, error) {
-	n, fraction, isDouble := 0, 0.0, false
+	var b bytes.Buffer
+	isDouble := false
 	d := reader.Get()
 	for unicode.IsDigit(d) {
-		n = n*10 + int(d-'0')
+		b.WriteRune(d)
 		d = reader.Get()
 	}
 	if d == '.' {
 		isDouble = true
-		weight := 10.0
+		b.WriteRune(d)
 		d = reader.Get()
 		for unicode.IsDigit(d) {
-			fraction += float64(d-'0') / weight
-			weight *= 10
+			b.WriteRune(d)
 			d = reader.Get()
 		}
 	}
@@ -299,10 +319,27 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 		return nil, MakeReadError(reader, "Number not followed by delimiter")
 	}
 	reader.Unget()
+	str := b.String()
 	if isDouble {
-		return Double(float64(sign) * (float64(n) + fraction)), nil
+		var dbl float64
+		fmt.Sscan(str, &dbl)
+		return Double(float64(sign) * dbl), nil
 	}
-	return Int(sign * n), nil
+	var i int
+	n, err := fmt.Sscan(str, &i)
+	if n < 1 {
+		var bi big.Int
+		n, err = fmt.Sscan(str, &bi)
+		if n < 1 {
+			return nil, err
+		}
+		if sign == -1 {
+			bi.Neg(&bi)
+		}
+		res := BigInt(bi)
+		return &res, nil
+	}
+	return Int(sign * i), nil
 }
 
 func isSymbolInitial(r rune) bool {
@@ -314,7 +351,7 @@ func isSymbolInitial(r rune) bool {
 }
 
 func isSymbolRune(r rune) bool {
-	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/'
+	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\''
 }
 
 func readSymbol(reader *Reader, first rune) (Object, error) {
