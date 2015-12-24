@@ -53,7 +53,7 @@ func init() {
 }
 
 func (bi *BigInt) ToString(escape bool) string {
-	return (*big.Int)(bi).String()
+	return (*big.Int)(bi).String() + "N"
 }
 
 func (bi *BigInt) Equals(other interface{}) bool {
@@ -298,6 +298,19 @@ func readCharacter(reader *Reader) (Object, error) {
 	return Char(r), nil
 }
 
+func scanBigInt(str string, sign int) (*BigInt, error) {
+	var bi big.Int
+	n, err := fmt.Sscan(str, &bi)
+	if n < 1 {
+		return nil, err
+	}
+	if sign == -1 {
+		bi.Neg(&bi)
+	}
+	res := BigInt(bi)
+	return &res, nil
+}
+
 func readNumber(reader *Reader, sign int) (Object, error) {
 	var b bytes.Buffer
 	isDouble := false
@@ -315,29 +328,26 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 			d = reader.Get()
 		}
 	}
+	str := b.String()
+	if d == 'N' {
+		if isDouble {
+			return nil, MakeReadError(reader, fmt.Sprintf("Invalid number: %sN", str))
+		}
+		return scanBigInt(str, sign)
+	}
+	reader.Unget()
 	if !isDelimiter(d) {
 		return nil, MakeReadError(reader, "Number not followed by delimiter")
 	}
-	reader.Unget()
-	str := b.String()
 	if isDouble {
 		var dbl float64
 		fmt.Sscan(str, &dbl)
 		return Double(float64(sign) * dbl), nil
 	}
 	var i int
-	n, err := fmt.Sscan(str, &i)
+	n, _ := fmt.Sscan(str, &i)
 	if n < 1 {
-		var bi big.Int
-		n, err = fmt.Sscan(str, &bi)
-		if n < 1 {
-			return nil, err
-		}
-		if sign == -1 {
-			bi.Neg(&bi)
-		}
-		res := BigInt(bi)
-		return &res, nil
+		return scanBigInt(str, sign)
 	}
 	return Int(sign * i), nil
 }
