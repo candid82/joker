@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"strconv"
 	"unicode"
 	"unicode/utf8"
 )
@@ -21,6 +22,7 @@ type (
 	Double    float64
 	Int       int
 	BigInt    big.Int
+	BigFloat  big.Float
 	Bool      bool
 	Keyword   string
 	Symbol    string
@@ -66,6 +68,24 @@ func (bi *BigInt) Equals(other interface{}) bool {
 	case Int:
 		bi2 := big.NewInt(int64(b))
 		return ((*big.Int)(bi)).Cmp(bi2) == 0
+	}
+	return false
+}
+
+func (bf *BigFloat) ToString(escape bool) string {
+	return (*big.Float)(bf).Text('g', 256) + "M"
+}
+
+func (bf *BigFloat) Equals(other interface{}) bool {
+	if bf == other {
+		return true
+	}
+	switch b := other.(type) {
+	case *BigFloat:
+		return ((*big.Float)(bf)).Cmp((*big.Float)(b)) == 0
+	case Double:
+		bf2 := big.NewFloat(float64(b))
+		return ((*big.Float)(bf)).Cmp(bf2) == 0
 	}
 	return false
 }
@@ -298,10 +318,9 @@ func readCharacter(reader *Reader) (Object, error) {
 	return Char(r), nil
 }
 
-func scanBigInt(str string, sign int) (*BigInt, error) {
+func scanBigInt(reader *Reader, str string, sign int, err error) (*BigInt, error) {
 	var bi big.Int
-	n, err := fmt.Sscan(str, &bi)
-	if n < 1 {
+	if _, ok := bi.SetString(str, 0); !ok {
 		return nil, err
 	}
 	if sign == -1 {
@@ -311,45 +330,57 @@ func scanBigInt(str string, sign int) (*BigInt, error) {
 	return &res, nil
 }
 
+func scanBigFloat(reader *Reader, str string, sign int, err error) (*BigFloat, error) {
+	var bf big.Float
+	if _, ok := bf.SetPrec(256).SetString(str); !ok {
+		return nil, err
+	}
+	if sign == -1 {
+		bf.Neg(&bf)
+	}
+	res := BigFloat(bf)
+	return &res, nil
+}
+
 func readNumber(reader *Reader, sign int) (Object, error) {
 	var b bytes.Buffer
 	isDouble := false
 	d := reader.Get()
-	for unicode.IsDigit(d) {
-		b.WriteRune(d)
-		d = reader.Get()
-	}
-	if d == '.' {
-		isDouble = true
-		b.WriteRune(d)
-		d = reader.Get()
-		for unicode.IsDigit(d) {
-			b.WriteRune(d)
-			d = reader.Get()
+	last := d
+	for !isDelimiter(d) {
+		if d == '.' {
+			isDouble = true
 		}
-	}
-	str := b.String()
-	if d == 'N' {
-		if isDouble {
-			return nil, MakeReadError(reader, fmt.Sprintf("Invalid number: %sN", str))
-		}
-		return scanBigInt(str, sign)
+		b.WriteRune(d)
+		last = d
+		d = reader.Get()
 	}
 	reader.Unget()
-	if !isDelimiter(d) {
-		return nil, MakeReadError(reader, "Number not followed by delimiter")
+	str := b.String()
+	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
+	if last == 'N' {
+		if isDouble {
+			return nil, invalidNumberError
+		}
+		b.Truncate(b.Len() - 1)
+		return scanBigInt(reader, b.String(), sign, invalidNumberError)
+	}
+	if last == 'M' {
+		b.Truncate(b.Len() - 1)
+		return scanBigFloat(reader, b.String(), sign, invalidNumberError)
 	}
 	if isDouble {
-		var dbl float64
-		fmt.Sscan(str, &dbl)
+		dbl, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return nil, invalidNumberError
+		}
 		return Double(float64(sign) * dbl), nil
 	}
-	var i int
-	n, _ := fmt.Sscan(str, &i)
-	if n < 1 {
-		return scanBigInt(str, sign)
+	i, err := strconv.ParseInt(str, 0, 0)
+	if err != nil {
+		return scanBigInt(reader, str, sign, invalidNumberError)
 	}
-	return Int(sign * i), nil
+	return Int(sign * int(i)), nil
 }
 
 func isSymbolInitial(r rune) bool {
