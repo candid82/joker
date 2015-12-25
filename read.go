@@ -23,6 +23,7 @@ type (
 	Int       int
 	BigInt    big.Int
 	BigFloat  big.Float
+	Ratio     big.Rat
 	Bool      bool
 	Keyword   string
 	Symbol    string
@@ -52,6 +53,29 @@ var DATA_READERS = map[Symbol]ReadFunc{}
 func init() {
 	DATA_READERS[Symbol("inst")] = readStub
 	DATA_READERS[Symbol("uuid")] = readStub
+}
+
+func (rat *Ratio) ToString(escape bool) string {
+	return (*big.Rat)(rat).String()
+}
+
+func (rat *Ratio) Equals(other interface{}) bool {
+	if rat == other {
+		return true
+	}
+	switch r := other.(type) {
+	case *Ratio:
+		return ((*big.Rat)(rat)).Cmp((*big.Rat)(r)) == 0
+	case *BigInt:
+		var otherRat big.Rat
+		otherRat.SetInt((*big.Int)(r))
+		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
+	case Int:
+		var otherRat big.Rat
+		otherRat.SetInt64(int64(r))
+		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
+	}
+	return false
 }
 
 func (bi *BigInt) ToString(escape bool) string {
@@ -327,6 +351,15 @@ func scanBigInt(str string, base int, err error) (*BigInt, error) {
 	return &res, nil
 }
 
+func scanRatio(str string, err error) (*Ratio, error) {
+	var rat big.Rat
+	if _, ok := rat.SetString(str); !ok {
+		return nil, err
+	}
+	res := Ratio(rat)
+	return &res, nil
+}
+
 func scanBigFloat(str string, err error) (*BigFloat, error) {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
@@ -346,13 +379,15 @@ func scanInt(str string, base int, err error) (Object, error) {
 
 func readNumber(reader *Reader) (Object, error) {
 	var b bytes.Buffer
-	isDouble, isHex, isExp, base := false, false, false, ""
+	isDouble, isHex, isExp, isRatio, base, nonDigits := false, false, false, false, "", 0
 	d := reader.Get()
 	last := d
 	for !isDelimiter(d) {
 		switch d {
 		case '.':
 			isDouble = true
+		case '/':
+			isRatio = true
 		case 'x', 'X':
 			isHex = true
 		case 'e', 'E':
@@ -365,6 +400,9 @@ func readNumber(reader *Reader) (Object, error) {
 				d = reader.Get()
 				continue
 			}
+		}
+		if !unicode.IsDigit(d) {
+			nonDigits++
 		}
 		b.WriteRune(d)
 		last = d
@@ -388,6 +426,12 @@ func readNumber(reader *Reader) (Object, error) {
 		return scanInt(str, int(baseInt), invalidNumberError)
 	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
+	if isRatio {
+		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' {
+			return nil, invalidNumberError
+		}
+		return scanRatio(str, invalidNumberError)
+	}
 	if last == 'N' {
 		b.Truncate(b.Len() - 1)
 		return scanBigInt(b.String(), 0, invalidNumberError)
