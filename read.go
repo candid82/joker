@@ -318,38 +318,37 @@ func readCharacter(reader *Reader) (Object, error) {
 	return Char(r), nil
 }
 
-func scanBigInt(reader *Reader, str string, sign int, err error) (*BigInt, error) {
+func scanBigInt(reader *Reader, str string, err error) (*BigInt, error) {
 	var bi big.Int
 	if _, ok := bi.SetString(str, 0); !ok {
 		return nil, err
-	}
-	if sign == -1 {
-		bi.Neg(&bi)
 	}
 	res := BigInt(bi)
 	return &res, nil
 }
 
-func scanBigFloat(reader *Reader, str string, sign int, err error) (*BigFloat, error) {
+func scanBigFloat(reader *Reader, str string, err error) (*BigFloat, error) {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
 		return nil, err
-	}
-	if sign == -1 {
-		bf.Neg(&bf)
 	}
 	res := BigFloat(bf)
 	return &res, nil
 }
 
-func readNumber(reader *Reader, sign int) (Object, error) {
+func readNumber(reader *Reader) (Object, error) {
 	var b bytes.Buffer
-	isDouble := false
+	isDouble, isHex, isExp := false, false, false
 	d := reader.Get()
 	last := d
 	for !isDelimiter(d) {
-		if d == '.' {
+		switch d {
+		case '.':
 			isDouble = true
+		case 'x', 'X':
+			isHex = true
+		case 'e', 'E':
+			isExp = true
 		}
 		b.WriteRune(d)
 		last = d
@@ -359,28 +358,25 @@ func readNumber(reader *Reader, sign int) (Object, error) {
 	str := b.String()
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if last == 'N' {
-		if isDouble {
-			return nil, invalidNumberError
-		}
 		b.Truncate(b.Len() - 1)
-		return scanBigInt(reader, b.String(), sign, invalidNumberError)
+		return scanBigInt(reader, b.String(), invalidNumberError)
 	}
 	if last == 'M' {
 		b.Truncate(b.Len() - 1)
-		return scanBigFloat(reader, b.String(), sign, invalidNumberError)
+		return scanBigFloat(reader, b.String(), invalidNumberError)
 	}
-	if isDouble {
+	if isDouble || (!isHex && isExp) {
 		dbl, err := strconv.ParseFloat(str, 64)
 		if err != nil {
 			return nil, invalidNumberError
 		}
-		return Double(float64(sign) * dbl), nil
+		return Double(dbl), nil
 	}
 	i, err := strconv.ParseInt(str, 0, 0)
 	if err != nil {
-		return scanBigInt(reader, str, sign, invalidNumberError)
+		return scanBigInt(reader, str, invalidNumberError)
 	}
-	return Int(sign * int(i)), nil
+	return Int(int(i)), nil
 }
 
 func isSymbolInitial(r rune) bool {
@@ -793,10 +789,11 @@ func Read(reader *Reader) (Object, error) {
 		return readCharacter(reader)
 	case unicode.IsDigit(r):
 		reader.Unget()
-		return readNumber(reader, 1)
+		return readNumber(reader)
 	case r == '-':
 		if unicode.IsDigit(reader.Peek()) {
-			return readNumber(reader, -1)
+			reader.Unget()
+			return readNumber(reader)
 		}
 		return readSymbol(reader, '-')
 	case r == '%' && ARGS != nil:
