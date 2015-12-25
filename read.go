@@ -318,16 +318,16 @@ func readCharacter(reader *Reader) (Object, error) {
 	return Char(r), nil
 }
 
-func scanBigInt(reader *Reader, str string, err error) (*BigInt, error) {
+func scanBigInt(str string, base int, err error) (*BigInt, error) {
 	var bi big.Int
-	if _, ok := bi.SetString(str, 0); !ok {
+	if _, ok := bi.SetString(str, base); !ok {
 		return nil, err
 	}
 	res := BigInt(bi)
 	return &res, nil
 }
 
-func scanBigFloat(reader *Reader, str string, err error) (*BigFloat, error) {
+func scanBigFloat(str string, err error) (*BigFloat, error) {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
 		return nil, err
@@ -336,9 +336,17 @@ func scanBigFloat(reader *Reader, str string, err error) (*BigFloat, error) {
 	return &res, nil
 }
 
+func scanInt(str string, base int, err error) (Object, error) {
+	i, e := strconv.ParseInt(str, base, 0)
+	if e != nil {
+		return scanBigInt(str, base, err)
+	}
+	return Int(int(i)), nil
+}
+
 func readNumber(reader *Reader) (Object, error) {
 	var b bytes.Buffer
-	isDouble, isHex, isExp := false, false, false
+	isDouble, isHex, isExp, base := false, false, false, ""
 	d := reader.Get()
 	last := d
 	for !isDelimiter(d) {
@@ -349,6 +357,14 @@ func readNumber(reader *Reader) (Object, error) {
 			isHex = true
 		case 'e', 'E':
 			isExp = true
+		case 'r', 'R':
+			if base == "" {
+				base = b.String()
+				b.Reset()
+				last = d
+				d = reader.Get()
+				continue
+			}
 		}
 		b.WriteRune(d)
 		last = d
@@ -356,14 +372,29 @@ func readNumber(reader *Reader) (Object, error) {
 	}
 	reader.Unget()
 	str := b.String()
+	if base != "" {
+		invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", base+"r"+str))
+		baseInt, err := strconv.ParseInt(base, 0, 0)
+		if err != nil {
+			return nil, invalidNumberError
+		}
+		if base[0] == '-' {
+			baseInt = -baseInt
+			str = "-" + str
+		}
+		if baseInt < 2 || baseInt > 36 {
+			return nil, invalidNumberError
+		}
+		return scanInt(str, int(baseInt), invalidNumberError)
+	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if last == 'N' {
 		b.Truncate(b.Len() - 1)
-		return scanBigInt(reader, b.String(), invalidNumberError)
+		return scanBigInt(b.String(), 0, invalidNumberError)
 	}
 	if last == 'M' {
 		b.Truncate(b.Len() - 1)
-		return scanBigFloat(reader, b.String(), invalidNumberError)
+		return scanBigFloat(b.String(), invalidNumberError)
 	}
 	if isDouble || (!isHex && isExp) {
 		dbl, err := strconv.ParseFloat(str, 64)
@@ -372,11 +403,7 @@ func readNumber(reader *Reader) (Object, error) {
 		}
 		return Double(dbl), nil
 	}
-	i, err := strconv.ParseInt(str, 0, 0)
-	if err != nil {
-		return scanBigInt(reader, str, invalidNumberError)
-	}
-	return Int(int(i)), nil
+	return scanInt(str, 0, invalidNumberError)
 }
 
 func isSymbolInitial(r rune) bool {
