@@ -315,6 +315,26 @@ func eatWhitespace(reader *Reader) {
 	}
 }
 
+func readUnicodeCharacter(reader *Reader, length, base int) (Object, error) {
+	var b bytes.Buffer
+	for n := reader.Get(); !isDelimiter(n); n = reader.Get() {
+		b.WriteRune(n)
+	}
+	reader.Unget()
+	str := b.String()
+	if len(str) != length {
+		return nil, MakeReadError(reader, "Invalid unicode character: \\o"+str)
+	}
+	i, err := strconv.ParseInt(str, base, 32)
+	if err != nil {
+		return nil, MakeReadError(reader, "Invalid unicode character: \\o"+str)
+	}
+	if err := peekExpectedDelimiter(reader); err != nil {
+		return nil, err
+	}
+	return Char(rune(i)), nil
+}
+
 func readCharacter(reader *Reader) (Object, error) {
 	r := reader.Get()
 	if r == EOF {
@@ -347,21 +367,11 @@ func readCharacter(reader *Reader) (Object, error) {
 		}
 	case 'u':
 		if !isDelimiter(reader.Peek()) {
-			str := string(reader.Get()) + string(reader.Get()) + string(reader.Get()) + string(reader.Get())
-			i, err := strconv.ParseInt(str, 16, 32)
-			if err != nil {
-				return nil, MakeReadError(reader, "Invalid character: \\u"+str)
-			}
-			r = rune(i)
+			return readUnicodeCharacter(reader, 4, 16)
 		}
 	case 'o':
 		if !isDelimiter(reader.Peek()) {
-			str := string(reader.Get()) + string(reader.Get()) + string(reader.Get())
-			i, err := strconv.ParseInt(str, 8, 32)
-			if err != nil {
-				return nil, MakeReadError(reader, "Invalid character: \\o"+str)
-			}
-			r = rune(i)
+			readUnicodeCharacter(reader, 3, 8)
 		}
 	}
 	if err := peekExpectedDelimiter(reader); err != nil {
@@ -541,6 +551,23 @@ func readString(reader *Reader, isRegex bool) (Object, error) {
 				r = '\b'
 			case 'f':
 				r = '\f'
+			case 'u':
+				var b bytes.Buffer
+				n := reader.Get()
+				for i := 0; i < 4 && n != '"'; i++ {
+					b.WriteRune(n)
+					n = reader.Get()
+				}
+				reader.Unget()
+				str := b.String()
+				if len(str) != 4 {
+					return nil, MakeReadError(reader, "Invalid unicode escape: \\u"+str)
+				}
+				i, err := strconv.ParseInt(str, 16, 32)
+				if err != nil {
+					return nil, MakeReadError(reader, "Invalid unicode escape: \\u"+str)
+				}
+				r = rune(i)
 			}
 		}
 		if r == EOF {
