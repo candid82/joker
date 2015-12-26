@@ -8,12 +8,17 @@ import (
 )
 
 func readFile(filename string) {
-	f, err := os.Open(filename)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error: ", err)
-		return
+	var reader *Reader
+	if filename == "--" {
+		reader = NewReader(bufio.NewReader(os.Stdin))
+	} else {
+		f, err := os.Open(filename)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error: ", err)
+			return
+		}
+		reader = NewReader(bufio.NewReader(f))
 	}
-	reader := NewReader(bufio.NewReader(f))
 	for {
 		_, err := TryRead(reader)
 		switch {
