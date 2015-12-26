@@ -972,6 +972,8 @@ func Read(reader *Reader) (Object, error) {
 		return readWithMeta(reader)
 	case r == '#':
 		return readDispatch(reader)
+	case r == EOF:
+		return nil, MakeReadError(reader, "Unexpected end of file")
 	}
 	return nil, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
 }
