@@ -114,15 +114,15 @@ func (v *Vector) ToString(escape bool) string {
 }
 
 func (v *Vector) Equals(other interface{}) bool {
+	if v == other {
+		return true
+	}
 	switch otherVector := other.(type) {
 	case *Vector:
-		if v == otherVector {
-			return true
-		}
 		if v.count != otherVector.count {
 			return false
 		}
-		for i := 0; i < v.count-1; i++ {
+		for i := 0; i < v.count; i++ {
 			if v.at(i) != otherVector.at(i) {
 				return false
 			}
