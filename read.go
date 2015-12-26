@@ -335,6 +335,24 @@ func readCharacter(reader *Reader) (Object, error) {
 		if reader.Peek() == 'e' {
 			return readSpecialCharacter(reader, "eturn", '\r')
 		}
+	case 'u':
+		if !isDelimiter(reader.Peek()) {
+			str := string(reader.Get()) + string(reader.Get()) + string(reader.Get()) + string(reader.Get())
+			i, err := strconv.ParseInt(str, 16, 32)
+			if err != nil {
+				return nil, MakeReadError(reader, "Invalid character: \\u"+str)
+			}
+			r = rune(i)
+		}
+	case 'o':
+		if !isDelimiter(reader.Peek()) {
+			str := string(reader.Get()) + string(reader.Get()) + string(reader.Get())
+			i, err := strconv.ParseInt(str, 8, 32)
+			if err != nil {
+				return nil, MakeReadError(reader, "Invalid character: \\o"+str)
+			}
+			r = rune(i)
+		}
 	}
 	if err := peekExpectedDelimiter(reader); err != nil {
 		return nil, err
