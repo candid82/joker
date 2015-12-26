@@ -25,6 +25,7 @@ type (
 	BigFloat  big.Float
 	Ratio     big.Rat
 	Bool      bool
+	Nil       struct{}
 	Keyword   string
 	Symbol    string
 	String    string
@@ -49,10 +50,19 @@ func readStub(reader *Reader) (Object, error) {
 }
 
 var DATA_READERS = map[Symbol]ReadFunc{}
+var NIL Nil
 
 func init() {
 	DATA_READERS[Symbol("inst")] = readStub
 	DATA_READERS[Symbol("uuid")] = readStub
+}
+
+func (n Nil) ToString(escape bool) string {
+	return "nil"
+}
+
+func (n Nil) Equals(other interface{}) bool {
+	return n == other
 }
 
 func (rat *Ratio) ToString(escape bool) string {
@@ -502,7 +512,7 @@ func readSymbol(reader *Reader, first rune) (Object, error) {
 	str := b.String()
 	switch {
 	case str == "nil":
-		return nil, nil
+		return NIL, nil
 	case str == "true":
 		return Bool(true), nil
 	case str == "false":
