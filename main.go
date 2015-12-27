@@ -50,10 +50,20 @@ func repl() {
 		case err == io.EOF:
 			return
 		case err != nil:
-			fmt.Fprintln(os.Stderr, "Error: ", err)
+			fmt.Fprintln(os.Stderr, "Read error: ", err)
 			skipRestOfLine(reader)
 		default:
-			fmt.Println(obj.ToString(true))
+			expr, err := parse(obj)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Parse error: ", err)
+				continue
+			}
+			res, err := expr.Eval()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Eval error: ", err)
+				continue
+			}
+			fmt.Println(res.ToString(true))
 		}
 	}
 }
