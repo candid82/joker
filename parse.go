@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type (
 	Expr interface {
 		Eval() (Object, error)
@@ -8,23 +12,23 @@ type (
 		obj Object
 	}
 	ParseError struct {
-		obj Object
+		obj ReadObject
 		msg string
 	}
 )
 
-func (err *ParseError) Error() string {
-	return err.msg
+func (err ParseError) Error() string {
+	return fmt.Sprintf("stdin:%d:%d: %s", err.obj.line, err.obj.column, err.msg)
 }
 
 func (expr *LiteralExpr) Eval() (Object, error) {
 	return expr.obj, nil
 }
 
-func parse(obj Object) (Expr, error) {
-	switch obj.(type) {
+func parse(obj ReadObject) (Expr, error) {
+	switch obj.obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio:
-		return &LiteralExpr{obj: obj}, nil
+		return &LiteralExpr{obj: obj.obj}, nil
 	default:
 		return nil, &ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)}
 	}
