@@ -40,7 +40,7 @@ type (
 		column int
 		msg    string
 	}
-	ReadFunc func(reader *Reader) (ReadObject, error)
+	ReadFunc func(reader *Reader) ReadObject
 )
 
 const EOF = -1
@@ -50,7 +50,7 @@ var (
 	GENSYM int
 )
 
-func readStub(reader *Reader) (ReadObject, error) {
+func readStub(reader *Reader) ReadObject {
 	return Read(reader)
 }
 
@@ -299,31 +299,25 @@ func isDelimiter(r rune) bool {
 	return unicode.IsSpace(r)
 }
 
-func eatString(reader *Reader, str string) error {
+func eatString(reader *Reader, str string) {
 	for _, sr := range str {
 		if r := reader.Get(); r != sr {
-			return MakeReadError(reader, fmt.Sprintf("Unexpected character %U", r))
+			panic(MakeReadError(reader, fmt.Sprintf("Unexpected character %U", r)))
 		}
 	}
-	return nil
 }
 
-func peekExpectedDelimiter(reader *Reader) error {
+func peekExpectedDelimiter(reader *Reader) {
 	r := reader.Peek()
 	if !isDelimiter(r) {
-		return MakeReadError(reader, "Character not followed by delimiter")
+		panic(MakeReadError(reader, "Character not followed by delimiter"))
 	}
-	return nil
 }
 
-func readSpecialCharacter(reader *Reader, ending string, r rune) (ReadObject, error) {
-	if err := eatString(reader, ending); err != nil {
-		return ReadObject{}, err
-	}
-	if err := peekExpectedDelimiter(reader); err != nil {
-		return ReadObject{}, err
-	}
-	return MakeReadObject(reader, Char(r)), nil
+func readSpecialCharacter(reader *Reader, ending string, r rune) ReadObject {
+	eatString(reader, ending)
+	peekExpectedDelimiter(reader)
+	return MakeReadObject(reader, Char(r))
 }
 
 func eatWhitespace(reader *Reader) {
@@ -351,7 +345,7 @@ func eatWhitespace(reader *Reader) {
 	}
 }
 
-func readUnicodeCharacter(reader *Reader, length, base int) (ReadObject, error) {
+func readUnicodeCharacter(reader *Reader, length, base int) ReadObject {
 	var b bytes.Buffer
 	for n := reader.Get(); !isDelimiter(n); n = reader.Get() {
 		b.WriteRune(n)
@@ -359,22 +353,20 @@ func readUnicodeCharacter(reader *Reader, length, base int) (ReadObject, error) 
 	reader.Unget()
 	str := b.String()
 	if len(str) != length {
-		return ReadObject{}, MakeReadError(reader, "Invalid unicode character: \\o"+str)
+		panic(MakeReadError(reader, "Invalid unicode character: \\o"+str))
 	}
 	i, err := strconv.ParseInt(str, base, 32)
 	if err != nil {
-		return ReadObject{}, MakeReadError(reader, "Invalid unicode character: \\o"+str)
+		panic(MakeReadError(reader, "Invalid unicode character: \\o"+str))
 	}
-	if err := peekExpectedDelimiter(reader); err != nil {
-		return ReadObject{}, err
-	}
-	return MakeReadObject(reader, Char(rune(i))), nil
+	peekExpectedDelimiter(reader)
+	return MakeReadObject(reader, Char(rune(i)))
 }
 
-func readCharacter(reader *Reader) (ReadObject, error) {
+func readCharacter(reader *Reader) ReadObject {
 	r := reader.Get()
 	if r == EOF {
-		return ReadObject{}, MakeReadError(reader, "Incomplete character literal")
+		panic(MakeReadError(reader, "Incomplete character literal"))
 	}
 	switch r {
 	case 's':
@@ -410,48 +402,46 @@ func readCharacter(reader *Reader) (ReadObject, error) {
 			readUnicodeCharacter(reader, 3, 8)
 		}
 	}
-	if err := peekExpectedDelimiter(reader); err != nil {
-		return ReadObject{}, err
-	}
-	return MakeReadObject(reader, Char(r)), nil
+	peekExpectedDelimiter(reader)
+	return MakeReadObject(reader, Char(r))
 }
 
-func scanBigInt(str string, base int, err error, reader *Reader) (ReadObject, error) {
+func scanBigInt(str string, base int, err error, reader *Reader) ReadObject {
 	var bi big.Int
 	if _, ok := bi.SetString(str, base); !ok {
-		return ReadObject{}, err
+		panic(err)
 	}
 	res := BigInt(bi)
-	return MakeReadObject(reader, &res), nil
+	return MakeReadObject(reader, &res)
 }
 
-func scanRatio(str string, err error, reader *Reader) (ReadObject, error) {
+func scanRatio(str string, err error, reader *Reader) ReadObject {
 	var rat big.Rat
 	if _, ok := rat.SetString(str); !ok {
-		return ReadObject{}, err
+		panic(err)
 	}
 	res := Ratio(rat)
-	return MakeReadObject(reader, &res), nil
+	return MakeReadObject(reader, &res)
 }
 
-func scanBigFloat(str string, err error, reader *Reader) (ReadObject, error) {
+func scanBigFloat(str string, err error, reader *Reader) ReadObject {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
-		return ReadObject{}, err
+		panic(err)
 	}
 	res := BigFloat(bf)
-	return MakeReadObject(reader, &res), nil
+	return MakeReadObject(reader, &res)
 }
 
-func scanInt(str string, base int, err error, reader *Reader) (ReadObject, error) {
+func scanInt(str string, base int, err error, reader *Reader) ReadObject {
 	i, e := strconv.ParseInt(str, base, 0)
 	if e != nil {
 		return scanBigInt(str, base, err, reader)
 	}
-	return MakeReadObject(reader, Int(int(i))), nil
+	return MakeReadObject(reader, Int(int(i)))
 }
 
-func readNumber(reader *Reader) (ReadObject, error) {
+func readNumber(reader *Reader) ReadObject {
 	var b bytes.Buffer
 	isDouble, isHex, isExp, isRatio, base, nonDigits := false, false, false, false, "", 0
 	d := reader.Get()
@@ -488,21 +478,21 @@ func readNumber(reader *Reader) (ReadObject, error) {
 		invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", base+"r"+str))
 		baseInt, err := strconv.ParseInt(base, 0, 0)
 		if err != nil {
-			return ReadObject{}, invalidNumberError
+			panic(invalidNumberError)
 		}
 		if base[0] == '-' {
 			baseInt = -baseInt
 			str = "-" + str
 		}
 		if baseInt < 2 || baseInt > 36 {
-			return ReadObject{}, invalidNumberError
+			panic(invalidNumberError)
 		}
 		return scanInt(str, int(baseInt), invalidNumberError, reader)
 	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if isRatio {
 		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' {
-			return ReadObject{}, invalidNumberError
+			panic(invalidNumberError)
 		}
 		return scanRatio(str, invalidNumberError, reader)
 	}
@@ -517,9 +507,9 @@ func readNumber(reader *Reader) (ReadObject, error) {
 	if isDouble || (!isHex && isExp) {
 		dbl, err := strconv.ParseFloat(str, 64)
 		if err != nil {
-			return ReadObject{}, invalidNumberError
+			panic(invalidNumberError)
 		}
-		return MakeReadObject(reader, Double(dbl)), nil
+		return MakeReadObject(reader, Double(dbl))
 	}
 	return scanInt(str, 0, invalidNumberError, reader)
 }
@@ -536,7 +526,7 @@ func isSymbolRune(r rune) bool {
 	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\''
 }
 
-func readSymbol(reader *Reader, first rune) (ReadObject, error) {
+func readSymbol(reader *Reader, first rune) ReadObject {
 	var b bytes.Buffer
 	b.WriteRune(first)
 	var lastAdded rune
@@ -544,7 +534,7 @@ func readSymbol(reader *Reader, first rune) (ReadObject, error) {
 	for isSymbolRune(r) {
 		if r == ':' {
 			if b.Len() > 1 && lastAdded == ':' {
-				return ReadObject{}, MakeReadError(reader, "Invalid use of ':' in symbol name")
+				panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
 			}
 		}
 		b.WriteRune(r)
@@ -552,25 +542,25 @@ func readSymbol(reader *Reader, first rune) (ReadObject, error) {
 		r = reader.Get()
 	}
 	if lastAdded == ':' || lastAdded == '/' {
-		return ReadObject{}, MakeReadError(reader, fmt.Sprintf("Invalid use of %c in symbol name", lastAdded))
+		panic(MakeReadError(reader, fmt.Sprintf("Invalid use of %c in symbol name", lastAdded)))
 	}
 	reader.Unget()
 	str := b.String()
 	switch {
 	case str == "nil":
-		return MakeReadObject(reader, NIL), nil
+		return MakeReadObject(reader, NIL)
 	case str == "true":
-		return MakeReadObject(reader, Bool(true)), nil
+		return MakeReadObject(reader, Bool(true))
 	case str == "false":
-		return MakeReadObject(reader, Bool(false)), nil
+		return MakeReadObject(reader, Bool(false))
 	case first == ':':
-		return MakeReadObject(reader, Keyword(str)), nil
+		return MakeReadObject(reader, Keyword(str))
 	default:
-		return MakeReadObject(reader, Symbol(str)), nil
+		return MakeReadObject(reader, Symbol(str))
 	}
 }
 
-func readString(reader *Reader, isRegex bool) (ReadObject, error) {
+func readString(reader *Reader, isRegex bool) ReadObject {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
@@ -597,36 +587,33 @@ func readString(reader *Reader, isRegex bool) (ReadObject, error) {
 				reader.Unget()
 				str := b.String()
 				if len(str) != 4 {
-					return ReadObject{}, MakeReadError(reader, "Invalid unicode escape: \\u"+str)
+					panic(MakeReadError(reader, "Invalid unicode escape: \\u"+str))
 				}
 				i, err := strconv.ParseInt(str, 16, 32)
 				if err != nil {
-					return ReadObject{}, MakeReadError(reader, "Invalid unicode escape: \\u"+str)
+					panic(MakeReadError(reader, "Invalid unicode escape: \\u"+str))
 				}
 				r = rune(i)
 			}
 		}
 		if r == EOF {
-			return ReadObject{}, MakeReadError(reader, "Non-terminated string literal")
+			panic(MakeReadError(reader, "Non-terminated string literal"))
 		}
 		b.WriteRune(r)
 		r = reader.Get()
 	}
 	if isRegex {
-		return MakeReadObject(reader, Regex(b.String())), nil
+		return MakeReadObject(reader, Regex(b.String()))
 	}
-	return MakeReadObject(reader, String(b.String())), nil
+	return MakeReadObject(reader, String(b.String()))
 }
 
-func readList(reader *Reader) (ReadObject, error) {
+func readList(reader *Reader) ReadObject {
 	s := make([]ReadObject, 0, 10)
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ')' {
-		obj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		obj := Read(reader)
 		s = append(s, obj)
 		eatWhitespace(reader)
 		r = reader.Peek()
@@ -636,86 +623,71 @@ func readList(reader *Reader) (ReadObject, error) {
 	for i := len(s) - 1; i >= 0; i-- {
 		list = list.Conj(s[i])
 	}
-	return MakeReadObject(reader, list), nil
+	return MakeReadObject(reader, list)
 }
 
-func readVector(reader *Reader) (ReadObject, error) {
+func readVector(reader *Reader) ReadObject {
 	result := EmptyVector
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ']' {
-		obj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		obj := Read(reader)
 		result = result.conj(obj)
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
 	reader.Get()
-	return MakeReadObject(reader, result), nil
+	return MakeReadObject(reader, result)
 }
 
-func readMap(reader *Reader) (ReadObject, error) {
+func readMap(reader *Reader) ReadObject {
 	m := EmptyArrayMap()
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != '}' {
-		key, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
-		value, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		key := Read(reader)
+		value := Read(reader)
 		if !m.Add(key, value) {
-			return ReadObject{}, MakeReadError(reader, "Duplicate key "+key.ToString(false))
+			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
 	reader.Get()
-	return MakeReadObject(reader, m), nil
+	return MakeReadObject(reader, m)
 }
 
-func readSet(reader *Reader) (ReadObject, error) {
+func readSet(reader *Reader) ReadObject {
 	set := EmptySet()
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != '}' {
-		obj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		obj := Read(reader)
 		if !set.Add(obj) {
-			return ReadObject{}, MakeReadError(reader, "Duplicate key "+obj.ToString(false))
+			panic(MakeReadError(reader, "Duplicate key "+obj.ToString(false)))
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
 	reader.Get()
-	return MakeReadObject(reader, set), nil
+	return MakeReadObject(reader, set)
 }
 
 func makeQuote(obj ReadObject, quote Symbol) ReadObject {
 	return ReadObject{column: obj.column, line: obj.line, obj: EmptyList.Cons(obj).Cons(quote)}
 }
 
-func readMeta(reader *Reader) (ReadObject, error) {
-	obj, err := Read(reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
+func readMeta(reader *Reader) ReadObject {
+	obj := Read(reader)
 	switch obj.obj.(type) {
 	case *ArrayMap:
-		return obj, nil
+		return obj
 	case String, Symbol:
-		return DeriveReadObject(obj, &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword(":tag")), obj}}), nil
+		return DeriveReadObject(obj, &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword(":tag")), obj}})
 	case Keyword:
-		return DeriveReadObject(obj, &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool(true))}}), nil
+		return DeriveReadObject(obj, &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool(true))}})
 	default:
-		return ReadObject{}, MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map")
+		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
 }
 
@@ -778,23 +750,20 @@ func registerArg(index int) Symbol {
 	return ARGS[index]
 }
 
-func readArgSymbol(reader *Reader) (ReadObject, error) {
+func readArgSymbol(reader *Reader) ReadObject {
 	r := reader.Peek()
 	if unicode.IsSpace(r) || isTerminatingMacro(r) {
-		return MakeReadObject(reader, registerArg(1)), nil
+		return MakeReadObject(reader, registerArg(1))
 	}
-	obj, err := Read(reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
+	obj := Read(reader)
 	if obj.obj.Equals(Symbol("&")) {
-		return MakeReadObject(reader, registerArg(-1)), nil
+		return MakeReadObject(reader, registerArg(-1))
 	}
 	switch n := obj.obj.(type) {
 	case Int:
-		return MakeReadObject(reader, registerArg(int(n))), nil
+		return MakeReadObject(reader, registerArg(int(n)))
 	default:
-		return ReadObject{}, MakeReadError(reader, "Arg literal must be %, %& or %integer")
+		panic(MakeReadError(reader, "Arg literal must be %, %& or %integer"))
 	}
 }
 
@@ -819,39 +788,33 @@ func isCall(obj Object, name Symbol) bool {
 	}
 }
 
-func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) (Seq, error) {
+func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
 		obj := iter.Next().(ReadObject)
 		if isCall(obj.obj, Symbol("unquote-splicing")) {
 			res = append(res, (obj.obj).(Seq).Rest().First())
 		} else {
-			q, err := makeSyntaxQuote(obj, env, reader)
-			if err != nil {
-				return nil, err
-			}
+			q := makeSyntaxQuote(obj, env, reader)
 			res = append(res, ReadObject{line: q.line, column: q.column, obj: NewListFrom(Symbol("list"), q)})
 		}
 	}
-	return &ArraySeq{arr: res}, nil
+	return &ArraySeq{arr: res}
 }
 
-func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, line int, column int) (ReadObject, error) {
-	q, err := syntaxQuoteSeq(seq, env, reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
+func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, line int, column int) ReadObject {
+	q := syntaxQuoteSeq(seq, env, reader)
 	concat := q.Cons(Symbol("concat"))
 	seqList := NewListFrom(Symbol("seq"), concat)
 	if ctor == Symbol("") {
-		return ReadObject{line: line, column: column, obj: seqList}, nil
+		return ReadObject{line: line, column: column, obj: seqList}
 	}
-	return ReadObject{line: line, column: column, obj: NewListFrom(ctor, seqList).Cons(Symbol("apply"))}, nil
+	return ReadObject{line: line, column: column, obj: NewListFrom(ctor, seqList).Cons(Symbol("apply"))}
 }
 
-func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) (ReadObject, error) {
+func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) ReadObject {
 	if isSelfEvaluating(obj.obj) {
-		return obj, nil
+		return obj
 	}
 	switch s := obj.obj.(type) {
 	case Symbol:
@@ -864,13 +827,13 @@ func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) (Rea
 			}
 			obj = ReadObject{column: obj.column, line: obj.line, obj: sym}
 		}
-		return makeQuote(obj, Symbol("quote")), nil
+		return makeQuote(obj, Symbol("quote"))
 	case Seq:
 		if isCall(obj.obj, Symbol("unquote")) {
-			return Second(s).(ReadObject), nil
+			return Second(s).(ReadObject)
 		}
 		if isCall(obj.obj, Symbol("unquote-splicing")) {
-			return ReadObject{}, MakeReadError(reader, "Splice not in list")
+			panic(MakeReadError(reader, "Splice not in list"))
 		}
 		return syntaxQuoteColl(s, env, reader, Symbol(""), obj.line, obj.column)
 	case *Vector:
@@ -880,38 +843,32 @@ func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) (Rea
 	case *Set:
 		return syntaxQuoteColl(s.Seq(), env, reader, Symbol("hash-set"), obj.line, obj.column)
 	default:
-		return obj, nil
+		return obj
 	}
 }
 
-func readTagged(reader *Reader) (ReadObject, error) {
-	obj, err := Read(reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
+func readTagged(reader *Reader) ReadObject {
+	obj := Read(reader)
 	switch s := obj.obj.(type) {
 	case Symbol:
 		readFunc := DATA_READERS[s]
 		if readFunc == nil {
-			return ReadObject{}, MakeReadError(reader, "No reader function for tag "+string(s))
+			panic(MakeReadError(reader, "No reader function for tag "+string(s)))
 		}
 		return readFunc(reader)
 	default:
-		return ReadObject{}, MakeReadError(reader, "Reader tag must be a symbol")
+		panic(MakeReadError(reader, "Reader tag must be a symbol"))
 	}
 }
 
-func readDispatch(reader *Reader) (ReadObject, error) {
+func readDispatch(reader *Reader) ReadObject {
 	r := reader.Get()
 	switch r {
 	case '"':
 		return readString(reader, true)
 	case '\'':
-		nextObj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("var")), nextObj)), nil
+		nextObj := Read(reader)
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("var")), nextObj))
 	case '^':
 		return readWithMeta(reader)
 	case '{':
@@ -919,31 +876,22 @@ func readDispatch(reader *Reader) (ReadObject, error) {
 	case '(':
 		reader.Unget()
 		ARGS = make(map[int]Symbol)
-		fn, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		fn := Read(reader)
 		res := makeFnForm(ARGS, fn)
 		ARGS = nil
-		return res, nil
+		return res
 	}
 	reader.Unget()
 	return readTagged(reader)
 }
 
-func readWithMeta(reader *Reader) (ReadObject, error) {
-	meta, err := readMeta(reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
-	nextObj, err := Read(reader)
-	if err != nil {
-		return ReadObject{}, err
-	}
-	return makeWithMeta(nextObj, meta), nil
+func readWithMeta(reader *Reader) ReadObject {
+	meta := readMeta(reader)
+	nextObj := Read(reader)
+	return makeWithMeta(nextObj, meta)
 }
 
-func Read(reader *Reader) (ReadObject, error) {
+func Read(reader *Reader) ReadObject {
 	eatWhitespace(reader)
 	r := reader.Get()
 	switch {
@@ -971,53 +919,43 @@ func Read(reader *Reader) (ReadObject, error) {
 	case r == '{':
 		return readMap(reader)
 	case r == '/' && isDelimiter(reader.Peek()):
-		return MakeReadObject(reader, Symbol("/")), nil
+		return MakeReadObject(reader, Symbol("/"))
 	case r == '\'':
-		nextObj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
-		return makeQuote(nextObj, Symbol("quote")), nil
+		nextObj := Read(reader)
+		return makeQuote(nextObj, Symbol("quote"))
 	case r == '@':
-		nextObj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("deref")), nextObj)), nil
+		nextObj := Read(reader)
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("deref")), nextObj))
 	case r == '~':
 		if reader.Peek() == '@' {
 			reader.Get()
-			nextObj, err := Read(reader)
-			if err != nil {
-				return ReadObject{}, err
-			}
-			return makeQuote(nextObj, Symbol("unquote-splicing")), nil
+			nextObj := Read(reader)
+			return makeQuote(nextObj, Symbol("unquote-splicing"))
 		}
-		nextObj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
-		return makeQuote(nextObj, Symbol("unquote")), nil
+		nextObj := Read(reader)
+		return makeQuote(nextObj, Symbol("unquote"))
 	case r == '`':
-		nextObj, err := Read(reader)
-		if err != nil {
-			return ReadObject{}, err
-		}
+		nextObj := Read(reader)
 		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol), reader)
 	case r == '^':
 		return readWithMeta(reader)
 	case r == '#':
 		return readDispatch(reader)
 	case r == EOF:
-		return ReadObject{}, MakeReadError(reader, "Unexpected end of file")
+		panic(MakeReadError(reader, "Unexpected end of file"))
 	}
-	return ReadObject{}, MakeReadError(reader, fmt.Sprintf("Unexpected %c", r))
+	panic(MakeReadError(reader, fmt.Sprintf("Unexpected %c", r)))
 }
 
-func TryRead(reader *Reader) (ReadObject, error) {
+func TryRead(reader *Reader) (obj ReadObject, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
 	eatWhitespace(reader)
 	if reader.Peek() == EOF {
 		return ReadObject{}, io.EOF
 	}
-	return Read(reader)
+	return Read(reader), nil
 }
