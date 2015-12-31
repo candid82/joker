@@ -53,12 +53,12 @@ func repl() {
 			fmt.Fprintln(os.Stderr, "Read error: ", err)
 			skipRestOfLine(reader)
 		default:
-			expr, err := parse(obj)
+			expr, err := TryParse(obj)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Parse error: ", err)
 				continue
 			}
-			res, err := expr.Eval()
+			res, err := TryEval(expr)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Eval error: ", err)
 				continue
