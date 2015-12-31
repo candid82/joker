@@ -8,7 +8,28 @@ type (
 	ArrayMap struct {
 		arr []Object
 	}
+	ArrayMapIterator struct {
+		m       *ArrayMap
+		current int
+	}
+	Pair struct {
+		key   Object
+		value Object
+	}
 )
+
+func (iter *ArrayMapIterator) Next() Pair {
+	res := Pair{
+		key:   iter.m.arr[iter.current],
+		value: iter.m.arr[iter.current+1],
+	}
+	iter.current += 2
+	return res
+}
+
+func (iter *ArrayMapIterator) HasNext() bool {
+	return iter.current < len(iter.m.arr)
+}
 
 func (m *ArrayMap) indexOf(key Object) int {
 	for i := 0; i < len(m.arr); i += 2 {
@@ -86,6 +107,10 @@ func (m *ArrayMap) Keys() Seq {
 		res[i] = m.arr[i*2]
 	}
 	return &ArraySeq{arr: res}
+}
+
+func (m *ArrayMap) iter() *ArrayMapIterator {
+	return &ArrayMapIterator{m: m}
 }
 
 func EmptyArrayMap() *ArrayMap {

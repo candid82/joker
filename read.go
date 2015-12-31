@@ -64,7 +64,7 @@ func init() {
 
 func (ro ReadObject) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case *ReadObject:
+	case ReadObject:
 		return ro.obj.Equals(other.obj)
 	case Object:
 		return ro.obj.Equals(other)
