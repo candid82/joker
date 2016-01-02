@@ -117,13 +117,13 @@ func (v *Vector) Equals(other interface{}) bool {
 	if v == other {
 		return true
 	}
-	switch otherVector := other.(type) {
+	switch other := other.(type) {
 	case *Vector:
-		if v.count != otherVector.count {
+		if v.count != other.count {
 			return false
 		}
 		for i := 0; i < v.count; i++ {
-			if v.at(i) != otherVector.at(i) {
+			if !v.at(i).Equals(other.at(i)) {
 				return false
 			}
 		}

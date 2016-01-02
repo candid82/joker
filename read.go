@@ -664,7 +664,7 @@ func readSet(reader *Reader) ReadObject {
 	for r != '}' {
 		obj := Read(reader)
 		if !set.Add(obj) {
-			panic(MakeReadError(reader, "Duplicate key "+obj.ToString(false)))
+			panic(MakeReadError(reader, "Duplicate element set "+obj.ToString(false)))
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()

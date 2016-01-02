@@ -136,23 +136,17 @@ func (m *ArrayMap) ToString(escape bool) string {
 }
 
 func (m *ArrayMap) Equals(other interface{}) bool {
+	if m == other {
+		return true
+	}
 	switch otherMap := other.(type) {
 	case *ArrayMap:
-		if m == otherMap {
-			return true
-		}
 		if len(m.arr) != len(otherMap.arr) {
 			return false
 		}
 		for i := 0; i < len(m.arr); i += 2 {
 			success, value := otherMap.Get(m.arr[i])
-			if !success || value != m.arr[i+1] {
-				return false
-			}
-		}
-		for i := 0; i < len(otherMap.arr); i += 2 {
-			success, value := m.Get(otherMap.arr[i])
-			if !success || value != otherMap.arr[i+1] {
+			if !success || !value.Equals(m.arr[i+1]) {
 				return false
 			}
 		}

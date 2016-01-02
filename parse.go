@@ -18,6 +18,9 @@ type (
 		keys   []Expr
 		values []Expr
 	}
+	SetExpr struct {
+		elements []Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -58,6 +61,17 @@ func (expr *MapExpr) Eval() Object {
 	return res
 }
 
+func (expr *SetExpr) Eval() Object {
+	res := EmptySet()
+	for _, elemExpr := range expr.elements {
+		el := elemExpr.Eval()
+		if !res.Add(el) {
+			panic(&EvalError{msg: "Duplicate set element: " + el.ToString(false)})
+		}
+	}
+	return res
+}
+
 func ensureReadObject(obj Object) ReadObject {
 	switch obj := obj.(type) {
 	case ReadObject:
@@ -88,6 +102,16 @@ func parseMap(m *ArrayMap) Expr {
 	return &res
 }
 
+func parseSet(s *Set) Expr {
+	res := SetExpr{
+		elements: make([]Expr, s.m.Count()),
+	}
+	for iter, i := iter(s.Seq()), 0; iter.HasNext(); i++ {
+		res.elements[i] = parse(ensureReadObject(iter.Next()))
+	}
+	return &res
+}
+
 func parse(obj ReadObject) Expr {
 	switch v := obj.obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
@@ -96,6 +120,8 @@ func parse(obj ReadObject) Expr {
 		return parseVector(v)
 	case *ArrayMap:
 		return parseMap(v)
+	case *Set:
+		return parseSet(v)
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
