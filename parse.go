@@ -26,6 +26,10 @@ type (
 		pos  Expr
 		neg  Expr
 	}
+	DefExpr struct {
+		name  Symbol
+		value Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -34,6 +38,8 @@ type (
 		msg string
 	}
 )
+
+var GLOBAL_ENV = map[Symbol]Object{}
 
 func (err ParseError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.obj.line, err.obj.column, err.msg)
@@ -75,6 +81,12 @@ func (expr *SetExpr) Eval() Object {
 		}
 	}
 	return res
+}
+
+func (expr *DefExpr) Eval() Object {
+	v := expr.value.Eval()
+	GLOBAL_ENV[expr.name] = v
+	return v
 }
 
 func toBool(obj Object) bool {
@@ -161,6 +173,15 @@ func parseList(obj ReadObject) Expr {
 				cond: parse(ensureReadObject(list.Second())),
 				pos:  parse(ensureReadObject(list.Third())),
 				neg:  parse(ensureReadObject(list.Forth())),
+			}
+		case "def":
+			checkForm(obj, 3, 3)
+			s := ensureReadObject(list.Second())
+			switch v := s.obj.(type) {
+			case Symbol:
+				return &DefExpr{name: v, value: parse(ensureReadObject(list.Third()))}
+			default:
+				panic(&ParseError{obj: s, msg: "First argument to def must be a Symbol"})
 			}
 		}
 	}
