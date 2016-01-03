@@ -30,12 +30,19 @@ type (
 		name  Symbol
 		value Expr
 	}
+	CallExpr struct {
+		callable Expr
+		args     []Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
 	}
 	EvalError struct {
 		msg string
+	}
+	Callable interface {
+		Call(args []Object) Object
 	}
 )
 
@@ -89,6 +96,24 @@ func (expr *DefExpr) Eval() Object {
 	return v
 }
 
+func evalSeq(exprs []Expr) []Object {
+	res := make([]Object, len(exprs))
+	for i, expr := range exprs {
+		res[i] = expr.Eval()
+	}
+	return res
+}
+
+func (expr *CallExpr) Eval() Object {
+	callable := expr.callable.Eval()
+	switch callable := callable.(type) {
+	case Callable:
+		return callable.Call(evalSeq(expr.args))
+	default:
+		panic(EvalError{msg: callable.ToString(false) + " is not callable"})
+	}
+}
+
 func toBool(obj Object) bool {
 	switch obj := obj.(type) {
 	case Nil:
@@ -114,6 +139,15 @@ func ensureReadObject(obj Object) ReadObject {
 	default:
 		return ReadObject{obj: obj}
 	}
+}
+
+func parseSeq(seq Seq) []Expr {
+	res := make([]Expr, 0)
+	for !seq.IsEmpty() {
+		res = append(res, parse(ensureReadObject(seq.First())))
+		seq = seq.Rest()
+	}
+	return res
 }
 
 func parseVector(v *Vector) Expr {
@@ -185,7 +219,7 @@ func parseList(obj ReadObject) Expr {
 			}
 		}
 	}
-	return &LiteralExpr{obj: list}
+	return &CallExpr{callable: parse(ensureReadObject(list.first)), args: parseSeq(list.rest)}
 }
 
 func parse(obj ReadObject) Expr {
