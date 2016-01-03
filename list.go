@@ -65,4 +65,20 @@ func (list *List) Seq() Seq {
 	return list
 }
 
-var EmptyList = NewList(nil, nil)
+func (list *List) Second() Object {
+	return list.rest.first
+}
+
+func (list *List) Third() Object {
+	return list.rest.rest.first
+}
+
+func (list *List) Forth() Object {
+	return list.rest.rest.rest.first
+}
+
+var EmptyList = NewList(Nil{}, nil)
+
+func init() {
+	EmptyList.rest = EmptyList
+}

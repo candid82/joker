@@ -21,6 +21,11 @@ type (
 	SetExpr struct {
 		elements []Expr
 	}
+	IfExpr struct {
+		cond Expr
+		pos  Expr
+		neg  Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -72,6 +77,24 @@ func (expr *SetExpr) Eval() Object {
 	return res
 }
 
+func toBool(obj Object) bool {
+	switch obj := obj.(type) {
+	case Nil:
+		return false
+	case Bool:
+		return bool(obj)
+	default:
+		return true
+	}
+}
+
+func (expr *IfExpr) Eval() Object {
+	if toBool(expr.cond.Eval()) {
+		return expr.pos.Eval()
+	}
+	return expr.neg.Eval()
+}
+
 func ensureReadObject(obj Object) ReadObject {
 	switch obj := obj.(type) {
 	case ReadObject:
@@ -112,6 +135,38 @@ func parseSet(s *Set) Expr {
 	return &res
 }
 
+func checkForm(obj ReadObject, min int, max int) {
+	list := obj.obj.(*List)
+	if list.count < min {
+		panic(&ParseError{obj: obj, msg: "Too few arguments to " + list.first.ToString(false)})
+	}
+}
+
+func parseList(obj ReadObject) Expr {
+	list := obj.obj.(*List)
+	if list.count == 0 {
+		return &LiteralExpr{obj: list}
+	}
+	first := ensureReadObject(list.first)
+	switch v := first.obj.(type) {
+	case Symbol:
+		switch string(v) {
+		case "quote":
+			// TODO: this probably needs unwrapping from ReadObject to Object
+			// for collections
+			return &LiteralExpr{obj: ensureReadObject(list.Second()).obj}
+		case "if":
+			checkForm(obj, 3, 4)
+			return &IfExpr{
+				cond: parse(ensureReadObject(list.Second())),
+				pos:  parse(ensureReadObject(list.Third())),
+				neg:  parse(ensureReadObject(list.Forth())),
+			}
+		}
+	}
+	return &LiteralExpr{obj: list}
+}
+
 func parse(obj ReadObject) Expr {
 	switch v := obj.obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
@@ -122,6 +177,8 @@ func parse(obj ReadObject) Expr {
 		return parseMap(v)
 	case *Set:
 		return parseSet(v)
+	case *List:
+		return parseList(obj)
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
