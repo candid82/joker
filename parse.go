@@ -77,64 +77,6 @@ func NewLiteralExpr(obj ReadObject) *LiteralExpr {
 	return &res
 }
 
-func NewVectorExpr(exprs []Expr, pos Position) *VectorExpr {
-	res := VectorExpr{v: exprs}
-	res.line = pos.line
-	res.column = pos.column
-	return &res
-}
-
-func NewMapExpr(count int, pos Position) *MapExpr {
-	res := MapExpr{
-		keys:   make([]Expr, count),
-		values: make([]Expr, count),
-	}
-	res.line = pos.line
-	res.column = pos.column
-	return &res
-}
-
-func NewSetExpr(count int, pos Position) *SetExpr {
-	res := SetExpr{
-		elements: make([]Expr, count),
-	}
-	res.line = pos.line
-	res.column = pos.column
-	return &res
-}
-
-func NewIfExpr(cond, positive, negative Expr, pos Position) *IfExpr {
-	res := &IfExpr{
-		cond:     cond,
-		positive: positive,
-		negative: negative,
-	}
-	res.line = pos.line
-	res.column = pos.column
-	return res
-}
-
-func NewDefExpr(name Symbol, value Expr, pos Position) *DefExpr {
-	res := &DefExpr{name: name, value: value}
-	res.line = pos.line
-	res.column = pos.column
-	return res
-}
-
-func NewCallExpr(callable Expr, args []Expr, pos Position) *CallExpr {
-	res := &CallExpr{callable: callable, args: args}
-	res.line = pos.line
-	res.column = pos.column
-	return res
-}
-
-func NewRefExpr(symbol Symbol, pos Position) *RefExpr {
-	res := &RefExpr{symbol: symbol}
-	res.line = pos.line
-	res.column = pos.column
-	return res
-}
-
 func (err ParseError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.obj.line, err.obj.column, err.msg)
 }
@@ -262,11 +204,18 @@ func parseVector(v *Vector, pos Position) Expr {
 	for i := 0; i < v.count; i++ {
 		r[i] = parse(ensureReadObject(v.at(i)))
 	}
-	return NewVectorExpr(r, pos)
+	return &VectorExpr{
+		v:        r,
+		Position: pos,
+	}
 }
 
 func parseMap(m *ArrayMap, pos Position) Expr {
-	res := NewMapExpr(m.Count(), pos)
+	res := &MapExpr{
+		keys:     make([]Expr, m.Count()),
+		values:   make([]Expr, m.Count()),
+		Position: pos,
+	}
 	for iter, i := m.iter(), 0; iter.HasNext(); i++ {
 		p := iter.Next()
 		res.keys[i] = parse(ensureReadObject(p.key))
@@ -276,7 +225,10 @@ func parseMap(m *ArrayMap, pos Position) Expr {
 }
 
 func parseSet(s *Set, pos Position) Expr {
-	res := NewSetExpr(s.m.Count(), pos)
+	res := &SetExpr{
+		elements: make([]Expr, s.m.Count()),
+		Position: pos,
+	}
 	for iter, i := iter(s.Seq()), 0; iter.HasNext(); i++ {
 		res.elements[i] = parse(ensureReadObject(iter.Next()))
 	}
@@ -305,23 +257,32 @@ func parseList(obj ReadObject) Expr {
 			return NewLiteralExpr(ensureReadObject(list.Second()))
 		case "if":
 			checkForm(obj, 3, 4)
-			return NewIfExpr(
-				parse(ensureReadObject(list.Second())),
-				parse(ensureReadObject(list.Third())),
-				parse(ensureReadObject(list.Forth())),
-				Position{line: obj.line, column: obj.column})
+			return &IfExpr{
+				cond:     parse(ensureReadObject(list.Second())),
+				positive: parse(ensureReadObject(list.Third())),
+				negative: parse(ensureReadObject(list.Forth())),
+				Position: Position{line: obj.line, column: obj.column},
+			}
 		case "def":
 			checkForm(obj, 3, 3)
 			s := ensureReadObject(list.Second())
 			switch v := s.obj.(type) {
 			case Symbol:
-				return NewDefExpr(v, parse(ensureReadObject(list.Third())), Position{line: obj.line, column: obj.column})
+				return &DefExpr{
+					name:     v,
+					value:    parse(ensureReadObject(list.Third())),
+					Position: Position{line: obj.line, column: obj.column},
+				}
 			default:
 				panic(&ParseError{obj: s, msg: "First argument to def must be a Symbol"})
 			}
 		}
 	}
-	return NewCallExpr(parse(ensureReadObject(list.first)), parseSeq(list.rest), Position{line: obj.line, column: obj.column})
+	return &CallExpr{
+		callable: parse(ensureReadObject(list.first)),
+		args:     parseSeq(list.rest),
+		Position: Position{line: obj.line, column: obj.column},
+	}
 }
 
 func parse(obj ReadObject) Expr {
@@ -338,7 +299,10 @@ func parse(obj ReadObject) Expr {
 	case *List:
 		return parseList(obj)
 	case Symbol:
-		return NewRefExpr(v, pos)
+		return &RefExpr{
+			symbol:   v,
+			Position: pos,
+		}
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
