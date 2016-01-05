@@ -6,7 +6,7 @@ import (
 
 type (
 	Expr interface {
-		Eval() Object
+		Eval(env Env) Object
 		Pos() Position
 	}
 	Position struct {
@@ -46,6 +46,10 @@ type (
 		callable Expr
 		args     []Expr
 	}
+	RefExpr struct {
+		Position
+		symbol Symbol
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -57,9 +61,10 @@ type (
 	Callable interface {
 		Call(args []Object) Object
 	}
+	Env map[Symbol]Object
 )
 
-var GLOBAL_ENV = map[Symbol]Object{}
+var GLOBAL_ENV = Env{}
 
 func (pos Position) Pos() Position {
 	return pos
@@ -123,6 +128,13 @@ func NewCallExpr(callable Expr, args []Expr, pos Position) *CallExpr {
 	return res
 }
 
+func NewRefExpr(symbol Symbol, pos Position) *RefExpr {
+	res := &RefExpr{symbol: symbol}
+	res.line = pos.line
+	res.column = pos.column
+	return res
+}
+
 func (err ParseError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.obj.line, err.obj.column, err.msg)
 }
@@ -131,23 +143,34 @@ func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.pos.line, err.pos.column, err.msg)
 }
 
-func (expr *LiteralExpr) Eval() Object {
+func (expr *RefExpr) Eval(env Env) Object {
+	v, ok := env[expr.symbol]
+	if !ok {
+		panic(&EvalError{
+			msg: "Unbound symbol: " + expr.symbol.ToString(false),
+			pos: expr.Position,
+		})
+	}
+	return v
+}
+
+func (expr *LiteralExpr) Eval(env Env) Object {
 	return expr.obj
 }
 
-func (expr *VectorExpr) Eval() Object {
+func (expr *VectorExpr) Eval(env Env) Object {
 	res := EmptyVector
 	for _, e := range expr.v {
-		res = res.conj(e.Eval())
+		res = res.conj(e.Eval(env))
 	}
 	return res
 }
 
-func (expr *MapExpr) Eval() Object {
+func (expr *MapExpr) Eval(env Env) Object {
 	res := EmptyArrayMap()
 	for i := range expr.keys {
-		key := expr.keys[i].Eval()
-		if !res.Add(key, expr.values[i].Eval()) {
+		key := expr.keys[i].Eval(env)
+		if !res.Add(key, expr.values[i].Eval(env)) {
 			panic(&EvalError{
 				msg: "Duplicate key: " + key.ToString(false),
 				pos: expr.Position,
@@ -157,10 +180,10 @@ func (expr *MapExpr) Eval() Object {
 	return res
 }
 
-func (expr *SetExpr) Eval() Object {
+func (expr *SetExpr) Eval(env Env) Object {
 	res := EmptySet()
 	for _, elemExpr := range expr.elements {
-		el := elemExpr.Eval()
+		el := elemExpr.Eval(env)
 		if !res.Add(el) {
 			panic(&EvalError{
 				msg: "Duplicate set element: " + el.ToString(false),
@@ -171,25 +194,25 @@ func (expr *SetExpr) Eval() Object {
 	return res
 }
 
-func (expr *DefExpr) Eval() Object {
-	v := expr.value.Eval()
+func (expr *DefExpr) Eval(env Env) Object {
+	v := expr.value.Eval(env)
 	GLOBAL_ENV[expr.name] = v
 	return v
 }
 
-func evalSeq(exprs []Expr) []Object {
+func evalSeq(exprs []Expr, env Env) []Object {
 	res := make([]Object, len(exprs))
 	for i, expr := range exprs {
-		res[i] = expr.Eval()
+		res[i] = expr.Eval(env)
 	}
 	return res
 }
 
-func (expr *CallExpr) Eval() Object {
-	callable := expr.callable.Eval()
+func (expr *CallExpr) Eval(env Env) Object {
+	callable := expr.callable.Eval(env)
 	switch callable := callable.(type) {
 	case Callable:
-		return callable.Call(evalSeq(expr.args))
+		return callable.Call(evalSeq(expr.args, env))
 	default:
 		panic(&EvalError{
 			msg: callable.ToString(false) + " is not callable",
@@ -209,11 +232,11 @@ func toBool(obj Object) bool {
 	}
 }
 
-func (expr *IfExpr) Eval() Object {
-	if toBool(expr.cond.Eval()) {
-		return expr.positive.Eval()
+func (expr *IfExpr) Eval(env Env) Object {
+	if toBool(expr.cond.Eval(env)) {
+		return expr.positive.Eval(env)
 	}
-	return expr.negative.Eval()
+	return expr.negative.Eval(env)
 }
 
 func ensureReadObject(obj Object) ReadObject {
@@ -302,17 +325,20 @@ func parseList(obj ReadObject) Expr {
 }
 
 func parse(obj ReadObject) Expr {
+	pos := Position{line: obj.line, column: obj.column}
 	switch v := obj.obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
 		return NewLiteralExpr(obj)
 	case *Vector:
-		return parseVector(v, Position{line: obj.line, column: obj.column})
+		return parseVector(v, pos)
 	case *ArrayMap:
-		return parseMap(v, Position{line: obj.line, column: obj.column})
+		return parseMap(v, pos)
 	case *Set:
-		return parseSet(v, Position{line: obj.line, column: obj.column})
+		return parseSet(v, pos)
 	case *List:
 		return parseList(obj)
+	case Symbol:
+		return NewRefExpr(v, pos)
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
@@ -333,5 +359,5 @@ func TryEval(expr Expr) (obj Object, err error) {
 			err = r.(error)
 		}
 	}()
-	return expr.Eval(), nil
+	return expr.Eval(GLOBAL_ENV), nil
 }
