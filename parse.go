@@ -144,7 +144,7 @@ func parseList(obj ReadObject) Expr {
 	first := ensureReadObject(list.first)
 	switch v := first.obj.(type) {
 	case Symbol:
-		switch string(v) {
+		switch *v.name {
 		case "quote":
 			// TODO: this probably needs unwrapping from ReadObject to Object
 			// for collections

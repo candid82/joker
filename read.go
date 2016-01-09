@@ -18,16 +18,19 @@ type (
 		Equality
 		ToString(escape bool) string
 	}
-	Char       rune
-	Double     float64
-	Int        int
-	BigInt     big.Int
-	BigFloat   big.Float
-	Ratio      big.Rat
-	Bool       bool
-	Nil        struct{}
-	Keyword    string
-	Symbol     string
+	Char     rune
+	Double   float64
+	Int      int
+	BigInt   big.Int
+	BigFloat big.Float
+	Ratio    big.Rat
+	Bool     bool
+	Nil      struct{}
+	Keyword  string
+	Symbol   struct {
+		ns   *string
+		name *string
+	}
 	String     string
 	Regex      string
 	ReadObject struct {
@@ -57,9 +60,23 @@ func readStub(reader *Reader) ReadObject {
 var DATA_READERS = map[Symbol]ReadFunc{}
 var NIL Nil
 
+func MakeQualifiedSymbol(ns, name string) Symbol {
+	return Symbol{
+		ns:   STRINGS.Intern(ns),
+		name: STRINGS.Intern(name),
+	}
+}
+
+func MakeSymbol(name string) Symbol {
+	return Symbol{
+		ns:   nil,
+		name: STRINGS.Intern(name),
+	}
+}
+
 func init() {
-	DATA_READERS[Symbol("inst")] = readStub
-	DATA_READERS[Symbol("uuid")] = readStub
+	DATA_READERS[MakeSymbol("inst")] = readStub
+	DATA_READERS[MakeSymbol("uuid")] = readStub
 }
 
 func (ro ReadObject) Equals(other interface{}) bool {
@@ -199,7 +216,10 @@ func (rx Regex) Equals(other interface{}) bool {
 }
 
 func (s Symbol) ToString(escape bool) string {
-	return string(s)
+	if s.ns != nil {
+		return *s.ns + "/" + *s.name
+	}
+	return *s.name
 }
 
 func (s Symbol) Equals(other interface{}) bool {
@@ -556,7 +576,7 @@ func readSymbol(reader *Reader, first rune) ReadObject {
 	case first == ':':
 		return MakeReadObject(reader, Keyword(str))
 	default:
-		return MakeReadObject(reader, Symbol(str))
+		return MakeReadObject(reader, MakeSymbol(str))
 	}
 }
 
@@ -692,7 +712,7 @@ func readMeta(reader *Reader) ReadObject {
 }
 
 func makeWithMeta(obj ReadObject, meta ReadObject) ReadObject {
-	return DeriveReadObject(obj, NewListFrom(DeriveReadObject(meta, Symbol("with-meta")), meta, obj))
+	return DeriveReadObject(obj, NewListFrom(DeriveReadObject(meta, MakeSymbol("with-meta")), meta, obj))
 }
 
 func fillInMissingArgs(args map[int]Symbol) {
@@ -704,7 +724,7 @@ func fillInMissingArgs(args map[int]Symbol) {
 	}
 	for i := 1; i < max; i++ {
 		if _, ok := args[i]; !ok {
-			args[i] = makeSymbol("p")
+			args[i] = generateSymbol("p")
 		}
 	}
 }
@@ -718,14 +738,14 @@ func makeFnForm(args map[int]Symbol, body ReadObject) ReadObject {
 		}
 	}
 	if v, ok := args[-1]; ok {
-		a[len(args)-1] = Symbol("&")
+		a[len(args)-1] = MakeSymbol("&")
 		a = append(a, v)
 	}
 	argVector := EmptyVector
 	for _, v := range a {
 		argVector = argVector.conj(v)
 	}
-	return DeriveReadObject(body, NewListFrom(Symbol("fn"), argVector, body))
+	return DeriveReadObject(body, NewListFrom(MakeSymbol("fn"), argVector, body))
 }
 
 func isTerminatingMacro(r rune) bool {
@@ -737,16 +757,16 @@ func isTerminatingMacro(r rune) bool {
 	}
 }
 
-func makeSymbol(prefix string) Symbol {
+func generateSymbol(prefix string) Symbol {
 	GENSYM++
-	return Symbol(fmt.Sprintf("%s__%d#", prefix, GENSYM))
+	return MakeSymbol(fmt.Sprintf("%s__%d#", prefix, GENSYM))
 }
 
 func registerArg(index int) Symbol {
 	if s, ok := ARGS[index]; ok {
 		return s
 	}
-	ARGS[index] = makeSymbol("p")
+	ARGS[index] = generateSymbol("p")
 	return ARGS[index]
 }
 
@@ -756,7 +776,7 @@ func readArgSymbol(reader *Reader) ReadObject {
 		return MakeReadObject(reader, registerArg(1))
 	}
 	obj := Read(reader)
-	if obj.obj.Equals(Symbol("&")) {
+	if obj.obj.Equals(MakeSymbol("&")) {
 		return MakeReadObject(reader, registerArg(-1))
 	}
 	switch n := obj.obj.(type) {
@@ -792,11 +812,11 @@ func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
 		obj := iter.Next().(ReadObject)
-		if isCall(obj.obj, Symbol("unquote-splicing")) {
+		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
 			res = append(res, (obj.obj).(Seq).Rest().First())
 		} else {
 			q := makeSyntaxQuote(obj, env, reader)
-			res = append(res, ReadObject{line: q.line, column: q.column, obj: NewListFrom(Symbol("list"), q)})
+			res = append(res, ReadObject{line: q.line, column: q.column, obj: NewListFrom(MakeSymbol("list"), q)})
 		}
 	}
 	return &ArraySeq{arr: res}
@@ -804,12 +824,12 @@ func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 
 func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, line int, column int) ReadObject {
 	q := syntaxQuoteSeq(seq, env, reader)
-	concat := q.Cons(Symbol("concat"))
-	seqList := NewListFrom(Symbol("seq"), concat)
-	if ctor == Symbol("") {
+	concat := q.Cons(MakeSymbol("concat"))
+	seqList := NewListFrom(MakeSymbol("seq"), concat)
+	if ctor == MakeSymbol("") {
 		return ReadObject{line: line, column: column, obj: seqList}
 	}
-	return ReadObject{line: line, column: column, obj: NewListFrom(ctor, seqList).Cons(Symbol("apply"))}
+	return ReadObject{line: line, column: column, obj: NewListFrom(ctor, seqList).Cons(MakeSymbol("apply"))}
 }
 
 func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) ReadObject {
@@ -818,30 +838,30 @@ func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) Read
 	}
 	switch s := obj.obj.(type) {
 	case Symbol:
-		str := string(s)
+		str := *s.name
 		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
 			sym, ok := env[s]
 			if !ok {
-				sym = makeSymbol(str[:len(str)-1])
+				sym = generateSymbol(str[:len(str)-1])
 				env[s] = sym
 			}
 			obj = ReadObject{column: obj.column, line: obj.line, obj: sym}
 		}
-		return makeQuote(obj, Symbol("quote"))
+		return makeQuote(obj, MakeSymbol("quote"))
 	case Seq:
-		if isCall(obj.obj, Symbol("unquote")) {
+		if isCall(obj.obj, MakeSymbol("unquote")) {
 			return Second(s).(ReadObject)
 		}
-		if isCall(obj.obj, Symbol("unquote-splicing")) {
+		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
 			panic(MakeReadError(reader, "Splice not in list"))
 		}
-		return syntaxQuoteColl(s, env, reader, Symbol(""), obj.line, obj.column)
+		return syntaxQuoteColl(s, env, reader, MakeSymbol(""), obj.line, obj.column)
 	case *Vector:
-		return syntaxQuoteColl(s.Seq(), env, reader, Symbol("vector"), obj.line, obj.column)
+		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("vector"), obj.line, obj.column)
 	case *ArrayMap:
-		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, Symbol("hash-map"), obj.line, obj.column)
+		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, MakeSymbol("hash-map"), obj.line, obj.column)
 	case *Set:
-		return syntaxQuoteColl(s.Seq(), env, reader, Symbol("hash-set"), obj.line, obj.column)
+		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("hash-set"), obj.line, obj.column)
 	default:
 		return obj
 	}
@@ -853,7 +873,7 @@ func readTagged(reader *Reader) ReadObject {
 	case Symbol:
 		readFunc := DATA_READERS[s]
 		if readFunc == nil {
-			panic(MakeReadError(reader, "No reader function for tag "+string(s)))
+			panic(MakeReadError(reader, "No reader function for tag "+s.ToString(false)))
 		}
 		return readFunc(reader)
 	default:
@@ -868,7 +888,7 @@ func readDispatch(reader *Reader) ReadObject {
 		return readString(reader, true)
 	case '\'':
 		nextObj := Read(reader)
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("var")), nextObj))
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, MakeSymbol("var")), nextObj))
 	case '^':
 		return readWithMeta(reader)
 	case '{':
@@ -919,21 +939,21 @@ func Read(reader *Reader) ReadObject {
 	case r == '{':
 		return readMap(reader)
 	case r == '/' && isDelimiter(reader.Peek()):
-		return MakeReadObject(reader, Symbol("/"))
+		return MakeReadObject(reader, MakeSymbol("/"))
 	case r == '\'':
 		nextObj := Read(reader)
-		return makeQuote(nextObj, Symbol("quote"))
+		return makeQuote(nextObj, MakeSymbol("quote"))
 	case r == '@':
 		nextObj := Read(reader)
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, Symbol("deref")), nextObj))
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, MakeSymbol("deref")), nextObj))
 	case r == '~':
 		if reader.Peek() == '@' {
 			reader.Get()
 			nextObj := Read(reader)
-			return makeQuote(nextObj, Symbol("unquote-splicing"))
+			return makeQuote(nextObj, MakeSymbol("unquote-splicing"))
 		}
 		nextObj := Read(reader)
-		return makeQuote(nextObj, Symbol("unquote"))
+		return makeQuote(nextObj, MakeSymbol("unquote"))
 	case r == '`':
 		nextObj := Read(reader)
 		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol), reader)

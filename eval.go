@@ -17,6 +17,12 @@ func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.pos.line, err.pos.column, err.msg)
 }
 
+func (env Env) Print() {
+	for key, value := range env {
+		fmt.Println(key, value)
+	}
+}
+
 func (expr *RefExpr) Eval(env Env) Object {
 	v, ok := env[expr.symbol]
 	if !ok {
