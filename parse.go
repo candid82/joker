@@ -6,7 +6,7 @@ import (
 
 type (
 	Expr interface {
-		Eval(env Env) Object
+		Eval(env *Env) Object
 		Pos() Position
 	}
 	Position struct {
@@ -57,7 +57,14 @@ type (
 	Callable interface {
 		Call(args []Object) Object
 	}
-	Env map[Symbol]Object
+	Namespace struct {
+		name     Symbol
+		mappings map[Symbol]Object
+	}
+	Env struct {
+		namespaces       map[Symbol]*Namespace
+		currentNamespace *Namespace
+	}
 )
 
 func (pos Position) Pos() Position {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/big"
 	"strconv"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -67,10 +68,17 @@ func MakeQualifiedSymbol(ns, name string) Symbol {
 	}
 }
 
-func MakeSymbol(name string) Symbol {
+func MakeSymbol(nsname string) Symbol {
+	index := strings.IndexRune(nsname, '/')
+	if index == -1 {
+		return Symbol{
+			ns:   nil,
+			name: STRINGS.Intern(nsname),
+		}
+	}
 	return Symbol{
-		ns:   nil,
-		name: STRINGS.Intern(name),
+		ns:   STRINGS.Intern(nsname[0:index]),
+		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
 	}
 }
 

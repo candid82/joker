@@ -11,20 +11,40 @@ type (
 	}
 )
 
-var GLOBAL_ENV = Env{}
+var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
+
+func NewEnv(currentNs Symbol) *Env {
+	res := &Env{
+		namespaces: make(map[Symbol]*Namespace),
+		currentNamespace: &Namespace{
+			name:     currentNs,
+			mappings: make(map[Symbol]Object),
+		},
+	}
+	res.namespaces[currentNs] = res.currentNamespace
+	return res
+}
 
 func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.pos.line, err.pos.column, err.msg)
 }
 
-func (env Env) Print() {
-	for key, value := range env {
-		fmt.Println(key, value)
+func (env *Env) Resolve(s Symbol) (Object, bool) {
+	var ns *Namespace
+	if s.ns == nil {
+		ns = env.currentNamespace
+	} else {
+		ns = env.namespaces[Symbol{name: s.ns}]
 	}
+	if ns == nil {
+		return nil, false
+	}
+	obj, ok := ns.mappings[Symbol{name: s.name}]
+	return obj, ok
 }
 
-func (expr *RefExpr) Eval(env Env) Object {
-	v, ok := env[expr.symbol]
+func (expr *RefExpr) Eval(env *Env) Object {
+	v, ok := env.Resolve(expr.symbol)
 	if !ok {
 		panic(&EvalError{
 			msg: "Unbound symbol: " + expr.symbol.ToString(false),
@@ -34,11 +54,11 @@ func (expr *RefExpr) Eval(env Env) Object {
 	return v
 }
 
-func (expr *LiteralExpr) Eval(env Env) Object {
+func (expr *LiteralExpr) Eval(env *Env) Object {
 	return expr.obj
 }
 
-func (expr *VectorExpr) Eval(env Env) Object {
+func (expr *VectorExpr) Eval(env *Env) Object {
 	res := EmptyVector
 	for _, e := range expr.v {
 		res = res.conj(e.Eval(env))
@@ -46,7 +66,7 @@ func (expr *VectorExpr) Eval(env Env) Object {
 	return res
 }
 
-func (expr *MapExpr) Eval(env Env) Object {
+func (expr *MapExpr) Eval(env *Env) Object {
 	res := EmptyArrayMap()
 	for i := range expr.keys {
 		key := expr.keys[i].Eval(env)
@@ -60,7 +80,7 @@ func (expr *MapExpr) Eval(env Env) Object {
 	return res
 }
 
-func (expr *SetExpr) Eval(env Env) Object {
+func (expr *SetExpr) Eval(env *Env) Object {
 	res := EmptySet()
 	for _, elemExpr := range expr.elements {
 		el := elemExpr.Eval(env)
@@ -74,13 +94,19 @@ func (expr *SetExpr) Eval(env Env) Object {
 	return res
 }
 
-func (expr *DefExpr) Eval(env Env) Object {
+func (expr *DefExpr) Eval(env *Env) Object {
+	if expr.name.ns != nil && (Symbol{name: expr.name.ns} != env.currentNamespace.name) {
+		panic(&EvalError{
+			msg: "Can't create defs outside of current ns",
+			pos: expr.Position,
+		})
+	}
 	v := expr.value.Eval(env)
-	GLOBAL_ENV[expr.name] = v
+	env.currentNamespace.mappings[Symbol{name: expr.name.name}] = v
 	return v
 }
 
-func evalSeq(exprs []Expr, env Env) []Object {
+func evalSeq(exprs []Expr, env *Env) []Object {
 	res := make([]Object, len(exprs))
 	for i, expr := range exprs {
 		res[i] = expr.Eval(env)
@@ -88,7 +114,7 @@ func evalSeq(exprs []Expr, env Env) []Object {
 	return res
 }
 
-func (expr *CallExpr) Eval(env Env) Object {
+func (expr *CallExpr) Eval(env *Env) Object {
 	callable := expr.callable.Eval(env)
 	switch callable := callable.(type) {
 	case Callable:
@@ -112,7 +138,7 @@ func toBool(obj Object) bool {
 	}
 }
 
-func (expr *IfExpr) Eval(env Env) Object {
+func (expr *IfExpr) Eval(env *Env) Object {
 	if toBool(expr.cond.Eval(env)) {
 		return expr.positive.Eval(env)
 	}
