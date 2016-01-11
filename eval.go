@@ -18,7 +18,7 @@ func NewEnv(currentNs Symbol) *Env {
 		namespaces: make(map[Symbol]*Namespace),
 		currentNamespace: &Namespace{
 			name:     currentNs,
-			mappings: make(map[Symbol]Object),
+			mappings: make(map[Symbol]*Var),
 		},
 	}
 	res.namespaces[currentNs] = res.currentNamespace
@@ -29,7 +29,7 @@ func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: %s", err.pos.line, err.pos.column, err.msg)
 }
 
-func (env *Env) Resolve(s Symbol) (Object, bool) {
+func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	var ns *Namespace
 	if s.ns == nil {
 		ns = env.currentNamespace
@@ -39,8 +39,8 @@ func (env *Env) Resolve(s Symbol) (Object, bool) {
 	if ns == nil {
 		return nil, false
 	}
-	obj, ok := ns.mappings[Symbol{name: s.name}]
-	return obj, ok
+	v, ok := ns.mappings[Symbol{name: s.name}]
+	return v, ok
 }
 
 func (expr *RefExpr) Eval(env *Env) Object {
@@ -51,7 +51,7 @@ func (expr *RefExpr) Eval(env *Env) Object {
 			pos: expr.Position,
 		})
 	}
-	return v
+	return v.value
 }
 
 func (expr *LiteralExpr) Eval(env *Env) Object {
@@ -101,8 +101,9 @@ func (expr *DefExpr) Eval(env *Env) Object {
 			pos: expr.Position,
 		})
 	}
-	v := expr.value.Eval(env)
-	env.currentNamespace.mappings[Symbol{name: expr.name.name}] = v
+	value := expr.value.Eval(env)
+	v := env.currentNamespace.intern(Symbol{name: expr.name.name})
+	v.value = value
 	return v
 }
 

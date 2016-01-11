@@ -59,13 +59,39 @@ type (
 	}
 	Namespace struct {
 		name     Symbol
-		mappings map[Symbol]Object
+		mappings map[Symbol]*Var
 	}
 	Env struct {
 		namespaces       map[Symbol]*Namespace
 		currentNamespace *Namespace
 	}
+	Var struct {
+		ns    *Namespace
+		name  Symbol
+		value Object
+	}
 )
+
+func (v *Var) ToString(escape bool) string {
+	return "#'" + v.ns.name.ToString(false) + "/" + v.name.ToString(false)
+}
+
+func (v *Var) Equals(other interface{}) bool {
+	return v == other
+}
+
+// sym must be not qualified
+func (ns *Namespace) intern(sym Symbol) *Var {
+	v, ok := ns.mappings[sym]
+	if !ok {
+		v = &Var{
+			ns:   ns,
+			name: sym,
+		}
+		ns.mappings[sym] = v
+	}
+	return v
+}
 
 func (pos Position) Pos() Position {
 	return pos
