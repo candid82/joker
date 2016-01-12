@@ -26,7 +26,7 @@ func NewEnv(currentNs Symbol) *Env {
 }
 
 func (err EvalError) Error() string {
-	return fmt.Sprintf("stdin:%d:%d: %s", err.pos.line, err.pos.column, err.msg)
+	return fmt.Sprintf("stdin:%d:%d: Eval error: %s", err.pos.line, err.pos.column, err.msg)
 }
 
 func (env *Env) Resolve(s Symbol) (*Var, bool) {

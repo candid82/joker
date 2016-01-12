@@ -105,7 +105,7 @@ func NewLiteralExpr(obj ReadObject) *LiteralExpr {
 }
 
 func (err ParseError) Error() string {
-	return fmt.Sprintf("stdin:%d:%d: %s", err.obj.line, err.obj.column, err.msg)
+	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", err.obj.line, err.obj.column, err.msg)
 }
 
 func ensureReadObject(obj Object) ReadObject {

@@ -316,7 +316,7 @@ func DeriveReadObject(base ReadObject, obj Object) ReadObject {
 }
 
 func (err ReadError) Error() string {
-	return fmt.Sprintf("stdin:%d:%d: %s", err.line, err.column, err.msg)
+	return fmt.Sprintf("stdin:%d:%d: Read error: %s", err.line, err.column, err.msg)
 }
 
 func isDelimiter(r rune) bool {

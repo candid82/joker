@@ -7,7 +7,17 @@ import (
 	"os"
 )
 
-func readFile(filename string) {
+type (
+	Phase int
+)
+
+const (
+	READ Phase = iota
+	PARSE
+	EVAL
+)
+
+func processFile(filename string, phase Phase) {
 	var reader *Reader
 	if filename == "--" {
 		reader = NewReader(bufio.NewReader(os.Stdin))
@@ -20,12 +30,28 @@ func readFile(filename string) {
 		reader = NewReader(bufio.NewReader(f))
 	}
 	for {
-		_, err := TryRead(reader)
-		switch {
-		case err == io.EOF:
+		obj, err := TryRead(reader)
+		if err == io.EOF {
 			return
-		case err != nil:
-			fmt.Fprintln(os.Stderr, "Error: ", err)
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+		if phase == READ {
+			continue
+		}
+		expr, err := TryParse(obj)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+		if phase == PARSE {
+			continue
+		}
+		_, err = TryEval(expr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 	}
@@ -50,17 +76,17 @@ func repl() {
 		case err == io.EOF:
 			return
 		case err != nil:
-			fmt.Fprintln(os.Stderr, "Read error: ", err)
+			fmt.Fprintln(os.Stderr, err)
 			skipRestOfLine(reader)
 		default:
 			expr, err := TryParse(obj)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "Parse error: ", err)
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 			res, err := TryEval(expr)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "Eval error: ", err)
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 			fmt.Println(res.ToString(true))
@@ -68,9 +94,24 @@ func repl() {
 	}
 }
 
+func parsePhase(s string) Phase {
+	switch s {
+	case "--read":
+		return READ
+	case "--parse":
+		return PARSE
+	default:
+		return EVAL
+	}
+}
+
 func main() {
 	if len(os.Args) > 1 {
-		readFile(os.Args[1])
+		if len(os.Args) > 2 {
+			processFile(os.Args[2], parsePhase(os.Args[1]))
+		} else {
+			processFile(os.Args[1], EVAL)
+		}
 	} else {
 		repl()
 	}
