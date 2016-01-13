@@ -702,7 +702,7 @@ func readSet(reader *Reader) ReadObject {
 }
 
 func makeQuote(obj ReadObject, quote Symbol) ReadObject {
-	return ReadObject{column: obj.column, line: obj.line, obj: EmptyList.Cons(obj).Cons(quote)}
+	return ReadObject{column: obj.column, line: obj.line, obj: NewListFrom(quote, obj)}
 }
 
 func readMeta(reader *Reader) ReadObject {
