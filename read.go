@@ -819,7 +819,7 @@ func isCall(obj Object, name Symbol) bool {
 func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
-		obj := iter.Next().(ReadObject)
+		obj := ensureReadObject(iter.Next())
 		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
 			res = append(res, (obj.obj).(Seq).Rest().First())
 		} else {
@@ -858,7 +858,7 @@ func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) Read
 		return makeQuote(obj, MakeSymbol("quote"))
 	case Seq:
 		if isCall(obj.obj, MakeSymbol("unquote")) {
-			return Second(s).(ReadObject)
+			return ensureReadObject(Second(s))
 		}
 		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
 			panic(MakeReadError(reader, "Splice not in list"))
@@ -978,7 +978,7 @@ func Read(reader *Reader) ReadObject {
 func TryRead(reader *Reader) (obj ReadObject, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			err = r.(ReadError)
 		}
 	}()
 	eatWhitespace(reader)

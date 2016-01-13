@@ -66,31 +66,39 @@ func skipRestOfLine(reader *Reader) {
 	}
 }
 
-func repl() {
+func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
 	reader := NewReader(bufio.NewReader(os.Stdin))
 	for {
 		fmt.Print("> ")
 		obj, err := TryRead(reader)
-		switch {
-		case err == io.EOF:
+		if err == io.EOF {
 			return
-		case err != nil:
+		}
+		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			skipRestOfLine(reader)
-		default:
-			expr, err := TryParse(obj)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-			res, err := TryEval(expr)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-			fmt.Println(res.ToString(true))
+			continue
 		}
+		if phase == READ {
+			fmt.Println(obj.ToString(true))
+			continue
+		}
+		expr, err := TryParse(obj)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+		if phase == PARSE {
+			fmt.Println(expr)
+			continue
+		}
+		res, err := TryEval(expr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+		fmt.Println(res.ToString(true))
 	}
 }
 
@@ -113,6 +121,6 @@ func main() {
 			processFile(os.Args[1], EVAL)
 		}
 	} else {
-		repl()
+		repl(EVAL)
 	}
 }
