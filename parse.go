@@ -170,34 +170,34 @@ func checkForm(obj ReadObject, min int, max int) {
 }
 
 func parseList(obj ReadObject) Expr {
-	list := obj.obj.(*List)
-	if list.count == 0 {
+	seq := obj.obj.(Seq)
+	if seq.IsEmpty() {
 		return NewLiteralExpr(obj)
 	}
-	first := ensureReadObject(list.first)
+	first := ensureReadObject(seq.First())
 	switch v := first.obj.(type) {
 	case Symbol:
 		switch *v.name {
 		case "quote":
 			// TODO: this probably needs unwrapping from ReadObject to Object
 			// for collections
-			return NewLiteralExpr(ensureReadObject(list.Second()))
+			return NewLiteralExpr(ensureReadObject(Second(seq)))
 		case "if":
 			checkForm(obj, 3, 4)
 			return &IfExpr{
-				cond:     parse(ensureReadObject(list.Second())),
-				positive: parse(ensureReadObject(list.Third())),
-				negative: parse(ensureReadObject(list.Forth())),
+				cond:     parse(ensureReadObject(Second(seq))),
+				positive: parse(ensureReadObject(Third(seq))),
+				negative: parse(ensureReadObject(Forth(seq))),
 				Position: Position{line: obj.line, column: obj.column},
 			}
 		case "def":
 			checkForm(obj, 3, 3)
-			s := ensureReadObject(list.Second())
+			s := ensureReadObject(Second(seq))
 			switch v := s.obj.(type) {
 			case Symbol:
 				return &DefExpr{
 					name:     v,
-					value:    parse(ensureReadObject(list.Third())),
+					value:    parse(ensureReadObject(Third(seq))),
 					Position: Position{line: obj.line, column: obj.column},
 				}
 			default:
@@ -206,8 +206,8 @@ func parseList(obj ReadObject) Expr {
 		}
 	}
 	return &CallExpr{
-		callable: parse(ensureReadObject(list.first)),
-		args:     parseSeq(list.rest),
+		callable: parse(ensureReadObject(seq.First())),
+		args:     parseSeq(seq.Rest()),
 		Position: Position{line: obj.line, column: obj.column},
 	}
 }
@@ -223,7 +223,7 @@ func parse(obj ReadObject) Expr {
 		return parseMap(v, pos)
 	case *Set:
 		return parseSet(v, pos)
-	case *List:
+	case Seq:
 		return parseList(obj)
 	case Symbol:
 		return &RefExpr{

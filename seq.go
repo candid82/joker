@@ -135,3 +135,11 @@ func (iter *SeqIterator) HasNext() bool {
 func Second(seq Seq) Object {
 	return seq.Rest().First()
 }
+
+func Third(seq Seq) Object {
+	return seq.Rest().Rest().First()
+}
+
+func Forth(seq Seq) Object {
+	return seq.Rest().Rest().Rest().First()
+}
