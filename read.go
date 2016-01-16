@@ -6,34 +6,11 @@ import (
 	"io"
 	"math/big"
 	"strconv"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
 type (
-	Equality interface {
-		Equals(interface{}) bool
-	}
-	Object interface {
-		Equality
-		ToString(escape bool) string
-	}
-	Char     rune
-	Double   float64
-	Int      int
-	BigInt   big.Int
-	BigFloat big.Float
-	Ratio    big.Rat
-	Bool     bool
-	Nil      struct{}
-	Keyword  string
-	Symbol   struct {
-		ns   *string
-		name *string
-	}
-	String     string
-	Regex      string
 	ReadObject struct {
 		line   int
 		column int
@@ -61,27 +38,6 @@ func readStub(reader *Reader) ReadObject {
 var DATA_READERS = map[Symbol]ReadFunc{}
 var NIL Nil
 
-func MakeQualifiedSymbol(ns, name string) Symbol {
-	return Symbol{
-		ns:   STRINGS.Intern(ns),
-		name: STRINGS.Intern(name),
-	}
-}
-
-func MakeSymbol(nsname string) Symbol {
-	index := strings.IndexRune(nsname, '/')
-	if index == -1 {
-		return Symbol{
-			ns:   nil,
-			name: STRINGS.Intern(nsname),
-		}
-	}
-	return Symbol{
-		ns:   STRINGS.Intern(nsname[0:index]),
-		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
-	}
-}
-
 func init() {
 	DATA_READERS[MakeSymbol("inst")] = readStub
 	DATA_READERS[MakeSymbol("uuid")] = readStub
@@ -100,149 +56,6 @@ func (ro ReadObject) Equals(other interface{}) bool {
 
 func (ro ReadObject) ToString(escape bool) string {
 	return ro.obj.ToString(escape)
-}
-
-func (n Nil) ToString(escape bool) string {
-	return "nil"
-}
-
-func (n Nil) Equals(other interface{}) bool {
-	return n == other
-}
-
-func (rat *Ratio) ToString(escape bool) string {
-	return (*big.Rat)(rat).String()
-}
-
-func (rat *Ratio) Equals(other interface{}) bool {
-	if rat == other {
-		return true
-	}
-	switch r := other.(type) {
-	case *Ratio:
-		return ((*big.Rat)(rat)).Cmp((*big.Rat)(r)) == 0
-	case *BigInt:
-		var otherRat big.Rat
-		otherRat.SetInt((*big.Int)(r))
-		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
-	case Int:
-		var otherRat big.Rat
-		otherRat.SetInt64(int64(r))
-		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
-	}
-	return false
-}
-
-func (bi *BigInt) ToString(escape bool) string {
-	return (*big.Int)(bi).String() + "N"
-}
-
-func (bi *BigInt) Equals(other interface{}) bool {
-	if bi == other {
-		return true
-	}
-	switch b := other.(type) {
-	case *BigInt:
-		return ((*big.Int)(bi)).Cmp((*big.Int)(b)) == 0
-	case Int:
-		bi2 := big.NewInt(int64(b))
-		return ((*big.Int)(bi)).Cmp(bi2) == 0
-	}
-	return false
-}
-
-func (bf *BigFloat) ToString(escape bool) string {
-	return (*big.Float)(bf).Text('g', 256) + "M"
-}
-
-func (bf *BigFloat) Equals(other interface{}) bool {
-	if bf == other {
-		return true
-	}
-	switch b := other.(type) {
-	case *BigFloat:
-		return ((*big.Float)(bf)).Cmp((*big.Float)(b)) == 0
-	case Double:
-		bf2 := big.NewFloat(float64(b))
-		return ((*big.Float)(bf)).Cmp(bf2) == 0
-	}
-	return false
-}
-
-func (c Char) ToString(escape bool) string {
-	if escape {
-		return escapeRune(rune(c))
-	}
-	return string(c)
-}
-
-func (c Char) Equals(other interface{}) bool {
-	return c == other
-}
-
-func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%f", float64(d))
-}
-
-func (d Double) Equals(other interface{}) bool {
-	return d == other
-}
-
-func (i Int) ToString(escape bool) string {
-	return fmt.Sprintf("%d", int(i))
-}
-
-func (i Int) Equals(other interface{}) bool {
-	return i == other
-}
-
-func (b Bool) ToString(escape bool) string {
-	return fmt.Sprintf("%t", bool(b))
-}
-
-func (b Bool) Equals(other interface{}) bool {
-	return b == other
-}
-
-func (k Keyword) ToString(escape bool) string {
-	return string(k)
-}
-
-func (k Keyword) Equals(other interface{}) bool {
-	return k == other
-}
-
-func (rx Regex) ToString(escape bool) string {
-	if escape {
-		return "#" + escapeString(string(rx))
-	}
-	return "#" + string(rx)
-}
-
-func (rx Regex) Equals(other interface{}) bool {
-	return rx == other
-}
-
-func (s Symbol) ToString(escape bool) string {
-	if s.ns != nil {
-		return *s.ns + "/" + *s.name
-	}
-	return *s.name
-}
-
-func (s Symbol) Equals(other interface{}) bool {
-	return s == other
-}
-
-func (s String) ToString(escape bool) string {
-	if escape {
-		return escapeString(string(s))
-	}
-	return string(s)
-}
-
-func (s String) Equals(other interface{}) bool {
-	return s == other
 }
 
 func escapeRune(r rune) string {
