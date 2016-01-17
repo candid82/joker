@@ -1,6 +1,7 @@
 package main
 
 type List struct {
+	MetaHolder
 	first Object
 	rest  *List
 	count int
@@ -23,6 +24,12 @@ func NewListFrom(objs ...Object) *List {
 		res = res.Conj(objs[i])
 	}
 	return res
+}
+
+func (list *List) WithMeta(meta *ArrayMap) Object {
+	res := *list
+	res.meta = meta
+	return &res
 }
 
 func (list *List) Conj(obj Object) *List {

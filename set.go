@@ -6,9 +6,16 @@ import (
 
 type (
 	Set struct {
+		MetaHolder
 		m *ArrayMap
 	}
 )
+
+func (v *Set) WithMeta(meta *ArrayMap) Object {
+	res := *v
+	res.meta = meta
+	return &res
+}
 
 func (set *Set) Cons(obj Object) *Set {
 	return &Set{m: set.m.Assoc(obj, Bool(true))}

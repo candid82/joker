@@ -6,6 +6,7 @@ import (
 
 type (
 	Vector struct {
+		MetaHolder
 		root  []interface{}
 		tail  []interface{}
 		count int
@@ -20,6 +21,12 @@ type (
 		count int
 	}
 )
+
+func (v *Vector) WithMeta(meta *ArrayMap) Object {
+	res := *v
+	res.meta = meta
+	return &res
+}
 
 func clone(s []interface{}) []interface{} {
 	result := make([]interface{}, len(s), cap(s))

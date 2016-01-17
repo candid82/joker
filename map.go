@@ -6,6 +6,7 @@ import (
 
 type (
 	ArrayMap struct {
+		MetaHolder
 		arr []Object
 	}
 	ArrayMapIterator struct {
@@ -17,6 +18,12 @@ type (
 		value Object
 	}
 )
+
+func (v *ArrayMap) WithMeta(meta *ArrayMap) Object {
+	res := *v
+	res.meta = meta
+	return &res
+}
 
 func (iter *ArrayMapIterator) Next() Pair {
 	res := Pair{
