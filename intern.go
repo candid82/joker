@@ -1,6 +1,8 @@
 package main
 
-type StringPool map[string]*string
+type (
+	StringPool map[string]*string
+)
 
 var STRINGS StringPool = StringPool{}
 

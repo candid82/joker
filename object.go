@@ -14,6 +14,13 @@ type (
 		Equality
 		ToString(escape bool) string
 	}
+	Meta interface {
+		GetMeta() *ArrayMap
+		WithMeta(*ArrayMap) Object
+	}
+	MetaHolder struct {
+		meta *ArrayMap
+	}
 	Char     rune
 	Double   float64
 	Int      int
@@ -24,12 +31,23 @@ type (
 	Nil      struct{}
 	Keyword  string
 	Symbol   struct {
+		MetaHolder
 		ns   *string
 		name *string
 	}
 	String string
 	Regex  string
 )
+
+func (m MetaHolder) GetMeta() *ArrayMap {
+	return m.meta
+}
+
+func (sym Symbol) WithMeta(meta *ArrayMap) Object {
+	res := sym
+	res.meta = meta
+	return res
+}
 
 func MakeQualifiedSymbol(ns, name string) Symbol {
 	return Symbol{
@@ -181,7 +199,12 @@ func (s Symbol) ToString(escape bool) string {
 }
 
 func (s Symbol) Equals(other interface{}) bool {
-	return s == other
+	switch other := other.(type) {
+	case Symbol:
+		return s.ns == other.ns && s.name == other.name
+	default:
+		return false
+	}
 }
 
 func (s String) ToString(escape bool) string {

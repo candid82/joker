@@ -518,22 +518,18 @@ func makeQuote(obj ReadObject, quote Symbol) ReadObject {
 	return ReadObject{column: obj.column, line: obj.line, obj: NewListFrom(quote, obj)}
 }
 
-func readMeta(reader *Reader) ReadObject {
+func readMeta(reader *Reader) *ArrayMap {
 	obj := Read(reader)
-	switch obj.obj.(type) {
+	switch v := obj.obj.(type) {
 	case *ArrayMap:
-		return obj
+		return v
 	case String, Symbol:
-		return DeriveReadObject(obj, &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword(":tag")), obj}})
+		return &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword(":tag")), obj}}
 	case Keyword:
-		return DeriveReadObject(obj, &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool(true))}})
+		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool(true))}}
 	default:
 		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
-}
-
-func makeWithMeta(obj ReadObject, meta ReadObject) ReadObject {
-	return DeriveReadObject(obj, NewListFrom(DeriveReadObject(meta, MakeSymbol("with-meta")), meta, obj))
 }
 
 func fillInMissingArgs(args map[int]Symbol) {
@@ -729,7 +725,12 @@ func readDispatch(reader *Reader) ReadObject {
 func readWithMeta(reader *Reader) ReadObject {
 	meta := readMeta(reader)
 	nextObj := Read(reader)
-	return makeWithMeta(nextObj, meta)
+	switch v := nextObj.obj.(type) {
+	case Meta:
+		return DeriveReadObject(nextObj, v.WithMeta(meta))
+	default:
+		panic(MakeReadError(reader, "Metadata cannot be applied to "+v.ToString(false)))
+	}
 }
 
 func Read(reader *Reader) ReadObject {

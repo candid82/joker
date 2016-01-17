@@ -82,6 +82,7 @@ func (v *Var) Equals(other interface{}) bool {
 
 // sym must be not qualified
 func (ns *Namespace) intern(sym Symbol) *Var {
+	sym.meta = nil
 	v, ok := ns.mappings[sym]
 	if !ok {
 		v = &Var{
