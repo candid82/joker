@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"os"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -690,7 +691,8 @@ func readTagged(reader *Reader) ReadObject {
 	case Symbol:
 		readFunc := DATA_READERS[s]
 		if readFunc == nil {
-			panic(MakeReadError(reader, "No reader function for tag "+s.ToString(false)))
+			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Read warning: No reader function for tag %s\n", reader.line, reader.column, s.ToString(false))
+			return Read(reader)
 		}
 		return readFunc(reader)
 	default:
