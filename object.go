@@ -37,6 +37,12 @@ type (
 	}
 	String string
 	Regex  string
+	Var    struct {
+		MetaHolder
+		ns    *Namespace
+		name  Symbol
+		value Object
+	}
 )
 
 func (m MetaHolder) GetMeta() *ArrayMap {
@@ -47,6 +53,12 @@ func (sym Symbol) WithMeta(meta *ArrayMap) Object {
 	res := sym
 	res.meta = meta
 	return res
+}
+
+func (v *Var) WithMeta(meta *ArrayMap) Object {
+	res := *v
+	res.meta = meta
+	return &res
 }
 
 func MakeQualifiedSymbol(ns, name string) Symbol {
@@ -68,6 +80,15 @@ func MakeSymbol(nsname string) Symbol {
 		ns:   STRINGS.Intern(nsname[0:index]),
 		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
 	}
+}
+
+func (v *Var) ToString(escape bool) string {
+	return "#'" + v.ns.name.ToString(false) + "/" + v.name.ToString(false)
+}
+
+func (v *Var) Equals(other interface{}) bool {
+	// TODO: revisit this
+	return v == other
 }
 
 func (n Nil) ToString(escape bool) string {

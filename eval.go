@@ -51,6 +51,13 @@ func (expr *RefExpr) Eval(env *Env) Object {
 			pos: expr.Position,
 		})
 	}
+	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
+	if v.value == nil {
+		panic(&EvalError{
+			msg: "Unbound var: " + v.ToString(false),
+			pos: expr.Position,
+		})
+	}
 	return v.value
 }
 
@@ -101,9 +108,13 @@ func (expr *DefExpr) Eval(env *Env) Object {
 			pos: expr.Position,
 		})
 	}
-	value := expr.value.Eval(env)
 	v := env.currentNamespace.intern(Symbol{name: expr.name.name})
-	v.value = value
+	if expr.value != nil {
+		v.value = expr.value.Eval(env)
+	}
+	if expr.meta != nil {
+		v.meta = expr.meta.Eval(env).(*ArrayMap)
+	}
 	return v
 }
 

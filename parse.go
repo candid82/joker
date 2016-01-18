@@ -40,6 +40,7 @@ type (
 		Position
 		name  Symbol
 		value Expr
+		meta  Expr
 	}
 	CallExpr struct {
 		Position
@@ -65,20 +66,7 @@ type (
 		namespaces       map[Symbol]*Namespace
 		currentNamespace *Namespace
 	}
-	Var struct {
-		ns    *Namespace
-		name  Symbol
-		value Object
-	}
 )
-
-func (v *Var) ToString(escape bool) string {
-	return "#'" + v.ns.name.ToString(false) + "/" + v.name.ToString(false)
-}
-
-func (v *Var) Equals(other interface{}) bool {
-	return v == other
-}
 
 // sym must be not qualified
 func (ns *Namespace) intern(sym Symbol) *Var {
@@ -163,10 +151,45 @@ func parseSet(s *Set, pos Position) Expr {
 	return res
 }
 
-func checkForm(obj ReadObject, min int, max int) {
+func checkForm(obj ReadObject, min int, max int) int {
 	list := obj.obj.(*List)
 	if list.count < min {
 		panic(&ParseError{obj: obj, msg: "Too few arguments to " + list.first.ToString(false)})
+	}
+	if list.count > max {
+		panic(&ParseError{obj: obj, msg: "Too many arguments to " + list.first.ToString(false)})
+	}
+	return list.count
+}
+
+func parseDef(obj ReadObject) *DefExpr {
+	count := checkForm(obj, 2, 4)
+	seq := obj.obj.(Seq)
+	s := ensureReadObject(Second(seq))
+	switch v := s.obj.(type) {
+	case Symbol:
+		res := &DefExpr{
+			name:     v,
+			value:    nil,
+			Position: Position{line: obj.line, column: obj.column},
+		}
+		if count == 3 {
+			res.value = parse(ensureReadObject(Third(seq)))
+		} else if count == 4 {
+			res.value = parse(ensureReadObject(Forth(seq)))
+			docstring := ensureReadObject(Third(seq))
+			switch docstring.obj.(type) {
+			case String:
+				meta := EmptyArrayMap()
+				meta.Add(Keyword(":doc"), docstring)
+				res.meta = parse(DeriveReadObject(docstring, meta))
+			default:
+				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
+			}
+		}
+		return res
+	default:
+		panic(&ParseError{obj: s, msg: "First argument to def must be a Symbol"})
 	}
 }
 
@@ -192,18 +215,7 @@ func parseList(obj ReadObject) Expr {
 				Position: Position{line: obj.line, column: obj.column},
 			}
 		case "def":
-			checkForm(obj, 3, 3)
-			s := ensureReadObject(Second(seq))
-			switch v := s.obj.(type) {
-			case Symbol:
-				return &DefExpr{
-					name:     v,
-					value:    parse(ensureReadObject(Third(seq))),
-					Position: Position{line: obj.line, column: obj.column},
-				}
-			default:
-				panic(&ParseError{obj: s, msg: "First argument to def must be a Symbol"})
-			}
+			return parseDef(obj)
 		}
 	}
 	return &CallExpr{
