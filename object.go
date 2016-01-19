@@ -43,7 +43,25 @@ type (
 		name  Symbol
 		value Object
 	}
+	Proc func([]Object) Object
 )
+
+func (p Proc) Call(args []Object) Object {
+	return p(args)
+}
+
+func (p Proc) ToString(escape bool) string {
+	return "primitive function"
+}
+
+func (p Proc) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case Proc:
+		return &p == &other
+	default:
+		return false
+	}
+}
 
 func (m MetaHolder) GetMeta() *ArrayMap {
 	return m.meta
