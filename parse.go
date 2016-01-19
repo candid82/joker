@@ -51,6 +51,10 @@ type (
 		Position
 		symbol Symbol
 	}
+	VarExpr struct {
+		Position
+		symbol Symbol
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -216,6 +220,17 @@ func parseList(obj ReadObject) Expr {
 			}
 		case "def":
 			return parseDef(obj)
+		case "var":
+			checkForm(obj, 2, 2)
+			switch s := (ensureReadObject(Second(seq)).obj).(type) {
+			case Symbol:
+				return &VarExpr{
+					symbol:   s,
+					Position: Position{line: obj.line, column: obj.column},
+				}
+			default:
+				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
+			}
 		}
 	}
 	return &CallExpr{

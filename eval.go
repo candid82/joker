@@ -118,6 +118,17 @@ func (expr *DefExpr) Eval(env *Env) Object {
 	return v
 }
 
+func (expr *VarExpr) Eval(env *Env) Object {
+	res, ok := env.Resolve(expr.symbol)
+	if !ok {
+		panic(&EvalError{
+			msg: "Enable to resolve var " + expr.symbol.ToString(false) + " in this context",
+			pos: expr.Position,
+		})
+	}
+	return res
+}
+
 func evalSeq(exprs []Expr, env *Env) []Object {
 	res := make([]Object, len(exprs))
 	for i, expr := range exprs {
