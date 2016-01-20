@@ -3,10 +3,12 @@ package main
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:
-		return obj.GetMeta()
-	default:
-		return NIL
+		meta := obj.GetMeta()
+		if meta != nil {
+			return meta
+		}
 	}
+	return NIL
 }
 
 func init() {

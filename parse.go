@@ -55,6 +55,11 @@ type (
 		Position
 		symbol Symbol
 	}
+	MetaExpr struct {
+		Position
+		meta *MapExpr
+		expr Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -130,7 +135,7 @@ func parseVector(v *Vector, pos Position) Expr {
 	}
 }
 
-func parseMap(m *ArrayMap, pos Position) Expr {
+func parseMap(m *ArrayMap, pos Position) *MapExpr {
 	res := &MapExpr{
 		keys:     make([]Expr, m.Count()),
 		values:   make([]Expr, m.Count()),
@@ -242,25 +247,41 @@ func parseList(obj ReadObject) Expr {
 
 func parse(obj ReadObject) Expr {
 	pos := Position{line: obj.line, column: obj.column}
+	var res Expr
+	canHaveMeta := false
 	switch v := obj.obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
-		return NewLiteralExpr(obj)
+		res = NewLiteralExpr(obj)
 	case *Vector:
-		return parseVector(v, pos)
+		canHaveMeta = true
+		res = parseVector(v, pos)
 	case *ArrayMap:
-		return parseMap(v, pos)
+		canHaveMeta = true
+		res = parseMap(v, pos)
 	case *Set:
-		return parseSet(v, pos)
+		canHaveMeta = true
+		res = parseSet(v, pos)
 	case Seq:
-		return parseList(obj)
+		res = parseList(obj)
 	case Symbol:
-		return &RefExpr{
+		res = &RefExpr{
 			symbol:   v,
 			Position: pos,
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
+	if canHaveMeta {
+		meta := obj.obj.(Meta).GetMeta()
+		if meta != nil {
+			return &MetaExpr{
+				meta:     parseMap(meta, pos),
+				expr:     res,
+				Position: pos,
+			}
+		}
+	}
+	return res
 }
 
 func TryParse(obj ReadObject) (expr Expr, err error) {

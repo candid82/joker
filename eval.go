@@ -129,6 +129,12 @@ func (expr *VarExpr) Eval(env *Env) Object {
 	return res
 }
 
+func (expr *MetaExpr) Eval(env *Env) Object {
+	meta := expr.meta.Eval(env)
+	res := expr.expr.Eval(env)
+	return res.(Meta).WithMeta(meta.(*ArrayMap))
+}
+
 func evalSeq(exprs []Expr, env *Env) []Object {
 	res := make([]Object, len(exprs))
 	for i, expr := range exprs {
