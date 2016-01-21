@@ -21,7 +21,7 @@ type (
 
 func (v *ArrayMap) WithMeta(meta *ArrayMap) Object {
 	res := *v
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
@@ -83,11 +83,16 @@ func (m *ArrayMap) Count() int {
 	return len(m.arr) / 2
 }
 
-func (m *ArrayMap) Assoc(key Object, value Object) *ArrayMap {
+func (m *ArrayMap) Clone() *ArrayMap {
 	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
 	copy(result.arr, m.arr)
-	result.Set(key, value)
 	return &result
+}
+
+func (m *ArrayMap) Assoc(key Object, value Object) *ArrayMap {
+	result := m.Clone()
+	result.Set(key, value)
+	return result
 }
 
 func (m *ArrayMap) Without(key Object) *ArrayMap {
@@ -105,6 +110,21 @@ func (m *ArrayMap) Without(key Object) *ArrayMap {
 		result.arr = result.arr[:j]
 	}
 	return &result
+}
+
+func (m *ArrayMap) Merge(other *ArrayMap) *ArrayMap {
+	if other.Count() == 0 {
+		return m
+	}
+	if m.Count() == 0 {
+		return other
+	}
+	res := m.Clone()
+	for iter := other.iter(); iter.HasNext(); {
+		p := iter.Next()
+		res.Set(p.key, p.value)
+	}
+	return res
 }
 
 func (m *ArrayMap) Keys() Seq {
@@ -161,4 +181,11 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
+	if m1 == nil {
+		return m2
+	}
+	return m1.Merge(m2)
 }

@@ -24,7 +24,7 @@ type (
 
 func (v *Vector) WithMeta(meta *ArrayMap) Object {
 	res := *v
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 

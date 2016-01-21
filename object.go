@@ -69,13 +69,13 @@ func (m MetaHolder) GetMeta() *ArrayMap {
 
 func (sym Symbol) WithMeta(meta *ArrayMap) Object {
 	res := sym
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return res
 }
 
 func (v *Var) WithMeta(meta *ArrayMap) Object {
 	res := *v
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 

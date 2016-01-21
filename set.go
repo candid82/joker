@@ -13,7 +13,7 @@ type (
 
 func (v *Set) WithMeta(meta *ArrayMap) Object {
 	res := *v
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 

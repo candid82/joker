@@ -28,7 +28,7 @@ func NewListFrom(objs ...Object) *List {
 
 func (list *List) WithMeta(meta *ArrayMap) Object {
 	res := *list
-	res.meta = meta
+	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
