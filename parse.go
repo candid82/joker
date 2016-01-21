@@ -175,6 +175,7 @@ func parseDef(obj ReadObject) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.obj.(Seq)
 	s := ensureReadObject(Second(seq))
+	var meta *ArrayMap
 	switch v := s.obj.(type) {
 	case Symbol:
 		res := &DefExpr{
@@ -182,6 +183,7 @@ func parseDef(obj ReadObject) *DefExpr {
 			value:    nil,
 			Position: Position{line: obj.line, column: obj.column},
 		}
+		meta = v.GetMeta()
 		if count == 3 {
 			res.value = parse(ensureReadObject(Third(seq)))
 		} else if count == 4 {
@@ -189,12 +191,18 @@ func parseDef(obj ReadObject) *DefExpr {
 			docstring := ensureReadObject(Third(seq))
 			switch docstring.obj.(type) {
 			case String:
-				meta := EmptyArrayMap()
-				meta.Add(Keyword(":doc"), docstring)
-				res.meta = parse(DeriveReadObject(docstring, meta))
+				if meta != nil {
+					meta = meta.Assoc(Keyword(":doc"), docstring)
+				} else {
+					meta = EmptyArrayMap()
+					meta.Add(Keyword(":doc"), docstring)
+				}
 			default:
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
+		}
+		if meta != nil {
+			res.meta = parse(DeriveReadObject(obj, meta))
 		}
 		return res
 	default:
