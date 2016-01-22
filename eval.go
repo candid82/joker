@@ -156,6 +156,14 @@ func (expr *CallExpr) Eval(env *Env) Object {
 	}
 }
 
+func (doExpr *DoExpr) Eval(env *Env) Object {
+	var res Object = NIL
+	for _, expr := range doExpr.body {
+		res = expr.Eval(env)
+	}
+	return res
+}
+
 func toBool(obj Object) bool {
 	switch obj := obj.(type) {
 	case Nil:

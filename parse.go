@@ -60,6 +60,10 @@ type (
 		meta *MapExpr
 		expr Expr
 	}
+	DoExpr struct {
+		Position
+		body []Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -210,11 +214,21 @@ func parseDef(obj ReadObject) *DefExpr {
 	}
 }
 
+func parseBody(seq Seq) []Expr {
+	res := make([]Expr, 0)
+	for !seq.IsEmpty() {
+		res = append(res, parse(ensureReadObject(seq.First())))
+		seq = seq.Rest()
+	}
+	return res
+}
+
 func parseList(obj ReadObject) Expr {
 	seq := obj.obj.(Seq)
 	if seq.IsEmpty() {
 		return NewLiteralExpr(obj)
 	}
+	pos := Position{line: obj.line, column: obj.column}
 	first := ensureReadObject(seq.First())
 	switch v := first.obj.(type) {
 	case Symbol:
@@ -229,7 +243,7 @@ func parseList(obj ReadObject) Expr {
 				cond:     parse(ensureReadObject(Second(seq))),
 				positive: parse(ensureReadObject(Third(seq))),
 				negative: parse(ensureReadObject(Forth(seq))),
-				Position: Position{line: obj.line, column: obj.column},
+				Position: pos,
 			}
 		case "def":
 			return parseDef(obj)
@@ -239,10 +253,15 @@ func parseList(obj ReadObject) Expr {
 			case Symbol:
 				return &VarExpr{
 					symbol:   s,
-					Position: Position{line: obj.line, column: obj.column},
+					Position: pos,
 				}
 			default:
 				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
+			}
+		case "do":
+			return &DoExpr{
+				body:     parseBody(seq.Rest()),
+				Position: pos,
 			}
 		}
 	}
