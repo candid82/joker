@@ -11,6 +11,16 @@ var procMeta Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procIsZero Proc = func(args []Object) Object {
+	// checkArity(args, 1, "zero?")
+	return Bool(args[0].(Number).IsZero())
+}
+
+func intern(name string, proc Proc) {
+	GLOBAL_ENV.currentNamespace.intern(MakeSymbol(name)).value = proc
+}
+
 func init() {
-	GLOBAL_ENV.currentNamespace.intern(MakeSymbol("meta")).value = procMeta
+	intern("meta", procMeta)
+	intern("zero?", procIsZero)
 }
