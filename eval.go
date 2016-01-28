@@ -11,54 +11,19 @@ type (
 	}
 )
 
-var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
-
-func NewEnv(currentNs Symbol) *Env {
-	res := &Env{
-		namespaces: make(map[Symbol]*Namespace),
-		currentNamespace: &Namespace{
-			name:     currentNs,
-			mappings: make(map[Symbol]*Var),
-		},
-	}
-	res.namespaces[currentNs] = res.currentNamespace
-	return res
-}
-
 func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: Eval error: %s", err.pos.line, err.pos.column, err.msg)
 }
 
-func (env *Env) Resolve(s Symbol) (*Var, bool) {
-	var ns *Namespace
-	if s.ns == nil {
-		ns = env.currentNamespace
-	} else {
-		ns = env.namespaces[Symbol{name: s.ns}]
-	}
-	if ns == nil {
-		return nil, false
-	}
-	v, ok := ns.mappings[Symbol{name: s.name}]
-	return v, ok
-}
-
 func (expr *RefExpr) Eval(env *Env) Object {
-	v, ok := env.Resolve(expr.symbol)
-	if !ok {
-		panic(&EvalError{
-			msg: "Unbound symbol: " + expr.symbol.ToString(false),
-			pos: expr.Position,
-		})
-	}
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
-	if v.value == nil {
+	if expr.vr.value == nil {
 		panic(&EvalError{
-			msg: "Unbound var: " + v.ToString(false),
+			msg: "Unbound var: " + expr.vr.ToString(false),
 			pos: expr.Position,
 		})
 	}
-	return v.value
+	return expr.vr.value
 }
 
 func (expr *LiteralExpr) Eval(env *Env) Object {
@@ -102,20 +67,13 @@ func (expr *SetExpr) Eval(env *Env) Object {
 }
 
 func (expr *DefExpr) Eval(env *Env) Object {
-	if expr.name.ns != nil && (Symbol{name: expr.name.ns} != env.currentNamespace.name) {
-		panic(&EvalError{
-			msg: "Can't create defs outside of current ns",
-			pos: expr.Position,
-		})
-	}
-	v := env.currentNamespace.intern(Symbol{name: expr.name.name})
 	if expr.value != nil {
-		v.value = expr.value.Eval(env)
+		expr.vr.value = expr.value.Eval(env)
 	}
 	if expr.meta != nil {
-		v.meta = expr.meta.Eval(env).(*ArrayMap)
+		expr.vr.meta = expr.meta.Eval(env).(*ArrayMap)
 	}
-	return v
+	return expr.vr
 }
 
 func (expr *VarExpr) Eval(env *Env) Object {

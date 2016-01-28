@@ -38,7 +38,7 @@ type (
 	}
 	DefExpr struct {
 		Position
-		name  Symbol
+		vr    *Var
 		value Expr
 		meta  Expr
 	}
@@ -49,7 +49,7 @@ type (
 	}
 	RefExpr struct {
 		Position
-		symbol Symbol
+		vr *Var
 	}
 	VarExpr struct {
 		Position
@@ -80,6 +80,34 @@ type (
 		currentNamespace *Namespace
 	}
 )
+
+var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
+
+func NewEnv(currentNs Symbol) *Env {
+	res := &Env{
+		namespaces: make(map[Symbol]*Namespace),
+		currentNamespace: &Namespace{
+			name:     currentNs,
+			mappings: make(map[Symbol]*Var),
+		},
+	}
+	res.namespaces[currentNs] = res.currentNamespace
+	return res
+}
+
+func (env *Env) Resolve(s Symbol) (*Var, bool) {
+	var ns *Namespace
+	if s.ns == nil {
+		ns = env.currentNamespace
+	} else {
+		ns = env.namespaces[Symbol{name: s.ns}]
+	}
+	if ns == nil {
+		return nil, false
+	}
+	v, ok := ns.mappings[Symbol{name: s.name}]
+	return v, ok
+}
 
 // sym must be not qualified
 func (ns *Namespace) intern(sym Symbol) *Var {
@@ -180,14 +208,22 @@ func parseDef(obj ReadObject) *DefExpr {
 	seq := obj.obj.(Seq)
 	s := ensureReadObject(Second(seq))
 	var meta *ArrayMap
-	switch v := s.obj.(type) {
+	switch sym := s.obj.(type) {
 	case Symbol:
+		if sym.ns != nil && (Symbol{name: sym.ns} != GLOBAL_ENV.currentNamespace.name) {
+			panic(&ParseError{
+				msg: "Can't create defs outside of current ns",
+				obj: obj,
+			})
+		}
+		vr := GLOBAL_ENV.currentNamespace.intern(Symbol{name: sym.name})
+
 		res := &DefExpr{
-			name:     v,
+			vr:       vr,
 			value:    nil,
 			Position: Position{line: obj.line, column: obj.column},
 		}
-		meta = v.GetMeta()
+		meta = sym.GetMeta()
 		if count == 3 {
 			res.value = parse(ensureReadObject(Third(seq)))
 		} else if count == 4 {
@@ -272,6 +308,18 @@ func parseList(obj ReadObject) Expr {
 	}
 }
 
+func parseSymbol(obj ReadObject) Expr {
+	sym := obj.obj.(Symbol)
+	vr, ok := GLOBAL_ENV.Resolve(sym)
+	if !ok {
+		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+	}
+	return &RefExpr{
+		vr:       vr,
+		Position: Position{line: obj.line, column: obj.column},
+	}
+}
+
 func parse(obj ReadObject) Expr {
 	pos := Position{line: obj.line, column: obj.column}
 	var res Expr
@@ -291,10 +339,7 @@ func parse(obj ReadObject) Expr {
 	case Seq:
 		res = parseList(obj)
 	case Symbol:
-		res = &RefExpr{
-			symbol:   v,
-			Position: pos,
-		}
+		res = parseSymbol(obj)
 	default:
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
