@@ -7,140 +7,250 @@ import (
 type (
 	Number interface {
 		Object
-		IsZero() bool
-		Plus(Number) Number
+		Int() Int
+		Double() Double
+		BigInt() *big.Int
+		BigFloat() *big.Float
+		Ratio() *big.Rat
 	}
+	Ops interface {
+		Combine(ops Ops) Ops
+		Plus(Number, Number) Number
+		IsZero(Number) bool
+	}
+	IntOps      struct{}
+	DoubleOps   struct{}
+	BigIntOps   struct{}
+	BigFloatOps struct{}
+	RatioOps    struct{}
 )
 
-func (i Int) Plus(n Number) Number {
-	switch n := n.(type) {
-	case Int:
-		return i + n
-	case Double:
-		return Double(i) + n
-	case *BigInt:
-		res := BigInt(*(&big.Int{}).Add((*big.Int)(n), big.NewInt(int64(i))))
-		return &res
-	case *BigFloat:
-		res := BigFloat(*(&big.Float{}).Add((*big.Float)(n), big.NewFloat(float64(i))))
-		return &res
-	case *Ratio:
-		res := Ratio(*(&big.Rat{}).Add((*big.Rat)(n), big.NewRat(int64(i), 1)))
-		return &res
+var (
+	INT_OPS      = IntOps{}
+	DOUBLE_OPS   = DoubleOps{}
+	BIGINT_OPS   = BigIntOps{}
+	BIGFLOAT_OPS = BigFloatOps{}
+	RATIO_OPS    = RatioOps{}
+)
+
+func (ops IntOps) Combine(other Ops) Ops {
+	return other
+}
+
+func (ops DoubleOps) Combine(other Ops) Ops {
+	switch other.(type) {
+	case BigFloatOps:
+		return other
 	default:
-		panic(&EvalError{msg: "Type of " + n.ToString(false) + " is unknown"})
+		return ops
 	}
 }
 
-func (d Double) Plus(n Number) Number {
-	switch n := n.(type) {
-	case Int:
-		return d + Double(n)
-	case Double:
-		return d + n
-	case *BigInt:
-		return d + Double((*big.Int)(n).Int64())
-	case *BigFloat:
-		f, _ := (*big.Float)(n).Float64()
-		return d + Double(f)
-	case *Ratio:
-		f, _ := (*big.Rat)(n).Float64()
-		return d + Double(f)
+func (ops BigIntOps) Combine(other Ops) Ops {
+	switch other.(type) {
+	case IntOps:
+		return ops
 	default:
-		panic(&EvalError{msg: "Type of " + n.ToString(false) + " is unknown"})
+		return other
 	}
 }
 
-func (b *BigInt) Plus(n Number) Number {
-	bi := (*big.Int)(b)
-	switch n := n.(type) {
-	case Int:
-		res := BigInt(*(&big.Int{}).Add(bi, big.NewInt(int64(n))))
-		return &res
-	case Double:
-		return Double(n) + Double(bi.Int64())
-	case *BigInt:
-		res := BigInt(*(&big.Int{}).Add((*big.Int)(n), bi))
-		return &res
-	case *BigFloat:
-		s := (&big.Float{}).SetInt(bi)
-		res := BigFloat(*(&big.Float{}).Add((*big.Float)(n), s))
-		return &res
-	case *Ratio:
-		s := (&big.Rat{}).SetInt(bi)
-		res := Ratio(*(&big.Rat{}).Add((*big.Rat)(n), s))
-		return &res
+func (ops BigFloatOps) Combine(other Ops) Ops {
+	return ops
+}
+
+func (ops RatioOps) Combine(other Ops) Ops {
+	switch other.(type) {
+	case DoubleOps, BigFloatOps:
+		return other
 	default:
-		panic(&EvalError{msg: "Type of " + n.ToString(false) + " is unknown"})
+		return ops
 	}
 }
 
-func (b *BigFloat) Plus(n Number) Number {
-	bf := (*big.Float)(b)
-	switch n := n.(type) {
-	case Int:
-		res := BigFloat(*(&big.Float{}).Add(bf, big.NewFloat(float64(n))))
-		return &res
+func GetOps(obj Object) Ops {
+	switch obj.(type) {
 	case Double:
-		res := BigFloat(*(&big.Float{}).Add(bf, big.NewFloat(float64(n))))
-		return &res
+		return DOUBLE_OPS
 	case *BigInt:
-		s := (&big.Float{}).SetInt((*big.Int)(n))
-		res := BigFloat(*(&big.Float{}).Add(bf, s))
-		return &res
+		return BIGINT_OPS
 	case *BigFloat:
-		res := BigFloat(*(&big.Float{}).Add((*big.Float)(n), bf))
-		return &res
+		return BIGFLOAT_OPS
 	case *Ratio:
-		f, _ := (*big.Rat)(n).Float64()
-		res := BigFloat(*(&big.Float{}).Add(bf, big.NewFloat(f)))
-		return &res
+		return RATIO_OPS
 	default:
-		panic(&EvalError{msg: "Type of " + n.ToString(false) + " is unknown"})
+		return INT_OPS
 	}
 }
 
-func (r *Ratio) Plus(n Number) Number {
-	rt := (*big.Rat)(r)
-	switch n := n.(type) {
-	case Int:
-		res := Ratio(*(&big.Rat{}).Add(rt, big.NewRat(int64(n), 1)))
-		return &res
-	case Double:
-		f, _ := rt.Float64()
-		return n + Double(f)
-	case *BigInt:
-		s := (&big.Rat{}).SetInt((*big.Int)(n))
-		res := Ratio(*(&big.Rat{}).Add(rt, s))
-		return &res
-	case *BigFloat:
-		f, _ := rt.Float64()
-		res := BigFloat(*(&big.Float{}).Add((*big.Float)(n), big.NewFloat(f)))
-		return &res
-	case *Ratio:
-		res := Ratio(*(&big.Rat{}).Add(rt, (*big.Rat)(n)))
-		return &res
-	default:
-		panic(&EvalError{msg: "Type of " + n.ToString(false) + " is unknown"})
-	}
+// Int conversions
+
+func (i Int) Int() Int {
+	return i
 }
 
-func (i Int) IsZero() bool {
-	return int(i) == 0
+func (i Int) Double() Double {
+	return Double(i)
 }
 
-func (d Double) IsZero() bool {
-	return float64(d) == 0.0
+func (i Int) BigInt() *big.Int {
+	return big.NewInt(int64(i))
 }
 
-func (b *BigInt) IsZero() bool {
-	return (*big.Int)(b).Sign() == 0
+func (i Int) BigFloat() *big.Float {
+	return big.NewFloat(float64(i))
 }
 
-func (b *BigFloat) IsZero() bool {
-	return (*big.Float)(b).Sign() == 0
+func (i Int) Ratio() *big.Rat {
+	return big.NewRat(int64(i), 1)
 }
 
-func (b *Ratio) IsZero() bool {
-	return (*big.Rat)(b).Sign() == 0
+// Double conversions
+
+func (d Double) Int() Int {
+	return Int(d)
+}
+
+func (d Double) BigInt() *big.Int {
+	return big.NewInt(int64(d))
+}
+
+func (d Double) Double() Double {
+	return d
+}
+
+func (d Double) BigFloat() *big.Float {
+	return big.NewFloat(float64(d))
+}
+
+func (d Double) Ratio() *big.Rat {
+	res := big.Rat{}
+	return res.SetFloat64(float64(d))
+}
+
+// BigInt conversions
+
+func (b *BigInt) Int() Int {
+	return Int(b.BigInt().Int64())
+}
+
+func (b *BigInt) BigInt() *big.Int {
+	return (*big.Int)(b)
+}
+
+func (b *BigInt) Double() Double {
+	return Double(b.BigInt().Int64())
+}
+
+func (b *BigInt) BigFloat() *big.Float {
+	res := big.Float{}
+	return res.SetInt(b.BigInt())
+}
+
+func (b *BigInt) Ratio() *big.Rat {
+	res := big.Rat{}
+	return res.SetInt(b.BigInt())
+}
+
+// BigFloat conversions
+
+func (b *BigFloat) Int() Int {
+	i, _ := b.BigFloat().Int64()
+	return Int(i)
+}
+
+func (b *BigFloat) BigInt() *big.Int {
+	bi, _ := b.BigFloat().Int(nil)
+	return bi
+}
+
+func (b *BigFloat) Double() Double {
+	f, _ := b.BigFloat().Float64()
+	return Double(f)
+}
+
+func (b *BigFloat) BigFloat() *big.Float {
+	return (*big.Float)(b)
+}
+
+func (b *BigFloat) Ratio() *big.Rat {
+	res := big.Rat{}
+	return res.SetFloat64(float64(b.Double()))
+}
+
+// Ratio conversions
+
+func (r *Ratio) Int() Int {
+	f, _ := r.Ratio().Float64()
+	return Int(f)
+}
+
+func (r *Ratio) BigInt() *big.Int {
+	f, _ := r.Ratio().Float64()
+	return big.NewInt(int64(f))
+}
+
+func (r *Ratio) Double() Double {
+	f, _ := r.Ratio().Float64()
+	return Double(f)
+}
+
+func (r *Ratio) BigFloat() *big.Float {
+	f, _ := r.Ratio().Float64()
+	return big.NewFloat(f)
+}
+
+func (r *Ratio) Ratio() *big.Rat {
+	return (*big.Rat)(r)
+}
+
+// Ops
+
+func (ops IntOps) Plus(x, y Number) Number {
+	return x.Int() + y.Int()
+}
+
+func (ops DoubleOps) Plus(x, y Number) Number {
+	return x.Double() + y.Double()
+}
+
+func (ops BigIntOps) Plus(x, y Number) Number {
+	b := big.Int{}
+	b.Add(x.BigInt(), y.BigInt())
+	res := BigInt(b)
+	return &res
+}
+
+func (ops BigFloatOps) Plus(x, y Number) Number {
+	b := big.Float{}
+	b.Add(x.BigFloat(), y.BigFloat())
+	res := BigFloat(b)
+	return &res
+}
+
+func (ops RatioOps) Plus(x, y Number) Number {
+	r := big.Rat{}
+	r.Add(x.Ratio(), y.Ratio())
+	res := Ratio(r)
+	return &res
+}
+
+func (ops IntOps) IsZero(x Number) bool {
+	return x.Int() == 0
+}
+
+func (ops DoubleOps) IsZero(x Number) bool {
+	return x.Double() == 0
+}
+
+func (ops BigIntOps) IsZero(x Number) bool {
+	return x.BigInt().Sign() == 0
+}
+
+func (ops BigFloatOps) IsZero(x Number) bool {
+	return x.BigFloat().Sign() == 0
+}
+
+func (ops RatioOps) IsZero(x Number) bool {
+	return x.Ratio().Sign() == 0
 }

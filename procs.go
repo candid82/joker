@@ -22,13 +22,16 @@ var procMeta Proc = func(args []Object) Object {
 
 var procIsZero Proc = func(args []Object) Object {
 	// checkArity(args, 1, "zero?")
-	return Bool(args[0].(Number).IsZero())
+	n := ensureNumber(args[0])
+	ops := GetOps(ensureNumber(args[0]))
+	return Bool(ops.IsZero(n))
 }
 
 var procPlus Proc = func(args []Object) Object {
 	var res Number = Int(0)
 	for _, n := range args {
-		res = res.Plus(ensureNumber(n))
+		ops := GetOps(res).Combine(GetOps(n))
+		res = ops.Plus(res, ensureNumber(n))
 	}
 	return res
 }
