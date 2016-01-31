@@ -16,6 +16,7 @@ type (
 	Ops interface {
 		Combine(ops Ops) Ops
 		Plus(Number, Number) Number
+		Subtract(Number, Number) Number
 		IsZero(Number) bool
 	}
 	IntOps      struct{}
@@ -206,6 +207,8 @@ func (r *Ratio) Ratio() *big.Rat {
 
 // Ops
 
+// Plus
+
 func (ops IntOps) Plus(x, y Number) Number {
 	return x.Int() + y.Int()
 }
@@ -234,6 +237,39 @@ func (ops RatioOps) Plus(x, y Number) Number {
 	res := Ratio(r)
 	return &res
 }
+
+// Subtract
+
+func (ops IntOps) Subtract(x, y Number) Number {
+	return x.Int() - y.Int()
+}
+
+func (ops DoubleOps) Subtract(x, y Number) Number {
+	return x.Double() - y.Double()
+}
+
+func (ops BigIntOps) Subtract(x, y Number) Number {
+	b := big.Int{}
+	b.Sub(x.BigInt(), y.BigInt())
+	res := BigInt(b)
+	return &res
+}
+
+func (ops BigFloatOps) Subtract(x, y Number) Number {
+	b := big.Float{}
+	b.Sub(x.BigFloat(), y.BigFloat())
+	res := BigFloat(b)
+	return &res
+}
+
+func (ops RatioOps) Subtract(x, y Number) Number {
+	r := big.Rat{}
+	r.Sub(x.Ratio(), y.Ratio())
+	res := Ratio(r)
+	return &res
+}
+
+// IsZero
 
 func (ops IntOps) IsZero(x Number) bool {
 	return x.Int() == 0

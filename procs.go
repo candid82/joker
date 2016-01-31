@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 func ensureNumber(obj Object) Number {
 	switch n := obj.(type) {
 	case Number:
@@ -36,6 +40,27 @@ var procPlus Proc = func(args []Object) Object {
 	return res
 }
 
+func panicArity(n int, name string) {
+	panic(&EvalError{msg: fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)})
+}
+
+var procSubtract Proc = func(args []Object) Object {
+	if len(args) == 0 {
+		panicArity(0, "-")
+	}
+	var res Number = Int(0)
+	numbers := args
+	if len(args) > 1 {
+		res = ensureNumber(args[0])
+		numbers = args[1:]
+	}
+	for _, n := range numbers {
+		ops := GetOps(res).Combine(GetOps(n))
+		res = ops.Subtract(res, ensureNumber(n))
+	}
+	return res
+}
+
 func intern(name string, proc Proc) {
 	GLOBAL_ENV.currentNamespace.intern(MakeSymbol(name)).value = proc
 }
@@ -44,4 +69,5 @@ func init() {
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
 	intern("+", procPlus)
+	intern("-", procSubtract)
 }
