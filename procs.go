@@ -40,6 +40,15 @@ var procAdd Proc = func(args []Object) Object {
 	return res
 }
 
+var procMultiply Proc = func(args []Object) Object {
+	var res Number = Int(1)
+	for _, n := range args {
+		ops := GetOps(res).Combine(GetOps(n))
+		res = ops.Multiply(res, ensureNumber(n))
+	}
+	return res
+}
+
 func panicArity(n int, name string) {
 	panic(&EvalError{msg: fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)})
 }
@@ -70,4 +79,5 @@ func init() {
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
 	intern("-", procSubtract)
+	intern("*", procMultiply)
 }

@@ -17,6 +17,7 @@ type (
 		Combine(ops Ops) Ops
 		Add(Number, Number) Number
 		Subtract(Number, Number) Number
+		Multiply(Number, Number) Number
 		IsZero(Number) bool
 	}
 	IntOps      struct{}
@@ -265,6 +266,37 @@ func (ops BigFloatOps) Subtract(x, y Number) Number {
 func (ops RatioOps) Subtract(x, y Number) Number {
 	r := big.Rat{}
 	r.Sub(x.Ratio(), y.Ratio())
+	res := Ratio(r)
+	return &res
+}
+
+// Multiply
+
+func (ops IntOps) Multiply(x, y Number) Number {
+	return x.Int() * y.Int()
+}
+
+func (ops DoubleOps) Multiply(x, y Number) Number {
+	return x.Double() * y.Double()
+}
+
+func (ops BigIntOps) Multiply(x, y Number) Number {
+	b := big.Int{}
+	b.Mul(x.BigInt(), y.BigInt())
+	res := BigInt(b)
+	return &res
+}
+
+func (ops BigFloatOps) Multiply(x, y Number) Number {
+	b := big.Float{}
+	b.Mul(x.BigFloat(), y.BigFloat())
+	res := BigFloat(b)
+	return &res
+}
+
+func (ops RatioOps) Multiply(x, y Number) Number {
+	r := big.Rat{}
+	r.Mul(x.Ratio(), y.Ratio())
 	res := Ratio(r)
 	return &res
 }
