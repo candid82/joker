@@ -70,6 +70,23 @@ var procSubtract Proc = func(args []Object) Object {
 	return res
 }
 
+var procDivide Proc = func(args []Object) Object {
+	if len(args) == 0 {
+		panicArity(0, "/")
+	}
+	var res Number = Int(1)
+	numbers := args
+	if len(args) > 1 {
+		res = ensureNumber(args[0])
+		numbers = args[1:]
+	}
+	for _, n := range numbers {
+		ops := GetOps(res).Combine(GetOps(n))
+		res = ops.Divide(res, ensureNumber(n))
+	}
+	return res
+}
+
 func intern(name string, proc Proc) {
 	GLOBAL_ENV.currentNamespace.intern(MakeSymbol(name)).value = proc
 }
@@ -80,4 +97,5 @@ func init() {
 	intern("+", procAdd)
 	intern("-", procSubtract)
 	intern("*", procMultiply)
+	intern("/", procDivide)
 }

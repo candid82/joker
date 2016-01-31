@@ -18,6 +18,7 @@ type (
 		Add(Number, Number) Number
 		Subtract(Number, Number) Number
 		Multiply(Number, Number) Number
+		Divide(Number, Number) Number
 		IsZero(Number) bool
 	}
 	IntOps      struct{}
@@ -297,6 +298,46 @@ func (ops BigFloatOps) Multiply(x, y Number) Number {
 func (ops RatioOps) Multiply(x, y Number) Number {
 	r := big.Rat{}
 	r.Mul(x.Ratio(), y.Ratio())
+	res := Ratio(r)
+	return &res
+}
+
+// Divide
+
+func (ops IntOps) Divide(x, y Number) Number {
+	b := big.NewRat(int64(x.Int()), int64(y.Int()))
+	if b.IsInt() {
+		return Int(b.Num().Int64())
+	}
+	res := Ratio(*b)
+	return &res
+}
+
+func (ops DoubleOps) Divide(x, y Number) Number {
+	return x.Double() / y.Double()
+}
+
+func (ops BigIntOps) Divide(x, y Number) Number {
+	b := big.Rat{}
+	b.Quo(x.Ratio(), y.Ratio())
+	if b.IsInt() {
+		res := BigInt(*b.Num())
+		return &res
+	}
+	res := Ratio(b)
+	return &res
+}
+
+func (ops BigFloatOps) Divide(x, y Number) Number {
+	b := big.Float{}
+	b.Quo(x.BigFloat(), y.BigFloat())
+	res := BigFloat(b)
+	return &res
+}
+
+func (ops RatioOps) Divide(x, y Number) Number {
+	r := big.Rat{}
+	r.Quo(x.Ratio(), y.Ratio())
 	res := Ratio(r)
 	return &res
 }

@@ -88,7 +88,7 @@ func MakeQualifiedSymbol(ns, name string) Symbol {
 
 func MakeSymbol(nsname string) Symbol {
 	index := strings.IndexRune(nsname, '/')
-	if index == -1 {
+	if index == -1 || nsname == "/" {
 		return Symbol{
 			ns:   nil,
 			name: STRINGS.Intern(nsname),
