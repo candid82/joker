@@ -31,11 +31,11 @@ var procIsZero Proc = func(args []Object) Object {
 	return Bool(ops.IsZero(n))
 }
 
-var procPlus Proc = func(args []Object) Object {
+var procAdd Proc = func(args []Object) Object {
 	var res Number = Int(0)
 	for _, n := range args {
 		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Plus(res, ensureNumber(n))
+		res = ops.Add(res, ensureNumber(n))
 	}
 	return res
 }
@@ -68,6 +68,6 @@ func intern(name string, proc Proc) {
 func init() {
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
-	intern("+", procPlus)
+	intern("+", procAdd)
 	intern("-", procSubtract)
 }
