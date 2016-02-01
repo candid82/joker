@@ -68,6 +68,7 @@ func skipRestOfLine(reader *Reader) {
 
 func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
+	GLOBAL_ENV.namespaces[MakeSymbol("user")].ReferAll(GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")])
 	reader := NewReader(bufio.NewReader(os.Stdin))
 	for {
 		fmt.Print("> ")

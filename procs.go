@@ -55,7 +55,7 @@ func panicArity(n int, name string) {
 
 var procSubtract Proc = func(args []Object) Object {
 	if len(args) == 0 {
-		panicArity(0, "-")
+		panicArity(0, "core/-")
 	}
 	var res Number = Int(0)
 	numbers := args
@@ -72,7 +72,7 @@ var procSubtract Proc = func(args []Object) Object {
 
 var procDivide Proc = func(args []Object) Object {
 	if len(args) == 0 {
-		panicArity(0, "/")
+		panicArity(0, "core//")
 	}
 	var res Number = Int(1)
 	numbers := args
@@ -87,8 +87,10 @@ var procDivide Proc = func(args []Object) Object {
 	return res
 }
 
+var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")]
+
 func intern(name string, proc Proc) {
-	GLOBAL_ENV.currentNamespace.intern(MakeSymbol(name)).value = proc
+	coreNamespace.intern(MakeSymbol(name)).value = proc
 }
 
 func init() {

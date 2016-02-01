@@ -83,6 +83,33 @@ type (
 
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
 
+func NewNamespace(sym Symbol) *Namespace {
+	return &Namespace{
+		name:     sym,
+		mappings: make(map[Symbol]*Var),
+	}
+}
+
+func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
+	if sym.ns != nil {
+		panic(&EvalError{msg: "Can't intern namespace-qualified symbol " + sym.ToString(false)})
+	}
+	ns.mappings[sym] = vr
+	return vr
+}
+
+func (ns *Namespace) ReferAll(other *Namespace) {
+	for sym, vr := range other.mappings {
+		ns.Refer(sym, vr)
+	}
+}
+
+func (env *Env) EnsureNamespace(sym Symbol) {
+	if env.namespaces[sym] == nil {
+		env.namespaces[sym] = NewNamespace(sym)
+	}
+}
+
 func NewEnv(currentNs Symbol) *Env {
 	res := &Env{
 		namespaces: make(map[Symbol]*Namespace),
@@ -92,6 +119,7 @@ func NewEnv(currentNs Symbol) *Env {
 		},
 	}
 	res.namespaces[currentNs] = res.currentNamespace
+	res.EnsureNamespace(MakeSymbol("gclojure.core"))
 	return res
 }
 
