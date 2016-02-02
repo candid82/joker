@@ -140,6 +140,10 @@ func (expr *IfExpr) Eval(env *Env) Object {
 	return expr.negative.Eval(env)
 }
 
+func (expr *FnExpr) Eval(env *Env) Object {
+	return NIL
+}
+
 func TryEval(expr Expr) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {

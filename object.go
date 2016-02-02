@@ -256,3 +256,30 @@ func (s String) ToString(escape bool) string {
 func (s String) Equals(other interface{}) bool {
 	return s == other
 }
+
+func IsSymbol(obj Object) bool {
+	switch obj.(type) {
+	case Symbol:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsVector(obj Object) bool {
+	switch obj.(type) {
+	case *Vector:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsSeq(obj Object) bool {
+	switch obj.(type) {
+	case Seq:
+		return true
+	default:
+		return false
+	}
+}

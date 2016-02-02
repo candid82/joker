@@ -64,6 +64,17 @@ type (
 		Position
 		body []Expr
 	}
+	FnArityExpr struct {
+		Position
+		args []Object
+		body []Expr
+	}
+	FnExpr struct {
+		Position
+		arities  []FnArityExpr
+		variadic FnArityExpr
+		self     Symbol
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -287,6 +298,49 @@ func parseBody(seq Seq) []Expr {
 	return res
 }
 
+func addArity(fn *FnExpr, params ReadObject, body Seq) {
+
+}
+
+// Examples:
+// (fn f [] 1 2)
+// (fn f ([] 1 2)
+//       ([a] a 3)
+//       ([a & b] a b))
+func parseFn(obj ReadObject) Expr {
+	res := &FnExpr{Position: Position{line: obj.line, column: obj.column}}
+	bodies := obj.obj.(Seq).Rest()
+	p := ensureReadObject(bodies.First())
+	if IsSymbol(p.obj) { // self reference
+		res.self = p.obj.(Symbol)
+		bodies = bodies.Rest()
+		p = ensureReadObject(bodies.First())
+	}
+	if IsVector(p.obj) { // single arity
+		addArity(res, p, bodies.Rest())
+		return res
+	}
+	// multiple arities
+	if bodies.IsEmpty() {
+		panic(&ParseError{obj: p, msg: "Parameter declaration missing"})
+	}
+	for !bodies.IsEmpty() {
+		body := ensureReadObject(bodies.First())
+		switch s := body.obj.(type) {
+		case Seq:
+			params := ensureReadObject(s.First())
+			if !IsVector(params.obj) {
+				panic(&ParseError{obj: params, msg: "Parameter declaration must be a vector. Got: " + params.obj.ToString(false)})
+			}
+			addArity(res, params, s.Rest())
+		default:
+			panic(&ParseError{obj: body, msg: "Function body must be a list. Got: " + s.ToString(false)})
+		}
+		bodies = bodies.Rest()
+	}
+	return res
+}
+
 func parseList(obj ReadObject) Expr {
 	seq := obj.obj.(Seq)
 	if seq.IsEmpty() {
@@ -309,6 +363,8 @@ func parseList(obj ReadObject) Expr {
 				negative: parse(ensureReadObject(Forth(seq))),
 				Position: pos,
 			}
+		case "fn":
+			return parseFn(obj)
 		case "def":
 			return parseDef(obj)
 		case "var":
