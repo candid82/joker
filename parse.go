@@ -72,7 +72,7 @@ type (
 	FnExpr struct {
 		Position
 		arities  []FnArityExpr
-		variadic FnArityExpr
+		variadic *FnArityExpr
 		self     Symbol
 	}
 	ParseError struct {
@@ -298,8 +298,60 @@ func parseBody(seq Seq) []Expr {
 	return res
 }
 
-func addArity(fn *FnExpr, params ReadObject, body Seq) {
+func parseParams(params ReadObject) (bindings []Object, isVariadic bool) {
+	res := make([]Object, 0)
+	v := params.obj.(*Vector)
+	for i := 0; i < v.count; i++ {
+		ro := ensureReadObject(v.at(i))
+		sym := ro.obj
+		if !IsSymbol(sym) {
+			panic(&ParseError{obj: ro, msg: "Unsupported binding form: " + sym.ToString(false)})
+		}
+		if sym == MakeSymbol("&") {
+			if v.count > i+2 {
+				ro := ensureReadObject(v.at(i + 2))
+				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.obj.ToString(false)})
+			}
+			if v.count == i+2 {
+				variadic := ensureReadObject(v.at(i + 1))
+				if !IsSymbol(variadic.obj) {
+					panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.obj.ToString(false)})
+				}
+				res = append(res, variadic.obj)
+				return res, true
+			} else {
+				return res, false
+			}
+		}
+		res = append(res, sym)
+	}
+	return res, false
+}
 
+func addArity(fn *FnExpr, params ReadObject, body Seq) {
+	args, isVariadic := parseParams(params)
+	arity := FnArityExpr{args: args, body: parseBody(body)}
+	if isVariadic {
+		if fn.variadic != nil {
+			panic(&ParseError{obj: params, msg: "Can't have more than 1 variadic overload"})
+		}
+		for _, arity := range fn.arities {
+			if len(arity.args) >= len(args) {
+				panic(&ParseError{obj: params, msg: "Can't have fixed arity function with more params than variadic function"})
+			}
+		}
+		fn.variadic = &arity
+	} else {
+		for _, arity := range fn.arities {
+			if len(arity.args) == len(args) {
+				panic(&ParseError{obj: params, msg: "Can't have 2 overloads with same arity"})
+			}
+		}
+		if fn.variadic != nil && len(args) >= len(fn.variadic.args) {
+			panic(&ParseError{obj: params, msg: "Can't have fixed arity function with more params than variadic function"})
+		}
+		fn.arities = append(fn.arities, arity)
+	}
 }
 
 // Examples:
