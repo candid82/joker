@@ -44,7 +44,28 @@ type (
 		value Object
 	}
 	Proc func([]Object) Object
+	Fn   struct {
+		fnExpr *FnExpr
+		env    *Env
+	}
 )
+
+func (fn *Fn) ToString(escape bool) string {
+	return "function"
+}
+
+func (fn *Fn) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case *Fn:
+		return fn == other
+	default:
+		return false
+	}
+}
+
+func (fn *Fn) Call(args []Object) Object {
+	return evalBody(fn.fnExpr.arities[0].body, fn.env)
+}
 
 func (p Proc) Call(args []Object) Object {
 	return p(args)

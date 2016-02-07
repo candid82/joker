@@ -114,12 +114,16 @@ func (expr *CallExpr) Eval(env *Env) Object {
 	}
 }
 
-func (doExpr *DoExpr) Eval(env *Env) Object {
+func evalBody(body []Expr, env *Env) Object {
 	var res Object = NIL
-	for _, expr := range doExpr.body {
+	for _, expr := range body {
 		res = expr.Eval(env)
 	}
 	return res
+}
+
+func (doExpr *DoExpr) Eval(env *Env) Object {
+	return evalBody(doExpr.body, env)
 }
 
 func toBool(obj Object) bool {
@@ -141,7 +145,7 @@ func (expr *IfExpr) Eval(env *Env) Object {
 }
 
 func (expr *FnExpr) Eval(env *Env) Object {
-	return NIL
+	return &Fn{fnExpr: expr, env: env}
 }
 
 func TryEval(expr Expr) (obj Object, err error) {
