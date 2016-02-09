@@ -26,6 +26,10 @@ func (expr *RefExpr) Eval(env *Env) Object {
 	return expr.vr.value
 }
 
+func (expr *BindingExpr) Eval(env *Env) Object {
+	return NIL
+}
+
 func (expr *LiteralExpr) Eval(env *Env) Object {
 	return expr.obj
 }

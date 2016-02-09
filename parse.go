@@ -51,6 +51,10 @@ type (
 		Position
 		vr *Var
 	}
+	BindingExpr struct {
+		Position
+		binding *Binding
+	}
 	VarExpr struct {
 		Position
 		symbol Symbol
@@ -66,7 +70,7 @@ type (
 	}
 	FnArityExpr struct {
 		Position
-		args []Object
+		args []Symbol
 		body []Expr
 	}
 	FnExpr struct {
@@ -90,9 +94,54 @@ type (
 		namespaces       map[Symbol]*Namespace
 		currentNamespace *Namespace
 	}
+	Binding struct {
+		name  Symbol
+		index int
+	}
+	LocalEnv struct {
+		bindings map[Symbol]*Binding
+		parent   *LocalEnv
+		count    int
+	}
 )
 
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
+var LOCAL_ENV *LocalEnv = nil
+
+func pushLocalFrame() {
+	count := 0
+	if LOCAL_ENV != nil {
+		count = LOCAL_ENV.count
+	}
+	LOCAL_ENV = &LocalEnv{
+		bindings: make(map[Symbol]*Binding),
+		parent:   LOCAL_ENV,
+		count:    count,
+	}
+}
+
+func popLocalFrame() {
+	LOCAL_ENV = LOCAL_ENV.parent
+}
+
+func addLocalBinding(sym Symbol) {
+	LOCAL_ENV.bindings[sym] = &Binding{
+		name:  sym,
+		index: LOCAL_ENV.count,
+	}
+	LOCAL_ENV.count += 1
+}
+
+func getLocalBinding(sym Symbol) *Binding {
+	env := LOCAL_ENV
+	for env != nil {
+		if b, ok := env.bindings[sym]; ok {
+			return b
+		}
+		env = env.parent
+	}
+	return nil
+}
 
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
@@ -298,8 +347,8 @@ func parseBody(seq Seq) []Expr {
 	return res
 }
 
-func parseParams(params ReadObject) (bindings []Object, isVariadic bool) {
-	res := make([]Object, 0)
+func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
+	res := make([]Symbol, 0)
 	v := params.obj.(*Vector)
 	for i := 0; i < v.count; i++ {
 		ro := ensureReadObject(v.at(i))
@@ -317,19 +366,24 @@ func parseParams(params ReadObject) (bindings []Object, isVariadic bool) {
 				if !IsSymbol(variadic.obj) {
 					panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.obj.ToString(false)})
 				}
-				res = append(res, variadic.obj)
+				res = append(res, variadic.obj.(Symbol))
 				return res, true
 			} else {
 				return res, false
 			}
 		}
-		res = append(res, sym)
+		res = append(res, sym.(Symbol))
 	}
 	return res, false
 }
 
 func addArity(fn *FnExpr, params ReadObject, body Seq) {
 	args, isVariadic := parseParams(params)
+	pushLocalFrame()
+	defer popLocalFrame()
+	for _, b := range args {
+		addLocalBinding(b)
+	}
 	arity := FnArityExpr{args: args, body: parseBody(body)}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -446,6 +500,13 @@ func parseList(obj ReadObject) Expr {
 
 func parseSymbol(obj ReadObject) Expr {
 	sym := obj.obj.(Symbol)
+	b := getLocalBinding(sym)
+	if b != nil {
+		return &BindingExpr{
+			binding:  b,
+			Position: Position{line: obj.line, column: obj.column},
+		}
+	}
 	vr, ok := GLOBAL_ENV.Resolve(sym)
 	if !ok {
 		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
