@@ -6,7 +6,7 @@ import (
 
 type (
 	Expr interface {
-		Eval(env *Env) Object
+		Eval(env *LocalEnv) Object
 		Pos() Position
 	}
 	Position struct {
@@ -47,7 +47,7 @@ type (
 		callable Expr
 		args     []Expr
 	}
-	RefExpr struct {
+	VarRefExpr struct {
 		Position
 		vr *Var
 	}
@@ -98,42 +98,50 @@ type (
 		name  Symbol
 		index int
 	}
-	LocalEnv struct {
+	Bindings struct {
 		bindings map[Symbol]*Binding
-		parent   *LocalEnv
+		parent   *Bindings
 		count    int
+	}
+	LocalEnv struct {
+		bindings []Object
 	}
 )
 
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
-var LOCAL_ENV *LocalEnv = nil
+var LOCAL_BINDINGS *Bindings = nil
+
+func (localEnv *LocalEnv) pushBindings(vals []Object) *LocalEnv {
+	res := LocalEnv{bindings: append(localEnv.bindings, vals...)}
+	return &res
+}
 
 func pushLocalFrame() {
 	count := 0
-	if LOCAL_ENV != nil {
-		count = LOCAL_ENV.count
+	if LOCAL_BINDINGS != nil {
+		count = LOCAL_BINDINGS.count
 	}
-	LOCAL_ENV = &LocalEnv{
+	LOCAL_BINDINGS = &Bindings{
 		bindings: make(map[Symbol]*Binding),
-		parent:   LOCAL_ENV,
+		parent:   LOCAL_BINDINGS,
 		count:    count,
 	}
 }
 
 func popLocalFrame() {
-	LOCAL_ENV = LOCAL_ENV.parent
+	LOCAL_BINDINGS = LOCAL_BINDINGS.parent
 }
 
 func addLocalBinding(sym Symbol) {
-	LOCAL_ENV.bindings[sym] = &Binding{
+	LOCAL_BINDINGS.bindings[sym] = &Binding{
 		name:  sym,
-		index: LOCAL_ENV.count,
+		index: LOCAL_BINDINGS.count,
 	}
-	LOCAL_ENV.count += 1
+	LOCAL_BINDINGS.count += 1
 }
 
 func getLocalBinding(sym Symbol) *Binding {
-	env := LOCAL_ENV
+	env := LOCAL_BINDINGS
 	for env != nil {
 		if b, ok := env.bindings[sym]; ok {
 			return b
@@ -511,7 +519,7 @@ func parseSymbol(obj ReadObject) Expr {
 	if !ok {
 		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 	}
-	return &RefExpr{
+	return &VarRefExpr{
 		vr:       vr,
 		Position: Position{line: obj.line, column: obj.column},
 	}

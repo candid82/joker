@@ -46,7 +46,7 @@ type (
 	Proc func([]Object) Object
 	Fn   struct {
 		fnExpr *FnExpr
-		env    *Env
+		env    *LocalEnv
 	}
 )
 
@@ -64,7 +64,7 @@ func (fn *Fn) Equals(other interface{}) bool {
 }
 
 func (fn *Fn) Call(args []Object) Object {
-	return evalBody(fn.fnExpr.arities[0].body, fn.env)
+	return evalBody(fn.fnExpr.arities[0].body, fn.env.pushBindings(args))
 }
 
 func (p Proc) Call(args []Object) Object {

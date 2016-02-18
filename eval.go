@@ -15,7 +15,7 @@ func (err EvalError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: Eval error: %s", err.pos.line, err.pos.column, err.msg)
 }
 
-func (expr *RefExpr) Eval(env *Env) Object {
+func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
 	if expr.vr.value == nil {
 		panic(&EvalError{
@@ -26,15 +26,15 @@ func (expr *RefExpr) Eval(env *Env) Object {
 	return expr.vr.value
 }
 
-func (expr *BindingExpr) Eval(env *Env) Object {
-	return NIL
+func (expr *BindingExpr) Eval(env *LocalEnv) Object {
+	return env.bindings[expr.binding.index]
 }
 
-func (expr *LiteralExpr) Eval(env *Env) Object {
+func (expr *LiteralExpr) Eval(env *LocalEnv) Object {
 	return expr.obj
 }
 
-func (expr *VectorExpr) Eval(env *Env) Object {
+func (expr *VectorExpr) Eval(env *LocalEnv) Object {
 	res := EmptyVector
 	for _, e := range expr.v {
 		res = res.conj(e.Eval(env))
@@ -42,7 +42,7 @@ func (expr *VectorExpr) Eval(env *Env) Object {
 	return res
 }
 
-func (expr *MapExpr) Eval(env *Env) Object {
+func (expr *MapExpr) Eval(env *LocalEnv) Object {
 	res := EmptyArrayMap()
 	for i := range expr.keys {
 		key := expr.keys[i].Eval(env)
@@ -56,7 +56,7 @@ func (expr *MapExpr) Eval(env *Env) Object {
 	return res
 }
 
-func (expr *SetExpr) Eval(env *Env) Object {
+func (expr *SetExpr) Eval(env *LocalEnv) Object {
 	res := EmptySet()
 	for _, elemExpr := range expr.elements {
 		el := elemExpr.Eval(env)
@@ -70,7 +70,7 @@ func (expr *SetExpr) Eval(env *Env) Object {
 	return res
 }
 
-func (expr *DefExpr) Eval(env *Env) Object {
+func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	if expr.value != nil {
 		expr.vr.value = expr.value.Eval(env)
 	}
@@ -80,8 +80,8 @@ func (expr *DefExpr) Eval(env *Env) Object {
 	return expr.vr
 }
 
-func (expr *VarExpr) Eval(env *Env) Object {
-	res, ok := env.Resolve(expr.symbol)
+func (expr *VarExpr) Eval(env *LocalEnv) Object {
+	res, ok := GLOBAL_ENV.Resolve(expr.symbol)
 	if !ok {
 		panic(&EvalError{
 			msg: "Enable to resolve var " + expr.symbol.ToString(false) + " in this context",
@@ -91,13 +91,13 @@ func (expr *VarExpr) Eval(env *Env) Object {
 	return res
 }
 
-func (expr *MetaExpr) Eval(env *Env) Object {
+func (expr *MetaExpr) Eval(env *LocalEnv) Object {
 	meta := expr.meta.Eval(env)
 	res := expr.expr.Eval(env)
 	return res.(Meta).WithMeta(meta.(*ArrayMap))
 }
 
-func evalSeq(exprs []Expr, env *Env) []Object {
+func evalSeq(exprs []Expr, env *LocalEnv) []Object {
 	res := make([]Object, len(exprs))
 	for i, expr := range exprs {
 		res[i] = expr.Eval(env)
@@ -105,7 +105,7 @@ func evalSeq(exprs []Expr, env *Env) []Object {
 	return res
 }
 
-func (expr *CallExpr) Eval(env *Env) Object {
+func (expr *CallExpr) Eval(env *LocalEnv) Object {
 	callable := expr.callable.Eval(env)
 	switch callable := callable.(type) {
 	case Callable:
@@ -118,7 +118,7 @@ func (expr *CallExpr) Eval(env *Env) Object {
 	}
 }
 
-func evalBody(body []Expr, env *Env) Object {
+func evalBody(body []Expr, env *LocalEnv) Object {
 	var res Object = NIL
 	for _, expr := range body {
 		res = expr.Eval(env)
@@ -126,7 +126,7 @@ func evalBody(body []Expr, env *Env) Object {
 	return res
 }
 
-func (doExpr *DoExpr) Eval(env *Env) Object {
+func (doExpr *DoExpr) Eval(env *LocalEnv) Object {
 	return evalBody(doExpr.body, env)
 }
 
@@ -141,14 +141,14 @@ func toBool(obj Object) bool {
 	}
 }
 
-func (expr *IfExpr) Eval(env *Env) Object {
+func (expr *IfExpr) Eval(env *LocalEnv) Object {
 	if toBool(expr.cond.Eval(env)) {
 		return expr.positive.Eval(env)
 	}
 	return expr.negative.Eval(env)
 }
 
-func (expr *FnExpr) Eval(env *Env) Object {
+func (expr *FnExpr) Eval(env *LocalEnv) Object {
 	return &Fn{fnExpr: expr, env: env}
 }
 
@@ -158,5 +158,5 @@ func TryEval(expr Expr) (obj Object, err error) {
 			err = r.(error)
 		}
 	}()
-	return expr.Eval(GLOBAL_ENV), nil
+	return expr.Eval(&LocalEnv{}), nil
 }
