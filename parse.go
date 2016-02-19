@@ -370,7 +370,11 @@ func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
 		ro := ensureReadObject(v.at(i))
 		sym := ro.obj
 		if !IsSymbol(sym) {
-			panic(&ParseError{obj: ro, msg: "Unsupported binding form: " + sym.ToString(false)})
+			if LINTER_MODE {
+				sym = generateSymbol("linter")
+			} else {
+				panic(&ParseError{obj: ro, msg: "Unsupported binding form: " + sym.ToString(false)})
+			}
 		}
 		if sym == MakeSymbol("&") {
 			if v.count > i+2 {
@@ -522,7 +526,11 @@ func parseSymbol(obj ReadObject) Expr {
 	}
 	vr, ok := GLOBAL_ENV.Resolve(sym)
 	if !ok {
-		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+		if LINTER_MODE {
+			vr = GLOBAL_ENV.currentNamespace.intern(sym)
+		} else {
+			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+		}
 	}
 	return &VarRefExpr{
 		vr:       vr,

@@ -17,6 +17,8 @@ const (
 	EVAL
 )
 
+var LINTER_MODE bool = false
+
 func processFile(filename string, phase Phase) {
 	var reader *Reader
 	if filename == "--" {
@@ -117,6 +119,7 @@ func parsePhase(s string) Phase {
 func main() {
 	if len(os.Args) > 1 {
 		if len(os.Args) > 2 {
+			LINTER_MODE = true
 			processFile(os.Args[2], parsePhase(os.Args[1]))
 		} else {
 			processFile(os.Args[1], EVAL)
