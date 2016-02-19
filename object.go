@@ -64,7 +64,7 @@ func (fn *Fn) Equals(other interface{}) bool {
 }
 
 func (fn *Fn) Call(args []Object) Object {
-	return evalBody(fn.fnExpr.arities[0].body, fn.env.pushBindings(args))
+	return evalBody(fn.fnExpr.arities[0].body, fn.env.addFrame(args))
 }
 
 func (p Proc) Call(args []Object) Object {

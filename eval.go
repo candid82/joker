@@ -27,6 +27,9 @@ func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
+	for i := env.frame; i > expr.binding.frame; i-- {
+		env = env.parent
+	}
 	return env.bindings[expr.binding.index]
 }
 
@@ -158,5 +161,5 @@ func TryEval(expr Expr) (obj Object, err error) {
 			err = r.(error)
 		}
 	}()
-	return expr.Eval(&LocalEnv{}), nil
+	return expr.Eval(nil), nil
 }

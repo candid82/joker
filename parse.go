@@ -97,47 +97,55 @@ type (
 	Binding struct {
 		name  Symbol
 		index int
+		frame int
 	}
 	Bindings struct {
 		bindings map[Symbol]*Binding
 		parent   *Bindings
-		count    int
+		frame    int
 	}
 	LocalEnv struct {
 		bindings []Object
+		parent   *LocalEnv
+		frame    int
 	}
 )
 
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
 var LOCAL_BINDINGS *Bindings = nil
 
-func (localEnv *LocalEnv) pushBindings(vals []Object) *LocalEnv {
-	res := LocalEnv{bindings: append(localEnv.bindings, vals...)}
+func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
+	res := LocalEnv{
+		bindings: values,
+		parent:   localEnv,
+	}
+	if localEnv != nil {
+		res.frame = localEnv.frame + 1
+	}
 	return &res
 }
 
-func pushLocalFrame() {
-	count := 0
+func pushLocalFrame(names []Symbol) {
+	frame := 0
 	if LOCAL_BINDINGS != nil {
-		count = LOCAL_BINDINGS.count
+		frame = LOCAL_BINDINGS.frame + 1
 	}
 	LOCAL_BINDINGS = &Bindings{
 		bindings: make(map[Symbol]*Binding),
 		parent:   LOCAL_BINDINGS,
-		count:    count,
+		frame:    frame,
+	}
+	for i, sym := range names {
+		LOCAL_BINDINGS.bindings[sym] = &Binding{
+			name:  sym,
+			frame: frame,
+			index: i,
+		}
 	}
 }
 
 func popLocalFrame() {
 	LOCAL_BINDINGS = LOCAL_BINDINGS.parent
-}
-
-func addLocalBinding(sym Symbol) {
-	LOCAL_BINDINGS.bindings[sym] = &Binding{
-		name:  sym,
-		index: LOCAL_BINDINGS.count,
-	}
-	LOCAL_BINDINGS.count += 1
 }
 
 func getLocalBinding(sym Symbol) *Binding {
@@ -387,11 +395,8 @@ func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
 
 func addArity(fn *FnExpr, params ReadObject, body Seq) {
 	args, isVariadic := parseParams(params)
-	pushLocalFrame()
+	pushLocalFrame(args)
 	defer popLocalFrame()
-	for _, b := range args {
-		addLocalBinding(b)
-	}
 	arity := FnArityExpr{args: args, body: parseBody(body)}
 	if isVariadic {
 		if fn.variadic != nil {
