@@ -73,7 +73,7 @@ func repl(phase Phase) {
 	GLOBAL_ENV.namespaces[MakeSymbol("user")].ReferAll(GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")])
 	reader := NewReader(bufio.NewReader(os.Stdin))
 	for {
-		fmt.Print("> ")
+		fmt.Print(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
 		obj, err := TryRead(reader)
 		if err == io.EOF {
 			return
