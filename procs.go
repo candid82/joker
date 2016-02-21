@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 func ensureNumber(obj Object) Number {
 	switch n := obj.(type) {
 	case Number:
@@ -47,10 +43,6 @@ var procMultiply Proc = func(args []Object) Object {
 		res = ops.Multiply(res, ensureNumber(n))
 	}
 	return res
-}
-
-func panicArity(n int, name string) {
-	panic(&EvalError{msg: fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)})
 }
 
 var procSubtract Proc = func(args []Object) Object {

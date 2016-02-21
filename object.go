@@ -50,6 +50,10 @@ type (
 	}
 )
 
+func panicArity(n int, name string) {
+	panic(&EvalError{msg: fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)})
+}
+
 func (fn *Fn) ToString(escape bool) string {
 	return "function"
 }
@@ -64,7 +68,22 @@ func (fn *Fn) Equals(other interface{}) bool {
 }
 
 func (fn *Fn) Call(args []Object) Object {
-	return evalBody(fn.fnExpr.arities[0].body, fn.env.addFrame(args))
+	for _, arity := range fn.fnExpr.arities {
+		if len(arity.args) == len(args) {
+			return evalBody(arity.body, fn.env.addFrame(args))
+		}
+	}
+	v := fn.fnExpr.variadic
+	if v == nil || len(args) < len(v.args)-1 {
+		panicArity(len(args), "fn")
+	}
+	restArgs := &ArraySeq{arr: args, index: len(v.args) - 1}
+	vargs := make([]Object, len(v.args))
+	for i := 0; i < len(vargs)-1; i++ {
+		vargs[i] = args[i]
+	}
+	vargs[len(vargs)-1] = restArgs
+	return evalBody(v.body, fn.env.addFrame(vargs))
 }
 
 func (p Proc) Call(args []Object) Object {

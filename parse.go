@@ -438,6 +438,8 @@ func parseFn(obj ReadObject) Expr {
 		res.self = p.obj.(Symbol)
 		bodies = bodies.Rest()
 		p = ensureReadObject(bodies.First())
+		pushLocalFrame([]Symbol{res.self})
+		defer popLocalFrame()
 	}
 	if IsVector(p.obj) { // single arity
 		addArity(res, p, bodies.Rest())

@@ -152,7 +152,12 @@ func (expr *IfExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *FnExpr) Eval(env *LocalEnv) Object {
-	return &Fn{fnExpr: expr, env: env}
+	res := &Fn{fnExpr: expr}
+	if expr.self.name != nil {
+		env = env.addFrame([]Object{res})
+	}
+	res.env = env
+	return res
 }
 
 func TryEval(expr Expr) (obj Object, err error) {
