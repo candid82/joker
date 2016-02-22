@@ -46,6 +46,7 @@ type (
 		Position
 		callable Expr
 		args     []Expr
+		name     string
 	}
 	VarRefExpr struct {
 		Position
@@ -510,11 +511,19 @@ func parseList(obj ReadObject) Expr {
 			}
 		}
 	}
-	return &CallExpr{
+	res := &CallExpr{
 		callable: parse(ensureReadObject(seq.First())),
 		args:     parseSeq(seq.Rest()),
 		Position: Position{line: obj.line, column: obj.column},
+		name:     "fn",
 	}
+	switch c := res.callable.(type) {
+	case *VarRefExpr:
+		res.name = c.vr.ToString(false)
+	case *BindingExpr:
+		res.name = c.binding.name.ToString(false)
+	}
+	return res
 }
 
 func parseSymbol(obj ReadObject) Expr {

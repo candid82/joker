@@ -47,7 +47,7 @@ var procMultiply Proc = func(args []Object) Object {
 
 var procSubtract Proc = func(args []Object) Object {
 	if len(args) == 0 {
-		panicArity(0, "core/-")
+		panicArity(0)
 	}
 	var res Number = Int(0)
 	numbers := args
@@ -64,7 +64,7 @@ var procSubtract Proc = func(args []Object) Object {
 
 var procDivide Proc = func(args []Object) Object {
 	if len(args) == 0 {
-		panicArity(0, "core//")
+		panicArity(0)
 	}
 	var res Number = Int(1)
 	numbers := args
