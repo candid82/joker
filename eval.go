@@ -14,17 +14,17 @@ type (
 	Frame struct {
 		callExpr *CallExpr
 	}
-	CallStack struct {
+	Callstack struct {
 		frames []Frame
 	}
 	Runtime struct {
-		callstack   *CallStack
+		callstack   *Callstack
 		currentExpr Expr
 	}
 )
 
 var RT *Runtime = &Runtime{
-	callstack: &CallStack{frames: make([]Frame, 0, 50)},
+	callstack: &Callstack{frames: make([]Frame, 0, 50)},
 }
 
 func (rt *Runtime) clone() *Runtime {
@@ -45,12 +45,10 @@ func (rt *Runtime) newError(msg string) *EvalError {
 func (rt *Runtime) stacktrace() string {
 	var b bytes.Buffer
 	pos := rt.currentExpr.Pos()
-	// line, column := pos.line, pos.column
 	name := "global"
 	for _, f := range rt.callstack.frames {
 		b.WriteString(fmt.Sprintf("%s %d:%d\n", name, f.callExpr.line, f.callExpr.column))
 		name = f.callExpr.name
-		// line, column = f.callExpr.line, f.callExpr.column
 	}
 	b.WriteString(fmt.Sprintf("%s %d:%d", name, pos.line, pos.column))
 	return b.String()
@@ -71,21 +69,21 @@ func eval(expr Expr, env *LocalEnv) Object {
 	return expr.Eval(env)
 }
 
-func (s *CallStack) pushFrame(frame Frame) {
+func (s *Callstack) pushFrame(frame Frame) {
 	s.frames = append(s.frames, frame)
 }
 
-func (s *CallStack) popFrame() {
+func (s *Callstack) popFrame() {
 	s.frames = s.frames[:len(s.frames)-1]
 }
 
-func (s *CallStack) clone() *CallStack {
-	res := &CallStack{frames: make([]Frame, len(s.frames))}
+func (s *Callstack) clone() *Callstack {
+	res := &Callstack{frames: make([]Frame, len(s.frames))}
 	copy(res.frames, s.frames)
 	return res
 }
 
-func (s *CallStack) String() string {
+func (s *Callstack) String() string {
 	var b bytes.Buffer
 	for _, f := range s.frames {
 		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.callExpr.name, f.callExpr.line, f.callExpr.column))
