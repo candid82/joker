@@ -5,7 +5,7 @@ func ensureNumber(obj Object) Number {
 	case Number:
 		return n
 	default:
-		panic(&EvalError{msg: obj.ToString(false) + " is not a Number"})
+		panic(RT.newError(obj.ToString(false) + " is not a Number"))
 	}
 }
 

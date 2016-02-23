@@ -35,16 +35,30 @@ func (rt *Runtime) clone() *Runtime {
 }
 
 func (rt *Runtime) newError(msg string) *EvalError {
+	res := &EvalError{
+		msg: msg,
+		rt:  rt.clone(),
+	}
+	if rt.currentExpr != nil {
+		res.pos = rt.currentExpr.Pos()
+	}
+	return res
+}
+
+func (rt *Runtime) newErrorWithPos(msg string, pos Position) *EvalError {
 	return &EvalError{
 		msg: msg,
-		pos: rt.currentExpr.Pos(),
+		pos: pos,
 		rt:  rt.clone(),
 	}
 }
 
 func (rt *Runtime) stacktrace() string {
 	var b bytes.Buffer
-	pos := rt.currentExpr.Pos()
+	pos := Position{}
+	if rt.currentExpr != nil {
+		pos = rt.currentExpr.Pos()
+	}
 	name := "global"
 	for _, f := range rt.callstack.frames {
 		b.WriteString(fmt.Sprintf("%s %d:%d\n", name, f.callExpr.line, f.callExpr.column))
@@ -105,10 +119,7 @@ func (err EvalError) Error() string {
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
 	if expr.vr.value == nil {
-		panic(&EvalError{
-			msg: "Unbound var: " + expr.vr.ToString(false),
-			pos: expr.Position,
-		})
+		panic(RT.newError("Unbound var: " + expr.vr.ToString(false)))
 	}
 	return expr.vr.value
 }
@@ -137,10 +148,7 @@ func (expr *MapExpr) Eval(env *LocalEnv) Object {
 	for i := range expr.keys {
 		key := eval(expr.keys[i], env)
 		if !res.Add(key, eval(expr.values[i], env)) {
-			panic(&EvalError{
-				msg: "Duplicate key: " + key.ToString(false),
-				pos: expr.Position,
-			})
+			panic(RT.newError("Duplicate key: " + key.ToString(false)))
 		}
 	}
 	return res
@@ -151,10 +159,7 @@ func (expr *SetExpr) Eval(env *LocalEnv) Object {
 	for _, elemExpr := range expr.elements {
 		el := eval(elemExpr, env)
 		if !res.Add(el) {
-			panic(&EvalError{
-				msg: "Duplicate set element: " + el.ToString(false),
-				pos: expr.Position,
-			})
+			panic(RT.newError("Duplicate set element: " + el.ToString(false)))
 		}
 	}
 	return res
@@ -173,10 +178,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 func (expr *VarExpr) Eval(env *LocalEnv) Object {
 	res, ok := GLOBAL_ENV.Resolve(expr.symbol)
 	if !ok {
-		panic(&EvalError{
-			msg: "Enable to resolve var " + expr.symbol.ToString(false) + " in this context",
-			pos: expr.Position,
-		})
+		panic(RT.newError("Enable to resolve var " + expr.symbol.ToString(false) + " in this context"))
 	}
 	return res
 }
@@ -202,10 +204,7 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 		args := evalSeq(expr.args, env)
 		return callable.Call(args)
 	default:
-		panic(&EvalError{
-			msg: callable.ToString(false) + " is not callable",
-			pos: expr.callable.Pos(),
-		})
+		panic(RT.newErrorWithPos(callable.ToString(false)+" is not callable", expr.callable.Pos()))
 	}
 }
 

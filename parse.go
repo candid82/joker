@@ -169,7 +169,7 @@ func NewNamespace(sym Symbol) *Namespace {
 
 func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
 	if sym.ns != nil {
-		panic(&EvalError{msg: "Can't intern namespace-qualified symbol " + sym.ToString(false)})
+		panic(RT.newError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
 	}
 	ns.mappings[sym] = vr
 	return vr
