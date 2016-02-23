@@ -87,10 +87,6 @@ type (
 	Callable interface {
 		Call(args []Object) Object
 	}
-	Namespace struct {
-		name     Symbol
-		mappings map[Symbol]*Var
-	}
 	Env struct {
 		namespaces       map[Symbol]*Namespace
 		currentNamespace *Namespace
@@ -160,27 +156,6 @@ func getLocalBinding(sym Symbol) *Binding {
 	return nil
 }
 
-func NewNamespace(sym Symbol) *Namespace {
-	return &Namespace{
-		name:     sym,
-		mappings: make(map[Symbol]*Var),
-	}
-}
-
-func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
-	if sym.ns != nil {
-		panic(RT.newError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
-	}
-	ns.mappings[sym] = vr
-	return vr
-}
-
-func (ns *Namespace) ReferAll(other *Namespace) {
-	for sym, vr := range other.mappings {
-		ns.Refer(sym, vr)
-	}
-}
-
 func (env *Env) EnsureNamespace(sym Symbol) {
 	if env.namespaces[sym] == nil {
 		env.namespaces[sym] = NewNamespace(sym)
@@ -212,20 +187,6 @@ func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	}
 	v, ok := ns.mappings[Symbol{name: s.name}]
 	return v, ok
-}
-
-// sym must be not qualified
-func (ns *Namespace) intern(sym Symbol) *Var {
-	sym.meta = nil
-	v, ok := ns.mappings[sym]
-	if !ok {
-		v = &Var{
-			ns:   ns,
-			name: sym,
-		}
-		ns.mappings[sym] = v
-	}
-	return v
 }
 
 func (pos Position) Pos() Position {
@@ -426,6 +387,18 @@ func addArity(fn *FnExpr, params ReadObject, body Seq) {
 	}
 }
 
+func wrapWithMeta(fnExpr *FnExpr, obj ReadObject) Expr {
+	meta := obj.obj.(Meta).GetMeta()
+	if meta != nil {
+		return &MetaExpr{
+			meta:     parseMap(meta, fnExpr.Pos()),
+			expr:     fnExpr,
+			Position: fnExpr.Pos(),
+		}
+	}
+	return fnExpr
+}
+
 // Examples:
 // (fn f [] 1 2)
 // (fn f ([] 1 2)
@@ -444,7 +417,7 @@ func parseFn(obj ReadObject) Expr {
 	}
 	if IsVector(p.obj) { // single arity
 		addArity(res, p, bodies.Rest())
-		return res
+		return wrapWithMeta(res, obj)
 	}
 	// multiple arities
 	if bodies.IsEmpty() {
@@ -464,7 +437,7 @@ func parseFn(obj ReadObject) Expr {
 		}
 		bodies = bodies.Rest()
 	}
-	return res
+	return wrapWithMeta(res, obj)
 }
 
 func parseList(obj ReadObject) Expr {

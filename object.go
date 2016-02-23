@@ -45,6 +45,7 @@ type (
 	}
 	Proc func([]Object) Object
 	Fn   struct {
+		MetaHolder
 		fnExpr *FnExpr
 		env    *LocalEnv
 	}
@@ -66,6 +67,12 @@ func (fn *Fn) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (fn *Fn) WithMeta(meta *ArrayMap) Object {
+	res := *fn
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (fn *Fn) Call(args []Object) Object {
