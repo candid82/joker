@@ -90,6 +90,18 @@ type (
 		Position
 		e Expr
 	}
+	CatchExpr struct {
+		Position
+		excType   Symbol
+		excSymbol Symbol
+		body      []Expr
+	}
+	TryExpr struct {
+		Position
+		body        []Expr
+		catches     []*CatchExpr
+		finallyExpr []Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -473,6 +485,66 @@ func parseFn(obj ReadObject) Expr {
 	return wrapWithMeta(res, obj)
 }
 
+func isCatch(obj ReadObject) bool {
+	return IsSeq(obj.obj) && obj.obj.(Seq).First().Equals(MakeSymbol("catch"))
+}
+
+func isFinally(obj ReadObject) bool {
+	return IsSeq(obj.obj) && obj.obj.(Seq).First().Equals(MakeSymbol("finally"))
+}
+
+func parseCatch(obj ReadObject) *CatchExpr {
+	seq := obj.obj.(Seq).Rest()
+	if seq.IsEmpty() || seq.Rest().IsEmpty() {
+		panic(&ParseError{obj: obj, msg: "catch requires at least two arguments: type symbol and binding symbol"})
+	}
+	excType := ensureReadObject(seq.First())
+	if !IsSymbol(excType.obj) {
+		panic(&ParseError{obj: excType, msg: "Unable to resolve type: " + excType.obj.ToString(false)})
+	}
+	excSymbol := ensureReadObject(Second(seq))
+	if !IsSymbol(excSymbol.obj) {
+		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.obj.ToString(false)})
+	}
+	return &CatchExpr{
+		Position:  Position{line: obj.line, column: obj.column},
+		excType:   excType.obj.(Symbol),
+		excSymbol: excSymbol.obj.(Symbol),
+		body:      parseBody(seq.Rest().Rest()),
+	}
+}
+
+func parseTry(obj ReadObject) *TryExpr {
+	const (
+		Regular = iota
+		Catch   = iota
+		Finally = iota
+	)
+	res := &TryExpr{Position: Position{line: obj.line, column: obj.column}}
+	lastType := Regular
+	seq := obj.obj.(Seq).Rest()
+	for !seq.IsEmpty() {
+		obj = ensureReadObject(seq.First())
+		if lastType == Finally {
+			panic(&ParseError{obj: obj, msg: "finally clause must be last in try expression"})
+		}
+		if isCatch(obj) {
+			res.catches = append(res.catches, parseCatch(obj))
+			lastType = Catch
+		} else if isFinally(obj) {
+			res.finallyExpr = parseBody(obj.obj.(Seq).Rest())
+			lastType = Finally
+		} else {
+			if lastType == Catch {
+				panic(&ParseError{obj: obj, msg: "Only catch or finally clause can follow catch in try expression"})
+			}
+			res.body = append(res.body, parse(obj))
+		}
+		seq = seq.Rest()
+	}
+	return res
+}
+
 func parseLet(obj ReadObject) Expr {
 	res := &LetExpr{
 		Position: Position{line: obj.line, column: obj.column}}
@@ -557,6 +629,8 @@ func parseList(obj ReadObject) Expr {
 				Position: pos,
 				e:        parse(ensureReadObject(Second(seq))),
 			}
+		case "try":
+			return parseTry(obj)
 		}
 	}
 	res := &CallExpr{

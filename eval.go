@@ -218,6 +218,10 @@ func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
 	}
 }
 
+func (expr *TryExpr) Eval(env *LocalEnv) Object {
+	return NIL
+}
+
 func evalBody(body []Expr, env *LocalEnv) Object {
 	var res Object = NIL
 	for _, expr := range body {
