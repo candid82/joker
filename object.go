@@ -49,11 +49,39 @@ type (
 		fnExpr *FnExpr
 		env    *LocalEnv
 	}
+	ExInfo struct {
+		msg  String
+		data *ArrayMap
+	}
 )
 
 func panicArity(n int) {
 	name := RT.currentExpr.(*CallExpr).name
 	panic(RT.newError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
+}
+
+func checkArity(args []Object, min int, max int) {
+	n := len(args)
+	if n < min || n > max {
+		panicArity(n)
+	}
+}
+
+func (exInfo *ExInfo) ToString(escape bool) string {
+	return exInfo.msg.ToString(escape)
+}
+
+func (exInfo *ExInfo) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case *ExInfo:
+		return exInfo.msg == other.msg && exInfo.data.Equals(other.data)
+	default:
+		return false
+	}
+}
+
+func (exInfo *ExInfo) Error() string {
+	return string(exInfo.msg)
 }
 
 func (fn *Fn) ToString(escape bool) string {

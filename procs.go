@@ -9,6 +9,24 @@ func ensureNumber(obj Object) Number {
 	}
 }
 
+func ensureString(obj Object) String {
+	switch n := obj.(type) {
+	case String:
+		return n
+	default:
+		panic(RT.newError(obj.ToString(false) + " is not a String"))
+	}
+}
+
+func ensureMap(obj Object) *ArrayMap {
+	switch n := obj.(type) {
+	case *ArrayMap:
+		return n
+	default:
+		panic(RT.newError(obj.ToString(false) + " is not a Map"))
+	}
+}
+
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:
@@ -79,6 +97,14 @@ var procDivide Proc = func(args []Object) Object {
 	return res
 }
 
+var procExInfo Proc = func(args []Object) Object {
+	checkArity(args, 2, 2)
+	return &ExInfo{
+		msg:  ensureString(args[0]),
+		data: ensureMap(args[1]),
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")]
 
 func intern(name string, proc Proc) {
@@ -92,4 +118,5 @@ func init() {
 	intern("-", procSubtract)
 	intern("*", procMultiply)
 	intern("/", procDivide)
+	intern("ex-info", procExInfo)
 }
