@@ -80,6 +80,12 @@ type (
 		variadic *FnArityExpr
 		self     Symbol
 	}
+	LetExpr struct {
+		Position
+		names  []Symbol
+		values []Expr
+		body   []Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -111,6 +117,21 @@ type (
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
 var LOCAL_BINDINGS *Bindings = nil
 
+func (localEnv *LocalEnv) addEmptyFrame(capacity int) *LocalEnv {
+	res := LocalEnv{
+		bindings: make([]Object, 0, capacity),
+		parent:   localEnv,
+	}
+	if localEnv != nil {
+		res.frame = localEnv.frame + 1
+	}
+	return &res
+}
+
+func (localEnv *LocalEnv) addBinding(obj Object) {
+	localEnv.bindings = append(localEnv.bindings, obj)
+}
+
 func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
 	res := LocalEnv{
 		bindings: values,
@@ -122,7 +143,15 @@ func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
 	return &res
 }
 
-func pushLocalFrame(names []Symbol) {
+func addLocalBinding(sym Symbol, index int) {
+	LOCAL_BINDINGS.bindings[sym] = &Binding{
+		name:  sym,
+		frame: LOCAL_BINDINGS.frame,
+		index: index,
+	}
+}
+
+func pushEmptyLocalFrame() {
 	frame := 0
 	if LOCAL_BINDINGS != nil {
 		frame = LOCAL_BINDINGS.frame + 1
@@ -132,12 +161,12 @@ func pushLocalFrame(names []Symbol) {
 		parent:   LOCAL_BINDINGS,
 		frame:    frame,
 	}
+}
+
+func pushLocalFrame(names []Symbol) {
+	pushEmptyLocalFrame()
 	for i, sym := range names {
-		LOCAL_BINDINGS.bindings[sym] = &Binding{
-			name:  sym,
-			frame: frame,
-			index: i,
-		}
+		addLocalBinding(sym, i)
 	}
 }
 
@@ -440,6 +469,37 @@ func parseFn(obj ReadObject) Expr {
 	return wrapWithMeta(res, obj)
 }
 
+func parseLet(obj ReadObject) Expr {
+	res := &LetExpr{
+		Position: Position{line: obj.line, column: obj.column}}
+	bindings := ensureReadObject(obj.obj.(Seq).Rest().First())
+	switch b := bindings.obj.(type) {
+	case *Vector:
+		if b.count%2 != 0 {
+			panic(&ParseError{obj: bindings, msg: "let requires an even number of forms in binding vector"})
+		}
+		res.names = make([]Symbol, b.count/2)
+		res.values = make([]Expr, b.count/2)
+		pushEmptyLocalFrame()
+		defer popLocalFrame()
+		for i := 0; i < b.count/2; i++ {
+			s := ensureReadObject(b.at(i * 2))
+			switch sym := s.obj.(type) {
+			case Symbol:
+				res.names[i] = sym
+			default:
+				panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
+			}
+			res.values[i] = parse(ensureReadObject(b.at(i*2 + 1)))
+			addLocalBinding(res.names[i], i)
+		}
+		res.body = parseBody(obj.obj.(Seq).Rest().Rest())
+	default:
+		panic(&ParseError{obj: obj, msg: "Let requires a vector for its bindings"})
+	}
+	return res
+}
+
 func parseList(obj ReadObject) Expr {
 	seq := obj.obj.(Seq)
 	if seq.IsEmpty() {
@@ -464,6 +524,8 @@ func parseList(obj ReadObject) Expr {
 			}
 		case "fn":
 			return parseFn(obj)
+		case "let":
+			return parseLet(obj)
 		case "def":
 			return parseDef(obj)
 		case "var":

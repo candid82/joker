@@ -247,6 +247,14 @@ func (expr *FnExpr) Eval(env *LocalEnv) Object {
 	return res
 }
 
+func (expr *LetExpr) Eval(env *LocalEnv) Object {
+	env = env.addEmptyFrame(len(expr.names))
+	for _, bindingExpr := range expr.values {
+		env.addBinding(eval(bindingExpr, env))
+	}
+	return evalBody(expr.body, env)
+}
+
 func TryEval(expr Expr) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
