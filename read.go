@@ -133,6 +133,10 @@ func (err ReadError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: Read error: %s", err.line, err.column, err.msg)
 }
 
+func (err ReadError) Type() Symbol {
+	return MakeSymbol("ReadError")
+}
+
 func isDelimiter(r rune) bool {
 	switch r {
 	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',', '\\':

@@ -116,6 +116,10 @@ func (err EvalError) Error() string {
 	}
 }
 
+func (err EvalError) Type() Symbol {
+	return MakeSymbol("EvalError")
+}
+
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
 	if expr.vr.value == nil {
@@ -211,15 +215,36 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
 	e := eval(expr.e, env)
 	switch e.(type) {
-	case error:
+	case Error:
 		panic(e)
 	default:
 		panic(RT.newError("Cannot throw " + e.ToString(false)))
 	}
 }
 
-func (expr *TryExpr) Eval(env *LocalEnv) Object {
-	return NIL
+func (expr *TryExpr) Eval(env *LocalEnv) (obj Object) {
+	defer func() {
+		defer func() {
+			if expr.finallyExpr != nil {
+				evalBody(expr.finallyExpr, env)
+			}
+		}()
+		if r := recover(); r != nil {
+			switch r := r.(type) {
+			case Error:
+				for _, catchExpr := range expr.catches {
+					if catchExpr.excType.Equals(r.Type()) {
+						obj = evalBody(catchExpr.body, env.addFrame([]Object{r}))
+						return
+					}
+				}
+				panic(r)
+			default:
+				panic(r)
+			}
+		}
+	}()
+	return evalBody(expr.body, env)
 }
 
 func evalBody(body []Expr, env *LocalEnv) Object {

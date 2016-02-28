@@ -249,6 +249,10 @@ func (err ParseError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", err.obj.line, err.obj.column, err.msg)
 }
 
+func (err ParseError) Type() Symbol {
+	return MakeSymbol("ParseError")
+}
+
 func ensureReadObject(obj Object) ReadObject {
 	switch obj := obj.(type) {
 	case ReadObject:
@@ -506,6 +510,7 @@ func parseCatch(obj ReadObject) *CatchExpr {
 	if !IsSymbol(excSymbol.obj) {
 		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.obj.ToString(false)})
 	}
+	pushLocalFrame([]Symbol{excSymbol.obj.(Symbol)})
 	return &CatchExpr{
 		Position:  Position{line: obj.line, column: obj.column},
 		excType:   excType.obj.(Symbol),

@@ -14,6 +14,11 @@ type (
 		Equality
 		ToString(escape bool) string
 	}
+	Error interface {
+		error
+		Object
+		Type() Symbol
+	}
 	Meta interface {
 		GetMeta() *ArrayMap
 		WithMeta(*ArrayMap) Object
@@ -69,6 +74,10 @@ func checkArity(args []Object, min int, max int) {
 
 func (exInfo *ExInfo) ToString(escape bool) string {
 	return exInfo.msg.ToString(escape)
+}
+
+func (exInfo *ExInfo) Type() Symbol {
+	return MakeSymbol("ExInfo")
 }
 
 func (exInfo *ExInfo) Equals(other interface{}) bool {

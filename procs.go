@@ -105,6 +105,18 @@ var procExInfo Proc = func(args []Object) Object {
 	}
 }
 
+var procPrint Proc = func(args []Object) Object {
+	n := len(args)
+	if n > 0 {
+		for _, arg := range args[:n-1] {
+			print(arg.ToString(false))
+			print(" ")
+		}
+		print(args[n-1].ToString(false))
+	}
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")]
 
 func intern(name string, proc Proc) {
@@ -119,4 +131,5 @@ func init() {
 	intern("*", procMultiply)
 	intern("/", procDivide)
 	intern("ex-info", procExInfo)
+	intern("print", procPrint)
 }
