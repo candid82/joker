@@ -208,6 +208,16 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 	}
 }
 
+func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
+	e := eval(expr.e, env)
+	switch e.(type) {
+	case error:
+		panic(e)
+	default:
+		panic(RT.newError("Cannot throw " + e.ToString(false)))
+	}
+}
+
 func evalBody(body []Expr, env *LocalEnv) Object {
 	var res Object = NIL
 	for _, expr := range body {

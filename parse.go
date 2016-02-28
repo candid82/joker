@@ -86,6 +86,10 @@ type (
 		values []Expr
 		body   []Expr
 	}
+	ThrowExpr struct {
+		Position
+		e Expr
+	}
 	ParseError struct {
 		obj ReadObject
 		msg string
@@ -472,7 +476,7 @@ func parseFn(obj ReadObject) Expr {
 func parseLet(obj ReadObject) Expr {
 	res := &LetExpr{
 		Position: Position{line: obj.line, column: obj.column}}
-	bindings := ensureReadObject(obj.obj.(Seq).Rest().First())
+	bindings := ensureReadObject(Second(obj.obj.(Seq)))
 	switch b := bindings.obj.(type) {
 	case *Vector:
 		if b.count%2 != 0 {
@@ -488,7 +492,11 @@ func parseLet(obj ReadObject) Expr {
 			case Symbol:
 				res.names[i] = sym
 			default:
-				panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
+				if LINTER_MODE {
+					res.names[i] = generateSymbol("linter")
+				} else {
+					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
+				}
 			}
 			res.values[i] = parse(ensureReadObject(b.at(i*2 + 1)))
 			addLocalBinding(res.names[i], i)
@@ -543,6 +551,11 @@ func parseList(obj ReadObject) Expr {
 			return &DoExpr{
 				body:     parseBody(seq.Rest()),
 				Position: pos,
+			}
+		case "throw":
+			return &ThrowExpr{
+				Position: pos,
+				e:        parse(ensureReadObject(Second(seq))),
 			}
 		}
 	}
