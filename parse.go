@@ -86,6 +86,7 @@ type (
 		values []Expr
 		body   []Expr
 	}
+	LoopExpr  LetExpr
 	ThrowExpr struct {
 		Position
 		e Expr
@@ -550,14 +551,22 @@ func parseTry(obj ReadObject) *TryExpr {
 	return res
 }
 
-func parseLet(obj ReadObject) Expr {
+func parseLet(obj ReadObject) *LetExpr {
+	return parseLetLoop(obj, "let")
+}
+
+func parseLoop(obj ReadObject) *LoopExpr {
+	return (*LoopExpr)(parseLetLoop(obj, "loop"))
+}
+
+func parseLetLoop(obj ReadObject, formName string) *LetExpr {
 	res := &LetExpr{
 		Position: Position{line: obj.line, column: obj.column}}
 	bindings := ensureReadObject(Second(obj.obj.(Seq)))
 	switch b := bindings.obj.(type) {
 	case *Vector:
 		if b.count%2 != 0 {
-			panic(&ParseError{obj: bindings, msg: "let requires an even number of forms in binding vector"})
+			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
 		}
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
@@ -580,7 +589,7 @@ func parseLet(obj ReadObject) Expr {
 		}
 		res.body = parseBody(obj.obj.(Seq).Rest().Rest())
 	default:
-		panic(&ParseError{obj: obj, msg: "Let requires a vector for its bindings"})
+		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
 	}
 	return res
 }
@@ -611,6 +620,8 @@ func parseList(obj ReadObject) Expr {
 			return parseFn(obj)
 		case "let":
 			return parseLet(obj)
+		case "loop":
+			return parseLoop(obj)
 		case "def":
 			return parseDef(obj)
 		case "var":
