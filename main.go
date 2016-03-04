@@ -20,6 +20,7 @@ const (
 var LINTER_MODE bool = false
 
 func processFile(filename string, phase Phase) {
+	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
 	var reader *Reader
 	if filename == "--" {
 		reader = NewReader(bufio.NewReader(os.Stdin))
@@ -43,7 +44,7 @@ func processFile(filename string, phase Phase) {
 		if phase == READ {
 			continue
 		}
-		expr, err := TryParse(obj)
+		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return
@@ -71,6 +72,7 @@ func skipRestOfLine(reader *Reader) {
 func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
 	GLOBAL_ENV.namespaces[MakeSymbol("user")].ReferAll(GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")])
+	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
 	reader := NewReader(bufio.NewReader(os.Stdin))
 	for {
 		fmt.Print(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
@@ -87,7 +89,7 @@ func repl(phase Phase) {
 			fmt.Println(obj.ToString(true))
 			continue
 		}
-		expr, err := TryParse(obj)
+		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue

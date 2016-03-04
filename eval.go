@@ -298,6 +298,10 @@ func (expr *LoopExpr) Eval(env *LocalEnv) Object {
 	return NIL
 }
 
+func (expr *RecurExpr) Eval(env *LocalEnv) Object {
+	return NIL
+}
+
 func TryEval(expr Expr) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
