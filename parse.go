@@ -136,6 +136,8 @@ type (
 	ParseContext struct {
 		globalEnv     *Env
 		localBindings *Bindings
+		loopBindings  [][]Symbol
+		recur         bool
 	}
 )
 
@@ -166,6 +168,22 @@ func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
 		res.frame = localEnv.frame + 1
 	}
 	return &res
+}
+
+func (ctx *ParseContext) PushLoopBindings(bindings []Symbol) {
+	ctx.loopBindings = append(ctx.loopBindings, bindings)
+}
+
+func (ctx *ParseContext) PopLoopBindings() {
+	ctx.loopBindings = ctx.loopBindings[:len(ctx.loopBindings)-1]
+}
+
+func (ctx *ParseContext) GetLoopBindings() []Symbol {
+	n := len(ctx.loopBindings)
+	if n == 0 {
+		return nil
+	}
+	return ctx.loopBindings[n-1]
 }
 
 func (ctx *ParseContext) AddLocalBinding(sym Symbol, index int) {
@@ -375,14 +393,18 @@ func parseDef(obj ReadObject, ctx *ParseContext) *DefExpr {
 }
 
 func parseBody(seq Seq, ctx *ParseContext) []Expr {
-	// RECUR: make sure recur tail position
-	// if recur flag is set after parsing a form,
-	// it must be the last form in the body.
-	// reset flag in the beginning???
+	recur := ctx.recur
+	ctx.recur = false
+	defer func() { ctx.recur = recur }()
 	res := make([]Expr, 0)
 	for !seq.IsEmpty() {
-		res = append(res, parse(ensureReadObject(seq.First()), ctx))
+		ro := ensureReadObject(seq.First())
+		expr := parse(ro, ctx)
 		seq = seq.Rest()
+		if ctx.recur && !seq.IsEmpty() {
+			panic(&ParseError{obj: ro, msg: "Can only recur from tail position"})
+		}
+		res = append(res, expr)
 	}
 	return res
 }
@@ -422,12 +444,11 @@ func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
 }
 
 func addArity(fn *FnExpr, params ReadObject, body Seq, ctx *ParseContext) {
-	// RECUR:
-	// set loopBindings while parsing fn body,
-	// so that recur proper positioning and arity can be checked
 	args, isVariadic := parseParams(params)
 	ctx.PushLocalFrame(args)
 	defer ctx.PopLocalFrame()
+	ctx.PushLoopBindings(args)
+	defer ctx.PopLoopBindings()
 	arity := FnArityExpr{args: args, body: parseBody(body, ctx)}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -567,19 +588,21 @@ func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
 }
 
 func parseLet(obj ReadObject, ctx *ParseContext) *LetExpr {
-	return parseLetLoop(obj, "let", ctx)
+	return parseLetLoop(obj, false, ctx)
 }
 
 func parseLoop(obj ReadObject, ctx *ParseContext) *LoopExpr {
-	// RECUR:
-	// set loopBindings while parsing loop body,
-	// so that recur proper positioning and arity can be checked
-	return (*LoopExpr)(parseLetLoop(obj, "loop", ctx))
+	return (*LoopExpr)(parseLetLoop(obj, true, ctx))
 }
 
-func parseLetLoop(obj ReadObject, formName string, ctx *ParseContext) *LetExpr {
+func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
+	formName := "let"
+	if isLoop {
+		formName = "loop"
+	}
 	res := &LetExpr{
-		Position: Position{line: obj.line, column: obj.column}}
+		Position: Position{line: obj.line, column: obj.column},
+	}
 	bindings := ensureReadObject(Second(obj.obj.(Seq)))
 	switch b := bindings.obj.(type) {
 	case *Vector:
@@ -605,11 +628,34 @@ func parseLetLoop(obj ReadObject, formName string, ctx *ParseContext) *LetExpr {
 			res.values[i] = parse(ensureReadObject(b.at(i*2+1)), ctx)
 			ctx.AddLocalBinding(res.names[i], i)
 		}
+
+		if isLoop {
+			ctx.PushLoopBindings(res.names)
+			defer ctx.PopLoopBindings()
+		}
+
 		res.body = parseBody(obj.obj.(Seq).Rest().Rest(), ctx)
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
 	}
 	return res
+}
+
+func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
+	loopBindings := ctx.GetLoopBindings()
+	if loopBindings == nil {
+		panic(&ParseError{obj: obj, msg: "No recursion point for recur"})
+	}
+	seq := obj.obj.(Seq)
+	args := parseSeq(seq.Rest(), ctx)
+	if len(loopBindings) != len(args) {
+		panic(&ParseError{obj: obj, msg: fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))})
+	}
+	ctx.recur = true
+	return &RecurExpr{
+		args:     args,
+		Position: Position{line: obj.line, column: obj.column},
+	}
 }
 
 func parseList(obj ReadObject, ctx *ParseContext) Expr {
@@ -641,13 +687,7 @@ func parseList(obj ReadObject, ctx *ParseContext) Expr {
 		case "loop":
 			return parseLoop(obj, ctx)
 		case "recur":
-			// RECUR: ensure recur tail position and that it's inside fn or loop
-			// 1. check that loopBindings (set by fn and loop) are not nil and arities match
-			// 2. set recur flag so that it can be checked by parseBody
-			return &RecurExpr{
-				args:     parseSeq(seq.Rest(), ctx),
-				Position: pos,
-			}
+			return parseRecur(obj, ctx)
 		case "def":
 			return parseDef(obj, ctx)
 		case "var":
