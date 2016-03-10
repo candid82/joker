@@ -134,10 +134,11 @@ type (
 		frame    int
 	}
 	ParseContext struct {
-		globalEnv     *Env
-		localBindings *Bindings
-		loopBindings  [][]Symbol
-		recur         bool
+		globalEnv      *Env
+		localBindings  *Bindings
+		loopBindings   [][]Symbol
+		recur          bool
+		noRecurAllowed bool
 	}
 )
 
@@ -557,12 +558,23 @@ func parseCatch(obj ReadObject, ctx *ParseContext) *CatchExpr {
 		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.obj.ToString(false)})
 	}
 	ctx.PushLocalFrame([]Symbol{excSymbol.obj.(Symbol)})
+	defer ctx.PopLocalFrame()
+	noRecurAllowed := ctx.noRecurAllowed
+	ctx.noRecurAllowed = true
+	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 	return &CatchExpr{
 		Position:  Position{line: obj.line, column: obj.column},
 		excType:   excType.obj.(Symbol),
 		excSymbol: excSymbol.obj.(Symbol),
 		body:      parseBody(seq.Rest().Rest(), ctx),
 	}
+}
+
+func parseFinally(body Seq, ctx *ParseContext) []Expr {
+	noRecurAllowed := ctx.noRecurAllowed
+	ctx.noRecurAllowed = true
+	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
+	return parseBody(body, ctx)
 }
 
 func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
@@ -583,7 +595,7 @@ func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
 			res.catches = append(res.catches, parseCatch(obj, ctx))
 			lastType = Catch
 		} else if isFinally(obj) {
-			res.finallyExpr = parseBody(obj.obj.(Seq).Rest(), ctx)
+			res.finallyExpr = parseFinally(obj.obj.(Seq).Rest(), ctx)
 			lastType = Finally
 		} else {
 			if lastType == Catch {
@@ -651,6 +663,9 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 }
 
 func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
+	if ctx.noRecurAllowed {
+		panic(&ParseError{obj: obj, msg: "Cannot recur across try"})
+	}
 	loopBindings := ctx.GetLoopBindings()
 	if loopBindings == nil {
 		panic(&ParseError{obj: obj, msg: "No recursion point for recur"})
