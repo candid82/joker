@@ -411,7 +411,7 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 		ro := ensureReadObject(seq.First())
 		expr := parse(ro, ctx)
 		seq = seq.Rest()
-		if ctx.recur && !seq.IsEmpty() {
+		if ctx.recur && !seq.IsEmpty() && !LINTER_MODE {
 			panic(&ParseError{obj: ro, msg: "Can only recur from tail position"})
 		}
 		res = append(res, expr)
@@ -667,12 +667,12 @@ func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
 		panic(&ParseError{obj: obj, msg: "Cannot recur across try"})
 	}
 	loopBindings := ctx.GetLoopBindings()
-	if loopBindings == nil {
+	if loopBindings == nil && !LINTER_MODE {
 		panic(&ParseError{obj: obj, msg: "No recursion point for recur"})
 	}
 	seq := obj.obj.(Seq)
 	args := parseSeq(seq.Rest(), ctx)
-	if len(loopBindings) != len(args) {
+	if len(loopBindings) != len(args) && !LINTER_MODE {
 		panic(&ParseError{obj: obj, msg: fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))})
 	}
 	ctx.recur = true
