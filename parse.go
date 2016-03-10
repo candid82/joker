@@ -170,6 +170,15 @@ func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
 	return &res
 }
 
+func (localEnv *LocalEnv) replaceFrame(values []Object) *LocalEnv {
+	res := LocalEnv{
+		bindings: values,
+		parent:   localEnv.parent,
+		frame:    localEnv.frame,
+	}
+	return &res
+}
+
 func (ctx *ParseContext) PushLoopBindings(bindings []Symbol) {
 	ctx.loopBindings = append(ctx.loopBindings, bindings)
 }

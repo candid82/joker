@@ -58,6 +58,7 @@ type (
 		msg  String
 		data *ArrayMap
 	}
+	RecurBindings []Object
 )
 
 func panicArity(n int) {
@@ -70,6 +71,14 @@ func checkArity(args []Object, min int, max int) {
 	if n < min || n > max {
 		panicArity(n)
 	}
+}
+
+func (rb RecurBindings) ToString(escape bool) string {
+	return "RecurBindings"
+}
+
+func (rb RecurBindings) Equals(other interface{}) bool {
+	return false
 }
 
 func (exInfo *ExInfo) ToString(escape bool) string {
@@ -117,7 +126,7 @@ func (fn *Fn) Call(args []Object) Object {
 		if len(arity.args) == len(args) {
 			RT.pushFrame()
 			defer RT.popFrame()
-			return evalBody(arity.body, fn.env.addFrame(args))
+			return evalLoop(arity.body, fn.env.addFrame(args))
 		}
 	}
 	v := fn.fnExpr.variadic
@@ -132,7 +141,7 @@ func (fn *Fn) Call(args []Object) Object {
 	vargs[len(vargs)-1] = restArgs
 	RT.pushFrame()
 	defer RT.popFrame()
-	return evalBody(v.body, fn.env.addFrame(vargs))
+	return evalLoop(v.body, fn.env.addFrame(vargs))
 }
 
 func (p Proc) Call(args []Object) Object {

@@ -255,6 +255,22 @@ func evalBody(body []Expr, env *LocalEnv) Object {
 	return res
 }
 
+func evalLoop(body []Expr, env *LocalEnv) Object {
+	var res Object = NIL
+loop:
+	for _, expr := range body {
+		res = eval(expr, env)
+	}
+	switch res := res.(type) {
+	default:
+		return res
+	case RecurBindings:
+		env = env.replaceFrame(res)
+		goto loop
+	}
+	return res
+}
+
 func (doExpr *DoExpr) Eval(env *LocalEnv) Object {
 	return evalBody(doExpr.body, env)
 }
@@ -295,11 +311,15 @@ func (expr *LetExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *LoopExpr) Eval(env *LocalEnv) Object {
-	return NIL
+	env = env.addEmptyFrame(len(expr.names))
+	for _, bindingExpr := range expr.values {
+		env.addBinding(eval(bindingExpr, env))
+	}
+	return evalLoop(expr.body, env)
 }
 
 func (expr *RecurExpr) Eval(env *LocalEnv) Object {
-	return NIL
+	return RecurBindings(evalSeq(expr.args, env))
 }
 
 func TryEval(expr Expr) (obj Object, err error) {
