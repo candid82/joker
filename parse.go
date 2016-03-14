@@ -658,7 +658,7 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 
 		res.body = parseBody(obj.obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
-			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s with empty body\n", obj.line, obj.column, formName)
+			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s form with empty body\n", obj.line, obj.column, formName)
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
