@@ -6,6 +6,7 @@ import (
 
 type (
 	Vector struct {
+		InfoHolder
 		MetaHolder
 		root  []interface{}
 		tail  []interface{}
@@ -13,6 +14,7 @@ type (
 		shift uint
 	}
 	VectorSeq struct {
+		InfoHolder
 		vector *Vector
 		index  int
 	}

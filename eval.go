@@ -280,7 +280,7 @@ func toBool(obj Object) bool {
 	case Nil:
 		return false
 	case Bool:
-		return bool(obj)
+		return obj.b
 	default:
 		return true
 	}

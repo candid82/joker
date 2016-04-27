@@ -6,6 +6,7 @@ import (
 
 type (
 	ArrayMap struct {
+		InfoHolder
 		MetaHolder
 		arr []Object
 	}

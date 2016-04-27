@@ -93,29 +93,29 @@ func (i Int) Int() Int {
 }
 
 func (i Int) Double() Double {
-	return Double(i)
+	return Double{d: float64(i.i)}
 }
 
 func (i Int) BigInt() *big.Int {
-	return big.NewInt(int64(i))
+	return big.NewInt(int64(i.i))
 }
 
 func (i Int) BigFloat() *big.Float {
-	return big.NewFloat(float64(i))
+	return big.NewFloat(float64(i.i))
 }
 
 func (i Int) Ratio() *big.Rat {
-	return big.NewRat(int64(i), 1)
+	return big.NewRat(int64(i.i), 1)
 }
 
 // Double conversions
 
 func (d Double) Int() Int {
-	return Int(d)
+	return Int{i: int(d.d)}
 }
 
 func (d Double) BigInt() *big.Int {
-	return big.NewInt(int64(d))
+	return big.NewInt(int64(d.d))
 }
 
 func (d Double) Double() Double {
@@ -123,26 +123,26 @@ func (d Double) Double() Double {
 }
 
 func (d Double) BigFloat() *big.Float {
-	return big.NewFloat(float64(d))
+	return big.NewFloat(float64(d.d))
 }
 
 func (d Double) Ratio() *big.Rat {
 	res := big.Rat{}
-	return res.SetFloat64(float64(d))
+	return res.SetFloat64(float64(d.d))
 }
 
 // BigInt conversions
 
 func (b *BigInt) Int() Int {
-	return Int(b.BigInt().Int64())
+	return Int{i: int(b.BigInt().Int64())}
 }
 
 func (b *BigInt) BigInt() *big.Int {
-	return (*big.Int)(b)
+	return &b.b
 }
 
 func (b *BigInt) Double() Double {
-	return Double(b.BigInt().Int64())
+	return Double{d: float64(b.BigInt().Int64())}
 }
 
 func (b *BigInt) BigFloat() *big.Float {
@@ -159,7 +159,7 @@ func (b *BigInt) Ratio() *big.Rat {
 
 func (b *BigFloat) Int() Int {
 	i, _ := b.BigFloat().Int64()
-	return Int(i)
+	return Int{i: int(i)}
 }
 
 func (b *BigFloat) BigInt() *big.Int {
@@ -169,23 +169,23 @@ func (b *BigFloat) BigInt() *big.Int {
 
 func (b *BigFloat) Double() Double {
 	f, _ := b.BigFloat().Float64()
-	return Double(f)
+	return Double{d: f}
 }
 
 func (b *BigFloat) BigFloat() *big.Float {
-	return (*big.Float)(b)
+	return &b.b
 }
 
 func (b *BigFloat) Ratio() *big.Rat {
 	res := big.Rat{}
-	return res.SetFloat64(float64(b.Double()))
+	return res.SetFloat64(float64(b.Double().d))
 }
 
 // Ratio conversions
 
 func (r *Ratio) Int() Int {
 	f, _ := r.Ratio().Float64()
-	return Int(f)
+	return Int{i: int(f)}
 }
 
 func (r *Ratio) BigInt() *big.Int {
@@ -195,7 +195,7 @@ func (r *Ratio) BigInt() *big.Int {
 
 func (r *Ratio) Double() Double {
 	f, _ := r.Ratio().Float64()
-	return Double(f)
+	return Double{d: f}
 }
 
 func (r *Ratio) BigFloat() *big.Float {
@@ -204,7 +204,7 @@ func (r *Ratio) BigFloat() *big.Float {
 }
 
 func (r *Ratio) Ratio() *big.Rat {
-	return (*big.Rat)(r)
+	return &r.r
 }
 
 // Ops
@@ -212,144 +212,144 @@ func (r *Ratio) Ratio() *big.Rat {
 // Add
 
 func (ops IntOps) Add(x, y Number) Number {
-	return x.Int() + y.Int()
+	return Int{i: x.Int().i + y.Int().i}
 }
 
 func (ops DoubleOps) Add(x, y Number) Number {
-	return x.Double() + y.Double()
+	return Double{d: x.Double().d + y.Double().d}
 }
 
 func (ops BigIntOps) Add(x, y Number) Number {
 	b := big.Int{}
 	b.Add(x.BigInt(), y.BigInt())
-	res := BigInt(b)
+	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Add(x, y Number) Number {
 	b := big.Float{}
 	b.Add(x.BigFloat(), y.BigFloat())
-	res := BigFloat(b)
+	res := BigFloat{b: b}
 	return &res
 }
 
 func (ops RatioOps) Add(x, y Number) Number {
 	r := big.Rat{}
 	r.Add(x.Ratio(), y.Ratio())
-	res := Ratio(r)
+	res := Ratio{r: r}
 	return &res
 }
 
 // Subtract
 
 func (ops IntOps) Subtract(x, y Number) Number {
-	return x.Int() - y.Int()
+	return Int{i: x.Int().i - y.Int().i}
 }
 
 func (ops DoubleOps) Subtract(x, y Number) Number {
-	return x.Double() - y.Double()
+	return Double{d: x.Double().d - y.Double().d}
 }
 
 func (ops BigIntOps) Subtract(x, y Number) Number {
 	b := big.Int{}
 	b.Sub(x.BigInt(), y.BigInt())
-	res := BigInt(b)
+	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Subtract(x, y Number) Number {
 	b := big.Float{}
 	b.Sub(x.BigFloat(), y.BigFloat())
-	res := BigFloat(b)
+	res := BigFloat{b: b}
 	return &res
 }
 
 func (ops RatioOps) Subtract(x, y Number) Number {
 	r := big.Rat{}
 	r.Sub(x.Ratio(), y.Ratio())
-	res := Ratio(r)
+	res := Ratio{r: r}
 	return &res
 }
 
 // Multiply
 
 func (ops IntOps) Multiply(x, y Number) Number {
-	return x.Int() * y.Int()
+	return Int{i: x.Int().i * y.Int().i}
 }
 
 func (ops DoubleOps) Multiply(x, y Number) Number {
-	return x.Double() * y.Double()
+	return Double{d: x.Double().d * y.Double().d}
 }
 
 func (ops BigIntOps) Multiply(x, y Number) Number {
 	b := big.Int{}
 	b.Mul(x.BigInt(), y.BigInt())
-	res := BigInt(b)
+	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Multiply(x, y Number) Number {
 	b := big.Float{}
 	b.Mul(x.BigFloat(), y.BigFloat())
-	res := BigFloat(b)
+	res := BigFloat{b: b}
 	return &res
 }
 
 func (ops RatioOps) Multiply(x, y Number) Number {
 	r := big.Rat{}
 	r.Mul(x.Ratio(), y.Ratio())
-	res := Ratio(r)
+	res := Ratio{r: r}
 	return &res
 }
 
 // Divide
 
 func (ops IntOps) Divide(x, y Number) Number {
-	b := big.NewRat(int64(x.Int()), int64(y.Int()))
+	b := big.NewRat(int64(x.Int().i), int64(y.Int().i))
 	if b.IsInt() {
-		return Int(b.Num().Int64())
+		return Int{i: int(b.Num().Int64())}
 	}
-	res := Ratio(*b)
+	res := Ratio{r: *b}
 	return &res
 }
 
 func (ops DoubleOps) Divide(x, y Number) Number {
-	return x.Double() / y.Double()
+	return Double{d: x.Double().d / y.Double().d}
 }
 
 func (ops BigIntOps) Divide(x, y Number) Number {
 	b := big.Rat{}
 	b.Quo(x.Ratio(), y.Ratio())
 	if b.IsInt() {
-		res := BigInt(*b.Num())
+		res := BigInt{b: *b.Num()}
 		return &res
 	}
-	res := Ratio(b)
+	res := Ratio{r: b}
 	return &res
 }
 
 func (ops BigFloatOps) Divide(x, y Number) Number {
 	b := big.Float{}
 	b.Quo(x.BigFloat(), y.BigFloat())
-	res := BigFloat(b)
+	res := BigFloat{b: b}
 	return &res
 }
 
 func (ops RatioOps) Divide(x, y Number) Number {
 	r := big.Rat{}
 	r.Quo(x.Ratio(), y.Ratio())
-	res := Ratio(r)
+	res := Ratio{r: r}
 	return &res
 }
 
 // IsZero
 
 func (ops IntOps) IsZero(x Number) bool {
-	return x.Int() == 0
+	return x.Int().i == 0
 }
 
 func (ops DoubleOps) IsZero(x Number) bool {
-	return x.Double() == 0
+	return x.Double().d == 0
 }
 
 func (ops BigIntOps) IsZero(x Number) bool {

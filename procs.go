@@ -42,11 +42,11 @@ var procIsZero Proc = func(args []Object) Object {
 	// checkArity(args, 1, "zero?")
 	n := ensureNumber(args[0])
 	ops := GetOps(ensureNumber(args[0]))
-	return Bool(ops.IsZero(n))
+	return Bool{b: ops.IsZero(n)}
 }
 
 var procAdd Proc = func(args []Object) Object {
-	var res Number = Int(0)
+	var res Number = Int{i: 0}
 	for _, n := range args {
 		ops := GetOps(res).Combine(GetOps(n))
 		res = ops.Add(res, ensureNumber(n))
@@ -55,7 +55,7 @@ var procAdd Proc = func(args []Object) Object {
 }
 
 var procMultiply Proc = func(args []Object) Object {
-	var res Number = Int(1)
+	var res Number = Int{i: 1}
 	for _, n := range args {
 		ops := GetOps(res).Combine(GetOps(n))
 		res = ops.Multiply(res, ensureNumber(n))
@@ -67,7 +67,7 @@ var procSubtract Proc = func(args []Object) Object {
 	if len(args) == 0 {
 		panicArity(0)
 	}
-	var res Number = Int(0)
+	var res Number = Int{i: 0}
 	numbers := args
 	if len(args) > 1 {
 		res = ensureNumber(args[0])
@@ -84,7 +84,7 @@ var procDivide Proc = func(args []Object) Object {
 	if len(args) == 0 {
 		panicArity(0)
 	}
-	var res Number = Int(1)
+	var res Number = Int{i: 1}
 	numbers := args
 	if len(args) > 1 {
 		res = ensureNumber(args[0])

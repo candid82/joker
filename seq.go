@@ -19,10 +19,12 @@ type (
 		seq Seq
 	}
 	ConsSeq struct {
+		InfoHolder
 		first Object
 		rest  Seq
 	}
 	ArraySeq struct {
+		InfoHolder
 		arr   []Object
 		index int
 	}

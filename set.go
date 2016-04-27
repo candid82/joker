@@ -6,6 +6,7 @@ import (
 
 type (
 	Set struct {
+		InfoHolder
 		MetaHolder
 		m *ArrayMap
 	}
@@ -18,7 +19,7 @@ func (v *Set) WithMeta(meta *ArrayMap) Object {
 }
 
 func (set *Set) Cons(obj Object) *Set {
-	return &Set{m: set.m.Assoc(obj, Bool(true))}
+	return &Set{m: set.m.Assoc(obj, Bool{b: true})}
 }
 
 func (set *Set) Disjoin(obj Object) *Set {
@@ -26,7 +27,7 @@ func (set *Set) Disjoin(obj Object) *Set {
 }
 
 func (set *Set) Add(obj Object) bool {
-	return set.m.Add(obj, Bool(true))
+	return set.m.Add(obj, Bool{b: true})
 }
 
 func EmptySet() *Set {

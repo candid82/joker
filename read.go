@@ -12,17 +12,12 @@ import (
 )
 
 type (
-	ReadObject struct {
-		line   int
-		column int
-		obj    Object
-	}
 	ReadError struct {
 		line   int
 		column int
 		msg    string
 	}
-	ReadFunc func(reader *Reader) ReadObject
+	ReadFunc func(reader *Reader) Object
 )
 
 const EOF = -1
@@ -32,31 +27,16 @@ var (
 	GENSYM int
 )
 
-func readStub(reader *Reader) ReadObject {
+func readStub(reader *Reader) Object {
 	return Read(reader)
 }
 
 var DATA_READERS = map[Symbol]ReadFunc{}
-var NIL Nil
+var NIL = Nil{}
 
 func init() {
 	DATA_READERS[MakeSymbol("inst")] = readStub
 	DATA_READERS[MakeSymbol("uuid")] = readStub
-}
-
-func (ro ReadObject) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case ReadObject:
-		return ro.obj.Equals(other.obj)
-	case Object:
-		return ro.obj.Equals(other)
-	default:
-		return false
-	}
-}
-
-func (ro ReadObject) ToString(escape bool) string {
-	return ro.obj.ToString(escape)
 }
 
 func escapeRune(r rune) string {
@@ -113,20 +93,17 @@ func MakeReadError(reader *Reader, msg string) ReadError {
 	}
 }
 
-func MakeReadObject(reader *Reader, obj Object) ReadObject {
-	return ReadObject{
-		line:   reader.line,
-		column: reader.column,
-		obj:    obj,
-	}
+func MakeReadObject(reader *Reader, obj Object) Object {
+	obj.SetInfo(&ObjectInfo{Position: Position{line: reader.line, column: reader.column}})
+	return obj
 }
 
-func DeriveReadObject(base ReadObject, obj Object) ReadObject {
-	return ReadObject{
-		line:   base.line,
-		column: base.column,
-		obj:    obj,
+func DeriveReadObject(base Object, obj Object) Object {
+	baseInfo := base.GetInfo()
+	if baseInfo != nil {
+		obj.SetInfo(&ObjectInfo{Position: Position{line: baseInfo.line, column: baseInfo.column}})
 	}
+	return obj
 }
 
 func (err ReadError) Error() string {
@@ -160,10 +137,10 @@ func peekExpectedDelimiter(reader *Reader) {
 	}
 }
 
-func readSpecialCharacter(reader *Reader, ending string, r rune) ReadObject {
+func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 	eatString(reader, ending)
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char(r))
+	return MakeReadObject(reader, Char{ch: r})
 }
 
 func eatWhitespace(reader *Reader) {
@@ -191,7 +168,7 @@ func eatWhitespace(reader *Reader) {
 	}
 }
 
-func readUnicodeCharacter(reader *Reader, length, base int) ReadObject {
+func readUnicodeCharacter(reader *Reader, length, base int) Object {
 	var b bytes.Buffer
 	for n := reader.Get(); !isDelimiter(n); n = reader.Get() {
 		b.WriteRune(n)
@@ -206,10 +183,10 @@ func readUnicodeCharacter(reader *Reader, length, base int) ReadObject {
 		panic(MakeReadError(reader, "Invalid unicode character: \\o"+str))
 	}
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char(rune(i)))
+	return MakeReadObject(reader, Char{ch: rune(i)})
 }
 
-func readCharacter(reader *Reader) ReadObject {
+func readCharacter(reader *Reader) Object {
 	r := reader.Get()
 	if r == EOF {
 		panic(MakeReadError(reader, "Incomplete character literal"))
@@ -249,45 +226,45 @@ func readCharacter(reader *Reader) ReadObject {
 		}
 	}
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char(r))
+	return MakeReadObject(reader, Char{ch: r})
 }
 
-func scanBigInt(str string, base int, err error, reader *Reader) ReadObject {
+func scanBigInt(str string, base int, err error, reader *Reader) Object {
 	var bi big.Int
 	if _, ok := bi.SetString(str, base); !ok {
 		panic(err)
 	}
-	res := BigInt(bi)
+	res := BigInt{b: bi}
 	return MakeReadObject(reader, &res)
 }
 
-func scanRatio(str string, err error, reader *Reader) ReadObject {
+func scanRatio(str string, err error, reader *Reader) Object {
 	var rat big.Rat
 	if _, ok := rat.SetString(str); !ok {
 		panic(err)
 	}
-	res := Ratio(rat)
+	res := Ratio{r: rat}
 	return MakeReadObject(reader, &res)
 }
 
-func scanBigFloat(str string, err error, reader *Reader) ReadObject {
+func scanBigFloat(str string, err error, reader *Reader) Object {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
 		panic(err)
 	}
-	res := BigFloat(bf)
+	res := BigFloat{b: bf}
 	return MakeReadObject(reader, &res)
 }
 
-func scanInt(str string, base int, err error, reader *Reader) ReadObject {
+func scanInt(str string, base int, err error, reader *Reader) Object {
 	i, e := strconv.ParseInt(str, base, 0)
 	if e != nil {
 		return scanBigInt(str, base, err, reader)
 	}
-	return MakeReadObject(reader, Int(int(i)))
+	return MakeReadObject(reader, Int{i: int(i)})
 }
 
-func readNumber(reader *Reader) ReadObject {
+func readNumber(reader *Reader) Object {
 	var b bytes.Buffer
 	isDouble, isHex, isExp, isRatio, base, nonDigits := false, false, false, false, "", 0
 	d := reader.Get()
@@ -355,7 +332,7 @@ func readNumber(reader *Reader) ReadObject {
 		if err != nil {
 			panic(invalidNumberError)
 		}
-		return MakeReadObject(reader, Double(dbl))
+		return MakeReadObject(reader, Double{d: dbl})
 	}
 	return scanInt(str, 0, invalidNumberError, reader)
 }
@@ -372,7 +349,7 @@ func isSymbolRune(r rune) bool {
 	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\''
 }
 
-func readSymbol(reader *Reader, first rune) ReadObject {
+func readSymbol(reader *Reader, first rune) Object {
 	var b bytes.Buffer
 	b.WriteRune(first)
 	var lastAdded rune
@@ -396,17 +373,17 @@ func readSymbol(reader *Reader, first rune) ReadObject {
 	case str == "nil":
 		return MakeReadObject(reader, NIL)
 	case str == "true":
-		return MakeReadObject(reader, Bool(true))
+		return MakeReadObject(reader, Bool{b: true})
 	case str == "false":
-		return MakeReadObject(reader, Bool(false))
+		return MakeReadObject(reader, Bool{b: false})
 	case first == ':':
-		return MakeReadObject(reader, Keyword(str))
+		return MakeReadObject(reader, Keyword{k: str})
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}
 }
 
-func readString(reader *Reader, isRegex bool) ReadObject {
+func readString(reader *Reader, isRegex bool) Object {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
@@ -449,13 +426,13 @@ func readString(reader *Reader, isRegex bool) ReadObject {
 		r = reader.Get()
 	}
 	if isRegex {
-		return MakeReadObject(reader, Regex(b.String()))
+		return MakeReadObject(reader, Regex{r: b.String()})
 	}
-	return MakeReadObject(reader, String(b.String()))
+	return MakeReadObject(reader, String{s: b.String()})
 }
 
-func readList(reader *Reader) ReadObject {
-	s := make([]ReadObject, 0, 10)
+func readList(reader *Reader) Object {
+	s := make([]Object, 0, 10)
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ')' {
@@ -469,10 +446,11 @@ func readList(reader *Reader) ReadObject {
 	for i := len(s) - 1; i >= 0; i-- {
 		list = list.Conj(s[i])
 	}
-	return MakeReadObject(reader, list)
+	res := MakeReadObject(reader, list)
+	return res
 }
 
-func readVector(reader *Reader) ReadObject {
+func readVector(reader *Reader) Object {
 	result := EmptyVector
 	eatWhitespace(reader)
 	r := reader.Peek()
@@ -486,7 +464,7 @@ func readVector(reader *Reader) ReadObject {
 	return MakeReadObject(reader, result)
 }
 
-func readMap(reader *Reader) ReadObject {
+func readMap(reader *Reader) Object {
 	m := EmptyArrayMap()
 	eatWhitespace(reader)
 	r := reader.Peek()
@@ -503,7 +481,7 @@ func readMap(reader *Reader) ReadObject {
 	return MakeReadObject(reader, m)
 }
 
-func readSet(reader *Reader) ReadObject {
+func readSet(reader *Reader) Object {
 	set := EmptySet()
 	eatWhitespace(reader)
 	r := reader.Peek()
@@ -519,19 +497,20 @@ func readSet(reader *Reader) ReadObject {
 	return MakeReadObject(reader, set)
 }
 
-func makeQuote(obj ReadObject, quote Symbol) ReadObject {
-	return ReadObject{column: obj.column, line: obj.line, obj: NewListFrom(quote, obj)}
+func makeQuote(obj Object, quote Symbol) Object {
+	res := NewListFrom(quote, obj)
+	return DeriveReadObject(obj, res)
 }
 
 func readMeta(reader *Reader) *ArrayMap {
 	obj := Read(reader)
-	switch v := obj.obj.(type) {
+	switch v := obj.(type) {
 	case *ArrayMap:
 		return v
 	case String, Symbol:
-		return &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword(":tag")), obj}}
+		return &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword{k: ":tag"}), obj}}
 	case Keyword:
-		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool(true))}}
+		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{b: true})}}
 	default:
 		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
@@ -551,7 +530,7 @@ func fillInMissingArgs(args map[int]Symbol) {
 	}
 }
 
-func makeFnForm(args map[int]Symbol, body ReadObject) ReadObject {
+func makeFnForm(args map[int]Symbol, body Object) Object {
 	fillInMissingArgs(args)
 	a := make([]Symbol, len(args))
 	for key, value := range args {
@@ -592,18 +571,18 @@ func registerArg(index int) Symbol {
 	return ARGS[index]
 }
 
-func readArgSymbol(reader *Reader) ReadObject {
+func readArgSymbol(reader *Reader) Object {
 	r := reader.Peek()
 	if unicode.IsSpace(r) || isTerminatingMacro(r) {
 		return MakeReadObject(reader, registerArg(1))
 	}
 	obj := Read(reader)
-	if obj.obj.Equals(MakeSymbol("&")) {
+	if obj.Equals(MakeSymbol("&")) {
 		return MakeReadObject(reader, registerArg(-1))
 	}
-	switch n := obj.obj.(type) {
+	switch n := obj.(type) {
 	case Int:
-		return MakeReadObject(reader, registerArg(int(n)))
+		return MakeReadObject(reader, registerArg(n.i))
 	default:
 		panic(MakeReadError(reader, "Arg literal must be %, %& or %integer"))
 	}
@@ -633,32 +612,35 @@ func isCall(obj Object, name Symbol) bool {
 func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
-		obj := ensureReadObject(iter.Next())
-		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
-			res = append(res, (obj.obj).(Seq).Rest().First())
+		obj := iter.Next()
+		if isCall(obj, MakeSymbol("unquote-splicing")) {
+			res = append(res, (obj).(Seq).Rest().First())
 		} else {
 			q := makeSyntaxQuote(obj, env, reader)
-			res = append(res, ReadObject{line: q.line, column: q.column, obj: NewListFrom(MakeSymbol("list"), q)})
+			res = append(res, DeriveReadObject(q, NewListFrom(MakeSymbol("list"), q)))
 		}
 	}
 	return &ArraySeq{arr: res}
 }
 
-func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, line int, column int) ReadObject {
+func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, info *ObjectInfo) Object {
 	q := syntaxQuoteSeq(seq, env, reader)
 	concat := q.Cons(MakeSymbol("concat"))
 	seqList := NewListFrom(MakeSymbol("seq"), concat)
-	if ctor == MakeSymbol("") {
-		return ReadObject{line: line, column: column, obj: seqList}
+	var res Object = seqList
+	if ctor != MakeSymbol("") {
+		res = NewListFrom(ctor, seqList).Cons(MakeSymbol("apply"))
 	}
-	return ReadObject{line: line, column: column, obj: NewListFrom(ctor, seqList).Cons(MakeSymbol("apply"))}
+	res.SetInfo(info)
+	return res
 }
 
-func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) ReadObject {
-	if isSelfEvaluating(obj.obj) {
+func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) Object {
+	if isSelfEvaluating(obj) {
 		return obj
 	}
-	switch s := obj.obj.(type) {
+	info := obj.GetInfo()
+	switch s := obj.(type) {
 	case Symbol:
 		str := *s.name
 		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
@@ -667,31 +649,31 @@ func makeSyntaxQuote(obj ReadObject, env map[Symbol]Symbol, reader *Reader) Read
 				sym = generateSymbol(str[:len(str)-1])
 				env[s] = sym
 			}
-			obj = ReadObject{column: obj.column, line: obj.line, obj: sym}
+			obj = DeriveReadObject(obj, sym)
 		}
 		return makeQuote(obj, MakeSymbol("quote"))
 	case Seq:
-		if isCall(obj.obj, MakeSymbol("unquote")) {
-			return ensureReadObject(Second(s))
+		if isCall(obj, MakeSymbol("unquote")) {
+			return Second(s)
 		}
-		if isCall(obj.obj, MakeSymbol("unquote-splicing")) {
+		if isCall(obj, MakeSymbol("unquote-splicing")) {
 			panic(MakeReadError(reader, "Splice not in list"))
 		}
-		return syntaxQuoteColl(s, env, reader, MakeSymbol(""), obj.line, obj.column)
+		return syntaxQuoteColl(s, env, reader, MakeSymbol(""), info)
 	case *Vector:
-		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("vector"), obj.line, obj.column)
+		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("vector"), info)
 	case *ArrayMap:
-		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, MakeSymbol("hash-map"), obj.line, obj.column)
+		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, MakeSymbol("hash-map"), info)
 	case *Set:
-		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("hash-set"), obj.line, obj.column)
+		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("hash-set"), info)
 	default:
 		return obj
 	}
 }
 
-func readTagged(reader *Reader) ReadObject {
+func readTagged(reader *Reader) Object {
 	obj := Read(reader)
-	switch s := obj.obj.(type) {
+	switch s := obj.(type) {
 	case Symbol:
 		readFunc := DATA_READERS[s]
 		if readFunc == nil {
@@ -704,7 +686,7 @@ func readTagged(reader *Reader) ReadObject {
 	}
 }
 
-func readDispatch(reader *Reader) ReadObject {
+func readDispatch(reader *Reader) Object {
 	r := reader.Get()
 	switch r {
 	case '"':
@@ -728,10 +710,10 @@ func readDispatch(reader *Reader) ReadObject {
 	return readTagged(reader)
 }
 
-func readWithMeta(reader *Reader) ReadObject {
+func readWithMeta(reader *Reader) Object {
 	meta := readMeta(reader)
 	nextObj := Read(reader)
-	switch v := nextObj.obj.(type) {
+	switch v := nextObj.(type) {
 	case Meta:
 		return DeriveReadObject(nextObj, v.WithMeta(meta))
 	default:
@@ -739,7 +721,7 @@ func readWithMeta(reader *Reader) ReadObject {
 	}
 }
 
-func Read(reader *Reader) ReadObject {
+func Read(reader *Reader) Object {
 	eatWhitespace(reader)
 	r := reader.Get()
 	switch {
@@ -795,7 +777,7 @@ func Read(reader *Reader) ReadObject {
 	panic(MakeReadError(reader, fmt.Sprintf("Unexpected %c", r)))
 }
 
-func TryRead(reader *Reader) (obj ReadObject, err error) {
+func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = r.(ReadError)
@@ -803,7 +785,7 @@ func TryRead(reader *Reader) (obj ReadObject, err error) {
 	}()
 	eatWhitespace(reader)
 	if reader.Peek() == EOF {
-		return ReadObject{}, io.EOF
+		return NIL, io.EOF
 	}
 	return Read(reader), nil
 }

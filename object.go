@@ -7,12 +7,18 @@ import (
 )
 
 type (
+	Position struct {
+		line   int
+		column int
+	}
 	Equality interface {
 		Equals(interface{}) bool
 	}
 	Object interface {
 		Equality
 		ToString(escape bool) string
+		GetInfo() *ObjectInfo
+		SetInfo(*ObjectInfo)
 	}
 	Error interface {
 		error
@@ -26,23 +32,64 @@ type (
 	MetaHolder struct {
 		meta *ArrayMap
 	}
-	Char     rune
-	Double   float64
-	Int      int
-	BigInt   big.Int
-	BigFloat big.Float
-	Ratio    big.Rat
-	Bool     bool
-	Nil      struct{}
-	Keyword  string
-	Symbol   struct {
+	ObjectInfo struct {
+		Position
+	}
+	InfoHolder struct {
+		info *ObjectInfo
+	}
+	Char struct {
+		InfoHolder
+		ch rune
+	}
+	Double struct {
+		InfoHolder
+		d float64
+	}
+	Int struct {
+		InfoHolder
+		i int
+	}
+	BigInt struct {
+		InfoHolder
+		b big.Int
+	}
+	BigFloat struct {
+		InfoHolder
+		b big.Float
+	}
+	Ratio struct {
+		InfoHolder
+		r big.Rat
+	}
+	Bool struct {
+		InfoHolder
+		b bool
+	}
+	Nil struct {
+		InfoHolder
+		n struct{}
+	}
+	Keyword struct {
+		InfoHolder
+		k string
+	}
+	Symbol struct {
+		InfoHolder
 		MetaHolder
 		ns   *string
 		name *string
 	}
-	String string
-	Regex  string
-	Var    struct {
+	String struct {
+		InfoHolder
+		s string
+	}
+	Regex struct {
+		InfoHolder
+		r string
+	}
+	Var struct {
+		InfoHolder
 		MetaHolder
 		ns    *Namespace
 		name  Symbol
@@ -50,11 +97,13 @@ type (
 	}
 	Proc func([]Object) Object
 	Fn   struct {
+		InfoHolder
 		MetaHolder
 		fnExpr *FnExpr
 		env    *LocalEnv
 	}
 	ExInfo struct {
+		InfoHolder
 		msg  String
 		data *ArrayMap
 	}
@@ -81,6 +130,14 @@ func (rb RecurBindings) Equals(other interface{}) bool {
 	return false
 }
 
+func (rb RecurBindings) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (rb RecurBindings) SetInfo(info *ObjectInfo) {
+	// NOOP
+}
+
 func (exInfo *ExInfo) ToString(escape bool) string {
 	return exInfo.msg.ToString(escape)
 }
@@ -99,7 +156,7 @@ func (exInfo *ExInfo) Equals(other interface{}) bool {
 }
 
 func (exInfo *ExInfo) Error() string {
-	return string(exInfo.msg)
+	return exInfo.msg.s
 }
 
 func (fn *Fn) ToString(escape bool) string {
@@ -161,6 +218,22 @@ func (p Proc) Equals(other interface{}) bool {
 	}
 }
 
+func (p Proc) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (p Proc) SetInfo(*ObjectInfo) {
+	// NOOP
+}
+
+func (i InfoHolder) GetInfo() *ObjectInfo {
+	return i.info
+}
+
+func (i InfoHolder) SetInfo(info *ObjectInfo) {
+	i.info = info
+}
+
 func (m MetaHolder) GetMeta() *ArrayMap {
 	return m.meta
 }
@@ -212,11 +285,16 @@ func (n Nil) ToString(escape bool) string {
 }
 
 func (n Nil) Equals(other interface{}) bool {
-	return n == other
+	switch other.(type) {
+	case Nil:
+		return true
+	default:
+		return false
+	}
 }
 
 func (rat *Ratio) ToString(escape bool) string {
-	return (*big.Rat)(rat).String()
+	return rat.r.String()
 }
 
 func (rat *Ratio) Equals(other interface{}) bool {
@@ -225,21 +303,21 @@ func (rat *Ratio) Equals(other interface{}) bool {
 	}
 	switch r := other.(type) {
 	case *Ratio:
-		return ((*big.Rat)(rat)).Cmp((*big.Rat)(r)) == 0
+		return rat.r.Cmp(&r.r) == 0
 	case *BigInt:
 		var otherRat big.Rat
-		otherRat.SetInt((*big.Int)(r))
-		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
+		otherRat.SetInt(&r.b)
+		return rat.r.Cmp(&otherRat) == 0
 	case Int:
 		var otherRat big.Rat
-		otherRat.SetInt64(int64(r))
-		return ((*big.Rat)(rat)).Cmp(&otherRat) == 0
+		otherRat.SetInt64(int64(r.i))
+		return rat.r.Cmp(&otherRat) == 0
 	}
 	return false
 }
 
 func (bi *BigInt) ToString(escape bool) string {
-	return (*big.Int)(bi).String() + "N"
+	return bi.b.String() + "N"
 }
 
 func (bi *BigInt) Equals(other interface{}) bool {
@@ -248,16 +326,16 @@ func (bi *BigInt) Equals(other interface{}) bool {
 	}
 	switch b := other.(type) {
 	case *BigInt:
-		return ((*big.Int)(bi)).Cmp((*big.Int)(b)) == 0
+		return bi.b.Cmp(&b.b) == 0
 	case Int:
-		bi2 := big.NewInt(int64(b))
-		return ((*big.Int)(bi)).Cmp(bi2) == 0
+		bi2 := big.NewInt(int64(b.i))
+		return bi.b.Cmp(bi2) == 0
 	}
 	return false
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
-	return (*big.Float)(bf).Text('g', 256) + "M"
+	return bf.b.Text('g', 256) + "M"
 }
 
 func (bf *BigFloat) Equals(other interface{}) bool {
@@ -266,66 +344,96 @@ func (bf *BigFloat) Equals(other interface{}) bool {
 	}
 	switch b := other.(type) {
 	case *BigFloat:
-		return ((*big.Float)(bf)).Cmp((*big.Float)(b)) == 0
+		return bf.b.Cmp(&b.b) == 0
 	case Double:
-		bf2 := big.NewFloat(float64(b))
-		return ((*big.Float)(bf)).Cmp(bf2) == 0
+		bf2 := big.NewFloat(b.d)
+		return bf.b.Cmp(bf2) == 0
 	}
 	return false
 }
 
 func (c Char) ToString(escape bool) string {
 	if escape {
-		return escapeRune(rune(c))
+		return escapeRune(c.ch)
 	}
-	return string(c)
+	return string(c.ch)
 }
 
 func (c Char) Equals(other interface{}) bool {
-	return c == other
+	switch other := other.(type) {
+	case Char:
+		return c.ch == other.ch
+	default:
+		return false
+	}
 }
 
 func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%f", float64(d))
+	return fmt.Sprintf("%f", d.d)
 }
 
 func (d Double) Equals(other interface{}) bool {
-	return d == other
+	switch other := other.(type) {
+	case Double:
+		return d.d == other.d
+	default:
+		return false
+	}
 }
 
 func (i Int) ToString(escape bool) string {
-	return fmt.Sprintf("%d", int(i))
+	return fmt.Sprintf("%d", i.i)
 }
 
 func (i Int) Equals(other interface{}) bool {
-	return i == other
+	switch other := other.(type) {
+	case Int:
+		return i.i == other.i
+	default:
+		return false
+	}
 }
 
 func (b Bool) ToString(escape bool) string {
-	return fmt.Sprintf("%t", bool(b))
+	return fmt.Sprintf("%t", b.b)
 }
 
 func (b Bool) Equals(other interface{}) bool {
-	return b == other
+	switch other := other.(type) {
+	case Bool:
+		return b.b == other.b
+	default:
+		return false
+	}
 }
 
 func (k Keyword) ToString(escape bool) string {
-	return string(k)
+	return k.k
 }
 
 func (k Keyword) Equals(other interface{}) bool {
-	return k == other
+	switch other := other.(type) {
+	case Keyword:
+		return k.k == other.k
+	default:
+		return false
+	}
 }
 
 func (rx Regex) ToString(escape bool) string {
 	if escape {
-		return "#" + escapeString(string(rx))
+		return "#" + escapeString(rx.r)
 	}
-	return "#" + string(rx)
+	return "#" + rx.r
 }
 
 func (rx Regex) Equals(other interface{}) bool {
-	return rx == other
+	switch other := other.(type) {
+	case Regex:
+		return rx.r == other.r
+	default:
+		return false
+	}
 }
 
 func (s Symbol) ToString(escape bool) string {
@@ -346,13 +454,18 @@ func (s Symbol) Equals(other interface{}) bool {
 
 func (s String) ToString(escape bool) string {
 	if escape {
-		return escapeString(string(s))
+		return escapeString(s.s)
 	}
-	return string(s)
+	return s.s
 }
 
 func (s String) Equals(other interface{}) bool {
-	return s == other
+	switch other := other.(type) {
+	case String:
+		return s.s == other.s
+	default:
+		return false
+	}
 }
 
 func IsSymbol(obj Object) bool {

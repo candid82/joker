@@ -1,6 +1,7 @@
 package main
 
 type List struct {
+	InfoHolder
 	MetaHolder
 	first Object
 	rest  *List

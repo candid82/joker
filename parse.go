@@ -10,10 +10,6 @@ type (
 		Eval(env *LocalEnv) Object
 		Pos() Position
 	}
-	Position struct {
-		line   int
-		column int
-	}
 	LiteralExpr struct {
 		Position
 		obj Object
@@ -109,7 +105,7 @@ type (
 		finallyExpr []Expr
 	}
 	ParseError struct {
-		obj ReadObject
+		obj Object
 		msg string
 	}
 	Callable interface {
@@ -276,34 +272,33 @@ func (pos Position) Pos() Position {
 	return pos
 }
 
-func NewLiteralExpr(obj ReadObject) *LiteralExpr {
-	res := LiteralExpr{obj: obj.obj}
-	res.line = obj.line
-	res.column = obj.column
+func NewLiteralExpr(obj Object) *LiteralExpr {
+	res := LiteralExpr{obj: obj}
+	info := obj.GetInfo()
+	if info != nil {
+		res.line = info.line
+		res.column = info.column
+	}
 	return &res
 }
 
 func (err ParseError) Error() string {
-	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", err.obj.line, err.obj.column, err.msg)
+	line, column := 0, 0
+	info := err.obj.GetInfo()
+	if info != nil {
+		line, column = info.line, info.column
+	}
+	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", line, column, err.msg)
 }
 
 func (err ParseError) Type() Symbol {
 	return MakeSymbol("ParseError")
 }
 
-func ensureReadObject(obj Object) ReadObject {
-	switch obj := obj.(type) {
-	case ReadObject:
-		return obj
-	default:
-		return ReadObject{obj: obj}
-	}
-}
-
 func parseSeq(seq Seq, ctx *ParseContext) []Expr {
 	res := make([]Expr, 0)
 	for !seq.IsEmpty() {
-		res = append(res, parse(ensureReadObject(seq.First()), ctx))
+		res = append(res, parse(seq.First(), ctx))
 		seq = seq.Rest()
 	}
 	return res
@@ -312,7 +307,7 @@ func parseSeq(seq Seq, ctx *ParseContext) []Expr {
 func parseVector(v *Vector, pos Position, ctx *ParseContext) Expr {
 	r := make([]Expr, v.count)
 	for i := 0; i < v.count; i++ {
-		r[i] = parse(ensureReadObject(v.at(i)), ctx)
+		r[i] = parse(v.at(i), ctx)
 	}
 	return &VectorExpr{
 		v:        r,
@@ -328,8 +323,8 @@ func parseMap(m *ArrayMap, pos Position, ctx *ParseContext) *MapExpr {
 	}
 	for iter, i := m.iter(), 0; iter.HasNext(); i++ {
 		p := iter.Next()
-		res.keys[i] = parse(ensureReadObject(p.key), ctx)
-		res.values[i] = parse(ensureReadObject(p.value), ctx)
+		res.keys[i] = parse(p.key, ctx)
+		res.values[i] = parse(p.value, ctx)
 	}
 	return res
 }
@@ -340,13 +335,13 @@ func parseSet(s *Set, pos Position, ctx *ParseContext) Expr {
 		Position: pos,
 	}
 	for iter, i := iter(s.Seq()), 0; iter.HasNext(); i++ {
-		res.elements[i] = parse(ensureReadObject(iter.Next()), ctx)
+		res.elements[i] = parse(iter.Next(), ctx)
 	}
 	return res
 }
 
-func checkForm(obj ReadObject, min int, max int) int {
-	list := obj.obj.(*List)
+func checkForm(obj Object, min int, max int) int {
+	list := obj.(*List)
 	if list.count < min {
 		panic(&ParseError{obj: obj, msg: "Too few arguments to " + list.first.ToString(false)})
 	}
@@ -356,12 +351,20 @@ func checkForm(obj ReadObject, min int, max int) int {
 	return list.count
 }
 
-func parseDef(obj ReadObject, ctx *ParseContext) *DefExpr {
+func GetPosition(obj Object) Position {
+	info := obj.GetInfo()
+	if info != nil {
+		return Position{line: info.line, column: info.column}
+	}
+	return Position{line: 0, column: 0}
+}
+
+func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	count := checkForm(obj, 2, 4)
-	seq := obj.obj.(Seq)
-	s := ensureReadObject(Second(seq))
+	seq := obj.(Seq)
+	s := Second(seq)
 	var meta *ArrayMap
-	switch sym := s.obj.(type) {
+	switch sym := s.(type) {
 	case Symbol:
 		if sym.ns != nil && (Symbol{name: sym.ns} != ctx.globalEnv.currentNamespace.name) {
 			panic(&ParseError{
@@ -374,21 +377,21 @@ func parseDef(obj ReadObject, ctx *ParseContext) *DefExpr {
 		res := &DefExpr{
 			vr:       vr,
 			value:    nil,
-			Position: Position{line: obj.line, column: obj.column},
+			Position: GetPosition(obj),
 		}
 		meta = sym.GetMeta()
 		if count == 3 {
-			res.value = parse(ensureReadObject(Third(seq)), ctx)
+			res.value = parse(Third(seq), ctx)
 		} else if count == 4 {
-			res.value = parse(ensureReadObject(Forth(seq)), ctx)
-			docstring := ensureReadObject(Third(seq))
-			switch docstring.obj.(type) {
+			res.value = parse(Forth(seq), ctx)
+			docstring := Third(seq)
+			switch docstring.(type) {
 			case String:
 				if meta != nil {
-					meta = meta.Assoc(Keyword(":doc"), docstring)
+					meta = meta.Assoc(&Keyword{k: ":doc"}, docstring)
 				} else {
 					meta = EmptyArrayMap()
-					meta.Add(Keyword(":doc"), docstring)
+					meta.Add(&Keyword{k: ":doc"}, docstring)
 				}
 			default:
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
@@ -409,7 +412,7 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 	defer func() { ctx.recur = recur }()
 	res := make([]Expr, 0)
 	for !seq.IsEmpty() {
-		ro := ensureReadObject(seq.First())
+		ro := seq.First()
 		expr := parse(ro, ctx)
 		seq = seq.Rest()
 		if ctx.recur && !seq.IsEmpty() && !LINTER_MODE {
@@ -420,12 +423,12 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 	return res
 }
 
-func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
+func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 	res := make([]Symbol, 0)
-	v := params.obj.(*Vector)
+	v := params.(*Vector)
 	for i := 0; i < v.count; i++ {
-		ro := ensureReadObject(v.at(i))
-		sym := ro.obj
+		ro := v.at(i)
+		sym := ro
 		if !IsSymbol(sym) {
 			if LINTER_MODE {
 				sym = generateSymbol("linter")
@@ -435,15 +438,15 @@ func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
 		}
 		if sym == MakeSymbol("&") {
 			if v.count > i+2 {
-				ro := ensureReadObject(v.at(i + 2))
-				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.obj.ToString(false)})
+				ro := v.at(i + 2)
+				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.ToString(false)})
 			}
 			if v.count == i+2 {
-				variadic := ensureReadObject(v.at(i + 1))
-				if !IsSymbol(variadic.obj) {
-					panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.obj.ToString(false)})
+				variadic := v.at(i + 1)
+				if !IsSymbol(variadic) {
+					panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.ToString(false)})
 				}
-				res = append(res, variadic.obj.(Symbol))
+				res = append(res, variadic.(Symbol))
 				return res, true
 			} else {
 				return res, false
@@ -454,7 +457,7 @@ func parseParams(params ReadObject) (bindings []Symbol, isVariadic bool) {
 	return res, false
 }
 
-func addArity(fn *FnExpr, params ReadObject, body Seq, ctx *ParseContext) {
+func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 	args, isVariadic := parseParams(params)
 	ctx.PushLocalFrame(args)
 	defer ctx.PopLocalFrame()
@@ -484,8 +487,8 @@ func addArity(fn *FnExpr, params ReadObject, body Seq, ctx *ParseContext) {
 	}
 }
 
-func wrapWithMeta(fnExpr *FnExpr, obj ReadObject, ctx *ParseContext) Expr {
-	meta := obj.obj.(Meta).GetMeta()
+func wrapWithMeta(fnExpr *FnExpr, obj Object, ctx *ParseContext) Expr {
+	meta := obj.(Meta).GetMeta()
 	if meta != nil {
 		return &MetaExpr{
 			meta:     parseMap(meta, fnExpr.Pos(), ctx),
@@ -501,18 +504,18 @@ func wrapWithMeta(fnExpr *FnExpr, obj ReadObject, ctx *ParseContext) Expr {
 // (fn f ([] 1 2)
 //       ([a] a 3)
 //       ([a & b] a b))
-func parseFn(obj ReadObject, ctx *ParseContext) Expr {
-	res := &FnExpr{Position: Position{line: obj.line, column: obj.column}}
-	bodies := obj.obj.(Seq).Rest()
-	p := ensureReadObject(bodies.First())
-	if IsSymbol(p.obj) { // self reference
-		res.self = p.obj.(Symbol)
+func parseFn(obj Object, ctx *ParseContext) Expr {
+	res := &FnExpr{Position: GetPosition(obj)}
+	bodies := obj.(Seq).Rest()
+	p := bodies.First()
+	if IsSymbol(p) { // self reference
+		res.self = p.(Symbol)
 		bodies = bodies.Rest()
-		p = ensureReadObject(bodies.First())
+		p = bodies.First()
 		ctx.PushLocalFrame([]Symbol{res.self})
 		defer ctx.PopLocalFrame()
 	}
-	if IsVector(p.obj) { // single arity
+	if IsVector(p) { // single arity
 		addArity(res, p, bodies.Rest(), ctx)
 		return wrapWithMeta(res, obj, ctx)
 	}
@@ -521,12 +524,12 @@ func parseFn(obj ReadObject, ctx *ParseContext) Expr {
 		panic(&ParseError{obj: p, msg: "Parameter declaration missing"})
 	}
 	for !bodies.IsEmpty() {
-		body := ensureReadObject(bodies.First())
-		switch s := body.obj.(type) {
+		body := bodies.First()
+		switch s := body.(type) {
 		case Seq:
-			params := ensureReadObject(s.First())
-			if !IsVector(params.obj) {
-				panic(&ParseError{obj: params, msg: "Parameter declaration must be a vector. Got: " + params.obj.ToString(false)})
+			params := s.First()
+			if !IsVector(params) {
+				panic(&ParseError{obj: params, msg: "Parameter declaration must be a vector. Got: " + params.ToString(false)})
 			}
 			addArity(res, params, s.Rest(), ctx)
 		default:
@@ -537,36 +540,36 @@ func parseFn(obj ReadObject, ctx *ParseContext) Expr {
 	return wrapWithMeta(res, obj, ctx)
 }
 
-func isCatch(obj ReadObject) bool {
-	return IsSeq(obj.obj) && obj.obj.(Seq).First().Equals(MakeSymbol("catch"))
+func isCatch(obj Object) bool {
+	return IsSeq(obj) && obj.(Seq).First().Equals(MakeSymbol("catch"))
 }
 
-func isFinally(obj ReadObject) bool {
-	return IsSeq(obj.obj) && obj.obj.(Seq).First().Equals(MakeSymbol("finally"))
+func isFinally(obj Object) bool {
+	return IsSeq(obj) && obj.(Seq).First().Equals(MakeSymbol("finally"))
 }
 
-func parseCatch(obj ReadObject, ctx *ParseContext) *CatchExpr {
-	seq := obj.obj.(Seq).Rest()
+func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
+	seq := obj.(Seq).Rest()
 	if seq.IsEmpty() || seq.Rest().IsEmpty() {
 		panic(&ParseError{obj: obj, msg: "catch requires at least two arguments: type symbol and binding symbol"})
 	}
-	excType := ensureReadObject(seq.First())
-	if !IsSymbol(excType.obj) {
-		panic(&ParseError{obj: excType, msg: "Unable to resolve type: " + excType.obj.ToString(false)})
+	excType := seq.First()
+	if !IsSymbol(excType) {
+		panic(&ParseError{obj: excType, msg: "Unable to resolve type: " + excType.ToString(false)})
 	}
-	excSymbol := ensureReadObject(Second(seq))
-	if !IsSymbol(excSymbol.obj) {
-		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.obj.ToString(false)})
+	excSymbol := Second(seq)
+	if !IsSymbol(excSymbol) {
+		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.ToString(false)})
 	}
-	ctx.PushLocalFrame([]Symbol{excSymbol.obj.(Symbol)})
+	ctx.PushLocalFrame([]Symbol{excSymbol.(Symbol)})
 	defer ctx.PopLocalFrame()
 	noRecurAllowed := ctx.noRecurAllowed
 	ctx.noRecurAllowed = true
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 	return &CatchExpr{
-		Position:  Position{line: obj.line, column: obj.column},
-		excType:   excType.obj.(Symbol),
-		excSymbol: excSymbol.obj.(Symbol),
+		Position:  GetPosition(obj),
+		excType:   excType.(Symbol),
+		excSymbol: excSymbol.(Symbol),
 		body:      parseBody(seq.Rest().Rest(), ctx),
 	}
 }
@@ -578,17 +581,17 @@ func parseFinally(body Seq, ctx *ParseContext) []Expr {
 	return parseBody(body, ctx)
 }
 
-func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
+func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 	const (
 		Regular = iota
 		Catch   = iota
 		Finally = iota
 	)
-	res := &TryExpr{Position: Position{line: obj.line, column: obj.column}}
+	res := &TryExpr{Position: GetPosition(obj)}
 	lastType := Regular
-	seq := obj.obj.(Seq).Rest()
+	seq := obj.(Seq).Rest()
 	for !seq.IsEmpty() {
-		obj = ensureReadObject(seq.First())
+		obj = seq.First()
 		if lastType == Finally {
 			panic(&ParseError{obj: obj, msg: "finally clause must be last in try expression"})
 		}
@@ -596,7 +599,7 @@ func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
 			res.catches = append(res.catches, parseCatch(obj, ctx))
 			lastType = Catch
 		} else if isFinally(obj) {
-			res.finallyExpr = parseFinally(obj.obj.(Seq).Rest(), ctx)
+			res.finallyExpr = parseFinally(obj.(Seq).Rest(), ctx)
 			lastType = Finally
 		} else {
 			if lastType == Catch {
@@ -609,24 +612,24 @@ func parseTry(obj ReadObject, ctx *ParseContext) *TryExpr {
 	return res
 }
 
-func parseLet(obj ReadObject, ctx *ParseContext) *LetExpr {
+func parseLet(obj Object, ctx *ParseContext) *LetExpr {
 	return parseLetLoop(obj, false, ctx)
 }
 
-func parseLoop(obj ReadObject, ctx *ParseContext) *LoopExpr {
+func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
 	return (*LoopExpr)(parseLetLoop(obj, true, ctx))
 }
 
-func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
+func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 	formName := "let"
 	if isLoop {
 		formName = "loop"
 	}
 	res := &LetExpr{
-		Position: Position{line: obj.line, column: obj.column},
+		Position: GetPosition(obj),
 	}
-	bindings := ensureReadObject(Second(obj.obj.(Seq)))
-	switch b := bindings.obj.(type) {
+	bindings := Second(obj.(Seq))
+	switch b := bindings.(type) {
 	case *Vector:
 		if b.count%2 != 0 {
 			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
@@ -636,8 +639,8 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 		ctx.PushEmptyLocalFrame()
 		defer ctx.PopLocalFrame()
 		for i := 0; i < b.count/2; i++ {
-			s := ensureReadObject(b.at(i * 2))
-			switch sym := s.obj.(type) {
+			s := b.at(i * 2)
+			switch sym := s.(type) {
 			case Symbol:
 				res.names[i] = sym
 			default:
@@ -647,7 +650,7 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
 				}
 			}
-			res.values[i] = parse(ensureReadObject(b.at(i*2+1)), ctx)
+			res.values[i] = parse(b.at(i*2+1), ctx)
 			ctx.AddLocalBinding(res.names[i], i)
 		}
 
@@ -656,9 +659,10 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 			defer ctx.PopLoopBindings()
 		}
 
-		res.body = parseBody(obj.obj.(Seq).Rest().Rest(), ctx)
+		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
-			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s form with empty body\n", obj.line, obj.column, formName)
+			pos := GetPosition(obj)
+			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s form with empty body\n", pos.line, pos.column, formName)
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
@@ -666,7 +670,7 @@ func parseLetLoop(obj ReadObject, isLoop bool, ctx *ParseContext) *LetExpr {
 	return res
 }
 
-func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
+func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 	if ctx.noRecurAllowed {
 		panic(&ParseError{obj: obj, msg: "Cannot recur across try"})
 	}
@@ -674,7 +678,7 @@ func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
 	if loopBindings == nil && !LINTER_MODE {
 		panic(&ParseError{obj: obj, msg: "No recursion point for recur"})
 	}
-	seq := obj.obj.(Seq)
+	seq := obj.(Seq)
 	args := parseSeq(seq.Rest(), ctx)
 	if len(loopBindings) != len(args) && !LINTER_MODE {
 		panic(&ParseError{obj: obj, msg: fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))})
@@ -682,31 +686,29 @@ func parseRecur(obj ReadObject, ctx *ParseContext) *RecurExpr {
 	ctx.recur = true
 	return &RecurExpr{
 		args:     args,
-		Position: Position{line: obj.line, column: obj.column},
+		Position: GetPosition(obj),
 	}
 }
 
-func parseList(obj ReadObject, ctx *ParseContext) Expr {
+func parseList(obj Object, ctx *ParseContext) Expr {
 	// MACRO: do macroexpand1 here
-	seq := obj.obj.(Seq)
+	seq := obj.(Seq)
 	if seq.IsEmpty() {
 		return NewLiteralExpr(obj)
 	}
-	pos := Position{line: obj.line, column: obj.column}
-	first := ensureReadObject(seq.First())
-	switch v := first.obj.(type) {
+	pos := GetPosition(obj)
+	first := seq.First()
+	switch v := first.(type) {
 	case Symbol:
 		switch *v.name {
 		case "quote":
-			// TODO: this probably needs unwrapping from ReadObject to Object
-			// for collections
-			return NewLiteralExpr(ensureReadObject(Second(seq)))
+			return NewLiteralExpr(Second(seq))
 		case "if":
 			checkForm(obj, 3, 4)
 			return &IfExpr{
-				cond:     parse(ensureReadObject(Second(seq)), ctx),
-				positive: parse(ensureReadObject(Third(seq)), ctx),
-				negative: parse(ensureReadObject(Forth(seq)), ctx),
+				cond:     parse(Second(seq), ctx),
+				positive: parse(Third(seq), ctx),
+				negative: parse(Forth(seq), ctx),
 				Position: pos,
 			}
 		case "fn":
@@ -721,7 +723,7 @@ func parseList(obj ReadObject, ctx *ParseContext) Expr {
 			return parseDef(obj, ctx)
 		case "var":
 			checkForm(obj, 2, 2)
-			switch s := (ensureReadObject(Second(seq)).obj).(type) {
+			switch s := Second(seq).(type) {
 			case Symbol:
 				return &VarExpr{
 					symbol:   s,
@@ -738,14 +740,14 @@ func parseList(obj ReadObject, ctx *ParseContext) Expr {
 		case "throw":
 			return &ThrowExpr{
 				Position: pos,
-				e:        parse(ensureReadObject(Second(seq)), ctx),
+				e:        parse(Second(seq), ctx),
 			}
 		case "try":
 			return parseTry(obj, ctx)
 		}
 	}
 	res := &CallExpr{
-		callable: parse(ensureReadObject(seq.First()), ctx),
+		callable: parse(seq.First(), ctx),
 		args:     parseSeq(seq.Rest(), ctx),
 		Position: pos,
 		name:     "fn",
@@ -759,13 +761,13 @@ func parseList(obj ReadObject, ctx *ParseContext) Expr {
 	return res
 }
 
-func parseSymbol(obj ReadObject, ctx *ParseContext) Expr {
-	sym := obj.obj.(Symbol)
+func parseSymbol(obj Object, ctx *ParseContext) Expr {
+	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
 	if b != nil {
 		return &BindingExpr{
 			binding:  b,
-			Position: Position{line: obj.line, column: obj.column},
+			Position: GetPosition(obj),
 		}
 	}
 	vr, ok := ctx.globalEnv.Resolve(sym)
@@ -778,15 +780,15 @@ func parseSymbol(obj ReadObject, ctx *ParseContext) Expr {
 	}
 	return &VarRefExpr{
 		vr:       vr,
-		Position: Position{line: obj.line, column: obj.column},
+		Position: GetPosition(obj),
 	}
 }
 
-func parse(obj ReadObject, ctx *ParseContext) Expr {
-	pos := Position{line: obj.line, column: obj.column}
+func parse(obj Object, ctx *ParseContext) Expr {
+	pos := GetPosition(obj)
 	var res Expr
 	canHaveMeta := false
-	switch v := obj.obj.(type) {
+	switch v := obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
 		res = NewLiteralExpr(obj)
 	case *Vector:
@@ -806,7 +808,7 @@ func parse(obj ReadObject, ctx *ParseContext) Expr {
 		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
 	}
 	if canHaveMeta {
-		meta := obj.obj.(Meta).GetMeta()
+		meta := obj.(Meta).GetMeta()
 		if meta != nil {
 			return &MetaExpr{
 				meta:     parseMap(meta, pos, ctx),
@@ -818,7 +820,7 @@ func parse(obj ReadObject, ctx *ParseContext) Expr {
 	return res
 }
 
-func TryParse(obj ReadObject, ctx *ParseContext) (expr Expr, err error) {
+func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = r.(error)
