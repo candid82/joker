@@ -18,7 +18,7 @@ type (
 		Equality
 		ToString(escape bool) string
 		GetInfo() *ObjectInfo
-		SetInfo(*ObjectInfo)
+		WithInfo(*ObjectInfo) Object
 	}
 	Error interface {
 		error
@@ -134,8 +134,8 @@ func (rb RecurBindings) GetInfo() *ObjectInfo {
 	return nil
 }
 
-func (rb RecurBindings) SetInfo(info *ObjectInfo) {
-	// NOOP
+func (rb RecurBindings) WithInfo(info *ObjectInfo) Object {
+	return rb
 }
 
 func (exInfo *ExInfo) ToString(escape bool) string {
@@ -153,6 +153,11 @@ func (exInfo *ExInfo) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (exInfo *ExInfo) WithInfo(info *ObjectInfo) Object {
+	exInfo.info = info
+	return exInfo
 }
 
 func (exInfo *ExInfo) Error() string {
@@ -176,6 +181,11 @@ func (fn *Fn) WithMeta(meta *ArrayMap) Object {
 	res := *fn
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
+}
+
+func (fn *Fn) WithInfo(info *ObjectInfo) Object {
+	fn.info = info
+	return fn
 }
 
 func (fn *Fn) Call(args []Object) Object {
@@ -222,16 +232,12 @@ func (p Proc) GetInfo() *ObjectInfo {
 	return nil
 }
 
-func (p Proc) SetInfo(*ObjectInfo) {
-	// NOOP
+func (p Proc) WithInfo(*ObjectInfo) Object {
+	return p
 }
 
 func (i InfoHolder) GetInfo() *ObjectInfo {
 	return i.info
-}
-
-func (i InfoHolder) SetInfo(info *ObjectInfo) {
-	i.info = info
 }
 
 func (m MetaHolder) GetMeta() *ArrayMap {
@@ -248,6 +254,11 @@ func (v *Var) WithMeta(meta *ArrayMap) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
+}
+
+func (v *Var) WithInfo(info *ObjectInfo) Object {
+	v.info = info
+	return v
 }
 
 func MakeQualifiedSymbol(ns, name string) Symbol {
@@ -293,6 +304,11 @@ func (n Nil) Equals(other interface{}) bool {
 	}
 }
 
+func (n Nil) WithInfo(info *ObjectInfo) Object {
+	n.info = info
+	return n
+}
+
 func (rat *Ratio) ToString(escape bool) string {
 	return rat.r.String()
 }
@@ -316,6 +332,11 @@ func (rat *Ratio) Equals(other interface{}) bool {
 	return false
 }
 
+func (rat *Ratio) WithInfo(info *ObjectInfo) Object {
+	rat.info = info
+	return rat
+}
+
 func (bi *BigInt) ToString(escape bool) string {
 	return bi.b.String() + "N"
 }
@@ -332,6 +353,11 @@ func (bi *BigInt) Equals(other interface{}) bool {
 		return bi.b.Cmp(bi2) == 0
 	}
 	return false
+}
+
+func (bi *BigInt) WithInfo(info *ObjectInfo) Object {
+	bi.info = info
+	return bi
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
@@ -352,6 +378,11 @@ func (bf *BigFloat) Equals(other interface{}) bool {
 	return false
 }
 
+func (bf *BigFloat) WithInfo(info *ObjectInfo) Object {
+	bf.info = info
+	return bf
+}
+
 func (c Char) ToString(escape bool) string {
 	if escape {
 		return escapeRune(c.ch)
@@ -368,6 +399,11 @@ func (c Char) Equals(other interface{}) bool {
 	}
 }
 
+func (c Char) WithInfo(info *ObjectInfo) Object {
+	c.info = info
+	return c
+}
+
 func (d Double) ToString(escape bool) string {
 	return fmt.Sprintf("%f", d.d)
 }
@@ -379,6 +415,11 @@ func (d Double) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (d Double) WithInfo(info *ObjectInfo) Object {
+	d.info = info
+	return d
 }
 
 func (i Int) ToString(escape bool) string {
@@ -394,6 +435,11 @@ func (i Int) Equals(other interface{}) bool {
 	}
 }
 
+func (i Int) WithInfo(info *ObjectInfo) Object {
+	i.info = info
+	return i
+}
+
 func (b Bool) ToString(escape bool) string {
 	return fmt.Sprintf("%t", b.b)
 }
@@ -407,6 +453,11 @@ func (b Bool) Equals(other interface{}) bool {
 	}
 }
 
+func (b Bool) WithInfo(info *ObjectInfo) Object {
+	b.info = info
+	return b
+}
+
 func (k Keyword) ToString(escape bool) string {
 	return k.k
 }
@@ -418,6 +469,11 @@ func (k Keyword) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (k Keyword) WithInfo(info *ObjectInfo) Object {
+	k.info = info
+	return k
 }
 
 func (rx Regex) ToString(escape bool) string {
@@ -436,6 +492,11 @@ func (rx Regex) Equals(other interface{}) bool {
 	}
 }
 
+func (rx Regex) WithInfo(info *ObjectInfo) Object {
+	rx.info = info
+	return rx
+}
+
 func (s Symbol) ToString(escape bool) string {
 	if s.ns != nil {
 		return *s.ns + "/" + *s.name
@@ -452,6 +513,11 @@ func (s Symbol) Equals(other interface{}) bool {
 	}
 }
 
+func (s Symbol) WithInfo(info *ObjectInfo) Object {
+	s.info = info
+	return s
+}
+
 func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.s)
@@ -466,6 +532,11 @@ func (s String) Equals(other interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func (s String) WithInfo(info *ObjectInfo) Object {
+	s.info = info
+	return s
 }
 
 func IsSymbol(obj Object) bool {

@@ -142,6 +142,11 @@ func (v *Vector) Equals(other interface{}) bool {
 	}
 }
 
+func (v *Vector) WithInfo(info *ObjectInfo) Object {
+	v.info = info
+	return v
+}
+
 func (vseq *VectorSeq) Equals(other interface{}) bool {
 	if vseq == other {
 		return true
@@ -156,6 +161,11 @@ func (vseq *VectorSeq) Equals(other interface{}) bool {
 
 func (vseq *VectorSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
+}
+
+func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
+	vseq.info = info
+	return vseq
 }
 
 func (vseq *VectorSeq) First() Object {

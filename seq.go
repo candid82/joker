@@ -46,6 +46,11 @@ func (seq *ArraySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
+func (seq *ArraySeq) WithInfo(info *ObjectInfo) Object {
+	seq.info = info
+	return seq
+}
+
 func (seq *ArraySeq) First() Object {
 	return seq.arr[seq.index]
 }
@@ -102,6 +107,11 @@ func (seq *ConsSeq) Equals(other interface{}) bool {
 
 func (seq *ConsSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
+}
+
+func (seq *ConsSeq) WithInfo(info *ObjectInfo) Object {
+	seq.info = info
+	return seq
 }
 
 func (seq *ConsSeq) First() Object {

@@ -184,6 +184,11 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 	}
 }
 
+func (m *ArrayMap) WithInfo(info *ObjectInfo) Object {
+	m.info = info
+	return m
+}
+
 func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
 	if m1 == nil {
 		return m2

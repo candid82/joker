@@ -53,6 +53,11 @@ func (list *List) Equals(other interface{}) bool {
 	}
 }
 
+func (list *List) WithInfo(info *ObjectInfo) Object {
+	list.info = info
+	return list
+}
+
 func (list *List) First() Object {
 	return list.first
 }

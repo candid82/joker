@@ -57,6 +57,11 @@ func (set *Set) Equals(other interface{}) bool {
 	}
 }
 
+func (set *Set) WithInfo(info *ObjectInfo) Object {
+	set.info = info
+	return set
+}
+
 func (set *Set) Seq() Seq {
 	return set.m.Keys()
 }
