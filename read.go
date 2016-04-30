@@ -31,12 +31,12 @@ func readStub(reader *Reader) Object {
 	return Read(reader)
 }
 
-var DATA_READERS = map[Symbol]ReadFunc{}
+var DATA_READERS = map[*string]ReadFunc{}
 var NIL = Nil{}
 
 func init() {
-	DATA_READERS[MakeSymbol("inst")] = readStub
-	DATA_READERS[MakeSymbol("uuid")] = readStub
+	DATA_READERS[MakeSymbol("inst").name] = readStub
+	DATA_READERS[MakeSymbol("uuid").name] = readStub
 }
 
 func escapeRune(r rune) string {
@@ -608,7 +608,7 @@ func isCall(obj Object, name Symbol) bool {
 	}
 }
 
-func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
+func syntaxQuoteSeq(seq Seq, env map[*string]Symbol, reader *Reader) Seq {
 	res := make([]Object, 0)
 	for iter := iter(seq); iter.HasNext(); {
 		obj := iter.Next()
@@ -622,7 +622,7 @@ func syntaxQuoteSeq(seq Seq, env map[Symbol]Symbol, reader *Reader) Seq {
 	return &ArraySeq{arr: res}
 }
 
-func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol, info *ObjectInfo) Object {
+func syntaxQuoteColl(seq Seq, env map[*string]Symbol, reader *Reader, ctor Symbol, info *ObjectInfo) Object {
 	q := syntaxQuoteSeq(seq, env, reader)
 	concat := q.Cons(MakeSymbol("concat"))
 	seqList := NewListFrom(MakeSymbol("seq"), concat)
@@ -633,7 +633,7 @@ func syntaxQuoteColl(seq Seq, env map[Symbol]Symbol, reader *Reader, ctor Symbol
 	return res.WithInfo(info)
 }
 
-func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) Object {
+func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object {
 	if isSelfEvaluating(obj) {
 		return obj
 	}
@@ -642,10 +642,10 @@ func makeSyntaxQuote(obj Object, env map[Symbol]Symbol, reader *Reader) Object {
 	case Symbol:
 		str := *s.name
 		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
-			sym, ok := env[s]
+			sym, ok := env[s.name]
 			if !ok {
 				sym = generateSymbol(str[:len(str)-1])
-				env[s] = sym
+				env[s.name] = sym
 			}
 			obj = DeriveReadObject(obj, sym)
 		}
@@ -673,7 +673,7 @@ func readTagged(reader *Reader) Object {
 	obj := Read(reader)
 	switch s := obj.(type) {
 	case Symbol:
-		readFunc := DATA_READERS[s]
+		readFunc := DATA_READERS[s.name]
 		if readFunc == nil {
 			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Read warning: No reader function for tag %s\n", reader.line, reader.column, s.ToString(false))
 			return Read(reader)
@@ -764,7 +764,7 @@ func Read(reader *Reader) Object {
 		return makeQuote(nextObj, MakeSymbol("unquote"))
 	case r == '`':
 		nextObj := Read(reader)
-		return makeSyntaxQuote(nextObj, make(map[Symbol]Symbol), reader)
+		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader)
 	case r == '^':
 		return readWithMeta(reader)
 	case r == '#':

@@ -3,14 +3,14 @@ package main
 type (
 	Namespace struct {
 		name     Symbol
-		mappings map[Symbol]*Var
+		mappings map[*string]*Var
 	}
 )
 
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		name:     sym,
-		mappings: make(map[Symbol]*Var),
+		mappings: make(map[*string]*Var),
 	}
 }
 
@@ -18,26 +18,26 @@ func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
 	if sym.ns != nil {
 		panic(RT.newError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
 	}
-	ns.mappings[sym] = vr
+	ns.mappings[sym.name] = vr
 	return vr
 }
 
 func (ns *Namespace) ReferAll(other *Namespace) {
-	for sym, vr := range other.mappings {
-		ns.Refer(sym, vr)
+	for name, vr := range other.mappings {
+		ns.mappings[name] = vr
 	}
 }
 
 // sym must be not qualified
 func (ns *Namespace) intern(sym Symbol) *Var {
 	sym.meta = nil
-	v, ok := ns.mappings[sym]
+	v, ok := ns.mappings[sym.name]
 	if !ok {
 		v = &Var{
 			ns:   ns,
 			name: sym,
 		}
-		ns.mappings[sym] = v
+		ns.mappings[sym.name] = v
 	}
 	return v
 }

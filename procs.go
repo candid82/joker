@@ -128,7 +128,7 @@ var procSetMacro Proc = func(args []Object) Object {
 	}
 }
 
-var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")]
+var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
 	coreNamespace.intern(MakeSymbol(name)).value = proc

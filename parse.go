@@ -112,7 +112,7 @@ type (
 		Call(args []Object) Object
 	}
 	Env struct {
-		namespaces       map[Symbol]*Namespace
+		namespaces       map[*string]*Namespace
 		currentNamespace *Namespace
 	}
 	Binding struct {
@@ -121,7 +121,7 @@ type (
 		frame int
 	}
 	Bindings struct {
-		bindings map[Symbol]*Binding
+		bindings map[*string]*Binding
 		parent   *Bindings
 		frame    int
 	}
@@ -194,7 +194,7 @@ func (ctx *ParseContext) GetLoopBindings() []Symbol {
 }
 
 func (ctx *ParseContext) AddLocalBinding(sym Symbol, index int) {
-	ctx.localBindings.bindings[sym] = &Binding{
+	ctx.localBindings.bindings[sym.name] = &Binding{
 		name:  sym,
 		frame: ctx.localBindings.frame,
 		index: index,
@@ -207,7 +207,7 @@ func (ctx *ParseContext) PushEmptyLocalFrame() {
 		frame = ctx.localBindings.frame + 1
 	}
 	ctx.localBindings = &Bindings{
-		bindings: make(map[Symbol]*Binding),
+		bindings: make(map[*string]*Binding),
 		parent:   ctx.localBindings,
 		frame:    frame,
 	}
@@ -227,7 +227,7 @@ func (ctx *ParseContext) PopLocalFrame() {
 func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
 	env := ctx.localBindings
 	for env != nil {
-		if b, ok := env.bindings[sym]; ok {
+		if b, ok := env.bindings[sym.name]; ok {
 			return b
 		}
 		env = env.parent
@@ -236,20 +236,20 @@ func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
 }
 
 func (env *Env) EnsureNamespace(sym Symbol) {
-	if env.namespaces[sym] == nil {
-		env.namespaces[sym] = NewNamespace(sym)
+	if env.namespaces[sym.name] == nil {
+		env.namespaces[sym.name] = NewNamespace(sym)
 	}
 }
 
 func NewEnv(currentNs Symbol) *Env {
 	res := &Env{
-		namespaces: make(map[Symbol]*Namespace),
+		namespaces: make(map[*string]*Namespace),
 		currentNamespace: &Namespace{
 			name:     currentNs,
-			mappings: make(map[Symbol]*Var),
+			mappings: make(map[*string]*Var),
 		},
 	}
-	res.namespaces[currentNs] = res.currentNamespace
+	res.namespaces[currentNs.name] = res.currentNamespace
 	res.EnsureNamespace(MakeSymbol("gclojure.core"))
 	return res
 }
@@ -259,12 +259,12 @@ func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	if s.ns == nil {
 		ns = env.currentNamespace
 	} else {
-		ns = env.namespaces[Symbol{name: s.ns}]
+		ns = env.namespaces[s.ns]
 	}
 	if ns == nil {
 		return nil, false
 	}
-	v, ok := ns.mappings[Symbol{name: s.name}]
+	v, ok := ns.mappings[s.name]
 	return v, ok
 }
 
