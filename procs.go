@@ -117,6 +117,17 @@ var procPrint Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procSetMacro Proc = func(args []Object) Object {
+	checkArity(args, 1, 1)
+	switch vr := args[0].(type) {
+	case *Var:
+		vr.isMacro = true
+		return vr
+	default:
+		panic(RT.newError("set-macro argument must be a Var"))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core")]
 
 func intern(name string, proc Proc) {
@@ -132,4 +143,5 @@ func init() {
 	intern("/", procDivide)
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
+	intern("set-macro", procSetMacro)
 }

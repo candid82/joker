@@ -155,3 +155,12 @@ func Third(seq Seq) Object {
 func Forth(seq Seq) Object {
 	return seq.Rest().Rest().Rest().First()
 }
+
+func ToSlice(seq Seq) []Object {
+	res := make([]Object, 0)
+	for !seq.IsEmpty() {
+		res = append(res, seq.First())
+		seq = seq.Rest()
+	}
+	return res
+}

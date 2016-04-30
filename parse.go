@@ -690,8 +690,37 @@ func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 	}
 }
 
+func resolveMacro(obj Object, ctx *ParseContext) Callable {
+	switch sym := obj.(type) {
+	case Symbol:
+		if ctx.GetLocalBinding(sym) != nil {
+			return nil
+		}
+		vr, ok := ctx.globalEnv.Resolve(sym)
+		if !ok || !vr.isMacro {
+			return nil
+		}
+		return vr.value.(Callable)
+	default:
+		return nil
+	}
+}
+
+func macroexpand1(seq Seq, ctx *ParseContext) Object {
+	op := seq.First()
+	macro := resolveMacro(op, ctx)
+	if macro != nil {
+		return macro.Call(ToSlice(seq.Rest()))
+	} else {
+		return seq
+	}
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
-	// MACRO: do macroexpand1 here
+	expanded := macroexpand1(obj.(Seq), ctx)
+	if expanded != obj {
+		return parse(expanded, ctx)
+	}
 	seq := obj.(Seq)
 	if seq.IsEmpty() {
 		return NewLiteralExpr(obj)

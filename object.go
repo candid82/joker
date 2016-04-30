@@ -91,9 +91,10 @@ type (
 	Var struct {
 		InfoHolder
 		MetaHolder
-		ns    *Namespace
-		name  Symbol
-		value Object
+		ns      *Namespace
+		name    Symbol
+		value   Object
+		isMacro bool
 	}
 	Proc func([]Object) Object
 	Fn   struct {
