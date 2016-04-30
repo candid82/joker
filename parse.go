@@ -45,6 +45,12 @@ type (
 		args     []Expr
 		name     string
 	}
+	MacroCallExpr struct {
+		Position
+		macro Callable
+		args  []Object
+		name  string
+	}
 	RecurExpr struct {
 		Position
 		args []Expr
@@ -710,7 +716,13 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 	op := seq.First()
 	macro := resolveMacro(op, ctx)
 	if macro != nil {
-		return macro.Call(ToSlice(seq.Rest()))
+		expr := &MacroCallExpr{
+			Position: GetPosition(seq),
+			macro:    macro,
+			args:     ToSlice(seq.Rest()),
+			name:     *op.(Symbol).name,
+		}
+		return eval(expr, nil)
 	} else {
 		return seq
 	}

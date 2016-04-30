@@ -6,13 +6,17 @@ import (
 )
 
 type (
+	Traceable interface {
+		Pos() Position
+		Name() string
+	}
 	EvalError struct {
 		msg string
 		pos Position
 		rt  *Runtime
 	}
 	Frame struct {
-		callExpr *CallExpr
+		traceable Traceable
 	}
 	Callstack struct {
 		frames []Frame
@@ -61,15 +65,16 @@ func (rt *Runtime) stacktrace() string {
 	}
 	name := "global"
 	for _, f := range rt.callstack.frames {
-		b.WriteString(fmt.Sprintf("%s %d:%d\n", name, f.callExpr.line, f.callExpr.column))
-		name = f.callExpr.name
+		pos := f.traceable.Pos()
+		b.WriteString(fmt.Sprintf("%s %d:%d\n", name, pos.line, pos.column))
+		name = f.traceable.Name()
 	}
 	b.WriteString(fmt.Sprintf("%s %d:%d", name, pos.line, pos.column))
 	return b.String()
 }
 
 func (rt *Runtime) pushFrame() {
-	rt.callstack.pushFrame(Frame{callExpr: rt.currentExpr.(*CallExpr)})
+	rt.callstack.pushFrame(Frame{traceable: rt.currentExpr.(Traceable)})
 }
 
 func (rt *Runtime) popFrame() {
@@ -100,7 +105,8 @@ func (s *Callstack) clone() *Callstack {
 func (s *Callstack) String() string {
 	var b bytes.Buffer
 	for _, f := range s.frames {
-		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.callExpr.name, f.callExpr.line, f.callExpr.column))
+		pos := f.traceable.Pos()
+		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.traceable.Pos(), pos.line, pos.column))
 	}
 	if b.Len() > 0 {
 		b.Truncate(b.Len() - 1)
@@ -212,6 +218,10 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 	}
 }
 
+func (expr *CallExpr) Name() string {
+	return expr.name
+}
+
 func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
 	e := eval(expr.e, env)
 	switch e.(type) {
@@ -320,6 +330,14 @@ func (expr *LoopExpr) Eval(env *LocalEnv) Object {
 
 func (expr *RecurExpr) Eval(env *LocalEnv) Object {
 	return RecurBindings(evalSeq(expr.args, env))
+}
+
+func (expr *MacroCallExpr) Eval(env *LocalEnv) Object {
+	return expr.macro.Call(expr.args)
+}
+
+func (expr *MacroCallExpr) Name() string {
+	return expr.name
 }
 
 func TryEval(expr Expr) (obj Object, err error) {
