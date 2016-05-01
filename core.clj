@@ -1,11 +1,17 @@
-(def and
-  "Evaluates exprs one at a time, from left to right. If a form
-  returns logical false (nil or false), and returns that value and
-  doesn't evaluate any of the other expressions, otherwise it returns
-  the value of the last expr. (and) returns true."
-  (fn
-    ([] true)
-    ([x] x)
-    ([x & next]
-     `(let [and# ~x]
-        (if and# (and ~@next) and#)))))
+(def unquote)
+(def unquote-splicing)
+
+(def
+ ^{:arglists '([& items])
+   :doc "Creates a new list containing the items."
+   :added "1.0"}
+  list list)
+
+(def
+ ^{:arglists '([x seq])
+    :doc "Returns a new seq where x is the first element and seq is
+    the rest."
+   :added "1.0"
+   :static true}
+ cons cons)
+

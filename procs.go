@@ -128,6 +128,20 @@ var procSetMacro Proc = func(args []Object) Object {
 	}
 }
 
+var procList Proc = func(args []Object) Object {
+	return NewListFrom(args...)
+}
+
+var procCons Proc = func(args []Object) Object {
+	checkArity(args, 2, 2)
+	switch s := args[1].(type) {
+	case Seq:
+		return s.Cons(args[0])
+	default:
+		panic(RT.newError("Second argument to cons must be a sequence"))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -135,6 +149,8 @@ func intern(name string, proc Proc) {
 }
 
 func init() {
+	intern("list", procList)
+	intern("cons", procCons)
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
@@ -144,4 +160,9 @@ func init() {
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
 	intern("set-macro", procSetMacro)
+
+	currentNamespace := GLOBAL_ENV.currentNamespace
+	GLOBAL_ENV.currentNamespace = coreNamespace
+	processFile("core.clj", EVAL)
+	GLOBAL_ENV.currentNamespace = currentNamespace
 }
