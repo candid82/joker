@@ -205,3 +205,11 @@ var EmptyVector = &Vector{
 	root:  make([]interface{}, 32),
 	tail:  make([]interface{}, 0, 32),
 }
+
+func NewVectorFrom(objs ...Object) *Vector {
+	res := EmptyVector
+	for i := 0; i < len(objs); i++ {
+		res = res.conj(objs[i])
+	}
+	return res
+}

@@ -18,7 +18,55 @@ type (
 		key   Object
 		value Object
 	}
+	ArrayMapSeq struct {
+		InfoHolder
+		m     *ArrayMap
+		index int
+	}
 )
+
+func (seq *ArrayMapSeq) Equals(other interface{}) bool {
+	if seq == other {
+		return true
+	}
+	switch s := other.(type) {
+	case Sequenceable:
+		return SeqsEqual(seq, s.Seq())
+	default:
+		return false
+	}
+}
+
+func (seq *ArrayMapSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *ArrayMapSeq) WithInfo(info *ObjectInfo) Object {
+	seq.info = info
+	return seq
+}
+
+func (seq *ArrayMapSeq) First() Object {
+	if seq.index < len(seq.m.arr) {
+		return NewVectorFrom(seq.m.arr[seq.index], seq.m.arr[seq.index+1])
+	}
+	return NIL
+}
+
+func (seq *ArrayMapSeq) Rest() Seq {
+	if seq.index < len(seq.m.arr) {
+		return &ArrayMapSeq{m: seq.m, index: seq.index + 2}
+	}
+	return EmptyList
+}
+
+func (seq *ArrayMapSeq) IsEmpty() bool {
+	return seq.index >= len(seq.m.arr)
+}
+
+func (seq *ArrayMapSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
 
 func (v *ArrayMap) WithMeta(meta *ArrayMap) Object {
 	res := *v
@@ -187,6 +235,10 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 func (m *ArrayMap) WithInfo(info *ObjectInfo) Object {
 	m.info = info
 	return m
+}
+
+func (m *ArrayMap) Seq() Seq {
+	return &ArrayMapSeq{m: m, index: 0}
 }
 
 func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
