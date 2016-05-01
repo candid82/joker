@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 )
 
 type (
@@ -23,6 +24,10 @@ type (
 		count int
 	}
 )
+
+func (err IndexError) Error() string {
+	return fmt.Sprintf("Index %d is out of bounds [0..%d]", err.index, err.count)
+}
 
 func (v *Vector) WithMeta(meta *ArrayMap) Object {
 	res := *v
@@ -169,7 +174,10 @@ func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
 }
 
 func (vseq *VectorSeq) First() Object {
-	return vseq.vector.at(vseq.index)
+	if vseq.index+1 < vseq.vector.count {
+		return vseq.vector.at(vseq.index)
+	}
+	return NIL
 }
 
 func (vseq *VectorSeq) Rest() Seq {

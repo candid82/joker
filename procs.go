@@ -137,8 +137,20 @@ var procCons Proc = func(args []Object) Object {
 	switch s := args[1].(type) {
 	case Seq:
 		return s.Cons(args[0])
+	case Sequenceable:
+		return s.Seq().Cons(args[0])
 	default:
-		panic(RT.newError("Second argument to cons must be a sequence"))
+		panic(RT.newError("cons's second argument must be sequenceable"))
+	}
+}
+
+var procFirst Proc = func(args []Object) Object {
+	checkArity(args, 1, 1)
+	switch s := args[0].(type) {
+	case Sequenceable:
+		return s.Seq().First()
+	default:
+		panic(RT.newError("first's argument must be sequenceable"))
 	}
 }
 
@@ -151,6 +163,7 @@ func intern(name string, proc Proc) {
 func init() {
 	intern("list", procList)
 	intern("cons", procCons)
+	intern("first", procFirst)
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
