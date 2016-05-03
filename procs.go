@@ -171,6 +171,19 @@ var procRest Proc = func(args []Object) Object {
 	return s.Rest()
 }
 
+var procConj Proc = func(args []Object) Object {
+	switch c := args[0].(type) {
+	case Nil:
+		return NewListFrom(args[1])
+	case Conjable:
+		return c.Conj(args[1])
+	case Seq:
+		return c.Cons(args[1])
+	default:
+		panic(RT.newError("conj's first argument must be a collection"))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -183,6 +196,7 @@ func init() {
 	intern("first", procFirst)
 	intern("next", procNext)
 	intern("rest", procRest)
+	intern("conj*", procConj)
 
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)

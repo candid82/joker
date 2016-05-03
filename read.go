@@ -443,7 +443,7 @@ func readList(reader *Reader) Object {
 	reader.Get()
 	list := EmptyList
 	for i := len(s) - 1; i >= 0; i-- {
-		list = list.Conj(s[i])
+		list = list.conj(s[i])
 	}
 	res := MakeReadObject(reader, list)
 	return res

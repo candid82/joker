@@ -199,6 +199,10 @@ func (v *Vector) Seq() Seq {
 	return &VectorSeq{vector: v, index: 0}
 }
 
+func (v *Vector) Conj(obj Object) Conjable {
+	return v.conj(obj)
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

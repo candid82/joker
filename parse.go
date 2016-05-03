@@ -442,7 +442,7 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 				panic(&ParseError{obj: ro, msg: "Unsupported binding form: " + sym.ToString(false)})
 			}
 		}
-		if sym == MakeSymbol("&") {
+		if MakeSymbol("&").Equals(sym) {
 			if v.count > i+2 {
 				ro := v.at(i + 2)
 				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.ToString(false)})

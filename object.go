@@ -20,6 +20,10 @@ type (
 		GetInfo() *ObjectInfo
 		WithInfo(*ObjectInfo) Object
 	}
+	Conjable interface {
+		Object
+		Conj(obj Object) Conjable
+	}
 	Error interface {
 		error
 		Object

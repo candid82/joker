@@ -22,7 +22,7 @@ func NewList(first Object, rest *List) *List {
 func NewListFrom(objs ...Object) *List {
 	res := EmptyList
 	for i := len(objs) - 1; i >= 0; i-- {
-		res = res.Conj(objs[i])
+		res = res.conj(objs[i])
 	}
 	return res
 }
@@ -33,8 +33,12 @@ func (list *List) WithMeta(meta *ArrayMap) Object {
 	return &res
 }
 
-func (list *List) Conj(obj Object) *List {
+func (list *List) conj(obj Object) *List {
 	return NewList(obj, list)
+}
+
+func (list *List) Conj(obj Object) Conjable {
+	return list.conj(obj)
 }
 
 func (list *List) ToString(escape bool) string {
@@ -71,7 +75,7 @@ func (list *List) IsEmpty() bool {
 }
 
 func (list *List) Cons(obj Object) Seq {
-	return list.Conj(obj)
+	return list.conj(obj)
 }
 
 func (list *List) Seq() Seq {
