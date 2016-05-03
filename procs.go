@@ -165,6 +165,12 @@ var procNext Proc = func(args []Object) Object {
 	return res
 }
 
+var procRest Proc = func(args []Object) Object {
+	checkArity(args, 1, 1)
+	s := ensureSeq(args[0], "rest's argument must be sequenceable")
+	return s.Rest()
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -176,6 +182,7 @@ func init() {
 	intern("cons", procCons)
 	intern("first", procFirst)
 	intern("next", procNext)
+	intern("rest", procRest)
 
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
