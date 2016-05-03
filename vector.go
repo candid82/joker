@@ -174,7 +174,7 @@ func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
 }
 
 func (vseq *VectorSeq) First() Object {
-	if vseq.index+1 < vseq.vector.count {
+	if vseq.index < vseq.vector.count {
 		return vseq.vector.at(vseq.index)
 	}
 	return NIL

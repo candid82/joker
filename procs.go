@@ -135,8 +135,6 @@ var procList Proc = func(args []Object) Object {
 var procCons Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	switch s := args[1].(type) {
-	case Seq:
-		return s.Cons(args[0])
 	case Sequenceable:
 		return s.Seq().Cons(args[0])
 	default:
@@ -154,6 +152,20 @@ var procFirst Proc = func(args []Object) Object {
 	}
 }
 
+var procNext Proc = func(args []Object) Object {
+	checkArity(args, 1, 1)
+	switch s := args[0].(type) {
+	case Sequenceable:
+		res := s.Seq().Rest()
+		if res.IsEmpty() {
+			return NIL
+		}
+		return res
+	default:
+		panic(RT.newError("next's argument must be sequenceable"))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -164,6 +176,8 @@ func init() {
 	intern("list", procList)
 	intern("cons", procCons)
 	intern("first", procFirst)
+	intern("next", procNext)
+
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
