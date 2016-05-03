@@ -132,38 +132,37 @@ var procList Proc = func(args []Object) Object {
 	return NewListFrom(args...)
 }
 
+func ensureSeq(obj Object, msg string) Seq {
+	switch s := obj.(type) {
+	case Seq:
+		return s
+	case Sequenceable:
+		return s.Seq()
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
 var procCons Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	switch s := args[1].(type) {
-	case Sequenceable:
-		return s.Seq().Cons(args[0])
-	default:
-		panic(RT.newError("cons's second argument must be sequenceable"))
-	}
+	s := ensureSeq(args[1], "cons's second argument must be sequenceable")
+	return s.Cons(args[0])
 }
 
 var procFirst Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	switch s := args[0].(type) {
-	case Sequenceable:
-		return s.Seq().First()
-	default:
-		panic(RT.newError("first's argument must be sequenceable"))
-	}
+	s := ensureSeq(args[0], "first's argument must be sequenceable")
+	return s.First()
 }
 
 var procNext Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	switch s := args[0].(type) {
-	case Sequenceable:
-		res := s.Seq().Rest()
-		if res.IsEmpty() {
-			return NIL
-		}
-		return res
-	default:
-		panic(RT.newError("next's argument must be sequenceable"))
+	s := ensureSeq(args[0], "next's argument must be sequenceable")
+	res := s.Rest()
+	if res.IsEmpty() {
+		return NIL
 	}
+	return res
 }
 
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
