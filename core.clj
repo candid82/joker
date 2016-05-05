@@ -91,4 +91,11 @@
    :added "1.0"}
  nnext (fn nnext [x] (next (next x))))
 
+(def
+ ^{:arglists '(^clojure.lang.ISeq [coll])
+   :doc "Returns a seq on the collection. If the collection is
+    empty, returns nil.  (seq nil) returns nil."
+   :added "1.0"}
+ seq seq*)
+
 
