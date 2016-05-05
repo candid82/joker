@@ -67,4 +67,28 @@
    :added "1.0"}
  second (fn second [x] (first (next x))))
 
+(def
+ ^{:doc "Same as (first (first x))"
+   :arglists '([x])
+   :added "1.0"}
+ ffirst (fn ffirst [x] (first (first x))))
+
+(def
+ ^{:doc "Same as (next (first x))"
+   :arglists '([x])
+   :added "1.0"}
+ nfirst (fn nfirst [x] (next (first x))))
+
+(def
+ ^{:doc "Same as (first (next x))"
+   :arglists '([x])
+   :added "1.0"}
+ fnext (fn fnext [x] (first (next x))))
+
+(def
+ ^{:doc "Same as (next (next x))"
+   :arglists '([x])
+   :added "1.0"}
+ nnext (fn nnext [x] (next (next x))))
+
 
