@@ -18,16 +18,16 @@ func (v *Set) WithMeta(meta *ArrayMap) Object {
 	return &res
 }
 
-func (set *Set) Cons(obj Object) *Set {
-	return &Set{m: set.m.Assoc(obj, Bool{b: true})}
-}
-
 func (set *Set) Disjoin(obj Object) *Set {
 	return &Set{m: set.m.Without(obj)}
 }
 
 func (set *Set) Add(obj Object) bool {
 	return set.m.Add(obj, Bool{b: true})
+}
+
+func (set *Set) Conj(obj Object) Conjable {
+	return &Set{m: set.m.Assoc(obj, Bool{b: true})}
 }
 
 func EmptySet() *Set {
