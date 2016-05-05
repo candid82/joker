@@ -314,6 +314,22 @@ func (n Nil) WithInfo(info *ObjectInfo) Object {
 	return n
 }
 
+func (n Nil) First() Object {
+	return NIL
+}
+
+func (n Nil) Rest() Seq {
+	return NIL
+}
+
+func (n Nil) IsEmpty() bool {
+	return true
+}
+
+func (n Nil) Cons(obj Object) Seq {
+	return NewListFrom(obj)
+}
+
 func (rat *Ratio) ToString(escape bool) string {
 	return rat.r.String()
 }

@@ -191,11 +191,11 @@ func intern(name string, proc Proc) {
 }
 
 func init() {
-	intern("list", procList)
-	intern("cons", procCons)
-	intern("first", procFirst)
-	intern("next", procNext)
-	intern("rest", procRest)
+	intern("list*", procList)
+	intern("cons*", procCons)
+	intern("first*", procFirst)
+	intern("next*", procNext)
+	intern("rest*", procRest)
 	intern("conj*", procConj)
 
 	intern("meta", procMeta)

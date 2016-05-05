@@ -18,35 +18,35 @@
  ^{:arglists '([& items])
    :doc "Creates a new list containing the items."
    :added "1.0"}
-  list list)
+  list list*)
 
 (def
  ^{:arglists '([x seq])
     :doc "Returns a new seq where x is the first element and seq is
     the rest."
    :added "1.0"}
- cons cons)
+ cons cons*)
 
 (def
  ^{:arglists '([coll])
    :doc "Returns the first item in the collection. Calls seq on its
     argument. If coll is nil, returns nil."
    :added "1.0"}
- first first)
+ first first*)
 
 (def
  ^{:arglists '([coll])
    :doc "Returns a seq of the items after the first. Calls seq on its
   argument.  If there are no more items, returns nil."
    :added "1.0"}
- next next)
+ next next*)
 
 (def
  ^{:arglists '([coll])
    :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
   argument."
    :added "1.0"}
- rest rest)
+ rest rest*)
 
 (def
  ^{:arglists '([coll x] [coll x & xs])
@@ -60,5 +60,11 @@
          (if xs
            (recur (conj* coll x) (first xs) (next xs))
            (conj* coll x)))))
+
+(def
+ ^{:doc "Same as (first (next x))"
+   :arglists '([x])
+   :added "1.0"}
+ second (fn second [x] (first (next x))))
 
 
