@@ -189,6 +189,18 @@ func (m *ArrayMap) iter() *ArrayMapIterator {
 	return &ArrayMapIterator{m: m}
 }
 
+func (m *ArrayMap) Conj(obj Object) Conjable {
+	switch obj := obj.(type) {
+	case *Vector:
+		if obj.count != 2 {
+			panic(RT.newError("Argument to map's conj must be a vector with two elements"))
+		}
+		return m.Assoc(obj.at(0), obj.at(1))
+	default:
+		panic(RT.newError("Argument to map's conj must be a vector with two elements"))
+	}
+}
+
 func EmptyArrayMap() *ArrayMap {
 	return &ArrayMap{}
 }
