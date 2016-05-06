@@ -25,6 +25,10 @@ type (
 	}
 )
 
+func (seq *ArrayMapSeq) GetType() *Type {
+	return TYPES["ArrayMapSeq"]
+}
+
 func (seq *ArrayMapSeq) Equals(other interface{}) bool {
 	if seq == other {
 		return true
@@ -247,6 +251,10 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 func (m *ArrayMap) WithInfo(info *ObjectInfo) Object {
 	m.info = info
 	return m
+}
+
+func (m *ArrayMap) GetType() *Type {
+	return TYPES["ArrayMap"]
 }
 
 func (m *ArrayMap) Seq() Seq {

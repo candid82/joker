@@ -830,7 +830,7 @@ func parse(obj Object, ctx *ParseContext) Expr {
 	var res Expr
 	canHaveMeta := false
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex:
+	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex, *Type:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true

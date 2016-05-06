@@ -14,11 +14,15 @@ type (
 	Equality interface {
 		Equals(interface{}) bool
 	}
+	Type struct {
+		name string
+	}
 	Object interface {
 		Equality
 		ToString(escape bool) string
 		GetInfo() *ObjectInfo
 		WithInfo(*ObjectInfo) Object
+		GetType() *Type
 	}
 	Conjable interface {
 		Object
@@ -115,6 +119,37 @@ type (
 	RecurBindings []Object
 )
 
+var TYPES = map[string]*Type{}
+
+func init() {
+	TYPES["String"] = &Type{name: "String"}
+	TYPES["Int"] = &Type{name: "Int"}
+	TYPES["Type"] = &Type{name: "Type"}
+	TYPES["Char"] = &Type{name: "Char"}
+	TYPES["Double"] = &Type{name: "Double"}
+	TYPES["BigInt"] = &Type{name: "BigInt"}
+	TYPES["BigFloat"] = &Type{name: "BigFloat"}
+	TYPES["Ratio"] = &Type{name: "Ratio"}
+	TYPES["Bool"] = &Type{name: "Bool"}
+	TYPES["Nil"] = &Type{name: "Nil"}
+	TYPES["Keyword"] = &Type{name: "Keyword"}
+	TYPES["Symbol"] = &Type{name: "Symbol"}
+	TYPES["Regex"] = &Type{name: "Regex"}
+	TYPES["Var"] = &Type{name: "Var"}
+	TYPES["Proc"] = &Type{name: "Proc"}
+	TYPES["Fn"] = &Type{name: "Fn"}
+	TYPES["ExInfo"] = &Type{name: "ExInfo"}
+	TYPES["RecurBindings"] = &Type{name: "RecurBindings"}
+	TYPES["Vector"] = &Type{name: "Vector"}
+	TYPES["ArrayMap"] = &Type{name: "ArrayMap"}
+	TYPES["Set"] = &Type{name: "Set"}
+	TYPES["List"] = &Type{name: "List"}
+	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq"}
+	TYPES["ArraySeq"] = &Type{name: "ArraySeq"}
+	TYPES["ConsSeq"] = &Type{name: "ConsSeq"}
+	TYPES["VectorSeq"] = &Type{name: "VectorSeq"}
+}
+
 func panicArity(n int) {
 	name := RT.currentExpr.(*CallExpr).name
 	panic(RT.newError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
@@ -125,6 +160,26 @@ func checkArity(args []Object, min int, max int) {
 	if n < min || n > max {
 		panicArity(n)
 	}
+}
+
+func (t *Type) ToString(escape bool) string {
+	return t.name
+}
+
+func (t *Type) Equals(other interface{}) bool {
+	return t == other
+}
+
+func (t *Type) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (t *Type) WithInfo(info *ObjectInfo) Object {
+	return t
+}
+
+func (t *Type) GetType() *Type {
+	return TYPES["Type"]
 }
 
 func (rb RecurBindings) ToString(escape bool) string {
@@ -141,6 +196,10 @@ func (rb RecurBindings) GetInfo() *ObjectInfo {
 
 func (rb RecurBindings) WithInfo(info *ObjectInfo) Object {
 	return rb
+}
+
+func (rb RecurBindings) GetType() *Type {
+	return TYPES["RecurBindings"]
 }
 
 func (exInfo *ExInfo) ToString(escape bool) string {
@@ -163,6 +222,10 @@ func (exInfo *ExInfo) Equals(other interface{}) bool {
 func (exInfo *ExInfo) WithInfo(info *ObjectInfo) Object {
 	exInfo.info = info
 	return exInfo
+}
+
+func (exInfo *ExInfo) GetType() *Type {
+	return TYPES["ExInfo"]
 }
 
 func (exInfo *ExInfo) Error() string {
@@ -191,6 +254,10 @@ func (fn *Fn) WithMeta(meta *ArrayMap) Object {
 func (fn *Fn) WithInfo(info *ObjectInfo) Object {
 	fn.info = info
 	return fn
+}
+
+func (fn *Fn) GetType() *Type {
+	return TYPES["Fn"]
 }
 
 func (fn *Fn) Call(args []Object) Object {
@@ -241,6 +308,10 @@ func (p Proc) WithInfo(*ObjectInfo) Object {
 	return p
 }
 
+func (p Proc) GetType() *Type {
+	return TYPES["Proc"]
+}
+
 func (i InfoHolder) GetInfo() *ObjectInfo {
 	return i.info
 }
@@ -264,6 +335,10 @@ func (v *Var) WithMeta(meta *ArrayMap) Object {
 func (v *Var) WithInfo(info *ObjectInfo) Object {
 	v.info = info
 	return v
+}
+
+func (v *Var) GetType() *Type {
+	return TYPES["Var"]
 }
 
 func MakeQualifiedSymbol(ns, name string) Symbol {
@@ -314,6 +389,10 @@ func (n Nil) WithInfo(info *ObjectInfo) Object {
 	return n
 }
 
+func (n Nil) GetType() *Type {
+	return TYPES["Nil"]
+}
+
 func (n Nil) First() Object {
 	return NIL
 }
@@ -358,6 +437,10 @@ func (rat *Ratio) WithInfo(info *ObjectInfo) Object {
 	return rat
 }
 
+func (rat *Ratio) GetType() *Type {
+	return TYPES["Ratio"]
+}
+
 func (bi *BigInt) ToString(escape bool) string {
 	return bi.b.String() + "N"
 }
@@ -379,6 +462,10 @@ func (bi *BigInt) Equals(other interface{}) bool {
 func (bi *BigInt) WithInfo(info *ObjectInfo) Object {
 	bi.info = info
 	return bi
+}
+
+func (bi *BigInt) GetType() *Type {
+	return TYPES["BigInt"]
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
@@ -404,6 +491,10 @@ func (bf *BigFloat) WithInfo(info *ObjectInfo) Object {
 	return bf
 }
 
+func (bf *BigFloat) GetType() *Type {
+	return TYPES["BigFloat"]
+}
+
 func (c Char) ToString(escape bool) string {
 	if escape {
 		return escapeRune(c.ch)
@@ -425,6 +516,10 @@ func (c Char) WithInfo(info *ObjectInfo) Object {
 	return c
 }
 
+func (c Char) GetType() *Type {
+	return TYPES["Char"]
+}
+
 func (d Double) ToString(escape bool) string {
 	return fmt.Sprintf("%f", d.d)
 }
@@ -441,6 +536,10 @@ func (d Double) Equals(other interface{}) bool {
 func (d Double) WithInfo(info *ObjectInfo) Object {
 	d.info = info
 	return d
+}
+
+func (d Double) GetType() *Type {
+	return TYPES["Double"]
 }
 
 func (i Int) ToString(escape bool) string {
@@ -461,6 +560,10 @@ func (i Int) WithInfo(info *ObjectInfo) Object {
 	return i
 }
 
+func (i Int) GetType() *Type {
+	return TYPES["Int"]
+}
+
 func (b Bool) ToString(escape bool) string {
 	return fmt.Sprintf("%t", b.b)
 }
@@ -479,6 +582,10 @@ func (b Bool) WithInfo(info *ObjectInfo) Object {
 	return b
 }
 
+func (b Bool) GetType() *Type {
+	return TYPES["Bool"]
+}
+
 func (k Keyword) ToString(escape bool) string {
 	return k.k
 }
@@ -495,6 +602,10 @@ func (k Keyword) Equals(other interface{}) bool {
 func (k Keyword) WithInfo(info *ObjectInfo) Object {
 	k.info = info
 	return k
+}
+
+func (k Keyword) GetType() *Type {
+	return TYPES["Keyword"]
 }
 
 func (rx Regex) ToString(escape bool) string {
@@ -518,6 +629,10 @@ func (rx Regex) WithInfo(info *ObjectInfo) Object {
 	return rx
 }
 
+func (rx Regex) GetType() *Type {
+	return TYPES["Regex"]
+}
+
 func (s Symbol) ToString(escape bool) string {
 	if s.ns != nil {
 		return *s.ns + "/" + *s.name
@@ -539,6 +654,10 @@ func (s Symbol) WithInfo(info *ObjectInfo) Object {
 	return s
 }
 
+func (s Symbol) GetType() *Type {
+	return TYPES["Symbol"]
+}
+
 func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.s)
@@ -558,6 +677,10 @@ func (s String) Equals(other interface{}) bool {
 func (s String) WithInfo(info *ObjectInfo) Object {
 	s.info = info
 	return s
+}
+
+func (s String) GetType() *Type {
+	return TYPES["String"]
 }
 
 func IsSymbol(obj Object) bool {

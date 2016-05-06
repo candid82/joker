@@ -92,10 +92,17 @@
  nnext (fn nnext [x] (next (next x))))
 
 (def
- ^{:arglists '(^clojure.lang.ISeq [coll])
+ ^{:arglists '([coll])
    :doc "Returns a seq on the collection. If the collection is
     empty, returns nil.  (seq nil) returns nil."
    :added "1.0"}
  seq seq*)
+
+(def
+ ^{:arglists '([c x])
+   :doc "Evaluates x and tests if it is an instance of type
+    c. Returns true or false"
+   :added "1.0"}
+ instance? instance?*)
 
 

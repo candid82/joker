@@ -62,6 +62,10 @@ func (list *List) WithInfo(info *ObjectInfo) Object {
 	return list
 }
 
+func (list *List) GetType() *Type {
+	return TYPES["List"]
+}
+
 func (list *List) First() Object {
 	return list.first
 }

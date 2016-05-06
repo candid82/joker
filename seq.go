@@ -51,6 +51,10 @@ func (seq *ArraySeq) WithInfo(info *ObjectInfo) Object {
 	return seq
 }
 
+func (seq *ArraySeq) GetType() *Type {
+	return TYPES["ArraySeq"]
+}
+
 func (seq *ArraySeq) First() Object {
 	return seq.arr[seq.index]
 }
@@ -112,6 +116,10 @@ func (seq *ConsSeq) ToString(escape bool) string {
 func (seq *ConsSeq) WithInfo(info *ObjectInfo) Object {
 	seq.info = info
 	return seq
+}
+
+func (seq *ConsSeq) GetType() *Type {
+	return TYPES["ConsSeq"]
 }
 
 func (seq *ConsSeq) First() Object {

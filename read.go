@@ -377,6 +377,8 @@ func readSymbol(reader *Reader, first rune) Object {
 		return MakeReadObject(reader, Bool{b: false})
 	case first == ':':
 		return MakeReadObject(reader, Keyword{k: str})
+	case TYPES[str] != nil:
+		return TYPES[str]
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}

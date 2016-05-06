@@ -152,6 +152,10 @@ func (v *Vector) WithInfo(info *ObjectInfo) Object {
 	return v
 }
 
+func (v *Vector) GetType() *Type {
+	return TYPES["Vector"]
+}
+
 func (vseq *VectorSeq) Equals(other interface{}) bool {
 	if vseq == other {
 		return true
@@ -171,6 +175,10 @@ func (vseq *VectorSeq) ToString(escape bool) string {
 func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
 	vseq.info = info
 	return vseq
+}
+
+func (vseq *VectorSeq) GetType() *Type {
+	return TYPES["VectorSeq"]
 }
 
 func (vseq *VectorSeq) First() Object {

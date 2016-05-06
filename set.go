@@ -62,6 +62,10 @@ func (set *Set) WithInfo(info *ObjectInfo) Object {
 	return set
 }
 
+func (seq *Set) GetType() *Type {
+	return TYPES["Set"]
+}
+
 func (set *Set) Seq() Seq {
 	return set.m.Keys()
 }

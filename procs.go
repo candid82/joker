@@ -189,6 +189,16 @@ var procSeq Proc = func(args []Object) Object {
 	return ensureSeq(args[0], "Argument to seq must be sequenceable")
 }
 
+var procIsInstance Proc = func(args []Object) Object {
+	checkArity(args, 2, 2)
+	switch t := args[0].(type) {
+	case *Type:
+		return Bool{b: args[1].GetType() == t}
+	default:
+		panic(RT.newError("First argument to instance? must be a type"))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -203,6 +213,7 @@ func init() {
 	intern("rest*", procRest)
 	intern("conj*", procConj)
 	intern("seq*", procSeq)
+	intern("instance?*", procIsInstance)
 
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)
