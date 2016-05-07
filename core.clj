@@ -105,4 +105,34 @@
    :added "1.0"}
  instance? instance?*)
 
+(def
+ ^{:arglists '([x])
+   :doc "Returns true if x is a sequence"
+   :added "1.0"}
+ seq? (fn seq? [x] (instance? Seq x)))
+
+(def
+ ^{:arglists '([x])
+   :doc "Returns true if x is a Char"
+   :added "1.0"}
+ char? (fn char? [x] (instance? Char x)))
+
+(def
+ ^{:arglists '([x])
+   :doc "Returns true if x is a String"
+   :added "1.0"}
+ string? (fn string? [x] (instance? String x)))
+
+(def
+ ^{:arglists '([x])
+   :doc "Returns true if x is a map"
+   :added "1.0"}
+ map? (fn map? [x] (instance? ArrayMap x)))
+
+(def
+ ^{:arglists '([x])
+   :doc "Returns true if x is a vector"
+   :added "1.0"}
+ vector? (fn vector? [x] (instance? Vector x)))
+
 

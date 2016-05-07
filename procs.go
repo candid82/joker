@@ -1,5 +1,9 @@
 package main
 
+import (
+	"reflect"
+)
+
 func ensureNumber(obj Object) Number {
 	switch n := obj.(type) {
 	case Number:
@@ -193,7 +197,11 @@ var procIsInstance Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	switch t := args[0].(type) {
 	case *Type:
-		return Bool{b: args[1].GetType() == t}
+		if t.reflectType.Kind() == reflect.Interface {
+			return Bool{b: args[1].GetType().reflectType.Implements(t.reflectType)}
+		} else {
+			return Bool{b: args[1].GetType().reflectType == t.reflectType}
+		}
 	default:
 		panic(RT.newError("First argument to instance? must be a type"))
 	}

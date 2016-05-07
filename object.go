@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"reflect"
 	"strings"
 )
 
@@ -15,7 +16,8 @@ type (
 		Equals(interface{}) bool
 	}
 	Type struct {
-		name string
+		name        string
+		reflectType reflect.Type
 	}
 	Object interface {
 		Equality
@@ -122,32 +124,33 @@ type (
 var TYPES = map[string]*Type{}
 
 func init() {
-	TYPES["String"] = &Type{name: "String"}
-	TYPES["Int"] = &Type{name: "Int"}
-	TYPES["Type"] = &Type{name: "Type"}
-	TYPES["Char"] = &Type{name: "Char"}
-	TYPES["Double"] = &Type{name: "Double"}
-	TYPES["BigInt"] = &Type{name: "BigInt"}
-	TYPES["BigFloat"] = &Type{name: "BigFloat"}
-	TYPES["Ratio"] = &Type{name: "Ratio"}
-	TYPES["Bool"] = &Type{name: "Bool"}
-	TYPES["Nil"] = &Type{name: "Nil"}
-	TYPES["Keyword"] = &Type{name: "Keyword"}
-	TYPES["Symbol"] = &Type{name: "Symbol"}
-	TYPES["Regex"] = &Type{name: "Regex"}
-	TYPES["Var"] = &Type{name: "Var"}
-	TYPES["Proc"] = &Type{name: "Proc"}
-	TYPES["Fn"] = &Type{name: "Fn"}
-	TYPES["ExInfo"] = &Type{name: "ExInfo"}
-	TYPES["RecurBindings"] = &Type{name: "RecurBindings"}
-	TYPES["Vector"] = &Type{name: "Vector"}
-	TYPES["ArrayMap"] = &Type{name: "ArrayMap"}
-	TYPES["Set"] = &Type{name: "Set"}
-	TYPES["List"] = &Type{name: "List"}
-	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq"}
-	TYPES["ArraySeq"] = &Type{name: "ArraySeq"}
-	TYPES["ConsSeq"] = &Type{name: "ConsSeq"}
-	TYPES["VectorSeq"] = &Type{name: "VectorSeq"}
+	TYPES["String"] = &Type{name: "String", reflectType: reflect.TypeOf((*String)(nil)).Elem()}
+	TYPES["Int"] = &Type{name: "Int", reflectType: reflect.TypeOf((*Int)(nil)).Elem()}
+	TYPES["Type"] = &Type{name: "Type", reflectType: reflect.TypeOf((*Type)(nil))}
+	TYPES["Char"] = &Type{name: "Char", reflectType: reflect.TypeOf((*Char)(nil)).Elem()}
+	TYPES["Double"] = &Type{name: "Double", reflectType: reflect.TypeOf((*Double)(nil)).Elem()}
+	TYPES["BigInt"] = &Type{name: "BigInt", reflectType: reflect.TypeOf((*BigInt)(nil))}
+	TYPES["BigFloat"] = &Type{name: "BigFloat", reflectType: reflect.TypeOf((*BigFloat)(nil))}
+	TYPES["Ratio"] = &Type{name: "Ratio", reflectType: reflect.TypeOf((*Ratio)(nil))}
+	TYPES["Bool"] = &Type{name: "Bool", reflectType: reflect.TypeOf((*Bool)(nil)).Elem()}
+	TYPES["Nil"] = &Type{name: "Nil", reflectType: reflect.TypeOf((*Nil)(nil)).Elem()}
+	TYPES["Keyword"] = &Type{name: "Keyword", reflectType: reflect.TypeOf((*Keyword)(nil)).Elem()}
+	TYPES["Symbol"] = &Type{name: "Symbol", reflectType: reflect.TypeOf((*Symbol)(nil)).Elem()}
+	TYPES["Regex"] = &Type{name: "Regex", reflectType: reflect.TypeOf((*Regex)(nil)).Elem()}
+	TYPES["Var"] = &Type{name: "Var", reflectType: reflect.TypeOf((*Var)(nil))}
+	TYPES["Proc"] = &Type{name: "Proc", reflectType: reflect.TypeOf((*Proc)(nil)).Elem()}
+	TYPES["Fn"] = &Type{name: "Fn", reflectType: reflect.TypeOf((*Fn)(nil))}
+	TYPES["ExInfo"] = &Type{name: "ExInfo", reflectType: reflect.TypeOf((*ExInfo)(nil))}
+	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
+	TYPES["Vector"] = &Type{name: "Vector", reflectType: reflect.TypeOf((*Vector)(nil))}
+	TYPES["ArrayMap"] = &Type{name: "ArrayMap", reflectType: reflect.TypeOf((*ArrayMap)(nil))}
+	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil))}
+	TYPES["List"] = &Type{name: "List", reflectType: reflect.TypeOf((*List)(nil))}
+	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq", reflectType: reflect.TypeOf((*ArrayMapSeq)(nil))}
+	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
+	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
+	TYPES["VectorSeq"] = &Type{name: "VectorSeq", reflectType: reflect.TypeOf((*VectorSeq)(nil))}
+	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
 }
 
 func panicArity(n int) {
