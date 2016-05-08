@@ -823,7 +823,11 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	vr, ok := ctx.globalEnv.Resolve(sym)
 	if !ok {
 		if LINTER_MODE {
-			vr = ctx.globalEnv.currentNamespace.intern(sym)
+			ns := ""
+			if sym.ns != nil {
+				ns = *sym.ns
+			}
+			vr = ctx.globalEnv.currentNamespace.intern(MakeSymbol(ns + *sym.name))
 		} else {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
