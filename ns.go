@@ -30,6 +30,9 @@ func (ns *Namespace) ReferAll(other *Namespace) {
 
 // sym must be not qualified
 func (ns *Namespace) intern(sym Symbol) *Var {
+	if TYPES[*sym.name] != nil {
+		panic(RT.newError("Can't intern type name " + *sym.name + " as a Var"))
+	}
 	sym.meta = nil
 	v, ok := ns.mappings[sym.name]
 	if !ok {

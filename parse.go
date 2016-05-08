@@ -231,6 +231,9 @@ func (ctx *ParseContext) PopLocalFrame() {
 }
 
 func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
+	if sym.ns != nil {
+		return nil
+	}
 	env := ctx.localBindings
 	for env != nil {
 		if b, ok := env.bindings[sym.name]; ok {
@@ -809,6 +812,12 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		return &BindingExpr{
 			binding:  b,
 			Position: GetPosition(obj),
+		}
+	}
+	if sym.ns == nil && TYPES[*sym.name] != nil {
+		return &LiteralExpr{
+			Position: GetPosition(obj),
+			obj:      TYPES[*sym.name],
 		}
 	}
 	vr, ok := ctx.globalEnv.Resolve(sym)
