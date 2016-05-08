@@ -106,6 +106,7 @@ var procExInfo Proc = func(args []Object) Object {
 	return &ExInfo{
 		msg:  ensureString(args[0]),
 		data: ensureMap(args[1]),
+		rt:   RT.clone(),
 	}
 }
 
@@ -207,6 +208,10 @@ var procIsInstance Proc = func(args []Object) Object {
 	}
 }
 
+var procAssoc Proc = func(args []Object) Object {
+	return ensureMap(args[0]).Assoc(args[1], args[2])
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -222,6 +227,7 @@ func init() {
 	intern("conj*", procConj)
 	intern("seq*", procSeq)
 	intern("instance?*", procIsInstance)
+	intern("assoc*", procAssoc)
 
 	intern("meta", procMeta)
 	intern("zero?", procIsZero)

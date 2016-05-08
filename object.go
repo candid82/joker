@@ -117,6 +117,7 @@ type (
 		InfoHolder
 		msg  String
 		data *ArrayMap
+		rt   *Runtime
 	}
 	RecurBindings []Object
 )
@@ -232,7 +233,11 @@ func (exInfo *ExInfo) GetType() *Type {
 }
 
 func (exInfo *ExInfo) Error() string {
-	return exInfo.msg.s
+	if len(exInfo.rt.callstack.frames) > 0 {
+		return fmt.Sprintf("Exception: %s\nStacktrace:\n%s", exInfo.msg.s, exInfo.rt.stacktrace())
+	} else {
+		return fmt.Sprintf("Exception: %s", exInfo.msg.s)
+	}
 }
 
 func (fn *Fn) ToString(escape bool) string {
