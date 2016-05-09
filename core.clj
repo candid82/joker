@@ -152,3 +152,17 @@
           (recur ret (first kvs) (second kvs) (nnext kvs))
           (throw (ex-info "assoc expects even number of arguments after map/vector, found odd number" {})))
         ret)))))
+
+(def
+ ^{:arglists '([obj])
+   :doc "Returns the metadata of obj, returns nil if there is no metadata."
+   :added "1.0"}
+ meta meta*)
+
+(def
+ ^{:arglists '([obj m])
+   :doc "Returns an object of the same type and value as obj, with
+    map m as its metadata."
+   :added "1.0"}
+ with-meta with-meta*)
+

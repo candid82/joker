@@ -31,6 +31,15 @@ func ensureMap(obj Object) *ArrayMap {
 	}
 }
 
+func ensureMeta(args []Object, index int) Meta {
+	switch obj := args[index].(type) {
+	case Meta:
+		return obj
+	default:
+		panic(RT.newArgTypeError(index, "Meta"))
+	}
+}
+
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:
@@ -40,6 +49,11 @@ var procMeta Proc = func(args []Object) Object {
 		}
 	}
 	return NIL
+}
+
+var procWithMeta Proc = func(args []Object) Object {
+	checkArity(args, 2, 2)
+	return ensureMeta(args, 0).WithMeta(ensureMap(args[1]))
 }
 
 var procIsZero Proc = func(args []Object) Object {
@@ -228,8 +242,9 @@ func init() {
 	intern("seq*", procSeq)
 	intern("instance?*", procIsInstance)
 	intern("assoc*", procAssoc)
+	intern("meta*", procMeta)
+	intern("with-meta*", procWithMeta)
 
-	intern("meta", procMeta)
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
 	intern("-", procSubtract)
