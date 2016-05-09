@@ -51,7 +51,7 @@ func (rt *Runtime) newError(msg string) *EvalError {
 
 func (rt *Runtime) newArgTypeError(index int, typeName string) *EvalError {
 	name := rt.currentExpr.(*CallExpr).name
-	return rt.newError(fmt.Sprintf("Arg[(%d)] of %s must be of type %s", index, name, typeName))
+	return rt.newError(fmt.Sprintf("Arg[%d] of %s must be of type %s", index, name, typeName))
 }
 
 func (rt *Runtime) newErrorWithPos(msg string, pos Position) *EvalError {

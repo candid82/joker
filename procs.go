@@ -4,30 +4,30 @@ import (
 	"reflect"
 )
 
-func ensureNumber(obj Object) Number {
-	switch n := obj.(type) {
+func ensureNumber(args []Object, index int) Number {
+	switch obj := args[index].(type) {
 	case Number:
-		return n
+		return obj
 	default:
-		panic(RT.newError(obj.ToString(false) + " is not a Number"))
+		panic(RT.newArgTypeError(index, "Number"))
 	}
 }
 
-func ensureString(obj Object) String {
-	switch n := obj.(type) {
+func ensureString(args []Object, index int) String {
+	switch obj := args[index].(type) {
 	case String:
-		return n
+		return obj
 	default:
-		panic(RT.newError(obj.ToString(false) + " is not a String"))
+		panic(RT.newArgTypeError(index, "String"))
 	}
 }
 
-func ensureMap(obj Object) *ArrayMap {
-	switch n := obj.(type) {
+func ensureMap(args []Object, index int) *ArrayMap {
+	switch obj := args[index].(type) {
 	case *ArrayMap:
-		return n
+		return obj
 	default:
-		panic(RT.newError(obj.ToString(false) + " is not a Map"))
+		panic(RT.newArgTypeError(index, "Map"))
 	}
 }
 
@@ -53,30 +53,30 @@ var procMeta Proc = func(args []Object) Object {
 
 var procWithMeta Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	return ensureMeta(args, 0).WithMeta(ensureMap(args[1]))
+	return ensureMeta(args, 0).WithMeta(ensureMap(args, 1))
 }
 
 var procIsZero Proc = func(args []Object) Object {
 	// checkArity(args, 1, "zero?")
-	n := ensureNumber(args[0])
-	ops := GetOps(ensureNumber(args[0]))
+	n := ensureNumber(args, 0)
+	ops := GetOps(ensureNumber(args, 0))
 	return Bool{b: ops.IsZero(n)}
 }
 
 var procAdd Proc = func(args []Object) Object {
 	var res Number = Int{i: 0}
-	for _, n := range args {
+	for i, n := range args {
 		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Add(res, ensureNumber(n))
+		res = ops.Add(res, ensureNumber(args, i))
 	}
 	return res
 }
 
 var procMultiply Proc = func(args []Object) Object {
 	var res Number = Int{i: 1}
-	for _, n := range args {
+	for i, n := range args {
 		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Multiply(res, ensureNumber(n))
+		res = ops.Multiply(res, ensureNumber(args, i))
 	}
 	return res
 }
@@ -86,14 +86,14 @@ var procSubtract Proc = func(args []Object) Object {
 		panicArity(0)
 	}
 	var res Number = Int{i: 0}
-	numbers := args
+	start := 0
 	if len(args) > 1 {
-		res = ensureNumber(args[0])
-		numbers = args[1:]
+		res = ensureNumber(args, 0)
+		start = 1
 	}
-	for _, n := range numbers {
-		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Subtract(res, ensureNumber(n))
+	for i := start; i < len(args); i++ {
+		ops := GetOps(res).Combine(GetOps(args[i]))
+		res = ops.Subtract(res, ensureNumber(args, i))
 	}
 	return res
 }
@@ -103,14 +103,14 @@ var procDivide Proc = func(args []Object) Object {
 		panicArity(0)
 	}
 	var res Number = Int{i: 1}
-	numbers := args
+	start := 0
 	if len(args) > 1 {
-		res = ensureNumber(args[0])
-		numbers = args[1:]
+		res = ensureNumber(args, 0)
+		start = 1
 	}
-	for _, n := range numbers {
-		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Divide(res, ensureNumber(n))
+	for i := start; i < len(args); i++ {
+		ops := GetOps(res).Combine(GetOps(args[i]))
+		res = ops.Divide(res, ensureNumber(args, i))
 	}
 	return res
 }
@@ -118,8 +118,8 @@ var procDivide Proc = func(args []Object) Object {
 var procExInfo Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	return &ExInfo{
-		msg:  ensureString(args[0]),
-		data: ensureMap(args[1]),
+		msg:  ensureString(args, 0),
+		data: ensureMap(args, 1),
 		rt:   RT.clone(),
 	}
 }
@@ -223,7 +223,7 @@ var procIsInstance Proc = func(args []Object) Object {
 }
 
 var procAssoc Proc = func(args []Object) Object {
-	return ensureMap(args[0]).Assoc(args[1], args[2])
+	return ensureMap(args, 0).Assoc(args[1], args[2])
 }
 
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
