@@ -30,6 +30,9 @@ type (
 		Object
 		Conj(obj Object) Conjable
 	}
+	Counted interface {
+		Count() int
+	}
 	Error interface {
 		error
 		Object

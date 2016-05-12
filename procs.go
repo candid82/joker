@@ -226,6 +226,41 @@ var procAssoc Proc = func(args []Object) Object {
 	return ensureMap(args, 0).Assoc(args[1], args[2])
 }
 
+var procEquals Proc = func(args []Object) Object {
+	return Bool{b: args[0].Equals(args[1])}
+}
+
+var procCount Proc = func(args []Object) Object {
+	switch obj := args[0].(type) {
+	case Counted:
+		return Int{i: obj.Count()}
+	default:
+		s := ensureSeq(obj, "count not supported on this type: "+obj.GetType().ToString(false))
+		c := 0
+		for !s.IsEmpty() {
+			c++
+			s = s.Rest()
+			switch obj := s.(type) {
+			case Counted:
+				return Int{i: c + obj.Count()}
+			}
+		}
+		return Int{i: c}
+	}
+}
+
+var procSubvec Proc = func(args []Object) Object {
+	// TODO: implement proper Subvector structure
+	v := args[0].(*Vector)
+	start := args[1].(Int).i
+	end := args[2].(Int).i
+	subv := make([]Object, 0, end-start)
+	for i := start; i < end; i++ {
+		subv = append(subv, v.at(i))
+	}
+	return NewVectorFrom(subv...)
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -244,6 +279,9 @@ func init() {
 	intern("assoc*", procAssoc)
 	intern("meta*", procMeta)
 	intern("with-meta*", procWithMeta)
+	intern("=*", procEquals)
+	intern("count*", procCount)
+	intern("subvec*", procSubvec)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
