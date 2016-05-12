@@ -194,4 +194,11 @@
             (seq ret)))
         (list (asig fdecl))))))
 
-
+(def
+  ^{:arglists '([coll])
+    :doc "Return the last item in coll, in linear time"
+    :added "1.0"}
+  last (fn last [s]
+         (if (next s)
+           (recur (next s))
+           (first s))))
