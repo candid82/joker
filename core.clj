@@ -202,3 +202,13 @@
          (if (next s)
            (recur (next s))
            (first s))))
+
+(def
+  ^{:arglists '([coll])
+    :doc "Return a seq of all but the last item in coll, in linear time"
+    :added "1.0"}
+  butlast (fn butlast [s]
+            (loop [ret [] s s]
+              (if (next s)
+                (recur (conj ret (first s)) (next s))
+                (seq ret)))))
