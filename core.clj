@@ -212,3 +212,45 @@
               (if (next s)
                 (recur (conj ret (first s)) (next s))
                 (seq ret)))))
+
+(def
+
+  ^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
+         name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
+         to the var metadata. prepost-map defines a map with optional keys
+         :pre and :post that contain collections of pre or post conditions."
+         :arglists '([name doc-string? attr-map? [params*] prepost-map? body]
+                     [name doc-string? attr-map? ([params*] prepost-map? body)+ attr-map?])
+         :added "1.0"}
+  defn (fn defn [&form &env name & fdecl]
+         ;; Note: Cannot delegate this check to def because of the call to (with-meta name ..)
+         (if (instance? Symbol name)
+           nil
+           (throw (ex-info "First argument to defn must be a symbol" {})))
+         (let [m (if (string? (first fdecl))
+                   {:doc (first fdecl)}
+                   {})
+               fdecl (if (string? (first fdecl))
+                       (next fdecl)
+                       fdecl)
+               m (if (map? (first fdecl))
+                   (conj m (first fdecl))
+                   m)
+               fdecl (if (map? (first fdecl))
+                       (next fdecl)
+                       fdecl)
+               fdecl (if (vector? (first fdecl))
+                       (list fdecl)
+                       fdecl)
+               m (if (map? (last fdecl))
+                   (conj m (last fdecl))
+                   m)
+               fdecl (if (map? (last fdecl))
+                       (butlast fdecl)
+                       fdecl)
+               m (conj {:arglists (list 'quote (sigs fdecl))} m)
+               m (conj (if (meta name) (meta name) {}) m)]
+           (list 'def (with-meta name m)
+                 (cons `fn fdecl) ))))
+
+(set-macro* #'defn)

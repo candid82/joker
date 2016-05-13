@@ -148,6 +148,17 @@ type (
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
 var LOCAL_BINDINGS *Bindings = nil
 
+func (b *Bindings) ToMap() *ArrayMap {
+	res := EmptyArrayMap()
+	for b != nil {
+		for _, v := range b.bindings {
+			res = res.Assoc(v.name, NIL)
+		}
+		b = b.parent
+	}
+	return res
+}
+
 func (localEnv *LocalEnv) addEmptyFrame(capacity int) *LocalEnv {
 	res := LocalEnv{
 		bindings: make([]Object, 0, capacity),
@@ -722,7 +733,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 		expr := &MacroCallExpr{
 			Position: GetPosition(seq),
 			macro:    macro,
-			args:     ToSlice(seq.Rest()),
+			args:     ToSlice(seq.Rest().Cons(ctx.localBindings.ToMap()).Cons(seq)),
 			name:     *op.(Symbol).name,
 		}
 		return eval(expr, nil)
@@ -877,7 +888,14 @@ func parse(obj Object, ctx *ParseContext) Expr {
 func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			switch r.(type) {
+			case *ParseError:
+				err = r.(error)
+			case *EvalError:
+				err = r.(error)
+			default:
+				panic(r)
+			}
 		}
 	}()
 	return parse(obj, ctx), nil

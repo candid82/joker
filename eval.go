@@ -50,7 +50,7 @@ func (rt *Runtime) newError(msg string) *EvalError {
 }
 
 func (rt *Runtime) newArgTypeError(index int, typeName string) *EvalError {
-	name := rt.currentExpr.(*CallExpr).name
+	name := rt.currentExpr.(Traceable).Name()
 	return rt.newError(fmt.Sprintf("Arg[%d] of %s must be of type %s", index, name, typeName))
 }
 
@@ -348,7 +348,12 @@ func (expr *MacroCallExpr) Name() string {
 func TryEval(expr Expr) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			switch r.(type) {
+			case *EvalError:
+				err = r.(error)
+			default:
+				panic(r)
+			}
 		}
 	}()
 	return eval(expr, nil), nil

@@ -137,14 +137,9 @@ var procPrint Proc = func(args []Object) Object {
 }
 
 var procSetMacro Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
-	switch vr := args[0].(type) {
-	case *Var:
-		vr.isMacro = true
-		return vr
-	default:
-		panic(RT.newError("set-macro argument must be a Var"))
-	}
+	vr := args[0].(*Var)
+	vr.isMacro = true
+	return vr
 }
 
 var procList Proc = func(args []Object) Object {
@@ -290,7 +285,7 @@ func init() {
 	intern("/", procDivide)
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
-	intern("set-macro", procSetMacro)
+	intern("set-macro*", procSetMacro)
 
 	currentNamespace := GLOBAL_ENV.currentNamespace
 	GLOBAL_ENV.currentNamespace = coreNamespace

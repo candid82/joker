@@ -159,7 +159,7 @@ func init() {
 }
 
 func panicArity(n int) {
-	name := RT.currentExpr.(*CallExpr).name
+	name := RT.currentExpr.(Traceable).Name()
 	panic(RT.newError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
 
