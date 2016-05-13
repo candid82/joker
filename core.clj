@@ -254,3 +254,9 @@
                  (cons `fn fdecl) ))))
 
 (set-macro* #'defn)
+
+(defn cast
+  "Throws an error if x is not of a type t, else returns x."
+  {:added "1.0"}
+  [^Type t x]
+  (cast* t x))

@@ -22,6 +22,15 @@ func ensureString(args []Object, index int) String {
 	}
 }
 
+func ensureType(args []Object, index int) *Type {
+	switch obj := args[index].(type) {
+	case *Type:
+		return obj
+	default:
+		panic(RT.newArgTypeError(index, "Type"))
+	}
+}
+
 func ensureMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
 	case *ArrayMap:
@@ -256,6 +265,16 @@ var procSubvec Proc = func(args []Object) Object {
 	return NewVectorFrom(subv...)
 }
 
+var procCast Proc = func(args []Object) Object {
+	t := ensureType(args, 0)
+	if t.reflectType.Kind() == reflect.Interface &&
+		args[1].GetType().reflectType.Implements(t.reflectType) ||
+		args[1].GetType().reflectType == t.reflectType {
+		return args[1]
+	}
+	panic(RT.newError("Cannot cast " + args[1].GetType().ToString(false) + " to " + t.ToString(false)))
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -277,6 +296,7 @@ func init() {
 	intern("=*", procEquals)
 	intern("count*", procCount)
 	intern("subvec*", procSubvec)
+	intern("cast*", procCast)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
