@@ -214,6 +214,12 @@
                 (seq ret)))))
 
 (def
+  ^{:arglists '([& args])
+    :doc "Creates a new vector containing the args."
+    :added "1.0"}
+  vector vector*)
+
+(def
 
   ^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
          name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
