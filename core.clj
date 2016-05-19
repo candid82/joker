@@ -214,12 +214,6 @@
                 (seq ret)))))
 
 (def
-  ^{:arglists '([& args])
-    :doc "Creates a new vector containing the args."
-    :added "1.0"}
-  vector vector*)
-
-(def
   ^{:arglists '([coll])
     :doc "Creates a new vector containing the contents of coll."
     :added "1.0"}
@@ -272,3 +266,9 @@
   {:added "1.0"}
   [^Type t x]
   (cast* t x))
+
+(defn vector
+  "Creates a new vector containing the args."
+  {:added "1.0"}
+  [& args]
+  (vec args))
