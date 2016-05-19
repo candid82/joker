@@ -280,3 +280,10 @@
          equal, they are handled as if by repeated uses of assoc."
          :added "1.0"}
   hash-map hash-map*)
+
+(def
+  ^{:arglists '([& keys])
+    :doc "Returns a new hash set with supplied keys.  Any equal keys are
+         handled as if by repeated uses of conj."
+         :added "1.0"}
+  hash-set hash-set*)

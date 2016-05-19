@@ -301,6 +301,14 @@ var procHashMap Proc = func(args []Object) Object {
 	return res
 }
 
+var procHashSet Proc = func(args []Object) Object {
+	res := EmptySet()
+	for i := 0; i < len(args); i++ {
+		res.Add(args[i])
+	}
+	return res
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -325,6 +333,7 @@ func init() {
 	intern("cast*", procCast)
 	intern("vec*", procVec)
 	intern("hash-map*", procHashMap)
+	intern("hash-set*", procHashSet)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
