@@ -287,3 +287,9 @@
          handled as if by repeated uses of conj."
          :added "1.0"}
   hash-set hash-set*)
+
+(defn nil?
+  "Returns true if x is nil, false otherwise."
+  {:tag Bool
+   :added "1.0"}
+  [x] (instance? Nil x))

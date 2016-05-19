@@ -220,7 +220,11 @@ var procConj Proc = func(args []Object) Object {
 
 var procSeq Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	return ensureSeq(args, 0)
+	s := ensureSeq(args, 0)
+	if s.IsEmpty() {
+		return NIL
+	}
+	return s
 }
 
 var procIsInstance Proc = func(args []Object) Object {
