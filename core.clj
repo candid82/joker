@@ -214,12 +214,6 @@
                 (seq ret)))))
 
 (def
-  ^{:arglists '([coll])
-    :doc "Creates a new vector containing the contents of coll."
-    :added "1.0"}
-  vec vec*)
-
-(def
 
   ^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
          name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
@@ -267,8 +261,22 @@
   [^Type t x]
   (cast* t x))
 
+(def
+  ^{:arglists '([coll])
+    :doc "Creates a new vector containing the contents of coll."
+    :added "1.0"}
+  vec vec*)
+
 (defn vector
   "Creates a new vector containing the args."
   {:added "1.0"}
   [& args]
   (vec args))
+
+(def
+  ^{:arglists '([& keyvals])
+    :doc "keyval => key val
+         Returns a new hash map with supplied mappings.  If any keys are
+         equal, they are handled as if by repeated uses of assoc."
+         :added "1.0"}
+  hash-map hash-map*)

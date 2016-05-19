@@ -290,6 +290,17 @@ var procVec Proc = func(args []Object) Object {
 	return NewVectorFromSeq(ensureSeq(args, 0))
 }
 
+var procHashMap Proc = func(args []Object) Object {
+	if len(args)%2 != 0 {
+		panic(RT.newError("No value supplied for key " + args[len(args)-1].ToString(false)))
+	}
+	res := EmptyArrayMap()
+	for i := 0; i < len(args); i += 2 {
+		res.Set(args[i], args[i+1])
+	}
+	return res
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -313,6 +324,7 @@ func init() {
 	intern("subvec*", procSubvec)
 	intern("cast*", procCast)
 	intern("vec*", procVec)
+	intern("hash-map*", procHashMap)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
