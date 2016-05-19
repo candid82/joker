@@ -196,7 +196,7 @@
 
 (def
   ^{:arglists '([coll])
-    :doc "Return the last item in coll, in linear time"
+    :doc "Return the last item in coll, in linear time."
     :added "1.0"}
   last (fn last [s]
          (if (next s)
@@ -205,7 +205,7 @@
 
 (def
   ^{:arglists '([coll])
-    :doc "Return a seq of all but the last item in coll, in linear time"
+    :doc "Return a seq of all but the last item in coll, in linear time."
     :added "1.0"}
   butlast (fn butlast [s]
             (loop [ret [] s s]
@@ -218,6 +218,12 @@
     :doc "Creates a new vector containing the args."
     :added "1.0"}
   vector vector*)
+
+(def
+  ^{:arglists '([coll])
+    :doc "Creates a new vector containing the contents of coll."
+    :added "1.0"}
+  vec vec*)
 
 (def
 

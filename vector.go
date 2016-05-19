@@ -225,3 +225,12 @@ func NewVectorFrom(objs ...Object) *Vector {
 	}
 	return res
 }
+
+func NewVectorFromSeq(seq Seq) *Vector {
+	res := EmptyVector
+	for !seq.IsEmpty() {
+		res = res.conj(seq.First())
+		seq = seq.Rest()
+	}
+	return res
+}

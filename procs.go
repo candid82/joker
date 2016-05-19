@@ -4,6 +4,28 @@ import (
 	"reflect"
 )
 
+func assertSeq(obj Object, msg string) Seq {
+	switch s := obj.(type) {
+	case Seq:
+		return s
+	case Sequenceable:
+		return s.Seq()
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func ensureSeq(args []Object, index int) Seq {
+	switch s := args[index].(type) {
+	case Seq:
+		return s
+	case Sequenceable:
+		return s.Seq()
+	default:
+		panic(RT.newArgTypeError(index, "Seq"))
+	}
+}
+
 func ensureNumber(args []Object, index int) Number {
 	switch obj := args[index].(type) {
 	case Number:
@@ -155,32 +177,21 @@ var procList Proc = func(args []Object) Object {
 	return NewListFrom(args...)
 }
 
-func ensureSeq(obj Object, msg string) Seq {
-	switch s := obj.(type) {
-	case Seq:
-		return s
-	case Sequenceable:
-		return s.Seq()
-	default:
-		panic(RT.newError(msg))
-	}
-}
-
 var procCons Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	s := ensureSeq(args[1], "cons's second argument must be sequenceable")
+	s := ensureSeq(args, 1)
 	return s.Cons(args[0])
 }
 
 var procFirst Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args[0], "first's argument must be sequenceable")
+	s := ensureSeq(args, 0)
 	return s.First()
 }
 
 var procNext Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args[0], "next's argument must be sequenceable")
+	s := ensureSeq(args, 0)
 	res := s.Rest()
 	if res.IsEmpty() {
 		return NIL
@@ -190,7 +201,7 @@ var procNext Proc = func(args []Object) Object {
 
 var procRest Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args[0], "rest's argument must be sequenceable")
+	s := ensureSeq(args, 0)
 	return s.Rest()
 }
 
@@ -209,7 +220,7 @@ var procConj Proc = func(args []Object) Object {
 
 var procSeq Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	return ensureSeq(args[0], "Argument to seq must be sequenceable")
+	return ensureSeq(args, 0)
 }
 
 var procIsInstance Proc = func(args []Object) Object {
@@ -239,7 +250,7 @@ var procCount Proc = func(args []Object) Object {
 	case Counted:
 		return Int{i: obj.Count()}
 	default:
-		s := ensureSeq(obj, "count not supported on this type: "+obj.GetType().ToString(false))
+		s := assertSeq(obj, "count not supported on this type: "+obj.GetType().ToString(false))
 		c := 0
 		for !s.IsEmpty() {
 			c++
@@ -279,6 +290,10 @@ var procVector Proc = func(args []Object) Object {
 	return NewVectorFrom(args...)
 }
 
+var procVec Proc = func(args []Object) Object {
+	return NewVectorFromSeq(ensureSeq(args, 0))
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -302,6 +317,7 @@ func init() {
 	intern("subvec*", procSubvec)
 	intern("cast*", procCast)
 	intern("vector*", procVector)
+	intern("vec*", procVec)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
