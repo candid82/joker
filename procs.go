@@ -286,10 +286,6 @@ var procCast Proc = func(args []Object) Object {
 	panic(RT.newError("Cannot cast " + args[1].GetType().ToString(false) + " to " + t.ToString(false)))
 }
 
-var procVector Proc = func(args []Object) Object {
-	return NewVectorFrom(args...)
-}
-
 var procVec Proc = func(args []Object) Object {
 	return NewVectorFromSeq(ensureSeq(args, 0))
 }
@@ -316,7 +312,6 @@ func init() {
 	intern("count*", procCount)
 	intern("subvec*", procSubvec)
 	intern("cast*", procCast)
-	intern("vector*", procVector)
 	intern("vec*", procVec)
 
 	intern("zero?", procIsZero)
