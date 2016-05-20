@@ -20,6 +20,7 @@ type (
 	}
 	ConsSeq struct {
 		InfoHolder
+		MetaHolder
 		first Object
 		rest  Seq
 	}
@@ -95,6 +96,12 @@ func SeqToString(seq Seq, escape bool) string {
 	}
 	b.WriteRune(')')
 	return b.String()
+}
+
+func (seq *ConsSeq) WithMeta(meta *ArrayMap) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (seq *ConsSeq) Equals(other interface{}) bool {
