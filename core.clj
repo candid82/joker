@@ -292,7 +292,7 @@
   "Returns true if x is nil, false otherwise."
   {:tag Bool
    :added "1.0"}
-  [x] (instance? Nil x))
+  [x] (=* x nil))
 
 (def
 
@@ -353,3 +353,9 @@
   {:added "1.0"}
   [test & body]
     (list 'if test nil (cons 'do body)))
+
+(defn false?
+  "Returns true if x is the value false, false otherwise."
+  {:tag Bool
+   :added "1.0"}
+  [x] (=* x false))
