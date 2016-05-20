@@ -365,3 +365,9 @@
   {:tag Bool
    :added "1.0"}
   [x] (=* x true))
+
+(defn not
+  "Returns true if x is logical false, false otherwise."
+  {:tag Bool
+   :added "1.0"}
+  [x] (if x false true))
