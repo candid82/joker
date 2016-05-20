@@ -371,3 +371,9 @@
   {:tag Bool
    :added "1.0"}
   [x] (if x false true))
+
+(defn some?
+  "Returns true if x is not nil, false otherwise."
+  {:tag Bool
+   :added "1.0"}
+  [x] (not (nil? x)))
