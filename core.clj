@@ -359,3 +359,9 @@
   {:tag Bool
    :added "1.0"}
   [x] (=* x false))
+
+(defn true?
+  "Returns true if x is the value true, false otherwise."
+  {:tag Bool
+   :added "1.0"}
+  [x] (=* x true))
