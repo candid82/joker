@@ -386,3 +386,13 @@
          :added "1.0"
          :tag String}
   str str*)
+
+(defn symbol?
+  "Return true if x is a Symbol"
+  {:added "1.0"}
+  [x] (instance? Symbol x))
+
+(defn keyword?
+  "Return true if x is a Keyword"
+  {:added "1.0"}
+  [x] (instance? Keyword x))
