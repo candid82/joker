@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"reflect"
 )
 
@@ -313,6 +314,16 @@ var procHashSet Proc = func(args []Object) Object {
 	return res
 }
 
+var procStr Proc = func(args []Object) Object {
+	var buffer bytes.Buffer
+	for _, obj := range args {
+		if !obj.Equals(NIL) {
+			buffer.WriteString(obj.ToString(false))
+		}
+	}
+	return String{s: buffer.String()}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -338,6 +349,7 @@ func init() {
 	intern("vec*", procVec)
 	intern("hash-map*", procHashMap)
 	intern("hash-set*", procHashSet)
+	intern("str*", procStr)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

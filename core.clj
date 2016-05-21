@@ -377,3 +377,12 @@
   {:tag Bool
    :added "1.0"}
   [x] (not (nil? x)))
+
+(def
+  ^{:arglists '([& xs])
+    :doc "With no args, returns the empty string. With one arg x, returns
+         string representation of x. (str nil) returns the empty string. With more than
+         one arg, returns the concatenation of the str values of the args."
+         :added "1.0"
+         :tag String}
+  str str*)
