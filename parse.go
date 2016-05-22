@@ -817,6 +817,24 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	case *BindingExpr:
 		res.name = c.binding.name.ToString(false)
 	}
+	if LINTER_MODE {
+		switch c := res.callable.(type) {
+		case *VarRefExpr:
+			switch f := c.vr.value.(type) {
+			case *Fn:
+				for _, arity := range f.fnExpr.arities {
+					if len(arity.args) == len(res.args) {
+						return res
+					}
+				}
+				v := f.fnExpr.variadic
+				if v != nil && len(res.args) >= len(v.args)-1 {
+					return res
+				}
+				fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.line, pos.column, len(res.args), res.name)
+			}
+		}
+	}
 	return res
 }
 
