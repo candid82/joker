@@ -324,6 +324,16 @@ var procStr Proc = func(args []Object) Object {
 	return String{s: buffer.String()}
 }
 
+var procSymbol Proc = func(args []Object) Object {
+	if len(args) == 1 {
+		return MakeSymbol(ensureString(args, 0).s)
+	}
+	return Symbol{
+		ns:   STRINGS.Intern(ensureString(args, 0).s),
+		name: STRINGS.Intern(ensureString(args, 1).s),
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -350,6 +360,7 @@ func init() {
 	intern("hash-map*", procHashMap)
 	intern("hash-set*", procHashSet)
 	intern("str*", procStr)
+	intern("symbol*", procSymbol)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

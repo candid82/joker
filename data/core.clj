@@ -396,3 +396,10 @@
   "Return true if x is a Keyword"
   {:added "1.0"}
   [x] (instance? Keyword x))
+
+(defn symbol
+  "Returns a Symbol with the given namespace and name."
+  {:tag Symbol
+   :added "1.0"}
+  ([name] (if (symbol? name) name (symbol* name)))
+  ([ns name] (symbol* ns name)))
