@@ -237,10 +237,15 @@ func (exInfo *ExInfo) GetType() *Type {
 }
 
 func (exInfo *ExInfo) Error() string {
+	var pos Position
+	ok, form := exInfo.data.Get(Keyword{k: ":form"})
+	if ok {
+		pos = form.GetInfo().Pos()
+	}
 	if len(exInfo.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("Exception: %s\nStacktrace:\n%s", exInfo.msg.s, exInfo.rt.stacktrace())
+		return fmt.Sprintf("stdin:%d:%d: Exception: %s\nStacktrace:\n%s", pos.line, pos.column, exInfo.msg.s, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("Exception: %s", exInfo.msg.s)
+		return fmt.Sprintf("stdin:%d:%d: Exception: %s", pos.line, pos.column, exInfo.msg.s)
 	}
 }
 

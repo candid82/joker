@@ -351,6 +351,8 @@ func TryEval(expr Expr) (obj Object, err error) {
 			switch r.(type) {
 			case *EvalError:
 				err = r.(error)
+			case *ExInfo:
+				err = r.(error)
 			default:
 				panic(r)
 			}

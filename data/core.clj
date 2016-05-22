@@ -226,7 +226,7 @@
          ;; Note: Cannot delegate this check to def because of the call to (with-meta name ..)
          (if (instance? Symbol name)
            nil
-           (throw (ex-info "First argument to defn must be a symbol" {})))
+           (throw (ex-info "First argument to defn must be a symbol" {:form name})))
          (let [m (if (string? (first fdecl))
                    {:doc (first fdecl)}
                    {})

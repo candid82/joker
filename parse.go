@@ -464,7 +464,11 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 			if v.count == i+2 {
 				variadic := v.at(i + 1)
 				if !IsSymbol(variadic) {
-					panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.ToString(false)})
+					if LINTER_MODE {
+						variadic = generateSymbol("linter")
+					} else {
+						panic(&ParseError{obj: variadic, msg: "Unsupported binding form: " + variadic.ToString(false)})
+					}
 				}
 				res = append(res, variadic.(Symbol))
 				return res, true
@@ -892,6 +896,8 @@ func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 			case *ParseError:
 				err = r.(error)
 			case *EvalError:
+				err = r.(error)
+			case *ExInfo:
 				err = r.(error)
 			default:
 				panic(r)
