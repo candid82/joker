@@ -334,6 +334,10 @@ var procSymbol Proc = func(args []Object) Object {
 	}
 }
 
+var procGensym Proc = func(args []Object) Object {
+	return genSym(ensureString(args, 0).s, "")
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -361,6 +365,7 @@ func init() {
 	intern("hash-set*", procHashSet)
 	intern("str*", procStr)
 	intern("symbol*", procSymbol)
+	intern("gensym*", procGensym)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

@@ -524,7 +524,7 @@ func fillInMissingArgs(args map[int]Symbol) {
 	}
 	for i := 1; i < max; i++ {
 		if _, ok := args[i]; !ok {
-			args[i] = generateSymbol("p")
+			args[i] = generateSymbol("p__")
 		}
 	}
 }
@@ -557,16 +557,20 @@ func isTerminatingMacro(r rune) bool {
 	}
 }
 
-func generateSymbol(prefix string) Symbol {
+func genSym(prefix string, postfix string) Symbol {
 	GENSYM++
-	return MakeSymbol(fmt.Sprintf("%s__%d#", prefix, GENSYM))
+	return MakeSymbol(fmt.Sprintf("%s%d%s", prefix, GENSYM, postfix))
+}
+
+func generateSymbol(prefix string) Symbol {
+	return genSym(prefix, "#")
 }
 
 func registerArg(index int) Symbol {
 	if s, ok := ARGS[index]; ok {
 		return s
 	}
-	ARGS[index] = generateSymbol("p")
+	ARGS[index] = generateSymbol("p__")
 	return ARGS[index]
 }
 
@@ -644,7 +648,7 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
 			sym, ok := env[s.name]
 			if !ok {
-				sym = generateSymbol(str[:len(str)-1])
+				sym = generateSymbol(str[:len(str)-1] + "__")
 				env[s.name] = sym
 			}
 			obj = DeriveReadObject(obj, sym)
