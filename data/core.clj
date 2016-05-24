@@ -411,3 +411,17 @@
   {:added "1.0"}
   ([] (gensym "G__"))
   ([prefix-string] (gensym* prefix-string)))
+
+(defmacro cond
+  "Takes a set of test/expr pairs. It evaluates each test one at a
+  time.  If a test returns logical true, cond evaluates and returns
+  the value of the corresponding expr and doesn't evaluate any of the
+  other tests or exprs. (cond) returns nil."
+  {:added "1.0"}
+  [& clauses]
+  (when clauses
+    (list 'if (first clauses)
+          (if (next clauses)
+            (second clauses)
+            (throw (ex-info "cond requires an even number of forms" {:form (first clauses)})))
+          (cons 'gclojure.core/cond (next (next clauses))))))

@@ -57,6 +57,9 @@ func (seq *ArraySeq) GetType() *Type {
 }
 
 func (seq *ArraySeq) First() Object {
+	if seq.IsEmpty() {
+		return NIL
+	}
 	return seq.arr[seq.index]
 }
 

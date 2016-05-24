@@ -240,7 +240,9 @@ func (exInfo *ExInfo) Error() string {
 	var pos Position
 	ok, form := exInfo.data.Get(Keyword{k: ":form"})
 	if ok {
-		pos = form.GetInfo().Pos()
+		if form.GetInfo() != nil {
+			pos = form.GetInfo().Pos()
+		}
 	}
 	if len(exInfo.rt.callstack.frames) > 0 {
 		return fmt.Sprintf("stdin:%d:%d: Exception: %s\nStacktrace:\n%s", pos.line, pos.column, exInfo.msg.s, exInfo.rt.stacktrace())
@@ -289,7 +291,10 @@ func (fn *Fn) Call(args []Object) Object {
 	if v == nil || len(args) < len(v.args)-1 {
 		panicArity(len(args))
 	}
-	restArgs := &ArraySeq{arr: args, index: len(v.args) - 1}
+	var restArgs Object = NIL
+	if len(v.args)-1 < len(args) {
+		restArgs = &ArraySeq{arr: args, index: len(v.args) - 1}
+	}
 	vargs := make([]Object, len(v.args))
 	for i := 0; i < len(vargs)-1; i++ {
 		vargs[i] = args[i]
