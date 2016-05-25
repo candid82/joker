@@ -16,6 +16,15 @@ func assertSeq(obj Object, msg string) Seq {
 	}
 }
 
+func ensureCallable(args []Object, index int) Callable {
+	switch c := args[index].(type) {
+	case Callable:
+		return c
+	default:
+		panic(RT.newArgTypeError(index, "Fn"))
+	}
+}
+
 func ensureSeq(args []Object, index int) Seq {
 	switch s := args[index].(type) {
 	case Seq:
@@ -358,6 +367,14 @@ var procGensym Proc = func(args []Object) Object {
 	return genSym(ensureString(args, 0).s, "")
 }
 
+var procApply Proc = func(args []Object) Object {
+	// TODO:
+	// Stacktrace is broken. Need to somehow know
+	// the name of the function passed ...
+	f := ensureCallable(args, 0)
+	return f.Call(ToSlice(ensureSeq(args, 1)))
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -387,6 +404,7 @@ func init() {
 	intern("symbol*", procSymbol)
 	intern("gensym*", procGensym)
 	intern("keyword*", procKeyword)
+	intern("apply*", procApply)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

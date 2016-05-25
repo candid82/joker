@@ -454,3 +454,17 @@
   ([a b c args] (cons a (cons b (cons c args))))
   ([a b c d & more]
      (cons a (cons b (cons c (cons d (spread more)))))))
+
+(defn apply
+  "Applies fn f to the argument list formed by prepending intervening arguments to args."
+  {:added "1.0"}
+  ([^Fn f args]
+     (apply* f (seq args)))
+  ([^Fn f x args]
+     (apply* f (list* x args)))
+  ([^Fn f x y args]
+     (apply* f (list* x y args)))
+  ([^Fn f x y z args]
+     (apply* f (list* x y z args)))
+  ([^Fn f a b c d & args]
+     (apply* f (cons a (cons b (cons c (cons d (spread args))))))))
