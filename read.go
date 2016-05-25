@@ -350,12 +350,14 @@ func isSymbolRune(r rune) bool {
 
 func readSymbol(reader *Reader, first rune) Object {
 	var b bytes.Buffer
-	b.WriteRune(first)
+	if first != ':' {
+		b.WriteRune(first)
+	}
 	var lastAdded rune
 	r := reader.Get()
 	for isSymbolRune(r) {
 		if r == ':' {
-			if b.Len() > 1 && lastAdded == ':' {
+			if lastAdded == ':' {
 				panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
 			}
 		}
@@ -369,14 +371,14 @@ func readSymbol(reader *Reader, first rune) Object {
 	reader.Unget()
 	str := b.String()
 	switch {
+	case first == ':':
+		return MakeReadObject(reader, MakeKeyword(str))
 	case str == "nil":
 		return MakeReadObject(reader, NIL)
 	case str == "true":
 		return MakeReadObject(reader, Bool{b: true})
 	case str == "false":
 		return MakeReadObject(reader, Bool{b: false})
-	case first == ':':
-		return MakeReadObject(reader, Keyword{k: str})
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}
@@ -507,7 +509,7 @@ func readMeta(reader *Reader) *ArrayMap {
 	case *ArrayMap:
 		return v
 	case String, Symbol:
-		return &ArrayMap{arr: []Object{DeriveReadObject(obj, Keyword{k: ":tag"}), obj}}
+		return &ArrayMap{arr: []Object{DeriveReadObject(obj, MakeKeyword("tag")), obj}}
 	case Keyword:
 		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{b: true})}}
 	default:

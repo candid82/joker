@@ -425,3 +425,13 @@
             (second clauses)
             (throw (ex-info "cond requires an even number of forms" {:form (first clauses)})))
           (cons 'gclojure.core/cond (next (next clauses))))))
+
+(defn keyword
+  "Returns a Keyword with the given namespace and name.  Do not use :
+  in the keyword strings, it will be added automatically."
+  {:tag Keyword
+   :added "1.0"}
+  ([name] (cond (keyword? name) name
+                (symbol? name) (keyword* name)
+                (string? name) (keyword* name)))
+  ([ns name] (keyword* ns name)))

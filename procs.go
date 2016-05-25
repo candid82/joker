@@ -334,6 +334,26 @@ var procSymbol Proc = func(args []Object) Object {
 	}
 }
 
+var procKeyword Proc = func(args []Object) Object {
+	if len(args) == 1 {
+		switch obj := args[0].(type) {
+		case String:
+			return MakeKeyword(obj.s)
+		case Symbol:
+			return Keyword{
+				ns:   obj.ns,
+				name: obj.name,
+			}
+		default:
+			return NIL
+		}
+	}
+	return Keyword{
+		ns:   STRINGS.Intern(ensureString(args, 0).s),
+		name: STRINGS.Intern(ensureString(args, 1).s),
+	}
+}
+
 var procGensym Proc = func(args []Object) Object {
 	return genSym(ensureString(args, 0).s, "")
 }
@@ -366,6 +386,7 @@ func init() {
 	intern("str*", procStr)
 	intern("symbol*", procSymbol)
 	intern("gensym*", procGensym)
+	intern("keyword*", procKeyword)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

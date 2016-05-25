@@ -408,10 +408,10 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			switch docstring.(type) {
 			case String:
 				if meta != nil {
-					meta = meta.Assoc(Keyword{k: ":doc"}, docstring)
+					meta = meta.Assoc(MakeKeyword("doc"), docstring)
 				} else {
 					meta = EmptyArrayMap()
-					meta.Add(Keyword{k: ":doc"}, docstring)
+					meta.Add(MakeKeyword("doc"), docstring)
 				}
 			default:
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})

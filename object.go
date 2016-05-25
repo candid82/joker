@@ -85,7 +85,8 @@ type (
 	}
 	Keyword struct {
 		InfoHolder
-		k string
+		ns   *string
+		name *string
 	}
 	Symbol struct {
 		InfoHolder
@@ -238,7 +239,7 @@ func (exInfo *ExInfo) GetType() *Type {
 
 func (exInfo *ExInfo) Error() string {
 	var pos Position
-	ok, form := exInfo.data.Get(Keyword{k: ":form"})
+	ok, form := exInfo.data.Get(MakeKeyword("form"))
 	if ok {
 		if form.GetInfo() != nil {
 			pos = form.GetInfo().Pos()
@@ -363,13 +364,6 @@ func (v *Var) GetType() *Type {
 	return TYPES["Var"]
 }
 
-func MakeQualifiedSymbol(ns, name string) Symbol {
-	return Symbol{
-		ns:   STRINGS.Intern(ns),
-		name: STRINGS.Intern(name),
-	}
-}
-
 func MakeSymbol(nsname string) Symbol {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -379,6 +373,20 @@ func MakeSymbol(nsname string) Symbol {
 		}
 	}
 	return Symbol{
+		ns:   STRINGS.Intern(nsname[0:index]),
+		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
+	}
+}
+
+func MakeKeyword(nsname string) Keyword {
+	index := strings.IndexRune(nsname, '/')
+	if index == -1 || nsname == "/" {
+		return Keyword{
+			ns:   nil,
+			name: STRINGS.Intern(nsname),
+		}
+	}
+	return Keyword{
 		ns:   STRINGS.Intern(nsname[0:index]),
 		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
 	}
@@ -609,13 +617,16 @@ func (b Bool) GetType() *Type {
 }
 
 func (k Keyword) ToString(escape bool) string {
-	return k.k
+	if k.ns != nil {
+		return ":" + *k.ns + "/" + *k.name
+	}
+	return ":" + *k.name
 }
 
 func (k Keyword) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Keyword:
-		return k.k == other.k
+		return k.ns == other.ns && k.name == other.name
 	default:
 		return false
 	}
