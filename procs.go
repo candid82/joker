@@ -9,7 +9,7 @@ func assertSeq(obj Object, msg string) Seq {
 	switch s := obj.(type) {
 	case Seq:
 		return s
-	case Sequenceable:
+	case Seqable:
 		return s.Seq()
 	default:
 		panic(RT.newError(msg))
@@ -29,7 +29,7 @@ func ensureSeq(args []Object, index int) Seq {
 	switch s := args[index].(type) {
 	case Seq:
 		return s
-	case Sequenceable:
+	case Seqable:
 		return s.Seq()
 	default:
 		panic(RT.newArgTypeError(index, "Seq"))
@@ -378,6 +378,12 @@ var procApply Proc = func(args []Object) Object {
 	return f.Call(ToSlice(ensureSeq(args, 1)))
 }
 
+var procLazySeq Proc = func(args []Object) Object {
+	return &LazySeq{
+		fn: args[0].(*Fn),
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -385,7 +391,7 @@ func intern(name string, proc Proc) {
 }
 
 func init() {
-	intern("list*", procList)
+	intern("list**", procList)
 	intern("cons*", procCons)
 	intern("first*", procFirst)
 	intern("next*", procNext)
@@ -408,6 +414,7 @@ func init() {
 	intern("gensym*", procGensym)
 	intern("keyword*", procKeyword)
 	intern("apply*", procApply)
+	intern("lazy-seq*", procLazySeq)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

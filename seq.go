@@ -12,7 +12,7 @@ type (
 		IsEmpty() bool
 		Cons(obj Object) Seq
 	}
-	Sequenceable interface {
+	Seqable interface {
 		Seq() Seq
 	}
 	SeqIterator struct {
@@ -26,21 +26,84 @@ type (
 	}
 	ArraySeq struct {
 		InfoHolder
+		MetaHolder
 		arr   []Object
 		index int
 	}
+	LazySeq struct {
+		InfoHolder
+		MetaHolder
+		fn  Callable
+		seq Seq
+	}
 )
 
-func (seq *ArraySeq) Equals(other interface{}) bool {
+func SeqsEqual(seq1, seq2 Seq) bool {
+	iter2 := iter(seq2)
+	for iter1 := iter(seq1); iter1.HasNext(); {
+		if !iter2.HasNext() || !iter2.Next().Equals(iter1.Next()) {
+			return false
+		}
+	}
+	return !iter2.HasNext()
+}
+
+func IsSeqEqual(seq Seq, other interface{}) bool {
 	if seq == other {
 		return true
 	}
 	switch s := other.(type) {
-	case Sequenceable:
+	case Seqable:
 		return SeqsEqual(seq, s.Seq())
 	default:
 		return false
 	}
+}
+
+func (seq *LazySeq) realize() {
+	if seq.seq == nil {
+		seq.seq = seq.fn.Call([]Object{}).(Seq)
+	}
+}
+
+func (seq *LazySeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
+}
+
+func (seq *LazySeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *LazySeq) WithInfo(info *ObjectInfo) Object {
+	seq.info = info
+	return seq
+}
+
+func (seq *LazySeq) GetType() *Type {
+	return TYPES["LazySeq"]
+}
+
+func (seq *LazySeq) First() Object {
+	seq.realize()
+	return seq.seq.First()
+}
+
+func (seq *LazySeq) Rest() Seq {
+	seq.realize()
+	return seq.seq.Rest()
+}
+
+func (seq *LazySeq) IsEmpty() bool {
+	seq.realize()
+	return seq.seq.IsEmpty()
+}
+
+func (seq *LazySeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *ArraySeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
 }
 
 func (seq *ArraySeq) ToString(escape bool) string {
@@ -78,16 +141,6 @@ func (seq *ArraySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
 
-func SeqsEqual(seq1, seq2 Seq) bool {
-	iter2 := iter(seq2)
-	for iter1 := iter(seq1); iter1.HasNext(); {
-		if !iter2.HasNext() || !iter2.Next().Equals(iter1.Next()) {
-			return false
-		}
-	}
-	return !iter2.HasNext()
-}
-
 func SeqToString(seq Seq, escape bool) string {
 	var b bytes.Buffer
 	b.WriteRune('(')
@@ -108,15 +161,7 @@ func (seq *ConsSeq) WithMeta(meta *ArrayMap) Object {
 }
 
 func (seq *ConsSeq) Equals(other interface{}) bool {
-	if seq == other {
-		return true
-	}
-	switch s := other.(type) {
-	case Sequenceable:
-		return SeqsEqual(seq, s.Seq())
-	default:
-		return false
-	}
+	return IsSeqEqual(seq, other)
 }
 
 func (seq *ConsSeq) ToString(escape bool) string {

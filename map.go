@@ -34,7 +34,7 @@ func (seq *ArrayMapSeq) Equals(other interface{}) bool {
 		return true
 	}
 	switch s := other.(type) {
-	case Sequenceable:
+	case Seqable:
 		return SeqsEqual(seq, s.Seq())
 	default:
 		return false

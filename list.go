@@ -50,7 +50,7 @@ func (list *List) Equals(other interface{}) bool {
 		return true
 	}
 	switch s := other.(type) {
-	case Sequenceable:
+	case Seqable:
 		return SeqsEqual(list, s.Seq())
 	default:
 		return false

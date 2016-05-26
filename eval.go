@@ -79,7 +79,14 @@ func (rt *Runtime) stacktrace() string {
 }
 
 func (rt *Runtime) pushFrame() {
-	rt.callstack.pushFrame(Frame{traceable: rt.currentExpr.(Traceable)})
+	// TODO: this is all wrong. We cannot realy on
+	// currentExpr for stacktraces. Instead, each Callable
+	// should not it's name / position.
+	var tr Traceable
+	if rt.currentExpr != nil {
+		tr = rt.currentExpr.(Traceable)
+	}
+	rt.callstack.pushFrame(Frame{traceable: tr})
 }
 
 func (rt *Runtime) popFrame() {

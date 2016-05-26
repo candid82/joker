@@ -161,7 +161,7 @@ func (vseq *VectorSeq) Equals(other interface{}) bool {
 		return true
 	}
 	switch s := other.(type) {
-	case Sequenceable:
+	case Seqable:
 		return SeqsEqual(vseq, s.Seq())
 	default:
 		return false
