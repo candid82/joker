@@ -252,6 +252,9 @@ var procIsInstance Proc = func(args []Object) Object {
 }
 
 var procAssoc Proc = func(args []Object) Object {
+	if args[0].Equals(NIL) {
+		return EmptyArrayMap().Assoc(args[1], args[2])
+	}
 	return ensureMap(args, 0).Assoc(args[1], args[2])
 }
 

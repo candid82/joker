@@ -10,3 +10,8 @@
     (if (zero? x)
       res
       (recur (* res x) (- x 1)))))
+
+; 1 1 2 3 5 8 ...
+; (defn fib
+;   [n]
+;   ())

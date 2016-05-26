@@ -468,3 +468,10 @@
      (apply* f (list* x y z args)))
   ([^Fn f a b c d & args]
      (apply* f (cons a (cons b (cons c (cons d (spread args))))))))
+
+(defn vary-meta
+ "Returns an object of the same type and value as obj, with
+  (apply f (meta obj) args) as its metadata."
+ {:added "1.0"}
+ [obj f & args]
+  (with-meta obj (apply f (meta obj) args)))
