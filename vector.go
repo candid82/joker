@@ -156,6 +156,10 @@ func (v *Vector) GetType() *Type {
 	return TYPES["Vector"]
 }
 
+func (seq *VectorSeq) Seq() Seq {
+	return seq
+}
+
 func (vseq *VectorSeq) Equals(other interface{}) bool {
 	if vseq == other {
 		return true

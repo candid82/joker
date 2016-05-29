@@ -29,6 +29,10 @@ func (seq *ArrayMapSeq) GetType() *Type {
 	return TYPES["ArrayMapSeq"]
 }
 
+func (seq *ArrayMapSeq) Seq() Seq {
+	return seq
+}
+
 func (seq *ArrayMapSeq) Equals(other interface{}) bool {
 	if seq == other {
 		return true

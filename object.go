@@ -156,6 +156,7 @@ func init() {
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
 	TYPES["VectorSeq"] = &Type{name: "VectorSeq", reflectType: reflect.TypeOf((*VectorSeq)(nil))}
 	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
+	TYPES["Seqable"] = &Type{name: "Seqable", reflectType: reflect.TypeOf((*Seqable)(nil)).Elem()}
 	TYPES["Number"] = &Type{name: "Number", reflectType: reflect.TypeOf((*Number)(nil)).Elem()}
 }
 
@@ -421,6 +422,10 @@ func (n Nil) WithInfo(info *ObjectInfo) Object {
 
 func (n Nil) GetType() *Type {
 	return TYPES["Nil"]
+}
+
+func (n Nil) Seq() Seq {
+	return n
 }
 
 func (n Nil) First() Object {

@@ -6,6 +6,7 @@ import (
 
 type (
 	Seq interface {
+		Seqable
 		Object
 		First() Object
 		Rest() Seq
@@ -60,6 +61,10 @@ func IsSeqEqual(seq Seq, other interface{}) bool {
 	}
 }
 
+func (seq *LazySeq) Seq() Seq {
+	return seq
+}
+
 func (seq *LazySeq) realize() {
 	if seq.seq == nil {
 		seq.seq = seq.fn.Call([]Object{}).(Seq)
@@ -100,6 +105,10 @@ func (seq *LazySeq) IsEmpty() bool {
 
 func (seq *LazySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *ArraySeq) Seq() Seq {
+	return seq
 }
 
 func (seq *ArraySeq) Equals(other interface{}) bool {
@@ -158,6 +167,10 @@ func (seq *ConsSeq) WithMeta(meta *ArrayMap) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
+}
+
+func (seq *ConsSeq) Seq() Seq {
+	return seq
 }
 
 func (seq *ConsSeq) Equals(other interface{}) bool {

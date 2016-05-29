@@ -7,8 +7,6 @@ import (
 
 func assertSeq(obj Object, msg string) Seq {
 	switch s := obj.(type) {
-	case Seq:
-		return s
 	case Seqable:
 		return s.Seq()
 	default:
@@ -27,12 +25,10 @@ func ensureCallable(args []Object, index int) Callable {
 
 func ensureSeq(args []Object, index int) Seq {
 	switch s := args[index].(type) {
-	case Seq:
-		return s
 	case Seqable:
 		return s.Seq()
 	default:
-		panic(RT.newArgTypeError(index, "Seq"))
+		panic(RT.newArgTypeError(index, "Seqable"))
 	}
 }
 
