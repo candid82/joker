@@ -6,7 +6,7 @@ import (
 
 type (
 	Reader struct {
-		scanner        io.RuneScanner
+		runeReader     io.RuneReader
 		rw             *RuneWindow
 		line           int
 		prevLineLength int
@@ -16,11 +16,14 @@ type (
 	}
 )
 
-func NewReader(scanner io.RuneScanner) *Reader {
-	return &Reader{line: 1, scanner: scanner, rw: &RuneWindow{}, rewind: -1}
+func NewReader(runeReader io.RuneReader) *Reader {
+	return &Reader{line: 1, runeReader: runeReader, rw: &RuneWindow{}, rewind: -1}
 }
 
 func (reader *Reader) Get() rune {
+	if reader.isEof {
+		return EOF
+	}
 	if reader.rewind > -1 {
 		r := top(reader.rw, reader.rewind)
 		reader.rewind--
@@ -33,7 +36,7 @@ func (reader *Reader) Get() rune {
 		}
 		return r
 	}
-	r, _, err := reader.scanner.ReadRune()
+	r, _, err := reader.runeReader.ReadRune()
 	switch {
 	case err == io.EOF:
 		reader.isEof = true
@@ -67,6 +70,9 @@ func (reader *Reader) Unget() {
 }
 
 func (reader *Reader) Peek() rune {
+	if reader.isEof {
+		return EOF
+	}
 	r := reader.Get()
 	reader.Unget()
 	return r

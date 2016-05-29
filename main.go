@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"gopkg.in/readline.v1"
 	"io"
 	"os"
 )
@@ -76,9 +77,16 @@ func skipRestOfLine(reader *Reader) {
 func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
 	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
-	reader := NewReader(bufio.NewReader(os.Stdin))
+
+	rl, err := readline.New("")
+	if err != nil {
+		fmt.Println("Error: " + err.Error())
+	}
+	defer rl.Close()
+
+	reader := NewReader(NewLineRuneReader(rl))
 	for {
-		fmt.Print(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
+		rl.SetPrompt(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
 		obj, err := TryRead(reader)
 		if err == io.EOF {
 			return
