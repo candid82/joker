@@ -484,3 +484,28 @@
   {:added "1.0"}
   [& body]
   (list 'lazy-seq* (list* 'fn [] body)))
+
+(defn chunked-seq? [s]
+  ; Chunked sequences are not currently supported
+  false)
+
+(defn concat
+  "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
+  {:added "1.0"}
+  ([] (lazy-seq nil))
+  ([x] (lazy-seq x))
+  ([x y]
+   (lazy-seq
+    (let [s (seq x)]
+      (if s
+        (cons (first s) (concat (rest s) y))
+        y))))
+  ([x y & zs]
+   (let [cat (fn cat [xys zs]
+               (lazy-seq
+                (let [xys (seq xys)]
+                  (if xys
+                    (cons (first xys) (cat (rest xys) zs))
+                    (when zs
+                      (cat (first zs) (next zs)))))))]
+     (cat (concat x y) zs))))

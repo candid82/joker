@@ -6,6 +6,7 @@ import (
 	"gopkg.in/readline.v1"
 	"io"
 	"os"
+	"runtime"
 )
 
 type (
@@ -74,6 +75,49 @@ func skipRestOfLine(reader *Reader) {
 	}
 }
 
+func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext) (exit bool) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			switch r := r.(type) {
+			case *ParseError:
+				fmt.Fprintln(os.Stderr, r)
+			case *EvalError:
+				fmt.Fprintln(os.Stderr, r)
+			case *runtime.TypeAssertionError:
+				fmt.Fprintln(os.Stderr, r)
+			default:
+				panic(r)
+			}
+		}
+	}()
+
+	obj, err := TryRead(reader)
+	if err == io.EOF {
+		return true
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		skipRestOfLine(reader)
+		return
+	}
+
+	if phase == READ {
+		fmt.Println(obj.ToString(true))
+		return false
+	}
+
+	expr := parse(obj, parseContext)
+	if phase == PARSE {
+		fmt.Println(expr)
+		return false
+	}
+
+	res := eval(expr, nil)
+	fmt.Println(res.ToString(true))
+	return false
+}
+
 func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
 	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
@@ -85,36 +129,12 @@ func repl(phase Phase) {
 	defer rl.Close()
 
 	reader := NewReader(NewLineRuneReader(rl))
+
 	for {
 		rl.SetPrompt(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
-		obj, err := TryRead(reader)
-		if err == io.EOF {
+		if processReplCommand(reader, phase, parseContext) {
 			return
 		}
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			skipRestOfLine(reader)
-			continue
-		}
-		if phase == READ {
-			fmt.Println(obj.ToString(true))
-			continue
-		}
-		expr, err := TryParse(obj, parseContext)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			continue
-		}
-		if phase == PARSE {
-			fmt.Println(expr)
-			continue
-		}
-		res, err := TryEval(expr)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			continue
-		}
-		fmt.Println(res.ToString(true))
 	}
 }
 
