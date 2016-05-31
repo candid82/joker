@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 )
 
@@ -10,6 +11,9 @@ func assertSeq(obj Object, msg string) Seq {
 	case Seqable:
 		return s.Seq()
 	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "Seqable", obj.GetType().ToString(false))
+		}
 		panic(RT.newError(msg))
 	}
 }

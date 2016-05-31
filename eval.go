@@ -85,6 +85,8 @@ func (rt *Runtime) pushFrame() {
 	var tr Traceable
 	if rt.currentExpr != nil {
 		tr = rt.currentExpr.(Traceable)
+	} else {
+		tr = &CallExpr{name: "noname frame"}
 	}
 	rt.callstack.pushFrame(Frame{traceable: tr})
 }
