@@ -124,6 +124,10 @@ type (
 		rt   *Runtime
 	}
 	RecurBindings []Object
+	Delay         struct {
+		fn    Callable
+		value Object
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -132,6 +136,7 @@ func init() {
 	TYPES["String"] = &Type{name: "String", reflectType: reflect.TypeOf((*String)(nil)).Elem()}
 	TYPES["Int"] = &Type{name: "Int", reflectType: reflect.TypeOf((*Int)(nil)).Elem()}
 	TYPES["Type"] = &Type{name: "Type", reflectType: reflect.TypeOf((*Type)(nil))}
+	TYPES["Delay"] = &Type{name: "Delay", reflectType: reflect.TypeOf((*Delay)(nil))}
 	TYPES["Char"] = &Type{name: "Char", reflectType: reflect.TypeOf((*Char)(nil)).Elem()}
 	TYPES["Double"] = &Type{name: "Double", reflectType: reflect.TypeOf((*Double)(nil)).Elem()}
 	TYPES["BigInt"] = &Type{name: "BigInt", reflectType: reflect.TypeOf((*BigInt)(nil))}
@@ -172,6 +177,33 @@ func checkArity(args []Object, min int, max int) {
 	}
 }
 
+func (d *Delay) ToString(escape bool) string {
+	return "#object[Delay]"
+}
+
+func (d *Delay) Equals(other interface{}) bool {
+	return d == other
+}
+
+func (d *Delay) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (d *Delay) WithInfo(info *ObjectInfo) Object {
+	return d
+}
+
+func (d *Delay) GetType() *Type {
+	return TYPES["Delay"]
+}
+
+func (d *Delay) Force() Object {
+	if d.value == nil {
+		d.value = d.fn.Call([]Object{})
+	}
+	return d.value
+}
+
 func (t *Type) ToString(escape bool) string {
 	return t.name
 }
@@ -193,7 +225,7 @@ func (t *Type) GetType() *Type {
 }
 
 func (rb RecurBindings) ToString(escape bool) string {
-	return "RecurBindings"
+	return "#object[RecurBindings]"
 }
 
 func (rb RecurBindings) Equals(other interface{}) bool {
@@ -254,7 +286,7 @@ func (exInfo *ExInfo) Error() string {
 }
 
 func (fn *Fn) ToString(escape bool) string {
-	return "function"
+	return "#object[Fn]"
 }
 
 func (fn *Fn) Equals(other interface{}) bool {
@@ -312,7 +344,7 @@ func (p Proc) Call(args []Object) Object {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return "primitive function"
+	return "#object[Proc]"
 }
 
 func (p Proc) Equals(other interface{}) bool {

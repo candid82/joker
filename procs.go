@@ -384,6 +384,21 @@ var procLazySeq Proc = func(args []Object) Object {
 	}
 }
 
+var procDelay Proc = func(args []Object) Object {
+	return &Delay{
+		fn: args[0].(*Fn),
+	}
+}
+
+var procForce Proc = func(args []Object) Object {
+	switch d := args[0].(type) {
+	case *Delay:
+		return d.Force()
+	default:
+		return d
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -415,6 +430,8 @@ func init() {
 	intern("keyword*", procKeyword)
 	intern("apply*", procApply)
 	intern("lazy-seq*", procLazySeq)
+	intern("delay*", procDelay)
+	intern("force*", procForce)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

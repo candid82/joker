@@ -509,3 +509,23 @@
                     (when zs
                       (cat (first zs) (next zs)))))))]
      (cat (concat x y) zs))))
+
+
+(defmacro delay
+  "Takes a body of expressions and yields a Delay object that will
+  invoke the body only the first time it is forced (with force or deref/@), and
+  will cache the result and return it on all subsequent force
+  calls. See also - realized?"
+  {:added "1.0"}
+  [& body]
+  (list 'delay* (list* 'fn [] body)))
+
+(defn delay?
+  "returns true if x is a Delay created with delay"
+  {:added "1.0"}
+  [x] (instance? Delay x))
+
+(defn force
+  "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
+  {:added "1.0"}
+  [x] (force* x))
