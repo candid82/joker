@@ -33,16 +33,10 @@ func (seq *ArrayMapSeq) Seq() Seq {
 	return seq
 }
 
+func (seq *ArrayMapSeq) sequential() {}
+
 func (seq *ArrayMapSeq) Equals(other interface{}) bool {
-	if seq == other {
-		return true
-	}
-	switch s := other.(type) {
-	case Seqable:
-		return SeqsEqual(seq, s.Seq())
-	default:
-		return false
-	}
+	return IsSeqEqual(seq, other)
 }
 
 func (seq *ArrayMapSeq) ToString(escape bool) string {

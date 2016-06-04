@@ -128,6 +128,9 @@ type (
 		fn    Callable
 		value Object
 	}
+	Sequential interface {
+		sequential()
+	}
 )
 
 var TYPES = map[string]*Type{}

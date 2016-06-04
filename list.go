@@ -46,15 +46,7 @@ func (list *List) ToString(escape bool) string {
 }
 
 func (list *List) Equals(other interface{}) bool {
-	if list == other {
-		return true
-	}
-	switch s := other.(type) {
-	case Seqable:
-		return SeqsEqual(list, s.Seq())
-	default:
-		return false
-	}
+	return IsSeqEqual(list, other)
 }
 
 func (list *List) WithInfo(info *ObjectInfo) Object {
@@ -101,6 +93,8 @@ func (list *List) Forth() Object {
 func (list *List) Count() int {
 	return list.count
 }
+
+func (list *List) sequential() {}
 
 var EmptyList = NewList(Nil{}, nil)
 

@@ -131,20 +131,7 @@ func (v *Vector) Equals(other interface{}) bool {
 	if v == other {
 		return true
 	}
-	switch other := other.(type) {
-	case *Vector:
-		if v.count != other.count {
-			return false
-		}
-		for i := 0; i < v.count; i++ {
-			if !v.at(i).Equals(other.at(i)) {
-				return false
-			}
-		}
-		return true
-	default:
-		return false
-	}
+	return IsSeqEqual(v.Seq(), other)
 }
 
 func (v *Vector) WithInfo(info *ObjectInfo) Object {
@@ -161,15 +148,7 @@ func (seq *VectorSeq) Seq() Seq {
 }
 
 func (vseq *VectorSeq) Equals(other interface{}) bool {
-	if vseq == other {
-		return true
-	}
-	switch s := other.(type) {
-	case Seqable:
-		return SeqsEqual(vseq, s.Seq())
-	default:
-		return false
-	}
+	return IsSeqEqual(vseq, other)
 }
 
 func (vseq *VectorSeq) ToString(escape bool) string {
@@ -207,6 +186,8 @@ func (vseq *VectorSeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: vseq}
 }
 
+func (vseq *VectorSeq) sequential() {}
+
 func (v *Vector) Seq() Seq {
 	return &VectorSeq{vector: v, index: 0}
 }
@@ -218,6 +199,8 @@ func (v *Vector) Conj(obj Object) Conjable {
 func (v *Vector) Count() int {
 	return v.count
 }
+
+func (v *Vector) sequential() {}
 
 var EmptyVector = &Vector{
 	count: 0,

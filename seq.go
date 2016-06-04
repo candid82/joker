@@ -53,12 +53,14 @@ func IsSeqEqual(seq Seq, other interface{}) bool {
 	if seq == other {
 		return true
 	}
-	switch s := other.(type) {
-	case Seqable:
-		return SeqsEqual(seq, s.Seq())
-	default:
-		return false
+	switch other := other.(type) {
+	case Sequential:
+		switch other := other.(type) {
+		case Seqable:
+			return SeqsEqual(seq, other.Seq())
+		}
 	}
+	return false
 }
 
 func (seq *LazySeq) Seq() Seq {
@@ -107,6 +109,8 @@ func (seq *LazySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
 
+func (seq *LazySeq) sequential() {}
+
 func (seq *ArraySeq) Seq() Seq {
 	return seq
 }
@@ -149,6 +153,8 @@ func (seq *ArraySeq) IsEmpty() bool {
 func (seq *ArraySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
+
+func (seq *ArraySeq) sequential() {}
 
 func SeqToString(seq Seq, escape bool) string {
 	var b bytes.Buffer
@@ -205,6 +211,8 @@ func (seq *ConsSeq) IsEmpty() bool {
 func (seq *ConsSeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
+
+func (seq *ConsSeq) sequential() {}
 
 func iter(seq Seq) *SeqIterator {
 	return &SeqIterator{seq: seq}
