@@ -545,3 +545,18 @@
   {:added "1.0"}
   [x y]
   (identical* x y))
+
+(defn =
+  "Equality. Returns true if x equals y, false if not. Works for nil, and compares
+  numbers and collections in a type-independent manner.  Immutable data
+  structures define = as a value, not an identity,
+  comparison."
+  {:added "1.0"}
+  ([x] true)
+  ([x y] (=* x y))
+  ([x y & more]
+   (if (=* x y)
+     (if (next more)
+       (recur y (first more) (next more))
+       (=* y (first more)))
+     false)))
