@@ -228,7 +228,7 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 		args := evalSeq(expr.args, env)
 		return callable.Call(args)
 	default:
-		panic(RT.newErrorWithPos(callable.ToString(false)+" is not callable", expr.callable.Pos()))
+		panic(RT.newErrorWithPos(callable.ToString(false)+" is not a Fn", expr.callable.Pos()))
 	}
 }
 

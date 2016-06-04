@@ -816,6 +816,8 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		res.name = c.vr.ToString(false)
 	case *BindingExpr:
 		res.name = c.binding.name.ToString(false)
+	case *LiteralExpr:
+		res.name = c.obj.ToString(false)
 	}
 	if LINTER_MODE {
 		switch c := res.callable.(type) {

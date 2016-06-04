@@ -397,6 +397,12 @@ func (v *Var) GetType() *Type {
 	return TYPES["Var"]
 }
 
+func (v *Var) Call(args []Object) Object {
+	return assertCallable(
+		v.value,
+		"Var "+v.ToString(false)+" resolves to "+v.value.ToString(false)+", which is not a Fn").Call(args)
+}
+
 func MakeSymbol(nsname string) Symbol {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -676,6 +682,21 @@ func (k Keyword) WithInfo(info *ObjectInfo) Object {
 
 func (k Keyword) GetType() *Type {
 	return TYPES["Keyword"]
+}
+
+func (k Keyword) Call(args []Object) Object {
+	checkArity(args, 1, 2)
+	switch m := args[0].(type) {
+	case *ArrayMap:
+		ok, v := m.Get(k)
+		if ok {
+			return v
+		}
+	}
+	if len(args) == 2 {
+		return args[1]
+	}
+	return NIL
 }
 
 func (rx Regex) ToString(escape bool) string {

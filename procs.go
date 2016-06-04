@@ -6,6 +6,15 @@ import (
 	"reflect"
 )
 
+func assertCallable(obj Object, msg string) Callable {
+	switch s := obj.(type) {
+	case Callable:
+		return s
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
 func assertSeq(obj Object, msg string) Seq {
 	switch s := obj.(type) {
 	case Seqable:
