@@ -98,6 +98,10 @@ func (list *List) Forth() Object {
 	return list.rest.rest.rest.first
 }
 
+func (list *List) Count() int {
+	return list.count
+}
+
 var EmptyList = NewList(Nil{}, nil)
 
 func init() {

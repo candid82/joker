@@ -215,6 +215,10 @@ func (v *Vector) Conj(obj Object) Conjable {
 	return v.conj(obj)
 }
 
+func (v *Vector) Count() int {
+	return v.count
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

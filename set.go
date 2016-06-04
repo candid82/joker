@@ -69,3 +69,7 @@ func (seq *Set) GetType() *Type {
 func (set *Set) Seq() Seq {
 	return set.m.Keys()
 }
+
+func (set *Set) Count() int {
+	return set.m.Count()
+}

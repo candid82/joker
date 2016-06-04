@@ -240,3 +240,16 @@ func ToSlice(seq Seq) []Object {
 	}
 	return res
 }
+
+func SeqCount(seq Seq) int {
+	c := 0
+	for !seq.IsEmpty() {
+		switch obj := seq.(type) {
+		case Counted:
+			return c + obj.Count()
+		}
+		c++
+		seq = seq.Rest()
+	}
+	return c
+}

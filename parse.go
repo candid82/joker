@@ -361,14 +361,15 @@ func parseSet(s *Set, pos Position, ctx *ParseContext) Expr {
 }
 
 func checkForm(obj Object, min int, max int) int {
-	list := obj.(*List)
-	if list.count < min {
-		panic(&ParseError{obj: obj, msg: "Too few arguments to " + list.first.ToString(false)})
+	seq := obj.(Seq)
+	c := SeqCount(seq)
+	if c < min {
+		panic(&ParseError{obj: obj, msg: "Too few arguments to " + seq.First().ToString(false)})
 	}
-	if list.count > max {
-		panic(&ParseError{obj: obj, msg: "Too many arguments to " + list.first.ToString(false)})
+	if c > max {
+		panic(&ParseError{obj: obj, msg: "Too many arguments to " + seq.First().ToString(false)})
 	}
-	return list.count
+	return c
 }
 
 func GetPosition(obj Object) Position {
