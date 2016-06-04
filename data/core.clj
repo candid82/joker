@@ -523,12 +523,14 @@
 (defn delay?
   "returns true if x is a Delay created with delay"
   {:added "1.0"}
-  [x] (instance? Delay x))
+  [x]
+  (instance? Delay x))
 
 (defn force
   "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
   {:added "1.0"}
-  [x] (force* x))
+  [x]
+  (force* x))
 
 (defmacro if-not
   "Evaluates test. If logical false, evaluates and returns then expr,
@@ -537,3 +539,9 @@
   ([test then] `(if-not ~test ~then nil))
   ([test then else]
    `(if (not ~test) ~then ~else)))
+
+(defn identical?
+  "Tests if 2 arguments are the same object"
+  {:added "1.0"}
+  [x y]
+  (identical* x y))

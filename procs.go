@@ -399,6 +399,10 @@ var procForce Proc = func(args []Object) Object {
 	}
 }
 
+var procIdentical Proc = func(args []Object) Object {
+	return Bool{b: args[0] == args[1]}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -432,6 +436,7 @@ func init() {
 	intern("lazy-seq*", procLazySeq)
 	intern("delay*", procDelay)
 	intern("force*", procForce)
+	intern("identical*", procIdentical)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)
