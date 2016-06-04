@@ -774,6 +774,10 @@ func (s String) GetType() *Type {
 	return TYPES["String"]
 }
 
+func (s String) Count() int {
+	return len(s.s)
+}
+
 func IsSymbol(obj Object) bool {
 	switch obj.(type) {
 	case Symbol:
