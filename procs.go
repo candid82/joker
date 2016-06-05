@@ -15,6 +15,15 @@ func assertCallable(obj Object, msg string) Callable {
 	}
 }
 
+func assertNumber(obj Object, msg string) Number {
+	switch s := obj.(type) {
+	case Number:
+		return s
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
 func assertSeq(obj Object, msg string) Seq {
 	switch s := obj.(type) {
 	case Seqable:
@@ -403,6 +412,24 @@ var procIdentical Proc = func(args []Object) Object {
 	return Bool{b: args[0] == args[1]}
 }
 
+var procCompare Proc = func(args []Object) Object {
+	k1, k2 := args[0], args[1]
+	if k1.Equals(k2) {
+		return Int{i: 0}
+	}
+	switch k2.(type) {
+	case Nil:
+		return Int{i: 1}
+	}
+	switch k1 := k1.(type) {
+	case Nil:
+		return Int{i: -1}
+	case Number:
+		return Int{i: CompareNumbers(k1, assertNumber(k2, "Cannot compare number and "+k2.GetType().ToString(false)))}
+	}
+	panic(RT.newError(fmt.Sprintf("%s (type: %s) is not a Comparable", k1.ToString(true), k1.GetType().ToString(false))))
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -437,6 +464,7 @@ func init() {
 	intern("delay*", procDelay)
 	intern("force*", procForce)
 	intern("identical*", procIdentical)
+	intern("compare*", procCompare)
 
 	intern("zero?", procIsZero)
 	intern("+", procAdd)

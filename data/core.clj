@@ -569,3 +569,11 @@
   ([x y] (not (= x y)))
   ([x y & more]
    (not (apply = x y more))))
+
+(defn compare
+  "Comparator. Returns a negative number, zero, or a positive number
+  when x is logically 'less than', 'equal to', or 'greater than'
+  y. Works for nil, and compares numbers and collections in a type-independent manner. x
+  must implement Comparable"
+  {:added "1.0"}
+  [x y] (compare* x y))

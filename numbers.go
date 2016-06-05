@@ -20,6 +20,7 @@ type (
 		Multiply(Number, Number) Number
 		Divide(Number, Number) Number
 		IsZero(Number) bool
+		Lt(Number, Number) bool
 	}
 	IntOps      struct{}
 	DoubleOps   struct{}
@@ -362,4 +363,37 @@ func (ops BigFloatOps) IsZero(x Number) bool {
 
 func (ops RatioOps) IsZero(x Number) bool {
 	return x.Ratio().Sign() == 0
+}
+
+// Lt
+
+func (ops IntOps) Lt(x Number, y Number) bool {
+	return x.Int().i < y.Int().i
+}
+
+func (ops DoubleOps) Lt(x Number, y Number) bool {
+	return x.Double().d < y.Double().d
+}
+
+func (ops BigIntOps) Lt(x Number, y Number) bool {
+	return x.BigInt().Cmp(y.BigInt()) < 0
+}
+
+func (ops BigFloatOps) Lt(x Number, y Number) bool {
+	return x.BigFloat().Cmp(y.BigFloat()) < 0
+}
+
+func (ops RatioOps) Lt(x Number, y Number) bool {
+	return x.Ratio().Cmp(y.Ratio()) < 0
+}
+
+func CompareNumbers(x Number, y Number) int {
+	ops := GetOps(x).Combine(GetOps(y))
+	if ops.Lt(x, y) {
+		return -1
+	}
+	if ops.Lt(y, x) {
+		return 1
+	}
+	return 0
 }
