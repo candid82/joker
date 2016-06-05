@@ -560,3 +560,12 @@
        (recur y (first more) (next more))
        (=* y (first more)))
      false)))
+
+(defn not=
+  "Same as (not (= obj1 obj2))"
+  {:tag Bool
+   :added "1.0"}
+  ([x] false)
+  ([x y] (not (= x y)))
+  ([x y & more]
+   (not (apply = x y more))))
