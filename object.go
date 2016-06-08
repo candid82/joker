@@ -131,6 +131,9 @@ type (
 	Sequential interface {
 		sequential()
 	}
+	Comparable interface {
+		Compare(other Object) int
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -166,6 +169,8 @@ func init() {
 	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
 	TYPES["Seqable"] = &Type{name: "Seqable", reflectType: reflect.TypeOf((*Seqable)(nil)).Elem()}
 	TYPES["Number"] = &Type{name: "Number", reflectType: reflect.TypeOf((*Number)(nil)).Elem()}
+	TYPES["Sequential"] = &Type{name: "Sequential", reflectType: reflect.TypeOf((*Sequential)(nil)).Elem()}
+	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
 }
 
 func panicArity(n int) {
@@ -517,6 +522,10 @@ func (rat *Ratio) GetType() *Type {
 	return TYPES["Ratio"]
 }
 
+func (rat *Ratio) Compare(other Object) int {
+	return CompareNumbers(rat, assertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
+}
+
 func (bi *BigInt) ToString(escape bool) string {
 	return bi.b.String() + "N"
 }
@@ -542,6 +551,10 @@ func (bi *BigInt) WithInfo(info *ObjectInfo) Object {
 
 func (bi *BigInt) GetType() *Type {
 	return TYPES["BigInt"]
+}
+
+func (bi *BigInt) Compare(other Object) int {
+	return CompareNumbers(bi, assertNumber(other, "Cannot compare BigInt and "+other.GetType().ToString(false)))
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
@@ -571,6 +584,10 @@ func (bf *BigFloat) GetType() *Type {
 	return TYPES["BigFloat"]
 }
 
+func (bf *BigFloat) Compare(other Object) int {
+	return CompareNumbers(bf, assertNumber(other, "Cannot compare BigFloat and "+other.GetType().ToString(false)))
+}
+
 func (c Char) ToString(escape bool) string {
 	if escape {
 		return escapeRune(c.ch)
@@ -596,6 +613,17 @@ func (c Char) GetType() *Type {
 	return TYPES["Char"]
 }
 
+func (c Char) Compare(other Object) int {
+	c2 := assertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
+	if c.ch < c2.ch {
+		return -1
+	}
+	if c2.ch < c.ch {
+		return 1
+	}
+	return 0
+}
+
 func (d Double) ToString(escape bool) string {
 	return fmt.Sprintf("%f", d.d)
 }
@@ -616,6 +644,10 @@ func (d Double) WithInfo(info *ObjectInfo) Object {
 
 func (d Double) GetType() *Type {
 	return TYPES["Double"]
+}
+
+func (d Double) Compare(other Object) int {
+	return CompareNumbers(d, assertNumber(other, "Cannot compare Double and "+other.GetType().ToString(false)))
 }
 
 func (i Int) ToString(escape bool) string {
@@ -640,6 +672,10 @@ func (i Int) GetType() *Type {
 	return TYPES["Int"]
 }
 
+func (i Int) Compare(other Object) int {
+	return CompareNumbers(i, assertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
+}
+
 func (b Bool) ToString(escape bool) string {
 	return fmt.Sprintf("%t", b.b)
 }
@@ -660,6 +696,17 @@ func (b Bool) WithInfo(info *ObjectInfo) Object {
 
 func (b Bool) GetType() *Type {
 	return TYPES["Bool"]
+}
+
+func (b Bool) Compare(other Object) int {
+	b2 := assertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
+	if b.b == b2.b {
+		return 0
+	}
+	if b.b {
+		return 1
+	}
+	return -1
 }
 
 func (k Keyword) ToString(escape bool) string {
@@ -685,6 +732,11 @@ func (k Keyword) WithInfo(info *ObjectInfo) Object {
 
 func (k Keyword) GetType() *Type {
 	return TYPES["Keyword"]
+}
+
+func (k Keyword) Compare(other Object) int {
+	k2 := assertKeyword(other, "Cannot compare Keyword and "+other.GetType().ToString(false))
+	return strings.Compare(k.ToString(false), k2.ToString(false))
 }
 
 func (k Keyword) Call(args []Object) Object {
@@ -752,6 +804,11 @@ func (s Symbol) GetType() *Type {
 	return TYPES["Symbol"]
 }
 
+func (s Symbol) Compare(other Object) int {
+	s2 := assertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
+	return strings.Compare(s.ToString(false), s2.ToString(false))
+}
+
 func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.s)
@@ -779,6 +836,11 @@ func (s String) GetType() *Type {
 
 func (s String) Count() int {
 	return len(s.s)
+}
+
+func (s String) Compare(other Object) int {
+	s2 := assertString(other, "Cannot compare String and "+other.GetType().ToString(false))
+	return strings.Compare(s.s, s2.s)
 }
 
 func IsSymbol(obj Object) bool {

@@ -15,6 +15,51 @@ func assertCallable(obj Object, msg string) Callable {
 	}
 }
 
+func assertChar(obj Object, msg string) Char {
+	switch c := obj.(type) {
+	case Char:
+		return c
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func assertString(obj Object, msg string) String {
+	switch s := obj.(type) {
+	case String:
+		return s
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func assertSymbol(obj Object, msg string) Symbol {
+	switch s := obj.(type) {
+	case Symbol:
+		return s
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func assertKeyword(obj Object, msg string) Keyword {
+	switch k := obj.(type) {
+	case Keyword:
+		return k
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func assertBool(obj Object, msg string) Bool {
+	switch b := obj.(type) {
+	case Bool:
+		return b
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
 func assertNumber(obj Object, msg string) Number {
 	switch s := obj.(type) {
 	case Number:
@@ -424,8 +469,8 @@ var procCompare Proc = func(args []Object) Object {
 	switch k1 := k1.(type) {
 	case Nil:
 		return Int{i: -1}
-	case Number:
-		return Int{i: CompareNumbers(k1, assertNumber(k2, "Cannot compare number and "+k2.GetType().ToString(false)))}
+	case Comparable:
+		return Int{i: k1.Compare(k2)}
 	}
 	panic(RT.newError(fmt.Sprintf("%s (type: %s) is not a Comparable", k1.ToString(true), k1.GetType().ToString(false))))
 }
