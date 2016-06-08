@@ -202,6 +202,23 @@ func (v *Vector) Count() int {
 
 func (v *Vector) sequential() {}
 
+func (v *Vector) Compare(other Object) int {
+	v2 := assertVector(other, "Cannot compare Vector and "+other.GetType().ToString(false))
+	if v.Count() > v2.Count() {
+		return 1
+	}
+	if v.Count() < v2.Count() {
+		return -1
+	}
+	for i := 0; i < v.Count(); i++ {
+		c := assertComparable(v.at(i), "").Compare(v2.at(i))
+		if c != 0 {
+			return c
+		}
+	}
+	return 0
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

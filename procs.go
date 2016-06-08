@@ -42,6 +42,27 @@ func assertSymbol(obj Object, msg string) Symbol {
 	}
 }
 
+func assertVector(obj Object, msg string) *Vector {
+	switch v := obj.(type) {
+	case *Vector:
+		return v
+	default:
+		panic(RT.newError(msg))
+	}
+}
+
+func assertComparable(obj Object, msg string) Comparable {
+	switch c := obj.(type) {
+	case Comparable:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "Comparable", obj.GetType().ToString(false))
+		}
+		panic(RT.newError(msg))
+	}
+}
+
 func assertKeyword(obj Object, msg string) Keyword {
 	switch k := obj.(type) {
 	case Keyword:
