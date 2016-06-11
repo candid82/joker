@@ -255,8 +255,8 @@ var procCount Proc = func(args []Object) Object {
 	case Counted:
 		return Int{i: obj.Count()}
 	default:
-		s := assertSeq(obj, "count not supported on this type: "+obj.GetType().ToString(false))
-		return Int{i: SeqCount(s)}
+		s := assertSeqable(obj, "count not supported on this type: "+obj.GetType().ToString(false))
+		return Int{i: SeqCount(s.Seq())}
 	}
 }
 

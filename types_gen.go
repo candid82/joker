@@ -102,13 +102,13 @@ func assertNumber(obj Object, msg string) Number {
   }
 }
 
-func assertSeq(obj Object, msg string) Seq {
+func assertSeqable(obj Object, msg string) Seqable {
   switch c := obj.(type) {
-  case Seq:
+  case Seqable:
     return c
   default:
     if msg == "" {
-      msg = fmt.Sprintf("Expected %s, got %s", "Seq", obj.GetType().ToString(false))
+      msg = fmt.Sprintf("Expected %s, got %s", "Seqable", obj.GetType().ToString(false))
     }
     panic(RT.newError(msg))
   }
