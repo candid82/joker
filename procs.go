@@ -6,66 +6,12 @@ import (
 	"reflect"
 )
 
-func ensureCallable(args []Object, index int) Callable {
-	switch c := args[index].(type) {
-	case Callable:
-		return c
-	default:
-		panic(RT.newArgTypeError(index, "Fn"))
-	}
-}
-
-func ensureSeq(args []Object, index int) Seq {
-	switch s := args[index].(type) {
-	case Seqable:
-		return s.Seq()
-	default:
-		panic(RT.newArgTypeError(index, "Seqable"))
-	}
-}
-
-func ensureNumber(args []Object, index int) Number {
-	switch obj := args[index].(type) {
-	case Number:
-		return obj
-	default:
-		panic(RT.newArgTypeError(index, "Number"))
-	}
-}
-
-func ensureString(args []Object, index int) String {
-	switch obj := args[index].(type) {
-	case String:
-		return obj
-	default:
-		panic(RT.newArgTypeError(index, "String"))
-	}
-}
-
-func ensureType(args []Object, index int) *Type {
-	switch obj := args[index].(type) {
-	case *Type:
-		return obj
-	default:
-		panic(RT.newArgTypeError(index, "Type"))
-	}
-}
-
 func ensureMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
 	case *ArrayMap:
 		return obj
 	default:
 		panic(RT.newArgTypeError(index, "Map"))
-	}
-}
-
-func ensureMeta(args []Object, index int) Meta {
-	switch obj := args[index].(type) {
-	case Meta:
-		return obj
-	default:
-		panic(RT.newArgTypeError(index, "Meta"))
 	}
 }
 
@@ -177,19 +123,19 @@ var procList Proc = func(args []Object) Object {
 
 var procCons Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	s := ensureSeq(args, 1)
+	s := ensureSeqable(args, 1).Seq()
 	return s.Cons(args[0])
 }
 
 var procFirst Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args, 0)
+	s := ensureSeqable(args, 0).Seq()
 	return s.First()
 }
 
 var procNext Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args, 0)
+	s := ensureSeqable(args, 0).Seq()
 	res := s.Rest()
 	if res.IsEmpty() {
 		return NIL
@@ -199,7 +145,7 @@ var procNext Proc = func(args []Object) Object {
 
 var procRest Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args, 0)
+	s := ensureSeqable(args, 0).Seq()
 	return s.Rest()
 }
 
@@ -218,7 +164,7 @@ var procConj Proc = func(args []Object) Object {
 
 var procSeq Proc = func(args []Object) Object {
 	checkArity(args, 1, 1)
-	s := ensureSeq(args, 0)
+	s := ensureSeqable(args, 0).Seq()
 	if s.IsEmpty() {
 		return NIL
 	}
@@ -283,7 +229,7 @@ var procCast Proc = func(args []Object) Object {
 }
 
 var procVec Proc = func(args []Object) Object {
-	return NewVectorFromSeq(ensureSeq(args, 0))
+	return NewVectorFromSeq(ensureSeqable(args, 0).Seq())
 }
 
 var procHashMap Proc = func(args []Object) Object {
@@ -354,7 +300,7 @@ var procApply Proc = func(args []Object) Object {
 	// Stacktrace is broken. Need to somehow know
 	// the name of the function passed ...
 	f := ensureCallable(args, 0)
-	return f.Call(ToSlice(ensureSeq(args, 1)))
+	return f.Call(ToSlice(ensureSeqable(args, 1).Seq()))
 }
 
 var procLazySeq Proc = func(args []Object) Object {

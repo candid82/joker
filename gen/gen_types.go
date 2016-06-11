@@ -35,6 +35,17 @@ func assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
 }
 `
 
+var ensureTemplate string = `
+func ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
+  switch c := args[index].(type) {
+  case {{.TypeName}}:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "{{.Name}}"))
+  }
+}
+`
+
 func checkError(err error) {
 	if err != nil {
 		panic(err)
@@ -47,7 +58,8 @@ func main() {
 	checkError(err)
 	defer f.Close()
 
-	var tmpl = template.Must(template.New("assert").Parse(assertTemplate))
+	var assert = template.Must(template.New("assert").Parse(assertTemplate))
+	var ensure = template.Must(template.New("ensure").Parse(ensureTemplate))
 	f.WriteString(header)
 	for _, t := range os.Args[1:] {
 		typeInfo := TypeInfo{
@@ -57,6 +69,7 @@ func main() {
 		if t[0] == '*' {
 			typeInfo.Name = t[1:]
 		}
-		tmpl.Execute(f, typeInfo)
+		assert.Execute(f, typeInfo)
+		ensure.Execute(f, typeInfo)
 	}
 }
