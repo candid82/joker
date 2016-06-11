@@ -1,3 +1,5 @@
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seq Callable
+
 package main
 
 import (
