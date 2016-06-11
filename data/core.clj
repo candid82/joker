@@ -606,3 +606,9 @@
   "Returns true if num is zero, else false"
   {:added "1.0"}
   [x] (zero?* x))
+
+(defn count
+  "Returns the number of items in the collection. (count nil) returns
+  0.  Also works on strings"
+  {:added "1.0"}
+  [coll] (count* coll))
