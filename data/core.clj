@@ -601,3 +601,8 @@
   ([x & next]
       `(let [or# ~x]
          (if or# or# (or ~@next)))))
+
+(defn zero?
+  "Returns true if num is zero, else false"
+  {:added "1.0"}
+  [x] (zero?* x))

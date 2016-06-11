@@ -32,7 +32,6 @@ var procWithMeta Proc = func(args []Object) Object {
 }
 
 var procIsZero Proc = func(args []Object) Object {
-	// checkArity(args, 1, "zero?")
 	n := ensureNumber(args, 0)
 	ops := GetOps(ensureNumber(args, 0))
 	return Bool{b: ops.IsZero(n)}
@@ -382,7 +381,7 @@ func init() {
 	intern("identical*", procIdentical)
 	intern("compare*", procCompare)
 
-	intern("zero?", procIsZero)
+	intern("zero?*", procIsZero)
 	intern("+", procAdd)
 	intern("-", procSubtract)
 	intern("*", procMultiply)
