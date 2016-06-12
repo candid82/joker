@@ -617,3 +617,11 @@
   "Coerce to int"
   {:added "1.0"}
   [x] (int* x))
+
+(defn nth
+  "Returns the value at the index. get returns nil if index out of
+  bounds, nth throws an exception unless not-found is supplied.  nth
+  also works for strings, and, in O(n) time, for sequences."
+  {:added "1.0"}
+  ([coll index] (nth* coll index))
+  ([coll index not-found] (nth* coll index not-found)))

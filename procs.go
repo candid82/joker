@@ -356,6 +356,18 @@ var procInt Proc = func(args []Object) Object {
 	}
 }
 
+var procNth Proc = func(args []Object) Object {
+	n := ensureNumber(args, 1).Int().i
+	switch coll := args[0].(type) {
+	case Indexed:
+		return coll.Nth(n)
+	case Seqable:
+		return SeqNth(coll.Seq(), n)
+	default:
+		panic(RT.newError("nth not supported on this type: " + coll.GetType().ToString(false)))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -393,6 +405,7 @@ func init() {
 	intern("compare*", procCompare)
 	intern("zero?*", procIsZero)
 	intern("int*", procInt)
+	intern("nth*", procNth)
 
 	intern("+", procAdd)
 	intern("-", procSubtract)

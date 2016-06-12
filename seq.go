@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 )
 
 type (
@@ -260,4 +261,19 @@ func SeqCount(seq Seq) int {
 		seq = seq.Rest()
 	}
 	return c
+}
+
+func SeqNth(seq Seq, n int) Object {
+	if n < 0 {
+		panic(RT.newError(fmt.Sprintf("Negative index: %d", n)))
+	}
+	i := n
+	for !seq.IsEmpty() {
+		if i == 0 {
+			return seq.First()
+		}
+		seq = seq.Rest()
+		i--
+	}
+	panic(RT.newError(fmt.Sprintf("Index %d exceeds seq's length %d", n, (n - i))))
 }

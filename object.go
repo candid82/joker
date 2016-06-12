@@ -136,6 +136,9 @@ type (
 	Comparable interface {
 		Compare(other Object) int
 	}
+	Indexed interface {
+		Nth(i int) Object
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -173,6 +176,7 @@ func init() {
 	TYPES["Number"] = &Type{name: "Number", reflectType: reflect.TypeOf((*Number)(nil)).Elem()}
 	TYPES["Sequential"] = &Type{name: "Sequential", reflectType: reflect.TypeOf((*Sequential)(nil)).Elem()}
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
+	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
 }
 
 func panicArity(n int) {

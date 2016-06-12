@@ -19,15 +19,7 @@ type (
 		vector *Vector
 		index  int
 	}
-	IndexError struct {
-		index int
-		count int
-	}
 )
-
-func (err IndexError) Error() string {
-	return fmt.Sprintf("Index %d is out of bounds [0..%d]", err.index, err.count)
-}
 
 func (v *Vector) WithMeta(meta *ArrayMap) Object {
 	res := *v
@@ -50,7 +42,7 @@ func (v *Vector) tailoff() int {
 
 func (v *Vector) arrayFor(i int) []interface{} {
 	if i >= v.count || i < 0 {
-		panic(IndexError{index: i, count: v.count})
+		panic(RT.newError(fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count-1)))
 	}
 	if i >= v.tailoff() {
 		return v.tail
@@ -198,6 +190,10 @@ func (v *Vector) Conj(obj Object) Conjable {
 
 func (v *Vector) Count() int {
 	return v.count
+}
+
+func (v *Vector) Nth(i int) Object {
+	return v.at(i)
 }
 
 func (v *Vector) sequential() {}
