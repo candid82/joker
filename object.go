@@ -845,6 +845,31 @@ func (s String) Count() int {
 	return len(s.s)
 }
 
+func (s String) Nth(i int) Object {
+	if i < 0 {
+		panic(RT.newError(fmt.Sprintf("Negative index: %d", i)))
+	}
+	j, r := 0, 't'
+	for j, r = range s.s {
+		if i == j {
+			return Char{ch: r}
+		}
+	}
+	panic(RT.newError(fmt.Sprintf("Index %d exceeds string's length %d", i, j+1)))
+}
+
+func (s String) TryNth(i int, d Object) Object {
+	if i < 0 {
+		return d
+	}
+	for j, r := range s.s {
+		if i == j {
+			return Char{ch: r}
+		}
+	}
+	return d
+}
+
 func (s String) Compare(other Object) int {
 	s2 := assertString(other, "Cannot compare String and "+other.GetType().ToString(false))
 	return strings.Compare(s.s, s2.s)
