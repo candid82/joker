@@ -612,3 +612,8 @@
   0.  Also works on strings"
   {:added "1.0"}
   [coll] (count* coll))
+
+(defn int
+  "Coerce to int"
+  {:added "1.0"}
+  [x] (int* x))

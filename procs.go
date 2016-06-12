@@ -345,6 +345,17 @@ var procCompare Proc = func(args []Object) Object {
 	panic(RT.newError(fmt.Sprintf("%s (type: %s) is not a Comparable", k1.ToString(true), k1.GetType().ToString(false))))
 }
 
+var procInt Proc = func(args []Object) Object {
+	switch obj := args[0].(type) {
+	case Char:
+		return Int{i: int(obj.ch)}
+	case Number:
+		return obj.Int()
+	default:
+		panic(RT.newError(fmt.Sprintf("Cannot cast %s (type: %s) to Int", obj.ToString(true), obj.GetType().ToString(false))))
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -380,8 +391,9 @@ func init() {
 	intern("force*", procForce)
 	intern("identical*", procIdentical)
 	intern("compare*", procCompare)
-
 	intern("zero?*", procIsZero)
+	intern("int*", procInt)
+
 	intern("+", procAdd)
 	intern("-", procSubtract)
 	intern("*", procMultiply)
