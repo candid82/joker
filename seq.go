@@ -277,3 +277,18 @@ func SeqNth(seq Seq, n int) Object {
 	}
 	panic(RT.newError(fmt.Sprintf("Index %d exceeds seq's length %d", n, (n - i))))
 }
+
+func SeqTryNth(seq Seq, n int, d Object) Object {
+	if n < 0 {
+		return d
+	}
+	i := n
+	for !seq.IsEmpty() {
+		if i == 0 {
+			return seq.First()
+		}
+		seq = seq.Rest()
+		i--
+	}
+	return d
+}

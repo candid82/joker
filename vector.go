@@ -196,6 +196,13 @@ func (v *Vector) Nth(i int) Object {
 	return v.at(i)
 }
 
+func (v *Vector) TryNth(i int, d Object) Object {
+	if i < 0 || i >= v.count {
+		return d
+	}
+	return v.at(i)
+}
+
 func (v *Vector) sequential() {}
 
 func (v *Vector) Compare(other Object) int {

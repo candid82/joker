@@ -138,6 +138,7 @@ type (
 	}
 	Indexed interface {
 		Nth(i int) Object
+		TryNth(i int, d Object) Object
 	}
 )
 
