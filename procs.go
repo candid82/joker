@@ -374,6 +374,11 @@ var procNth Proc = func(args []Object) Object {
 	}
 }
 
+var procLt Proc = func(args []Object) Object {
+	a := assertNumber(args[0], "")
+	return Bool{b: GetOps(a).Lt(a, assertNumber(args[1], ""))}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -412,6 +417,7 @@ func init() {
 	intern("zero?*", procIsZero)
 	intern("int*", procInt)
 	intern("nth*", procNth)
+	intern("<*", procLt)
 
 	intern("+", procAdd)
 	intern("-", procSubtract)

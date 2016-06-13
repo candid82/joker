@@ -625,3 +625,16 @@
   {:added "1.0"}
   ([coll index] (nth* coll index))
   ([coll index not-found] (nth* coll index not-found)))
+
+(defn <
+  "Returns non-nil if nums are in monotonically increasing order,
+  otherwise false."
+  {:added "1.0"}
+  ([x] true)
+  ([x y] (<* x y))
+  ([x y & more]
+   (if (< x y)
+     (if (next more)
+       (recur y (first more) (next more))
+       (< y (first more)))
+     false)))
