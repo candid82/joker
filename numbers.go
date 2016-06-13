@@ -24,6 +24,7 @@ type (
 		Lte(Number, Number) bool
 		Gt(Number, Number) bool
 		Gte(Number, Number) bool
+		Eq(Number, Number) bool
 	}
 	IntOps      struct{}
 	DoubleOps   struct{}
@@ -454,6 +455,28 @@ func (ops BigFloatOps) Gte(x Number, y Number) bool {
 
 func (ops RatioOps) Gte(x Number, y Number) bool {
 	return x.Ratio().Cmp(y.Ratio()) >= 0
+}
+
+// Eq
+
+func (ops IntOps) Eq(x Number, y Number) bool {
+	return x.Int().i == y.Int().i
+}
+
+func (ops DoubleOps) Eq(x Number, y Number) bool {
+	return x.Double().d == y.Double().d
+}
+
+func (ops BigIntOps) Eq(x Number, y Number) bool {
+	return x.BigInt().Cmp(y.BigInt()) == 0
+}
+
+func (ops BigFloatOps) Eq(x Number, y Number) bool {
+	return x.BigFloat().Cmp(y.BigFloat()) == 0
+}
+
+func (ops RatioOps) Eq(x Number, y Number) bool {
+	return x.Ratio().Cmp(y.Ratio()) == 0
 }
 
 func CompareNumbers(x Number, y Number) int {

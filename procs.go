@@ -403,6 +403,11 @@ var procGte Proc = func(args []Object) Object {
 	return Bool{b: GetOps(a).Gte(a, assertNumber(args[1], ""))}
 }
 
+var procEq Proc = func(args []Object) Object {
+	a := assertNumber(args[0], "")
+	return Bool{b: GetOps(a).Eq(a, assertNumber(args[1], ""))}
+}
+
 var procIncEx Proc = func(args []Object) Object {
 	x := ensureNumber(args, 0)
 	ops := GetOps(x).Combine(BIGINT_OPS)
@@ -457,6 +462,7 @@ func init() {
 	intern("<=*", procLte)
 	intern(">*", procGt)
 	intern(">=*", procGte)
+	intern("==*", procEq)
 	intern("inc'*", procIncEx)
 	intern("inc*", procInc)
 	intern("add'*", procAddEx)
