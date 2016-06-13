@@ -291,7 +291,7 @@
 (defn nil?
   "Returns true if x is nil, false otherwise."
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   [x] (=* x nil))
 
 (def
@@ -352,30 +352,30 @@
   "Evaluates test. If logical false, evaluates body in an implicit do."
   {:added "1.0"}
   [test & body]
-    (list 'if test nil (cons 'do body)))
+  (list 'if test nil (cons 'do body)))
 
 (defn false?
   "Returns true if x is the value false, false otherwise."
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   [x] (=* x false))
 
 (defn true?
   "Returns true if x is the value true, false otherwise."
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   [x] (=* x true))
 
 (defn not
   "Returns true if x is logical false, false otherwise."
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   [x] (if x false true))
 
 (defn some?
   "Returns true if x is not nil, false otherwise."
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   [x] (not (nil? x)))
 
 (def
@@ -400,7 +400,7 @@
 (defn symbol
   "Returns a Symbol with the given namespace and name."
   {:tag Symbol
-   :added "1.0"}
+  :added "1.0"}
   ([name] (if (symbol? name) name (symbol* name)))
   ([ns name] (symbol* ns name)))
 
@@ -430,19 +430,19 @@
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
   {:tag Keyword
-   :added "1.0"}
+  :added "1.0"}
   ([name] (cond (keyword? name) name
-                (symbol? name) (keyword* name)
-                (string? name) (keyword* name)))
+            (symbol? name) (keyword* name)
+            (string? name) (keyword* name)))
   ([ns name] (keyword* ns name)))
 
 (defn spread
   {:private true}
   [arglist]
   (cond
-   (nil? arglist) nil
-   (nil? (next arglist)) (seq (first arglist))
-   :else (cons (first arglist) (spread (next arglist)))))
+    (nil? arglist) nil
+    (nil? (next arglist)) (seq (first arglist))
+    :else (cons (first arglist) (spread (next arglist)))))
 
 (defn list*
   "Creates a new list containing the items prepended to the rest, the
@@ -453,27 +453,27 @@
   ([a b args] (cons a (cons b args)))
   ([a b c args] (cons a (cons b (cons c args))))
   ([a b c d & more]
-     (cons a (cons b (cons c (cons d (spread more)))))))
+   (cons a (cons b (cons c (cons d (spread more)))))))
 
 (defn apply
   "Applies fn f to the argument list formed by prepending intervening arguments to args."
   {:added "1.0"}
   ([^Fn f args]
-     (apply* f (seq args)))
+   (apply* f (seq args)))
   ([^Fn f x args]
-     (apply* f (list* x args)))
+   (apply* f (list* x args)))
   ([^Fn f x y args]
-     (apply* f (list* x y args)))
+   (apply* f (list* x y args)))
   ([^Fn f x y z args]
-     (apply* f (list* x y z args)))
+   (apply* f (list* x y z args)))
   ([^Fn f a b c d & args]
-     (apply* f (cons a (cons b (cons c (cons d (spread args))))))))
+   (apply* f (cons a (cons b (cons c (cons d (spread args))))))))
 
 (defn vary-meta
- "Returns an object of the same type and value as obj, with
+  "Returns an object of the same type and value as obj, with
   (apply f (meta obj) args) as its metadata."
- {:added "1.0"}
- [obj f & args]
+  {:added "1.0"}
+  [obj f & args]
   (with-meta obj (apply f (meta obj) args)))
 
 (defmacro lazy-seq
@@ -564,7 +564,7 @@
 (defn not=
   "Same as (not (= obj1 obj2))"
   {:tag Bool
-   :added "1.0"}
+  :added "1.0"}
   ([x] false)
   ([x y] (not (= x y)))
   ([x y & more]
@@ -599,8 +599,8 @@
   ([] nil)
   ([x] x)
   ([x & next]
-      `(let [or# ~x]
-         (if or# or# (or ~@next)))))
+   `(let [or# ~x]
+      (if or# or# (or ~@next)))))
 
 (defn zero?
   "Returns true if num is zero, else false"
@@ -650,3 +650,22 @@
   ints, will overflow. See also: inc'"
   {:added "1.0"}
   [x] (inc* x))
+
+(defn ^:private
+  reduce1
+  ([f coll]
+   (let [s (seq coll)]
+     (if s
+       (reduce1 f (first s) (next s))
+       (f))))
+  ([f val coll]
+   (let [s (seq coll)]
+     (if s
+       (recur f (f val (first s)) (next s))
+       val))))
+
+(defn reverse
+  "Returns a seq of the items in coll in reverse order. Not lazy."
+  {:added "1.0"}
+  [coll]
+  (reduce1 conj () coll))
