@@ -638,3 +638,9 @@
        (recur y (first more) (next more))
        (< y (first more)))
      false)))
+
+(defn inc'
+  "Returns a number one greater than num. Supports arbitrary precision.
+  See also: inc"
+  {:added "1.0"}
+  [x] (inc'* x))

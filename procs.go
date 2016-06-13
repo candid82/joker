@@ -379,6 +379,12 @@ var procLt Proc = func(args []Object) Object {
 	return Bool{b: GetOps(a).Lt(a, assertNumber(args[1], ""))}
 }
 
+var procIncEx Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	ops := GetOps(x).Combine(BIGINT_OPS)
+	return ops.Add(x, Int{i: 1})
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -418,6 +424,7 @@ func init() {
 	intern("int*", procInt)
 	intern("nth*", procNth)
 	intern("<*", procLt)
+	intern("inc'*", procIncEx)
 
 	intern("+", procAdd)
 	intern("-", procSubtract)
