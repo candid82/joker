@@ -676,7 +676,7 @@
   {:added "1.0"}
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (+'* x y))
+  ([x y] (add'* x y))
   ([x y & more]
    (reduce1 +' (+' x y) more)))
 
@@ -686,7 +686,7 @@
   {:added "1.0"}
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (+* x y))
+  ([x y] (add* x y))
   ([x y & more]
      (reduce1 + (+ x y) more)))
 
@@ -696,7 +696,7 @@
   {:added "1.0"}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (*'* x y))
+  ([x y] (multiply'* x y))
   ([x y & more]
    (reduce1 *' (*' x y) more)))
 
@@ -706,7 +706,7 @@
   {:added "1.0"}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (** x y))
+  ([x y] (multiply* x y))
   ([x y & more]
      (reduce1 * (* x y) more)))
 
