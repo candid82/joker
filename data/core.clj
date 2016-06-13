@@ -718,3 +718,23 @@
   ([x y] (divide* x y))
   ([x y & more]
    (reduce1 / (/ x y) more)))
+
+(defn -'
+  "If no ys are supplied, returns the negation of x, else subtracts
+  the ys from x and returns the result. Supports arbitrary precision.
+  See also: -"
+  {:added "1.0"}
+  ([x] (subtract'* x))
+  ([x y] (subtract'* x y))
+  ([x y & more]
+   (reduce1 -' (-' x y) more)))
+
+(defn -
+  "If no ys are supplied, returns the negation of x, else subtracts
+  the ys from x and returns the result. Does not auto-promote
+  ints, will overflow. See also: -'"
+  {:added "1.0"}
+  ([x] (subtract* x))
+  ([x y] (subtract* x y))
+  ([x y & more]
+     (reduce1 - (- x y) more)))

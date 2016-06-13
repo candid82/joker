@@ -38,48 +38,57 @@ var procIsZero Proc = func(args []Object) Object {
 }
 
 var procAdd Proc = func(args []Object) Object {
-	x := ensureNumber(args, 0)
-	y := ensureNumber(args, 1)
+	x := assertNumber(args[0], "")
+	y := assertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y))
 	return ops.Add(x, y)
 }
 
 var procAddEx Proc = func(args []Object) Object {
-	x := ensureNumber(args, 0)
-	y := ensureNumber(args, 1)
+	x := assertNumber(args[0], "")
+	y := assertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
 	return ops.Add(x, y)
 }
 
 var procMultiply Proc = func(args []Object) Object {
-	x := ensureNumber(args, 0)
-	y := ensureNumber(args, 1)
+	x := assertNumber(args[0], "")
+	y := assertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y))
 	return ops.Multiply(x, y)
 }
 
 var procMultiplyEx Proc = func(args []Object) Object {
-	x := ensureNumber(args, 0)
-	y := ensureNumber(args, 1)
+	x := assertNumber(args[0], "")
+	y := assertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
 	return ops.Multiply(x, y)
 }
 
 var procSubtract Proc = func(args []Object) Object {
-	if len(args) == 0 {
-		panicArity(0)
+	var a, b Object
+	if len(args) == 1 {
+		a = Int{i: 0}
+		b = args[0]
+	} else {
+		a = args[0]
+		b = args[1]
 	}
-	var res Number = Int{i: 0}
-	start := 0
-	if len(args) > 1 {
-		res = ensureNumber(args, 0)
-		start = 1
+	ops := GetOps(a).Combine(GetOps(b))
+	return ops.Subtract(assertNumber(a, ""), assertNumber(b, ""))
+}
+
+var procSubtractEx Proc = func(args []Object) Object {
+	var a, b Object
+	if len(args) == 1 {
+		a = Int{i: 0}
+		b = args[0]
+	} else {
+		a = args[0]
+		b = args[1]
 	}
-	for i := start; i < len(args); i++ {
-		ops := GetOps(res).Combine(GetOps(args[i]))
-		res = ops.Subtract(res, ensureNumber(args, i))
-	}
-	return res
+	ops := GetOps(a).Combine(GetOps(b)).Combine(BIGINT_OPS)
+	return ops.Subtract(assertNumber(a, ""), assertNumber(b, ""))
 }
 
 var procDivide Proc = func(args []Object) Object {
@@ -437,8 +446,9 @@ func init() {
 	intern("multiply'*", procMultiplyEx)
 	intern("multiply*", procMultiply)
 	intern("divide*", procDivide)
+	intern("subtract'*", procSubtractEx)
+	intern("subtract*", procSubtract)
 
-	intern("-", procSubtract)
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
 	intern("set-macro*", procSetMacro)
