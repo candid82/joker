@@ -709,3 +709,12 @@
   ([x y] (** x y))
   ([x y & more]
      (reduce1 * (* x y) more)))
+
+(defn /
+  "If no denominators are supplied, returns 1/numerator,
+  else returns numerator divided by all of the denominators."
+  {:added "1.0"}
+  ([x] (/ 1 x))
+  ([x y] (divide* x y))
+  ([x y & more]
+   (reduce1 / (/ x y) more)))

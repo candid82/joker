@@ -83,20 +83,10 @@ var procSubtract Proc = func(args []Object) Object {
 }
 
 var procDivide Proc = func(args []Object) Object {
-	if len(args) == 0 {
-		panicArity(0)
-	}
-	var res Number = Int{i: 1}
-	start := 0
-	if len(args) > 1 {
-		res = ensureNumber(args, 0)
-		start = 1
-	}
-	for i := start; i < len(args); i++ {
-		ops := GetOps(res).Combine(GetOps(args[i]))
-		res = ops.Divide(res, ensureNumber(args, i))
-	}
-	return res
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y))
+	return ops.Divide(x, y)
 }
 
 var procExInfo Proc = func(args []Object) Object {
@@ -446,9 +436,9 @@ func init() {
 	intern("+*", procAdd)
 	intern("*'*", procMultiplyEx)
 	intern("**", procMultiply)
+	intern("divide*", procDivide)
 
 	intern("-", procSubtract)
-	intern("/", procDivide)
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
 	intern("set-macro*", procSetMacro)
