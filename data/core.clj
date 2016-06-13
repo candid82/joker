@@ -669,3 +669,23 @@
   {:added "1.0"}
   [coll]
   (reduce1 conj () coll))
+
+(defn +'
+  "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
+  See also: +"
+  {:added "1.0"}
+  ([] 0)
+  ([x] (cast Number x))
+  ([x y] (+'* x y))
+  ([x y & more]
+   (reduce1 +' (+' x y) more)))
+
+(defn +
+  "Returns the sum of nums. (+) returns 0. Does not auto-promote
+  ints, will overflow. See also: +'"
+  {:added "1.0"}
+  ([] 0)
+  ([x] (cast Number x))
+  ([x y] (+* x y))
+  ([x y & more]
+     (reduce1 + (+ x y) more)))

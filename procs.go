@@ -46,6 +46,13 @@ var procAdd Proc = func(args []Object) Object {
 	return res
 }
 
+var procAddEx Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
+	return ops.Add(x, y)
+}
+
 var procMultiply Proc = func(args []Object) Object {
 	var res Number = Int{i: 1}
 	for i, n := range args {
@@ -432,8 +439,9 @@ func init() {
 	intern("<*", procLt)
 	intern("inc'*", procIncEx)
 	intern("inc*", procInc)
+	intern("+'*", procAddEx)
+	intern("+*", procAdd)
 
-	intern("+", procAdd)
 	intern("-", procSubtract)
 	intern("*", procMultiply)
 	intern("/", procDivide)
