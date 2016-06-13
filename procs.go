@@ -385,6 +385,12 @@ var procIncEx Proc = func(args []Object) Object {
 	return ops.Add(x, Int{i: 1})
 }
 
+var procInc Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	ops := GetOps(x).Combine(INT_OPS)
+	return ops.Add(x, Int{i: 1})
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -425,6 +431,7 @@ func init() {
 	intern("nth*", procNth)
 	intern("<*", procLt)
 	intern("inc'*", procIncEx)
+	intern("inc*", procInc)
 
 	intern("+", procAdd)
 	intern("-", procSubtract)

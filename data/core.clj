@@ -644,3 +644,9 @@
   See also: inc"
   {:added "1.0"}
   [x] (inc'* x))
+
+(defn inc
+  "Returns a number one greater than num. Does not auto-promote
+  ints, will overflow. See also: inc'"
+  {:added "1.0"}
+  [x] (inc* x))
