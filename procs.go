@@ -38,12 +38,10 @@ var procIsZero Proc = func(args []Object) Object {
 }
 
 var procAdd Proc = func(args []Object) Object {
-	var res Number = Int{i: 0}
-	for i, n := range args {
-		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Add(res, ensureNumber(args, i))
-	}
-	return res
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y))
+	return ops.Add(x, y)
 }
 
 var procAddEx Proc = func(args []Object) Object {
@@ -54,12 +52,17 @@ var procAddEx Proc = func(args []Object) Object {
 }
 
 var procMultiply Proc = func(args []Object) Object {
-	var res Number = Int{i: 1}
-	for i, n := range args {
-		ops := GetOps(res).Combine(GetOps(n))
-		res = ops.Multiply(res, ensureNumber(args, i))
-	}
-	return res
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y))
+	return ops.Multiply(x, y)
+}
+
+var procMultiplyEx Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
+	return ops.Multiply(x, y)
 }
 
 var procSubtract Proc = func(args []Object) Object {
@@ -441,9 +444,10 @@ func init() {
 	intern("inc*", procInc)
 	intern("+'*", procAddEx)
 	intern("+*", procAdd)
+	intern("*'*", procMultiplyEx)
+	intern("**", procMultiply)
 
 	intern("-", procSubtract)
-	intern("*", procMultiply)
 	intern("/", procDivide)
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
