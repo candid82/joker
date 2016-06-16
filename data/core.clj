@@ -806,3 +806,15 @@
   ([x y] (min* x y))
   ([x y & more]
    (reduce1 min (min x y) more)))
+
+(defn dec'
+  "Returns a number one less than num. Supports arbitrary precision.
+  See also: dec"
+  {:added "1.0"}
+  [x] (dec'* x))
+
+(defn dec
+  "Returns a number one less than num. Does not auto-promote
+  ints, will overflow. See also: dec'"
+  {:added "1.0"}
+  [x] (dec* x))
