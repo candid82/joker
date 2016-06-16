@@ -33,8 +33,14 @@ var procWithMeta Proc = func(args []Object) Object {
 
 var procIsZero Proc = func(args []Object) Object {
 	n := ensureNumber(args, 0)
-	ops := GetOps(ensureNumber(args, 0))
+	ops := GetOps(n)
 	return Bool{b: ops.IsZero(n)}
+}
+
+var procIsPos Proc = func(args []Object) Object {
+	n := ensureNumber(args, 0)
+	ops := GetOps(n)
+	return Bool{b: ops.Gt(n, Int{i: 0})}
 }
 
 var procAdd Proc = func(args []Object) Object {
@@ -505,6 +511,7 @@ func init() {
 	intern("subtract*", procSubtract)
 	intern("max*", procMax)
 	intern("min*", procMin)
+	intern("pos*", procIsPos)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

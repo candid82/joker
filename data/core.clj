@@ -818,3 +818,8 @@
   ints, will overflow. See also: dec'"
   {:added "1.0"}
   [x] (dec* x))
+
+(defn pos?
+  "Returns true if num is greater than zero, else false"
+  {:added "1.0"}
+  [x] (pos* x))
