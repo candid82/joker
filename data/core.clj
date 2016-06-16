@@ -823,3 +823,8 @@
   "Returns true if num is greater than zero, else false"
   {:added "1.0"}
   [x] (pos* x))
+
+(defn neg?
+  "Returns true if num is less than zero, else false"
+  {:added "1.0"}
+  [x] (neg* x))

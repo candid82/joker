@@ -43,6 +43,12 @@ var procIsPos Proc = func(args []Object) Object {
 	return Bool{b: ops.Gt(n, Int{i: 0})}
 }
 
+var procIsNeg Proc = func(args []Object) Object {
+	n := ensureNumber(args, 0)
+	ops := GetOps(n)
+	return Bool{b: ops.Lt(n, Int{i: 0})}
+}
+
 var procAdd Proc = func(args []Object) Object {
 	x := assertNumber(args[0], "")
 	y := assertNumber(args[1], "")
@@ -512,6 +518,7 @@ func init() {
 	intern("max*", procMax)
 	intern("min*", procMin)
 	intern("pos*", procIsPos)
+	intern("neg*", procIsNeg)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
