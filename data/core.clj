@@ -798,3 +798,11 @@
   ([x y] (max* x y))
   ([x y & more]
    (reduce1 max (max x y) more)))
+
+(defn min
+  "Returns the least of the nums."
+  {:added "1.0"}
+  ([x] x)
+  ([x y] (min* x y))
+  ([x y & more]
+   (reduce1 min (min x y) more)))

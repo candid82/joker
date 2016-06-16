@@ -497,3 +497,11 @@ func Max(x Number, y Number) Number {
 	}
 	return x
 }
+
+func Min(x Number, y Number) Number {
+	ops := GetOps(x).Combine(GetOps(y))
+	if ops.Lt(x, y) {
+		return x
+	}
+	return y
+}

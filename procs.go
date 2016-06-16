@@ -419,6 +419,12 @@ var procMax Proc = func(args []Object) Object {
 	return Max(a, b)
 }
 
+var procMin Proc = func(args []Object) Object {
+	a := assertNumber(args[0], "")
+	b := assertNumber(args[1], "")
+	return Min(a, b)
+}
+
 var procIncEx Proc = func(args []Object) Object {
 	x := ensureNumber(args, 0)
 	ops := GetOps(x).Combine(BIGINT_OPS)
@@ -484,6 +490,7 @@ func init() {
 	intern("subtract'*", procSubtractEx)
 	intern("subtract*", procSubtract)
 	intern("max*", procMax)
+	intern("min*", procMin)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
