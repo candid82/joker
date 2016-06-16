@@ -385,27 +385,38 @@ var procNth Proc = func(args []Object) Object {
 
 var procLt Proc = func(args []Object) Object {
 	a := assertNumber(args[0], "")
-	return Bool{b: GetOps(a).Lt(a, assertNumber(args[1], ""))}
+	b := assertNumber(args[1], "")
+	return Bool{b: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
 }
 
 var procLte Proc = func(args []Object) Object {
 	a := assertNumber(args[0], "")
-	return Bool{b: GetOps(a).Lte(a, assertNumber(args[1], ""))}
+	b := assertNumber(args[1], "")
+	return Bool{b: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
 }
 
 var procGt Proc = func(args []Object) Object {
 	a := assertNumber(args[0], "")
-	return Bool{b: GetOps(a).Gt(a, assertNumber(args[1], ""))}
+	b := assertNumber(args[1], "")
+	return Bool{b: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
 }
 
 var procGte Proc = func(args []Object) Object {
 	a := assertNumber(args[0], "")
-	return Bool{b: GetOps(a).Gte(a, assertNumber(args[1], ""))}
+	b := assertNumber(args[1], "")
+	return Bool{b: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
 }
 
 var procEq Proc = func(args []Object) Object {
 	a := assertNumber(args[0], "")
-	return Bool{b: GetOps(a).Eq(a, assertNumber(args[1], ""))}
+	b := assertNumber(args[1], "")
+	return Bool{b: GetOps(a).Combine(GetOps(b)).Eq(a, b)}
+}
+
+var procMax Proc = func(args []Object) Object {
+	a := assertNumber(args[0], "")
+	b := assertNumber(args[1], "")
+	return Max(a, b)
 }
 
 var procIncEx Proc = func(args []Object) Object {
@@ -472,6 +483,7 @@ func init() {
 	intern("divide*", procDivide)
 	intern("subtract'*", procSubtractEx)
 	intern("subtract*", procSubtract)
+	intern("max*", procMax)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

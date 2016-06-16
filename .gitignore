@@ -4,3 +4,5 @@ gclojure
 input.clj
 
 bindata.go
+
+.vscode/.browse.VC.db

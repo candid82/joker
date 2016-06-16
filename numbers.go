@@ -489,3 +489,11 @@ func CompareNumbers(x Number, y Number) int {
 	}
 	return 0
 }
+
+func Max(x Number, y Number) Number {
+	ops := GetOps(x).Combine(GetOps(y))
+	if ops.Lt(x, y) {
+		return y
+	}
+	return x
+}

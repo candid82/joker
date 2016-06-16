@@ -790,3 +790,11 @@
        (recur y (first more) (next more))
        (== y (first more)))
      false)))
+
+(defn max
+  "Returns the greatest of the nums."
+  {:added "1.0"}
+  ([x] x)
+  ([x y] (max* x y))
+  ([x y & more]
+   (reduce1 max (max x y) more)))
