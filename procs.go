@@ -110,6 +110,13 @@ var procDivide Proc = func(args []Object) Object {
 	return ops.Divide(x, y)
 }
 
+var procQuot Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y))
+	return ops.Quotient(x, y)
+}
+
 var procExInfo Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	return &ExInfo{
@@ -519,6 +526,7 @@ func init() {
 	intern("min*", procMin)
 	intern("pos*", procIsPos)
 	intern("neg*", procIsNeg)
+	intern("quot*", procQuot)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

@@ -25,6 +25,7 @@ type (
 		Gt(Number, Number) bool
 		Gte(Number, Number) bool
 		Eq(Number, Number) bool
+		Quotient(Number, Number) Number
 	}
 	IntOps      struct{}
 	DoubleOps   struct{}
@@ -32,6 +33,9 @@ type (
 	BigFloatOps struct{}
 	RatioOps    struct{}
 )
+
+const MAX_INT = int(^uint(0) >> 1)
+const MIN_INT = -MAX_INT - 1
 
 var (
 	INT_OPS      = IntOps{}
@@ -345,6 +349,38 @@ func (ops RatioOps) Divide(x, y Number) Number {
 	r.Quo(x.Ratio(), y.Ratio())
 	res := Ratio{r: r}
 	return &res
+}
+
+// Quotient
+
+func (ops IntOps) Quotient(x, y Number) Number {
+	return Int{i: x.Int().i / y.Int().i}
+}
+
+func (ops DoubleOps) Quotient(x, y Number) Number {
+	z := x.Double().d / y.Double().d
+	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
+		return Int{i: int(z)}
+	}
+	return &BigInt{b: *big.NewInt(int64(z))}
+}
+
+func (ops BigIntOps) Quotient(x, y Number) Number {
+	z := big.Int{}
+	z.Quo(x.BigInt(), y.BigInt())
+	return &BigInt{b: z}
+}
+
+func (ops BigFloatOps) Quotient(x, y Number) Number {
+	z := big.Float{}
+	i, _ := z.Quo(x.BigFloat(), y.BigFloat()).Int64()
+	return &BigFloat{b: *z.SetInt64(i)}
+}
+
+func (ops RatioOps) Quotient(x, y Number) Number {
+	z := big.Rat{}
+	f, _ := z.Quo(x.Ratio(), y.Ratio()).Float64()
+	return &BigInt{b: *big.NewInt(int64(f))}
 }
 
 // IsZero

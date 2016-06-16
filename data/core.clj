@@ -828,3 +828,9 @@
   "Returns true if num is less than zero, else false"
   {:added "1.0"}
   [x] (neg* x))
+
+(defn quot
+  "quot[ient] of dividing numerator by denominator."
+  {:added "1.0"}
+  [num div]
+  (quot* num div))
