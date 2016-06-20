@@ -845,3 +845,10 @@
   "Bitwise complement"
   {:added "1.0"}
   [x] (bit-not* x))
+
+(defn bit-and
+  "Bitwise and"
+   {:added "1.0"}
+   ([x y] (bit-and* x y))
+   ([x y & more]
+      (reduce1 bit-and (bit-and x y) more)))
