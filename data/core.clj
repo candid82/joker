@@ -840,3 +840,8 @@
   {:added "1.0"}
   [num div]
   (rem* num div))
+
+(defn bit-not
+  "Bitwise complement"
+  {:added "1.0"}
+  [x] (bit-not* x))

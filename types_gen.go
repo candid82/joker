@@ -257,3 +257,24 @@ func ensureMeta(args []Object, index int) Meta {
     panic(RT.newArgTypeError(index, "Meta"))
   }
 }
+
+func assertInt(obj Object, msg string) Int {
+  switch c := obj.(type) {
+  case Int:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Int", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureInt(args []Object, index int) Int {
+  switch c := args[index].(type) {
+  case Int:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Int"))
+  }
+}

@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int
 
 package main
 
