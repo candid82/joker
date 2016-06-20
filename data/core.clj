@@ -852,3 +852,10 @@
    ([x y] (bit-and* x y))
    ([x y & more]
       (reduce1 bit-and (bit-and x y) more)))
+
+(defn bit-or
+  "Bitwise or"
+  {:added "1.0"}
+  ([x y] (bit-or* x y))
+  ([x y & more]
+    (reduce1 bit-or (bit-or x y) more)))
