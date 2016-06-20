@@ -26,6 +26,7 @@ type (
 		Gte(Number, Number) bool
 		Eq(Number, Number) bool
 		Quotient(Number, Number) Number
+		Rem(Number, Number) Number
 	}
 	IntOps      struct{}
 	DoubleOps   struct{}
@@ -381,6 +382,48 @@ func (ops RatioOps) Quotient(x, y Number) Number {
 	z := big.Rat{}
 	f, _ := z.Quo(x.Ratio(), y.Ratio()).Float64()
 	return &BigInt{b: *big.NewInt(int64(f))}
+}
+
+// Remainder
+
+func (ops IntOps) Rem(x, y Number) Number {
+	return Int{i: x.Int().i % y.Int().i}
+}
+
+func (ops DoubleOps) Rem(x, y Number) Number {
+	n := x.Double().d
+	d := y.Double().d
+	z := n / d
+	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
+		return Double{d: n - float64(int(z))*d}
+	}
+	return Double{d: n - float64(int64(z))*d}
+}
+
+func (ops BigIntOps) Rem(x, y Number) Number {
+	z := big.Int{}
+	z.Rem(x.BigInt(), y.BigInt())
+	return &BigInt{b: z}
+}
+
+func (ops BigFloatOps) Rem(x, y Number) Number {
+	n := x.BigFloat()
+	d := y.BigFloat()
+	z := big.Float{}
+	i, _ := z.Quo(n, d).Int64()
+	d.Mul(d, big.NewFloat(float64(i)))
+	z.Sub(n, d)
+	return &BigFloat{b: z}
+}
+
+func (ops RatioOps) Rem(x, y Number) Number {
+	n := x.Ratio()
+	d := y.Ratio()
+	z := big.Rat{}
+	f, _ := z.Quo(n, d).Float64()
+	d.Mul(d, big.NewRat(int64(f), 1))
+	z.Sub(n, d)
+	return &Ratio{r: z}
 }
 
 // IsZero

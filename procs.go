@@ -117,6 +117,13 @@ var procQuot Proc = func(args []Object) Object {
 	return ops.Quotient(x, y)
 }
 
+var procRem Proc = func(args []Object) Object {
+	x := ensureNumber(args, 0)
+	y := ensureNumber(args, 1)
+	ops := GetOps(x).Combine(GetOps(y))
+	return ops.Rem(x, y)
+}
+
 var procExInfo Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	return &ExInfo{
@@ -527,6 +534,7 @@ func init() {
 	intern("pos*", procIsPos)
 	intern("neg*", procIsNeg)
 	intern("quot*", procQuot)
+	intern("rem*", procRem)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

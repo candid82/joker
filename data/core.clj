@@ -834,3 +834,9 @@
   {:added "1.0"}
   [num div]
   (quot* num div))
+
+(defn rem
+  "remainder of dividing numerator by denominator."
+  {:added "1.0"}
+  [num div]
+  (rem* num div))
