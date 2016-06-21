@@ -945,3 +945,8 @@
   {:added "1.0"}
   [x]
   (fn [& args] x))
+
+(defn identity
+  "Returns its argument."
+  {:added "1.0"}
+  [x] x)
