@@ -883,3 +883,8 @@
   "Set bit at index n"
   {:added "1.0"}
   [x n] (bit-set* x n))
+
+(defn bit-flip
+  "Flip bit at index n"
+  {:added "1.0"}
+  [x n] (bit-flip* x n))
