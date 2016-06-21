@@ -129,69 +129,64 @@ var procBitNot Proc = func(args []Object) Object {
 	return Int{i: ^x.i}
 }
 
-var procBitAnd Proc = func(args []Object) Object {
+func assertInts(args []Object) (Int, Int) {
 	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
 	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	return x, y
+}
+
+var procBitAnd Proc = func(args []Object) Object {
+	x, y := assertInts(args)
 	return Int{i: x.i & y.i}
 }
 
 var procBitOr Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i | y.i}
 }
 
 var procBitXor Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i ^ y.i}
 }
 
 var procBitAndNot Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i &^ y.i}
 }
 
 var procBitClear Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i &^ (1 << uint(y.i))}
 }
 
 var procBitSet Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i | (1 << uint(y.i))}
 }
 
 var procBitFlip Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i ^ (1 << uint(y.i))}
 }
 
 var procBitTest Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Bool{b: x.i&(1<<uint(y.i)) != 0}
 }
 
 var procBitShiftLeft Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i << uint(y.i)}
 }
 
 var procBitShiftRight Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: x.i >> uint(y.i)}
 }
 
 var procUnsignedBitShiftRight Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	x, y := assertInts(args)
 	return Int{i: int(uint(x.i) >> uint(y.i))}
 }
 
