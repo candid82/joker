@@ -908,3 +908,10 @@
   "Bitwise shift right, without sign-extension."
   {:added "1.0"}
   [x n] (unsigned-bit-shift-right* x n))
+
+(defn integer?
+  "Returns true if n is an integer"
+  {:static true}
+  [n]
+  (or (instance? Int n)
+      (instance? BigInt n)))
