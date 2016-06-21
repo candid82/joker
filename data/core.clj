@@ -866,3 +866,15 @@
   ([x y] (bit-xor* x y))
   ([x y & more]
    (reduce1 bit-xor (bit-xor x y) more)))
+
+(defn bit-and-not
+  "Bitwise and with complement"
+  {:added "1.0"}
+  ([x y] (bit-and-not* x y))
+  ([x y & more]
+   (reduce1 bit-and-not (bit-and-not x y) more)))
+
+(defn bit-clear
+  "Clear bit at index n"
+  {:added "1.0"}
+  [x n] (bit-clear* x n))
