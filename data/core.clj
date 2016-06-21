@@ -923,3 +923,19 @@
   (if (integer? n)
     (zero? (bit-and (int* n) 1))
     (throw (ex-info (str "Argument must be an integer: " n) {}))))
+
+(defn odd?
+  "Returns true if n is odd, throws an exception if n is not an integer"
+  {:added "1.0"}
+  [n] (not (even? n)))
+
+(defn complement
+  "Takes a fn f and returns a fn that takes the same arguments as f,
+  has the same effects, if any, and returns the opposite truth value."
+  {:added "1.0"}
+  [f]
+  (fn
+    ([] (not (f)))
+    ([x] (not (f x)))
+    ([x y] (not (f x y)))
+    ([x y & zs] (not (apply f x y zs)))))
