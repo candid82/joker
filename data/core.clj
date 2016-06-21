@@ -888,3 +888,8 @@
   "Flip bit at index n"
   {:added "1.0"}
   [x n] (bit-flip* x n))
+
+(defn bit-test
+  "Test bit at index n"
+  {:added "1.0"}
+  [x n] (bit-test* x n))
