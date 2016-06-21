@@ -141,6 +141,12 @@ var procBitOr Proc = func(args []Object) Object {
 	return Int{i: x.i | y.i}
 }
 
+var procBitXor Proc = func(args []Object) Object {
+	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
+	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+	return Int{i: x.i ^ y.i}
+}
+
 var procExInfo Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	return &ExInfo{
@@ -555,6 +561,7 @@ func init() {
 	intern("bit-not*", procBitNot)
 	intern("bit-and*", procBitAnd)
 	intern("bit-or*", procBitOr)
+	intern("bit-xor*", procBitXor)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
