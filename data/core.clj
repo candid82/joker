@@ -939,3 +939,9 @@
     ([x] (not (f x)))
     ([x y] (not (f x y)))
     ([x y & zs] (not (apply f x y zs)))))
+
+(defn constantly
+  "Returns a function that takes any number of arguments and returns x."
+  {:added "1.0"}
+  [x]
+  (fn [& args] x))
