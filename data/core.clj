@@ -878,3 +878,8 @@
   "Clear bit at index n"
   {:added "1.0"}
   [x n] (bit-clear* x n))
+
+(defn bit-set
+  "Set bit at index n"
+  {:added "1.0"}
+  [x n] (bit-set* x n))
