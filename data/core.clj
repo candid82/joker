@@ -915,3 +915,11 @@
   [n]
   (or (instance? Int n)
       (instance? BigInt n)))
+
+(defn even?
+  "Returns true if n is even, throws an exception if n is not an integer"
+  {:added "1.0"}
+  [n]
+  (if (integer? n)
+    (zero? (bit-and (int* n) 1))
+    (throw (ex-info (str "Argument must be an integer: " n) {}))))

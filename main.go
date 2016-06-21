@@ -84,6 +84,8 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext)
 				fmt.Fprintln(os.Stderr, r)
 			case *EvalError:
 				fmt.Fprintln(os.Stderr, r)
+			case Error:
+				fmt.Fprintln(os.Stderr, r)
 			// case *runtime.TypeAssertionError:
 			// 	fmt.Fprintln(os.Stderr, r)
 			default:
