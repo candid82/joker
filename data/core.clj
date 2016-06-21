@@ -903,3 +903,8 @@
   "Bitwise shift right"
   {:added "1.0"}
   [x n] (bit-shift-right* x n))
+
+(defn unsigned-bit-shift-right
+  "Bitwise shift right, without sign-extension."
+  {:added "1.0"}
+  [x n] (unsigned-bit-shift-right* x n))
