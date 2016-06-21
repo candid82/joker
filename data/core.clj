@@ -893,3 +893,13 @@
   "Test bit at index n"
   {:added "1.0"}
   [x n] (bit-test* x n))
+
+(defn bit-shift-left
+  "Bitwise shift left"
+  {:added "1.0"}
+  [x n] (bit-shift-left* x n))
+
+(defn bit-shift-right
+  "Bitwise shift right"
+  {:added "1.0"}
+  [x n] (bit-shift-right* x n))
