@@ -956,3 +956,11 @@
   more efficient than, last. If the collection is empty, returns nil."
   {:added "1.0"}
   [coll] (peek* coll))
+
+(defn pop
+  "For a list, returns a new list without the first
+  item, for a vector, returns a new vector without the last item. If
+  the collection is empty, throws an exception.  Note - not the same
+  as next/butlast."
+  {:added "1.0"}
+  [coll] (pop* coll))

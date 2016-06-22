@@ -546,6 +546,11 @@ var procPeek Proc = func(args []Object) Object {
 	return s.Peek()
 }
 
+var procPop Proc = func(args []Object) Object {
+	s := assertStack(args[0], "")
+	return s.Pop().(Object)
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -619,6 +624,7 @@ func init() {
 	intern("bit-shift-right*", procBitShiftRight)
 	intern("unsigned-bit-shift-right*", procUnsignedBitShiftRight)
 	intern("peek*", procPeek)
+	intern("pop*", procPop)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
