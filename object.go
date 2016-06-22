@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack
 
 package main
 
@@ -139,6 +139,10 @@ type (
 	Indexed interface {
 		Nth(i int) Object
 		TryNth(i int, d Object) Object
+	}
+	Stack interface {
+		Peek() Object
+		Pop() Stack
 	}
 )
 

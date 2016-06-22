@@ -94,6 +94,14 @@ func (list *List) Count() int {
 	return list.count
 }
 
+func (list *List) Peek() Object {
+	return list.first
+}
+
+func (list *List) Pop() Stack {
+	return list.rest
+}
+
 func (list *List) sequential() {}
 
 var EmptyList = NewList(Nil{}, nil)

@@ -278,3 +278,24 @@ func ensureInt(args []Object, index int) Int {
     panic(RT.newArgTypeError(index, "Int"))
   }
 }
+
+func assertStack(obj Object, msg string) Stack {
+  switch c := obj.(type) {
+  case Stack:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Stack", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureStack(args []Object, index int) Stack {
+  switch c := args[index].(type) {
+  case Stack:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Stack"))
+  }
+}

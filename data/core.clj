@@ -950,3 +950,9 @@
   "Returns its argument."
   {:added "1.0"}
   [x] x)
+
+(defn peek
+  "For a list, same as first, for a vector, same as, but much
+  more efficient than, last. If the collection is empty, returns nil."
+  {:added "1.0"}
+  [coll] (peek* coll))

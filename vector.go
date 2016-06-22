@@ -21,6 +21,8 @@ type (
 	}
 )
 
+var empty_node []interface{} = make([]interface{}, 32)
+
 func (v *Vector) WithMeta(meta *ArrayMap) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
@@ -222,10 +224,65 @@ func (v *Vector) Compare(other Object) int {
 	return 0
 }
 
+func (v *Vector) Peek() Object {
+	if v.count > 0 {
+		return v.Nth(v.count - 1)
+	}
+	return NIL
+}
+
+func (v *Vector) popTail(level uint, node []interface{}) []interface{} {
+	subidx := ((v.count - 2) >> level) & 0x01F
+	if level > 5 {
+		newChild := v.popTail(level-5, node[subidx].([]interface{}))
+		if newChild == nil && subidx == 0 {
+			return nil
+		} else {
+			ret := clone(node)
+			ret[subidx] = newChild
+			return ret
+		}
+	} else if subidx == 0 {
+		return nil
+	} else {
+		ret := clone(node)
+		ret[subidx] = nil
+		return ret
+	}
+}
+
+func (v *Vector) Pop() Stack {
+	if v.count == 0 {
+		panic(RT.newError("Can't pop empty vector"))
+	}
+	if v.count == 1 {
+		return EmptyVector.WithMeta(v.meta).(Stack)
+	}
+	if v.count-v.tailoff() > 1 {
+		newTail := clone(v.tail)[0 : len(v.tail)-1]
+		res := &Vector{count: v.count - 1, shift: v.shift, root: v.root, tail: newTail}
+		res.meta = v.meta
+		return res
+	}
+	newTail := v.arrayFor(v.count - 2)
+	newRoot := v.popTail(v.shift, v.root)
+	newShift := v.shift
+	if newRoot == nil {
+		newRoot = empty_node
+	}
+	if v.shift > 5 && newRoot[1] == nil {
+		newRoot = newRoot[0].([]interface{})
+		newShift -= 5
+	}
+	res := &Vector{count: v.count - 1, shift: newShift, root: newRoot, tail: newTail}
+	res.meta = v.meta
+	return res
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,
-	root:  make([]interface{}, 32),
+	root:  empty_node,
 	tail:  make([]interface{}, 0, 32),
 }
 
