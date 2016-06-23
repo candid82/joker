@@ -551,6 +551,11 @@ var procPop Proc = func(args []Object) Object {
 	return s.Pop().(Object)
 }
 
+var procContains Proc = func(args []Object) Object {
+	c := assertContains(args[0], "contains? not supported on type "+args[0].GetType().ToString(false))
+	return Bool{b: c.Contains(args[1])}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -625,6 +630,7 @@ func init() {
 	intern("unsigned-bit-shift-right*", procUnsignedBitShiftRight)
 	intern("peek*", procPeek)
 	intern("pop*", procPop)
+	intern("contains?*", procContains)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

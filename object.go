@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Contains
 
 package main
 
@@ -144,6 +144,9 @@ type (
 		Peek() Object
 		Pop() Stack
 	}
+	Contains interface {
+		Contains(key Object) bool
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -182,6 +185,7 @@ func init() {
 	TYPES["Sequential"] = &Type{name: "Sequential", reflectType: reflect.TypeOf((*Sequential)(nil)).Elem()}
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
 	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
+	TYPES["Stack"] = &Type{name: "Stack", reflectType: reflect.TypeOf((*Stack)(nil)).Elem()}
 }
 
 func panicArity(n int) {

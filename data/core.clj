@@ -621,7 +621,7 @@
 (defn nth
   "Returns the value at the index. get returns nil if index out of
   bounds, nth throws an exception unless not-found is supplied.  nth
-  also works for strings, and, in O(n) time, for sequences."
+  also works, in O(n) time, for strings and sequences."
   {:added "1.0"}
   ([coll index] (nth* coll index))
   ([coll index not-found] (nth* coll index not-found)))
@@ -964,3 +964,12 @@
   as next/butlast."
   {:added "1.0"}
   [coll] (pop* coll))
+
+(defn contains?
+  "Returns true if key is present in the given collection, otherwise
+  returns false.  Note that for numerically indexed collections like
+  vectors, this tests if the numeric key is within the
+  range of indexes. 'contains?' operates constant or logarithmic time;
+  it will not perform a linear search for a value.  See also 'some'."
+  {:added "1.0"}
+  [coll key] (contains?* coll key))

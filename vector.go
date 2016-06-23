@@ -279,6 +279,11 @@ func (v *Vector) Pop() Stack {
 	return res
 }
 
+func (v *Vector) Contains(key Object) bool {
+	n := assertInt(key, "")
+	return n.i >= 0 && n.i < v.count
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

@@ -57,6 +57,10 @@ func (set *Set) Equals(other interface{}) bool {
 	}
 }
 
+func (set *Set) Contains(key Object) bool {
+	return set.m.indexOf(key) != -1
+}
+
 func (set *Set) WithInfo(info *ObjectInfo) Object {
 	set.info = info
 	return set
