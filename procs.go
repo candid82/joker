@@ -556,6 +556,20 @@ var procContains Proc = func(args []Object) Object {
 	return Bool{b: c.Contains(args[1])}
 }
 
+var procGet Proc = func(args []Object) Object {
+	switch c := args[0].(type) {
+	case Gettable:
+		ok, v := c.Get(args[1])
+		if ok {
+			return v
+		}
+	}
+	if len(args) == 3 {
+		return args[2]
+	}
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -631,6 +645,7 @@ func init() {
 	intern("peek*", procPeek)
 	intern("pop*", procPop)
 	intern("contains?*", procContains)
+	intern("get*", procGet)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

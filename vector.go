@@ -284,6 +284,16 @@ func (v *Vector) Contains(key Object) bool {
 	return n.i >= 0 && n.i < v.count
 }
 
+func (v *Vector) Get(key Object) (bool, Object) {
+	switch key := key.(type) {
+	case Int:
+		if key.i >= 0 && key.i < v.count {
+			return true, v.at(key.i)
+		}
+	}
+	return false, nil
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

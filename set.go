@@ -61,6 +61,13 @@ func (set *Set) Contains(key Object) bool {
 	return set.m.indexOf(key) != -1
 }
 
+func (set *Set) Get(key Object) (bool, Object) {
+	if set.m.indexOf(key) != -1 {
+		return true, key
+	}
+	return false, nil
+}
+
 func (set *Set) WithInfo(info *ObjectInfo) Object {
 	set.info = info
 	return set

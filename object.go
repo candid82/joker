@@ -147,6 +147,9 @@ type (
 	Contains interface {
 		Contains(key Object) bool
 	}
+	Gettable interface {
+		Get(key Object) (bool, Object)
+	}
 )
 
 var TYPES = map[string]*Type{}

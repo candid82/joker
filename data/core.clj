@@ -973,3 +973,11 @@
   it will not perform a linear search for a value.  See also 'some'."
   {:added "1.0"}
   [coll key] (contains?* coll key))
+
+(defn get
+  "Returns the value mapped to key, not-found or nil if key not present."
+  {:added "1.0"}
+  ([map key]
+   (get* map key))
+  ([map key not-found]
+   (get* map key not-found)))
