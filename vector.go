@@ -279,11 +279,6 @@ func (v *Vector) Pop() Stack {
 	return res
 }
 
-func (v *Vector) Contains(key Object) bool {
-	n := assertInt(key, "")
-	return n.i >= 0 && n.i < v.count
-}
-
 func (v *Vector) Get(key Object) (bool, Object) {
 	switch key := key.(type) {
 	case Int:

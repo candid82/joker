@@ -261,10 +261,6 @@ func (m *ArrayMap) Seq() Seq {
 	return &ArrayMapSeq{m: m, index: 0}
 }
 
-func (m *ArrayMap) Contains(key Object) bool {
-	return m.indexOf(key) != -1
-}
-
 func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
 	if m1 == nil {
 		return m2

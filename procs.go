@@ -552,8 +552,15 @@ var procPop Proc = func(args []Object) Object {
 }
 
 var procContains Proc = func(args []Object) Object {
-	c := assertContains(args[0], "contains? not supported on type "+args[0].GetType().ToString(false))
-	return Bool{b: c.Contains(args[1])}
+	switch c := args[0].(type) {
+	case Gettable:
+		ok, _ := c.Get(args[1])
+		if ok {
+			return Bool{b: true}
+		}
+		return Bool{b: false}
+	}
+	panic(RT.newError("contains? not supported on type " + args[0].GetType().ToString(false)))
 }
 
 var procGet Proc = func(args []Object) Object {

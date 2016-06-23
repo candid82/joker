@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Contains
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack
 
 package main
 
@@ -143,9 +143,6 @@ type (
 	Stack interface {
 		Peek() Object
 		Pop() Stack
-	}
-	Contains interface {
-		Contains(key Object) bool
 	}
 	Gettable interface {
 		Get(key Object) (bool, Object)

@@ -57,10 +57,6 @@ func (set *Set) Equals(other interface{}) bool {
 	}
 }
 
-func (set *Set) Contains(key Object) bool {
-	return set.m.indexOf(key) != -1
-}
-
 func (set *Set) Get(key Object) (bool, Object) {
 	if set.m.indexOf(key) != -1 {
 		return true, key

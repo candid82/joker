@@ -299,24 +299,3 @@ func ensureStack(args []Object, index int) Stack {
     panic(RT.newArgTypeError(index, "Stack"))
   }
 }
-
-func assertContains(obj Object, msg string) Contains {
-  switch c := obj.(type) {
-  case Contains:
-    return c
-  default:
-    if msg == "" {
-      msg = fmt.Sprintf("Expected %s, got %s", "Contains", obj.GetType().ToString(false))
-    }
-    panic(RT.newError(msg))
-  }
-}
-
-func ensureContains(args []Object, index int) Contains {
-  switch c := args[index].(type) {
-  case Contains:
-    return c
-  default:
-    panic(RT.newArgTypeError(index, "Contains"))
-  }
-}
