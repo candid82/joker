@@ -668,7 +668,7 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("vector"), info)
 	case *ArrayMap:
 		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, MakeSymbol("hash-map"), info)
-	case *Set:
+	case *ArraySet:
 		return syntaxQuoteColl(s.Seq(), env, reader, MakeSymbol("hash-set"), info)
 	default:
 		return obj

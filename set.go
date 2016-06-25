@@ -5,36 +5,36 @@ import (
 )
 
 type (
-	Set struct {
+	ArraySet struct {
 		InfoHolder
 		MetaHolder
 		m *ArrayMap
 	}
 )
 
-func (v *Set) WithMeta(meta *ArrayMap) Object {
+func (v *ArraySet) WithMeta(meta *ArrayMap) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
-func (set *Set) Disjoin(obj Object) *Set {
-	return &Set{m: set.m.Without(obj).(*ArrayMap)}
+func (set *ArraySet) Disjoin(obj Object) *ArraySet {
+	return &ArraySet{m: set.m.Without(obj).(*ArrayMap)}
 }
 
-func (set *Set) Add(obj Object) bool {
+func (set *ArraySet) Add(obj Object) bool {
 	return set.m.Add(obj, Bool{b: true})
 }
 
-func (set *Set) Conj(obj Object) Conjable {
-	return &Set{m: set.m.Assoc(obj, Bool{b: true}).(*ArrayMap)}
+func (set *ArraySet) Conj(obj Object) Conjable {
+	return &ArraySet{m: set.m.Assoc(obj, Bool{b: true}).(*ArrayMap)}
 }
 
-func EmptySet() *Set {
-	return &Set{m: EmptyArrayMap()}
+func EmptySet() *ArraySet {
+	return &ArraySet{m: EmptyArrayMap()}
 }
 
-func (set *Set) ToString(escape bool) string {
+func (set *ArraySet) ToString(escape bool) string {
 	var b bytes.Buffer
 	b.WriteString("#{")
 	if len(set.m.arr) > 0 {
@@ -48,35 +48,35 @@ func (set *Set) ToString(escape bool) string {
 	return b.String()
 }
 
-func (set *Set) Equals(other interface{}) bool {
+func (set *ArraySet) Equals(other interface{}) bool {
 	switch otherSet := other.(type) {
-	case *Set:
+	case *ArraySet:
 		return set.m.Equals(otherSet.m)
 	default:
 		return false
 	}
 }
 
-func (set *Set) Get(key Object) (bool, Object) {
+func (set *ArraySet) Get(key Object) (bool, Object) {
 	if set.m.indexOf(key) != -1 {
 		return true, key
 	}
 	return false, nil
 }
 
-func (set *Set) WithInfo(info *ObjectInfo) Object {
+func (set *ArraySet) WithInfo(info *ObjectInfo) Object {
 	set.info = info
 	return set
 }
 
-func (seq *Set) GetType() *Type {
+func (seq *ArraySet) GetType() *Type {
 	return TYPES["Set"]
 }
 
-func (set *Set) Seq() Seq {
+func (set *ArraySet) Seq() Seq {
 	return set.m.Keys()
 }
 
-func (set *Set) Count() int {
+func (set *ArraySet) Count() int {
 	return set.m.Count()
 }

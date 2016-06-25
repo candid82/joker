@@ -173,7 +173,7 @@ func init() {
 	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
 	TYPES["Vector"] = &Type{name: "Vector", reflectType: reflect.TypeOf((*Vector)(nil))}
 	TYPES["ArrayMap"] = &Type{name: "ArrayMap", reflectType: reflect.TypeOf((*ArrayMap)(nil))}
-	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil))}
+	TYPES["ArraySet"] = &Type{name: "ArraySet", reflectType: reflect.TypeOf((*ArraySet)(nil))}
 	TYPES["List"] = &Type{name: "List", reflectType: reflect.TypeOf((*List)(nil))}
 	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq", reflectType: reflect.TypeOf((*ArrayMapSeq)(nil))}
 	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
