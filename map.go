@@ -6,8 +6,7 @@ import (
 
 type (
 	Map interface {
-		Conjable
-		Assoc(key, value Object) Map
+		Associative
 		Without(key Object) Map
 	}
 	ArrayMap struct {
@@ -145,10 +144,18 @@ func (m *ArrayMap) Clone() *ArrayMap {
 	return &result
 }
 
-func (m *ArrayMap) Assoc(key Object, value Object) Map {
+func (m *ArrayMap) Assoc(key Object, value Object) Associative {
 	result := m.Clone()
 	result.Set(key, value)
 	return result
+}
+
+func (m *ArrayMap) EntryAt(key Object) *Vector {
+	i := m.indexOf(key)
+	if i != -1 {
+		return NewVectorFrom(key, m.arr[i+1])
+	}
+	return nil
 }
 
 func (m *ArrayMap) Without(key Object) Map {

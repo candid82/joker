@@ -341,3 +341,24 @@ func ensureSet(args []Object, index int) Set {
     panic(RT.newArgTypeError(index, "Set"))
   }
 }
+
+func assertAssociative(obj Object, msg string) Associative {
+  switch c := obj.(type) {
+  case Associative:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Associative", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureAssociative(args []Object, index int) Associative {
+  switch c := args[index].(type) {
+  case Associative:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Associative"))
+  }
+}

@@ -137,7 +137,7 @@
 
 (def
   ^{:arglists '([map key val] [map key val & kvs])
-  :doc "assoc[iate]. When applied to a map, returns a new map of the
+  :doc "`assoc[iate]. When applied to a map, returns a new map of the
       same (hashed/sorted) type, that contains the mapping of key(s) to
       val(s). When applied to a vector, returns a new vector that
       contains val at index. Note - index must be <= (count vector)."
@@ -1008,3 +1008,8 @@
        (if ks
          (recur ret (first ks) (next ks))
          ret)))))
+
+(defn find
+  "Returns the map entry for key, or nil if key not present."
+  {:added "1.0"}
+  [map key] (find* map key))

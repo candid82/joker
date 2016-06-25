@@ -289,6 +289,57 @@ func (v *Vector) Get(key Object) (bool, Object) {
 	return false, nil
 }
 
+func (v *Vector) EntryAt(key Object) *Vector {
+	ok, val := v.Get(key)
+	if ok {
+		return NewVectorFrom(key, val)
+	}
+	return nil
+}
+
+func doAssoc(level uint, node []interface{}, i int, val Object) []interface{} {
+	ret := clone(node)
+	if level == 0 {
+		ret[i&0x01f] = val
+	} else {
+		subidx := (i >> level) & 0x01f
+		ret[subidx] = doAssoc(level-5, node[subidx].([]interface{}), i, val)
+	}
+	return ret
+}
+
+func (v *Vector) assocN(i int, val Object) *Vector {
+	if i < 0 || i > v.count {
+		panic(RT.newError((fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count))))
+	}
+	if i == v.count {
+		return v.conj(val)
+	}
+	if i < v.tailoff() {
+		res := &Vector{count: v.count, shift: v.shift, root: doAssoc(v.shift, v.root, i, val), tail: v.tail}
+		res.meta = v.meta
+		return res
+	}
+	newTail := clone(v.tail)
+	newTail[i&0x01f] = val
+	res := &Vector{count: v.count, shift: v.shift, root: v.root, tail: newTail}
+	res.meta = v.meta
+	return res
+}
+
+func (v *Vector) Assoc(key, val Object) Associative {
+	var i int
+	switch key := key.(type) {
+	case Int:
+		i = key.i
+	case *BigInt:
+		i = key.Int().i
+	default:
+		panic(RT.newError("Key must be integer"))
+	}
+	return v.assocN(i, val)
+}
+
 var EmptyVector = &Vector{
 	count: 0,
 	shift: 5,

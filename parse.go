@@ -152,7 +152,7 @@ func (b *Bindings) ToMap() Map {
 	var res Map = EmptyArrayMap()
 	for b != nil {
 		for _, v := range b.bindings {
-			res = res.Assoc(v.name, NIL)
+			res = res.Assoc(v.name, NIL).(*ArrayMap)
 		}
 		b = b.parent
 	}

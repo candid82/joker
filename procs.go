@@ -284,7 +284,7 @@ var procIsInstance Proc = func(args []Object) Object {
 }
 
 var procAssoc Proc = func(args []Object) Object {
-	return ensureMap(args, 0).Assoc(args[1], args[2]).(Object)
+	return ensureAssociative(args, 0).Assoc(args[1], args[2])
 }
 
 var procEquals Proc = func(args []Object) Object {
@@ -580,6 +580,14 @@ var procDisj Proc = func(args []Object) Object {
 	return ensureSet(args, 0).Disjoin(args[1])
 }
 
+var procFind Proc = func(args []Object) Object {
+	res := ensureAssociative(args, 0).EntryAt(args[1])
+	if res == nil {
+		return NIL
+	}
+	return res
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -658,6 +666,7 @@ func init() {
 	intern("get*", procGet)
 	intern("dissoc*", procDissoc)
 	intern("disj*", procDisj)
+	intern("find*", procFind)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

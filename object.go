@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative
 
 package main
 
@@ -146,6 +146,11 @@ type (
 	}
 	Gettable interface {
 		Get(key Object) (bool, Object)
+	}
+	Associative interface {
+		Conjable
+		EntryAt(key Object) *Vector
+		Assoc(key, val Object) Associative
 	}
 )
 
@@ -515,8 +520,12 @@ func (n Nil) Without(key Object) Map {
 	return n
 }
 
-func (n Nil) Assoc(key, value Object) Map {
+func (n Nil) Assoc(key, value Object) Associative {
 	return EmptyArrayMap().Assoc(key, value)
+}
+
+func (n Nil) EntryAt(key Object) *Vector {
+	return nil
 }
 
 func (n Nil) Get(key Object) (bool, Object) {
