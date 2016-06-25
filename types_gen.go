@@ -299,3 +299,24 @@ func ensureStack(args []Object, index int) Stack {
     panic(RT.newArgTypeError(index, "Stack"))
   }
 }
+
+func assertMap(obj Object, msg string) Map {
+  switch c := obj.(type) {
+  case Map:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Map", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureMap(args []Object, index int) Map {
+  switch c := args[index].(type) {
+  case Map:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Map"))
+  }
+}

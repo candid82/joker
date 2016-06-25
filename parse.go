@@ -148,8 +148,8 @@ type (
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"))
 var LOCAL_BINDINGS *Bindings = nil
 
-func (b *Bindings) ToMap() *ArrayMap {
-	res := EmptyArrayMap()
+func (b *Bindings) ToMap() Map {
+	var res Map = EmptyArrayMap()
 	for b != nil {
 		for _, v := range b.bindings {
 			res = res.Assoc(v.name, NIL)
@@ -409,7 +409,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			switch docstring.(type) {
 			case String:
 				if meta != nil {
-					meta = meta.Assoc(MakeKeyword("doc"), docstring)
+					meta = meta.Assoc(MakeKeyword("doc"), docstring).(*ArrayMap)
 				} else {
 					meta = EmptyArrayMap()
 					meta.Add(MakeKeyword("doc"), docstring)

@@ -981,3 +981,16 @@
    (get* map key))
   ([map key not-found]
    (get* map key not-found)))
+
+(defn dissoc
+  "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
+  that does not contain a mapping for key(s)."
+  {:added "1.0"}
+  ([map] map)
+  ([map key]
+   (dissoc* map key))
+  ([map key & ks]
+   (let [ret (dissoc* map key)]
+     (if ks
+       (recur ret (first ks) (next ks))
+       ret))))

@@ -5,6 +5,11 @@ import (
 )
 
 type (
+	Map interface {
+		Conjable
+		Assoc(key, value Object) Map
+		Without(key Object) Map
+	}
 	ArrayMap struct {
 		InfoHolder
 		MetaHolder
@@ -140,13 +145,13 @@ func (m *ArrayMap) Clone() *ArrayMap {
 	return &result
 }
 
-func (m *ArrayMap) Assoc(key Object, value Object) *ArrayMap {
+func (m *ArrayMap) Assoc(key Object, value Object) Map {
 	result := m.Clone()
 	result.Set(key, value)
 	return result
 }
 
-func (m *ArrayMap) Without(key Object) *ArrayMap {
+func (m *ArrayMap) Without(key Object) Map {
 	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
 	var i, j int
 	for i, j = 0, 0; i < len(m.arr); i += 2 {

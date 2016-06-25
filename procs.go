@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-func ensureMap(args []Object, index int) *ArrayMap {
+func ensureArrayMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
 	case *ArrayMap:
 		return obj
@@ -28,7 +28,7 @@ var procMeta Proc = func(args []Object) Object {
 
 var procWithMeta Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	return ensureMeta(args, 0).WithMeta(ensureMap(args, 1))
+	return ensureMeta(args, 0).WithMeta(ensureArrayMap(args, 1))
 }
 
 var procIsZero Proc = func(args []Object) Object {
@@ -194,7 +194,7 @@ var procExInfo Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	return &ExInfo{
 		msg:  ensureString(args, 0),
-		data: ensureMap(args, 1),
+		data: ensureArrayMap(args, 1),
 		rt:   RT.clone(),
 	}
 }
@@ -251,8 +251,6 @@ var procRest Proc = func(args []Object) Object {
 
 var procConj Proc = func(args []Object) Object {
 	switch c := args[0].(type) {
-	case Nil:
-		return NewListFrom(args[1])
 	case Conjable:
 		return c.Conj(args[1])
 	case Seq:
@@ -286,10 +284,7 @@ var procIsInstance Proc = func(args []Object) Object {
 }
 
 var procAssoc Proc = func(args []Object) Object {
-	if args[0].Equals(NIL) {
-		return EmptyArrayMap().Assoc(args[1], args[2])
-	}
-	return ensureMap(args, 0).Assoc(args[1], args[2])
+	return ensureMap(args, 0).Assoc(args[1], args[2]).(Object)
 }
 
 var procEquals Proc = func(args []Object) Object {
@@ -577,6 +572,11 @@ var procGet Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procDissoc Proc = func(args []Object) Object {
+	m := ensureMap(args, 0)
+	return m.Without(args[1]).(Object)
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -653,6 +653,7 @@ func init() {
 	intern("pop*", procPop)
 	intern("contains?*", procContains)
 	intern("get*", procGet)
+	intern("dissoc*", procDissoc)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

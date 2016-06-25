@@ -19,7 +19,7 @@ func (v *Set) WithMeta(meta *ArrayMap) Object {
 }
 
 func (set *Set) Disjoin(obj Object) *Set {
-	return &Set{m: set.m.Without(obj)}
+	return &Set{m: set.m.Without(obj).(*ArrayMap)}
 }
 
 func (set *Set) Add(obj Object) bool {
@@ -27,7 +27,7 @@ func (set *Set) Add(obj Object) bool {
 }
 
 func (set *Set) Conj(obj Object) Conjable {
-	return &Set{m: set.m.Assoc(obj, Bool{b: true})}
+	return &Set{m: set.m.Assoc(obj, Bool{b: true}).(*ArrayMap)}
 }
 
 func EmptySet() *Set {

@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map
 
 package main
 
@@ -503,6 +503,18 @@ func (n Nil) IsEmpty() bool {
 
 func (n Nil) Cons(obj Object) Seq {
 	return NewListFrom(obj)
+}
+
+func (n Nil) Conj(obj Object) Conjable {
+	return NewListFrom(obj)
+}
+
+func (n Nil) Without(key Object) Map {
+	return n
+}
+
+func (n Nil) Assoc(key, value Object) Map {
+	return EmptyArrayMap().Assoc(key, value)
 }
 
 func (rat *Ratio) ToString(escape bool) string {
