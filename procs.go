@@ -28,7 +28,11 @@ var procMeta Proc = func(args []Object) Object {
 
 var procWithMeta Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
-	return ensureMeta(args, 0).WithMeta(ensureArrayMap(args, 1))
+	m := ensureMeta(args, 0)
+	if args[1].Equals(NIL) {
+		return args[0]
+	}
+	return m.WithMeta(ensureArrayMap(args, 1))
 }
 
 var procIsZero Proc = func(args []Object) Object {

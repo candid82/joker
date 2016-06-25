@@ -1013,3 +1013,17 @@
   "Returns the map entry for key, or nil if key not present."
   {:added "1.0"}
   [map key] (find* map key))
+
+(defn select-keys
+  "Returns a map containing only those entries in map whose key is in keys"
+  {:added "1.0"}
+  [map keyseq]
+  (loop [ret {} keys (seq keyseq)]
+    (if keys
+      (let [entry (find* map (first keys))]
+        (recur
+         (if entry
+           (conj ret entry)
+           ret)
+         (next keys)))
+      (with-meta ret (meta map)))))
