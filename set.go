@@ -5,6 +5,11 @@ import (
 )
 
 type (
+	Set interface {
+		Conjable
+		Gettable
+		Disjoin(key Object) Set
+	}
 	ArraySet struct {
 		InfoHolder
 		MetaHolder
@@ -18,8 +23,8 @@ func (v *ArraySet) WithMeta(meta *ArrayMap) Object {
 	return &res
 }
 
-func (set *ArraySet) Disjoin(obj Object) *ArraySet {
-	return &ArraySet{m: set.m.Without(obj).(*ArrayMap)}
+func (set *ArraySet) Disjoin(key Object) Set {
+	return &ArraySet{m: set.m.Without(key).(*ArrayMap)}
 }
 
 func (set *ArraySet) Add(obj Object) bool {

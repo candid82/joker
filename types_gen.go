@@ -320,3 +320,24 @@ func ensureMap(args []Object, index int) Map {
     panic(RT.newArgTypeError(index, "Map"))
   }
 }
+
+func assertSet(obj Object, msg string) Set {
+  switch c := obj.(type) {
+  case Set:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Set", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureSet(args []Object, index int) Set {
+  switch c := args[index].(type) {
+  case Set:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Set"))
+  }
+}

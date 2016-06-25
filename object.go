@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set
 
 package main
 
@@ -186,6 +186,8 @@ func init() {
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
 	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
 	TYPES["Stack"] = &Type{name: "Stack", reflectType: reflect.TypeOf((*Stack)(nil)).Elem()}
+	TYPES["Map"] = &Type{name: "Map", reflectType: reflect.TypeOf((*Map)(nil)).Elem()}
+	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil)).Elem()}
 }
 
 func panicArity(n int) {
@@ -515,6 +517,14 @@ func (n Nil) Without(key Object) Map {
 
 func (n Nil) Assoc(key, value Object) Map {
 	return EmptyArrayMap().Assoc(key, value)
+}
+
+func (n Nil) Get(key Object) (bool, Object) {
+	return false, NIL
+}
+
+func (n Nil) Disjoin(key Object) Set {
+	return n
 }
 
 func (rat *Ratio) ToString(escape bool) string {

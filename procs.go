@@ -573,8 +573,11 @@ var procGet Proc = func(args []Object) Object {
 }
 
 var procDissoc Proc = func(args []Object) Object {
-	m := ensureMap(args, 0)
-	return m.Without(args[1]).(Object)
+	return ensureMap(args, 0).Without(args[1])
+}
+
+var procDisj Proc = func(args []Object) Object {
+	return ensureSet(args, 0).Disjoin(args[1])
 }
 
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
@@ -654,6 +657,7 @@ func init() {
 	intern("contains?*", procContains)
 	intern("get*", procGet)
 	intern("dissoc*", procDissoc)
+	intern("disj*", procDisj)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
