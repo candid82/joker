@@ -1032,3 +1032,8 @@
   "Returns a sequence of the map's keys, in the same order as (seq map)."
   {:added "1.0"}
   [map] (keys* map))
+
+(defn vals
+  "Returns a sequence of the map's values, in the same order as (seq map)."
+  {:added "1.0"}
+  [map] (vals* map))

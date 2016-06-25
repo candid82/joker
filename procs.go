@@ -596,6 +596,10 @@ var procKeys Proc = func(args []Object) Object {
 	return ensureMap(args, 0).Keys()
 }
 
+var procVals Proc = func(args []Object) Object {
+	return ensureMap(args, 0).Vals()
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -676,6 +680,7 @@ func init() {
 	intern("disj*", procDisj)
 	intern("find*", procFind)
 	intern("keys*", procKeys)
+	intern("vals*", procVals)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)

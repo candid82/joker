@@ -9,6 +9,7 @@ type (
 		Associative
 		Without(key Object) Map
 		Keys() Seq
+		Vals() Seq
 	}
 	ArrayMap struct {
 		InfoHolder
@@ -196,6 +197,15 @@ func (m *ArrayMap) Keys() Seq {
 	res := make([]Object, mlen)
 	for i := 0; i < mlen; i++ {
 		res[i] = m.arr[i*2]
+	}
+	return &ArraySeq{arr: res}
+}
+
+func (m *ArrayMap) Vals() Seq {
+	mlen := len(m.arr) / 2
+	res := make([]Object, mlen)
+	for i := 0; i < mlen; i++ {
+		res[i] = m.arr[i*2+1]
 	}
 	return &ArraySeq{arr: res}
 }

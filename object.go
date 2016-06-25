@@ -540,6 +540,10 @@ func (n Nil) Keys() Seq {
 	return NIL
 }
 
+func (n Nil) Vals() Seq {
+	return NIL
+}
+
 func (rat *Ratio) ToString(escape bool) string {
 	return rat.r.String()
 }
