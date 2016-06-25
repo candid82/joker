@@ -1037,3 +1037,15 @@
   "Returns a sequence of the map's values, in the same order as (seq map)."
   {:added "1.0"}
   [map] (vals* map))
+
+(defn key
+  "Returns the key of the map entry."
+  {:added "1.0"}
+  [e]
+  (first e))
+
+(defn val
+  "Returns the value in the map entry."
+  {:added "1.0"}
+  [e]
+  (second e))
