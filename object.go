@@ -536,6 +536,10 @@ func (n Nil) Disjoin(key Object) Set {
 	return n
 }
 
+func (n Nil) Keys() Seq {
+	return NIL
+}
+
 func (rat *Ratio) ToString(escape bool) string {
 	return rat.r.String()
 }

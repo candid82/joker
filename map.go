@@ -8,6 +8,7 @@ type (
 	Map interface {
 		Associative
 		Without(key Object) Map
+		Keys() Seq
 	}
 	ArrayMap struct {
 		InfoHolder
