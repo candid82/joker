@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible
 
 package main
 
@@ -152,6 +152,9 @@ type (
 		EntryAt(key Object) *Vector
 		Assoc(key, val Object) Associative
 	}
+	Reversible interface {
+		Rseq() Seq
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -184,6 +187,7 @@ func init() {
 	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
 	TYPES["VectorSeq"] = &Type{name: "VectorSeq", reflectType: reflect.TypeOf((*VectorSeq)(nil))}
+	TYPES["VectorRSeq"] = &Type{name: "VectorRSeq", reflectType: reflect.TypeOf((*VectorRSeq)(nil))}
 	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
 	TYPES["Seqable"] = &Type{name: "Seqable", reflectType: reflect.TypeOf((*Seqable)(nil)).Elem()}
 	TYPES["Number"] = &Type{name: "Number", reflectType: reflect.TypeOf((*Number)(nil)).Elem()}

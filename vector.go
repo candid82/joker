@@ -19,6 +19,11 @@ type (
 		vector *Vector
 		index  int
 	}
+	VectorRSeq struct {
+		InfoHolder
+		vector *Vector
+		index  int
+	}
 )
 
 var empty_node []interface{} = make([]interface{}, 32)
@@ -182,6 +187,51 @@ func (vseq *VectorSeq) Cons(obj Object) Seq {
 
 func (vseq *VectorSeq) sequential() {}
 
+func (seq *VectorRSeq) Seq() Seq {
+	return seq
+}
+
+func (vseq *VectorRSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(vseq, other)
+}
+
+func (vseq *VectorRSeq) ToString(escape bool) string {
+	return SeqToString(vseq, escape)
+}
+
+func (vseq *VectorRSeq) WithInfo(info *ObjectInfo) Object {
+	vseq.info = info
+	return vseq
+}
+
+func (vseq *VectorRSeq) GetType() *Type {
+	return TYPES["VectorRSeq"]
+}
+
+func (vseq *VectorRSeq) First() Object {
+	if vseq.index >= 0 {
+		return vseq.vector.at(vseq.index)
+	}
+	return NIL
+}
+
+func (vseq *VectorRSeq) Rest() Seq {
+	if vseq.index-1 >= 0 {
+		return &VectorRSeq{vector: vseq.vector, index: vseq.index - 1}
+	}
+	return EmptyList
+}
+
+func (vseq *VectorRSeq) IsEmpty() bool {
+	return vseq.index < 0
+}
+
+func (vseq *VectorRSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: vseq}
+}
+
+func (vseq *VectorRSeq) sequential() {}
+
 func (v *Vector) Seq() Seq {
 	return &VectorSeq{vector: v, index: 0}
 }
@@ -338,6 +388,10 @@ func (v *Vector) Assoc(key, val Object) Associative {
 		panic(RT.newError("Key must be integer"))
 	}
 	return v.assocN(i, val)
+}
+
+func (v *Vector) Rseq() Seq {
+	return &VectorRSeq{vector: v, index: v.count - 1}
 }
 
 var EmptyVector = &Vector{

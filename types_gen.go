@@ -362,3 +362,24 @@ func ensureAssociative(args []Object, index int) Associative {
     panic(RT.newArgTypeError(index, "Associative"))
   }
 }
+
+func assertReversible(obj Object, msg string) Reversible {
+  switch c := obj.(type) {
+  case Reversible:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Reversible", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureReversible(args []Object, index int) Reversible {
+  switch c := args[index].(type) {
+  case Reversible:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Reversible"))
+  }
+}
