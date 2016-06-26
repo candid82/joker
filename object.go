@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible
+//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named
 
 package main
 
@@ -155,6 +155,9 @@ type (
 	Reversible interface {
 		Rseq() Seq
 	}
+	Named interface {
+		Name() string
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -197,6 +200,7 @@ func init() {
 	TYPES["Stack"] = &Type{name: "Stack", reflectType: reflect.TypeOf((*Stack)(nil)).Elem()}
 	TYPES["Map"] = &Type{name: "Map", reflectType: reflect.TypeOf((*Map)(nil)).Elem()}
 	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil)).Elem()}
+	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
 }
 
 func panicArity(n int) {
@@ -768,10 +772,14 @@ func (b Bool) Compare(other Object) int {
 }
 
 func (k Keyword) ToString(escape bool) string {
+	return ":" + k.Name()
+}
+
+func (k Keyword) Name() string {
 	if k.ns != nil {
-		return ":" + *k.ns + "/" + *k.name
+		return *k.ns + "/" + *k.name
 	}
-	return ":" + *k.name
+	return *k.name
 }
 
 func (k Keyword) Equals(other interface{}) bool {
@@ -838,6 +846,10 @@ func (rx Regex) GetType() *Type {
 }
 
 func (s Symbol) ToString(escape bool) string {
+	return s.Name()
+}
+
+func (s Symbol) Name() string {
 	if s.ns != nil {
 		return *s.ns + "/" + *s.name
 	}
@@ -871,6 +883,10 @@ func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.s)
 	}
+	return s.s
+}
+
+func (s String) Name() string {
 	return s.s
 }
 

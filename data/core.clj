@@ -1052,7 +1052,14 @@
 
 (defn rseq
   "Returns, in constant time, a seq of the items in rev (which
-  can be a vector or sorted-map), in reverse order. If rev is empty returns nil"
+  can be a vector or sorted-map), in reverse order. If rev is empty returns nil."
   {:added "1.0"}
   [^Reversible rev]
   (rseq* rev))
+
+(defn name
+  "Returns the name String of a string, symbol or keyword."
+  {:tag String
+  :added "1.0"}
+  [x]
+  (name* x))

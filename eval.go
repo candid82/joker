@@ -7,8 +7,8 @@ import (
 
 type (
 	Traceable interface {
+		Named
 		Pos() Position
-		Name() string
 	}
 	EvalError struct {
 		msg string

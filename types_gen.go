@@ -383,3 +383,24 @@ func ensureReversible(args []Object, index int) Reversible {
     panic(RT.newArgTypeError(index, "Reversible"))
   }
 }
+
+func assertNamed(obj Object, msg string) Named {
+  switch c := obj.(type) {
+  case Named:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Named", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureNamed(args []Object, index int) Named {
+  switch c := args[index].(type) {
+  case Named:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, "Named"))
+  }
+}
