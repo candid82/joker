@@ -16,11 +16,13 @@ type (
 	}
 	VectorSeq struct {
 		InfoHolder
+		MetaHolder
 		vector *Vector
 		index  int
 	}
 	VectorRSeq struct {
 		InfoHolder
+		MetaHolder
 		vector *Vector
 		index  int
 	}
@@ -159,6 +161,12 @@ func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
 	return vseq
 }
 
+func (vseq *VectorSeq) WithMeta(meta *ArrayMap) Object {
+	res := *vseq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
 func (vseq *VectorSeq) GetType() *Type {
 	return TYPES["VectorSeq"]
 }
@@ -202,6 +210,12 @@ func (vseq *VectorRSeq) ToString(escape bool) string {
 func (vseq *VectorRSeq) WithInfo(info *ObjectInfo) Object {
 	vseq.info = info
 	return vseq
+}
+
+func (vseq *VectorRSeq) WithMeta(meta *ArrayMap) Object {
+	res := *vseq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (vseq *VectorRSeq) GetType() *Type {

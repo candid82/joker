@@ -26,6 +26,7 @@ type (
 	}
 	ArrayMapSeq struct {
 		InfoHolder
+		MetaHolder
 		m     *ArrayMap
 		index int
 	}
@@ -52,6 +53,12 @@ func (seq *ArrayMapSeq) ToString(escape bool) string {
 func (seq *ArrayMapSeq) WithInfo(info *ObjectInfo) Object {
 	seq.info = info
 	return seq
+}
+
+func (seq *ArrayMapSeq) WithMeta(meta *ArrayMap) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (seq *ArrayMapSeq) First() Object {

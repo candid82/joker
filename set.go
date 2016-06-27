@@ -75,7 +75,7 @@ func (set *ArraySet) WithInfo(info *ObjectInfo) Object {
 }
 
 func (seq *ArraySet) GetType() *Type {
-	return TYPES["Set"]
+	return TYPES["ArraySet"]
 }
 
 func (set *ArraySet) Seq() Seq {

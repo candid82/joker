@@ -41,7 +41,7 @@ func ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
   case {{.TypeName}}:
     return c
   default:
-    panic(RT.newArgTypeError(index, "{{.Name}}"))
+    panic(RT.newArgTypeError(index, c, "{{.Name}}"))
   }
 }
 `

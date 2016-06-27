@@ -49,9 +49,9 @@ func (rt *Runtime) newError(msg string) *EvalError {
 	return res
 }
 
-func (rt *Runtime) newArgTypeError(index int, typeName string) *EvalError {
+func (rt *Runtime) newArgTypeError(index int, obj Object, expectedType string) *EvalError {
 	name := rt.currentExpr.(Traceable).Name()
-	return rt.newError(fmt.Sprintf("Arg[%d] of %s must be of type %s", index, name, typeName))
+	return rt.newError(fmt.Sprintf("Arg[%d] of %s must have type %s, got %s", index, name, expectedType, obj.GetType().ToString(false)))
 }
 
 func (rt *Runtime) newErrorWithPos(msg string, pos Position) *EvalError {

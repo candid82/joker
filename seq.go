@@ -87,6 +87,12 @@ func (seq *LazySeq) WithInfo(info *ObjectInfo) Object {
 	return seq
 }
 
+func (seq *LazySeq) WithMeta(meta *ArrayMap) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
 func (seq *LazySeq) GetType() *Type {
 	return TYPES["LazySeq"]
 }
@@ -127,6 +133,12 @@ func (seq *ArraySeq) ToString(escape bool) string {
 func (seq *ArraySeq) WithInfo(info *ObjectInfo) Object {
 	seq.info = info
 	return seq
+}
+
+func (seq *ArraySeq) WithMeta(meta *ArrayMap) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (seq *ArraySeq) GetType() *Type {

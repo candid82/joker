@@ -11,7 +11,7 @@ func ensureArrayMap(args []Object, index int) *ArrayMap {
 	case *ArrayMap:
 		return obj
 	default:
-		panic(RT.newArgTypeError(index, "Map"))
+		panic(RT.newArgTypeError(index, obj, "Map"))
 	}
 }
 

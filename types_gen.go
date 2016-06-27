@@ -23,7 +23,7 @@ func ensureComparable(args []Object, index int) Comparable {
   case Comparable:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Comparable"))
+    panic(RT.newArgTypeError(index, c, "Comparable"))
   }
 }
 
@@ -44,7 +44,7 @@ func ensureVector(args []Object, index int) *Vector {
   case *Vector:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Vector"))
+    panic(RT.newArgTypeError(index, c, "Vector"))
   }
 }
 
@@ -65,7 +65,7 @@ func ensureChar(args []Object, index int) Char {
   case Char:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Char"))
+    panic(RT.newArgTypeError(index, c, "Char"))
   }
 }
 
@@ -86,7 +86,7 @@ func ensureString(args []Object, index int) String {
   case String:
     return c
   default:
-    panic(RT.newArgTypeError(index, "String"))
+    panic(RT.newArgTypeError(index, c, "String"))
   }
 }
 
@@ -107,7 +107,7 @@ func ensureSymbol(args []Object, index int) Symbol {
   case Symbol:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Symbol"))
+    panic(RT.newArgTypeError(index, c, "Symbol"))
   }
 }
 
@@ -128,7 +128,7 @@ func ensureKeyword(args []Object, index int) Keyword {
   case Keyword:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Keyword"))
+    panic(RT.newArgTypeError(index, c, "Keyword"))
   }
 }
 
@@ -149,7 +149,7 @@ func ensureBool(args []Object, index int) Bool {
   case Bool:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Bool"))
+    panic(RT.newArgTypeError(index, c, "Bool"))
   }
 }
 
@@ -170,7 +170,7 @@ func ensureNumber(args []Object, index int) Number {
   case Number:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Number"))
+    panic(RT.newArgTypeError(index, c, "Number"))
   }
 }
 
@@ -191,7 +191,7 @@ func ensureSeqable(args []Object, index int) Seqable {
   case Seqable:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Seqable"))
+    panic(RT.newArgTypeError(index, c, "Seqable"))
   }
 }
 
@@ -212,7 +212,7 @@ func ensureCallable(args []Object, index int) Callable {
   case Callable:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Callable"))
+    panic(RT.newArgTypeError(index, c, "Callable"))
   }
 }
 
@@ -233,7 +233,7 @@ func ensureType(args []Object, index int) *Type {
   case *Type:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Type"))
+    panic(RT.newArgTypeError(index, c, "Type"))
   }
 }
 
@@ -254,7 +254,7 @@ func ensureMeta(args []Object, index int) Meta {
   case Meta:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Meta"))
+    panic(RT.newArgTypeError(index, c, "Meta"))
   }
 }
 
@@ -275,7 +275,7 @@ func ensureInt(args []Object, index int) Int {
   case Int:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Int"))
+    panic(RT.newArgTypeError(index, c, "Int"))
   }
 }
 
@@ -296,7 +296,7 @@ func ensureStack(args []Object, index int) Stack {
   case Stack:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Stack"))
+    panic(RT.newArgTypeError(index, c, "Stack"))
   }
 }
 
@@ -317,7 +317,7 @@ func ensureMap(args []Object, index int) Map {
   case Map:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Map"))
+    panic(RT.newArgTypeError(index, c, "Map"))
   }
 }
 
@@ -338,7 +338,7 @@ func ensureSet(args []Object, index int) Set {
   case Set:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Set"))
+    panic(RT.newArgTypeError(index, c, "Set"))
   }
 }
 
@@ -359,7 +359,7 @@ func ensureAssociative(args []Object, index int) Associative {
   case Associative:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Associative"))
+    panic(RT.newArgTypeError(index, c, "Associative"))
   }
 }
 
@@ -380,7 +380,7 @@ func ensureReversible(args []Object, index int) Reversible {
   case Reversible:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Reversible"))
+    panic(RT.newArgTypeError(index, c, "Reversible"))
   }
 }
 
@@ -401,6 +401,6 @@ func ensureNamed(args []Object, index int) Named {
   case Named:
     return c
   default:
-    panic(RT.newArgTypeError(index, "Named"))
+    panic(RT.newArgTypeError(index, c, "Named"))
   }
 }
