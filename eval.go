@@ -7,7 +7,7 @@ import (
 
 type (
 	Traceable interface {
-		Named
+		Name() string
 		Pos() Position
 	}
 	EvalError struct {

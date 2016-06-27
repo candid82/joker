@@ -157,6 +157,7 @@ type (
 	}
 	Named interface {
 		Name() string
+		Namespace() string
 	}
 )
 
@@ -782,6 +783,13 @@ func (k Keyword) Name() string {
 	return *k.name
 }
 
+func (k Keyword) Namespace() string {
+	if k.ns != nil {
+		return *k.ns
+	}
+	return ""
+}
+
 func (k Keyword) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Keyword:
@@ -856,6 +864,13 @@ func (s Symbol) Name() string {
 	return *s.name
 }
 
+func (s Symbol) Namespace() string {
+	if s.ns != nil {
+		return *s.ns
+	}
+	return ""
+}
+
 func (s Symbol) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Symbol:
@@ -883,10 +898,6 @@ func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.s)
 	}
-	return s.s
-}
-
-func (s String) Name() string {
 	return s.s
 }
 

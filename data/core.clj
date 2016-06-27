@@ -1062,4 +1062,11 @@
   {:tag String
   :added "1.0"}
   [x]
-  (name* x))
+  (if (string? x) x (name* x)))
+
+(defn namespace
+  "Returns the namespace String of a symbol or keyword, or nil if not present."
+  {:tag String
+  :added "1.0"}
+  [^Named x]
+  (namespace* x))

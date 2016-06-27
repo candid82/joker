@@ -608,6 +608,14 @@ var procName Proc = func(args []Object) Object {
 	return String{s: ensureNamed(args, 0).Name()}
 }
 
+var procNamespace Proc = func(args []Object) Object {
+	ns := ensureNamed(args, 0).Namespace()
+	if ns == "" {
+		return NIL
+	}
+	return String{s: ns}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -691,6 +699,7 @@ func init() {
 	intern("vals*", procVals)
 	intern("rseq*", procRseq)
 	intern("name*", procName)
+	intern("namespace*", procNamespace)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
