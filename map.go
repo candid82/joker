@@ -50,11 +50,6 @@ func (seq *ArrayMapSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *ArrayMapSeq) WithInfo(info *ObjectInfo) Object {
-	seq.info = info
-	return seq
-}
-
 func (seq *ArrayMapSeq) WithMeta(meta *ArrayMap) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -276,11 +271,6 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (m *ArrayMap) WithInfo(info *ObjectInfo) Object {
-	m.info = info
-	return m
 }
 
 func (m *ArrayMap) GetType() *Type {

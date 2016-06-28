@@ -135,11 +135,6 @@ func (v *Vector) Equals(other interface{}) bool {
 	return IsSeqEqual(v.Seq(), other)
 }
 
-func (v *Vector) WithInfo(info *ObjectInfo) Object {
-	v.info = info
-	return v
-}
-
 func (v *Vector) GetType() *Type {
 	return TYPES["Vector"]
 }
@@ -154,11 +149,6 @@ func (vseq *VectorSeq) Equals(other interface{}) bool {
 
 func (vseq *VectorSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
-}
-
-func (vseq *VectorSeq) WithInfo(info *ObjectInfo) Object {
-	vseq.info = info
-	return vseq
 }
 
 func (vseq *VectorSeq) WithMeta(meta *ArrayMap) Object {
@@ -205,11 +195,6 @@ func (vseq *VectorRSeq) Equals(other interface{}) bool {
 
 func (vseq *VectorRSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
-}
-
-func (vseq *VectorRSeq) WithInfo(info *ObjectInfo) Object {
-	vseq.info = info
-	return vseq
 }
 
 func (vseq *VectorRSeq) WithMeta(meta *ArrayMap) Object {

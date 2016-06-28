@@ -69,11 +69,6 @@ func (set *ArraySet) Get(key Object) (bool, Object) {
 	return false, nil
 }
 
-func (set *ArraySet) WithInfo(info *ObjectInfo) Object {
-	set.info = info
-	return set
-}
-
 func (seq *ArraySet) GetType() *Type {
 	return TYPES["ArraySet"]
 }

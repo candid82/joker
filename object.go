@@ -1,4 +1,5 @@
-//go:generate go run gen/gen_types.go Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *ArraySeq *ConsSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package main
 
@@ -229,10 +230,6 @@ func (d *Delay) GetInfo() *ObjectInfo {
 	return nil
 }
 
-func (d *Delay) WithInfo(info *ObjectInfo) Object {
-	return d
-}
-
 func (d *Delay) GetType() *Type {
 	return TYPES["Delay"]
 }
@@ -256,10 +253,6 @@ func (t *Type) GetInfo() *ObjectInfo {
 	return nil
 }
 
-func (t *Type) WithInfo(info *ObjectInfo) Object {
-	return t
-}
-
 func (t *Type) GetType() *Type {
 	return TYPES["Type"]
 }
@@ -274,10 +267,6 @@ func (rb RecurBindings) Equals(other interface{}) bool {
 
 func (rb RecurBindings) GetInfo() *ObjectInfo {
 	return nil
-}
-
-func (rb RecurBindings) WithInfo(info *ObjectInfo) Object {
-	return rb
 }
 
 func (rb RecurBindings) GetType() *Type {
@@ -299,11 +288,6 @@ func (exInfo *ExInfo) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (exInfo *ExInfo) WithInfo(info *ObjectInfo) Object {
-	exInfo.info = info
-	return exInfo
 }
 
 func (exInfo *ExInfo) GetType() *Type {
@@ -342,11 +326,6 @@ func (fn *Fn) WithMeta(meta *ArrayMap) Object {
 	res := *fn
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
-}
-
-func (fn *Fn) WithInfo(info *ObjectInfo) Object {
-	fn.info = info
-	return fn
 }
 
 func (fn *Fn) GetType() *Type {
@@ -428,11 +407,6 @@ func (v *Var) WithMeta(meta *ArrayMap) Object {
 	return &res
 }
 
-func (v *Var) WithInfo(info *ObjectInfo) Object {
-	v.info = info
-	return v
-}
-
 func (v *Var) GetType() *Type {
 	return TYPES["Var"]
 }
@@ -491,11 +465,6 @@ func (n Nil) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (n Nil) WithInfo(info *ObjectInfo) Object {
-	n.info = info
-	return n
 }
 
 func (n Nil) GetType() *Type {
@@ -577,11 +546,6 @@ func (rat *Ratio) Equals(other interface{}) bool {
 	return false
 }
 
-func (rat *Ratio) WithInfo(info *ObjectInfo) Object {
-	rat.info = info
-	return rat
-}
-
 func (rat *Ratio) GetType() *Type {
 	return TYPES["Ratio"]
 }
@@ -606,11 +570,6 @@ func (bi *BigInt) Equals(other interface{}) bool {
 		return bi.b.Cmp(bi2) == 0
 	}
 	return false
-}
-
-func (bi *BigInt) WithInfo(info *ObjectInfo) Object {
-	bi.info = info
-	return bi
 }
 
 func (bi *BigInt) GetType() *Type {
@@ -639,11 +598,6 @@ func (bf *BigFloat) Equals(other interface{}) bool {
 	return false
 }
 
-func (bf *BigFloat) WithInfo(info *ObjectInfo) Object {
-	bf.info = info
-	return bf
-}
-
 func (bf *BigFloat) GetType() *Type {
 	return TYPES["BigFloat"]
 }
@@ -666,11 +620,6 @@ func (c Char) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (c Char) WithInfo(info *ObjectInfo) Object {
-	c.info = info
-	return c
 }
 
 func (c Char) GetType() *Type {
@@ -701,11 +650,6 @@ func (d Double) Equals(other interface{}) bool {
 	}
 }
 
-func (d Double) WithInfo(info *ObjectInfo) Object {
-	d.info = info
-	return d
-}
-
 func (d Double) GetType() *Type {
 	return TYPES["Double"]
 }
@@ -727,11 +671,6 @@ func (i Int) Equals(other interface{}) bool {
 	}
 }
 
-func (i Int) WithInfo(info *ObjectInfo) Object {
-	i.info = info
-	return i
-}
-
 func (i Int) GetType() *Type {
 	return TYPES["Int"]
 }
@@ -751,11 +690,6 @@ func (b Bool) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (b Bool) WithInfo(info *ObjectInfo) Object {
-	b.info = info
-	return b
 }
 
 func (b Bool) GetType() *Type {
@@ -800,11 +734,6 @@ func (k Keyword) Equals(other interface{}) bool {
 	}
 }
 
-func (k Keyword) WithInfo(info *ObjectInfo) Object {
-	k.info = info
-	return k
-}
-
 func (k Keyword) GetType() *Type {
 	return TYPES["Keyword"]
 }
@@ -845,11 +774,6 @@ func (rx Regex) Equals(other interface{}) bool {
 	}
 }
 
-func (rx Regex) WithInfo(info *ObjectInfo) Object {
-	rx.info = info
-	return rx
-}
-
 func (rx Regex) GetType() *Type {
 	return TYPES["Regex"]
 }
@@ -881,11 +805,6 @@ func (s Symbol) Equals(other interface{}) bool {
 	}
 }
 
-func (s Symbol) WithInfo(info *ObjectInfo) Object {
-	s.info = info
-	return s
-}
-
 func (s Symbol) GetType() *Type {
 	return TYPES["Symbol"]
 }
@@ -909,11 +828,6 @@ func (s String) Equals(other interface{}) bool {
 	default:
 		return false
 	}
-}
-
-func (s String) WithInfo(info *ObjectInfo) Object {
-	s.info = info
-	return s
 }
 
 func (s String) GetType() *Type {
@@ -979,4 +893,16 @@ func IsSeq(obj Object) bool {
 	default:
 		return false
 	}
+}
+
+func (x *Delay) WithInfo(info *ObjectInfo) Object {
+	return x
+}
+
+func (x *Type) WithInfo(info *ObjectInfo) Object {
+	return x
+}
+
+func (x RecurBindings) WithInfo(info *ObjectInfo) Object {
+	return x
 }

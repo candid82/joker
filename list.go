@@ -49,11 +49,6 @@ func (list *List) Equals(other interface{}) bool {
 	return IsSeqEqual(list, other)
 }
 
-func (list *List) WithInfo(info *ObjectInfo) Object {
-	list.info = info
-	return list
-}
-
 func (list *List) GetType() *Type {
 	return TYPES["List"]
 }

@@ -82,11 +82,6 @@ func (seq *LazySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *LazySeq) WithInfo(info *ObjectInfo) Object {
-	seq.info = info
-	return seq
-}
-
 func (seq *LazySeq) WithMeta(meta *ArrayMap) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -128,11 +123,6 @@ func (seq *ArraySeq) Equals(other interface{}) bool {
 
 func (seq *ArraySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
-}
-
-func (seq *ArraySeq) WithInfo(info *ObjectInfo) Object {
-	seq.info = info
-	return seq
 }
 
 func (seq *ArraySeq) WithMeta(meta *ArrayMap) Object {
@@ -198,11 +188,6 @@ func (seq *ConsSeq) Equals(other interface{}) bool {
 
 func (seq *ConsSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
-}
-
-func (seq *ConsSeq) WithInfo(info *ObjectInfo) Object {
-	seq.info = info
-	return seq
 }
 
 func (seq *ConsSeq) GetType() *Type {
