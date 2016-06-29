@@ -7,6 +7,7 @@ import (
 type (
 	Map interface {
 		Associative
+		Seqable
 		Without(key Object) Map
 		Keys() Seq
 		Vals() Seq

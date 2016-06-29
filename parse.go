@@ -731,6 +731,64 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 	}
 }
 
+func fixInfo(obj Object) Object {
+	var innerInfo *ObjectInfo
+	switch s := obj.(type) {
+	case Nil:
+		return obj
+	case Seq:
+		objs := make([]Object, 0, 8)
+		for !s.IsEmpty() {
+			t := fixInfo(s.First())
+			if innerInfo == nil {
+				innerInfo = t.GetInfo()
+			}
+			objs = append(objs, t)
+			s = s.Rest()
+		}
+		res := NewListFrom(objs...)
+		if info := obj.GetInfo(); info != nil {
+			return res.WithInfo(info)
+		}
+		return res.WithInfo(innerInfo)
+	case *Vector:
+		var res Conjable = EmptyVector
+		for i := 0; i < s.count; i++ {
+			t := fixInfo(s.at(i))
+			if innerInfo == nil {
+				innerInfo = t.GetInfo()
+			}
+			res = res.Conj(t)
+		}
+		if info := obj.GetInfo(); info != nil {
+			return res.WithInfo(info)
+		}
+		return res.WithInfo(innerInfo)
+	case *ArrayMap:
+		res := EmptyArrayMap()
+		iter := s.iter()
+		for iter.HasNext() {
+			p := iter.Next()
+			key := fixInfo(p.key)
+			value := fixInfo(p.value)
+			res.Add(key, value)
+			if innerInfo == nil {
+				if key.GetInfo() != nil {
+					innerInfo = key.GetInfo()
+				} else {
+					innerInfo = value.GetInfo()
+				}
+			}
+		}
+		if info := obj.GetInfo(); info != nil {
+			return res.WithInfo(info)
+		}
+		return res.WithInfo(innerInfo)
+	default:
+		return obj
+	}
+}
+
 func macroexpand1(seq Seq, ctx *ParseContext) Object {
 	op := seq.First()
 	macro := resolveMacro(op, ctx)
@@ -741,7 +799,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 			args:     ToSlice(seq.Rest().Cons(ctx.localBindings.ToMap()).Cons(seq)),
 			name:     *op.(Symbol).name,
 		}
-		return eval(expr, nil)
+		return fixInfo(eval(expr, nil))
 	} else {
 		return seq
 	}
