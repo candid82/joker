@@ -255,22 +255,26 @@ func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
 	return nil
 }
 
-func (env *Env) EnsureNamespace(sym Symbol) {
+func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 	if env.namespaces[sym.name] == nil {
 		env.namespaces[sym.name] = NewNamespace(sym)
 	}
+	return env.namespaces[sym.name]
+}
+
+func (env *Env) SetCurrentNamespace(ns *Namespace) {
+	env.currentNamespace = ns
+	v, _ := env.Resolve(MakeSymbol("gclojure.core/*ns*"))
+	v.value = ns
 }
 
 func NewEnv(currentNs Symbol) *Env {
 	res := &Env{
 		namespaces: make(map[*string]*Namespace),
-		currentNamespace: &Namespace{
-			name:     currentNs,
-			mappings: make(map[*string]*Var),
-		},
 	}
-	res.namespaces[currentNs.name] = res.currentNamespace
-	res.EnsureNamespace(MakeSymbol("gclojure.core"))
+	currentNamespace := res.EnsureNamespace(currentNs)
+	res.EnsureNamespace(MakeSymbol("gclojure.core")).intern(MakeSymbol("*ns*"))
+	res.SetCurrentNamespace(currentNamespace)
 	return res
 }
 

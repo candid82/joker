@@ -1102,3 +1102,12 @@
                        (list form x))]
         (recur threaded (next forms)))
       x)))
+
+(defmacro ^{:private true} assert-args
+  [& pairs]
+  `(do (when-not ~(first pairs)
+         (throw (ex-info
+                 (str (first ~'&form) " requires " ~(second pairs) " in " ~'*ns*))))
+     ~(let [more (nnext pairs)]
+        (when more
+          (list* `assert-args more)))))

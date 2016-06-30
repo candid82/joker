@@ -204,6 +204,7 @@ func init() {
 	TYPES["Map"] = &Type{name: "Map", reflectType: reflect.TypeOf((*Map)(nil)).Elem()}
 	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil)).Elem()}
 	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
+	TYPES["Namespace"] = &Type{name: "Namespace", reflectType: reflect.TypeOf((*Namespace)(nil)).Elem()}
 }
 
 func panicArity(n int) {

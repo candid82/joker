@@ -7,6 +7,26 @@ type (
 	}
 )
 
+func (ns *Namespace) ToString(escape bool) string {
+	return "#object[Namespace \"" + ns.name.ToString(escape) + "\"]"
+}
+
+func (ns *Namespace) Equals(other interface{}) bool {
+	return ns == other
+}
+
+func (ns *Namespace) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (ns *Namespace) WithInfo(info *ObjectInfo) Object {
+	return ns
+}
+
+func (ns *Namespace) GetType() *Type {
+	return TYPES["Namespace"]
+}
+
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		name:     sym,
