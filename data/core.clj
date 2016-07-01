@@ -1108,7 +1108,7 @@
   `(do (when-not ~(first pairs)
          (throw (ex-info
                  (str (first ~'&form) " requires " ~(second pairs))
-                 {})))
+                 {:form ~'&form})))
      ~(let [more (nnext pairs)]
         (when more
           (list* `assert-args more)))))
