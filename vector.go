@@ -376,21 +376,32 @@ func (v *Vector) assocN(i int, val Object) *Vector {
 	return res
 }
 
-func (v *Vector) Assoc(key, val Object) Associative {
+func assertInteger(obj Object) int {
 	var i int
-	switch key := key.(type) {
+	switch obj := obj.(type) {
 	case Int:
-		i = key.i
+		i = obj.i
 	case *BigInt:
-		i = key.Int().i
+		i = obj.Int().i
 	default:
 		panic(RT.newError("Key must be integer"))
 	}
+	return i
+}
+
+func (v *Vector) Assoc(key, val Object) Associative {
+	i := assertInteger(key)
 	return v.assocN(i, val)
 }
 
 func (v *Vector) Rseq() Seq {
 	return &VectorRSeq{vector: v, index: v.count - 1}
+}
+
+func (v *Vector) Call(args []Object) Object {
+	checkArity(args, 1, 1)
+	i := assertInteger(args[0])
+	return v.at(i)
 }
 
 var EmptyVector = &Vector{

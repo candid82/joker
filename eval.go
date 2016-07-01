@@ -79,9 +79,9 @@ func (rt *Runtime) stacktrace() string {
 }
 
 func (rt *Runtime) pushFrame() {
-	// TODO: this is all wrong. We cannot realy on
+	// TODO: this is all wrong. We cannot rely on
 	// currentExpr for stacktraces. Instead, each Callable
-	// should not it's name / position.
+	// should know it's name / position.
 	var tr Traceable
 	if rt.currentExpr != nil {
 		tr = rt.currentExpr.(Traceable)
