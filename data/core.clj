@@ -1318,3 +1318,20 @@
          :arglists '([pred coll])
          :added "1.0"}
   not-any? (comp not some))
+
+;will be redefed later with arg checks
+(defmacro dotimes
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
+  bound to integers from 0 through n-1."
+  {:added "1.0"}
+  [bindings & body]
+  (let [i (first bindings)
+        n (second bindings)]
+    `(let [n# (int* ~n)]
+       (loop [~i 0]
+         (when (< ~i n#)
+           ~@body
+           (recur (inc ~i)))))))
+
