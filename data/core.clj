@@ -1184,3 +1184,10 @@
          nil
          (let [~form temp#]
            ~@body)))))
+
+
+(defn find-var
+  "Returns the global var named by the namespace-qualified symbol, or
+  nil if no var with that name."
+  {:added "1.0"}
+  [sym] (find-var* sym))

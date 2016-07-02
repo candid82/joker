@@ -616,6 +616,17 @@ var procNamespace Proc = func(args []Object) Object {
 	return String{s: ns}
 }
 
+var procFindVar Proc = func(args []Object) Object {
+	sym := ensureSymbol(args, 0)
+	if sym.ns == nil {
+		panic(RT.newError("find-var argument must be namespace-qualified symbol"))
+	}
+	if v, ok := GLOBAL_ENV.Resolve(sym); ok {
+		return v
+	}
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -700,6 +711,7 @@ func init() {
 	intern("rseq*", procRseq)
 	intern("name*", procName)
 	intern("namespace*", procNamespace)
+	intern("find-var*", procFindVar)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
