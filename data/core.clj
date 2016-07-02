@@ -1272,3 +1272,23 @@
    (fn [& args] (apply f arg1 arg2 arg3 args)))
   ([f arg1 arg2 arg3 & more]
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
+
+(defn sequence
+  "Coerces coll to a (possibly empty) sequence, if it is not already
+  one. Will not force a lazy seq. (sequence nil) yields ()"
+  {:added "1.0"}
+  [coll]
+  (if (seq? coll)
+    coll
+    (or (seq coll) ())))
+
+(defn every?
+  "Returns true if (pred x) is logical true for every x in coll, else
+  false."
+  {:tag Bool
+  :added "1.0"}
+  [pred coll]
+  (cond
+    (nil? (seq coll)) true
+    (pred (first coll)) (recur pred (next coll))
+    :else false))
