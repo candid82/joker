@@ -1480,3 +1480,22 @@
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   {:added "1.0"}
   [f x] (cons x (lazy-seq (iterate f (f x)))))
+
+(defn range
+  "Returns a lazy seq of nums from start (inclusive) to end
+  (exclusive), by step, where start defaults to 0, step to 1, and end to
+  infinity. When step is equal to 0, returns an infinite sequence of
+  start. When start is equal to end, returns empty list."
+  {:added "1.0"}
+  ([] (iterate inc 0))
+  ([end] (range 0 end 1))
+  ([start end] (range start end 1))
+  ([start end step]
+   (lazy-seq
+    (let [comp (cond
+                 (or (zero? step) (= start end)) not=
+                 (pos? step) <
+                 (neg? step) >)]
+      (if (comp start end)
+        (cons start (range (+ start step) end step))
+        ())))))
