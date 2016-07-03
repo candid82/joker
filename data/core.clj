@@ -1463,3 +1463,15 @@
   {:added "1.0"}
   [n coll]
   [(take n coll) (drop n coll)])
+
+(defn split-with
+  "Returns a vector of [(take-while pred coll) (drop-while pred coll)]"
+  {:added "1.0"}
+  [pred coll]
+  [(take-while pred coll) (drop-while pred coll)])
+
+(defn repeat
+  "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
+  {:added "1.0"}
+  ([x] (lazy-seq (cons x (repeat x))))
+  ([n x] (take n (repeat x))))
