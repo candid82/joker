@@ -1525,3 +1525,16 @@
           merge2 (fn [m1 m2]
                    (reduce1 merge-entry (or m1 {}) (seq m2)))]
       (reduce1 merge2 maps))))
+
+(defn zipmap
+  "Returns a map with the keys mapped to the corresponding vals."
+  {:added "1.0"}
+  [keys vals]
+  (loop [map {}
+         ks (seq keys)
+         vs (seq vals)]
+    (if (and ks vs)
+      (recur (assoc map (first ks) (first vs))
+             (next ks)
+             (next vs))
+      map)))
