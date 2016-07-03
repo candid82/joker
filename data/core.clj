@@ -1372,3 +1372,15 @@
   {:added "1.0"}
   [f & colls]
   (apply concat (apply map f colls)))
+
+(defn filter
+  "Returns a lazy sequence of the items in coll for which
+  (pred item) returns true. pred must be free of side-effects."
+  {:added "1.0"}
+  ([pred coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (let [f (first s) r (rest s)]
+        (if (pred f)
+          (cons f (filter pred r))
+          (filter pred r)))))))
