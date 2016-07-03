@@ -1543,3 +1543,10 @@
   "defs the supplied var names with no bindings, useful for making forward declarations."
   {:added "1.0"}
   [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
+
+(defn comparator
+  "Returns a comparator based upon pred."
+  {:added "1.0"}
+  [pred]
+  (fn [x y]
+    (cond (pred x y) -1 (pred y x) 1 :else 0)))
