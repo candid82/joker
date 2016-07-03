@@ -1457,3 +1457,9 @@
   [coll] (lazy-seq
           (when-let [s (seq coll)]
             (concat s (cycle s)))))
+
+(defn split-at
+  "Returns a vector of [(take n coll) (drop n coll)]"
+  {:added "1.0"}
+  [n coll]
+  [(take n coll) (drop n coll)])
