@@ -1366,3 +1366,9 @@
                      (cons (map first ss) (step (map rest ss)))))))]
      (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
+(defn mapcat
+  "Returns the result of applying concat to the result of applying map
+  to f and colls.  Thus function f should return a collection."
+  {:added "1.0"}
+  [f & colls]
+  (apply concat (apply map f colls)))
