@@ -1632,3 +1632,8 @@
         (if (= n (count p))
           (cons p (partition n step pad (nthrest s step)))
           (list (take n (concat p pad)))))))))
+
+(defn eval
+  "Evaluates the form data structure (not text!) and returns the result."
+  {:added "1.0"}
+  [form] (eval* form))
