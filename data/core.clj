@@ -1544,18 +1544,21 @@
   {:added "1.0"}
   [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
 
-(defn comparator
-  "Returns a comparator based upon pred."
-  {:added "1.0"}
-  [pred]
-  (fn [x y]
-    (cond (pred x y) -1 (pred y x) 1 :else 0)))
-
 (defn sort
   "Returns a sorted sequence of the items in coll. If no comparator is
   supplied, uses compare."
   {:added "1.0"}
   ([coll]
    (sort compare coll))
-  ([comp coll]
+  ([^Comparator comp coll]
    (sort* comp coll)))
+
+(defn sort-by
+  "Returns a sorted sequence of the items in coll, where the sort
+  order is determined by comparing (keyfn item).  If no comparator is
+  supplied, uses compare."
+  {:added "1.0"}
+  ([keyfn coll]
+   (sort-by keyfn compare coll))
+  ([keyfn ^Comparator comp coll]
+   (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))
