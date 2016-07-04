@@ -1637,3 +1637,38 @@
   "Evaluates the form data structure (not text!) and returns the result."
   {:added "1.0"}
   [form] (eval* form))
+
+(defmacro doseq
+  "Repeatedly executes body (presumably for side-effects) with
+  bindings and filtering as provided by \"for\".  Does not retain
+  the head of the sequence. Returns nil."
+  [seq-exprs & body]
+  (assert-args
+   (vector? seq-exprs) "a vector for its binding"
+   (even? (count seq-exprs)) "an even number of forms in binding vector")
+  (let [step (fn step [recform exprs]
+               (if-not exprs
+                 [true `(do ~@body)]
+                 (let [k (first exprs)
+                       v (second exprs)
+                       seqsym (when-not (keyword? k) (gensym))
+                       recform (if (keyword? k) recform `(recur (next ~seqsym)))
+                       steppair (step recform (nnext exprs))
+                       needrec (steppair 0)
+                       subform (steppair 1)]
+                   (cond
+                     (= k :let) [needrec `(let ~v ~subform)]
+                     (= k :while) [false `(when ~v
+                                            ~subform
+                                            ~@(when needrec [recform]))]
+                     (= k :when) [false `(if ~v
+                                           (do
+                                             ~subform
+                                             ~@(when needrec [recform]))
+                                           ~recform)]
+                     :else [true `(loop [~seqsym (seq ~v)]
+                                    (when ~seqsym
+                                      (let [~k (first ~seqsym)]
+                                        ~subform
+                                        ~@(when needrec [recform]))))]))))]
+    (nth (step nil (seq seq-exprs)) 1)))
