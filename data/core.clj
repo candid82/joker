@@ -1319,22 +1319,6 @@
          :added "1.0"}
   not-any? (comp not some))
 
-;will be redefed later with arg checks
-(defmacro dotimes
-  "bindings => name n
-
-  Repeatedly executes body (presumably for side-effects) with name
-  bound to integers from 0 through n-1."
-  {:added "1.0"}
-  [bindings & body]
-  (let [i (first bindings)
-        n (second bindings)]
-    `(let [n# (int* ~n)]
-       (loop [~i 0]
-         (when (< ~i n#)
-           ~@body
-           (recur (inc ~i)))))))
-
 (defn map
   "Returns a lazy sequence consisting of the result of applying f to the
   set of first items of each coll, followed by applying f to the set
@@ -1642,6 +1626,7 @@
   "Repeatedly executes body (presumably for side-effects) with
   bindings and filtering as provided by \"for\".  Does not retain
   the head of the sequence. Returns nil."
+  {:added "1.0"}
   [seq-exprs & body]
   (assert-args
    (vector? seq-exprs) "a vector for its binding"
@@ -1672,3 +1657,21 @@
                                         ~subform
                                         ~@(when needrec [recform]))))]))))]
     (nth (step nil (seq seq-exprs)) 1)))
+
+(defmacro dotimes
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
+  bound to integers from 0 through n-1."
+  {:added "1.0"}
+  [bindings & body]
+  (assert-args
+   (vector? bindings) "a vector for its binding"
+   (= 2 (count bindings)) "exactly 2 forms in binding vector")
+  (let [i (first bindings)
+        n (second bindings)]
+    `(let [n# (int* ~n)]
+       (loop [~i 0]
+         (when (< ~i n#)
+           ~@body
+           (recur (inc ~i)))))))
