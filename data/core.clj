@@ -1550,3 +1550,12 @@
   [pred]
   (fn [x y]
     (cond (pred x y) -1 (pred y x) 1 :else 0)))
+
+(defn sort
+  "Returns a sorted sequence of the items in coll. If no comparator is
+  supplied, uses compare."
+  {:added "1.0"}
+  ([coll]
+   (sort compare coll))
+  ([comp coll]
+   (sort* comp coll)))

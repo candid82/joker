@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *ArraySeq *ConsSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package main
@@ -160,6 +160,13 @@ type (
 		Name() string
 		Namespace() string
 	}
+	Comparator interface {
+		Compare(a, b Object) int
+	}
+	SortableSlice struct {
+		s   []Object
+		cmp Comparator
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -205,6 +212,7 @@ func init() {
 	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil)).Elem()}
 	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
 	TYPES["Namespace"] = &Type{name: "Namespace", reflectType: reflect.TypeOf((*Namespace)(nil)).Elem()}
+	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
 }
 
 func panicArity(n int) {
@@ -217,6 +225,18 @@ func checkArity(args []Object, min int, max int) {
 	if n < min || n > max {
 		panicArity(n)
 	}
+}
+
+func (s SortableSlice) Len() int {
+	return len(s.s)
+}
+
+func (s SortableSlice) Swap(i, j int) {
+	s.s[i], s.s[j] = s.s[j], s.s[i]
+}
+
+func (s SortableSlice) Less(i, j int) bool {
+	return s.cmp.Compare(s.s[i], s.s[j]) == -1
 }
 
 func (d *Delay) ToString(escape bool) string {
@@ -359,8 +379,31 @@ func (fn *Fn) Call(args []Object) Object {
 	return evalLoop(v.body, fn.env.addFrame(vargs))
 }
 
+func compare(c Callable, a, b Object) int {
+	switch r := c.Call([]Object{a, b}).(type) {
+	case Bool:
+		if r.b {
+			return -1
+		}
+		if assertBool(c.Call([]Object{b, a}), "").b {
+			return 1
+		}
+		return 0
+	default:
+		return assertNumber(r, "Function is not a comparator since it returned a non-integer value").Int().i
+	}
+}
+
+func (fn *Fn) Compare(a, b Object) int {
+	return compare(fn, a, b)
+}
+
 func (p Proc) Call(args []Object) Object {
 	return p(args)
+}
+
+func (p Proc) Compare(a, b Object) int {
+	return compare(p, a, b)
 }
 
 func (p Proc) ToString(escape bool) string {

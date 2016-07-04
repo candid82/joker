@@ -404,3 +404,24 @@ func ensureNamed(args []Object, index int) Named {
     panic(RT.newArgTypeError(index, c, "Named"))
   }
 }
+
+func assertComparator(obj Object, msg string) Comparator {
+  switch c := obj.(type) {
+  case Comparator:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Comparator", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureComparator(args []Object, index int) Comparator {
+  switch c := args[index].(type) {
+  case Comparator:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Comparator"))
+  }
+}

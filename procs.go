@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"sort"
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
@@ -627,6 +628,17 @@ var procFindVar Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procSort Proc = func(args []Object) Object {
+	cmp := ensureComparator(args, 0)
+	coll := ensureSeqable(args, 1)
+	s := SortableSlice{
+		s:   ToSlice(coll.Seq()),
+		cmp: cmp,
+	}
+	sort.Sort(s)
+	return &ArraySeq{arr: s.s}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -712,6 +724,7 @@ func init() {
 	intern("name*", procName)
 	intern("namespace*", procNamespace)
 	intern("find-var*", procFindVar)
+	intern("sort*", procSort)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
