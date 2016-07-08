@@ -1681,3 +1681,9 @@
   {:added "1.0"}
   [x]
   (or (get (meta x) :type) (type* x)))
+
+(defn num
+  "Coerce to Number"
+  {:tag Number
+  :added "1.0"}
+  [x] (num* x))

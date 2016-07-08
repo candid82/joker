@@ -457,6 +457,10 @@ var procInt Proc = func(args []Object) Object {
 	}
 }
 
+var procNumber Proc = func(args []Object) Object {
+	return assertNumber(args[0], fmt.Sprintf("Cannot cast %s (type: %s) to Number", args[0].ToString(true), args[0].GetType().ToString(false)))
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -737,6 +741,7 @@ func init() {
 	intern("sort*", procSort)
 	intern("eval*", procEval)
 	intern("type*", procType)
+	intern("num*", procNumber)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
