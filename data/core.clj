@@ -1692,3 +1692,8 @@
   "Coerce to double"
   {:added "1.0"}
   [^Number x] (double* x))
+
+(defn char
+  "Coerce to char"
+  {:added "1.0"}
+  [x] (char* x))

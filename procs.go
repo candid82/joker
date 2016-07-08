@@ -466,6 +466,21 @@ var procDouble Proc = func(args []Object) Object {
 	return n.Double()
 }
 
+var procChar Proc = func(args []Object) Object {
+	switch c := args[0].(type) {
+	case Char:
+		return c
+	case Number:
+		i := c.Int().i
+		if i < MIN_RUNE || i > MAX_RUNE {
+			panic(RT.newError(fmt.Sprintf("Value out of range for char: %d", i)))
+		}
+		return Char{ch: rune(i)}
+	default:
+		panic(RT.newError(fmt.Sprintf("Cannot cast %s (type: %s) to Char", c.ToString(true), c.GetType().ToString(false))))
+	}
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -748,6 +763,7 @@ func init() {
 	intern("type*", procType)
 	intern("num*", procNumber)
 	intern("double*", procDouble)
+	intern("char*", procChar)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
