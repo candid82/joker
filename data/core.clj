@@ -1687,3 +1687,8 @@
   {:tag Number
   :added "1.0"}
   [x] (num* x))
+
+(defn double
+  "Coerce to double"
+  {:added "1.0"}
+  [^Number x] (double* x))
