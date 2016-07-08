@@ -1675,3 +1675,9 @@
          (when (< ~i n#)
            ~@body
            (recur (inc ~i)))))))
+
+(defn type
+  "Returns the :type metadata of x, or its Type if none"
+  {:added "1.0"}
+  [x]
+  (or (get (meta x) :type) (type* x)))

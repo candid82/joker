@@ -645,6 +645,10 @@ var procEval Proc = func(args []Object) Object {
 	return eval(expr, nil)
 }
 
+var procType Proc = func(args []Object) Object {
+	return args[0].GetType()
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -732,6 +736,7 @@ func init() {
 	intern("find-var*", procFindVar)
 	intern("sort*", procSort)
 	intern("eval*", procEval)
+	intern("type*", procType)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
