@@ -1697,3 +1697,8 @@
   "Coerce to char"
   {:added "1.0"}
   [x] (char* x))
+
+(defn bool
+  "Coerce to bool"
+  {:added "1.0"}
+  [x] (bool* x))

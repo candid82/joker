@@ -481,6 +481,10 @@ var procChar Proc = func(args []Object) Object {
 	}
 }
 
+var procBool Proc = func(args []Object) Object {
+	return Bool{b: toBool(args[0])}
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -764,6 +768,7 @@ func init() {
 	intern("num*", procNumber)
 	intern("double*", procDouble)
 	intern("char*", procChar)
+	intern("bool*", procBool)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
