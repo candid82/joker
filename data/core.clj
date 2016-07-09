@@ -1741,3 +1741,9 @@
   "Returns true if n is a BigFloat"
   {:added "1.0"}
   [n] (instance? BigFloat n))
+
+(defn float?
+  "Returns true if n is a floating point number"
+  {:added "1.0"}
+  [n]
+  (instance? Double n))
