@@ -1702,3 +1702,9 @@
   "Coerce to bool"
   {:added "1.0"}
   [x] (bool* x))
+
+(defn number?
+  "Returns true if x is a Number"
+  {:added "1.0"}
+  [x]
+  (instance? Number x))
