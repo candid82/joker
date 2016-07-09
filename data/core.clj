@@ -1736,3 +1736,8 @@
    :added "1.0"}
   [r]
   (denominator* r))
+
+(defn bigfloat?
+  "Returns true if n is a BigFloat"
+  {:added "1.0"}
+  [n] (instance? BigFloat n))
