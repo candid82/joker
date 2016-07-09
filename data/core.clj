@@ -1729,3 +1729,10 @@
    :added "1.0"}
   [r]
   (numerator* r))
+
+(defn denominator
+  "Returns the denominator part of a Ratio."
+  {:tag BigInt
+   :added "1.0"}
+  [r]
+  (denominator* r))

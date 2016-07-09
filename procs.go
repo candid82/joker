@@ -490,6 +490,11 @@ var procNumerator Proc = func(args []Object) Object {
 	return &BigInt{b: *bi}
 }
 
+var procDenominator Proc = func(args []Object) Object {
+	bi := ensureRatio(args, 0).r.Denom()
+	return &BigInt{b: *bi}
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -775,6 +780,7 @@ func init() {
 	intern("char*", procChar)
 	intern("bool*", procBool)
 	intern("numerator*", procNumerator)
+	intern("denominator*", procDenominator)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
