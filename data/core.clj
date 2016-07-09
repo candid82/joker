@@ -1717,3 +1717,8 @@
     (if (or (zero? m) (= (pos? num) (pos? div)))
       m
       (+ m div))))
+
+(defn ratio?
+  "Returns true if n is a Ratio"
+  {:added "1.0"}
+  [n] (instance? Ratio n))
