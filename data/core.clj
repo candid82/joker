@@ -1747,3 +1747,9 @@
   {:added "1.0"}
   [n]
   (instance? Double n))
+
+(defn rational?
+  "Returns true if n is a rational number"
+  {:added "1.0"}
+  [n]
+  (or (integer? n) (ratio? n)))
