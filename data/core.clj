@@ -1722,3 +1722,10 @@
   "Returns true if n is a Ratio"
   {:added "1.0"}
   [n] (instance? Ratio n))
+
+(defn numerator
+  "Returns the numerator part of a Ratio."
+  {:tag BigInt
+   :added "1.0"}
+  [r]
+  (numerator* r))

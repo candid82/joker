@@ -425,3 +425,24 @@ func ensureComparator(args []Object, index int) Comparator {
     panic(RT.newArgTypeError(index, c, "Comparator"))
   }
 }
+
+func assertRatio(obj Object, msg string) *Ratio {
+  switch c := obj.(type) {
+  case *Ratio:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Ratio", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureRatio(args []Object, index int) *Ratio {
+  switch c := args[index].(type) {
+  case *Ratio:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Ratio"))
+  }
+}
