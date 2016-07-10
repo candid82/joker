@@ -1726,14 +1726,14 @@
 (defn numerator
   "Returns the numerator part of a Ratio."
   {:tag BigInt
-   :added "1.0"}
+  :added "1.0"}
   [r]
   (numerator* r))
 
 (defn denominator
   "Returns the denominator part of a Ratio."
   {:tag BigInt
-   :added "1.0"}
+  :added "1.0"}
   [r]
   (denominator* r))
 
@@ -1753,3 +1753,10 @@
   {:added "1.0"}
   [n]
   (or (integer? n) (ratio? n)))
+
+(defn bigint
+  "Coerce to BigInt"
+  {:tag BigInt
+  :static true}
+  [x]
+  (bigint* x))

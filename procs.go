@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math/big"
 	"reflect"
 	"sort"
 )
@@ -495,6 +496,21 @@ var procDenominator Proc = func(args []Object) Object {
 	return &BigInt{b: *bi}
 }
 
+var procBigInt Proc = func(args []Object) Object {
+	switch n := args[0].(type) {
+	case Number:
+		return &BigInt{b: *n.BigInt()}
+	case String:
+		bi := big.Int{}
+		if _, ok := bi.SetString(n.s, 10); ok {
+			return &BigInt{b: bi}
+		}
+		panic(RT.newError("Invalid number format " + n.s))
+	default:
+		panic(RT.newError(fmt.Sprintf("Cannot cast %s (type: %s) to BigInt", n.ToString(true), n.GetType().ToString(false))))
+	}
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -781,6 +797,7 @@ func init() {
 	intern("bool*", procBool)
 	intern("numerator*", procNumerator)
 	intern("denominator*", procDenominator)
+	intern("bigint*", procBigInt)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
