@@ -1757,6 +1757,13 @@
 (defn bigint
   "Coerce to BigInt"
   {:tag BigInt
-  :static true}
+  :added "1.0"}
   [x]
   (bigint* x))
+
+(defn bigfloat
+  "Coerce to BigFloat"
+  {:tag BigFloat
+  :added "1.0"}
+  [x]
+  (bigfloat* x))

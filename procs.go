@@ -511,6 +511,21 @@ var procBigInt Proc = func(args []Object) Object {
 	}
 }
 
+var procBigFloat Proc = func(args []Object) Object {
+	switch n := args[0].(type) {
+	case Number:
+		return &BigFloat{b: *n.BigFloat()}
+	case String:
+		b := big.Float{}
+		if _, ok := b.SetString(n.s); ok {
+			return &BigFloat{b: b}
+		}
+		panic(RT.newError("Invalid number format " + n.s))
+	default:
+		panic(RT.newError(fmt.Sprintf("Cannot cast %s (type: %s) to BigFloat", n.ToString(true), n.GetType().ToString(false))))
+	}
+}
+
 var procNth Proc = func(args []Object) Object {
 	n := ensureNumber(args, 1).Int().i
 	switch coll := args[0].(type) {
@@ -798,6 +813,7 @@ func init() {
 	intern("numerator*", procNumerator)
 	intern("denominator*", procDenominator)
 	intern("bigint*", procBigInt)
+	intern("bigfloat*", procBigFloat)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
