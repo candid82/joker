@@ -205,18 +205,6 @@ var procExInfo Proc = func(args []Object) Object {
 	}
 }
 
-var procPrint Proc = func(args []Object) Object {
-	n := len(args)
-	if n > 0 {
-		for _, arg := range args[:n-1] {
-			print(arg.ToString(false))
-			print(" ")
-		}
-		print(args[n-1].ToString(false))
-	}
-	return NIL
-}
-
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -718,6 +706,26 @@ var procType Proc = func(args []Object) Object {
 	return args[0].GetType()
 }
 
+func pr(args []Object, escape bool) Object {
+	n := len(args)
+	if n > 0 {
+		for _, arg := range args[:n-1] {
+			print(arg.ToString(escape))
+			print(" ")
+		}
+		print(args[n-1].ToString(escape))
+	}
+	return NIL
+}
+
+var procPr Proc = func(args []Object) Object {
+	return pr(args, true)
+}
+
+var procPrint Proc = func(args []Object) Object {
+	return pr(args, false)
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -814,6 +822,7 @@ func init() {
 	intern("denominator*", procDenominator)
 	intern("bigint*", procBigInt)
 	intern("bigfloat*", procBigFloat)
+	intern("pr*", procPr)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
