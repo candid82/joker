@@ -1782,3 +1782,10 @@
   {:added "1.0"}
   []
   (newline*))
+
+(defn prn
+  "Same as pr followed by (newline)."
+  {:added "1.0"}
+  [& more]
+  (apply pr more)
+  (newline))
