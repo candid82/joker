@@ -1796,3 +1796,10 @@
          of *out*.  print and println produce output for human consumption."
          :added "1.0"}
   print print*)
+
+(defn println
+  "Same as print followed by (newline)"
+  {:added "1.0"}
+  [& more]
+  (apply print more)
+  (newline))
