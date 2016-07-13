@@ -1776,3 +1776,9 @@
          can be read by the reader"
          :added "1.0"}
   pr pr*)
+
+(defn newline
+  "Writes a platform-specific newline to *out*"
+  {:added "1.0"}
+  []
+  (newline*))

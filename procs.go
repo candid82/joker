@@ -726,6 +726,11 @@ var procPrint Proc = func(args []Object) Object {
 	return pr(args, false)
 }
 
+var procNewline Proc = func(args []Object) Object {
+	println()
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -823,6 +828,7 @@ func init() {
 	intern("bigint*", procBigInt)
 	intern("bigfloat*", procBigFloat)
 	intern("pr*", procPr)
+	intern("newline*", procNewline)
 
 	intern("ex-info", procExInfo)
 	intern("print", procPrint)
