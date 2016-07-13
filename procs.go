@@ -829,9 +829,9 @@ func init() {
 	intern("bigfloat*", procBigFloat)
 	intern("pr*", procPr)
 	intern("newline*", procNewline)
+	intern("print*", procPrint)
 
 	intern("ex-info", procExInfo)
-	intern("print", procPrint)
 	intern("set-macro*", procSetMacro)
 
 	currentNamespace := GLOBAL_ENV.currentNamespace

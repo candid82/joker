@@ -1789,3 +1789,10 @@
   [& more]
   (apply pr more)
   (newline))
+
+(def
+  ^{:arglists '([& args])
+    :doc "Prints the object(s) to the output stream that is the current value
+         of *out*.  print and println produce output for human consumption."
+         :added "1.0"}
+  print print*)
