@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"math/big"
+	"os"
 	"reflect"
 	"sort"
 )
@@ -731,6 +733,15 @@ var procNewline Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procRead Proc = func(args []Object) Object {
+	reader := NewReader(bufio.NewReader(os.Stdin))
+	obj, err := TryRead(reader)
+	if err != nil {
+		panic(RT.newError(err.Error()))
+	}
+	return obj
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -830,6 +841,7 @@ func init() {
 	intern("pr*", procPr)
 	intern("newline*", procNewline)
 	intern("print*", procPrint)
+	intern("read*", procRead)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

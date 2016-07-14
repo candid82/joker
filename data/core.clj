@@ -1803,3 +1803,9 @@
   [& more]
   (apply print more)
   (newline))
+
+(def
+  ^{:arglists '([])
+    :doc "Reads the next object from standard input."
+    :added "1.0"}
+  read read*)
