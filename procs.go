@@ -763,6 +763,16 @@ var procNanoTime Proc = func(args []Object) Object {
 	return &BigInt{b: *big.NewInt(time.Now().UnixNano())}
 }
 
+var procMacroexpand1 Proc = func(args []Object) Object {
+	switch s := args[0].(type) {
+	case Seq:
+		parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
+		return macroexpand1(s, parseContext)
+	default:
+		return s
+	}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -866,6 +876,7 @@ func init() {
 	intern("read-line*", procReadLine)
 	intern("read-string*", procReadString)
 	intern("nano-time*", procNanoTime)
+	intern("macroexpand-1*", procMacroexpand1)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

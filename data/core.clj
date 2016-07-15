@@ -1842,3 +1842,9 @@
          ret# ~expr]
      (prn (str "Elapsed time: " (/ (double (- (nano-time*) start#)) 1000000.0) " msecs"))
      ret#))
+
+(defn macroexpand-1
+  "If form represents a macro form, returns its expansion, else returns form."
+  {:added "1.0"}
+  [form]
+  (macroexpand-1* form))
