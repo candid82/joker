@@ -742,6 +742,12 @@ var procRead Proc = func(args []Object) Object {
 	return obj
 }
 
+var procReadLine Proc = func(args []Object) Object {
+	var line string
+	fmt.Scanln(&line)
+	return &String{s: line}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -842,6 +848,7 @@ func init() {
 	intern("newline*", procNewline)
 	intern("print*", procPrint)
 	intern("read*", procRead)
+	intern("read-line*", procReadLine)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

@@ -1809,3 +1809,9 @@
     :doc "Reads the next object from standard input."
     :added "1.0"}
   read read*)
+
+(def
+  ^{:arglists '([])
+    :doc "Reads the next line from standard input."
+    :added "1.0"}
+  read-line read-line*)
