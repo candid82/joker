@@ -1833,3 +1833,12 @@
    (subvec v start (count v)))
   ([v start end]
    (subvec* v start end)))
+
+(defmacro time
+  "Evaluates expr and prints the time it took.  Returns the value of expr."
+  {:added "1.0"}
+  [expr]
+  `(let [start# (nano-time*)
+         ret# ~expr]
+     (prn (str "Elapsed time: " (/ (double (- (nano-time*) start#)) 1000000.0) " msecs"))
+     ret#))

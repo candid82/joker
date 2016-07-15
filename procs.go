@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
@@ -758,6 +759,10 @@ var procReadLine Proc = func(args []Object) Object {
 	return &String{s: line}
 }
 
+var procNanoTime Proc = func(args []Object) Object {
+	return &BigInt{b: *big.NewInt(time.Now().UnixNano())}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -860,6 +865,7 @@ func init() {
 	intern("read*", procRead)
 	intern("read-line*", procReadLine)
 	intern("read-string*", procReadString)
+	intern("nano-time*", procNanoTime)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
