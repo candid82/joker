@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"math/big"
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
@@ -733,13 +735,21 @@ var procNewline Proc = func(args []Object) Object {
 	return NIL
 }
 
-var procRead Proc = func(args []Object) Object {
-	reader := NewReader(bufio.NewReader(os.Stdin))
-	obj, err := TryRead(reader)
+func readFromReader(reader io.RuneReader) Object {
+	r := NewReader(reader)
+	obj, err := TryRead(r)
 	if err != nil {
 		panic(RT.newError(err.Error()))
 	}
 	return obj
+}
+
+var procRead Proc = func(args []Object) Object {
+	return readFromReader(bufio.NewReader(os.Stdin))
+}
+
+var procReadString Proc = func(args []Object) Object {
+	return readFromReader(strings.NewReader(ensureString(args, 0).s))
 }
 
 var procReadLine Proc = func(args []Object) Object {
@@ -849,6 +859,7 @@ func init() {
 	intern("print*", procPrint)
 	intern("read*", procRead)
 	intern("read-line*", procReadLine)
+	intern("read-string*", procReadString)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
