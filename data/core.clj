@@ -1821,3 +1821,15 @@
     :doc "Reads one object from the string s."
     :added "1.0"}
   read-string read-string*)
+
+(defn subvec
+  "Returns a persistent vector of the items in vector from
+  start (inclusive) to end (exclusive).  If end is not supplied,
+  defaults to (count vector). This operation is O(1) and very fast, as
+  the resulting vector shares structure with the original and no
+  trimming is done."
+  {:added "1.0"}
+  ([v start]
+   (subvec v start (count v)))
+  ([v start end]
+   (subvec* v start end)))
