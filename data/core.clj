@@ -1866,3 +1866,8 @@
   {:added "1.0"}
   [s]
   (load-string* s))
+
+(defn set?
+  "Returns true if x implements Set"
+  {:added "1.0"}
+  [x] (instance? Set x))
