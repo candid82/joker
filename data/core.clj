@@ -1871,3 +1871,11 @@
   "Returns true if x implements Set"
   {:added "1.0"}
   [x] (instance? Set x))
+
+(defn set
+  "Returns a set of the distinct elements of coll."
+  {:added "1.0"}
+  [coll]
+  (if (set? coll)
+    (with-meta coll nil)
+    (reduce1 conj #{} coll)))
