@@ -773,6 +773,37 @@ var procMacroexpand1 Proc = func(args []Object) Object {
 	}
 }
 
+func loadReader(reader *Reader) (Object, error) {
+	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
+	var lastObj Object = NIL
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			return lastObj, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		expr, err := TryParse(obj, parseContext)
+		if err != nil {
+			return nil, err
+		}
+		lastObj, err = TryEval(expr)
+		if err != nil {
+			return nil, err
+		}
+	}
+}
+
+var procLoadString Proc = func(args []Object) Object {
+	s := ensureString(args, 0)
+	obj, err := loadReader(NewReader(strings.NewReader(s.s)))
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -877,6 +908,7 @@ func init() {
 	intern("read-string*", procReadString)
 	intern("nano-time*", procNanoTime)
 	intern("macroexpand-1*", procMacroexpand1)
+	intern("load-string*", procLoadString)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

@@ -1859,3 +1859,10 @@
     (if (identical? ex form)
       form
       (macroexpand ex))))
+
+(defn load-string
+  "Sequentially read and evaluate the set of forms contained in the
+  string"
+  {:added "1.0"}
+  [s]
+  (load-string* s))
