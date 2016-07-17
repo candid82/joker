@@ -882,6 +882,14 @@ func (s String) Count() int {
 	return len(s.s)
 }
 
+func (s String) Seq() Seq {
+	runes := make([]Object, 0, len(s.s))
+	for _, r := range s.s {
+		runes = append(runes, Char{ch: r})
+	}
+	return &ArraySeq{arr: runes}
+}
+
 func (s String) Nth(i int) Object {
 	if i < 0 {
 		panic(RT.newError(fmt.Sprintf("Negative index: %d", i)))
