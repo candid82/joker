@@ -292,6 +292,13 @@ func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	return v, ok
 }
 
+func (env *Env) FindNamespace(s Symbol) *Namespace {
+	if s.ns != nil {
+		return nil
+	}
+	return env.namespaces[s.name]
+}
+
 func (pos Position) Pos() Position {
 	return pos
 }

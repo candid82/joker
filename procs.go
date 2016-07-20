@@ -804,6 +804,14 @@ var procLoadString Proc = func(args []Object) Object {
 	return obj
 }
 
+var procFindNamespace Proc = func(args []Object) Object {
+	ns := GLOBAL_ENV.FindNamespace(ensureSymbol(args, 0))
+	if ns == nil {
+		return NIL
+	}
+	return ns
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -909,6 +917,7 @@ func init() {
 	intern("nano-time*", procNanoTime)
 	intern("macroexpand-1*", procMacroexpand1)
 	intern("load-string*", procLoadString)
+	intern("find-ns*", procFindNamespace)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

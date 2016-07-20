@@ -1879,3 +1879,17 @@
   (if (set? coll)
     (with-meta coll nil)
     (reduce1 conj #{} coll)))
+
+(defn ^:private filter-key
+  [keyfn pred amap]
+  (loop [ret {} es (seq amap)]
+    (if es
+      (if (pred (keyfn (first es)))
+        (recur (assoc ret (key (first es)) (val (first es))) (next es))
+        (recur ret (next es)))
+      ret)))
+
+(defn find-ns
+  "Returns the namespace named by the symbol or nil if it doesn't exist."
+  {:added "1.0"}
+  [sym] (find-ns* sym))
