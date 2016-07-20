@@ -1893,3 +1893,16 @@
   "Returns the namespace named by the symbol or nil if it doesn't exist."
   {:added "1.0"}
   [sym] (find-ns* sym))
+
+(defn create-ns
+  "Create a new namespace named by the symbol if one doesn't already
+  exist, returns it or the already-existing namespace of the same
+  name."
+  {:added "1.0"}
+  [sym] (create-ns* sym))
+
+(defn remove-ns
+  "Removes the namespace named by the symbol. Use with caution.
+  Cannot be used to remove the clojure namespace."
+  {:added "1.0"}
+  [sym] (remove-ns* sym))
