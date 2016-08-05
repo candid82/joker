@@ -446,3 +446,24 @@ func ensureRatio(args []Object, index int) *Ratio {
     panic(RT.newArgTypeError(index, c, "Ratio"))
   }
 }
+
+func assertNamespace(obj Object, msg string) *Namespace {
+  switch c := obj.(type) {
+  case *Namespace:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Namespace", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureNamespace(args []Object, index int) *Namespace {
+  switch c := args[index].(type) {
+  case *Namespace:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Namespace"))
+  }
+}

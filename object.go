@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *ArraySeq *ConsSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package main

@@ -832,6 +832,10 @@ var procAllNamespaces Proc = func(args []Object) Object {
 	return &ArraySeq{arr: s}
 }
 
+var procNamespaceName Proc = func(args []Object) Object {
+	return ensureNamespace(args, 0).name
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -941,6 +945,7 @@ func init() {
 	intern("create-ns*", procCreateNamespace)
 	intern("remove-ns*", procRemoveNamespace)
 	intern("all-ns*", procAllNamespaces)
+	intern("ns-name*", procNamespaceName)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

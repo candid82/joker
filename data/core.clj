@@ -1921,3 +1921,9 @@
   (if (instance? Namespace x)
     x
     (or (find-ns x) (throw (ex-info (str "No namespace: " x " found") {})))))
+
+(defn ns-name
+  "Returns the name of the namespace, a symbol."
+  {:added "1.0"}
+  [ns]
+  (ns-name* (the-ns ns)))
