@@ -824,6 +824,14 @@ var procRemoveNamespace Proc = func(args []Object) Object {
 	return ns
 }
 
+var procAllNamespaces Proc = func(args []Object) Object {
+	s := make([]Object, 0, len(GLOBAL_ENV.namespaces))
+	for _, ns := range GLOBAL_ENV.namespaces {
+		s = append(s, ns)
+	}
+	return &ArraySeq{arr: s}
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -932,6 +940,7 @@ func init() {
 	intern("find-ns*", procFindNamespace)
 	intern("create-ns*", procCreateNamespace)
 	intern("remove-ns*", procRemoveNamespace)
+	intern("all-ns*", procAllNamespaces)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

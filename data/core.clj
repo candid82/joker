@@ -1906,3 +1906,18 @@
   Cannot be used to remove the clojure namespace."
   {:added "1.0"}
   [sym] (remove-ns* sym))
+
+(defn all-ns
+  "Returns a sequence of all namespaces."
+  {:added "1.0"}
+  [] (all-ns*))
+
+(defn the-ns
+  "If passed a namespace, returns it. Else, when passed a symbol,
+  returns the namespace named by it, throwing an exception if not
+  found."
+  {:added "1.0"}
+  ^Namespace [x]
+  (if (instance? Namespace x)
+    x
+    (or (find-ns x) (throw (ex-info (str "No namespace: " x " found") {})))))
