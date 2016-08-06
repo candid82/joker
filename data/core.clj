@@ -1933,3 +1933,9 @@
   {:added "1.0"}
   [ns]
   (ns-map* (the-ns ns)))
+
+(defn ns-unmap
+  "Removes the mappings for the symbol from the namespace."
+  {:added "1.0"}
+  [ns sym]
+  (ns-unmap* (the-ns ns) sym))
