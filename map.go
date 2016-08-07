@@ -282,6 +282,17 @@ func (m *ArrayMap) Seq() Seq {
 	return &ArrayMapSeq{m: m, index: 0}
 }
 
+func (m *ArrayMap) Call(args []Object) Object {
+	checkArity(args, 1, 2)
+	if ok, v := m.Get(args[0]); ok {
+		return v
+	}
+	if len(args) == 2 {
+		return args[1]
+	}
+	return NIL
+}
+
 func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
 	if m1 == nil {
 		return m2

@@ -272,6 +272,9 @@ var procIsInstance Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	switch t := args[0].(type) {
 	case *Type:
+		if args[1].Equals(NIL) {
+			return Bool{b: false}
+		}
 		if t.reflectType.Kind() == reflect.Interface {
 			return Bool{b: args[1].GetType().reflectType.Implements(t.reflectType)}
 		} else {
@@ -859,6 +862,13 @@ var procVarNamespace Proc = func(args []Object) Object {
 	return v.ns
 }
 
+var procRefer Proc = func(args []Object) Object {
+	ns := ensureNamespace(args, 0)
+	sym := ensureSymbol(args, 1)
+	v := ensureVar(args, 2)
+	return ns.Refer(sym, v)
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -972,6 +982,7 @@ func init() {
 	intern("ns-map*", procNamespaceMap)
 	intern("ns-unmap*", procNamespaceUnmap)
 	intern("var-ns*", procVarNamespace)
+	intern("refer*", procRefer)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

@@ -80,3 +80,11 @@ func (set *ArraySet) Seq() Seq {
 func (set *ArraySet) Count() int {
 	return set.m.Count()
 }
+
+func (set *ArraySet) Call(args []Object) Object {
+	checkArity(args, 1, 1)
+	if ok, _ := set.Get(args[0]); ok {
+		return args[0]
+	}
+	return NIL
+}
