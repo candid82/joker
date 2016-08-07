@@ -1953,3 +1953,12 @@
                                       (= ns (var-ns* v))
                                       (public? v)))
                 (ns-map ns))))
+
+(defn ns-interns
+  "Returns a map of the intern mappings for the namespace."
+  {:added "1.0"}
+  [ns]
+  (let [ns (the-ns ns)]
+    (filter-key val (fn [^Var v] (and (instance? Var v)
+                                      (= ns (var-ns* v))))
+                (ns-map ns))))
