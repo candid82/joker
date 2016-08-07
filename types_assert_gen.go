@@ -467,3 +467,24 @@ func ensureNamespace(args []Object, index int) *Namespace {
     panic(RT.newArgTypeError(index, c, "Namespace"))
   }
 }
+
+func assertVar(obj Object, msg string) *Var {
+  switch c := obj.(type) {
+  case *Var:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Var", obj.GetType().ToString(false))
+    }
+    panic(RT.newError(msg))
+  }
+}
+
+func ensureVar(args []Object, index int) *Var {
+  switch c := args[index].(type) {
+  case *Var:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Var"))
+  }
+}

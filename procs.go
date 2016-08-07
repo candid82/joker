@@ -854,6 +854,11 @@ var procNamespaceUnmap Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procVarNamespace Proc = func(args []Object) Object {
+	v := ensureVar(args, 0)
+	return v.ns
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -966,6 +971,7 @@ func init() {
 	intern("ns-name*", procNamespaceName)
 	intern("ns-map*", procNamespaceMap)
 	intern("ns-unmap*", procNamespaceUnmap)
+	intern("var-ns*", procVarNamespace)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

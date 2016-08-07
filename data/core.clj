@@ -1939,3 +1939,17 @@
   {:added "1.0"}
   [ns sym]
   (ns-unmap* (the-ns ns) sym))
+
+(defn ^:private public?
+  [v]
+  (not (:private (meta v))))
+
+(defn ns-publics
+  "Returns a map of the public intern mappings for the namespace."
+  {:added "1.0"}
+  [ns]
+  (let [ns (the-ns ns)]
+    (filter-key val (fn [^Var v] (and (instance? Var v)
+                                      (= ns (var-ns* v))
+                                      (public? v)))
+                (ns-map ns))))
