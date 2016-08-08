@@ -4,6 +4,7 @@ type (
 	Namespace struct {
 		name     Symbol
 		mappings map[*string]*Var
+		aliases  map[*string]*Namespace
 	}
 )
 
@@ -31,6 +32,7 @@ func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		name:     sym,
 		mappings: make(map[*string]*Var),
+		aliases:  make(map[*string]*Namespace),
 	}
 }
 
@@ -63,4 +65,15 @@ func (ns *Namespace) intern(sym Symbol) *Var {
 		ns.mappings[sym.name] = v
 	}
 	return v
+}
+
+func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
+	if alias.ns != nil {
+		panic(RT.newError("Alias can't be namespace-qualified"))
+	}
+	existing := ns.aliases[alias.name]
+	if existing != nil && existing != namespace {
+		panic(RT.newError("Alias " + alias.ToString(false) + " already exists in namespace " + ns.name.ToString(false) + ", aliasing " + existing.name.ToString(false)))
+	}
+	ns.aliases[alias.name] = namespace
 }

@@ -38,7 +38,10 @@ func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	if s.ns == nil {
 		ns = env.currentNamespace
 	} else {
-		ns = env.namespaces[s.ns]
+		ns = env.currentNamespace.aliases[s.ns]
+		if ns == nil {
+			ns = env.namespaces[s.ns]
+		}
 	}
 	if ns == nil {
 		return nil, false

@@ -869,6 +869,11 @@ var procRefer Proc = func(args []Object) Object {
 	return ns.Refer(sym, v)
 }
 
+var procAlias Proc = func(args []Object) Object {
+	ensureNamespace(args, 0).AddAlias(ensureSymbol(args, 1), ensureNamespace(args, 2))
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -983,6 +988,7 @@ func init() {
 	intern("ns-unmap*", procNamespaceUnmap)
 	intern("var-ns*", procVarNamespace)
 	intern("refer*", procRefer)
+	intern("alias*", procAlias)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
