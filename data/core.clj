@@ -1999,3 +1999,12 @@
                       (str sym " is not public")
                       (str sym " does not exist")))))
           (refer* *ns* (or (rename sym) sym) v))))))
+
+(defn ns-refers
+  "Returns a map of the refer mappings for the namespace."
+  {:added "1.0"}
+  [ns]
+  (let [ns (the-ns ns)]
+    (filter-key val (fn [^Var v] (and (instance? Var v)
+                                      (not= ns (var-ns* v))))
+                (ns-map ns))))
