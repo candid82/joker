@@ -882,6 +882,16 @@ var procNamespaceAliases Proc = func(args []Object) Object {
 	return r
 }
 
+var procNamespaceUnalias Proc = func(args []Object) Object {
+	ns := ensureNamespace(args, 0)
+	sym := ensureSymbol(args, 1)
+	if sym.ns != nil {
+		panic(RT.newError("Alias can't be namespace-qualified"))
+	}
+	delete(ns.aliases, sym.name)
+	return NIL
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -998,6 +1008,7 @@ func init() {
 	intern("refer*", procRefer)
 	intern("alias*", procAlias)
 	intern("ns-aliases*", procNamespaceAliases)
+	intern("ns-unalias*", procNamespaceUnalias)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

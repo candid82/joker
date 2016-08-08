@@ -2023,3 +2023,9 @@
   {:added "1.0"}
   [ns]
   (ns-aliases* (the-ns ns)))
+
+(defn ns-unalias
+  "Removes the alias for the symbol from the namespace."
+  {:added "1.0"}
+  [ns sym]
+  (ns-unalias* (the-ns ns) sym))
