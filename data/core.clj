@@ -2017,3 +2017,9 @@
   {:added "1.0"}
   [alias namespace-sym]
   (alias* *ns* alias (the-ns namespace-sym)))
+
+(defn ns-aliases
+  "Returns a map of the aliases for the namespace."
+  {:added "1.0"}
+  [ns]
+  (ns-aliases* (the-ns ns)))
