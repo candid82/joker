@@ -2029,3 +2029,11 @@
   {:added "1.0"}
   [ns sym]
   (ns-unalias* (the-ns ns) sym))
+
+(defn take-nth
+  "Returns a lazy seq of every nth item in coll."
+  {:added "1.0"}
+  [n coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (cons (first s) (take-nth n (drop n s))))))
