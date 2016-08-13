@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/big"
 	"os"
+	"os/exec"
 	"reflect"
 	"sort"
 	"strings"
@@ -892,6 +893,39 @@ var procNamespaceUnalias Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procSh Proc = func(args []Object) Object {
+	strs := make([]string, len(args))
+	for i, _ := range args {
+		strs[i] = ensureString(args, i).s
+	}
+	cmd := exec.Command(strs[0], strs[1:len(strs)]...)
+	stdoutReader, err := cmd.StdoutPipe()
+	if err != nil {
+		panic(RT.newError(err.Error()))
+	}
+	stderrReader, err := cmd.StderrPipe()
+	if err != nil {
+		panic(RT.newError(err.Error()))
+	}
+	if err = cmd.Start(); err != nil {
+		panic(RT.newError(err.Error()))
+	}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stdoutReader)
+	stdoutString := buf.String()
+	buf = new(bytes.Buffer)
+	buf.ReadFrom(stderrReader)
+	stderrString := buf.String()
+	if err = cmd.Wait(); err != nil {
+		EmptyArrayMap().Assoc(MakeKeyword("success"), Bool{b: false})
+	}
+	res := EmptyArrayMap()
+	res.Add(MakeKeyword("success"), Bool{b: true})
+	res.Add(MakeKeyword("stdout"), String{s: stdoutString})
+	res.Add(MakeKeyword("stderr"), String{s: stderrString})
+	return res
+}
+
 var coreNamespace = GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name]
 
 func intern(name string, proc Proc) {
@@ -1012,6 +1046,7 @@ func init() {
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
+	intern("sh", procSh)
 
 	currentNamespace := GLOBAL_ENV.currentNamespace
 	GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
