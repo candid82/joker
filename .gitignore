@@ -1,8 +1,6 @@
-
 gclojure
-
 input.clj
-
 bindata.go
-
+play
 .vscode
+.idea
