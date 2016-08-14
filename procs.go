@@ -921,8 +921,8 @@ var procSh Proc = func(args []Object) Object {
 	}
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Bool{b: true})
-	res.Add(MakeKeyword("stdout"), String{s: stdoutString})
-	res.Add(MakeKeyword("stderr"), String{s: stderrString})
+	res.Add(MakeKeyword("out"), String{s: stdoutString})
+	res.Add(MakeKeyword("err"), String{s: stderrString})
 	return res
 }
 
