@@ -1088,13 +1088,13 @@ func init() {
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
 
-	// currentNamespace := GLOBAL_ENV.CurrentNamespace
-	// GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
-	// data, err := Asset("data/core.clj")
-	// if err != nil {
-	// 	panic(RT.newError("Could not load core.clj"))
-	// }
-	// reader := bytes.NewReader(data)
-	// ProcessReader(NewReader(reader), EVAL)
-	// GLOBAL_ENV.SetCurrentNamespace(currentNamespace)
+	currentNamespace := GLOBAL_ENV.CurrentNamespace
+	GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
+	data, err := Asset("data/core.clj")
+	if err != nil {
+		panic(RT.newError("Could not load core.clj"))
+	}
+	reader := bytes.NewReader(data)
+	ProcessReader(NewReader(reader), EVAL)
+	GLOBAL_ENV.SetCurrentNamespace(currentNamespace)
 }

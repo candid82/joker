@@ -174,8 +174,6 @@
   sigs
   (fn [fdecl]
     (assert-valid-fdecl fdecl)
-    (pr* fdecl)
-    (newline*)
     (let [asig
           (fn [fdecl]
             (let [arglist (first fdecl)
@@ -189,8 +187,6 @@
                   (with-meta arglist (conj (if (meta arglist) (meta arglist) {}) (first body)))
                   arglist)
                 arglist)))]
-      (pr* fdecl)
-      (newline*)
       (if (seq? (first fdecl))
         (loop [ret [] fdecls fdecl]
           (if fdecls

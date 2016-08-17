@@ -319,7 +319,7 @@ func (expr *IfExpr) Eval(env *LocalEnv) Object {
 
 func (expr *FnExpr) Eval(env *LocalEnv) Object {
 	res := &Fn{fnExpr: expr}
-	if expr.self.Name != nil {
+	if expr.self.name != nil {
 		env = env.addFrame([]Object{res})
 	}
 	res.env = env
