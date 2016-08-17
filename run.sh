@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-go-bindata data
-go generate && go build && ./gclojure $@
+# go-bindata -o core/bindata.go data
+# go generate &&
+go build && ./gclojure $@

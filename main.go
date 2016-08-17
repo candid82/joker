@@ -3,53 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	. "github.com/candid/gclojure/core"
 	"gopkg.in/readline.v1"
 	"io"
 	"os"
-	// "runtime"
 )
-
-type (
-	Phase int
-)
-
-const (
-	READ Phase = iota
-	PARSE
-	EVAL
-)
-
-var LINTER_MODE bool = false
-
-func processReader(reader *Reader, phase Phase) {
-	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
-	for {
-		obj, err := TryRead(reader)
-		if err == io.EOF {
-			return
-		}
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
-		}
-		if phase == READ {
-			continue
-		}
-		expr, err := TryParse(obj, parseContext)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
-		}
-		if phase == PARSE {
-			continue
-		}
-		_, err = TryEval(expr)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
-		}
-	}
-}
 
 func processFile(filename string, phase Phase) {
 	var reader *Reader
@@ -63,7 +21,7 @@ func processFile(filename string, phase Phase) {
 		}
 		reader = NewReader(bufio.NewReader(f))
 	}
-	processReader(reader, phase)
+	ProcessReader(reader, phase)
 }
 
 func skipRestOfLine(reader *Reader) {
@@ -109,20 +67,20 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext)
 		return false
 	}
 
-	expr := parse(obj, parseContext)
+	expr := Parse(obj, parseContext)
 	if phase == PARSE {
 		fmt.Println(expr)
 		return false
 	}
 
-	res := eval(expr, nil)
+	res := Eval(expr, nil)
 	fmt.Println(res.ToString(true))
 	return false
 }
 
 func repl(phase Phase) {
 	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
-	parseContext := &ParseContext{globalEnv: GLOBAL_ENV}
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 
 	rl, err := readline.New("")
 	if err != nil {
@@ -133,7 +91,7 @@ func repl(phase Phase) {
 	reader := NewReader(NewLineRuneReader(rl))
 
 	for {
-		rl.SetPrompt(GLOBAL_ENV.currentNamespace.name.ToString(false) + "=> ")
+		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace.Name.ToString(false) + "=> ")
 		if processReplCommand(reader, phase, parseContext) {
 			return
 		}
@@ -152,7 +110,7 @@ func parsePhase(s string) Phase {
 }
 
 func main() {
-	GLOBAL_ENV.namespaces[MakeSymbol("user").name].ReferAll(GLOBAL_ENV.namespaces[MakeSymbol("gclojure.core").name])
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("gclojure.core")))
 	if len(os.Args) > 1 {
 		if len(os.Args) > 2 {
 			LINTER_MODE = true
