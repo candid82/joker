@@ -2,4 +2,4 @@
 
 # go-bindata -o core/bindata.go data
 # go generate &&
-go build && ./gclojure $@
+go tool vet ./ && go build && ./gclojure $@

@@ -120,7 +120,7 @@ func (s *Callstack) String() string {
 	var b bytes.Buffer
 	for _, f := range s.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.traceable.Pos(), pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.traceable.Name(), pos.line, pos.column))
 	}
 	if b.Len() > 0 {
 		b.Truncate(b.Len() - 1)
@@ -292,7 +292,6 @@ loop:
 		env = env.replaceFrame(res)
 		goto loop
 	}
-	return res
 }
 
 func (doExpr *DoExpr) Eval(env *LocalEnv) Object {
