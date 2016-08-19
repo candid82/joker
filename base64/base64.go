@@ -1,7 +1,8 @@
-package core
+package base64
 
 import (
 	"encoding/base64"
+	. "github.com/candid/gclojure/core"
 )
 
 var base64DecodeString Proc = func(args []Object) Object {
