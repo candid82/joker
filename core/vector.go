@@ -51,7 +51,7 @@ func (v *Vector) tailoff() int {
 
 func (v *Vector) arrayFor(i int) []interface{} {
 	if i >= v.count || i < 0 {
-		panic(RT.newError(fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count-1)))
+		panic(RT.NewError(fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count-1)))
 	}
 	if i >= v.tailoff() {
 		return v.tail
@@ -93,7 +93,7 @@ func (v *Vector) pushTail(level uint, parent []interface{}, tailNode []interface
 	return result
 }
 
-func (v *Vector) conj(obj Object) *Vector {
+func (v *Vector) Conjoin(obj Object) *Vector {
 	var newTail []interface{}
 	if v.count-v.tailoff() < 32 {
 		newTail = append(clone(v.tail), obj)
@@ -236,7 +236,7 @@ func (v *Vector) Seq() Seq {
 }
 
 func (v *Vector) Conj(obj Object) Conjable {
-	return v.conj(obj)
+	return v.Conjoin(obj)
 }
 
 func (v *Vector) Count() int {
@@ -302,7 +302,7 @@ func (v *Vector) popTail(level uint, node []interface{}) []interface{} {
 
 func (v *Vector) Pop() Stack {
 	if v.count == 0 {
-		panic(RT.newError("Can't pop empty vector"))
+		panic(RT.NewError("Can't pop empty vector"))
 	}
 	if v.count == 1 {
 		return EmptyVector.WithMeta(v.meta).(Stack)
@@ -359,10 +359,10 @@ func doAssoc(level uint, node []interface{}, i int, val Object) []interface{} {
 
 func (v *Vector) assocN(i int, val Object) *Vector {
 	if i < 0 || i > v.count {
-		panic(RT.newError((fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count))))
+		panic(RT.NewError((fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count))))
 	}
 	if i == v.count {
-		return v.conj(val)
+		return v.Conjoin(val)
 	}
 	if i < v.tailoff() {
 		res := &Vector{count: v.count, shift: v.shift, root: doAssoc(v.shift, v.root, i, val), tail: v.tail}
@@ -384,7 +384,7 @@ func assertInteger(obj Object) int {
 	case *BigInt:
 		i = obj.Int().i
 	default:
-		panic(RT.newError("Key must be integer"))
+		panic(RT.NewError("Key must be integer"))
 	}
 	return i
 }
@@ -414,7 +414,7 @@ var EmptyVector = &Vector{
 func NewVectorFrom(objs ...Object) *Vector {
 	res := EmptyVector
 	for i := 0; i < len(objs); i++ {
-		res = res.conj(objs[i])
+		res = res.Conjoin(objs[i])
 	}
 	return res
 }
@@ -422,7 +422,7 @@ func NewVectorFrom(objs ...Object) *Vector {
 func NewVectorFromSeq(seq Seq) *Vector {
 	res := EmptyVector
 	for !seq.IsEmpty() {
-		res = res.conj(seq.First())
+		res = res.Conjoin(seq.First())
 		seq = seq.Rest()
 	}
 	return res

@@ -33,13 +33,13 @@ func assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "{{.Name}}", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 `
 
 var ensureTemplate string = `
-func ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
+func Ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
   switch c := args[index].(type) {
   case {{.TypeName}}:
     return c

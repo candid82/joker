@@ -262,7 +262,7 @@ func SeqCount(seq Seq) int {
 
 func SeqNth(seq Seq, n int) Object {
 	if n < 0 {
-		panic(RT.newError(fmt.Sprintf("Negative index: %d", n)))
+		panic(RT.NewError(fmt.Sprintf("Negative index: %d", n)))
 	}
 	i := n
 	for !seq.IsEmpty() {
@@ -272,7 +272,7 @@ func SeqNth(seq Seq, n int) Object {
 		seq = seq.Rest()
 		i--
 	}
-	panic(RT.newError(fmt.Sprintf("Index %d exceeds seq's length %d", n, (n - i))))
+	panic(RT.NewError(fmt.Sprintf("Index %d exceeds seq's length %d", n, (n - i))))
 }
 
 func SeqTryNth(seq Seq, n int, d Object) Object {

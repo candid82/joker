@@ -356,7 +356,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				obj: obj,
 			})
 		}
-		vr := ctx.GlobalEnv.CurrentNamespace.intern(Symbol{name: sym.name})
+		vr := ctx.GlobalEnv.CurrentNamespace.Intern(Symbol{name: sym.name})
 
 		res := &DefExpr{
 			vr:       vr,
@@ -688,7 +688,7 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 		if !ok || !vr.isMacro {
 			return nil
 		}
-		return vr.value.(Callable)
+		return vr.Value.(Callable)
 	default:
 		return nil
 	}
@@ -844,7 +844,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	if LINTER_MODE {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
-			switch f := c.vr.value.(type) {
+			switch f := c.vr.Value.(type) {
 			case *Fn:
 				for _, arity := range f.fnExpr.arities {
 					if len(arity.args) == len(res.args) {
@@ -884,7 +884,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			if sym.ns != nil {
 				ns = *sym.ns
 			}
-			vr = ctx.GlobalEnv.CurrentNamespace.intern(MakeSymbol(ns + *sym.name))
+			vr = ctx.GlobalEnv.CurrentNamespace.Intern(MakeSymbol(ns + *sym.name))
 		} else {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}

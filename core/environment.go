@@ -12,14 +12,14 @@ func NewEnv(currentNs Symbol) *Env {
 		Namespaces: make(map[*string]*Namespace),
 	}
 	currentNamespace := res.EnsureNamespace(currentNs)
-	res.EnsureNamespace(MakeSymbol("gclojure.core")).intern(MakeSymbol("*ns*"))
+	res.EnsureNamespace(MakeSymbol("gclojure.core")).Intern(MakeSymbol("*ns*"))
 	res.SetCurrentNamespace(currentNamespace)
 	return res
 }
 
 func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 	if sym.ns != nil {
-		panic(RT.newError("Namespace's name cannot be qualified: " + sym.ToString(false)))
+		panic(RT.NewError("Namespace's name cannot be qualified: " + sym.ToString(false)))
 	}
 	if env.Namespaces[sym.name] == nil {
 		env.Namespaces[sym.name] = NewNamespace(sym)
@@ -30,7 +30,7 @@ func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 func (env *Env) SetCurrentNamespace(ns *Namespace) {
 	env.CurrentNamespace = ns
 	v, _ := env.Resolve(MakeSymbol("gclojure.core/*ns*"))
-	v.value = ns
+	v.Value = ns
 }
 
 func (env *Env) Resolve(s Symbol) (*Var, bool) {
@@ -62,7 +62,7 @@ func (env *Env) RemoveNamespace(s Symbol) *Namespace {
 		return nil
 	}
 	if s.Equals(MakeSymbol("gclojure.core")) {
-		panic(RT.newError("Cannot remove gclojure.core namespace"))
+		panic(RT.NewError("Cannot remove gclojure.core namespace"))
 	}
 	ns := env.Namespaces[s.name]
 	delete(env.Namespaces, s.name)

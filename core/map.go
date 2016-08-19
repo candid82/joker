@@ -221,13 +221,13 @@ func (m *ArrayMap) Conj(obj Object) Conjable {
 	switch obj := obj.(type) {
 	case *Vector:
 		if obj.count != 2 {
-			panic(RT.newError("Vector argument to map's conj must be a vector with two elements"))
+			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
 		}
 		return m.Assoc(obj.at(0), obj.at(1))
 	case *ArrayMap:
 		return m.Merge(obj)
 	default:
-		panic(RT.newError("Argument to map's conj must be a vector with two elements or a map"))
+		panic(RT.NewError("Argument to map's conj must be a vector with two elements or a map"))
 	}
 }
 

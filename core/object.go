@@ -61,7 +61,7 @@ type (
 	}
 	Double struct {
 		InfoHolder
-		d float64
+		D float64
 	}
 	Int struct {
 		InfoHolder
@@ -81,7 +81,7 @@ type (
 	}
 	Bool struct {
 		InfoHolder
-		b bool
+		B bool
 	}
 	Nil struct {
 		InfoHolder
@@ -100,7 +100,7 @@ type (
 	}
 	String struct {
 		InfoHolder
-		s string
+		S string
 	}
 	Regex struct {
 		InfoHolder
@@ -111,7 +111,7 @@ type (
 		MetaHolder
 		ns      *Namespace
 		name    Symbol
-		value   Object
+		Value   Object
 		isMacro bool
 	}
 	Proc func([]Object) Object
@@ -218,7 +218,7 @@ func init() {
 
 func panicArity(n int) {
 	name := RT.currentExpr.(Traceable).Name()
-	panic(RT.newError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
 
 func checkArity(args []Object, min int, max int) {
@@ -325,9 +325,9 @@ func (exInfo *ExInfo) Error() string {
 		}
 	}
 	if len(exInfo.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("stdin:%d:%d: Exception: %s\nStacktrace:\n%s", pos.line, pos.column, exInfo.msg.s, exInfo.rt.stacktrace())
+		return fmt.Sprintf("stdin:%d:%d: Exception: %s\nStacktrace:\n%s", pos.line, pos.column, exInfo.msg.S, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("stdin:%d:%d: Exception: %s", pos.line, pos.column, exInfo.msg.s)
+		return fmt.Sprintf("stdin:%d:%d: Exception: %s", pos.line, pos.column, exInfo.msg.S)
 	}
 }
 
@@ -383,10 +383,10 @@ func (fn *Fn) Call(args []Object) Object {
 func compare(c Callable, a, b Object) int {
 	switch r := c.Call([]Object{a, b}).(type) {
 	case Bool:
-		if r.b {
+		if r.B {
 			return -1
 		}
-		if assertBool(c.Call([]Object{b, a}), "").b {
+		if assertBool(c.Call([]Object{b, a}), "").B {
 			return 1
 		}
 		return 0
@@ -458,8 +458,8 @@ func (v *Var) GetType() *Type {
 
 func (v *Var) Call(args []Object) Object {
 	return assertCallable(
-		v.value,
-		"Var "+v.ToString(false)+" resolves to "+v.value.ToString(false)+", which is not a Fn").Call(args)
+		v.Value,
+		"Var "+v.ToString(false)+" resolves to "+v.Value.ToString(false)+", which is not a Fn").Call(args)
 }
 
 func MakeSymbol(nsname string) Symbol {
@@ -637,7 +637,7 @@ func (bf *BigFloat) Equals(other interface{}) bool {
 	case *BigFloat:
 		return bf.b.Cmp(&b.b) == 0
 	case Double:
-		bf2 := big.NewFloat(b.d)
+		bf2 := big.NewFloat(b.D)
 		return bf.b.Cmp(bf2) == 0
 	}
 	return false
@@ -682,14 +682,18 @@ func (c Char) Compare(other Object) int {
 	return 0
 }
 
+func MakeDouble(d float64) Double {
+	return Double{D: d}
+}
+
 func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%f", d.d)
+	return fmt.Sprintf("%f", d.D)
 }
 
 func (d Double) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Double:
-		return d.d == other.d
+		return d.D == other.D
 	default:
 		return false
 	}
@@ -725,13 +729,13 @@ func (i Int) Compare(other Object) int {
 }
 
 func (b Bool) ToString(escape bool) string {
-	return fmt.Sprintf("%t", b.b)
+	return fmt.Sprintf("%t", b.B)
 }
 
 func (b Bool) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Bool:
-		return b.b == other.b
+		return b.B == other.B
 	default:
 		return false
 	}
@@ -743,10 +747,10 @@ func (b Bool) GetType() *Type {
 
 func (b Bool) Compare(other Object) int {
 	b2 := assertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
-	if b.b == b2.b {
+	if b.B == b2.B {
 		return 0
 	}
-	if b.b {
+	if b.B {
 		return 1
 	}
 	return -1
@@ -861,15 +865,19 @@ func (s Symbol) Compare(other Object) int {
 
 func (s String) ToString(escape bool) string {
 	if escape {
-		return escapeString(s.s)
+		return escapeString(s.S)
 	}
-	return s.s
+	return s.S
+}
+
+func MakeString(s string) String {
+	return String{S: s}
 }
 
 func (s String) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case String:
-		return s.s == other.s
+		return s.S == other.S
 	default:
 		return false
 	}
@@ -880,12 +888,12 @@ func (s String) GetType() *Type {
 }
 
 func (s String) Count() int {
-	return len(s.s)
+	return len(s.S)
 }
 
 func (s String) Seq() Seq {
-	runes := make([]Object, 0, len(s.s))
-	for _, r := range s.s {
+	runes := make([]Object, 0, len(s.S))
+	for _, r := range s.S {
 		runes = append(runes, Char{ch: r})
 	}
 	return &ArraySeq{arr: runes}
@@ -893,22 +901,22 @@ func (s String) Seq() Seq {
 
 func (s String) Nth(i int) Object {
 	if i < 0 {
-		panic(RT.newError(fmt.Sprintf("Negative index: %d", i)))
+		panic(RT.NewError(fmt.Sprintf("Negative index: %d", i)))
 	}
 	j, r := 0, 't'
-	for j, r = range s.s {
+	for j, r = range s.S {
 		if i == j {
 			return Char{ch: r}
 		}
 	}
-	panic(RT.newError(fmt.Sprintf("Index %d exceeds string's length %d", i, j+1)))
+	panic(RT.NewError(fmt.Sprintf("Index %d exceeds string's length %d", i, j+1)))
 }
 
 func (s String) TryNth(i int, d Object) Object {
 	if i < 0 {
 		return d
 	}
-	for j, r := range s.s {
+	for j, r := range s.S {
 		if i == j {
 			return Char{ch: r}
 		}
@@ -918,7 +926,7 @@ func (s String) TryNth(i int, d Object) Object {
 
 func (s String) Compare(other Object) int {
 	s2 := assertString(other, "Cannot compare String and "+other.GetType().ToString(false))
-	return strings.Compare(s.s, s2.s)
+	return strings.Compare(s.S, s2.S)
 }
 
 func IsSymbol(obj Object) bool {

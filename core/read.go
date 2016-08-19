@@ -333,7 +333,7 @@ func readNumber(reader *Reader) Object {
 		if err != nil {
 			panic(invalidNumberError)
 		}
-		return MakeReadObject(reader, Double{d: dbl})
+		return MakeReadObject(reader, Double{D: dbl})
 	}
 	return scanInt(str, 0, invalidNumberError, reader)
 }
@@ -381,9 +381,9 @@ func readSymbol(reader *Reader, first rune) Object {
 	case str == "nil":
 		return MakeReadObject(reader, NIL)
 	case str == "true":
-		return MakeReadObject(reader, Bool{b: true})
+		return MakeReadObject(reader, Bool{B: true})
 	case str == "false":
-		return MakeReadObject(reader, Bool{b: false})
+		return MakeReadObject(reader, Bool{B: false})
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}
@@ -434,7 +434,7 @@ func readString(reader *Reader, isRegex bool) Object {
 	if isRegex {
 		return MakeReadObject(reader, Regex{r: b.String()})
 	}
-	return MakeReadObject(reader, String{s: b.String()})
+	return MakeReadObject(reader, String{S: b.String()})
 }
 
 func readList(reader *Reader) Object {
@@ -462,7 +462,7 @@ func readVector(reader *Reader) Object {
 	r := reader.Peek()
 	for r != ']' {
 		obj := Read(reader)
-		result = result.conj(obj)
+		result = result.Conjoin(obj)
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
@@ -516,7 +516,7 @@ func readMeta(reader *Reader) *ArrayMap {
 	case String, Symbol:
 		return &ArrayMap{arr: []Object{DeriveReadObject(obj, MakeKeyword("tag")), obj}}
 	case Keyword:
-		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{b: true})}}
+		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{B: true})}}
 	default:
 		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
@@ -550,7 +550,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 	}
 	argVector := EmptyVector
 	for _, v := range a {
-		argVector = argVector.conj(v)
+		argVector = argVector.Conjoin(v)
 	}
 	return DeriveReadObject(body, NewListFrom(MakeSymbol("fn"), argVector, body))
 }

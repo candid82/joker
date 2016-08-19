@@ -95,7 +95,7 @@ func (list *List) Peek() Object {
 
 func (list *List) Pop() Stack {
 	if list.count == 0 {
-		panic(RT.newError("Can't pop empty list"))
+		panic(RT.NewError("Can't pop empty list"))
 	}
 	return list.rest
 }

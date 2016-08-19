@@ -28,11 +28,11 @@ func (set *ArraySet) Disjoin(key Object) Set {
 }
 
 func (set *ArraySet) Add(obj Object) bool {
-	return set.m.Add(obj, Bool{b: true})
+	return set.m.Add(obj, Bool{B: true})
 }
 
 func (set *ArraySet) Conj(obj Object) Conjable {
-	return &ArraySet{m: set.m.Assoc(obj, Bool{b: true}).(*ArrayMap)}
+	return &ArraySet{m: set.m.Assoc(obj, Bool{B: true}).(*ArrayMap)}
 }
 
 func EmptySet() *ArraySet {

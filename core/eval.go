@@ -38,7 +38,7 @@ func (rt *Runtime) clone() *Runtime {
 	}
 }
 
-func (rt *Runtime) newError(msg string) *EvalError {
+func (rt *Runtime) NewError(msg string) *EvalError {
 	res := &EvalError{
 		msg: msg,
 		rt:  rt.clone(),
@@ -51,7 +51,7 @@ func (rt *Runtime) newError(msg string) *EvalError {
 
 func (rt *Runtime) newArgTypeError(index int, obj Object, expectedType string) *EvalError {
 	name := rt.currentExpr.(Traceable).Name()
-	return rt.newError(fmt.Sprintf("Arg[%d] of %s must have type %s, got %s", index, name, expectedType, obj.GetType().ToString(false)))
+	return rt.NewError(fmt.Sprintf("Arg[%d] of %s must have type %s, got %s", index, name, expectedType, obj.GetType().ToString(false)))
 }
 
 func (rt *Runtime) newErrorWithPos(msg string, pos Position) *EvalError {
@@ -142,10 +142,10 @@ func (err EvalError) Type() Symbol {
 
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
-	if expr.vr.value == nil {
-		panic(RT.newError("Unbound var: " + expr.vr.ToString(false)))
+	if expr.vr.Value == nil {
+		panic(RT.NewError("Unbound var: " + expr.vr.ToString(false)))
 	}
-	return expr.vr.value
+	return expr.vr.Value
 }
 
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
@@ -162,7 +162,7 @@ func (expr *LiteralExpr) Eval(env *LocalEnv) Object {
 func (expr *VectorExpr) Eval(env *LocalEnv) Object {
 	res := EmptyVector
 	for _, e := range expr.v {
-		res = res.conj(Eval(e, env))
+		res = res.Conjoin(Eval(e, env))
 	}
 	return res
 }
@@ -172,7 +172,7 @@ func (expr *MapExpr) Eval(env *LocalEnv) Object {
 	for i := range expr.keys {
 		key := Eval(expr.keys[i], env)
 		if !res.Add(key, Eval(expr.values[i], env)) {
-			panic(RT.newError("Duplicate key: " + key.ToString(false)))
+			panic(RT.NewError("Duplicate key: " + key.ToString(false)))
 		}
 	}
 	return res
@@ -183,7 +183,7 @@ func (expr *SetExpr) Eval(env *LocalEnv) Object {
 	for _, elemExpr := range expr.elements {
 		el := Eval(elemExpr, env)
 		if !res.Add(el) {
-			panic(RT.newError("Duplicate set element: " + el.ToString(false)))
+			panic(RT.NewError("Duplicate set element: " + el.ToString(false)))
 		}
 	}
 	return res
@@ -191,7 +191,7 @@ func (expr *SetExpr) Eval(env *LocalEnv) Object {
 
 func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	if expr.value != nil {
-		expr.vr.value = Eval(expr.value, env)
+		expr.vr.Value = Eval(expr.value, env)
 	}
 	if expr.meta != nil {
 		expr.vr.meta = Eval(expr.meta, env).(*ArrayMap)
@@ -202,7 +202,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 func (expr *VarExpr) Eval(env *LocalEnv) Object {
 	res, ok := GLOBAL_ENV.Resolve(expr.symbol)
 	if !ok {
-		panic(RT.newError("Enable to resolve var " + expr.symbol.ToString(false) + " in this context"))
+		panic(RT.NewError("Enable to resolve var " + expr.symbol.ToString(false) + " in this context"))
 	}
 	return res
 }
@@ -242,7 +242,7 @@ func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
 	case Error:
 		panic(e)
 	default:
-		panic(RT.newError("Cannot throw " + e.ToString(false)))
+		panic(RT.NewError("Cannot throw " + e.ToString(false)))
 	}
 }
 
@@ -303,7 +303,7 @@ func toBool(obj Object) bool {
 	case Nil:
 		return false
 	case Bool:
-		return obj.b
+		return obj.B
 	default:
 		return true
 	}

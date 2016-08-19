@@ -14,11 +14,11 @@ func assertComparable(obj Object, msg string) Comparable {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Comparable", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureComparable(args []Object, index int) Comparable {
+func EnsureComparable(args []Object, index int) Comparable {
   switch c := args[index].(type) {
   case Comparable:
     return c
@@ -35,11 +35,11 @@ func assertVector(obj Object, msg string) *Vector {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Vector", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureVector(args []Object, index int) *Vector {
+func EnsureVector(args []Object, index int) *Vector {
   switch c := args[index].(type) {
   case *Vector:
     return c
@@ -56,11 +56,11 @@ func assertChar(obj Object, msg string) Char {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Char", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureChar(args []Object, index int) Char {
+func EnsureChar(args []Object, index int) Char {
   switch c := args[index].(type) {
   case Char:
     return c
@@ -77,11 +77,11 @@ func assertString(obj Object, msg string) String {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "String", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureString(args []Object, index int) String {
+func EnsureString(args []Object, index int) String {
   switch c := args[index].(type) {
   case String:
     return c
@@ -98,11 +98,11 @@ func assertSymbol(obj Object, msg string) Symbol {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Symbol", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureSymbol(args []Object, index int) Symbol {
+func EnsureSymbol(args []Object, index int) Symbol {
   switch c := args[index].(type) {
   case Symbol:
     return c
@@ -119,11 +119,11 @@ func assertKeyword(obj Object, msg string) Keyword {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Keyword", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureKeyword(args []Object, index int) Keyword {
+func EnsureKeyword(args []Object, index int) Keyword {
   switch c := args[index].(type) {
   case Keyword:
     return c
@@ -140,11 +140,11 @@ func assertBool(obj Object, msg string) Bool {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Bool", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureBool(args []Object, index int) Bool {
+func EnsureBool(args []Object, index int) Bool {
   switch c := args[index].(type) {
   case Bool:
     return c
@@ -161,11 +161,11 @@ func assertNumber(obj Object, msg string) Number {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Number", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureNumber(args []Object, index int) Number {
+func EnsureNumber(args []Object, index int) Number {
   switch c := args[index].(type) {
   case Number:
     return c
@@ -182,11 +182,11 @@ func assertSeqable(obj Object, msg string) Seqable {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Seqable", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureSeqable(args []Object, index int) Seqable {
+func EnsureSeqable(args []Object, index int) Seqable {
   switch c := args[index].(type) {
   case Seqable:
     return c
@@ -203,11 +203,11 @@ func assertCallable(obj Object, msg string) Callable {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Callable", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureCallable(args []Object, index int) Callable {
+func EnsureCallable(args []Object, index int) Callable {
   switch c := args[index].(type) {
   case Callable:
     return c
@@ -224,11 +224,11 @@ func assertType(obj Object, msg string) *Type {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Type", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureType(args []Object, index int) *Type {
+func EnsureType(args []Object, index int) *Type {
   switch c := args[index].(type) {
   case *Type:
     return c
@@ -245,11 +245,11 @@ func assertMeta(obj Object, msg string) Meta {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Meta", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureMeta(args []Object, index int) Meta {
+func EnsureMeta(args []Object, index int) Meta {
   switch c := args[index].(type) {
   case Meta:
     return c
@@ -266,11 +266,11 @@ func assertInt(obj Object, msg string) Int {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Int", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureInt(args []Object, index int) Int {
+func EnsureInt(args []Object, index int) Int {
   switch c := args[index].(type) {
   case Int:
     return c
@@ -287,11 +287,11 @@ func assertStack(obj Object, msg string) Stack {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Stack", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureStack(args []Object, index int) Stack {
+func EnsureStack(args []Object, index int) Stack {
   switch c := args[index].(type) {
   case Stack:
     return c
@@ -308,11 +308,11 @@ func assertMap(obj Object, msg string) Map {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Map", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureMap(args []Object, index int) Map {
+func EnsureMap(args []Object, index int) Map {
   switch c := args[index].(type) {
   case Map:
     return c
@@ -329,11 +329,11 @@ func assertSet(obj Object, msg string) Set {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Set", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureSet(args []Object, index int) Set {
+func EnsureSet(args []Object, index int) Set {
   switch c := args[index].(type) {
   case Set:
     return c
@@ -350,11 +350,11 @@ func assertAssociative(obj Object, msg string) Associative {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Associative", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureAssociative(args []Object, index int) Associative {
+func EnsureAssociative(args []Object, index int) Associative {
   switch c := args[index].(type) {
   case Associative:
     return c
@@ -371,11 +371,11 @@ func assertReversible(obj Object, msg string) Reversible {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Reversible", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureReversible(args []Object, index int) Reversible {
+func EnsureReversible(args []Object, index int) Reversible {
   switch c := args[index].(type) {
   case Reversible:
     return c
@@ -392,11 +392,11 @@ func assertNamed(obj Object, msg string) Named {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Named", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureNamed(args []Object, index int) Named {
+func EnsureNamed(args []Object, index int) Named {
   switch c := args[index].(type) {
   case Named:
     return c
@@ -413,11 +413,11 @@ func assertComparator(obj Object, msg string) Comparator {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Comparator", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureComparator(args []Object, index int) Comparator {
+func EnsureComparator(args []Object, index int) Comparator {
   switch c := args[index].(type) {
   case Comparator:
     return c
@@ -434,11 +434,11 @@ func assertRatio(obj Object, msg string) *Ratio {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Ratio", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureRatio(args []Object, index int) *Ratio {
+func EnsureRatio(args []Object, index int) *Ratio {
   switch c := args[index].(type) {
   case *Ratio:
     return c
@@ -455,11 +455,11 @@ func assertNamespace(obj Object, msg string) *Namespace {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Namespace", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureNamespace(args []Object, index int) *Namespace {
+func EnsureNamespace(args []Object, index int) *Namespace {
   switch c := args[index].(type) {
   case *Namespace:
     return c
@@ -476,11 +476,11 @@ func assertVar(obj Object, msg string) *Var {
     if msg == "" {
       msg = fmt.Sprintf("Expected %s, got %s", "Var", obj.GetType().ToString(false))
     }
-    panic(RT.newError(msg))
+    panic(RT.NewError(msg))
   }
 }
 
-func ensureVar(args []Object, index int) *Var {
+func EnsureVar(args []Object, index int) *Var {
   switch c := args[index].(type) {
   case *Var:
     return c

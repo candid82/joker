@@ -5,17 +5,17 @@ import (
 )
 
 var base64DecodeString Proc = func(args []Object) Object {
-	decoded, err := base64.StdEncoding.DecodeString(ensureString(args, 0).s)
+	decoded, err := base64.StdEncoding.DecodeString(EnsureString(args, 0).S)
 	if err != nil {
-		panic(RT.newError("Invalid bas64 string: " + err.Error()))
+		panic(RT.NewError("Invalid bas64 string: " + err.Error()))
 	}
-	return String{s: string(decoded)}
+	return String{S: string(decoded)}
 }
 
 var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.base64"))
 
 func internBase64(name string, proc Proc) {
-	base64Namespace.intern(MakeSymbol(name)).value = proc
+	base64Namespace.Intern(MakeSymbol(name)).Value = proc
 }
 
 func init() {
