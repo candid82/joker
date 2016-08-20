@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	. "github.com/candid/gclojure/core"
+	_ "github.com/candid/gclojure/json"
+	_ "github.com/candid/gclojure/base64"
 	"gopkg.in/readline.v1"
 	"io"
 	"os"
