@@ -6,7 +6,7 @@ import (
   "fmt"
 )
 
-func assertComparable(obj Object, msg string) Comparable {
+func AssertComparable(obj Object, msg string) Comparable {
   switch c := obj.(type) {
   case Comparable:
     return c
@@ -27,7 +27,7 @@ func EnsureComparable(args []Object, index int) Comparable {
   }
 }
 
-func assertVector(obj Object, msg string) *Vector {
+func AssertVector(obj Object, msg string) *Vector {
   switch c := obj.(type) {
   case *Vector:
     return c
@@ -48,7 +48,7 @@ func EnsureVector(args []Object, index int) *Vector {
   }
 }
 
-func assertChar(obj Object, msg string) Char {
+func AssertChar(obj Object, msg string) Char {
   switch c := obj.(type) {
   case Char:
     return c
@@ -69,7 +69,7 @@ func EnsureChar(args []Object, index int) Char {
   }
 }
 
-func assertString(obj Object, msg string) String {
+func AssertString(obj Object, msg string) String {
   switch c := obj.(type) {
   case String:
     return c
@@ -90,7 +90,7 @@ func EnsureString(args []Object, index int) String {
   }
 }
 
-func assertSymbol(obj Object, msg string) Symbol {
+func AssertSymbol(obj Object, msg string) Symbol {
   switch c := obj.(type) {
   case Symbol:
     return c
@@ -111,7 +111,7 @@ func EnsureSymbol(args []Object, index int) Symbol {
   }
 }
 
-func assertKeyword(obj Object, msg string) Keyword {
+func AssertKeyword(obj Object, msg string) Keyword {
   switch c := obj.(type) {
   case Keyword:
     return c
@@ -132,7 +132,28 @@ func EnsureKeyword(args []Object, index int) Keyword {
   }
 }
 
-func assertBool(obj Object, msg string) Bool {
+func AssertRegex(obj Object, msg string) Regex {
+  switch c := obj.(type) {
+  case Regex:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Regex", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureRegex(args []Object, index int) Regex {
+  switch c := args[index].(type) {
+  case Regex:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Regex"))
+  }
+}
+
+func AssertBool(obj Object, msg string) Bool {
   switch c := obj.(type) {
   case Bool:
     return c
@@ -153,7 +174,7 @@ func EnsureBool(args []Object, index int) Bool {
   }
 }
 
-func assertNumber(obj Object, msg string) Number {
+func AssertNumber(obj Object, msg string) Number {
   switch c := obj.(type) {
   case Number:
     return c
@@ -174,7 +195,7 @@ func EnsureNumber(args []Object, index int) Number {
   }
 }
 
-func assertSeqable(obj Object, msg string) Seqable {
+func AssertSeqable(obj Object, msg string) Seqable {
   switch c := obj.(type) {
   case Seqable:
     return c
@@ -195,7 +216,7 @@ func EnsureSeqable(args []Object, index int) Seqable {
   }
 }
 
-func assertCallable(obj Object, msg string) Callable {
+func AssertCallable(obj Object, msg string) Callable {
   switch c := obj.(type) {
   case Callable:
     return c
@@ -216,7 +237,7 @@ func EnsureCallable(args []Object, index int) Callable {
   }
 }
 
-func assertType(obj Object, msg string) *Type {
+func AssertType(obj Object, msg string) *Type {
   switch c := obj.(type) {
   case *Type:
     return c
@@ -237,7 +258,7 @@ func EnsureType(args []Object, index int) *Type {
   }
 }
 
-func assertMeta(obj Object, msg string) Meta {
+func AssertMeta(obj Object, msg string) Meta {
   switch c := obj.(type) {
   case Meta:
     return c
@@ -258,7 +279,7 @@ func EnsureMeta(args []Object, index int) Meta {
   }
 }
 
-func assertInt(obj Object, msg string) Int {
+func AssertInt(obj Object, msg string) Int {
   switch c := obj.(type) {
   case Int:
     return c
@@ -279,7 +300,7 @@ func EnsureInt(args []Object, index int) Int {
   }
 }
 
-func assertStack(obj Object, msg string) Stack {
+func AssertStack(obj Object, msg string) Stack {
   switch c := obj.(type) {
   case Stack:
     return c
@@ -300,7 +321,7 @@ func EnsureStack(args []Object, index int) Stack {
   }
 }
 
-func assertMap(obj Object, msg string) Map {
+func AssertMap(obj Object, msg string) Map {
   switch c := obj.(type) {
   case Map:
     return c
@@ -321,7 +342,7 @@ func EnsureMap(args []Object, index int) Map {
   }
 }
 
-func assertSet(obj Object, msg string) Set {
+func AssertSet(obj Object, msg string) Set {
   switch c := obj.(type) {
   case Set:
     return c
@@ -342,7 +363,7 @@ func EnsureSet(args []Object, index int) Set {
   }
 }
 
-func assertAssociative(obj Object, msg string) Associative {
+func AssertAssociative(obj Object, msg string) Associative {
   switch c := obj.(type) {
   case Associative:
     return c
@@ -363,7 +384,7 @@ func EnsureAssociative(args []Object, index int) Associative {
   }
 }
 
-func assertReversible(obj Object, msg string) Reversible {
+func AssertReversible(obj Object, msg string) Reversible {
   switch c := obj.(type) {
   case Reversible:
     return c
@@ -384,7 +405,7 @@ func EnsureReversible(args []Object, index int) Reversible {
   }
 }
 
-func assertNamed(obj Object, msg string) Named {
+func AssertNamed(obj Object, msg string) Named {
   switch c := obj.(type) {
   case Named:
     return c
@@ -405,7 +426,7 @@ func EnsureNamed(args []Object, index int) Named {
   }
 }
 
-func assertComparator(obj Object, msg string) Comparator {
+func AssertComparator(obj Object, msg string) Comparator {
   switch c := obj.(type) {
   case Comparator:
     return c
@@ -426,7 +447,7 @@ func EnsureComparator(args []Object, index int) Comparator {
   }
 }
 
-func assertRatio(obj Object, msg string) *Ratio {
+func AssertRatio(obj Object, msg string) *Ratio {
   switch c := obj.(type) {
   case *Ratio:
     return c
@@ -447,7 +468,7 @@ func EnsureRatio(args []Object, index int) *Ratio {
   }
 }
 
-func assertNamespace(obj Object, msg string) *Namespace {
+func AssertNamespace(obj Object, msg string) *Namespace {
   switch c := obj.(type) {
   case *Namespace:
     return c
@@ -468,7 +489,7 @@ func EnsureNamespace(args []Object, index int) *Namespace {
   }
 }
 
-func assertVar(obj Object, msg string) *Var {
+func AssertVar(obj Object, msg string) *Var {
   switch c := obj.(type) {
   case *Var:
     return c

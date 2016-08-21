@@ -105,25 +105,25 @@ func (i Int) Int() Int {
 }
 
 func (i Int) Double() Double {
-	return Double{D: float64(i.i)}
+	return Double{D: float64(i.I)}
 }
 
 func (i Int) BigInt() *big.Int {
-	return big.NewInt(int64(i.i))
+	return big.NewInt(int64(i.I))
 }
 
 func (i Int) BigFloat() *big.Float {
-	return big.NewFloat(float64(i.i))
+	return big.NewFloat(float64(i.I))
 }
 
 func (i Int) Ratio() *big.Rat {
-	return big.NewRat(int64(i.i), 1)
+	return big.NewRat(int64(i.I), 1)
 }
 
 // Double conversions
 
 func (d Double) Int() Int {
-	return Int{i: int(d.D)}
+	return Int{I: int(d.D)}
 }
 
 func (d Double) BigInt() *big.Int {
@@ -146,7 +146,7 @@ func (d Double) Ratio() *big.Rat {
 // BigInt conversions
 
 func (b *BigInt) Int() Int {
-	return Int{i: int(b.BigInt().Int64())}
+	return Int{I: int(b.BigInt().Int64())}
 }
 
 func (b *BigInt) BigInt() *big.Int {
@@ -171,7 +171,7 @@ func (b *BigInt) Ratio() *big.Rat {
 
 func (b *BigFloat) Int() Int {
 	i, _ := b.BigFloat().Int64()
-	return Int{i: int(i)}
+	return Int{I: int(i)}
 }
 
 func (b *BigFloat) BigInt() *big.Int {
@@ -197,7 +197,7 @@ func (b *BigFloat) Ratio() *big.Rat {
 
 func (r *Ratio) Int() Int {
 	f, _ := r.Ratio().Float64()
-	return Int{i: int(f)}
+	return Int{I: int(f)}
 }
 
 func (r *Ratio) BigInt() *big.Int {
@@ -224,7 +224,7 @@ func (r *Ratio) Ratio() *big.Rat {
 // Add
 
 func (ops IntOps) Add(x, y Number) Number {
-	return Int{i: x.Int().i + y.Int().i}
+	return Int{I: x.Int().I + y.Int().I}
 }
 
 func (ops DoubleOps) Add(x, y Number) Number {
@@ -255,7 +255,7 @@ func (ops RatioOps) Add(x, y Number) Number {
 // Subtract
 
 func (ops IntOps) Subtract(x, y Number) Number {
-	return Int{i: x.Int().i - y.Int().i}
+	return Int{I: x.Int().I - y.Int().I}
 }
 
 func (ops DoubleOps) Subtract(x, y Number) Number {
@@ -286,7 +286,7 @@ func (ops RatioOps) Subtract(x, y Number) Number {
 // Multiply
 
 func (ops IntOps) Multiply(x, y Number) Number {
-	return Int{i: x.Int().i * y.Int().i}
+	return Int{I: x.Int().I * y.Int().I}
 }
 
 func (ops DoubleOps) Multiply(x, y Number) Number {
@@ -317,9 +317,9 @@ func (ops RatioOps) Multiply(x, y Number) Number {
 // Divide
 
 func (ops IntOps) Divide(x, y Number) Number {
-	b := big.NewRat(int64(x.Int().i), int64(y.Int().i))
+	b := big.NewRat(int64(x.Int().I), int64(y.Int().I))
 	if b.IsInt() {
-		return Int{i: int(b.Num().Int64())}
+		return Int{I: int(b.Num().Int64())}
 	}
 	res := Ratio{r: *b}
 	return &res
@@ -357,13 +357,13 @@ func (ops RatioOps) Divide(x, y Number) Number {
 // Quotient
 
 func (ops IntOps) Quotient(x, y Number) Number {
-	return Int{i: x.Int().i / y.Int().i}
+	return Int{I: x.Int().I / y.Int().I}
 }
 
 func (ops DoubleOps) Quotient(x, y Number) Number {
 	z := x.Double().D / y.Double().D
 	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
-		return Int{i: int(z)}
+		return Int{I: int(z)}
 	}
 	return &BigInt{b: *big.NewInt(int64(z))}
 }
@@ -389,7 +389,7 @@ func (ops RatioOps) Quotient(x, y Number) Number {
 // Remainder
 
 func (ops IntOps) Rem(x, y Number) Number {
-	return Int{i: x.Int().i % y.Int().i}
+	return Int{I: x.Int().I % y.Int().I}
 }
 
 func (ops DoubleOps) Rem(x, y Number) Number {
@@ -431,7 +431,7 @@ func (ops RatioOps) Rem(x, y Number) Number {
 // IsZero
 
 func (ops IntOps) IsZero(x Number) bool {
-	return x.Int().i == 0
+	return x.Int().I == 0
 }
 
 func (ops DoubleOps) IsZero(x Number) bool {
@@ -453,7 +453,7 @@ func (ops RatioOps) IsZero(x Number) bool {
 // Lt
 
 func (ops IntOps) Lt(x Number, y Number) bool {
-	return x.Int().i < y.Int().i
+	return x.Int().I < y.Int().I
 }
 
 func (ops DoubleOps) Lt(x Number, y Number) bool {
@@ -475,7 +475,7 @@ func (ops RatioOps) Lt(x Number, y Number) bool {
 // Lte
 
 func (ops IntOps) Lte(x Number, y Number) bool {
-	return x.Int().i <= y.Int().i
+	return x.Int().I <= y.Int().I
 }
 
 func (ops DoubleOps) Lte(x Number, y Number) bool {
@@ -497,7 +497,7 @@ func (ops RatioOps) Lte(x Number, y Number) bool {
 // Gt
 
 func (ops IntOps) Gt(x Number, y Number) bool {
-	return x.Int().i > y.Int().i
+	return x.Int().I > y.Int().I
 }
 
 func (ops DoubleOps) Gt(x Number, y Number) bool {
@@ -519,7 +519,7 @@ func (ops RatioOps) Gt(x Number, y Number) bool {
 // Gte
 
 func (ops IntOps) Gte(x Number, y Number) bool {
-	return x.Int().i >= y.Int().i
+	return x.Int().I >= y.Int().I
 }
 
 func (ops DoubleOps) Gte(x Number, y Number) bool {
@@ -541,7 +541,7 @@ func (ops RatioOps) Gte(x Number, y Number) bool {
 // Eq
 
 func (ops IntOps) Eq(x Number, y Number) bool {
-	return x.Int().i == y.Int().i
+	return x.Int().I == y.Int().I
 }
 
 func (ops DoubleOps) Eq(x Number, y Number) bool {

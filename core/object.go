@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *ArraySeq *ConsSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -65,7 +65,7 @@ type (
 	}
 	Int struct {
 		InfoHolder
-		i int
+		I int
 	}
 	BigInt struct {
 		InfoHolder
@@ -104,7 +104,7 @@ type (
 	}
 	Regex struct {
 		InfoHolder
-		r string
+		R string
 	}
 	Var struct {
 		InfoHolder
@@ -386,12 +386,12 @@ func compare(c Callable, a, b Object) int {
 		if r.B {
 			return -1
 		}
-		if assertBool(c.Call([]Object{b, a}), "").B {
+		if AssertBool(c.Call([]Object{b, a}), "").B {
 			return 1
 		}
 		return 0
 	default:
-		return assertNumber(r, "Function is not a comparator since it returned a non-integer value").Int().i
+		return AssertNumber(r, "Function is not a comparator since it returned a non-integer value").Int().I
 	}
 }
 
@@ -457,7 +457,7 @@ func (v *Var) GetType() *Type {
 }
 
 func (v *Var) Call(args []Object) Object {
-	return assertCallable(
+	return AssertCallable(
 		v.Value,
 		"Var "+v.ToString(false)+" resolves to "+v.Value.ToString(false)+", which is not a Fn").Call(args)
 }
@@ -585,7 +585,7 @@ func (rat *Ratio) Equals(other interface{}) bool {
 		return rat.r.Cmp(&otherRat) == 0
 	case Int:
 		var otherRat big.Rat
-		otherRat.SetInt64(int64(r.i))
+		otherRat.SetInt64(int64(r.I))
 		return rat.r.Cmp(&otherRat) == 0
 	}
 	return false
@@ -596,7 +596,7 @@ func (rat *Ratio) GetType() *Type {
 }
 
 func (rat *Ratio) Compare(other Object) int {
-	return CompareNumbers(rat, assertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
+	return CompareNumbers(rat, AssertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
 }
 
 func (bi *BigInt) ToString(escape bool) string {
@@ -611,7 +611,7 @@ func (bi *BigInt) Equals(other interface{}) bool {
 	case *BigInt:
 		return bi.b.Cmp(&b.b) == 0
 	case Int:
-		bi2 := big.NewInt(int64(b.i))
+		bi2 := big.NewInt(int64(b.I))
 		return bi.b.Cmp(bi2) == 0
 	}
 	return false
@@ -622,7 +622,7 @@ func (bi *BigInt) GetType() *Type {
 }
 
 func (bi *BigInt) Compare(other Object) int {
-	return CompareNumbers(bi, assertNumber(other, "Cannot compare BigInt and "+other.GetType().ToString(false)))
+	return CompareNumbers(bi, AssertNumber(other, "Cannot compare BigInt and "+other.GetType().ToString(false)))
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
@@ -648,7 +648,7 @@ func (bf *BigFloat) GetType() *Type {
 }
 
 func (bf *BigFloat) Compare(other Object) int {
-	return CompareNumbers(bf, assertNumber(other, "Cannot compare BigFloat and "+other.GetType().ToString(false)))
+	return CompareNumbers(bf, AssertNumber(other, "Cannot compare BigFloat and "+other.GetType().ToString(false)))
 }
 
 func (c Char) ToString(escape bool) string {
@@ -672,7 +672,7 @@ func (c Char) GetType() *Type {
 }
 
 func (c Char) Compare(other Object) int {
-	c2 := assertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
+	c2 := AssertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
 	if c.ch < c2.ch {
 		return -1
 	}
@@ -704,17 +704,17 @@ func (d Double) GetType() *Type {
 }
 
 func (d Double) Compare(other Object) int {
-	return CompareNumbers(d, assertNumber(other, "Cannot compare Double and "+other.GetType().ToString(false)))
+	return CompareNumbers(d, AssertNumber(other, "Cannot compare Double and "+other.GetType().ToString(false)))
 }
 
 func (i Int) ToString(escape bool) string {
-	return fmt.Sprintf("%d", i.i)
+	return fmt.Sprintf("%d", i.I)
 }
 
 func (i Int) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Int:
-		return i.i == other.i
+		return i.I == other.I
 	default:
 		return false
 	}
@@ -725,7 +725,7 @@ func (i Int) GetType() *Type {
 }
 
 func (i Int) Compare(other Object) int {
-	return CompareNumbers(i, assertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
+	return CompareNumbers(i, AssertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
 }
 
 func (b Bool) ToString(escape bool) string {
@@ -746,7 +746,7 @@ func (b Bool) GetType() *Type {
 }
 
 func (b Bool) Compare(other Object) int {
-	b2 := assertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
+	b2 := AssertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
 	if b.B == b2.B {
 		return 0
 	}
@@ -788,7 +788,7 @@ func (k Keyword) GetType() *Type {
 }
 
 func (k Keyword) Compare(other Object) int {
-	k2 := assertKeyword(other, "Cannot compare Keyword and "+other.GetType().ToString(false))
+	k2 := AssertKeyword(other, "Cannot compare Keyword and "+other.GetType().ToString(false))
 	return strings.Compare(k.ToString(false), k2.ToString(false))
 }
 
@@ -809,15 +809,15 @@ func (k Keyword) Call(args []Object) Object {
 
 func (rx Regex) ToString(escape bool) string {
 	if escape {
-		return "#" + escapeString(rx.r)
+		return "#" + escapeString(rx.R)
 	}
-	return "#" + rx.r
+	return "#" + rx.R
 }
 
 func (rx Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Regex:
-		return rx.r == other.r
+		return rx.R == other.R
 	default:
 		return false
 	}
@@ -859,7 +859,7 @@ func (s Symbol) GetType() *Type {
 }
 
 func (s Symbol) Compare(other Object) int {
-	s2 := assertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
+	s2 := AssertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
 	return strings.Compare(s.ToString(false), s2.ToString(false))
 }
 
@@ -925,7 +925,7 @@ func (s String) TryNth(i int, d Object) Object {
 }
 
 func (s String) Compare(other Object) int {
-	s2 := assertString(other, "Cannot compare String and "+other.GetType().ToString(false))
+	s2 := AssertString(other, "Cannot compare String and "+other.GetType().ToString(false))
 	return strings.Compare(s.S, s2.S)
 }
 

@@ -257,7 +257,7 @@ func (v *Vector) TryNth(i int, d Object) Object {
 func (v *Vector) sequential() {}
 
 func (v *Vector) Compare(other Object) int {
-	v2 := assertVector(other, "Cannot compare Vector and "+other.GetType().ToString(false))
+	v2 := AssertVector(other, "Cannot compare Vector and "+other.GetType().ToString(false))
 	if v.Count() > v2.Count() {
 		return 1
 	}
@@ -265,7 +265,7 @@ func (v *Vector) Compare(other Object) int {
 		return -1
 	}
 	for i := 0; i < v.Count(); i++ {
-		c := assertComparable(v.at(i), "").Compare(v2.at(i))
+		c := AssertComparable(v.at(i), "").Compare(v2.at(i))
 		if c != 0 {
 			return c
 		}
@@ -331,8 +331,8 @@ func (v *Vector) Pop() Stack {
 func (v *Vector) Get(key Object) (bool, Object) {
 	switch key := key.(type) {
 	case Int:
-		if key.i >= 0 && key.i < v.count {
-			return true, v.at(key.i)
+		if key.I >= 0 && key.I < v.count {
+			return true, v.at(key.I)
 		}
 	}
 	return false, nil
@@ -380,9 +380,9 @@ func assertInteger(obj Object) int {
 	var i int
 	switch obj := obj.(type) {
 	case Int:
-		i = obj.i
+		i = obj.I
 	case *BigInt:
-		i = obj.Int().i
+		i = obj.Int().I
 	default:
 		panic(RT.NewError("Key must be integer"))
 	}

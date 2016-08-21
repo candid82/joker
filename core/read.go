@@ -262,7 +262,7 @@ func scanInt(str string, base int, err error, reader *Reader) Object {
 	if e != nil {
 		return scanBigInt(str, base, err, reader)
 	}
-	return MakeReadObject(reader, Int{i: int(i)})
+	return MakeReadObject(reader, Int{I: int(i)})
 }
 
 func readNumber(reader *Reader) Object {
@@ -432,7 +432,7 @@ func readString(reader *Reader, isRegex bool) Object {
 		r = reader.Get()
 	}
 	if isRegex {
-		return MakeReadObject(reader, Regex{r: b.String()})
+		return MakeReadObject(reader, Regex{R: b.String()})
 	}
 	return MakeReadObject(reader, String{S: b.String()})
 }
@@ -592,7 +592,7 @@ func readArgSymbol(reader *Reader) Object {
 	}
 	switch n := obj.(type) {
 	case Int:
-		return MakeReadObject(reader, registerArg(n.i))
+		return MakeReadObject(reader, registerArg(n.I))
 	default:
 		panic(MakeReadError(reader, "Arg literal must be %, %& or %integer"))
 	}

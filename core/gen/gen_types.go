@@ -25,7 +25,7 @@ import (
 `
 
 var assertTemplate string = `
-func assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
+func Assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
   switch c := obj.(type) {
   case {{.TypeName}}:
     return c

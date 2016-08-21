@@ -34,7 +34,7 @@ func toObject(v interface{}) Object {
 	}
 }
 
-var jsonReadString Proc = func(args []Object) Object {
+var readString Proc = func(args []Object) Object {
 	var v interface{}
 	if err := json.Unmarshal([]byte(EnsureString(args, 0).S), &v); err != nil {
 		panic(RT.NewError("Invalid json: " + err.Error()))
@@ -44,10 +44,10 @@ var jsonReadString Proc = func(args []Object) Object {
 
 var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.json"))
 
-func internJson(name string, proc Proc) {
+func intern(name string, proc Proc) {
 	jsonNamespace.Intern(MakeSymbol(name)).Value = proc
 }
 
 func init() {
-	internJson("read-string", jsonReadString)
+	intern("read-string", readString)
 }

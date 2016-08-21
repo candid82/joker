@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math/big"
 	"os"
 	"os/exec"
@@ -12,7 +13,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"io/ioutil"
 )
 
 type (
@@ -63,39 +63,39 @@ var procIsZero Proc = func(args []Object) Object {
 var procIsPos Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Gt(n, Int{i: 0})}
+	return Bool{B: ops.Gt(n, Int{I: 0})}
 }
 
 var procIsNeg Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Lt(n, Int{i: 0})}
+	return Bool{B: ops.Lt(n, Int{I: 0})}
 }
 
 var procAdd Proc = func(args []Object) Object {
-	x := assertNumber(args[0], "")
-	y := assertNumber(args[1], "")
+	x := AssertNumber(args[0], "")
+	y := AssertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y))
 	return ops.Add(x, y)
 }
 
 var procAddEx Proc = func(args []Object) Object {
-	x := assertNumber(args[0], "")
-	y := assertNumber(args[1], "")
+	x := AssertNumber(args[0], "")
+	y := AssertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
 	return ops.Add(x, y)
 }
 
 var procMultiply Proc = func(args []Object) Object {
-	x := assertNumber(args[0], "")
-	y := assertNumber(args[1], "")
+	x := AssertNumber(args[0], "")
+	y := AssertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y))
 	return ops.Multiply(x, y)
 }
 
 var procMultiplyEx Proc = func(args []Object) Object {
-	x := assertNumber(args[0], "")
-	y := assertNumber(args[1], "")
+	x := AssertNumber(args[0], "")
+	y := AssertNumber(args[1], "")
 	ops := GetOps(x).Combine(GetOps(y)).Combine(BIGINT_OPS)
 	return ops.Multiply(x, y)
 }
@@ -103,27 +103,27 @@ var procMultiplyEx Proc = func(args []Object) Object {
 var procSubtract Proc = func(args []Object) Object {
 	var a, b Object
 	if len(args) == 1 {
-		a = Int{i: 0}
+		a = Int{I: 0}
 		b = args[0]
 	} else {
 		a = args[0]
 		b = args[1]
 	}
 	ops := GetOps(a).Combine(GetOps(b))
-	return ops.Subtract(assertNumber(a, ""), assertNumber(b, ""))
+	return ops.Subtract(AssertNumber(a, ""), AssertNumber(b, ""))
 }
 
 var procSubtractEx Proc = func(args []Object) Object {
 	var a, b Object
 	if len(args) == 1 {
-		a = Int{i: 0}
+		a = Int{I: 0}
 		b = args[0]
 	} else {
 		a = args[0]
 		b = args[1]
 	}
 	ops := GetOps(a).Combine(GetOps(b)).Combine(BIGINT_OPS)
-	return ops.Subtract(assertNumber(a, ""), assertNumber(b, ""))
+	return ops.Subtract(AssertNumber(a, ""), AssertNumber(b, ""))
 }
 
 var procDivide Proc = func(args []Object) Object {
@@ -148,69 +148,69 @@ var procRem Proc = func(args []Object) Object {
 }
 
 var procBitNot Proc = func(args []Object) Object {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	return Int{i: ^x.i}
+	x := AssertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
+	return Int{I: ^x.I}
 }
 
-func assertInts(args []Object) (Int, Int) {
-	x := assertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
-	y := assertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
+func AssertInts(args []Object) (Int, Int) {
+	x := AssertInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
+	y := AssertInt(args[1], "Bit operation not supported for "+args[1].GetType().ToString(false))
 	return x, y
 }
 
 var procBitAnd Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i & y.i}
+	x, y := AssertInts(args)
+	return Int{I: x.I & y.I}
 }
 
 var procBitOr Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i | y.i}
+	x, y := AssertInts(args)
+	return Int{I: x.I | y.I}
 }
 
 var procBitXor Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i ^ y.i}
+	x, y := AssertInts(args)
+	return Int{I: x.I ^ y.I}
 }
 
 var procBitAndNot Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i &^ y.i}
+	x, y := AssertInts(args)
+	return Int{I: x.I &^ y.I}
 }
 
 var procBitClear Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i &^ (1 << uint(y.i))}
+	x, y := AssertInts(args)
+	return Int{I: x.I &^ (1 << uint(y.I))}
 }
 
 var procBitSet Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i | (1 << uint(y.i))}
+	x, y := AssertInts(args)
+	return Int{I: x.I | (1 << uint(y.I))}
 }
 
 var procBitFlip Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i ^ (1 << uint(y.i))}
+	x, y := AssertInts(args)
+	return Int{I: x.I ^ (1 << uint(y.I))}
 }
 
 var procBitTest Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Bool{B: x.i&(1<<uint(y.i)) != 0}
+	x, y := AssertInts(args)
+	return Bool{B: x.I&(1<<uint(y.I)) != 0}
 }
 
 var procBitShiftLeft Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i << uint(y.i)}
+	x, y := AssertInts(args)
+	return Int{I: x.I << uint(y.I)}
 }
 
 var procBitShiftRight Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: x.i >> uint(y.i)}
+	x, y := AssertInts(args)
+	return Int{I: x.I >> uint(y.I)}
 }
 
 var procUnsignedBitShiftRight Proc = func(args []Object) Object {
-	x, y := assertInts(args)
-	return Int{i: int(uint(x.i) >> uint(y.i))}
+	x, y := AssertInts(args)
+	return Int{I: int(uint(x.I) >> uint(y.I))}
 }
 
 var procExInfo Proc = func(args []Object) Object {
@@ -308,18 +308,18 @@ var procEquals Proc = func(args []Object) Object {
 var procCount Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Counted:
-		return Int{i: obj.Count()}
+		return Int{I: obj.Count()}
 	default:
-		s := assertSeqable(obj, "count not supported on this type: "+obj.GetType().ToString(false))
-		return Int{i: SeqCount(s.Seq())}
+		s := AssertSeqable(obj, "count not supported on this type: "+obj.GetType().ToString(false))
+		return Int{I: SeqCount(s.Seq())}
 	}
 }
 
 var procSubvec Proc = func(args []Object) Object {
 	// TODO: implement proper Subvector structure
 	v := args[0].(*Vector)
-	start := args[1].(Int).i
-	end := args[2].(Int).i
+	start := args[1].(Int).I
+	end := args[2].(Int).I
 	subv := make([]Object, 0, end-start)
 	for i := start; i < end; i++ {
 		subv = append(subv, v.at(i))
@@ -440,17 +440,17 @@ var procIdentical Proc = func(args []Object) Object {
 var procCompare Proc = func(args []Object) Object {
 	k1, k2 := args[0], args[1]
 	if k1.Equals(k2) {
-		return Int{i: 0}
+		return Int{I: 0}
 	}
 	switch k2.(type) {
 	case Nil:
-		return Int{i: 1}
+		return Int{I: 1}
 	}
 	switch k1 := k1.(type) {
 	case Nil:
-		return Int{i: -1}
+		return Int{I: -1}
 	case Comparable:
-		return Int{i: k1.Compare(k2)}
+		return Int{I: k1.Compare(k2)}
 	}
 	panic(RT.NewError(fmt.Sprintf("%s (type: %s) is not a Comparable", k1.ToString(true), k1.GetType().ToString(false))))
 }
@@ -458,7 +458,7 @@ var procCompare Proc = func(args []Object) Object {
 var procInt Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Char:
-		return Int{i: int(obj.ch)}
+		return Int{I: int(obj.ch)}
 	case Number:
 		return obj.Int()
 	default:
@@ -467,11 +467,11 @@ var procInt Proc = func(args []Object) Object {
 }
 
 var procNumber Proc = func(args []Object) Object {
-	return assertNumber(args[0], fmt.Sprintf("Cannot cast %s (type: %s) to Number", args[0].ToString(true), args[0].GetType().ToString(false)))
+	return AssertNumber(args[0], fmt.Sprintf("Cannot cast %s (type: %s) to Number", args[0].ToString(true), args[0].GetType().ToString(false)))
 }
 
 var procDouble Proc = func(args []Object) Object {
-	n := assertNumber(args[0], fmt.Sprintf("Cannot cast %s (type: %s) to Double", args[0].ToString(true), args[0].GetType().ToString(false)))
+	n := AssertNumber(args[0], fmt.Sprintf("Cannot cast %s (type: %s) to Double", args[0].ToString(true), args[0].GetType().ToString(false)))
 	return n.Double()
 }
 
@@ -480,7 +480,7 @@ var procChar Proc = func(args []Object) Object {
 	case Char:
 		return c
 	case Number:
-		i := c.Int().i
+		i := c.Int().I
 		if i < MIN_RUNE || i > MAX_RUNE {
 			panic(RT.NewError(fmt.Sprintf("Value out of range for char: %d", i)))
 		}
@@ -535,7 +535,7 @@ var procBigFloat Proc = func(args []Object) Object {
 }
 
 var procNth Proc = func(args []Object) Object {
-	n := EnsureNumber(args, 1).Int().i
+	n := EnsureNumber(args, 1).Int().I
 	switch coll := args[0].(type) {
 	case Indexed:
 		if len(args) == 3 {
@@ -553,78 +553,78 @@ var procNth Proc = func(args []Object) Object {
 }
 
 var procLt Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Bool{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
 }
 
 var procLte Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Bool{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
 }
 
 var procGt Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Bool{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
 }
 
 var procGte Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Bool{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
 }
 
 var procEq Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Bool{B: GetOps(a).Combine(GetOps(b)).Eq(a, b)}
 }
 
 var procMax Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Max(a, b)
 }
 
 var procMin Proc = func(args []Object) Object {
-	a := assertNumber(args[0], "")
-	b := assertNumber(args[1], "")
+	a := AssertNumber(args[0], "")
+	b := AssertNumber(args[1], "")
 	return Min(a, b)
 }
 
 var procIncEx Proc = func(args []Object) Object {
 	x := EnsureNumber(args, 0)
 	ops := GetOps(x).Combine(BIGINT_OPS)
-	return ops.Add(x, Int{i: 1})
+	return ops.Add(x, Int{I: 1})
 }
 
 var procDecEx Proc = func(args []Object) Object {
 	x := EnsureNumber(args, 0)
 	ops := GetOps(x).Combine(BIGINT_OPS)
-	return ops.Subtract(x, Int{i: 1})
+	return ops.Subtract(x, Int{I: 1})
 }
 
 var procInc Proc = func(args []Object) Object {
 	x := EnsureNumber(args, 0)
 	ops := GetOps(x).Combine(INT_OPS)
-	return ops.Add(x, Int{i: 1})
+	return ops.Add(x, Int{I: 1})
 }
 
 var procDec Proc = func(args []Object) Object {
 	x := EnsureNumber(args, 0)
 	ops := GetOps(x).Combine(INT_OPS)
-	return ops.Subtract(x, Int{i: 1})
+	return ops.Subtract(x, Int{I: 1})
 }
 
 var procPeek Proc = func(args []Object) Object {
-	s := assertStack(args[0], "")
+	s := AssertStack(args[0], "")
 	return s.Peek()
 }
 
 var procPop Proc = func(args []Object) Object {
-	s := assertStack(args[0], "")
+	s := AssertStack(args[0], "")
 	return s.Pop().(Object)
 }
 
