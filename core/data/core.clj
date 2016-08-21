@@ -2054,3 +2054,13 @@
     (let [ss (map seq (conj colls c2 c1))]
       (when (every? identity ss)
         (concat (map first ss) (apply interleave (map rest ss))))))))
+
+
+
+
+
+(defn slurp
+  "Opens a file f and reads all its contents, returning a string."
+  {:added "1.0"}
+  [f]
+  (slurp* f))

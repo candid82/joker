@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"io/ioutil"
 )
 
 type (
@@ -903,6 +904,14 @@ var procNamespaceUnalias Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procSlurp Proc = func(args []Object) Object {
+	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
+	if err != nil {
+		panic(RT.NewError(err.Error()))
+	}
+	return String{S: string(b)}
+}
+
 var procSh Proc = func(args []Object) Object {
 	strs := make([]string, len(args))
 	for i := range args {
@@ -1087,6 +1096,7 @@ func init() {
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
+	intern("slurp*", procSlurp)
 
 	currentNamespace := GLOBAL_ENV.CurrentNamespace
 	GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
