@@ -103,27 +103,24 @@ func repl(phase Phase) {
 	}
 }
 
-func parsePhase(s string) Phase {
-	switch s {
-	case "--read":
-		return READ
-	case "--parse":
-		return PARSE
-	default:
-		return EVAL
-	}
-}
-
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("gclojure.core")))
-	if len(os.Args) > 1 {
-		if len(os.Args) > 2 {
-			LINTER_MODE = true
-			processFile(os.Args[2], parsePhase(os.Args[1]))
-		} else {
-			processFile(os.Args[1], EVAL)
-		}
-	} else {
+	if len(os.Args) == 1 {
 		repl(EVAL)
+		return
+	}
+	if len(os.Args) == 2 {
+		processFile(os.Args[1], EVAL)
+		return
+	}
+	switch os.Args[1] {
+	case "--read":
+		LINTER_MODE = true
+		processFile(os.Args[2], READ)
+	case "--parse":
+		LINTER_MODE = true
+		processFile(os.Args[2], PARSE)
+	default:
+		processFile(os.Args[1], EVAL)
 	}
 }
