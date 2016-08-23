@@ -16,6 +16,14 @@ var env Proc = func(args []Object) Object {
 	return res
 }
 
+var args Proc = func(args []Object) Object {
+	res := EmptyVector
+	for _, arg := range os.Args {
+		res = res.Conjoin(String{S: arg})
+	}
+	return res
+}
+
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.os"))
 
 func intern(name string, proc Proc) {
@@ -24,4 +32,5 @@ func intern(name string, proc Proc) {
 
 func init() {
 	intern("env", env)
+	intern("args", args)
 }
