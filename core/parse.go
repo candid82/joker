@@ -381,6 +381,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
 		}
+		vr.expr = res.value
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
 		}
@@ -768,6 +769,23 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 	}
 }
 
+func reportNotAFunction(pos Position, name string) {
+	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s is not a function\n", pos.line, pos.column, name)
+}
+
+func reportWrongArity(expr *FnExpr, call *CallExpr, pos Position) {
+	for _, arity := range expr.arities {
+		if len(arity.args) == len(call.args) {
+			return
+		}
+	}
+	v := expr.variadic
+	if v != nil && len(call.args) >= len(v.args)-1 {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.line, pos.column, len(call.args), call.name)
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -844,18 +862,36 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	if LINTER_MODE {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
-			switch f := c.vr.Value.(type) {
-			case *Fn:
-				for _, arity := range f.fnExpr.arities {
-					if len(arity.args) == len(res.args) {
-						return res
-					}
-				}
-				v := f.fnExpr.variadic
-				if v != nil && len(res.args) >= len(v.args)-1 {
+			if c.vr.Value != nil {
+				switch f := c.vr.Value.(type) {
+				case *Fn:
+					reportWrongArity(f.fnExpr, res, pos)
+				case Callable:
 					return res
+				default:
+					reportNotAFunction(pos, res.name)
 				}
-				fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.line, pos.column, len(res.args), res.name)
+			} else {
+				switch expr := c.vr.expr.(type) {
+				case *FnExpr:
+					reportWrongArity(expr, res, pos)
+				case *LiteralExpr:
+					reportNotAFunction(pos, res.name)
+				case *VectorExpr:
+					reportNotAFunction(pos, res.name)
+				case *MapExpr:
+					reportNotAFunction(pos, res.name)
+				case *SetExpr:
+					reportNotAFunction(pos, res.name)
+				case *RecurExpr:
+					reportNotAFunction(pos, res.name)
+				case *BindingExpr:
+					reportNotAFunction(pos, res.name)
+				case *VarExpr:
+					reportNotAFunction(pos, res.name)
+				case *ThrowExpr:
+					reportNotAFunction(pos, res.name)
+				}
 			}
 		}
 	}

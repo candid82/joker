@@ -112,6 +112,7 @@ type (
 		ns      *Namespace
 		name    Symbol
 		Value   Object
+		expr    Expr
 		isMacro bool
 	}
 	Proc func([]Object) Object
