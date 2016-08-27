@@ -904,6 +904,10 @@ var procNamespaceUnalias Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procVarGet Proc = func(args []Object) Object {
+	return EnsureVar(args, 0).Value
+}
+
 var procSlurp Proc = func(args []Object) Object {
 	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
 	if err != nil {
@@ -1092,6 +1096,7 @@ func init() {
 	intern("alias*", procAlias)
 	intern("ns-aliases*", procNamespaceAliases)
 	intern("ns-unalias*", procNamespaceUnalias)
+	intern("var-get*", procVarGet)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

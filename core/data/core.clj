@@ -2055,6 +2055,10 @@
       (when (every? identity ss)
         (concat (map first ss) (apply interleave (map rest ss))))))))
 
+(defn var-get
+  "Gets the value in the var object"
+  {:added "1.0"}
+  [^Var x] (var-get* x))
 
 
 
