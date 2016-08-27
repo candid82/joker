@@ -908,6 +908,11 @@ var procVarGet Proc = func(args []Object) Object {
 	return EnsureVar(args, 0).Value
 }
 
+var procVarSet Proc = func(args []Object) Object {
+	EnsureVar(args, 0).Value = args[1]
+	return args[1]
+}
+
 var procSlurp Proc = func(args []Object) Object {
 	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
 	if err != nil {
@@ -1097,6 +1102,7 @@ func init() {
 	intern("ns-aliases*", procNamespaceAliases)
 	intern("ns-unalias*", procNamespaceUnalias)
 	intern("var-get*", procVarGet)
+	intern("var-set*", procVarSet)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

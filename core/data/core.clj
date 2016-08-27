@@ -2060,7 +2060,10 @@
   {:added "1.0"}
   [^Var x] (var-get* x))
 
-
+(defn var-set
+  "Sets the value in the var object to val."
+  {:added "1.0"}
+  [^Var x val] (var-set* x val))
 
 
 (defn slurp
