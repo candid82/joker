@@ -2077,6 +2077,12 @@
     (when-not (contains? env sym)
       (ns-resolve* (the-ns ns) sym))))
 
+(defn resolve
+  "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
+  {:added "1.0"}
+  ([sym] (ns-resolve *ns* sym))
+  ([env sym] (ns-resolve *ns* env sym)))
+
 (defn slurp
   "Opens a file f and reads all its contents, returning a string."
   {:added "1.0"}
