@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	. "github.com/candid/gclojure/core"
+	. "github.com/candid/joker/core"
 )
 
 var env Proc = func(args []Object) Object {
@@ -24,7 +24,7 @@ var args Proc = func(args []Object) Object {
 	return res
 }
 
-var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.os"))
+var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
 func intern(name string, proc Proc) {
 	osNamespace.Intern(MakeSymbol(name)).Value = proc

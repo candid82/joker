@@ -6,11 +6,11 @@ import (
 	"io"
 	"os"
 
-	_ "github.com/candid/gclojure/base64"
-	. "github.com/candid/gclojure/core"
-	_ "github.com/candid/gclojure/json"
-	_ "github.com/candid/gclojure/os"
-	_ "github.com/candid/gclojure/string"
+	_ "github.com/candid/joker/base64"
+	. "github.com/candid/joker/core"
+	_ "github.com/candid/joker/json"
+	_ "github.com/candid/joker/os"
+	_ "github.com/candid/joker/string"
 	"gopkg.in/readline.v1"
 )
 
@@ -84,7 +84,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext)
 }
 
 func repl(phase Phase) {
-	fmt.Println("Welcome to gclojure. Use ctrl-c to exit.")
+	fmt.Println("Welcome to joker. Use ctrl-c to exit.")
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 
 	rl, err := readline.New("")
@@ -104,7 +104,7 @@ func repl(phase Phase) {
 }
 
 func main() {
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("gclojure.core")))
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.core")))
 	if len(os.Args) == 1 {
 		repl(EVAL)
 		return

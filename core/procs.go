@@ -996,7 +996,7 @@ func ProcessReader(reader *Reader, phase Phase) {
 	}
 }
 
-var coreNamespace = GLOBAL_ENV.Namespaces[MakeSymbol("gclojure.core").name]
+var coreNamespace = GLOBAL_ENV.Namespaces[MakeSymbol("joker.core").name]
 
 func intern(name string, proc Proc) {
 	coreNamespace.Intern(MakeSymbol(name)).Value = proc

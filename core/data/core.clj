@@ -424,7 +424,7 @@
           (if (next clauses)
             (second clauses)
             (throw (ex-info "cond requires an even number of forms" {:form (first clauses)})))
-          (cons 'gclojure.core/cond (next (next clauses))))))
+          (cons 'joker.core/cond (next (next clauses))))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :

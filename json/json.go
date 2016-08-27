@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	. "github.com/candid/gclojure/core"
+	. "github.com/candid/joker/core"
 )
 
 func toObject(v interface{}) Object {
@@ -42,7 +42,7 @@ var readString Proc = func(args []Object) Object {
 	return toObject(v)
 }
 
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.json"))
+var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
 func intern(name string, proc Proc) {
 	jsonNamespace.Intern(MakeSymbol(name)).Value = proc

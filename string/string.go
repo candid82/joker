@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"regexp"
 
-	. "github.com/candid/gclojure/core"
+	. "github.com/candid/joker/core"
 )
 
-var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("gclojure.string"))
+var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
 func intern(name string, proc Proc) {
 	stringNamespace.Intern(MakeSymbol(name)).Value = proc
