@@ -913,6 +913,18 @@ var procVarSet Proc = func(args []Object) Object {
 	return args[1]
 }
 
+var procNsResolve Proc = func(args []Object) Object {
+	ns := EnsureNamespace(args, 0)
+	sym := EnsureSymbol(args, 1)
+	if sym.ns == nil && TYPES[*sym.name] != nil {
+		return TYPES[*sym.name]
+	}
+	if vr, ok := GLOBAL_ENV.ResolveIn(ns, sym); ok {
+		return vr
+	}
+	return NIL
+}
+
 var procSlurp Proc = func(args []Object) Object {
 	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
 	if err != nil {
@@ -1103,6 +1115,7 @@ func init() {
 	intern("ns-unalias*", procNamespaceUnalias)
 	intern("var-get*", procVarGet)
 	intern("var-set*", procVarSet)
+	intern("ns-resolve*", procNsResolve)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

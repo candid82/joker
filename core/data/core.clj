@@ -2065,6 +2065,17 @@
   {:added "1.0"}
   [^Var x val] (var-set* x val))
 
+(defn ns-resolve
+  "Returns the var or type to which a symbol will be resolved in the
+  namespace (unless found in the environment), else nil.  Note that
+  if the symbol is fully qualified, the var/Class to which it resolves
+  need not be present in the namespace."
+  {:added "1.0"}
+  ([ns sym]
+    (ns-resolve ns nil sym))
+  ([ns env sym]
+    (when-not (contains? env sym)
+      (ns-resolve* (the-ns ns) sym))))
 
 (defn slurp
   "Opens a file f and reads all its contents, returning a string."

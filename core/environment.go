@@ -33,12 +33,12 @@ func (env *Env) SetCurrentNamespace(ns *Namespace) {
 	v.Value = ns
 }
 
-func (env *Env) Resolve(s Symbol) (*Var, bool) {
+func (env *Env) ResolveIn(n *Namespace, s Symbol) (*Var, bool) {
 	var ns *Namespace
 	if s.ns == nil {
-		ns = env.CurrentNamespace
+		ns = n
 	} else {
-		ns = env.CurrentNamespace.aliases[s.ns]
+		ns = n.aliases[s.ns]
 		if ns == nil {
 			ns = env.Namespaces[s.ns]
 		}
@@ -48,6 +48,10 @@ func (env *Env) Resolve(s Symbol) (*Var, bool) {
 	}
 	v, ok := ns.mappings[s.name]
 	return v, ok
+}
+
+func (env *Env) Resolve(s Symbol) (*Var, bool) {
+	return env.ResolveIn(env.CurrentNamespace, s)
 }
 
 func (env *Env) FindNamespace(s Symbol) *Namespace {
