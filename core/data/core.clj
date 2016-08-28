@@ -2083,6 +2083,22 @@
   ([sym] (ns-resolve *ns* sym))
   ([env sym] (ns-resolve *ns* env sym)))
 
+(def
+  ^{:arglists '([& keyvals])
+    :doc "Constructs an array-map. If any keys are equal, they are handled as
+         if by repeated uses of assoc."
+         :added "1.0"}
+  array-map array-map*)
+
+
+
+
+
+
+
+
+
+
 (defn slurp
   "Opens a file f and reads all its contents, returning a string."
   {:added "1.0"}

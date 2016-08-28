@@ -925,6 +925,17 @@ var procNsResolve Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procArrayMap Proc = func(args []Object) Object {
+	if len(args)%2 == 1 {
+		panic(RT.NewError("No value supplied for key " + args[len(args)-1].ToString(false)))
+	}
+	res := EmptyArrayMap()
+	for i := 0; i < len(args); i += 2 {
+		res.Set(args[i], args[i+1])
+	}
+	return res
+}
+
 var procSlurp Proc = func(args []Object) Object {
 	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
 	if err != nil {
@@ -1116,6 +1127,7 @@ func init() {
 	intern("var-get*", procVarGet)
 	intern("var-set*", procVarSet)
 	intern("ns-resolve*", procNsResolve)
+	intern("array-map*", procArrayMap)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)
