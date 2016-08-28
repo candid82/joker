@@ -27,6 +27,22 @@
          :added "1.0"}
   cons cons*)
 
+;during bootstrap we don't have destructuring let, loop or fn, will redefine later
+(def
+  ^{:added "1.0"}
+  let (fn* let [&form &env & decl] (cons 'let* decl)))
+
+(set-macro* #'let)
+
+(def
+  ^{:added "1.0"}
+  fn (fn* fn [&form &env & decl]
+          (with-meta*
+            (cons 'fn* decl)
+            (meta* &form))))
+
+(set-macro* #'fn)
+
 (def
   ^{:arglists '([coll])
     :doc "Returns the first item in the collection. Calls seq on its
@@ -2090,8 +2106,169 @@
          :added "1.0"}
   array-map array-map*)
 
+;redefine let and loop  with destructuring
+(defn destructure [bindings]
+  (let [bents (partition 2 bindings)
+        pb (fn pb [bvec b v]
+             (let [pvec
+                   (fn [bvec b val]
+                     (let [gvec (gensym "vec__")]
+                       (loop [ret (-> bvec (conj gvec) (conj val))
+                              n 0
+                              bs b
+                              seen-rest? false]
+                         (if (seq bs)
+                           (let [firstb (first bs)]
+                             (cond
+                               (= firstb '&) (recur (pb ret (second bs) (list `nthnext gvec n))
+                                                    n
+                                                    (nnext bs)
+                                                    true)
+                               (= firstb :as) (pb ret (second bs) gvec)
+                               :else (if seen-rest?
+                                       (throw (ex-info "Unsupported binding form, only :as can follow & parameter" {}))
+                                       (recur (pb ret firstb  (list `nth gvec n nil))
+                                              (inc n)
+                                              (next bs)
+                                              seen-rest?))))
+                           ret))))
+                   pmap
+                   (fn [bvec b v]
+                     (let [gmap (gensym "map__")
+                           gmapseq (with-meta gmap {:tag 'Seq})
+                           defaults (:or b)]
+                       (loop [ret (-> bvec (conj gmap) (conj v)
+                                      (conj gmap) (conj `(if (seq? ~gmap) (apply array-map* (seq ~gmapseq)) ~gmap))
+                                      ((fn [ret]
+                                         (if (:as b)
+                                           (conj ret (:as b) gmap)
+                                           ret))))
+                              bes (reduce1
+                                   (fn [bes entry]
+                                     (reduce1 #(assoc %1 %2 ((val entry) %2))
+                                              (dissoc bes (key entry))
+                                              ((key entry) bes)))
+                                   (dissoc b :as :or)
+                                   {:keys #(if (keyword? %) % (keyword (str %))),
+                                    :strs str, :syms #(list `quote %)})]
+                         (if (seq bes)
+                           (let [bb (key (first bes))
+                                 bk (val (first bes))
+                                 bv (if (contains? defaults bb)
+                                      (list `get gmap bk (defaults bb))
+                                      (list `get gmap bk))]
+                             (recur (cond
+                                      (symbol? bb) (-> ret (conj (if (namespace bb) (symbol (name bb)) bb)) (conj bv))
+                                      (keyword? bb) (-> ret (conj (symbol (name bb)) bv))
+                                      :else (pb ret bb bv))
+                                    (next bes)))
+                           ret))))]
+               (cond
+                 (symbol? b) (-> bvec (conj b) (conj v))
+                 (vector? b) (pvec bvec b v)
+                 (map? b) (pmap bvec b v)
+                 :else (throw (ex-info (str "Unsupported binding form: " b) {})))))
+        process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
+    (if (every? symbol? (map first bents))
+      bindings
+      (reduce1 process-entry [] bents))))
 
+(defmacro let
+  "binding => binding-form init-expr
 
+  Evaluates the exprs in a lexical context in which the symbols in
+  the binding-forms are bound to their respective init-exprs or parts
+  therein."
+  {:added "1.0", :special-form true, :forms '[(let [bindings*] exprs*)]}
+  [bindings & body]
+  (assert-args
+   (vector? bindings) "a vector for its binding"
+   (even? (count bindings)) "an even number of forms in binding vector")
+  `(let* ~(destructure bindings) ~@body))
+
+(defn ^{:private true}
+  maybe-destructured
+  [params body]
+  (if (every? symbol? params)
+    (cons params body)
+    (loop [params params
+           new-params (with-meta [] (meta params))
+           lets []]
+      (if params
+        (if (symbol? (first params))
+          (recur (next params) (conj new-params (first params)) lets)
+          (let [gparam (gensym "p__")]
+            (recur (next params) (conj new-params gparam)
+                   (-> lets (conj (first params)) (conj gparam)))))
+        `(~new-params
+          (let ~lets
+            ~@body))))))
+
+;redefine fn with destructuring and pre/post conditions
+(defmacro fn
+  "params => positional-params* , or positional-params* & next-param
+  positional-param => binding-form
+  next-param => binding-form
+  name => symbol
+
+  Defines a function"
+  {:added "1.0", :special-form true,
+   :forms '[(fn name? [params* ] exprs*) (fn name? ([params* ] exprs*)+)]}
+  [& sigs]
+    (let [name (if (symbol? (first sigs)) (first sigs) nil)
+          sigs (if name (next sigs) sigs)
+          sigs (if (vector? (first sigs))
+                 (list sigs)
+                 (if (seq? (first sigs))
+                   sigs
+                   ;; Assume single arity syntax
+                   (throw (ex-info
+                            (if (seq sigs)
+                              (str "Parameter declaration "
+                                   (first sigs)
+                                   " should be a vector")
+                              (str "Parameter declaration missing"))
+                            {}))))
+          psig (fn* [sig]
+                 ;; Ensure correct type before destructuring sig
+                 (when (not (seq? sig))
+                   (throw (ex-info
+                            (str "Invalid signature " sig
+                                 " should be a list")
+                            {})))
+                 (let [[params & body] sig
+                       _ (when (not (vector? params))
+                           (throw (ex-info
+                                    (if (seq? (first sigs))
+                                      (str "Parameter declaration " params
+                                           " should be a vector")
+                                      (str "Invalid signature " sig
+                                           " should be a list"))
+                                    {})))
+                       conds (when (and (next body) (map? (first body)))
+                                           (first body))
+                       body (if conds (next body) body)
+                       conds (or conds (meta params))
+                       pre (:pre conds)
+                       post (:post conds)
+                       body (if post
+                              `((let [~'% ~(if (< 1 (count body))
+                                            `(do ~@body)
+                                            (first body))]
+                                 ~@(map (fn* [c] `(assert ~c)) post)
+                                 ~'%))
+                              body)
+                       body (if pre
+                              (concat (map (fn* [c] `(assert ~c)) pre)
+                                      body)
+                              body)]
+                   (maybe-destructured params body)))
+          new-sigs (map psig sigs)]
+      (with-meta
+        (if name
+          (list* 'fn* name new-sigs)
+          (cons 'fn* new-sigs))
+        (meta &form))))
 
 
 

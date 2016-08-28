@@ -810,9 +810,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				negative: Parse(Forth(seq), ctx),
 				Position: pos,
 			}
-		case "fn":
+		case "fn*":
 			return parseFn(obj, ctx)
-		case "let":
+		case "let*":
 			return parseLet(obj, ctx)
 		case "loop":
 			return parseLoop(obj, ctx)
