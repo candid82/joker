@@ -1014,6 +1014,8 @@ func intern(name string, proc Proc) {
 }
 
 func init() {
+	coreNamespace.Intern(MakeSymbol("*assert*")).Value = Bool{B: true}
+
 	intern("list**", procList)
 	intern("cons*", procCons)
 	intern("first*", procFirst)
