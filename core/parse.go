@@ -814,7 +814,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseFn(obj, ctx)
 		case "let*":
 			return parseLet(obj, ctx)
-		case "loop":
+		case "loop*":
 			return parseLoop(obj, ctx)
 		case "recur":
 			return parseRecur(obj, ctx)
