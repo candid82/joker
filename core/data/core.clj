@@ -2374,7 +2374,10 @@
     `(let [iter# ~(emit-bind (to-groups seq-exprs))]
        (iter# ~(second seq-exprs)))))
 
-
+(defmacro comment
+  "Ignores body, yields nil"
+  {:added "1.0"}
+  [& body])
 
 
 (defmacro assert
