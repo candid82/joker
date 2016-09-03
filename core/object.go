@@ -5,10 +5,12 @@
 package core
 
 import (
+	"encoding/binary"
 	"encoding/gob"
 	"fmt"
 	"hash"
 	"hash/fnv"
+	"math"
 	"math/big"
 	"reflect"
 	"strings"
@@ -227,6 +229,34 @@ var hasher hash.Hash32 = fnv.New32a()
 func getHash() hash.Hash32 {
 	hasher.Reset()
 	return hasher
+}
+
+func MakeSymbol(nsname string) Symbol {
+	index := strings.IndexRune(nsname, '/')
+	if index == -1 || nsname == "/" {
+		return Symbol{
+			ns:   nil,
+			name: STRINGS.Intern(nsname),
+		}
+	}
+	return Symbol{
+		ns:   STRINGS.Intern(nsname[0:index]),
+		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
+	}
+}
+
+func MakeKeyword(nsname string) Keyword {
+	index := strings.IndexRune(nsname, '/')
+	if index == -1 || nsname == "/" {
+		return Keyword{
+			ns:   nil,
+			name: STRINGS.Intern(nsname),
+		}
+	}
+	return Keyword{
+		ns:   STRINGS.Intern(nsname[0:index]),
+		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
+	}
 }
 
 func panicArity(n int) {
@@ -529,34 +559,6 @@ func (v *Var) Call(args []Object) Object {
 		"Var "+v.ToString(false)+" resolves to "+v.Value.ToString(false)+", which is not a Fn").Call(args)
 }
 
-func MakeSymbol(nsname string) Symbol {
-	index := strings.IndexRune(nsname, '/')
-	if index == -1 || nsname == "/" {
-		return Symbol{
-			ns:   nil,
-			name: STRINGS.Intern(nsname),
-		}
-	}
-	return Symbol{
-		ns:   STRINGS.Intern(nsname[0:index]),
-		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
-	}
-}
-
-func MakeKeyword(nsname string) Keyword {
-	index := strings.IndexRune(nsname, '/')
-	if index == -1 || nsname == "/" {
-		return Keyword{
-			ns:   nil,
-			name: STRINGS.Intern(nsname),
-		}
-	}
-	return Keyword{
-		ns:   STRINGS.Intern(nsname[0:index]),
-		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
-	}
-}
-
 func (n Nil) ToString(escape bool) string {
 	return "nil"
 }
@@ -745,6 +747,12 @@ func (c Char) GetType() *Type {
 	return TYPES["Char"]
 }
 
+func (c Char) Hash() uint32 {
+	h := getHash()
+	h.Write([]byte(string(c.ch)))
+	return h.Sum32()
+}
+
 func (c Char) Compare(other Object) int {
 	c2 := AssertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
 	if c.ch < c2.ch {
@@ -777,6 +785,14 @@ func (d Double) GetType() *Type {
 	return TYPES["Double"]
 }
 
+func (d Double) Hash() uint32 {
+	h := getHash()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, math.Float64bits(d.D))
+	h.Write(b)
+	return h.Sum32()
+}
+
 func (d Double) Compare(other Object) int {
 	return CompareNumbers(d, AssertNumber(other, "Cannot compare Double and "+other.GetType().ToString(false)))
 }
@@ -798,6 +814,14 @@ func (i Int) GetType() *Type {
 	return TYPES["Int"]
 }
 
+func (i Int) Hash() uint32 {
+	h := getHash()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(i.I))
+	h.Write(b)
+	return h.Sum32()
+}
+
 func (i Int) Compare(other Object) int {
 	return CompareNumbers(i, AssertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
 }
@@ -817,6 +841,18 @@ func (b Bool) Equals(other interface{}) bool {
 
 func (b Bool) GetType() *Type {
 	return TYPES["Bool"]
+}
+
+func (b Bool) Hash() uint32 {
+	h := getHash()
+	var bs = make([]byte, 1)
+	if b.B {
+		bs[0] = 1
+	} else {
+		bs[0] = 0
+	}
+	h.Write(bs)
+	return h.Sum32()
 }
 
 func (b Bool) Compare(other Object) int {
@@ -861,6 +897,15 @@ func (k Keyword) GetType() *Type {
 	return TYPES["Keyword"]
 }
 
+func (k Keyword) Hash() uint32 {
+	h := getHash()
+	b := make([]byte, 16)
+	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(k.name))))
+	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(k.ns))))
+	h.Write(b)
+	return h.Sum32()
+}
+
 func (k Keyword) Compare(other Object) int {
 	k2 := AssertKeyword(other, "Cannot compare Keyword and "+other.GetType().ToString(false))
 	return strings.Compare(k.ToString(false), k2.ToString(false))
@@ -901,6 +946,12 @@ func (rx Regex) GetType() *Type {
 	return TYPES["Regex"]
 }
 
+func (rx Regex) Hash() uint32 {
+	h := getHash()
+	h.Write([]byte(rx.R))
+	return h.Sum32()
+}
+
 func (s Symbol) ToString(escape bool) string {
 	return s.Name()
 }
@@ -932,6 +983,15 @@ func (s Symbol) GetType() *Type {
 	return TYPES["Symbol"]
 }
 
+func (s Symbol) Hash() uint32 {
+	h := getHash()
+	b := make([]byte, 16)
+	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(s.name))))
+	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(s.ns))))
+	h.Write(b)
+	return h.Sum32()
+}
+
 func (s Symbol) Compare(other Object) int {
 	s2 := AssertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
 	return strings.Compare(s.ToString(false), s2.ToString(false))
@@ -959,6 +1019,12 @@ func (s String) Equals(other interface{}) bool {
 
 func (s String) GetType() *Type {
 	return TYPES["String"]
+}
+
+func (s String) Hash() uint32 {
+	h := getHash()
+	h.Write([]byte(s.S))
+	return h.Sum32()
 }
 
 func (s String) Count() int {
