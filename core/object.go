@@ -5,10 +5,14 @@
 package core
 
 import (
+	"encoding/gob"
 	"fmt"
+	"hash"
+	"hash/fnv"
 	"math/big"
 	"reflect"
 	"strings"
+	"unsafe"
 )
 
 type (
@@ -29,6 +33,7 @@ type (
 		GetInfo() *ObjectInfo
 		WithInfo(*ObjectInfo) Object
 		GetType() *Type
+		// Hash() uint32
 	}
 	Conjable interface {
 		Object
@@ -189,7 +194,7 @@ func init() {
 	TYPES["Symbol"] = &Type{name: "Symbol", reflectType: reflect.TypeOf((*Symbol)(nil)).Elem()}
 	TYPES["Regex"] = &Type{name: "Regex", reflectType: reflect.TypeOf((*Regex)(nil)).Elem()}
 	TYPES["Var"] = &Type{name: "Var", reflectType: reflect.TypeOf((*Var)(nil))}
-	TYPES["Proc"] = &Type{name: "Fn", reflectType: reflect.TypeOf((*Proc)(nil)).Elem()}
+	TYPES["Proc"] = &Type{name: "Proc", reflectType: reflect.TypeOf((*Proc)(nil)).Elem()}
 	TYPES["Fn"] = &Type{name: "Fn", reflectType: reflect.TypeOf((*Fn)(nil))}
 	TYPES["ExInfo"] = &Type{name: "ExInfo", reflectType: reflect.TypeOf((*ExInfo)(nil))}
 	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
@@ -215,6 +220,13 @@ func init() {
 	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
 	TYPES["Namespace"] = &Type{name: "Namespace", reflectType: reflect.TypeOf((*Namespace)(nil)).Elem()}
 	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
+}
+
+var hasher hash.Hash32 = fnv.New32a()
+
+func getHash() hash.Hash32 {
+	hasher.Reset()
+	return hasher
 }
 
 func panicArity(n int) {
@@ -257,6 +269,37 @@ func (d *Delay) GetType() *Type {
 	return TYPES["Delay"]
 }
 
+func hashPtr(ptr uintptr) uint32 {
+	h := getHash()
+	b := make([]byte, unsafe.Sizeof(ptr))
+	b[0] = byte(ptr)
+	b[1] = byte(ptr >> 8)
+	b[2] = byte(ptr >> 16)
+	b[3] = byte(ptr >> 24)
+	if unsafe.Sizeof(ptr) == 8 {
+		b[4] = byte(ptr >> 32)
+		b[5] = byte(ptr >> 40)
+		b[6] = byte(ptr >> 48)
+		b[7] = byte(ptr >> 56)
+	}
+	h.Write(b)
+	return h.Sum32()
+}
+
+func hashGobEncoder(e gob.GobEncoder) uint32 {
+	h := getHash()
+	b, err := e.GobEncode()
+	if err != nil {
+		panic(RT.NewError(err.Error()))
+	}
+	h.Write(b)
+	return h.Sum32()
+}
+
+func (d *Delay) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(d)))
+}
+
 func (d *Delay) Force() Object {
 	if d.value == nil {
 		d.value = d.fn.Call([]Object{})
@@ -280,6 +323,10 @@ func (t *Type) GetType() *Type {
 	return TYPES["Type"]
 }
 
+func (t *Type) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(t)))
+}
+
 func (rb RecurBindings) ToString(escape bool) string {
 	return "#object[RecurBindings]"
 }
@@ -296,6 +343,10 @@ func (rb RecurBindings) GetType() *Type {
 	return TYPES["RecurBindings"]
 }
 
+func (t *RecurBindings) Hash() uint32 {
+	return 0
+}
+
 func (exInfo *ExInfo) ToString(escape bool) string {
 	return exInfo.msg.ToString(escape)
 }
@@ -305,16 +356,15 @@ func (exInfo *ExInfo) Type() Symbol {
 }
 
 func (exInfo *ExInfo) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case *ExInfo:
-		return exInfo.msg == other.msg && exInfo.data.Equals(other.data)
-	default:
-		return false
-	}
+	return exInfo == other
 }
 
 func (exInfo *ExInfo) GetType() *Type {
 	return TYPES["ExInfo"]
+}
+
+func (exInfo *ExInfo) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(exInfo)))
 }
 
 func (exInfo *ExInfo) Error() string {
@@ -353,6 +403,10 @@ func (fn *Fn) WithMeta(meta *ArrayMap) Object {
 
 func (fn *Fn) GetType() *Type {
 	return TYPES["Fn"]
+}
+
+func (fn *Fn) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(fn)))
 }
 
 func (fn *Fn) Call(args []Object) Object {
@@ -413,12 +467,7 @@ func (p Proc) ToString(escape bool) string {
 }
 
 func (p Proc) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case Proc:
-		return &p == &other
-	default:
-		return false
-	}
+	return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
 }
 
 func (p Proc) GetInfo() *ObjectInfo {
@@ -431,6 +480,10 @@ func (p Proc) WithInfo(*ObjectInfo) Object {
 
 func (p Proc) GetType() *Type {
 	return TYPES["Proc"]
+}
+
+func (p Proc) Hash() uint32 {
+	return hashPtr(reflect.ValueOf(p).Pointer())
 }
 
 func (i InfoHolder) GetInfo() *ObjectInfo {
@@ -447,6 +500,15 @@ func (sym Symbol) WithMeta(meta *ArrayMap) Object {
 	return res
 }
 
+func (v *Var) ToString(escape bool) string {
+	return "#'" + v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+}
+
+func (v *Var) Equals(other interface{}) bool {
+	// TODO: revisit this
+	return v == other
+}
+
 func (v *Var) WithMeta(meta *ArrayMap) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
@@ -455,6 +517,10 @@ func (v *Var) WithMeta(meta *ArrayMap) Object {
 
 func (v *Var) GetType() *Type {
 	return TYPES["Var"]
+}
+
+func (v *Var) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(v)))
 }
 
 func (v *Var) Call(args []Object) Object {
@@ -491,15 +557,6 @@ func MakeKeyword(nsname string) Keyword {
 	}
 }
 
-func (v *Var) ToString(escape bool) string {
-	return "#'" + v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
-}
-
-func (v *Var) Equals(other interface{}) bool {
-	// TODO: revisit this
-	return v == other
-}
-
 func (n Nil) ToString(escape bool) string {
 	return "nil"
 }
@@ -515,6 +572,10 @@ func (n Nil) Equals(other interface{}) bool {
 
 func (n Nil) GetType() *Type {
 	return TYPES["Nil"]
+}
+
+func (n Nil) Hash() uint32 {
+	return 0
 }
 
 func (n Nil) Seq() Seq {
@@ -596,6 +657,10 @@ func (rat *Ratio) GetType() *Type {
 	return TYPES["Ratio"]
 }
 
+func (rat *Ratio) Hash() uint32 {
+	return hashGobEncoder(&rat.r)
+}
+
 func (rat *Ratio) Compare(other Object) int {
 	return CompareNumbers(rat, AssertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
 }
@@ -622,6 +687,10 @@ func (bi *BigInt) GetType() *Type {
 	return TYPES["BigInt"]
 }
 
+func (bi *BigInt) Hash() uint32 {
+	return hashGobEncoder(&bi.b)
+}
+
 func (bi *BigInt) Compare(other Object) int {
 	return CompareNumbers(bi, AssertNumber(other, "Cannot compare BigInt and "+other.GetType().ToString(false)))
 }
@@ -646,6 +715,10 @@ func (bf *BigFloat) Equals(other interface{}) bool {
 
 func (bf *BigFloat) GetType() *Type {
 	return TYPES["BigFloat"]
+}
+
+func (bf *BigFloat) Hash() uint32 {
+	return hashGobEncoder(&bf.b)
 }
 
 func (bf *BigFloat) Compare(other Object) int {
