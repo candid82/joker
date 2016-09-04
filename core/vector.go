@@ -139,6 +139,10 @@ func (v *Vector) GetType() *Type {
 	return TYPES["Vector"]
 }
 
+func (v *Vector) Hash() uint32 {
+	return hashOrdered(v.Seq())
+}
+
 func (seq *VectorSeq) Seq() Seq {
 	return seq
 }
@@ -159,6 +163,10 @@ func (vseq *VectorSeq) WithMeta(meta *ArrayMap) Object {
 
 func (vseq *VectorSeq) GetType() *Type {
 	return TYPES["VectorSeq"]
+}
+
+func (vseq *VectorSeq) Hash() uint32 {
+	return hashOrdered(vseq)
 }
 
 func (vseq *VectorSeq) First() Object {
@@ -205,6 +213,10 @@ func (vseq *VectorRSeq) WithMeta(meta *ArrayMap) Object {
 
 func (vseq *VectorRSeq) GetType() *Type {
 	return TYPES["VectorRSeq"]
+}
+
+func (vseq *VectorRSeq) Hash() uint32 {
+	return hashOrdered(vseq)
 }
 
 func (vseq *VectorRSeq) First() Object {

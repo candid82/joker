@@ -1,5 +1,7 @@
 package core
 
+import "unsafe"
+
 type (
 	Namespace struct {
 		Name     Symbol
@@ -26,6 +28,10 @@ func (ns *Namespace) WithInfo(info *ObjectInfo) Object {
 
 func (ns *Namespace) GetType() *Type {
 	return TYPES["Namespace"]
+}
+
+func (ns *Namespace) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(ns)))
 }
 
 func NewNamespace(sym Symbol) *Namespace {

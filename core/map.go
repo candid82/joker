@@ -1,8 +1,6 @@
 package core
 
-import (
-	"bytes"
-)
+import "bytes"
 
 type (
 	Map interface {
@@ -33,14 +31,6 @@ type (
 	}
 )
 
-func (seq *ArrayMapSeq) GetType() *Type {
-	return TYPES["ArrayMapSeq"]
-}
-
-func (seq *ArrayMapSeq) Seq() Seq {
-	return seq
-}
-
 func (seq *ArrayMapSeq) sequential() {}
 
 func (seq *ArrayMapSeq) Equals(other interface{}) bool {
@@ -55,6 +45,18 @@ func (seq *ArrayMapSeq) WithMeta(meta *ArrayMap) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
+}
+
+func (seq *ArrayMapSeq) GetType() *Type {
+	return TYPES["ArrayMapSeq"]
+}
+
+func (seq *ArrayMapSeq) Hash() uint32 {
+	return hashOrdered(seq)
+}
+
+func (seq *ArrayMapSeq) Seq() Seq {
+	return seq
 }
 
 func (seq *ArrayMapSeq) First() Object {
@@ -276,6 +278,10 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 
 func (m *ArrayMap) GetType() *Type {
 	return TYPES["ArrayMap"]
+}
+
+func (m *ArrayMap) Hash() uint32 {
+	return hashUnordered(m.Seq())
 }
 
 func (m *ArrayMap) Seq() Seq {

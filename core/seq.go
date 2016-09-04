@@ -92,6 +92,10 @@ func (seq *LazySeq) GetType() *Type {
 	return TYPES["LazySeq"]
 }
 
+func (seq *LazySeq) Hash() uint32 {
+	return hashOrdered(seq)
+}
+
 func (seq *LazySeq) First() Object {
 	seq.realize()
 	return seq.seq.First()
@@ -133,6 +137,10 @@ func (seq *ArraySeq) WithMeta(meta *ArrayMap) Object {
 
 func (seq *ArraySeq) GetType() *Type {
 	return TYPES["ArraySeq"]
+}
+
+func (seq *ArraySeq) Hash() uint32 {
+	return hashOrdered(seq)
 }
 
 func (seq *ArraySeq) First() Object {
@@ -192,6 +200,10 @@ func (seq *ConsSeq) ToString(escape bool) string {
 
 func (seq *ConsSeq) GetType() *Type {
 	return TYPES["ConsSeq"]
+}
+
+func (seq *ConsSeq) Hash() uint32 {
+	return hashOrdered(seq)
 }
 
 func (seq *ConsSeq) First() Object {
@@ -288,4 +300,24 @@ func SeqTryNth(seq Seq, n int, d Object) Object {
 		i--
 	}
 	return d
+}
+
+func hashUnordered(seq Seq) uint32 {
+	var hash uint32
+	for !seq.IsEmpty() {
+		hash += seq.First().Hash()
+		seq = seq.Rest()
+	}
+	h := getHash()
+	h.Write(uint32ToBytes(hash))
+	return h.Sum32()
+}
+
+func hashOrdered(seq Seq) uint32 {
+	h := getHash()
+	for !seq.IsEmpty() {
+		h.Write(uint32ToBytes(seq.First().Hash()))
+		seq = seq.Rest()
+	}
+	return h.Sum32()
 }

@@ -53,6 +53,10 @@ func (list *List) GetType() *Type {
 	return TYPES["List"]
 }
 
+func (list *List) Hash() uint32 {
+	return hashOrdered(list)
+}
+
 func (list *List) First() Object {
 	return list.first
 }

@@ -35,7 +35,7 @@ type (
 		GetInfo() *ObjectInfo
 		WithInfo(*ObjectInfo) Object
 		GetType() *Type
-		// Hash() uint32
+		Hash() uint32
 	}
 	Conjable interface {
 		Object
@@ -226,6 +226,12 @@ func init() {
 
 var hasher hash.Hash32 = fnv.New32a()
 
+func uint32ToBytes(i uint32) []byte {
+	b := make([]byte, 4)
+	binary.LittleEndian.PutUint32(b, i)
+	return b
+}
+
 func getHash() hash.Hash32 {
 	hasher.Reset()
 	return hasher
@@ -373,7 +379,7 @@ func (rb RecurBindings) GetType() *Type {
 	return TYPES["RecurBindings"]
 }
 
-func (t *RecurBindings) Hash() uint32 {
+func (rb RecurBindings) Hash() uint32 {
 	return 0
 }
 

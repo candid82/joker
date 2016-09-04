@@ -73,6 +73,10 @@ func (seq *ArraySet) GetType() *Type {
 	return TYPES["ArraySet"]
 }
 
+func (set *ArraySet) Hash() uint32 {
+	return hashUnordered(set.Seq())
+}
+
 func (set *ArraySet) Seq() Seq {
 	return set.m.Keys()
 }
