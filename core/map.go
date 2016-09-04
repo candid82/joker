@@ -281,7 +281,7 @@ func (m *ArrayMap) GetType() *Type {
 }
 
 func (m *ArrayMap) Hash() uint32 {
-	return hashUnordered(m.Seq())
+	return hashUnordered(m.Seq(), 1)
 }
 
 func (m *ArrayMap) Seq() Seq {

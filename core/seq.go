@@ -302,14 +302,13 @@ func SeqTryNth(seq Seq, n int, d Object) Object {
 	return d
 }
 
-func hashUnordered(seq Seq) uint32 {
-	var hash uint32
+func hashUnordered(seq Seq, seed uint32) uint32 {
 	for !seq.IsEmpty() {
-		hash += seq.First().Hash()
+		seed += seq.First().Hash()
 		seq = seq.Rest()
 	}
 	h := getHash()
-	h.Write(uint32ToBytes(hash))
+	h.Write(uint32ToBytes(seed))
 	return h.Sum32()
 }
 

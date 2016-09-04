@@ -74,7 +74,7 @@ func (seq *ArraySet) GetType() *Type {
 }
 
 func (set *ArraySet) Hash() uint32 {
-	return hashUnordered(set.Seq())
+	return hashUnordered(set.Seq(), 2)
 }
 
 func (set *ArraySet) Seq() Seq {

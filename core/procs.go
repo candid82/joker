@@ -944,6 +944,10 @@ var procSlurp Proc = func(args []Object) Object {
 	return String{S: string(b)}
 }
 
+var procHash Proc = func(args []Object) Object {
+	return Int{I: int(args[0].Hash())}
+}
+
 var procSh Proc = func(args []Object) Object {
 	strs := make([]string, len(args))
 	for i := range args {
@@ -1135,6 +1139,7 @@ func init() {
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
 	intern("slurp*", procSlurp)
+	intern("hash*", procHash)
 
 	currentNamespace := GLOBAL_ENV.CurrentNamespace
 	GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
