@@ -149,6 +149,53 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 	}
 }
 
+func removePair(array []Object, n int) []Object {
+	newArray := make([]Object, len(array)-2)
+	for i := 0; i < 2*n; i++ {
+		newArray[i] = array[i]
+	}
+	for i := 2 * (n + 1); i < len(array); i++ {
+		newArray[i-2] = array[i]
+	}
+	return newArray
+}
+
+func (b *BitmapIndexedNode) without(shift uint, hash uint32, key Object) Node {
+	bit := bitpos(hash, shift)
+	if (b.bitmap & bit) == 0 {
+		return b
+	}
+	idx := b.index(bit)
+	keyOrNull := b.array[2*idx]
+	valOrNode := b.array[2*idx+1]
+	if keyOrNull == nil {
+		n := valOrNode.(Node).without(shift+5, hash, key)
+		if n == valOrNode {
+			return b
+		}
+		if n != nil {
+			return &BitmapIndexedNode{
+				bitmap: b.bitmap,
+				array:  cloneAndSet(b.array, 2*idx+1, n),
+			}
+		}
+		if b.bitmap == bit {
+			return nil
+		}
+		return &BitmapIndexedNode{
+			bitmap: b.bitmap ^ bit,
+			array:  removePair(b.array, idx),
+		}
+	}
+	if key.Equals(keyOrNull) {
+		return &BitmapIndexedNode{
+			bitmap: b.bitmap ^ bit,
+			array:  removePair(b.array, idx),
+		}
+	}
+	return b
+}
+
 func (m *HashMap) containsKey(key Object) bool {
 	if m.root != nil {
 		return m.root.tryFind(0, key.Hash(), key, notFound) != notFound
