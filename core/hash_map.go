@@ -8,11 +8,8 @@ type (
 		Object
 		assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node
 		without(shift uint, hash uint32, key Object) Node
-		find(shift uint, hash uint32, key Object) Pair
-		tryFind(shift uint, hash uint32, key Object, notFound Object) Object
+		find(shift uint, hash uint32, key Object) *Pair
 		nodeSeq() Seq
-		kvreduce(f Callable, init Object) Object
-		fold(combinef Callable, reducef Callable, fjtask Callable, fjfork Callable, fjjoin Callable) Object
 	}
 	HashMap struct {
 		InfoHolder
@@ -196,9 +193,33 @@ func (b *BitmapIndexedNode) without(shift uint, hash uint32, key Object) Node {
 	return b
 }
 
+func (b *BitmapIndexedNode) find(shift uint, hash uint32, key Object) *Pair {
+	bit := bitpos(hash, shift)
+	if (b.bitmap & bit) == 0 {
+		return nil
+	}
+	idx := b.index(bit)
+	keyOrNull := b.array[2*idx]
+	valOrNode := b.array[2*idx+1]
+	if keyOrNull == nil {
+		return valOrNode.(Node).find(shift+5, hash, key)
+	}
+	if key.Equals(keyOrNull) {
+		return &Pair{
+			key:   keyOrNull,
+			value: valOrNode,
+		}
+	}
+	return nil
+}
+
+func (b *BitmapIndexedNode) nodeSeq() Seq {
+	return &ArrayMapSeq{m: &ArrayMap{arr: b.array}}
+}
+
 func (m *HashMap) containsKey(key Object) bool {
 	if m.root != nil {
-		return m.root.tryFind(0, key.Hash(), key, notFound) != notFound
+		return m.root.find(0, key.Hash(), key) != nil
 	} else {
 		return false
 	}
