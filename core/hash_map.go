@@ -5,7 +5,6 @@ type (
 		val Object
 	}
 	Node interface {
-		Object
 		assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node
 		without(shift uint, hash uint32, key Object) Node
 		find(shift uint, hash uint32, key Object) *Pair
@@ -19,7 +18,14 @@ type (
 	}
 	BitmapIndexedNode struct {
 		bitmap int
-		array  []Object
+		array  []interface{}
+	}
+	NodeSeq struct {
+		InfoHolder
+		MetaHolder
+		array []interface{}
+		i     int
+		s     Seq
 	}
 )
 
@@ -28,6 +34,95 @@ var (
 	emptyIndexedNode = &BitmapIndexedNode{}
 	notFound         = EmptyArrayMap()
 )
+
+func newNodeSeq(array []interface{}, i int, s Seq) Seq {
+	if s != nil {
+		return &NodeSeq{
+			array: array,
+			i:     i,
+			s:     s,
+		}
+	}
+	for j := i; j < len(array); j += 2 {
+		if array[j] != nil {
+			return &NodeSeq{
+				array: array,
+				i:     j,
+			}
+		}
+		switch node := array[j+1].(type) {
+		case Node:
+			nodeSeq := node.nodeSeq()
+			if nodeSeq != nil {
+				return &NodeSeq{
+					array: array,
+					i:     j + 2,
+					s:     nodeSeq,
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (s *NodeSeq) WithMeta(meta *ArrayMap) Object {
+	res := *s
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
+func (s *NodeSeq) Seq() Seq {
+	return s
+}
+
+func (s *NodeSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(s, other)
+}
+
+func (s *NodeSeq) ToString(escape bool) string {
+	return SeqToString(s, escape)
+}
+
+func (s *NodeSeq) GetType() *Type {
+	return TYPES["NodeSeq"]
+}
+
+func (s *NodeSeq) Hash() uint32 {
+	return hashOrdered(s)
+}
+
+func (s *NodeSeq) First() Object {
+	if s.s != nil {
+		return s.First()
+	}
+	return NewVectorFrom(s.array[s.i].(Object), s.array[s.i+1].(Object))
+}
+
+func (s *NodeSeq) Rest() Seq {
+	var res Seq
+	if s.s != nil {
+		res = newNodeSeq(s.array, s.i, s.Rest())
+	} else {
+		res = newNodeSeq(s.array, s.i+2, nil)
+	}
+	if res == nil {
+		return EmptyList
+	}
+	return res
+}
+
+func (s *NodeSeq) IsEmpty() bool {
+	if s.s != nil {
+		return s.IsEmpty()
+	}
+	return false
+}
+
+func (s *NodeSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: s}
+}
+
+func (s *NodeSeq) sequential() {}
 
 func bitCount(n int) int {
 	var count int
@@ -50,20 +145,14 @@ func bitpos(hash uint32, shift uint) int {
 	return 1 << mask(hash, shift)
 }
 
-func cloneObjects(s []Object) []Object {
-	result := make([]Object, len(s), cap(s))
-	copy(result, s)
-	return result
-}
-
-func cloneAndSet(array []Object, i int, a Object) []Object {
-	res := cloneObjects(array)
+func cloneAndSet(array []interface{}, i int, a interface{}) []interface{} {
+	res := clone(array)
 	res[i] = a
 	return res
 }
 
-func cloneAndSet2(array []Object, i int, a Object, j int, b Object) []Object {
-	res := cloneObjects(array)
+func cloneAndSet2(array []interface{}, i int, a interface{}, j int, b interface{}) []interface{} {
+	res := clone(array)
 	res[i] = a
 	res[j] = b
 	return res
@@ -128,7 +217,7 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 			}
 			return &ArrayNode{}
 		} else {
-			newArray := make([]Object, 2*(n+1))
+			newArray := make([]interface{}, 2*(n+1))
 			for i := 0; i < 2*idx; i++ {
 				newArray[i] = b.array[i]
 			}
@@ -146,8 +235,8 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 	}
 }
 
-func removePair(array []Object, n int) []Object {
-	newArray := make([]Object, len(array)-2)
+func removePair(array []interface{}, n int) []interface{} {
+	newArray := make([]interface{}, len(array)-2)
 	for i := 0; i < 2*n; i++ {
 		newArray[i] = array[i]
 	}
@@ -206,15 +295,15 @@ func (b *BitmapIndexedNode) find(shift uint, hash uint32, key Object) *Pair {
 	}
 	if key.Equals(keyOrNull) {
 		return &Pair{
-			key:   keyOrNull,
-			value: valOrNode,
+			key:   keyOrNull.(Object),
+			value: valOrNode.(Object),
 		}
 	}
 	return nil
 }
 
 func (b *BitmapIndexedNode) nodeSeq() Seq {
-	return &ArrayMapSeq{m: &ArrayMap{arr: b.array}}
+	return &NodeSeq{array: b.array}
 }
 
 func (m *HashMap) containsKey(key Object) bool {
