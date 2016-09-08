@@ -20,6 +20,11 @@ type (
 		bitmap int
 		array  []interface{}
 	}
+	HashCollisionNode struct {
+		hash  uint32
+		count int
+		array []interface{}
+	}
 	NodeSeq struct {
 		InfoHolder
 		MetaHolder
@@ -124,6 +129,77 @@ func (s *NodeSeq) Cons(obj Object) Seq {
 
 func (s *NodeSeq) sequential() {}
 
+func (n *HashCollisionNode) findIndex(key Object) int {
+	for i := 0; i < 2*n.count; i += 2 {
+		if key.Equals(n.array[i]) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (n *HashCollisionNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
+	if hash == n.hash {
+		idx := n.findIndex(key)
+		if idx != -1 {
+			if n.array[idx+1] == val {
+				return n
+			}
+			return &HashCollisionNode{
+				hash:  hash,
+				count: n.count,
+				array: cloneAndSet(n.array, idx+1, val),
+			}
+		}
+		newArray := make([]interface{}, 2*(n.count+1))
+		for i := 0; i < 2*n.count; i++ {
+			newArray[i] = n.array[i]
+		}
+		newArray[2*n.count] = key
+		newArray[2*n.count+1] = val
+		// addedLeaf.val = addedLeaf
+		return &HashCollisionNode{
+			hash:  hash,
+			count: n.count + 1,
+			array: newArray,
+		}
+	}
+	return (&BitmapIndexedNode{
+		bitmap: bitpos(n.hash, shift),
+		array:  []interface{}{nil, n},
+	}).assoc(shift, hash, key, val, addedLeaf)
+}
+
+func (n *HashCollisionNode) without(shift uint, hash uint32, key Object) Node {
+	idx := n.findIndex(key)
+	if idx == -1 {
+		return n
+	}
+	if n.count == 1 {
+		return nil
+	}
+	return &HashCollisionNode{
+		hash:  hash,
+		count: n.count - 1,
+		array: removePair(n.array, idx/2),
+	}
+}
+
+func (n *HashCollisionNode) find(shift uint, hash uint32, key Object) *Pair {
+	idx := n.findIndex(key)
+	if idx == -1 {
+		return nil
+	}
+	return &Pair{
+		key:   n.array[idx].(Object),
+		value: n.array[idx+1].(Object),
+	}
+}
+
+func (n *HashCollisionNode) nodeSeq() Seq {
+	return newNodeSeq(n.array, 0, nil)
+}
+
 func bitCount(n int) int {
 	var count int
 	for n != 0 {
@@ -131,10 +207,6 @@ func bitCount(n int) int {
 		n &= n - 1
 	}
 	return count
-}
-
-func (b *BitmapIndexedNode) index(bit int) int {
-	return bitCount(b.bitmap & (bit - 1))
 }
 
 func mask(hash uint32, shift uint) uint32 {
@@ -165,6 +237,10 @@ func createNode(shift uint, key1 Object, val1 Object, key2hash uint32, key2 Obje
 	}
 	addedLeaf := &Box{}
 	return emptyIndexedNode.assoc(shift, key1hash, key1, val1, addedLeaf).assoc(shift, key2hash, key2, val2, addedLeaf)
+}
+
+func (b *BitmapIndexedNode) index(bit int) int {
+	return bitCount(b.bitmap & (bit - 1))
 }
 
 func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
