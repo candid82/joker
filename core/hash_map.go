@@ -565,26 +565,36 @@ func (m *HashMap) containsKey(key Object) bool {
 	}
 }
 
-// func (m *HashMap) Assoc(key, val Object) Associative {
-// 	addedLeaf := &Box{}
-// 	var newroot, t Node
-// 	if m.root == nil {
-// 		t = EmptyBitmapIndexedNode
-// 	} else {
-// 		t = root
-// 	}
-// 	newroot = t.assoc(0, key.Hash(), key, val, addedLeaf)
-// 	if newroot == root {
-// 		return m
-// 	}
-// 	newcount := m.count
-// 	if addedLeaf.val != nil {
-// 		newcount = m.count + 1
-// 	}
-// 	return &HashMap{
-// 		count: newcount,
-// 		root:  newroot,
-// 		meta:  m.meta,
-// 	}
+func (m *HashMap) Assoc(key, val Object) Associative {
+	addedLeaf := &Box{}
+	var newroot, t Node
+	if m.root == nil {
+		t = emptyIndexedNode
+	} else {
+		t = m.root
+	}
+	newroot = t.assoc(0, key.Hash(), key, val, addedLeaf)
+	if newroot == m.root {
+		return m
+	}
+	newcount := m.count
+	if addedLeaf.val != nil {
+		newcount = m.count + 1
+	}
+	res := &HashMap{
+		count: newcount,
+		root:  newroot,
+	}
+	res.meta = m.meta
+	return res
+}
 
-// }
+func (m *HashMap) EntryAt(key Object) *Vector {
+	if m.root != nil {
+		p := m.root.find(0, key.Hash(), key)
+		if p != nil {
+			return NewVectorFrom(p.key, p.value)
+		}
+	}
+	return nil
+}
