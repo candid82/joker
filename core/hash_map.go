@@ -25,10 +25,21 @@ type (
 		count int
 		array []interface{}
 	}
+	ArrayNode struct {
+		count int
+		array []Node
+	}
 	NodeSeq struct {
 		InfoHolder
 		MetaHolder
 		array []interface{}
+		i     int
+		s     Seq
+	}
+	ArrayNodeSeq struct {
+		InfoHolder
+		MetaHolder
+		nodes []Node
 		i     int
 		s     Seq
 	}
@@ -39,6 +50,80 @@ var (
 	emptyIndexedNode = &BitmapIndexedNode{}
 	notFound         = EmptyArrayMap()
 )
+
+func newArrayNodeSeq(nodes []Node, i int, s Seq) Seq {
+	if s != nil {
+		return &ArrayNodeSeq{
+			nodes: nodes,
+			i:     i,
+			s:     s,
+		}
+	}
+	for j := i; j < len(nodes); j++ {
+		if nodes[j] != nil {
+			ns := nodes[j].nodeSeq()
+			if ns != nil {
+				return &ArrayNodeSeq{
+					nodes: nodes,
+					i:     j + 1,
+					s:     ns,
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (s *ArrayNodeSeq) WithMeta(meta *ArrayMap) Object {
+	res := *s
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
+func (s *ArrayNodeSeq) Seq() Seq {
+	return s
+}
+
+func (s *ArrayNodeSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(s, other)
+}
+
+func (s *ArrayNodeSeq) ToString(escape bool) string {
+	return SeqToString(s, escape)
+}
+
+func (s *ArrayNodeSeq) GetType() *Type {
+	return TYPES["ArrayNodeSeq"]
+}
+
+func (s *ArrayNodeSeq) Hash() uint32 {
+	return hashOrdered(s)
+}
+
+func (s *ArrayNodeSeq) First() Object {
+	return s.First()
+}
+
+func (s *ArrayNodeSeq) Rest() Seq {
+	res := newArrayNodeSeq(s.nodes, s.i, s.Rest())
+	if res == nil {
+		return EmptyList
+	}
+	return res
+}
+
+func (s *ArrayNodeSeq) IsEmpty() bool {
+	if s.s != nil {
+		return s.IsEmpty()
+	}
+	return false
+}
+
+func (s *ArrayNodeSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: s}
+}
+
+func (s *ArrayNodeSeq) sequential() {}
 
 func newNodeSeq(array []interface{}, i int, s Seq) Seq {
 	if s != nil {
@@ -138,6 +223,89 @@ func (n *HashCollisionNode) findIndex(key Object) int {
 	return -1
 }
 
+func (n *ArrayNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
+	idx := mask(hash, shift)
+	node := n.array[idx]
+	if node == nil {
+		return &ArrayNode{
+			count: n.count + 1,
+			array: cloneAndSetNode(n.array, int(idx), emptyIndexedNode.assoc(shift+5, hash, key, val, addedLeaf)),
+		}
+	}
+	nn := node.assoc(shift+5, hash, key, val, addedLeaf)
+	if nn == node {
+		return n
+	}
+	return &ArrayNode{
+		count: n.count,
+		array: cloneAndSetNode(n.array, int(idx), nn),
+	}
+}
+
+func (n *ArrayNode) without(shift uint, hash uint32, key Object) Node {
+	idx := mask(hash, shift)
+	node := n.array[idx]
+	if node == nil {
+		return n
+	}
+	nn := node.without(shift+5, hash, key)
+	if nn == node {
+		return n
+	}
+	if nn == nil {
+		if n.count <= 8 {
+			return n.pack(uint(idx))
+		}
+		return &ArrayNode{
+			count: n.count - 1,
+			array: cloneAndSetNode(n.array, int(idx), nn),
+		}
+	} else {
+		return &ArrayNode{
+			count: n.count,
+			array: cloneAndSetNode(n.array, int(idx), nn),
+		}
+	}
+}
+
+func (n *ArrayNode) find(shift uint, hash uint32, key Object) *Pair {
+	idx := mask(hash, shift)
+	node := n.array[idx]
+	if node == nil {
+		return nil
+	}
+	return node.find(shift+5, hash, key)
+}
+
+func (n *ArrayNode) nodeSeq() Seq {
+	return newArrayNodeSeq(n.array, 0, nil)
+}
+
+func (n *ArrayNode) pack(idx uint) Node {
+	newArray := make([]interface{}, 2*(n.count-1))
+	j := 1
+	bitmap := 0
+	var i uint
+	for i = 0; i < idx; i++ {
+		if n.array[i] != nil {
+			newArray[j] = n.array[i]
+			bitmap |= 1 << i
+			j += 2
+		}
+	}
+	for i = idx + 1; i < uint(len(n.array)); i++ {
+		if n.array[i] != nil {
+			newArray[j] = n.array[i]
+			bitmap |= 1 << i
+			j += 2
+		}
+	}
+	return &BitmapIndexedNode{
+		bitmap: bitmap,
+		array:  newArray,
+	}
+}
+
 func (n *HashCollisionNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
 	if hash == n.hash {
 		idx := n.findIndex(key)
@@ -227,6 +395,13 @@ func cloneAndSet2(array []interface{}, i int, a interface{}, j int, b interface{
 	res := clone(array)
 	res[i] = a
 	res[j] = b
+	return res
+}
+
+func cloneAndSetNode(array []Node, i int, a Node) []Node {
+	res := make([]Node, len(array), cap(array))
+	copy(res, array)
+	res[i] = a
 	return res
 }
 

@@ -112,6 +112,11 @@ func (x *NodeSeq) WithInfo(info *ObjectInfo) Object {
   return x
 }
 
+func (x *ArrayNodeSeq) WithInfo(info *ObjectInfo) Object {
+  x.info = info
+  return x
+}
+
 func (x *ArraySet) WithInfo(info *ObjectInfo) Object {
   x.info = info
   return x
