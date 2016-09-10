@@ -10,6 +10,10 @@ type (
 		find(shift uint, hash uint32, key Object) *Pair
 		nodeSeq() Seq
 	}
+	MapIterator interface {
+		HasNext() bool
+		Next() Pair
+	}
 	HashMap struct {
 		InfoHolder
 		MetaHolder
@@ -43,6 +47,12 @@ type (
 		i     int
 		s     Seq
 	}
+	NodeIterator struct {
+		array []interface{}
+		i int
+		nextEntry *Pair
+		nextIter MapIterator
+	}
 )
 
 var (
@@ -50,6 +60,49 @@ var (
 	emptyIndexedNode = &BitmapIndexedNode{}
 	notFound         = EmptyArrayMap()
 )
+
+func (iter *NodeIterator) advance() bool {
+	for iter.i < len(iter.array) {
+		key := iter.array[i]
+		nodeOrVal := iter.array[i+1]
+		i += 2
+		if key != nil {
+			iter.nextEntry = &Pair{key: key, value: nodeOrVal}
+			return true
+		} else if nodeOrVal != nil {
+			iter1 := nodeOrVal.(Node).iter()
+			if iter != nil && iter.HasNext() {
+				iter.nextIter = iter1
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func (iter *NodeIterator) HasNext() bool {
+	if iter.nextEntry != nil || iter.nextIter != nil {
+		return true
+	}
+	return iter.advance()
+}
+
+func (iter *NodeIterator) Next() *Pair {
+	ret := iter.nextEntry
+	if ret != nil {
+		iter.nextEntry = nil
+		return ret
+	} else if iter.nextIter != nil {
+		ret := iter.nextIter.Next()
+		if !iter.nextIter.HasNext() {
+			iter.nextIter = nil
+		}
+		return ret
+	} else if iter.advance() {
+		return iter.Next()
+	}
+	panic(RT.NewError("Iterator reached the end of collection"))
+}
 
 func newArrayNodeSeq(nodes []Node, i int, s Seq) Seq {
 	if s != nil {
@@ -598,3 +651,19 @@ func (m *HashMap) EntryAt(key Object) *Vector {
 	}
 	return nil
 }
+
+func (m *HashMap)
+
+// func (h *HashMap) Conj(obj Object) Conjable {
+// 	switch obj := obj.(type) {
+// 	case *Vector:
+// 		if obj.count != 2 {
+// 			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
+// 		}
+// 		return h.Assoc(obj.at(0), obj.at(1))
+// 	case Map:
+// 		return m.Merge(obj)
+// 	default:
+// 		panic(RT.NewError("Argument to map's conj must be a vector with two elements or a map"))
+// 	}
+// }
