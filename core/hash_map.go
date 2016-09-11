@@ -9,10 +9,11 @@ type (
 		without(shift uint, hash uint32, key Object) Node
 		find(shift uint, hash uint32, key Object) *Pair
 		nodeSeq() Seq
+		iter() MapIterator
 	}
 	MapIterator interface {
 		HasNext() bool
-		Next() Pair
+		Next() *Pair
 	}
 	HashMap struct {
 		InfoHolder
@@ -48,10 +49,15 @@ type (
 		s     Seq
 	}
 	NodeIterator struct {
-		array []interface{}
-		i int
+		array     []interface{}
+		i         int
 		nextEntry *Pair
-		nextIter MapIterator
+		nextIter  MapIterator
+	}
+	ArrayNodeIterator struct {
+		array      []Node
+		i          int
+		nestedIter MapIterator
 	}
 )
 
@@ -61,13 +67,45 @@ var (
 	notFound         = EmptyArrayMap()
 )
 
+func newIteratorError() error {
+	return RT.NewError("Iterator reached the end of collection")
+}
+
+func (iter *ArrayNodeIterator) HasNext() bool {
+	for {
+		if iter.nestedIter != nil {
+			if iter.nestedIter.HasNext() {
+				return true
+			} else {
+				iter.nestedIter = nil
+			}
+		}
+		if iter.i < len(iter.array) {
+			node := iter.array[iter.i]
+			iter.i++
+			if node != nil {
+				iter.nestedIter = node.iter()
+			}
+		} else {
+			return false
+		}
+	}
+}
+
+func (iter *ArrayNodeIterator) Next() *Pair {
+	if iter.HasNext() {
+		return iter.nestedIter.Next()
+	}
+	panic(newIteratorError())
+}
+
 func (iter *NodeIterator) advance() bool {
 	for iter.i < len(iter.array) {
-		key := iter.array[i]
-		nodeOrVal := iter.array[i+1]
-		i += 2
+		key := iter.array[iter.i]
+		nodeOrVal := iter.array[iter.i+1]
+		iter.i += 2
 		if key != nil {
-			iter.nextEntry = &Pair{key: key, value: nodeOrVal}
+			iter.nextEntry = &Pair{key: key.(Object), value: nodeOrVal.(Object)}
 			return true
 		} else if nodeOrVal != nil {
 			iter1 := nodeOrVal.(Node).iter()
@@ -76,8 +114,8 @@ func (iter *NodeIterator) advance() bool {
 				return true
 			}
 		}
-		return false
 	}
+	return false
 }
 
 func (iter *NodeIterator) HasNext() bool {
@@ -101,7 +139,7 @@ func (iter *NodeIterator) Next() *Pair {
 	} else if iter.advance() {
 		return iter.Next()
 	}
-	panic(RT.NewError("Iterator reached the end of collection"))
+	panic(newIteratorError())
 }
 
 func newArrayNodeSeq(nodes []Node, i int, s Seq) Seq {
@@ -274,6 +312,18 @@ func (n *HashCollisionNode) findIndex(key Object) int {
 		}
 	}
 	return -1
+}
+
+func (n *HashCollisionNode) iter() MapIterator {
+	return &NodeIterator{
+		array: n.array,
+	}
+}
+
+func (n *ArrayNode) iter() MapIterator {
+	return &ArrayNodeIterator{
+		array: n.array,
+	}
 }
 
 func (n *ArrayNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
@@ -471,6 +521,12 @@ func (b *BitmapIndexedNode) index(bit int) int {
 	return bitCount(b.bitmap & (bit - 1))
 }
 
+func (b *BitmapIndexedNode) iter() MapIterator {
+	return &NodeIterator{
+		array: b.array,
+	}
+}
+
 func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node {
 	bit := bitpos(hash, shift)
 	idx := b.index(bit)
@@ -610,6 +666,36 @@ func (b *BitmapIndexedNode) nodeSeq() Seq {
 	return &NodeSeq{array: b.array}
 }
 
+func (m *HashMap) ToString(escape bool) string {
+	return mapToString(m, escape)
+}
+
+func (m *HashMap) Equals(other interface{}) bool {
+	return mapEquals(m, other)
+}
+
+func (m *HashMap) GetType() *Type {
+	return TYPES["HashMap"]
+}
+
+func (m *HashMap) Hash() uint32 {
+	return hashUnordered(m.Seq(), 1)
+}
+
+func (m *HashMap) Seq() Seq {
+	if m.root != nil {
+		s := m.root.nodeSeq()
+		if s != nil {
+			return s
+		}
+	}
+	return EmptyList
+}
+
+func (m *HashMap) Count() int {
+	return m.count
+}
+
 func (m *HashMap) containsKey(key Object) bool {
 	if m.root != nil {
 		return m.root.find(0, key.Hash(), key) != nil
@@ -652,18 +738,15 @@ func (m *HashMap) EntryAt(key Object) *Vector {
 	return nil
 }
 
-func (m *HashMap)
+func (m *HashMap) Get(key Object) (bool, Object) {
+	if m.root != nil {
+		if res := m.root.find(0, key.Hash(), key); res != nil {
+			return true, res.value
+		}
+	}
+	return false, nil
+}
 
-// func (h *HashMap) Conj(obj Object) Conjable {
-// 	switch obj := obj.(type) {
-// 	case *Vector:
-// 		if obj.count != 2 {
-// 			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
-// 		}
-// 		return h.Assoc(obj.at(0), obj.at(1))
-// 	case Map:
-// 		return m.Merge(obj)
-// 	default:
-// 		panic(RT.NewError("Argument to map's conj must be a vector with two elements or a map"))
-// 	}
-// }
+func (m *HashMap) Conj(obj Object) Conjable {
+	return mapConj(m, obj)
+}

@@ -6,9 +6,12 @@ type (
 	Map interface {
 		Associative
 		Seqable
+		Counted
 		Without(key Object) Map
 		Keys() Seq
 		Vals() Seq
+		Merge(m Map) Map
+		Iter() MapIterator
 	}
 	ArrayMap struct {
 		InfoHolder
@@ -87,13 +90,13 @@ func (v *ArrayMap) WithMeta(meta *ArrayMap) Object {
 	return &res
 }
 
-func (iter *ArrayMapIterator) Next() Pair {
+func (iter *ArrayMapIterator) Next() *Pair {
 	res := Pair{
 		key:   iter.m.arr[iter.current],
 		value: iter.m.arr[iter.current+1],
 	}
 	iter.current += 2
-	return res
+	return &res
 }
 
 func (iter *ArrayMapIterator) HasNext() bool {
@@ -182,7 +185,7 @@ func (m *ArrayMap) Without(key Object) Map {
 	return &result
 }
 
-func (m *ArrayMap) Merge(other *ArrayMap) *ArrayMap {
+func (m *ArrayMap) Merge(other Map) Map {
 	if other.Count() == 0 {
 		return m
 	}
@@ -190,7 +193,7 @@ func (m *ArrayMap) Merge(other *ArrayMap) *ArrayMap {
 		return other
 	}
 	res := m.Clone()
-	for iter := other.iter(); iter.HasNext(); {
+	for iter := other.Iter(); iter.HasNext(); {
 		p := iter.Next()
 		res.Set(p.key, p.value)
 	}
@@ -215,22 +218,12 @@ func (m *ArrayMap) Vals() Seq {
 	return &ArraySeq{arr: res}
 }
 
-func (m *ArrayMap) iter() *ArrayMapIterator {
+func (m *ArrayMap) Iter() MapIterator {
 	return &ArrayMapIterator{m: m}
 }
 
 func (m *ArrayMap) Conj(obj Object) Conjable {
-	switch obj := obj.(type) {
-	case *Vector:
-		if obj.count != 2 {
-			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
-		}
-		return m.Assoc(obj.at(0), obj.at(1))
-	case *ArrayMap:
-		return m.Merge(obj)
-	default:
-		panic(RT.NewError("Argument to map's conj must be a vector with two elements or a map"))
-	}
+	return mapConj(m, obj)
 }
 
 func EmptyArrayMap() *ArrayMap {
@@ -238,42 +231,11 @@ func EmptyArrayMap() *ArrayMap {
 }
 
 func (m *ArrayMap) ToString(escape bool) string {
-	var b bytes.Buffer
-	b.WriteRune('{')
-	if len(m.arr) > 0 {
-		for i := 0; i < len(m.arr)-2; i += 2 {
-			b.WriteString(m.arr[i].ToString(escape))
-			b.WriteRune(' ')
-			b.WriteString(m.arr[i+1].ToString(escape))
-			b.WriteString(", ")
-		}
-		b.WriteString(m.arr[len(m.arr)-2].ToString(escape))
-		b.WriteRune(' ')
-		b.WriteString(m.arr[len(m.arr)-1].ToString(escape))
-	}
-	b.WriteRune('}')
-	return b.String()
+	return mapToString(m, escape)
 }
 
 func (m *ArrayMap) Equals(other interface{}) bool {
-	if m == other {
-		return true
-	}
-	switch otherMap := other.(type) {
-	case *ArrayMap:
-		if len(m.arr) != len(otherMap.arr) {
-			return false
-		}
-		for i := 0; i < len(m.arr); i += 2 {
-			success, value := otherMap.Get(m.arr[i])
-			if !success || !value.Equals(m.arr[i+1]) {
-				return false
-			}
-		}
-		return true
-	default:
-		return false
-	}
+	return mapEquals(m, other)
 }
 
 func (m *ArrayMap) GetType() *Type {
@@ -303,5 +265,61 @@ func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
 	if m1 == nil {
 		return m2
 	}
-	return m1.Merge(m2)
+	return m1.Merge(m2).(*ArrayMap)
+}
+
+func mapConj(m Map, obj Object) Conjable {
+	switch obj := obj.(type) {
+	case *Vector:
+		if obj.count != 2 {
+			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
+		}
+		return m.Assoc(obj.at(0), obj.at(1))
+	case Map:
+		return m.Merge(obj)
+	default:
+		panic(RT.NewError("Argument to map's conj must be a vector with two elements or a map"))
+	}
+}
+
+func mapEquals(m Map, other interface{}) bool {
+	if m == other {
+		return true
+	}
+	switch otherMap := other.(type) {
+	case Map:
+		if m.Count() != otherMap.Count() {
+			return false
+		}
+		for iter := m.Iter(); iter.HasNext(); {
+			p := iter.Next()
+			success, value := otherMap.Get(p.key)
+			if !success || !value.Equals(p.value) {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
+func mapToString(m Map, escape bool) string {
+	var b bytes.Buffer
+	b.WriteRune('{')
+	if m.Count() > 0 {
+		for iter := m.Iter(); ; {
+			p := iter.Next()
+			b.WriteString(p.key.ToString(escape))
+			b.WriteRune(' ')
+			b.WriteString(p.value.ToString(escape))
+			if iter.HasNext() {
+				b.WriteString(", ")
+			} else {
+				break
+			}
+		}
+	}
+	b.WriteRune('}')
+	return b.String()
 }

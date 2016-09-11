@@ -159,6 +159,7 @@ type (
 	}
 	Associative interface {
 		Conjable
+		Gettable
 		EntryAt(key Object) *Vector
 		Assoc(key, val Object) Associative
 	}
