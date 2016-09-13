@@ -304,7 +304,7 @@ func parseMap(m *ArrayMap, pos Position, ctx *ParseContext) *MapExpr {
 		values:   make([]Expr, m.Count()),
 		Position: pos,
 	}
-	for iter, i := m.iter(), 0; iter.HasNext(); i++ {
+	for iter, i := m.Iter(), 0; iter.HasNext(); i++ {
 		p := iter.Next()
 		res.keys[i] = Parse(p.key, ctx)
 		res.values[i] = Parse(p.value, ctx)
@@ -730,7 +730,7 @@ func fixInfo(obj Object) Object {
 		return res.WithInfo(innerInfo)
 	case *ArrayMap:
 		res := EmptyArrayMap()
-		iter := s.iter()
+		iter := s.Iter()
 		for iter.HasNext() {
 			p := iter.Next()
 			key := fixInfo(p.key)

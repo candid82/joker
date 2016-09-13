@@ -617,6 +617,18 @@ func (n Nil) Without(key Object) Map {
 	return n
 }
 
+func (n Nil) Count() int {
+	return 0
+}
+
+func (n Nil) Iter() MapIterator {
+	return emptyMapIterator
+}
+
+func (n Nil) Merge(other Map) Map {
+	return other
+}
+
 func (n Nil) Assoc(key, value Object) Associative {
 	return EmptyArrayMap().Assoc(key, value)
 }
