@@ -59,13 +59,24 @@ type (
 		i          int
 		nestedIter MapIterator
 	}
+	EmptyMapIterator struct {
+	}
 )
 
 var (
 	EmptyHashMap     = &HashMap{}
 	emptyIndexedNode = &BitmapIndexedNode{}
 	notFound         = EmptyArrayMap()
+	emptyMapIterator = &EmptyMapIterator{}
 )
+
+func (iter *EmptyMapIterator) HasNext() bool {
+	return false
+}
+
+func (iter *EmptyMapIterator) Next() *Pair {
+	panic(newIteratorError())
+}
 
 func newIteratorError() error {
 	return RT.NewError("Iterator reached the end of collection")
@@ -192,11 +203,11 @@ func (s *ArrayNodeSeq) Hash() uint32 {
 }
 
 func (s *ArrayNodeSeq) First() Object {
-	return s.First()
+	return s.s.First()
 }
 
 func (s *ArrayNodeSeq) Rest() Seq {
-	res := newArrayNodeSeq(s.nodes, s.i, s.Rest())
+	res := newArrayNodeSeq(s.nodes, s.i, s.s.Rest())
 	if res == nil {
 		return EmptyList
 	}
@@ -749,4 +760,20 @@ func (m *HashMap) Get(key Object) (bool, Object) {
 
 func (m *HashMap) Conj(obj Object) Conjable {
 	return mapConj(m, obj)
+}
+
+func (m *HashMap) Iter() MapIterator {
+	if m.root == nil {
+		return emptyMapIterator
+	}
+	return m.root.iter()
+}
+
+func (m *HashMap) Keys() Seq {
+	return &MappingSeq{
+		seq: m.Seq(),
+		fn: func(obj Object) Object {
+			return obj.(*Vector).Nth(0)
+		},
+	}
 }

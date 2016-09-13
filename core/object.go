@@ -1,6 +1,6 @@
 //go:generate go-bindata -pkg core -o bindata.go data
 //go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
 
@@ -210,6 +210,7 @@ func init() {
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
 	TYPES["NodeSeq"] = &Type{name: "NodeSeq", reflectType: reflect.TypeOf((*NodeSeq)(nil))}
 	TYPES["LazySeq"] = &Type{name: "LazySeq", reflectType: reflect.TypeOf((*LazySeq)(nil))}
+	TYPES["MappingSeq"] = &Type{name: "MappingSeq", reflectType: reflect.TypeOf((*MappingSeq)(nil))}
 	TYPES["VectorSeq"] = &Type{name: "VectorSeq", reflectType: reflect.TypeOf((*VectorSeq)(nil))}
 	TYPES["VectorRSeq"] = &Type{name: "VectorRSeq", reflectType: reflect.TypeOf((*VectorRSeq)(nil))}
 	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}

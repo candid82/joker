@@ -38,6 +38,12 @@ type (
 		fn  Callable
 		seq Seq
 	}
+	MappingSeq struct {
+		InfoHolder
+		MetaHolder
+		seq Seq
+		fn  func(obj Object) Object
+	}
 )
 
 func SeqsEqual(seq1, seq2 Seq) bool {
@@ -63,6 +69,53 @@ func IsSeqEqual(seq Seq, other interface{}) bool {
 	}
 	return false
 }
+
+func (seq *MappingSeq) Seq() Seq {
+	return seq
+}
+
+func (seq *MappingSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
+}
+
+func (seq *MappingSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *MappingSeq) WithMeta(meta *ArrayMap) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
+func (seq *MappingSeq) GetType() *Type {
+	return TYPES["MappingSeq"]
+}
+
+func (seq *MappingSeq) Hash() uint32 {
+	return hashOrdered(seq)
+}
+
+func (seq *MappingSeq) First() Object {
+	return seq.fn(seq.seq.First())
+}
+
+func (seq *MappingSeq) Rest() Seq {
+	return &MappingSeq{
+		seq: seq.seq.Rest(),
+		fn:  seq.fn,
+	}
+}
+
+func (seq *MappingSeq) IsEmpty() bool {
+	return seq.seq.IsEmpty()
+}
+
+func (seq *MappingSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *MappingSeq) sequential() {}
 
 func (seq *LazySeq) Seq() Seq {
 	return seq

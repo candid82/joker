@@ -97,6 +97,11 @@ func (x *LazySeq) WithInfo(info *ObjectInfo) Object {
   return x
 }
 
+func (x *MappingSeq) WithInfo(info *ObjectInfo) Object {
+  x.info = info
+  return x
+}
+
 func (x *ArraySeq) WithInfo(info *ObjectInfo) Object {
   x.info = info
   return x
