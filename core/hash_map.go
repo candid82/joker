@@ -11,10 +11,6 @@ type (
 		nodeSeq() Seq
 		iter() MapIterator
 	}
-	MapIterator interface {
-		HasNext() bool
-		Next() *Pair
-	}
 	HashMap struct {
 		InfoHolder
 		MetaHolder
@@ -59,28 +55,11 @@ type (
 		i          int
 		nestedIter MapIterator
 	}
-	EmptyMapIterator struct {
-	}
 )
 
 var (
-	EmptyHashMap     = &HashMap{}
 	emptyIndexedNode = &BitmapIndexedNode{}
-	notFound         = EmptyArrayMap()
-	emptyMapIterator = &EmptyMapIterator{}
 )
-
-func (iter *EmptyMapIterator) HasNext() bool {
-	return false
-}
-
-func (iter *EmptyMapIterator) Next() *Pair {
-	panic(newIteratorError())
-}
-
-func newIteratorError() error {
-	return RT.NewError("Iterator reached the end of collection")
-}
 
 func (iter *ArrayNodeIterator) HasNext() bool {
 	for {
@@ -316,21 +295,6 @@ func (s *NodeSeq) Cons(obj Object) Seq {
 
 func (s *NodeSeq) sequential() {}
 
-func (n *HashCollisionNode) findIndex(key Object) int {
-	for i := 0; i < 2*n.count; i += 2 {
-		if key.Equals(n.array[i]) {
-			return i
-		}
-	}
-	return -1
-}
-
-func (n *HashCollisionNode) iter() MapIterator {
-	return &NodeIterator{
-		array: n.array,
-	}
-}
-
 func (n *ArrayNode) iter() MapIterator {
 	return &ArrayNodeIterator{
 		array: n.array,
@@ -417,6 +381,21 @@ func (n *ArrayNode) pack(idx uint) Node {
 	return &BitmapIndexedNode{
 		bitmap: bitmap,
 		array:  newArray,
+	}
+}
+
+func (n *HashCollisionNode) findIndex(key Object) int {
+	for i := 0; i < 2*n.count; i += 2 {
+		if key.Equals(n.array[i]) {
+			return i
+		}
+	}
+	return -1
+}
+
+func (n *HashCollisionNode) iter() MapIterator {
+	return &NodeIterator{
+		array: n.array,
 	}
 }
 
@@ -528,6 +507,17 @@ func createNode(shift uint, key1 Object, val1 Object, key2hash uint32, key2 Obje
 	return emptyIndexedNode.assoc(shift, key1hash, key1, val1, addedLeaf).assoc(shift, key2hash, key2, val2, addedLeaf)
 }
 
+func removePair(array []interface{}, n int) []interface{} {
+	newArray := make([]interface{}, len(array)-2)
+	for i := 0; i < 2*n; i++ {
+		newArray[i] = array[i]
+	}
+	for i := 2 * (n + 1); i < len(array); i++ {
+		newArray[i-2] = array[i]
+	}
+	return newArray
+}
+
 func (b *BitmapIndexedNode) index(bit int) int {
 	return bitCount(b.bitmap & (bit - 1))
 }
@@ -604,17 +594,6 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 			}
 		}
 	}
-}
-
-func removePair(array []interface{}, n int) []interface{} {
-	newArray := make([]interface{}, len(array)-2)
-	for i := 0; i < 2*n; i++ {
-		newArray[i] = array[i]
-	}
-	for i := 2 * (n + 1); i < len(array); i++ {
-		newArray[i-2] = array[i]
-	}
-	return newArray
 }
 
 func (b *BitmapIndexedNode) without(shift uint, hash uint32, key Object) Node {

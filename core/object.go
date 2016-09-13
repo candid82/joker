@@ -229,6 +229,10 @@ func init() {
 
 var hasher hash.Hash32 = fnv.New32a()
 
+func newIteratorError() error {
+	return RT.NewError("Iterator reached the end of collection")
+}
+
 func uint32ToBytes(i uint32) []byte {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, i)
