@@ -777,3 +777,43 @@ func (m *HashMap) Keys() Seq {
 		},
 	}
 }
+
+func (m *HashMap) Vals() Seq {
+	return &MappingSeq{
+		seq: m.Seq(),
+		fn: func(obj Object) Object {
+			return obj.(*Vector).Nth(1)
+		},
+	}
+}
+
+func (m *HashMap) Merge(other Map) Map {
+	if other.Count() == 0 {
+		return m
+	}
+	if m.Count() == 0 {
+		return other
+	}
+	var res Associative = m
+	for iter := other.Iter(); iter.HasNext(); {
+		p := iter.Next()
+		res = res.Assoc(p.key, p.value)
+	}
+	return res.(Map)
+}
+
+func (m *HashMap) Without(key Object) Map {
+	if m.root == nil {
+		return m
+	}
+	newroot := m.root.without(0, key.Hash(), key)
+	if newroot == m.root {
+		return m
+	}
+	res := &HashMap{
+		count: m.count - 1,
+		root:  newroot,
+	}
+	res.meta = m.meta
+	return res
+}

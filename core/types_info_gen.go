@@ -17,6 +17,11 @@ func (x *ArrayMap) WithInfo(info *ObjectInfo) Object {
   return x
 }
 
+func (x *HashMap) WithInfo(info *ObjectInfo) Object {
+  x.info = info
+  return x
+}
+
 func (x *ExInfo) WithInfo(info *ObjectInfo) Object {
   x.info = info
   return x
