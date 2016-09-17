@@ -1021,10 +1021,7 @@ func (s Symbol) GetType() *Type {
 }
 
 func (s Symbol) Hash() uint32 {
-	if s.hash == 0 {
-		s.hash = hashSymbol(s.ns, s.name)
-	}
-	return s.hash
+	return hashSymbol(s.ns, s.name)
 }
 
 func (s Symbol) Compare(other Object) int {
