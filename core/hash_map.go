@@ -657,6 +657,12 @@ func (b *BitmapIndexedNode) nodeSeq() Seq {
 	return &NodeSeq{array: b.array}
 }
 
+func (m *HashMap) WithMeta(meta *ArrayMap) Object {
+	res := *m
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
 func (m *HashMap) ToString(escape bool) string {
 	return mapToString(m, escape)
 }

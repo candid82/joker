@@ -298,7 +298,7 @@ func parseVector(v *Vector, pos Position, ctx *ParseContext) Expr {
 	}
 }
 
-func parseMap(m *ArrayMap, pos Position, ctx *ParseContext) *MapExpr {
+func parseMap(m Map, pos Position, ctx *ParseContext) *MapExpr {
 	res := &MapExpr{
 		keys:     make([]Expr, m.Count()),
 		values:   make([]Expr, m.Count()),
@@ -941,7 +941,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	case *Vector:
 		canHaveMeta = true
 		res = parseVector(v, pos, ctx)
-	case *ArrayMap:
+	case Map:
 		canHaveMeta = true
 		res = parseMap(v, pos, ctx)
 	case *ArraySet:
