@@ -581,7 +581,10 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 					j += 2
 				}
 			}
-			return &ArrayNode{}
+			return &ArrayNode{
+				count: n + 1,
+				array: nodes,
+			}
 		} else {
 			newArray := make([]interface{}, 2*(n+1))
 			for i := 0; i < 2*idx; i++ {
