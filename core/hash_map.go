@@ -502,7 +502,11 @@ func cloneAndSetNode(array []Node, i int, a Node) []Node {
 func createNode(shift uint, key1 Object, val1 Object, key2hash uint32, key2 Object, val2 Object) Node {
 	key1hash := key1.Hash()
 	if key1hash == key2hash {
-		return &HashCollisionNode{}
+		return &HashCollisionNode{
+			hash:  key1hash,
+			count: 2,
+			array: []interface{}{key1, val1, key2, val2},
+		}
 	}
 	addedLeaf := &Box{}
 	return emptyIndexedNode.assoc(shift, key1hash, key1, val1, addedLeaf).assoc(shift, key2hash, key2, val2, addedLeaf)
@@ -587,7 +591,7 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 			addedLeaf.val = addedLeaf
 			newArray[2*idx+1] = val
 			for i := 2 * idx; i < 2*n; i++ {
-				newArray[i+2] = b.array[i].(Object)
+				newArray[i+2] = b.array[i]
 			}
 			return &BitmapIndexedNode{
 				bitmap: b.bitmap | bit,
