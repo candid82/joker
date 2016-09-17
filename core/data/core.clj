@@ -2380,6 +2380,11 @@
   [& body])
 
 
+(defn hash
+  "Returns the hash code of its argument."
+  {:added "1.0"}
+  [x] (hash* x))
+
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
   logical true."

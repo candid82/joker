@@ -7,6 +7,7 @@ package core
 import (
 	"encoding/binary"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"hash"
 	"hash/fnv"
@@ -230,7 +231,7 @@ func init() {
 var hasher hash.Hash32 = fnv.New32a()
 
 func newIteratorError() error {
-	return RT.NewError("Iterator reached the end of collection")
+	return errors.New("Iterator reached the end of collection")
 }
 
 func uint32ToBytes(i uint32) []byte {

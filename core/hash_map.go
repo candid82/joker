@@ -2,7 +2,7 @@ package core
 
 type (
 	Box struct {
-		val Object
+		val interface{}
 	}
 	Node interface {
 		assoc(shift uint, hash uint32, key Object, val Object, addedLeaf *Box) Node
@@ -59,6 +59,7 @@ type (
 
 var (
 	emptyIndexedNode = &BitmapIndexedNode{}
+	EmptyHashMap     = &HashMap{}
 )
 
 func (iter *ArrayNodeIterator) HasNext() bool {
@@ -99,7 +100,7 @@ func (iter *NodeIterator) advance() bool {
 			return true
 		} else if nodeOrVal != nil {
 			iter1 := nodeOrVal.(Node).iter()
-			if iter != nil && iter.HasNext() {
+			if iter1 != nil && iter1.HasNext() {
 				iter.nextIter = iter1
 				return true
 			}
@@ -418,7 +419,7 @@ func (n *HashCollisionNode) assoc(shift uint, hash uint32, key Object, val Objec
 		}
 		newArray[2*n.count] = key
 		newArray[2*n.count+1] = val
-		// addedLeaf.val = addedLeaf
+		addedLeaf.val = addedLeaf
 		return &HashCollisionNode{
 			hash:  hash,
 			count: n.count + 1,
@@ -553,7 +554,7 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 				array:  cloneAndSet(b.array, 2*idx+1, val),
 			}
 		}
-		// addedLeaf.val = addedLeaf
+		addedLeaf.val = addedLeaf
 		return &BitmapIndexedNode{
 			bitmap: b.bitmap,
 			array:  cloneAndSet2(b.array, 2*idx, nil, 2*idx+1, createNode(shift+5, keyOrNull.(Object), valOrNode.(Object), hash, key, val)),
@@ -583,7 +584,7 @@ func (b *BitmapIndexedNode) assoc(shift uint, hash uint32, key Object, val Objec
 				newArray[i] = b.array[i]
 			}
 			newArray[2*idx] = key
-			// addedLeaf.val = addedLeaf
+			addedLeaf.val = addedLeaf
 			newArray[2*idx+1] = val
 			for i := 2 * idx; i < 2*n; i++ {
 				newArray[i+2] = b.array[i].(Object)
