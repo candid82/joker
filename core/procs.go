@@ -389,14 +389,18 @@ var procKeyword Proc = func(args []Object) Object {
 			return Keyword{
 				ns:   obj.ns,
 				name: obj.name,
+				hash: hashSymbol(obj.ns, obj.name),
 			}
 		default:
 			return NIL
 		}
 	}
+	ns := STRINGS.Intern(EnsureString(args, 0).S)
+	name := STRINGS.Intern(EnsureString(args, 1).S)
 	return Keyword{
-		ns:   STRINGS.Intern(EnsureString(args, 0).S),
-		name: STRINGS.Intern(EnsureString(args, 1).S),
+		ns:   ns,
+		name: name,
+		hash: hashSymbol(ns, name),
 	}
 }
 

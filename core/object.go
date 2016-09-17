@@ -99,12 +99,14 @@ type (
 		InfoHolder
 		ns   *string
 		name *string
+		hash uint32
 	}
 	Symbol struct {
 		InfoHolder
 		MetaHolder
 		ns   *string
 		name *string
+		hash uint32
 	}
 	String struct {
 		InfoHolder
@@ -245,6 +247,15 @@ func getHash() hash.Hash32 {
 	return hasher
 }
 
+func hashSymbol(ns, name *string) uint32 {
+	h := getHash()
+	b := make([]byte, 16)
+	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(name))))
+	binary.LittleEndian.PutUint64(b[8:], uint64(uintptr(unsafe.Pointer(ns))))
+	h.Write(b)
+	return h.Sum32()
+}
+
 func MakeSymbol(nsname string) Symbol {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -262,14 +273,19 @@ func MakeSymbol(nsname string) Symbol {
 func MakeKeyword(nsname string) Keyword {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
+		name := STRINGS.Intern(nsname)
 		return Keyword{
 			ns:   nil,
-			name: STRINGS.Intern(nsname),
+			name: name,
+			hash: hashSymbol(nil, name),
 		}
 	}
+	ns := STRINGS.Intern(nsname[0:index])
+	name := STRINGS.Intern(nsname[index+1 : len(nsname)])
 	return Keyword{
-		ns:   STRINGS.Intern(nsname[0:index]),
-		name: STRINGS.Intern(nsname[index+1 : len(nsname)]),
+		ns:   ns,
+		name: name,
+		hash: hashSymbol(ns, name),
 	}
 }
 
@@ -924,12 +940,7 @@ func (k Keyword) GetType() *Type {
 }
 
 func (k Keyword) Hash() uint32 {
-	h := getHash()
-	b := make([]byte, 16)
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(k.name))))
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(k.ns))))
-	h.Write(b)
-	return h.Sum32()
+	return k.hash
 }
 
 func (k Keyword) Compare(other Object) int {
@@ -1010,12 +1021,10 @@ func (s Symbol) GetType() *Type {
 }
 
 func (s Symbol) Hash() uint32 {
-	h := getHash()
-	b := make([]byte, 16)
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(s.name))))
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(s.ns))))
-	h.Write(b)
-	return h.Sum32()
+	if s.hash == 0 {
+		s.hash = hashSymbol(s.ns, s.name)
+	}
+	return s.hash
 }
 
 func (s Symbol) Compare(other Object) int {
