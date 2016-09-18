@@ -17,7 +17,7 @@ type (
 	}
 )
 
-func (v *ArraySet) WithMeta(meta *ArrayMap) Object {
+func (v *ArraySet) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

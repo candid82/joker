@@ -82,7 +82,7 @@ func (seq *MappingSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *MappingSeq) WithMeta(meta *ArrayMap) Object {
+func (seq *MappingSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -135,7 +135,7 @@ func (seq *LazySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *LazySeq) WithMeta(meta *ArrayMap) Object {
+func (seq *LazySeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -182,7 +182,7 @@ func (seq *ArraySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *ArraySeq) WithMeta(meta *ArrayMap) Object {
+func (seq *ArraySeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -233,7 +233,7 @@ func SeqToString(seq Seq, escape bool) string {
 	return b.String()
 }
 
-func (seq *ConsSeq) WithMeta(meta *ArrayMap) Object {
+func (seq *ConsSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

@@ -470,6 +470,23 @@ func readVector(reader *Reader) Object {
 	return MakeReadObject(reader, result)
 }
 
+func readHashMap(reader *Reader, hashMap *HashMap) Object {
+	eatWhitespace(reader)
+	r := reader.Peek()
+	for r != '}' {
+		key := Read(reader)
+		value := Read(reader)
+		if hashMap.containsKey(key) {
+			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
+		}
+		hashMap = hashMap.Assoc(key, value).(*HashMap)
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	return MakeReadObject(reader, hashMap)
+}
+
 func readMap(reader *Reader) Object {
 	m := EmptyArrayMap()
 	eatWhitespace(reader)
@@ -479,6 +496,10 @@ func readMap(reader *Reader) Object {
 		value := Read(reader)
 		if !m.Add(key, value) {
 			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
+		}
+		if len(m.arr) > HASHMAP_THRESHOLD {
+			hashMap := NewHashMap(m.arr...)
+			return readHashMap(reader, hashMap)
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()

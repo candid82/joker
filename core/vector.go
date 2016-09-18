@@ -30,7 +30,7 @@ type (
 
 var empty_node []interface{} = make([]interface{}, 32)
 
-func (v *Vector) WithMeta(meta *ArrayMap) Object {
+func (v *Vector) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -155,7 +155,7 @@ func (vseq *VectorSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
 }
 
-func (vseq *VectorSeq) WithMeta(meta *ArrayMap) Object {
+func (vseq *VectorSeq) WithMeta(meta Map) Object {
 	res := *vseq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -205,7 +205,7 @@ func (vseq *VectorRSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
 }
 
-func (vseq *VectorRSeq) WithMeta(meta *ArrayMap) Object {
+func (vseq *VectorRSeq) WithMeta(meta Map) Object {
 	res := *vseq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

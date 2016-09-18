@@ -51,11 +51,11 @@ type (
 		Type() Symbol
 	}
 	Meta interface {
-		GetMeta() *ArrayMap
-		WithMeta(*ArrayMap) Object
+		GetMeta() Map
+		WithMeta(Map) Object
 	}
 	MetaHolder struct {
-		meta *ArrayMap
+		meta Map
 	}
 	ObjectInfo struct {
 		Position
@@ -458,7 +458,7 @@ func (fn *Fn) Equals(other interface{}) bool {
 	}
 }
 
-func (fn *Fn) WithMeta(meta *ArrayMap) Object {
+func (fn *Fn) WithMeta(meta Map) Object {
 	res := *fn
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -553,11 +553,11 @@ func (i InfoHolder) GetInfo() *ObjectInfo {
 	return i.info
 }
 
-func (m MetaHolder) GetMeta() *ArrayMap {
+func (m MetaHolder) GetMeta() Map {
 	return m.meta
 }
 
-func (sym Symbol) WithMeta(meta *ArrayMap) Object {
+func (sym Symbol) WithMeta(meta Map) Object {
 	res := sym
 	res.meta = SafeMerge(res.meta, meta)
 	return res
@@ -572,7 +572,7 @@ func (v *Var) Equals(other interface{}) bool {
 	return v == other
 }
 
-func (v *Var) WithMeta(meta *ArrayMap) Object {
+func (v *Var) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

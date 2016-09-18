@@ -19,7 +19,7 @@ type (
 )
 
 const (
-	HASHMAP_THRESHOLD int = 8
+	HASHMAP_THRESHOLD int = 16
 )
 
 func EmptyArrayMap() *ArrayMap {
@@ -30,11 +30,11 @@ func ArraySeqFromArrayMap(m *ArrayMap) *ArraySeq {
 	return &ArraySeq{arr: m.arr}
 }
 
-func SafeMerge(m1, m2 *ArrayMap) *ArrayMap {
+func SafeMerge(m1, m2 Map) Map {
 	if m1 == nil {
 		return m2
 	}
-	return m1.Merge(m2).(*ArrayMap)
+	return m1.Merge(m2)
 }
 
 func (seq *ArrayMapSeq) sequential() {}
@@ -47,7 +47,7 @@ func (seq *ArrayMapSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *ArrayMapSeq) WithMeta(meta *ArrayMap) Object {
+func (seq *ArrayMapSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -100,7 +100,7 @@ func (iter *ArrayMapIterator) HasNext() bool {
 	return iter.current < len(iter.m.arr)
 }
 
-func (v *ArrayMap) WithMeta(meta *ArrayMap) Object {
+func (v *ArrayMap) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

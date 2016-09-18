@@ -347,7 +347,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
 	s := Second(seq)
-	var meta *ArrayMap
+	var meta Map
 	switch sym := s.(type) {
 	case Symbol:
 		if sym.ns != nil && (Symbol{name: sym.ns} != ctx.GlobalEnv.CurrentNamespace.Name) {
@@ -374,8 +374,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				if meta != nil {
 					meta = meta.Assoc(MakeKeyword("doc"), docstring).(*ArrayMap)
 				} else {
-					meta = EmptyArrayMap()
-					meta.Add(MakeKeyword("doc"), docstring)
+					meta = EmptyArrayMap().Assoc(MakeKeyword("doc"), docstring).(Map)
 				}
 			default:
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})

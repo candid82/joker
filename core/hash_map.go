@@ -156,7 +156,7 @@ func newArrayNodeSeq(nodes []Node, i int, s Seq) Seq {
 	return nil
 }
 
-func (s *ArrayNodeSeq) WithMeta(meta *ArrayMap) Object {
+func (s *ArrayNodeSeq) WithMeta(meta Map) Object {
 	res := *s
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -237,7 +237,7 @@ func newNodeSeq(array []interface{}, i int, s Seq) Seq {
 	return nil
 }
 
-func (s *NodeSeq) WithMeta(meta *ArrayMap) Object {
+func (s *NodeSeq) WithMeta(meta Map) Object {
 	res := *s
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
@@ -664,7 +664,7 @@ func (b *BitmapIndexedNode) nodeSeq() Seq {
 	return &NodeSeq{array: b.array}
 }
 
-func (m *HashMap) WithMeta(meta *ArrayMap) Object {
+func (m *HashMap) WithMeta(meta Map) Object {
 	res := *m
 	res.meta = SafeMerge(res.meta, meta)
 	return &res

@@ -168,6 +168,17 @@ func (expr *VectorExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *MapExpr) Eval(env *LocalEnv) Object {
+	if len(expr.keys) > HASHMAP_THRESHOLD/2 {
+		res := EmptyHashMap
+		for i := range expr.keys {
+			key := Eval(expr.keys[i], env)
+			if res.containsKey(key) {
+				panic(RT.NewError("Duplicate key: " + key.ToString(false)))
+			}
+			res = res.Assoc(key, Eval(expr.values[i], env)).(*HashMap)
+		}
+		return res
+	}
 	res := EmptyArrayMap()
 	for i := range expr.keys {
 		key := Eval(expr.keys[i], env)
@@ -194,7 +205,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 		expr.vr.Value = Eval(expr.value, env)
 	}
 	if expr.meta != nil {
-		expr.vr.meta = Eval(expr.meta, env).(*ArrayMap)
+		expr.vr.meta = Eval(expr.meta, env).(Map)
 	}
 	return expr.vr
 }
