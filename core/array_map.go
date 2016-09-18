@@ -18,6 +18,10 @@ type (
 	}
 )
 
+const (
+	HASHMAP_THRESHOLD int = 8
+)
+
 func EmptyArrayMap() *ArrayMap {
 	return &ArrayMap{}
 }
@@ -150,9 +154,19 @@ func (m *ArrayMap) Clone() *ArrayMap {
 }
 
 func (m *ArrayMap) Assoc(key Object, value Object) Associative {
-	result := m.Clone()
-	result.Set(key, value)
-	return result
+	i := m.indexOf(key)
+	if i != -1 {
+		res := m.Clone()
+		res.arr[i+1] = value
+		return res
+	}
+	if len(m.arr) >= HASHMAP_THRESHOLD {
+		return NewHashMap(m.arr...).Assoc(key, value)
+	}
+	res := m.Clone()
+	res.arr = append(res.arr, key)
+	res.arr = append(res.arr, value)
+	return res
 }
 
 func (m *ArrayMap) EntryAt(key Object) *Vector {

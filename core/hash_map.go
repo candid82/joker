@@ -810,3 +810,11 @@ func (m *HashMap) Without(key Object) Map {
 	res.meta = m.meta
 	return res
 }
+
+func NewHashMap(keyvals ...Object) *HashMap {
+	var res Associative = EmptyHashMap
+	for i := 0; i < len(keyvals); i += 2 {
+		res = res.Assoc(keyvals[i], keyvals[i+1])
+	}
+	return res.(*HashMap)
+}

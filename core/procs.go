@@ -345,11 +345,7 @@ var procHashMap Proc = func(args []Object) Object {
 	if len(args)%2 != 0 {
 		panic(RT.NewError("No value supplied for key " + args[len(args)-1].ToString(false)))
 	}
-	var res Associative = EmptyHashMap
-	for i := 0; i < len(args); i += 2 {
-		res = res.Assoc(args[i], args[i+1])
-	}
-	return res
+	return NewHashMap(args...)
 }
 
 var procHashSet Proc = func(args []Object) Object {

@@ -206,10 +206,13 @@ func init() {
 	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
 	TYPES["Vector"] = &Type{name: "Vector", reflectType: reflect.TypeOf((*Vector)(nil))}
 	TYPES["ArrayMap"] = &Type{name: "ArrayMap", reflectType: reflect.TypeOf((*ArrayMap)(nil))}
+	TYPES["HashMap"] = &Type{name: "HashMap", reflectType: reflect.TypeOf((*HashMap)(nil))}
 	TYPES["ArraySet"] = &Type{name: "ArraySet", reflectType: reflect.TypeOf((*ArraySet)(nil))}
 	TYPES["List"] = &Type{name: "List", reflectType: reflect.TypeOf((*List)(nil))}
 	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq", reflectType: reflect.TypeOf((*ArrayMapSeq)(nil))}
 	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
+	TYPES["ArrayNodeSeq"] = &Type{name: "ArrayNodeSeq", reflectType: reflect.TypeOf((*ArrayNodeSeq)(nil))}
+	TYPES["NodeSeq"] = &Type{name: "NodeSeq", reflectType: reflect.TypeOf((*NodeSeq)(nil))}
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
 	TYPES["NodeSeq"] = &Type{name: "NodeSeq", reflectType: reflect.TypeOf((*NodeSeq)(nil))}
 	TYPES["LazySeq"] = &Type{name: "LazySeq", reflectType: reflect.TypeOf((*LazySeq)(nil))}
