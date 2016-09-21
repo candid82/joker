@@ -187,7 +187,11 @@ func (s *ArrayNodeSeq) First() Object {
 }
 
 func (s *ArrayNodeSeq) Rest() Seq {
-	res := newArrayNodeSeq(s.nodes, s.i, s.s.Rest())
+	next := s.s.Rest()
+	if next.IsEmpty() {
+		next = nil
+	}
+	res := newArrayNodeSeq(s.nodes, s.i, next)
 	if res == nil {
 		return EmptyList
 	}
@@ -196,7 +200,7 @@ func (s *ArrayNodeSeq) Rest() Seq {
 
 func (s *ArrayNodeSeq) IsEmpty() bool {
 	if s.s != nil {
-		return s.IsEmpty()
+		return s.s.IsEmpty()
 	}
 	return false
 }
@@ -265,7 +269,7 @@ func (s *NodeSeq) Hash() uint32 {
 
 func (s *NodeSeq) First() Object {
 	if s.s != nil {
-		return s.First()
+		return s.s.First()
 	}
 	return NewVectorFrom(s.array[s.i].(Object), s.array[s.i+1].(Object))
 }
@@ -273,7 +277,11 @@ func (s *NodeSeq) First() Object {
 func (s *NodeSeq) Rest() Seq {
 	var res Seq
 	if s.s != nil {
-		res = newNodeSeq(s.array, s.i, s.Rest())
+		next := s.s.Rest()
+		if next.IsEmpty() {
+			next = nil
+		}
+		res = newNodeSeq(s.array, s.i, next)
 	} else {
 		res = newNodeSeq(s.array, s.i+2, nil)
 	}
@@ -285,7 +293,7 @@ func (s *NodeSeq) Rest() Seq {
 
 func (s *NodeSeq) IsEmpty() bool {
 	if s.s != nil {
-		return s.IsEmpty()
+		return s.s.IsEmpty()
 	}
 	return false
 }
@@ -661,7 +669,7 @@ func (b *BitmapIndexedNode) find(shift uint, hash uint32, key Object) *Pair {
 }
 
 func (b *BitmapIndexedNode) nodeSeq() Seq {
-	return &NodeSeq{array: b.array}
+	return newNodeSeq(b.array, 0, nil)
 }
 
 func (m *HashMap) WithMeta(meta Map) Object {
