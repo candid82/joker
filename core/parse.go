@@ -685,7 +685,7 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 			return nil
 		}
 		vr, ok := ctx.GlobalEnv.Resolve(sym)
-		if !ok || !vr.isMacro {
+		if !ok || !vr.isMacro || vr.Value == nil {
 			return nil
 		}
 		return vr.Value.(Callable)
@@ -772,17 +772,33 @@ func reportNotAFunction(pos Position, name string) {
 	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s is not a function\n", pos.line, pos.column, name)
 }
 
-func reportWrongArity(expr *FnExpr, call *CallExpr, pos Position) {
+func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
+	passedArgsCount := len(call.args)
+	if isMacro {
+		passedArgsCount += 2
+	}
 	for _, arity := range expr.arities {
-		if len(arity.args) == len(call.args) {
+		if len(arity.args) == passedArgsCount {
 			return
 		}
 	}
 	v := expr.variadic
-	if v != nil && len(call.args) >= len(v.args)-1 {
+	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return
 	}
 	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.line, pos.column, len(call.args), call.name)
+}
+
+func parseSetMacro(obj Object, ctx *ParseContext) Expr {
+	expr := Parse(Second(obj.(Seq)), ctx)
+	switch expr.(type) {
+	case *VarExpr:
+		vr := expr.Eval(nil).(*Var)
+		vr.isMacro = true
+		return expr
+	default:
+		panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
+	}
 }
 
 func parseList(obj Object, ctx *ParseContext) Expr {
@@ -817,6 +833,8 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseLoop(obj, ctx)
 		case "recur":
 			return parseRecur(obj, ctx)
+		case "set-macro*":
+			return parseSetMacro(obj, ctx)
 		case "def":
 			return parseDef(obj, ctx)
 		case "var":
@@ -864,7 +882,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			if c.vr.Value != nil {
 				switch f := c.vr.Value.(type) {
 				case *Fn:
-					reportWrongArity(f.fnExpr, res, pos)
+					reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos)
 				case Callable:
 					return res
 				default:
@@ -873,7 +891,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			} else {
 				switch expr := c.vr.expr.(type) {
 				case *FnExpr:
-					reportWrongArity(expr, res, pos)
+					reportWrongArity(expr, c.vr.isMacro, res, pos)
 				case *LiteralExpr:
 					reportNotAFunction(pos, res.name)
 				case *VectorExpr:
