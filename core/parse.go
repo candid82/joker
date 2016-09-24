@@ -894,12 +894,6 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					reportWrongArity(expr, c.vr.isMacro, res, pos)
 				case *LiteralExpr:
 					reportNotAFunction(pos, res.name)
-				case *VectorExpr:
-					reportNotAFunction(pos, res.name)
-				case *MapExpr:
-					reportNotAFunction(pos, res.name)
-				case *SetExpr:
-					reportNotAFunction(pos, res.name)
 				case *RecurExpr:
 					reportNotAFunction(pos, res.name)
 				case *BindingExpr:
