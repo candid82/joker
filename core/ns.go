@@ -1,6 +1,10 @@
 package core
 
-import "unsafe"
+import (
+	"fmt"
+	"os"
+	"unsafe"
+)
 
 type (
 	Namespace struct {
@@ -62,15 +66,30 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 		panic(RT.NewError("Can't intern type name " + *sym.name + " as a Var"))
 	}
 	sym.meta = nil
-	v, ok := ns.mappings[sym.name]
+	existingVar, ok := ns.mappings[sym.name]
 	if !ok {
-		v = &Var{
+		newVar := &Var{
 			ns:   ns,
 			name: sym,
 		}
-		ns.mappings[sym.name] = v
+		ns.mappings[sym.name] = newVar
+		return newVar
 	}
-	return v
+	if existingVar.ns != ns {
+		if existingVar.ns.Name.Equals(MakeSymbol("joker.core")) {
+			newVar := &Var{
+				ns:   ns,
+				name: sym,
+			}
+			ns.mappings[sym.name] = newVar
+			fmt.Fprintf(os.Stderr, "WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
+				sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false))
+			return newVar
+		}
+		panic(RT.NewError(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",
+			sym.ToString(false), existingVar.ToString(false), ns.ToString(false))))
+	}
+	return existingVar
 }
 
 func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {

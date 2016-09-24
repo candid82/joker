@@ -1011,14 +1011,12 @@ func ProcessReader(reader *Reader, phase Phase) {
 	}
 }
 
-var coreNamespace = GLOBAL_ENV.Namespaces[MakeSymbol("joker.core").name]
-
 func intern(name string, proc Proc) {
-	coreNamespace.Intern(MakeSymbol(name)).Value = proc
+	GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name)).Value = proc
 }
 
 func init() {
-	coreNamespace.Intern(MakeSymbol("*assert*")).Value = Bool{B: true}
+	GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*assert*")).Value = Bool{B: true}
 
 	intern("list**", procList)
 	intern("cons*", procCons)
@@ -1142,7 +1140,7 @@ func init() {
 	intern("hash*", procHash)
 
 	currentNamespace := GLOBAL_ENV.CurrentNamespace
-	GLOBAL_ENV.SetCurrentNamespace(coreNamespace)
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	data, err := Asset("data/core.clj")
 	if err != nil {
 		panic(RT.NewError("Could not load core.clj"))
