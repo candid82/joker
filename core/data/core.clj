@@ -2399,6 +2399,12 @@
      `(when-not ~x
         (throw (ex-info (str "Assert failed: " ~message "\n" '~x)))))))
 
+(defmacro defn-
+  "same as defn, yielding non-public def"
+  {:added "1.0"}
+  [name & decls]
+  (list* `defn (with-meta name (assoc (meta name) :private true)) decls))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
