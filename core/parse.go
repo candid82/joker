@@ -863,7 +863,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		}
 	}
 	res := &CallExpr{
-		callable: Parse(seq.First(), ctx),
+		callable: Parse(first, ctx),
 		args:     parseSeq(seq.Rest(), ctx),
 		Position: pos,
 		name:     "fn",

@@ -7,6 +7,6 @@ do
   ERROR=$(./joker --parse $f 2>&1)
   if [ -n "$ERROR" ]; then
     echo $f
-    echo $ERROR
+    echo "$ERROR"
   fi
 done
