@@ -274,10 +274,6 @@ func (err ParseError) Error() string {
 	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", line, column, err.msg)
 }
 
-func (err ParseError) Type() Symbol {
-	return MakeSymbol("ParseError")
-}
-
 func parseSeq(seq Seq, ctx *ParseContext) []Expr {
 	res := make([]Expr, 0)
 	for !seq.IsEmpty() {
