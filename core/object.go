@@ -48,7 +48,6 @@ type (
 	Error interface {
 		error
 		Object
-		Type() Symbol
 	}
 	Meta interface {
 		GetMeta() Map
@@ -231,6 +230,7 @@ func init() {
 	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
 	TYPES["Namespace"] = &Type{name: "Namespace", reflectType: reflect.TypeOf((*Namespace)(nil)).Elem()}
 	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
+	TYPES["EvalError"] = &Type{name: "EvalError", reflectType: reflect.TypeOf((*EvalError)(nil)).Elem()}
 }
 
 var hasher hash.Hash32 = fnv.New32a()
@@ -316,22 +316,6 @@ func (s SortableSlice) Less(i, j int) bool {
 	return s.cmp.Compare(s.s[i], s.s[j]) == -1
 }
 
-func (d *Delay) ToString(escape bool) string {
-	return "#object[Delay]"
-}
-
-func (d *Delay) Equals(other interface{}) bool {
-	return d == other
-}
-
-func (d *Delay) GetInfo() *ObjectInfo {
-	return nil
-}
-
-func (d *Delay) GetType() *Type {
-	return TYPES["Delay"]
-}
-
 func hashPtr(ptr uintptr) uint32 {
 	h := getHash()
 	b := make([]byte, unsafe.Sizeof(ptr))
@@ -359,8 +343,28 @@ func hashGobEncoder(e gob.GobEncoder) uint32 {
 	return h.Sum32()
 }
 
+func (d *Delay) ToString(escape bool) string {
+	return "#object[Delay]"
+}
+
+func (d *Delay) Equals(other interface{}) bool {
+	return d == other
+}
+
+func (d *Delay) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (d *Delay) GetType() *Type {
+	return TYPES["Delay"]
+}
+
 func (d *Delay) Hash() uint32 {
 	return hashPtr(uintptr(unsafe.Pointer(d)))
+}
+
+func (d *Delay) WithInfo(info *ObjectInfo) Object {
+	return d
 }
 
 func (d *Delay) Force() Object {
@@ -1131,14 +1135,21 @@ func IsSeq(obj Object) bool {
 	}
 }
 
-func (x *Delay) WithInfo(info *ObjectInfo) Object {
-	return x
-}
-
 func (x *Type) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
 func (x RecurBindings) WithInfo(info *ObjectInfo) Object {
 	return x
+}
+
+func IsInstance(t *Type, obj Object) bool {
+	if obj.Equals(NIL) {
+		return false
+	}
+	if t.reflectType.Kind() == reflect.Interface {
+		return obj.GetType().reflectType.Implements(t.reflectType)
+	} else {
+		return obj.GetType().reflectType == t.reflectType
+	}
 }

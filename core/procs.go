@@ -284,14 +284,7 @@ var procIsInstance Proc = func(args []Object) Object {
 	checkArity(args, 2, 2)
 	switch t := args[0].(type) {
 	case *Type:
-		if args[1].Equals(NIL) {
-			return Bool{B: false}
-		}
-		if t.reflectType.Kind() == reflect.Interface {
-			return Bool{B: args[1].GetType().reflectType.Implements(t.reflectType)}
-		} else {
-			return Bool{B: args[1].GetType().reflectType == t.reflectType}
-		}
+		return Bool{B: IsInstance(t, args[1])}
 	default:
 		panic(RT.NewError("First argument to instance? must be a type"))
 	}

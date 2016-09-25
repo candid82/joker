@@ -100,7 +100,7 @@ type (
 	}
 	CatchExpr struct {
 		Position
-		excType   Symbol
+		excType   *Type
 		excSymbol Symbol
 		body      []Expr
 	}
@@ -536,16 +536,25 @@ func isFinally(obj Object) bool {
 	return IsSeq(obj) && obj.(Seq).First().Equals(MakeSymbol("finally"))
 }
 
+func resolveType(obj Object, ctx *ParseContext) *Type {
+	excType := Parse(obj, ctx)
+	switch excType := excType.(type) {
+	case *LiteralExpr:
+		switch t := excType.obj.(type) {
+		case *Type:
+			return t
+		}
+	}
+	panic(&ParseError{obj: obj, msg: "Unable to resolve type: " + obj.ToString(false)})
+}
+
 func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
 	seq := obj.(Seq).Rest()
 	if seq.IsEmpty() || seq.Rest().IsEmpty() {
 		panic(&ParseError{obj: obj, msg: "catch requires at least two arguments: type symbol and binding symbol"})
 	}
-	excType := seq.First()
-	if !IsSymbol(excType) {
-		panic(&ParseError{obj: excType, msg: "Unable to resolve type: " + excType.ToString(false)})
-	}
 	excSymbol := Second(seq)
+	excType := resolveType(seq.First(), ctx)
 	if !IsSymbol(excSymbol) {
 		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.ToString(false)})
 	}
@@ -556,7 +565,7 @@ func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 	return &CatchExpr{
 		Position:  GetPosition(obj),
-		excType:   excType.(Symbol),
+		excType:   excType,
 		excSymbol: excSymbol.(Symbol),
 		body:      parseBody(seq.Rest().Rest(), ctx),
 	}

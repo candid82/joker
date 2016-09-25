@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"unsafe"
 )
 
 type (
@@ -128,16 +129,36 @@ func (s *Callstack) String() string {
 	return b.String()
 }
 
-func (err EvalError) Error() string {
+func (err *EvalError) ToString(escape bool) string {
+	return err.Error()
+}
+
+func (err *EvalError) Equals(other interface{}) bool {
+	return err == other
+}
+
+func (err *EvalError) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (err *EvalError) GetType() *Type {
+	return TYPES["EvalError"]
+}
+
+func (err *EvalError) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(err)))
+}
+
+func (err *EvalError) WithInfo(info *ObjectInfo) Object {
+	return err
+}
+
+func (err *EvalError) Error() string {
 	if len(err.rt.callstack.frames) > 0 {
 		return fmt.Sprintf("stdin:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.line, err.pos.column, err.msg, err.rt.stacktrace())
 	} else {
 		return fmt.Sprintf("stdin:%d:%d: Eval error: %s", err.pos.line, err.pos.column, err.msg)
 	}
-}
-
-func (err EvalError) Type() Symbol {
-	return MakeSymbol("EvalError")
 }
 
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
@@ -268,7 +289,7 @@ func (expr *TryExpr) Eval(env *LocalEnv) (obj Object) {
 			switch r := r.(type) {
 			case Error:
 				for _, catchExpr := range expr.catches {
-					if catchExpr.excType.Equals(r.Type()) {
+					if IsInstance(catchExpr.excType, r) {
 						obj = evalBody(catchExpr.body, env.addFrame([]Object{r}))
 						return
 					}
