@@ -2485,6 +2485,17 @@
           g
           (last steps)))))
 
+(defn reduce-kv
+  "Reduces an associative collection. f should be a function of 3
+  arguments. Returns the result of applying f to init, the first key
+  and the first value in coll, then applying f to that result and the
+  2nd key and value, etc. If coll contains no entries, returns init
+  and f is not called. Note that reduce-kv is supported on vectors,
+  where the keys will be the ordinals."
+  {:added "1.0"}
+  ([f init coll]
+   (reduce1 (fn [ret [k v]] (f ret k v)) init coll)))
+
 (defn keep
   "Returns a lazy sequence of the non-nil results of (f item). Note,
   this means false return values will be included.  f must be free of
