@@ -25,6 +25,18 @@ var padRight Proc = func(args []Object) Object {
 	}
 }
 
+var padLeft Proc = func(args []Object) Object {
+	str := EnsureString(args, 0).S
+	pad := EnsureString(args, 1).S
+	n := EnsureInt(args, 2).I
+	for {
+		str = pad + str
+		if len(str) > n {
+			return String{S: str[len(str)-n:]}
+		}
+	}
+}
+
 var split Proc = func(args []Object) Object {
 	str := EnsureString(args, 0).S
 	reg := regexp.MustCompile(EnsureRegex(args, 1).R)
@@ -55,6 +67,7 @@ var join Proc = func(args []Object) Object {
 
 func init() {
 	intern("pad-right", padRight)
+	intern("pad-left", padLeft)
 	intern("split", split)
 	intern("join", join)
 }
