@@ -541,6 +541,9 @@ func resolveType(obj Object, ctx *ParseContext) *Type {
 			return t
 		}
 	}
+	if LINTER_MODE {
+		return TYPES["Error"]
+	}
 	panic(&ParseError{obj: obj, msg: "Unable to resolve type: " + obj.ToString(false)})
 }
 
