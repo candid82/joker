@@ -722,11 +722,12 @@ var procType Proc = func(args []Object) Object {
 func pr(args []Object, escape bool) Object {
 	n := len(args)
 	if n > 0 {
+		f := GLOBAL_ENV.stdout.Value.(*File).f
 		for _, arg := range args[:n-1] {
-			print(arg.ToString(escape))
-			print(" ")
+			fmt.Fprint(f, arg.ToString(escape))
+			fmt.Fprint(f, " ")
 		}
-		print(args[n-1].ToString(escape))
+		fmt.Fprint(f, args[n-1].ToString(escape))
 	}
 	return NIL
 }
@@ -740,7 +741,8 @@ var procPrint Proc = func(args []Object) Object {
 }
 
 var procNewline Proc = func(args []Object) Object {
-	println()
+	f := GLOBAL_ENV.stdout.Value.(*File).f
+	fmt.Fprintln(f)
 	return NIL
 }
 

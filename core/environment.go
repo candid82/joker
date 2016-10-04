@@ -1,20 +1,25 @@
 package core
 
+import "os"
+
 type (
 	Env struct {
 		Namespaces       map[*string]*Namespace
 		CurrentNamespace *Namespace
 		CoreNamespace    *Namespace
+		stdout           *Var
 	}
 )
 
-func NewEnv(currentNs Symbol) *Env {
+func NewEnv(currentNs Symbol, stdout *os.File) *Env {
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
 	}
 	currentNamespace := res.EnsureNamespace(currentNs)
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("joker.core"))
 	res.CoreNamespace.Intern(MakeSymbol("*ns*"))
+	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
+	res.stdout.Value = &File{f: stdout}
 	res.SetCurrentNamespace(currentNamespace)
 	return res
 }

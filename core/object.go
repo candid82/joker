@@ -202,6 +202,7 @@ func init() {
 	TYPES["EvalError"] = &Type{name: "EvalError", reflectType: reflect.TypeOf((*EvalError)(nil))}
 	TYPES["ExInfo"] = &Type{name: "ExInfo", reflectType: reflect.TypeOf((*ExInfo)(nil))}
 	TYPES["Fn"] = &Type{name: "Fn", reflectType: reflect.TypeOf((*Fn)(nil))}
+	TYPES["File"] = &Type{name: "File", reflectType: reflect.TypeOf((*File)(nil))}
 	TYPES["HashMap"] = &Type{name: "HashMap", reflectType: reflect.TypeOf((*HashMap)(nil))}
 	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
 	TYPES["Int"] = &Type{name: "Int", reflectType: reflect.TypeOf((*Int)(nil)).Elem()}
