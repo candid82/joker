@@ -722,7 +722,7 @@ var procType Proc = func(args []Object) Object {
 func pr(args []Object, escape bool) Object {
 	n := len(args)
 	if n > 0 {
-		f := GLOBAL_ENV.stdout.Value.(*File).f
+		f := GLOBAL_ENV.stdout.Value.(io.Writer)
 		for _, arg := range args[:n-1] {
 			fmt.Fprint(f, arg.ToString(escape))
 			fmt.Fprint(f, " ")
@@ -741,7 +741,7 @@ var procPrint Proc = func(args []Object) Object {
 }
 
 var procNewline Proc = func(args []Object) Object {
-	f := GLOBAL_ENV.stdout.Value.(*File).f
+	f := GLOBAL_ENV.stdout.Value.(io.Writer)
 	fmt.Fprintln(f)
 	return NIL
 }
@@ -929,6 +929,10 @@ var procArrayMap Proc = func(args []Object) Object {
 		res.Set(args[i], args[i+1])
 	}
 	return res
+}
+
+var procBuffer Proc = func(args []Object) Object {
+	return &Buffer{&bytes.Buffer{}}
 }
 
 var procSlurp Proc = func(args []Object) Object {
@@ -1127,6 +1131,7 @@ func init() {
 	intern("var-set*", procVarSet)
 	intern("ns-resolve*", procNsResolve)
 	intern("array-map*", procArrayMap)
+	intern("buffer*", procBuffer)
 
 	intern("ex-info", procExInfo)
 	intern("set-macro*", procSetMacro)

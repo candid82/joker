@@ -1116,7 +1116,7 @@
   last item in second form, etc."
   {:added "1.0"}
   [x & forms]
-  (loop [x x, forms forms]
+  (loop [x x forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
@@ -1206,6 +1206,22 @@
          nil
          (let [~form temp#]
            ~@body)))))
+
+; (defn replace-bindings*
+;   [binding-map]
+;   )
+
+; (defn with-bindings*
+;   "Takes a map of Var/value pairs. Installs for the given Vars the associated
+;   values as thread-local bindings. Then calls f with the supplied arguments.
+;   Pops the installed bindings after f returned. Returns whatever f returns."
+;   {:added "1.0"}
+;   [binding-map f & args]
+;   (let [existing-bindings (replace-bindings* binding-map)]
+;     (try
+;       (apply f args)
+;       (finally
+;         (replace-bindings* existing-bindings)))))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
@@ -2379,7 +2395,18 @@
   {:added "1.0"}
   [& body])
 
-
+(defmacro with-out-str
+  "Evaluates exprs in a context in which *out* is bound to a fresh
+  Buffer.  Returns the string created by any nested printing
+  calls."
+  {:added "1.0"}
+  [& body]
+  `(let [s# (buffer*)
+         out# *out*]
+     (var-set* (var *out*) s#)
+     ~@body
+     (var-set (var *out*) out#)
+     (str s#)))
 
 (defn hash
   "Returns the hash code of its argument."

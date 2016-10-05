@@ -19,7 +19,7 @@ func NewEnv(currentNs Symbol, stdout *os.File) *Env {
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("joker.core"))
 	res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &File{f: stdout}
+	res.stdout.Value = &File{stdout}
 	res.SetCurrentNamespace(currentNamespace)
 	return res
 }

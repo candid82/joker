@@ -7,7 +7,7 @@ import (
 
 type (
 	File struct {
-		f *os.File
+		*os.File
 	}
 )
 
