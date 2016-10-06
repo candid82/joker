@@ -2400,9 +2400,9 @@
              binding-map))
 
 (defn with-bindings*
-  "Takes a map of Var/value pairs. Installs for the given Vars the associated
-  values as thread-local bindings. Then calls f with the supplied arguments.
-  Pops the installed bindings after f returned. Returns whatever f returns."
+  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
+  Then calls f with the supplied arguments. Resets the vars back to the original
+  values after f returned. Returns whatever f returns."
   {:added "1.0"}
   [binding-map f & args]
   (let [existing-bindings (replace-bindings* binding-map)]
@@ -2410,6 +2410,14 @@
       (apply f args)
       (finally
         (replace-bindings* existing-bindings)))))
+
+(defmacro with-bindings
+  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
+  Then executes body. Resets the vars back to the original
+  values after body was evaluated. Returns the value of body."
+  {:added "1.0"}
+  [binding-map & body]
+  `(with-bindings* ~binding-map (fn [] ~@body)))
 
 (defmacro with-out-str
   "Evaluates exprs in a context in which *out* is bound to a fresh
