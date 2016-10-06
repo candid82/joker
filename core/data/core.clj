@@ -2446,12 +2446,9 @@
   calls."
   {:added "1.0"}
   [& body]
-  `(let [s# (buffer*)
-         out# *out*]
-     (var-set* (var *out*) s#)
+  `(binding [*out* (buffer*)]
      ~@body
-     (var-set (var *out*) out#)
-     (str s#)))
+     (str *out*)))
 
 (defn hash
   "Returns the hash code of its argument."
