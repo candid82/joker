@@ -1207,22 +1207,6 @@
          (let [~form temp#]
            ~@body)))))
 
-; (defn replace-bindings*
-;   [binding-map]
-;   )
-
-; (defn with-bindings*
-;   "Takes a map of Var/value pairs. Installs for the given Vars the associated
-;   values as thread-local bindings. Then calls f with the supplied arguments.
-;   Pops the installed bindings after f returned. Returns whatever f returns."
-;   {:added "1.0"}
-;   [binding-map f & args]
-;   (let [existing-bindings (replace-bindings* binding-map)]
-;     (try
-;       (apply f args)
-;       (finally
-;         (replace-bindings* existing-bindings)))))
-
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
@@ -2395,6 +2379,38 @@
   {:added "1.0"}
   [& body])
 
+(defn reduce-kv
+  "Reduces an associative collection. f should be a function of 3
+  arguments. Returns the result of applying f to init, the first key
+  and the first value in coll, then applying f to that result and the
+  2nd key and value, etc. If coll contains no entries, returns init
+  and f is not called. Note that reduce-kv is supported on vectors,
+  where the keys will be the ordinals."
+  {:added "1.0"}
+  ([f init coll]
+   (reduce1 (fn [ret [k v]] (f ret k v)) init coll)))
+
+(defn replace-bindings*
+  [binding-map]
+  (reduce-kv (fn [res k v]
+               (let [c (var-get k)]
+                 (var-set k v)
+                 (assoc res k c)))
+             {}
+             binding-map))
+
+(defn with-bindings*
+  "Takes a map of Var/value pairs. Installs for the given Vars the associated
+  values as thread-local bindings. Then calls f with the supplied arguments.
+  Pops the installed bindings after f returned. Returns whatever f returns."
+  {:added "1.0"}
+  [binding-map f & args]
+  (let [existing-bindings (replace-bindings* binding-map)]
+    (try
+      (apply f args)
+      (finally
+        (replace-bindings* existing-bindings)))))
+
 (defmacro with-out-str
   "Evaluates exprs in a context in which *out* is bound to a fresh
   Buffer.  Returns the string created by any nested printing
@@ -2511,17 +2527,6 @@
        ~(if (empty? steps)
           g
           (last steps)))))
-
-(defn reduce-kv
-  "Reduces an associative collection. f should be a function of 3
-  arguments. Returns the result of applying f to init, the first key
-  and the first value in coll, then applying f to that result and the
-  2nd key and value, etc. If coll contains no entries, returns init
-  and f is not called. Note that reduce-kv is supported on vectors,
-  where the keys will be the ordinals."
-  {:added "1.0"}
-  ([f init coll]
-   (reduce1 (fn [ret [k v]] (f ret k v)) init coll)))
 
 (defn keep
   "Returns a lazy sequence of the non-nil results of (f item). Note,
