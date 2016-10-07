@@ -722,7 +722,7 @@ var procType Proc = func(args []Object) Object {
 func pr(args []Object, escape bool) Object {
 	n := len(args)
 	if n > 0 {
-		f := GLOBAL_ENV.stdout.Value.(io.Writer)
+		f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 		for _, arg := range args[:n-1] {
 			fmt.Fprint(f, arg.ToString(escape))
 			fmt.Fprint(f, " ")
@@ -741,7 +741,7 @@ var procPrint Proc = func(args []Object) Object {
 }
 
 var procNewline Proc = func(args []Object) Object {
-	f := GLOBAL_ENV.stdout.Value.(io.Writer)
+	f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 	fmt.Fprintln(f)
 	return NIL
 }
@@ -764,18 +764,53 @@ func EnsureIOReader(args []Object, index int) io.Reader {
 	}
 }
 
+func AssertIOReader(obj Object, msg string) io.Reader {
+	switch c := obj.(type) {
+	case io.Reader:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "IOReader", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func EnsureIOWriter(args []Object, index int) io.Writer {
+	switch c := args[index].(type) {
+	case io.Writer:
+		return c
+	default:
+		panic(RT.newArgTypeError(index, c, "IOWriter"))
+	}
+}
+
+func AssertIOWriter(obj Object, msg string) io.Writer {
+	switch c := obj.(type) {
+	case io.Writer:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "IOWriter", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
 var procRead Proc = func(args []Object) Object {
 	f := EnsureIOReader(args, 0)
 	return readFromReader(bufio.NewReader(f))
 }
 
 var procReadString Proc = func(args []Object) Object {
+	checkArity(args, 1, 1)
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
 var procReadLine Proc = func(args []Object) Object {
+	checkArity(args, 0, 0)
 	var line string
-	f := GLOBAL_ENV.stdin.Value.(io.Reader)
+	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
 	fmt.Fscanln(f, &line)
 	return &String{S: line}
 }
