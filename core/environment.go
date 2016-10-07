@@ -8,10 +8,11 @@ type (
 		CurrentNamespace *Namespace
 		CoreNamespace    *Namespace
 		stdout           *Var
+		stdin            *Var
 	}
 )
 
-func NewEnv(currentNs Symbol, stdout *os.File) *Env {
+func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
 	}
@@ -20,6 +21,8 @@ func NewEnv(currentNs Symbol, stdout *os.File) *Env {
 	res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
 	res.stdout.Value = &File{stdout}
+	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
+	res.stdin.Value = &File{stdin}
 	res.SetCurrentNamespace(currentNamespace)
 	return res
 }

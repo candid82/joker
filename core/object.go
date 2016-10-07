@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hash"
 	"hash/fnv"
+	"io"
 	"math"
 	"math/big"
 	"reflect"
@@ -207,6 +208,7 @@ func init() {
 	TYPES["HashMap"] = &Type{name: "HashMap", reflectType: reflect.TypeOf((*HashMap)(nil))}
 	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
 	TYPES["Int"] = &Type{name: "Int", reflectType: reflect.TypeOf((*Int)(nil)).Elem()}
+	TYPES["IOReader"] = &Type{name: "IOReader", reflectType: reflect.TypeOf((*io.Reader)(nil)).Elem()}
 	TYPES["Keyword"] = &Type{name: "Keyword", reflectType: reflect.TypeOf((*Keyword)(nil)).Elem()}
 	TYPES["LazySeq"] = &Type{name: "LazySeq", reflectType: reflect.TypeOf((*LazySeq)(nil))}
 	TYPES["List"] = &Type{name: "List", reflectType: reflect.TypeOf((*List)(nil))}

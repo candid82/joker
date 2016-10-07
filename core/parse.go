@@ -141,7 +141,7 @@ type (
 	}
 )
 
-var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout)
+var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin)
 var LOCAL_BINDINGS *Bindings = nil
 
 func (b *Bindings) ToMap() Map {

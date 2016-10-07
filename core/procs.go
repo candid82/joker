@@ -755,8 +755,18 @@ func readFromReader(reader io.RuneReader) Object {
 	return obj
 }
 
+func EnsureIOReader(args []Object, index int) io.Reader {
+	switch c := args[index].(type) {
+	case io.Reader:
+		return c
+	default:
+		panic(RT.newArgTypeError(index, c, "IOReader"))
+	}
+}
+
 var procRead Proc = func(args []Object) Object {
-	return readFromReader(bufio.NewReader(os.Stdin))
+	f := EnsureIOReader(args, 0)
+	return readFromReader(bufio.NewReader(f))
 }
 
 var procReadString Proc = func(args []Object) Object {
@@ -765,7 +775,8 @@ var procReadString Proc = func(args []Object) Object {
 
 var procReadLine Proc = func(args []Object) Object {
 	var line string
-	fmt.Scanln(&line)
+	f := GLOBAL_ENV.stdin.Value.(io.Reader)
+	fmt.Fscanln(f, &line)
 	return &String{S: line}
 }
 
@@ -932,6 +943,10 @@ var procArrayMap Proc = func(args []Object) Object {
 }
 
 var procBuffer Proc = func(args []Object) Object {
+	if len(args) > 0 {
+		s := EnsureString(args, 0)
+		return &Buffer{bytes.NewBufferString(s.S)}
+	}
 	return &Buffer{&bytes.Buffer{}}
 }
 

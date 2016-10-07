@@ -1826,15 +1826,15 @@
   (apply print more)
   (newline))
 
-(def
-  ^{:arglists '([])
-    :doc "Reads the next object from standard input."
-    :added "1.0"}
-  read read*)
+(defn read
+  "Reads the next object from reader (defaults to *in*)"
+  {:added "1.0"}
+  ([] (read *in*))
+  ([reader] (read* reader)))
 
 (def
   ^{:arglists '([])
-    :doc "Reads the next line from standard input."
+    :doc "Reads the next line from *in*."
     :added "1.0"}
   read-line read-line*)
 
@@ -2449,6 +2449,14 @@
   `(binding [*out* (buffer*)]
      ~@body
      (str *out*)))
+
+(defmacro with-in-str
+  "Evaluates body in a context in which *in* is bound to a fresh
+  Buffer initialized with the string s."
+  {:added "1.0"}
+  [s & body]
+  `(binding [*in* (buffer* ~s)]
+     ~@body))
 
 (defn hash
   "Returns the hash code of its argument."
