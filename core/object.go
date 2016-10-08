@@ -975,9 +975,9 @@ func (k Keyword) Call(args []Object) Object {
 
 func (rx Regex) ToString(escape bool) string {
 	if escape {
-		return "#" + escapeString(rx.R.String())
+		return "#\"" + rx.R.String() + "\""
 	}
-	return "#" + rx.R.String()
+	return rx.R.String()
 }
 
 func (rx Regex) Equals(other interface{}) bool {

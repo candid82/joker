@@ -390,9 +390,13 @@ func readString(reader *Reader, isRegex bool) Object {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
-		if r == '\\' {
+		if r == '\\' && !isRegex {
 			r = reader.Get()
 			switch r {
+			case '\\':
+				r = '\\'
+			case '"':
+				r = '"'
 			case 'n':
 				r = '\n'
 			case 't':
@@ -420,6 +424,8 @@ func readString(reader *Reader, isRegex bool) Object {
 					panic(MakeReadError(reader, "Invalid unicode escape: \\u"+str))
 				}
 				r = rune(i)
+			default:
+				panic(MakeReadError(reader, "Unsupported escape character: \\"+string(r)))
 			}
 		}
 		if r == EOF {
