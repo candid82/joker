@@ -3,6 +3,7 @@ package string
 import (
 	"bytes"
 	"regexp"
+	"strings"
 
 	. "github.com/candid/joker/core"
 )
@@ -65,9 +66,23 @@ var join Proc = func(args []Object) Object {
 	return String{S: b.String()}
 }
 
+var endsWith Proc = func(args []Object) Object {
+	str := EnsureString(args, 0).S
+	substr := EnsureString(args, 1).S
+	return Bool{B: strings.HasSuffix(str, substr)}
+}
+
+var startsWith Proc = func(args []Object) Object {
+	str := EnsureString(args, 0).S
+	substr := EnsureString(args, 1).S
+	return Bool{B: strings.HasPrefix(str, substr)}
+}
+
 func init() {
 	intern("pad-right", padRight)
 	intern("pad-left", padLeft)
 	intern("split", split)
 	intern("join", join)
+	intern("ends-with?", endsWith)
+	intern("starts-with?", startsWith)
 }
