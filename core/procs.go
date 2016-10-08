@@ -317,6 +317,9 @@ var procSubvec Proc = func(args []Object) Object {
 	v := args[0].(*Vector)
 	start := args[1].(Int).I
 	end := args[2].(Int).I
+	if start > end {
+		panic(RT.NewError(fmt.Sprintf("subvec's start index (%d) is greater than end index (%d)", start, end)))
+	}
 	subv := make([]Object, 0, end-start)
 	for i := start; i < end; i++ {
 		subv = append(subv, v.at(i))
