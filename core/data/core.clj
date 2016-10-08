@@ -158,6 +158,12 @@
   vector? (fn vector? [x] (instance? Vector x)))
 
 (def
+  ^{:arglists '([msg map] [msg map cause])
+    :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
+    :added "1.0"}
+  ex-info ex-info*)
+
+(def
   ^{:arglists '([map key val] [map key val & kvs])
     :doc "`assoc[iate]. When applied to a map, returns a new map of the
          same (hashed/sorted) type, that contains the mapping of key(s) to

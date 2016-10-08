@@ -214,12 +214,16 @@ var procUnsignedBitShiftRight Proc = func(args []Object) Object {
 }
 
 var procExInfo Proc = func(args []Object) Object {
-	checkArity(args, 2, 2)
-	return &ExInfo{
+	checkArity(args, 2, 3)
+	res := &ExInfo{
 		msg:  EnsureString(args, 0),
 		data: ensureArrayMap(args, 1),
 		rt:   RT.clone(),
 	}
+	if len(args) == 3 {
+		res.cause = EnsureError(args, 2)
+	}
+	return res
 }
 
 var procSetMacro Proc = func(args []Object) Object {
@@ -1183,7 +1187,7 @@ func init() {
 	intern("array-map*", procArrayMap)
 	intern("buffer*", procBuffer)
 
-	intern("ex-info", procExInfo)
+	intern("ex-info*", procExInfo)
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
 	intern("slurp*", procSlurp)

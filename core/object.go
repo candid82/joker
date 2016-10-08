@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -134,9 +134,10 @@ type (
 	}
 	ExInfo struct {
 		InfoHolder
-		msg  String
-		data *ArrayMap
-		rt   *Runtime
+		msg   String
+		data  *ArrayMap
+		cause Error
+		rt    *Runtime
 	}
 	RecurBindings []Object
 	Delay         struct {
