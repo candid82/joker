@@ -226,6 +226,10 @@ var procExInfo Proc = func(args []Object) Object {
 	return res
 }
 
+var procExData Proc = func(args []Object) Object {
+	return args[0].(*ExInfo).data
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1189,8 +1193,9 @@ func init() {
 	intern("ns-resolve*", procNsResolve)
 	intern("array-map*", procArrayMap)
 	intern("buffer*", procBuffer)
-
 	intern("ex-info*", procExInfo)
+	intern("ex-data*", procExData)
+
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
 	intern("slurp*", procSlurp)

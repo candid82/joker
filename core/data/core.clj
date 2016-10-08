@@ -2496,6 +2496,14 @@
   (with-out-str
     (apply println xs)))
 
+(defn ex-data
+  "Returns exception data (a map) if ex is an ExInfo.
+  Otherwise returns nil."
+  {:added "1.0"}
+  [ex]
+  (when (instance? ExInfo ex)
+    (ex-data* ^ExInfo ex)))
+
 (defn hash
   "Returns the hash code of its argument."
   {:added "1.0"}
