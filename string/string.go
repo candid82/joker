@@ -2,7 +2,6 @@ package string
 
 import (
 	"bytes"
-	"regexp"
 	"strings"
 
 	. "github.com/candid/joker/core"
@@ -40,7 +39,7 @@ var padLeft Proc = func(args []Object) Object {
 
 var split Proc = func(args []Object) Object {
 	str := EnsureString(args, 0).S
-	reg := regexp.MustCompile(EnsureRegex(args, 1).R)
+	reg := EnsureRegex(args, 1).R
 	indexes := reg.FindAllStringIndex(str, -1)
 	lastStart := 0
 	result := EmptyVector

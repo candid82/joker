@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/big"
 	"os"
+	"regexp"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -428,7 +429,11 @@ func readString(reader *Reader, isRegex bool) Object {
 		r = reader.Get()
 	}
 	if isRegex {
-		return MakeReadObject(reader, Regex{R: b.String()})
+		r, err := regexp.Compile(b.String())
+		if err != nil {
+			panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
+		}
+		return MakeReadObject(reader, Regex{R: r})
 	}
 	return MakeReadObject(reader, String{S: b.String()})
 }

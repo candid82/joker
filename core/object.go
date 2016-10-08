@@ -15,6 +15,7 @@ import (
 	"math"
 	"math/big"
 	"reflect"
+	"regexp"
 	"strings"
 	"unsafe"
 )
@@ -114,7 +115,7 @@ type (
 	}
 	Regex struct {
 		InfoHolder
-		R string
+		R *regexp.Regexp
 	}
 	Var struct {
 		InfoHolder
@@ -974,9 +975,9 @@ func (k Keyword) Call(args []Object) Object {
 
 func (rx Regex) ToString(escape bool) string {
 	if escape {
-		return "#" + escapeString(rx.R)
+		return "#" + escapeString(rx.R.String())
 	}
-	return "#" + rx.R
+	return "#" + rx.R.String()
 }
 
 func (rx Regex) Equals(other interface{}) bool {
@@ -993,9 +994,7 @@ func (rx Regex) GetType() *Type {
 }
 
 func (rx Regex) Hash() uint32 {
-	h := getHash()
-	h.Write([]byte(rx.R))
-	return h.Sum32()
+	return hashPtr(uintptr(unsafe.Pointer(rx.R)))
 }
 
 func (s Symbol) ToString(escape bool) string {
