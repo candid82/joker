@@ -2458,6 +2458,38 @@
   `(binding [*in* (buffer* ~s)]
      ~@body))
 
+(defn pr-str
+  "pr to a string, returning it"
+  {:tag String
+  :added "1.0"}
+  [& xs]
+  (with-out-str
+    (apply pr xs)))
+
+(defn prn-str
+  "prn to a string, returning it"
+  {:tag String
+  :added "1.0"}
+  [& xs]
+  (with-out-str
+    (apply prn xs)))
+
+(defn print-str
+  "print to a string, returning it"
+  {:tag String
+  :added "1.0"}
+  [& xs]
+  (with-out-str
+    (apply print xs)))
+
+(defn println-str
+  "println to a string, returning it"
+  {:tag String
+  :added "1.0"}
+  [& xs]
+  (with-out-str
+    (apply println xs)))
+
 (defn hash
   "Returns the hash code of its argument."
   {:added "1.0"}
