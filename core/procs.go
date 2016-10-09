@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -228,6 +229,14 @@ var procExInfo Proc = func(args []Object) Object {
 
 var procExData Proc = func(args []Object) Object {
 	return args[0].(*ExInfo).data
+}
+
+var procRegex Proc = func(args []Object) Object {
+	r, err := regexp.Compile(EnsureString(args, 0).S)
+	if err != nil {
+		panic(RT.NewError("Invalid regex: " + err.Error()))
+	}
+	return Regex{R: r}
 }
 
 var procSetMacro Proc = func(args []Object) Object {
@@ -1196,6 +1205,7 @@ func init() {
 	intern("buffer*", procBuffer)
 	intern("ex-info*", procExInfo)
 	intern("ex-data*", procExData)
+	intern("regex*", procRegex)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

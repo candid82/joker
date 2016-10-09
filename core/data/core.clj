@@ -2533,6 +2533,15 @@
       (do (f) :ok)
       :no-test)))
 
+(defn re-pattern
+  "Returns an instance of Regex"
+  {:tag Regex
+  :added "1.0"}
+  [s]
+  (if (instance? Regex s)
+    s
+    (regex* s)))
+
 (defmacro defn-
   "same as defn, yielding non-public def"
   {:added "1.0"}
