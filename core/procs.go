@@ -730,25 +730,27 @@ var procType Proc = func(args []Object) Object {
 	return args[0].GetType()
 }
 
-func pr(args []Object, escape bool) Object {
+func printObject(obj Object, w io.Writer) {
+	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
+	switch obj := obj.(type) {
+	case Printer:
+		obj.Print(w, printReadably)
+	default:
+		fmt.Fprint(w, obj.ToString(printReadably))
+	}
+}
+
+var procPr Proc = func(args []Object) Object {
 	n := len(args)
 	if n > 0 {
 		f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 		for _, arg := range args[:n-1] {
-			fmt.Fprint(f, arg.ToString(escape))
+			printObject(arg, f)
 			fmt.Fprint(f, " ")
 		}
-		fmt.Fprint(f, args[n-1].ToString(escape))
+		printObject(args[n-1], f)
 	}
 	return NIL
-}
-
-var procPr Proc = func(args []Object) Object {
-	return pr(args, true)
-}
-
-var procPrint Proc = func(args []Object) Object {
-	return pr(args, false)
 }
 
 var procNewline Proc = func(args []Object) Object {
@@ -1169,7 +1171,6 @@ func init() {
 	intern("bigfloat*", procBigFloat)
 	intern("pr*", procPr)
 	intern("newline*", procNewline)
-	intern("print*", procPrint)
 	intern("read*", procRead)
 	intern("read-line*", procReadLine)
 	intern("read-string*", procReadString)

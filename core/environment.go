@@ -9,6 +9,7 @@ type (
 		CoreNamespace    *Namespace
 		stdout           *Var
 		stdin            *Var
+		printReadably    *Var
 	}
 )
 
@@ -23,6 +24,8 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
 	res.stdout.Value = &File{stdout}
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
 	res.stdin.Value = &File{stdin}
+	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
+	res.printReadably.Value = Bool{B: true}
 	res.SetCurrentNamespace(currentNamespace)
 	return res
 }

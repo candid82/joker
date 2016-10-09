@@ -1213,6 +1213,77 @@
          (let [~form temp#]
            ~@body)))))
 
+(defn reduce-kv
+  "Reduces an associative collection. f should be a function of 3
+  arguments. Returns the result of applying f to init, the first key
+  and the first value in coll, then applying f to that result and the
+  2nd key and value, etc. If coll contains no entries, returns init
+  and f is not called. Note that reduce-kv is supported on vectors,
+  where the keys will be the ordinals."
+  {:added "1.0"}
+  ([f init coll]
+   (reduce1 (fn [ret kv] (f ret (first kv) (second kv))) init coll)))
+
+(defn var-get
+  "Gets the value in the var object"
+  {:added "1.0"}
+  [^Var x] (var-get* x))
+
+(defn var-set
+  "Sets the value in the var object to val."
+  {:added "1.0"}
+  [^Var x val] (var-set* x val))
+
+(defn replace-bindings*
+  [binding-map]
+  (reduce-kv (fn [res k v]
+               (let [c (var-get k)]
+                 (var-set k v)
+                 (assoc res k c)))
+             {}
+             binding-map))
+
+(defn with-bindings*
+  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
+  Then calls f with the supplied arguments. Resets the vars back to the original
+  values after f returned. Returns whatever f returns."
+  {:added "1.0"}
+  [binding-map f & args]
+  (let [existing-bindings (replace-bindings* binding-map)]
+    (try
+      (apply f args)
+      (finally
+        (replace-bindings* existing-bindings)))))
+
+(defmacro with-bindings
+  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
+  Then executes body. Resets the vars back to the original
+  values after body was evaluated. Returns the value of body."
+  {:added "1.0"}
+  [binding-map & body]
+  `(with-bindings* ~binding-map (fn [] ~@body)))
+
+(defmacro binding
+  "binding => var-symbol init-expr
+
+  Creates new bindings for the (already-existing) vars, with the
+  supplied initial values, executes the exprs in an implicit do, then
+  re-establishes the bindings that existed before.  The new bindings
+  are made in parallel (unlike let); all init-exprs are evaluated
+  before the vars are bound to their new values."
+  {:added "1.0"}
+  [bindings & body]
+  (assert-args
+    (vector? bindings) "a vector for its binding"
+    (even? (count bindings)) "an even number of forms in binding vector")
+  (let [var-ize (fn [var-vals]
+                  (loop [ret [] vvs (seq var-vals)]
+                    (if vvs
+                      (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
+                             (next (next vvs)))
+                      (seq ret))))]
+    `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
+
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
@@ -1818,19 +1889,20 @@
   (apply pr more)
   (newline))
 
-(def
-  ^{:arglists '([& args])
-    :doc "Prints the object(s) to the output stream that is the current value
-         of *out*.  print and println produce output for human consumption."
-         :added "1.0"}
-  print print*)
+(defn print
+  "Prints the object(s) to the output stream that is the current value
+  of *out*.  print and println produce output for human consumption."
+  {:added "1.0"}
+  [& more]
+  (binding [*print-readably* nil]
+    (apply pr more)))
 
 (defn println
   "Same as print followed by (newline)"
   {:added "1.0"}
   [& more]
-  (apply print more)
-  (newline))
+  (binding [*print-readably* nil]
+    (apply prn more)))
 
 (defn read
   "Reads the next object from reader (defaults to *in*)"
@@ -2082,16 +2154,6 @@
     (let [ss (map seq (conj colls c2 c1))]
       (when (every? identity ss)
         (concat (map first ss) (apply interleave (map rest ss))))))))
-
-(defn var-get
-  "Gets the value in the var object"
-  {:added "1.0"}
-  [^Var x] (var-get* x))
-
-(defn var-set
-  "Sets the value in the var object to val."
-  {:added "1.0"}
-  [^Var x val] (var-set* x val))
 
 (defn ns-resolve
   "Returns the var or type to which a symbol will be resolved in the
@@ -2384,67 +2446,6 @@
   "Ignores body, yields nil"
   {:added "1.0"}
   [& body])
-
-(defn reduce-kv
-  "Reduces an associative collection. f should be a function of 3
-  arguments. Returns the result of applying f to init, the first key
-  and the first value in coll, then applying f to that result and the
-  2nd key and value, etc. If coll contains no entries, returns init
-  and f is not called. Note that reduce-kv is supported on vectors,
-  where the keys will be the ordinals."
-  {:added "1.0"}
-  ([f init coll]
-   (reduce1 (fn [ret [k v]] (f ret k v)) init coll)))
-
-(defn replace-bindings*
-  [binding-map]
-  (reduce-kv (fn [res k v]
-               (let [c (var-get k)]
-                 (var-set k v)
-                 (assoc res k c)))
-             {}
-             binding-map))
-
-(defn with-bindings*
-  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
-  Then calls f with the supplied arguments. Resets the vars back to the original
-  values after f returned. Returns whatever f returns."
-  {:added "1.0"}
-  [binding-map f & args]
-  (let [existing-bindings (replace-bindings* binding-map)]
-    (try
-      (apply f args)
-      (finally
-        (replace-bindings* existing-bindings)))))
-
-(defmacro with-bindings
-  "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
-  Then executes body. Resets the vars back to the original
-  values after body was evaluated. Returns the value of body."
-  {:added "1.0"}
-  [binding-map & body]
-  `(with-bindings* ~binding-map (fn [] ~@body)))
-
-(defmacro binding
-  "binding => var-symbol init-expr
-
-  Creates new bindings for the (already-existing) vars, with the
-  supplied initial values, executes the exprs in an implicit do, then
-  re-establishes the bindings that existed before.  The new bindings
-  are made in parallel (unlike let); all init-exprs are evaluated
-  before the vars are bound to their new values."
-  {:added "1.0"}
-  [bindings & body]
-  (assert-args
-    (vector? bindings) "a vector for its binding"
-    (even? (count bindings)) "an even number of forms in binding vector")
-  (let [var-ize (fn [var-vals]
-                  (loop [ret [] vvs (seq var-vals)]
-                    (if vvs
-                      (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
-                             (next (next vvs)))
-                      (seq ret))))]
-    `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
 
 (defmacro with-out-str
   "Evaluates exprs in a context in which *out* is bound to a fresh

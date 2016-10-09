@@ -182,6 +182,9 @@ type (
 		s   []Object
 		cmp Comparator
 	}
+	Printer interface {
+		Print(writer io.Writer, printReadably bool)
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -978,6 +981,10 @@ func (rx Regex) ToString(escape bool) string {
 		return "#\"" + rx.R.String() + "\""
 	}
 	return rx.R.String()
+}
+
+func (rx Regex) Print(w io.Writer, printReadably bool) {
+	fmt.Fprint(w, rx.ToString(true))
 }
 
 func (rx Regex) Equals(other interface{}) bool {
