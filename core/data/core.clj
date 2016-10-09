@@ -2542,6 +2542,12 @@
     s
     (regex* s)))
 
+(defn re-seq
+  "Returns a sequence of successive matches of pattern in string"
+  {:added "1.0"}
+  [^Regex re s]
+  (re-seq* re s))
+
 (defmacro defn-
   "same as defn, yielding non-public def"
   {:added "1.0"}
