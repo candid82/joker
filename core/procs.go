@@ -258,6 +258,20 @@ var procReSeq Proc = func(args []Object) Object {
 	return &ArraySeq{arr: res}
 }
 
+var procReFind Proc = func(args []Object) Object {
+	re := EnsureRegex(args, 0)
+	s := EnsureString(args, 1)
+	match := re.R.FindStringSubmatch(s.S)
+	if len(match) == 1 {
+		return String{S: match[0]}
+	}
+	v := EmptyVector
+	for _, str := range match {
+		v = v.Conjoin(String{S: str})
+	}
+	return v
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1226,6 +1240,7 @@ func init() {
 	intern("ex-data*", procExData)
 	intern("regex*", procRegex)
 	intern("re-seq*", procReSeq)
+	intern("re-find*", procReFind)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
