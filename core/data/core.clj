@@ -2548,20 +2548,22 @@
   [^Regex re s]
   (re-seq* re s))
 
-#_(defn re-matches
-  "Returns the match, if any, of string to pattern."
-  {:added "1.0"
-   :static true}
-  [^java.util.regex.Pattern re s]
-    (let [m (re-matcher re s)]
-      (when (. m (matches))
-        (re-groups m))))
-
 (defn re-find
   "Returns the leftmost regex match, if any, of string to pattern."
   {:added "1.0"}
   [^Regex re s]
   (re-find* re s))
+
+(defn re-matches
+  "Returns the match, if any, of string to pattern."
+  {:added "1.0"}
+  [^Regex re s]
+  (let [m (re-find re s)
+        c (if (instance? String m)
+            (count m)
+            (count (first m)))]
+    (when (= c (count s))
+      m)))
 
 (defmacro defn-
   "same as defn, yielding non-public def"
