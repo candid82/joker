@@ -2624,6 +2624,34 @@
   [s]
   (special-symbol?* s))
 
+(defn var?
+  "Returns true if v is of type Var"
+  {:added "1.0"}
+  [v] (instance? Var v))
+
+(defn subs
+  "Returns the substring of s beginning at start inclusive, and ending
+  at end (defaults to length of string), exclusive."
+  {:added "1.0"}
+  (^String [^String s start] (subs* s start))
+  (^String [^String s start end] (subs* s start end)))
+
+(defn max-key
+  "Returns the x for which (k x), a number, is greatest."
+  {:added "1.0"}
+  ([k x] x)
+  ([k x y] (if (> (k x) (k y)) x y))
+  ([k x y & more]
+   (reduce1 #(max-key k %1 %2) (max-key k x y) more)))
+
+(defn min-key
+  "Returns the x for which (k x), a number, is least."
+  {:added "1.0"}
+  ([k x] x)
+  ([k x y] (if (< (k x) (k y)) x y))
+  ([k x y & more]
+   (reduce1 #(min-key k %1 %2) (min-key k x y) more)))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"

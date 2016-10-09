@@ -288,6 +288,22 @@ var procIsSpecialSymbol Proc = func(args []Object) Object {
 	}
 }
 
+var procSubs Proc = func(args []Object) Object {
+	s := EnsureString(args, 0).S
+	start := EnsureInt(args, 1).I
+	end := len(s)
+	if len(args) > 2 {
+		end = EnsureInt(args, 2).I
+	}
+	if start < 0 || start > len(s) {
+		panic(RT.NewError(fmt.Sprintf("String index out of range: %d", start)))
+	}
+	if end < 0 || end > len(s) {
+		panic(RT.NewError(fmt.Sprintf("String index out of range: %d", end)))
+	}
+	return String{S: s[start:end]}
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1260,6 +1276,7 @@ func init() {
 	intern("re-find*", procReFind)
 	intern("rand*", procRand)
 	intern("special-symbol?*", procIsSpecialSymbol)
+	intern("subs*", procSubs)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
