@@ -2599,6 +2599,31 @@
                         (mapcat walk (children node))))))]
     (walk root)))
 
+; TODO:
+; (defn file-seq
+;   "A tree seq on directory"
+;   {:added "1.0"}
+;   [dir]
+;   (tree-seq
+;    (fn [^java.io.File f] (. f (isDirectory)))
+;    (fn [^java.io.File d] (seq (. d (listFiles))))
+;    dir))
+
+(defn xml-seq
+  "A tree seq on the xml elements as per xml/parse"
+  {:added "1.0"}
+  [root]
+  (tree-seq
+   (complement string?)
+   (comp seq :content)
+   root))
+
+(defn special-symbol?
+  "Returns true if s names a special form"
+  {:added "1.0"}
+  [s]
+  (special-symbol?* s))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"

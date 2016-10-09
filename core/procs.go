@@ -278,6 +278,16 @@ var procRand Proc = func(args []Object) Object {
 	return Double{D: r}
 }
 
+var procIsSpecialSymbol Proc = func(args []Object) Object {
+	s := args[0]
+	switch s := s.(type) {
+	case Symbol:
+		return Bool{B: s.ns == nil && SPECIAL_SYMBOLS[s.name]}
+	default:
+		return Bool{B: false}
+	}
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1249,6 +1259,7 @@ func init() {
 	intern("re-seq*", procReSeq)
 	intern("re-find*", procReFind)
 	intern("rand*", procRand)
+	intern("special-symbol?*", procIsSpecialSymbol)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

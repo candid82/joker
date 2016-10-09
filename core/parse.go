@@ -143,6 +143,7 @@ type (
 
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin)
 var LOCAL_BINDINGS *Bindings = nil
+var SPECIAL_SYMBOLS = make(map[*string]bool)
 
 func (b *Bindings) ToMap() Map {
 	var res Map = EmptyArrayMap()
@@ -1002,4 +1003,21 @@ func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 		}
 	}()
 	return Parse(obj, ctx), nil
+}
+
+func init() {
+	SPECIAL_SYMBOLS[MakeSymbol("if").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("quote").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("fn*").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("let*").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("loop*").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("recur").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("set-macro*").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("def").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("var").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("do").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("throw").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("try").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("catch").name] = true
+	SPECIAL_SYMBOLS[MakeSymbol("finally").name] = true
 }
