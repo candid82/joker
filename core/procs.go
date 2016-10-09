@@ -242,10 +242,18 @@ var procRegex Proc = func(args []Object) Object {
 var procReSeq Proc = func(args []Object) Object {
 	re := EnsureRegex(args, 0)
 	s := EnsureString(args, 1)
-	matches := re.R.FindAllString(s.S, -1)
+	matches := re.R.FindAllStringSubmatch(s.S, -1)
 	res := make([]Object, len(matches))
-	for i, str := range matches {
-		res[i] = String{S: str}
+	for i, match := range matches {
+		if len(match) == 1 {
+			res[i] = String{S: match[0]}
+		} else {
+			v := EmptyVector
+			for _, str := range match {
+				v = v.Conjoin(String{S: str})
+			}
+			res[i] = v
+		}
 	}
 	return &ArraySeq{arr: res}
 }
