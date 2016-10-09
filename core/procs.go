@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math/big"
+	"math/rand"
 	"os"
 	"os/exec"
 	"reflect"
@@ -270,6 +271,11 @@ var procReFind Proc = func(args []Object) Object {
 		v = v.Conjoin(String{S: str})
 	}
 	return v
+}
+
+var procRand Proc = func(args []Object) Object {
+	r := rand.Float64()
+	return Double{D: r}
 }
 
 var procSetMacro Proc = func(args []Object) Object {
@@ -1120,6 +1126,7 @@ func intern(name string, proc Proc) {
 }
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 	GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*assert*")).Value = Bool{B: true}
 
 	intern("list**", procList)
@@ -1241,6 +1248,7 @@ func init() {
 	intern("regex*", procRegex)
 	intern("re-seq*", procReSeq)
 	intern("re-find*", procReFind)
+	intern("rand*", procRand)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
