@@ -2686,6 +2686,24 @@
   {:added "1.0"}
   [coll] (not (seq coll)))
 
+(defn get-in
+  "Returns the value in a nested associative structure,
+  where ks is a sequence of keys. Returns nil if the key
+  is not present, or the not-found value if supplied."
+  {:added "1.0"}
+  ([m ks]
+   (reduce1 get m ks))
+  ([m ks not-found]
+   (loop [sentinel {}
+          m m
+          ks (seq ks)]
+     (if ks
+       (let [m (get m (first ks) sentinel)]
+         (if (identical? sentinel m)
+           not-found
+           (recur sentinel m (next ks))))
+       m))))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
