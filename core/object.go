@@ -307,7 +307,7 @@ func panicArity(n int) {
 	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
 
-func checkArity(args []Object, min int, max int) {
+func CheckArity(args []Object, min int, max int) {
 	n := len(args)
 	if n < min || n > max {
 		panicArity(n)
@@ -962,7 +962,7 @@ func (k Keyword) Compare(other Object) int {
 }
 
 func (k Keyword) Call(args []Object) Object {
-	checkArity(args, 1, 2)
+	CheckArity(args, 1, 2)
 	switch m := args[0].(type) {
 	case *ArrayMap:
 		ok, v := m.Get(k)

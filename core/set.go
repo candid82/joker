@@ -86,7 +86,7 @@ func (set *ArraySet) Count() int {
 }
 
 func (set *ArraySet) Call(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	if ok, _ := set.Get(args[0]); ok {
 		return args[0]
 	}

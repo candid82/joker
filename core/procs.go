@@ -48,7 +48,7 @@ var procMeta Proc = func(args []Object) Object {
 }
 
 var procWithMeta Proc = func(args []Object) Object {
-	checkArity(args, 2, 2)
+	CheckArity(args, 2, 2)
 	m := EnsureMeta(args, 0)
 	if args[1].Equals(NIL) {
 		return args[0]
@@ -216,7 +216,7 @@ var procUnsignedBitShiftRight Proc = func(args []Object) Object {
 }
 
 var procExInfo Proc = func(args []Object) Object {
-	checkArity(args, 2, 3)
+	CheckArity(args, 2, 3)
 	res := &ExInfo{
 		msg:  EnsureString(args, 0),
 		data: ensureArrayMap(args, 1),
@@ -315,19 +315,19 @@ var procList Proc = func(args []Object) Object {
 }
 
 var procCons Proc = func(args []Object) Object {
-	checkArity(args, 2, 2)
+	CheckArity(args, 2, 2)
 	s := EnsureSeqable(args, 1).Seq()
 	return s.Cons(args[0])
 }
 
 var procFirst Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	s := EnsureSeqable(args, 0).Seq()
 	return s.First()
 }
 
 var procNext Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	s := EnsureSeqable(args, 0).Seq()
 	res := s.Rest()
 	if res.IsEmpty() {
@@ -337,7 +337,7 @@ var procNext Proc = func(args []Object) Object {
 }
 
 var procRest Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	s := EnsureSeqable(args, 0).Seq()
 	return s.Rest()
 }
@@ -354,7 +354,7 @@ var procConj Proc = func(args []Object) Object {
 }
 
 var procSeq Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	s := EnsureSeqable(args, 0).Seq()
 	if s.IsEmpty() {
 		return NIL
@@ -363,7 +363,7 @@ var procSeq Proc = func(args []Object) Object {
 }
 
 var procIsInstance Proc = func(args []Object) Object {
-	checkArity(args, 2, 2)
+	CheckArity(args, 2, 2)
 	switch t := args[0].(type) {
 	case *Type:
 		return Bool{B: IsInstance(t, args[1])}
@@ -890,12 +890,12 @@ var procRead Proc = func(args []Object) Object {
 }
 
 var procReadString Proc = func(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
 var procReadLine Proc = func(args []Object) Object {
-	checkArity(args, 0, 0)
+	CheckArity(args, 0, 0)
 	var line string
 	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
 	fmt.Fscanln(f, &line)

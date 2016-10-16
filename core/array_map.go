@@ -256,12 +256,5 @@ func (m *ArrayMap) Seq() Seq {
 }
 
 func (m *ArrayMap) Call(args []Object) Object {
-	checkArity(args, 1, 2)
-	if ok, v := m.Get(args[0]); ok {
-		return v
-	}
-	if len(args) == 2 {
-		return args[1]
-	}
-	return NIL
+	return callMap(m, args)
 }

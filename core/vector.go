@@ -411,7 +411,7 @@ func (v *Vector) Rseq() Seq {
 }
 
 func (v *Vector) Call(args []Object) Object {
-	checkArity(args, 1, 1)
+	CheckArity(args, 1, 1)
 	i := assertInteger(args[0])
 	return v.at(i)
 }

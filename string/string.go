@@ -14,6 +14,7 @@ func intern(name string, proc Proc) {
 }
 
 var padRight Proc = func(args []Object) Object {
+	CheckArity(args, 3, 3)
 	str := EnsureString(args, 0).S
 	pad := EnsureString(args, 1).S
 	n := EnsureInt(args, 2).I
@@ -26,6 +27,7 @@ var padRight Proc = func(args []Object) Object {
 }
 
 var padLeft Proc = func(args []Object) Object {
+	CheckArity(args, 3, 3)
 	str := EnsureString(args, 0).S
 	pad := EnsureString(args, 1).S
 	n := EnsureInt(args, 2).I
@@ -38,6 +40,7 @@ var padLeft Proc = func(args []Object) Object {
 }
 
 var split Proc = func(args []Object) Object {
+	CheckArity(args, 2, 2)
 	str := EnsureString(args, 0).S
 	reg := EnsureRegex(args, 1).R
 	indexes := reg.FindAllStringIndex(str, -1)
@@ -52,6 +55,7 @@ var split Proc = func(args []Object) Object {
 }
 
 var join Proc = func(args []Object) Object {
+	CheckArity(args, 2, 2)
 	sep := EnsureString(args, 0).S
 	seq := EnsureSeqable(args, 1).Seq()
 	var b bytes.Buffer
@@ -66,15 +70,25 @@ var join Proc = func(args []Object) Object {
 }
 
 var endsWith Proc = func(args []Object) Object {
+	CheckArity(args, 2, 2)
 	str := EnsureString(args, 0).S
 	substr := EnsureString(args, 1).S
 	return Bool{B: strings.HasSuffix(str, substr)}
 }
 
 var startsWith Proc = func(args []Object) Object {
+	CheckArity(args, 2, 2)
 	str := EnsureString(args, 0).S
 	substr := EnsureString(args, 1).S
 	return Bool{B: strings.HasPrefix(str, substr)}
+}
+
+var replace Proc = func(args []Object) Object {
+	CheckArity(args, 3, 3)
+	str := EnsureString(args, 0).S
+	old := EnsureString(args, 1).S
+	new := EnsureString(args, 2).S
+	return String{S: strings.Replace(str, old, new, -1)}
 }
 
 func init() {
@@ -84,4 +98,5 @@ func init() {
 	intern("join", join)
 	intern("ends-with?", endsWith)
 	intern("starts-with?", startsWith)
+	intern("replace", replace)
 }

@@ -819,6 +819,10 @@ func (m *HashMap) Without(key Object) Map {
 	return res
 }
 
+func (m *HashMap) Call(args []Object) Object {
+	return callMap(m, args)
+}
+
 func NewHashMap(keyvals ...Object) *HashMap {
 	var res Associative = EmptyHashMap
 	for i := 0; i < len(keyvals); i += 2 {

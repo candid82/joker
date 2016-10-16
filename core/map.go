@@ -92,3 +92,14 @@ func mapToString(m Map, escape bool) string {
 	b.WriteRune('}')
 	return b.String()
 }
+
+func callMap(m Map, args []Object) Object {
+	CheckArity(args, 1, 2)
+	if ok, v := m.Get(args[0]); ok {
+		return v
+	}
+	if len(args) == 2 {
+		return args[1]
+	}
+	return NIL
+}
