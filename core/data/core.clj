@@ -2680,12 +2680,6 @@
              coll (range (count coll)))
     (map #(if-let [e (find smap %)] (val e) %) coll)))
 
-(defn empty?
-  "Returns true if coll has no items - same as (not (seq coll)).
-  Please use the idiom (seq x) rather than (not (empty? x))"
-  {:added "1.0"}
-  [coll] (not (seq coll)))
-
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
@@ -2725,6 +2719,29 @@
    (if ks
      (assoc m k (apply update-in (get m k) ks f args))
      (assoc m k (apply f (get m k) args)))))
+
+(defn update
+  "'Updates' a value in an associative structure, where k is a
+  key and f is a function that will take the old value
+  and any supplied args and return the new value, and returns a new
+  structure.  If the key does not exist, nil is passed as the old value."
+  {:added "1.0"}
+  ([m k f]
+   (assoc m k (f (get m k))))
+  ([m k f x]
+   (assoc m k (f (get m k) x)))
+  ([m k f x y]
+   (assoc m k (f (get m k) x y)))
+  ([m k f x y z]
+   (assoc m k (f (get m k) x y z)))
+  ([m k f x y z & more]
+   (assoc m k (apply f (get m k) x y z more))))
+
+(defn empty?
+  "Returns true if coll has no items - same as (not (seq coll)).
+  Please use the idiom (seq x) rather than (not (empty? x))"
+  {:added "1.0"}
+  [coll] (not (seq coll)))
 
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
