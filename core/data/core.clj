@@ -2742,6 +2742,11 @@
   {:added "1.0"}
   [x] (instance? Collection x))
 
+(defn list?
+  "Returns true if x is a List"
+  {:added "1.0"}
+  [x] (instance? List x))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
