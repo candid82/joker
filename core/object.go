@@ -185,6 +185,10 @@ type (
 	Printer interface {
 		Print(writer io.Writer, printReadably bool)
 	}
+	Collection interface {
+		Counted
+		Seqable
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -200,6 +204,7 @@ func init() {
 	TYPES["Bool"] = &Type{name: "Bool", reflectType: reflect.TypeOf((*Bool)(nil)).Elem()}
 	TYPES["Buffer"] = &Type{name: "Buffer", reflectType: reflect.TypeOf((*Buffer)(nil))}
 	TYPES["Char"] = &Type{name: "Char", reflectType: reflect.TypeOf((*Char)(nil)).Elem()}
+	TYPES["Collection"] = &Type{name: "Collection", reflectType: reflect.TypeOf((*Collection)(nil)).Elem()}
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
 	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}

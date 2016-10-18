@@ -2737,6 +2737,11 @@
   ([m k f x y z & more]
    (assoc m k (apply f (get m k) x y z more))))
 
+(defn coll?
+  "Returns true if x implements Collection"
+  {:added "1.0"}
+  [x] (instance? Collection x))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"

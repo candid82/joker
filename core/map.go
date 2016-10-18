@@ -56,6 +56,8 @@ func mapEquals(m Map, other interface{}) bool {
 		return true
 	}
 	switch otherMap := other.(type) {
+	case Nil:
+		return false
 	case Map:
 		if m.Count() != otherMap.Count() {
 			return false
