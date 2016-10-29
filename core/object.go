@@ -210,6 +210,7 @@ func init() {
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
 	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
 	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
+	TYPES["Counted"] = &Type{name: "Counted", reflectType: reflect.TypeOf((*Counted)(nil)).Elem()}
 	TYPES["Delay"] = &Type{name: "Delay", reflectType: reflect.TypeOf((*Delay)(nil))}
 	TYPES["Double"] = &Type{name: "Double", reflectType: reflect.TypeOf((*Double)(nil)).Elem()}
 	TYPES["Error"] = &Type{name: "Error", reflectType: reflect.TypeOf((*Error)(nil)).Elem()}

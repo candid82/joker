@@ -2768,6 +2768,11 @@
   {:added "1.0"}
   [coll] (instance? Sequential coll))
 
+(defn counted?
+  "Returns true if coll implements count in constant time"
+  {:added "1.0"}
+  [coll] (instance? Counted coll))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
