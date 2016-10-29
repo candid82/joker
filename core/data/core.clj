@@ -2758,6 +2758,11 @@
   {:added "1.0"}
   [x] (instance? Fn x))
 
+(defn associative?
+  "Returns true if coll implements Associative"
+  {:added "1.0"}
+  [coll] (instance? Associative coll))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
