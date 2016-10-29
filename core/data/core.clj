@@ -2773,6 +2773,11 @@
   {:added "1.0"}
   [coll] (instance? Counted coll))
 
+(defn reversible?
+  "Returns true if coll implements Reversible"
+  {:added "1.0"}
+  [coll] (instance? Reversible coll))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
