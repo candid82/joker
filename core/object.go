@@ -203,6 +203,7 @@ func init() {
 	TYPES["BigInt"] = &Type{name: "BigInt", reflectType: reflect.TypeOf((*BigInt)(nil))}
 	TYPES["Bool"] = &Type{name: "Bool", reflectType: reflect.TypeOf((*Bool)(nil)).Elem()}
 	TYPES["Buffer"] = &Type{name: "Buffer", reflectType: reflect.TypeOf((*Buffer)(nil))}
+	TYPES["Callable"] = &Type{name: "Callable", reflectType: reflect.TypeOf((*Callable)(nil)).Elem()}
 	TYPES["Char"] = &Type{name: "Char", reflectType: reflect.TypeOf((*Char)(nil)).Elem()}
 	TYPES["Collection"] = &Type{name: "Collection", reflectType: reflect.TypeOf((*Collection)(nil)).Elem()}
 	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}

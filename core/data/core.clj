@@ -2747,6 +2747,12 @@
   {:added "1.0"}
   [x] (instance? List x))
 
+(defn callable?
+  "Returns true if x implements Callable. Note that many data structures
+  (e.g. sets and maps) implement Callable."
+  {:added "1.0"}
+  [x] (instance? Callable x))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
