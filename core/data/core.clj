@@ -2778,6 +2778,26 @@
   {:added "1.0"}
   [coll] (instance? Reversible coll))
 
+(def
+  ^{:doc "bound in a repl to the most recent value printed"
+    :added "1.0"}
+  *1)
+
+(def
+  ^{:doc "bound in a repl to the second most recent value printed"
+    :added "1.0"}
+  *2)
+
+(def
+  ^{:doc "bound in a repl to the third most recent value printed"
+    :added "1.0"}
+  *3)
+
+(def
+  ^{:doc "bound in a repl to the most recent exception caught by the repl"
+    :added "1.0"}
+  *e)
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"

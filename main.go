@@ -14,6 +14,42 @@ import (
 	"gopkg.in/readline.v1"
 )
 
+type (
+	ReplContext struct {
+		first  *Var
+		second *Var
+		third  *Var
+		exc    *Var
+	}
+)
+
+func NewReplContext(env *Env) *ReplContext {
+	first, _ := env.Resolve(MakeSymbol("joker.core/*1"))
+	second, _ := env.Resolve(MakeSymbol("joker.core/*2"))
+	third, _ := env.Resolve(MakeSymbol("joker.core/*3"))
+	exc, _ := env.Resolve(MakeSymbol("joker.core/*e"))
+	first.Value = NIL
+	second.Value = NIL
+	third.Value = NIL
+	exc.Value = NIL
+	return &ReplContext{
+		first:  first,
+		second: second,
+		third:  third,
+		exc:    exc,
+	}
+}
+
+func (ctx *ReplContext) PushValue(obj Object) {
+	ctx.third.Value = ctx.second.Value
+	ctx.second.Value = ctx.first.Value
+	ctx.first.Value = obj
+}
+
+func (ctx *ReplContext) PushException(exc Object) {
+	ctx.exc.Value = exc
+}
+
 func processFile(filename string, phase Phase) {
 	var reader *Reader
 	if filename == "--" {
@@ -38,16 +74,19 @@ func skipRestOfLine(reader *Reader) {
 	}
 }
 
-func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext) (exit bool) {
+func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext, replContext *ReplContext) (exit bool) {
 
 	defer func() {
 		if r := recover(); r != nil {
 			switch r := r.(type) {
 			case *ParseError:
+				replContext.PushException(r)
 				fmt.Fprintln(os.Stderr, r)
 			case *EvalError:
+				replContext.PushException(r)
 				fmt.Fprintln(os.Stderr, r)
 			case Error:
+				replContext.PushException(r)
 				fmt.Fprintln(os.Stderr, r)
 			// case *runtime.TypeAssertionError:
 			// 	fmt.Fprintln(os.Stderr, r)
@@ -79,6 +118,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext)
 	}
 
 	res := Eval(expr, nil)
+	replContext.PushValue(res)
 	fmt.Println(res.ToString(true))
 	return false
 }
@@ -86,6 +126,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext)
 func repl(phase Phase) {
 	fmt.Println("Welcome to joker. Use ctrl-c to exit.")
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	replContext := NewReplContext(parseContext.GlobalEnv)
 
 	rl, err := readline.New("")
 	if err != nil {
@@ -97,7 +138,7 @@ func repl(phase Phase) {
 
 	for {
 		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace.Name.ToString(false) + "=> ")
-		if processReplCommand(reader, phase, parseContext) {
+		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}
 	}

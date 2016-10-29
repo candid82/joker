@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"unsafe"
 )
 
 type (
@@ -264,6 +265,30 @@ func NewLiteralExpr(obj Object) *LiteralExpr {
 		res.column = info.column
 	}
 	return &res
+}
+
+func (err *ParseError) ToString(escape bool) string {
+	return err.Error()
+}
+
+func (err *ParseError) Equals(other interface{}) bool {
+	return err == other
+}
+
+func (err *ParseError) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (err *ParseError) GetType() *Type {
+	return TYPES["ParseError"]
+}
+
+func (err *ParseError) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(err)))
+}
+
+func (err *ParseError) WithInfo(info *ObjectInfo) Object {
+	return err
 }
 
 func (err ParseError) Error() string {
