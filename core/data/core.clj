@@ -2753,6 +2753,11 @@
   {:added "1.0"}
   [x] (instance? Callable x))
 
+(defn fn?
+  "Returns true if x is Fn, i.e. is an object created via fn."
+  {:added "1.0"}
+  [x] (instance? Fn x))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
