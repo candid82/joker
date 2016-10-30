@@ -304,6 +304,23 @@ var procSubs Proc = func(args []Object) Object {
 	return String{S: s[start:end]}
 }
 
+var procIntern = func(args []Object) Object {
+	ns := EnsureNamespace(args, 0)
+	sym := EnsureSymbol(args, 1)
+	vr := ns.Intern(sym)
+	if len(args) == 3 {
+		vr.Value = args[2]
+	}
+	return vr
+}
+
+var procSetMeta = func(args []Object) Object {
+	vr := EnsureVar(args, 0)
+	meta := EnsureMap(args, 1)
+	vr.meta = meta
+	return NIL
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1277,6 +1294,8 @@ func init() {
 	intern("rand*", procRand)
 	intern("special-symbol?*", procIsSpecialSymbol)
 	intern("subs*", procSubs)
+	intern("intern*", procIntern)
+	intern("set-meta*", procSetMeta)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

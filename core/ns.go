@@ -60,8 +60,10 @@ func (ns *Namespace) ReferAll(other *Namespace) {
 	}
 }
 
-// sym must be not qualified
 func (ns *Namespace) Intern(sym Symbol) *Var {
+	if sym.ns != nil {
+		panic(RT.NewError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
+	}
 	if TYPES[*sym.name] != nil {
 		panic(RT.NewError("Can't intern type name " + *sym.name + " as a Var"))
 	}

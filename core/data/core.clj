@@ -2815,6 +2815,21 @@
   ([f & args]
    (trampoline #(apply f args))))
 
+(defn intern
+  "Finds or creates a var named by the symbol name in the namespace
+  ns (which can be a symbol or a namespace), setting its root binding
+  to val if supplied. The namespace must exist. The var will adopt any
+  metadata from the name symbol.  Returns the var."
+  {:added "1.0"}
+  ([ns ^Symbol name]
+   (let [v (intern* (the-ns ns) name)]
+     (when (meta name) (set-meta* v (meta name)))
+     v))
+  ([ns name val]
+   (let [v (intern* (the-ns ns) name val)]
+     (when (meta name) (set-meta* v (meta name)))
+     v)))
+
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
