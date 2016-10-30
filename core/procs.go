@@ -916,7 +916,7 @@ var procReadLine Proc = func(args []Object) Object {
 	var line string
 	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
 	fmt.Fscanln(f, &line)
-	return &String{S: line}
+	return String{S: line}
 }
 
 var procNanoTime Proc = func(args []Object) Object {
