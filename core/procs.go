@@ -321,6 +321,22 @@ var procSetMeta = func(args []Object) Object {
 	return NIL
 }
 
+var procAtom = func(args []Object) Object {
+	res := &Atom{
+		value: args[0],
+	}
+	if len(args) > 1 {
+		m := NewHashMap(args[1:]...)
+		if ok, v := m.Get(MakeKeyword("meta")); ok {
+			res.meta = AssertMap(v, "")
+		}
+		if ok, v := m.Get(MakeKeyword("validator")); ok {
+			res.validator = AssertFn(v, "")
+		}
+	}
+	return res
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1296,6 +1312,7 @@ func init() {
 	intern("subs*", procSubs)
 	intern("intern*", procIntern)
 	intern("set-meta*", procSetMeta)
+	intern("atom*", procAtom)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

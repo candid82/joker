@@ -1284,6 +1284,23 @@
                       (seq ret))))]
     `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
 
+(defn atom
+  "Creates and returns an Atom with an initial value of x and zero or
+  more options (in any order):
+
+  :meta metadata-map
+
+  :validator validate-fn
+
+  If metadata-map is supplied, it will become the metadata on the
+  atom. validate-fn must be nil or a side-effect-free fn of one
+  argument, which will be passed the intended new state on any state
+  change. If the new state is unacceptable, the validate-fn should
+  return false or throw an exception."
+  {:added "1.0"}
+  [x & options]
+  (apply atom* x options))
+
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
@@ -2839,6 +2856,21 @@
      (when ~test
        ~@body
        (recur))))
+
+; (defn memoize
+;   "Returns a memoized version of a referentially transparent function. The
+;   memoized version of the function keeps a cache of the mapping from arguments
+;   to results and, when calls with the same arguments are repeated often, has
+;   higher performance at the expense of higher memory use."
+;   {:added "1.0"}
+;   [f]
+;   (let [mem (atom {})]
+;     (fn [& args]
+;       (if-let [e (find @mem args)]
+;         (val e)
+;         (let [ret (apply f args)]
+;           (swap! mem assoc args ret)
+;           ret)))))
 
 (defn empty?
   "Returns true if coll has no items - same as (not (seq coll)).

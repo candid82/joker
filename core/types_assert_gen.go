@@ -530,3 +530,24 @@ func EnsureError(args []Object, index int) Error {
     panic(RT.newArgTypeError(index, c, "Error"))
   }
 }
+
+func AssertFn(obj Object, msg string) *Fn {
+  switch c := obj.(type) {
+  case *Fn:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Fn", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureFn(args []Object, index int) *Fn {
+  switch c := args[index].(type) {
+  case *Fn:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Fn"))
+  }
+}

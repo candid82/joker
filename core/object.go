@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -189,6 +189,11 @@ type (
 		Counted
 		Seqable
 	}
+	Atom struct {
+		MetaHolder
+		value     Object
+		validator *Fn
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -200,6 +205,7 @@ func init() {
 	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
 	TYPES["ArraySet"] = &Type{name: "ArraySet", reflectType: reflect.TypeOf((*ArraySet)(nil))}
 	TYPES["Associative"] = &Type{name: "Associative", reflectType: reflect.TypeOf((*Associative)(nil)).Elem()}
+	TYPES["Atom"] = &Type{name: "Atom", reflectType: reflect.TypeOf((*Atom)(nil)).Elem()}
 	TYPES["BigFloat"] = &Type{name: "BigFloat", reflectType: reflect.TypeOf((*BigFloat)(nil))}
 	TYPES["BigInt"] = &Type{name: "BigInt", reflectType: reflect.TypeOf((*BigInt)(nil))}
 	TYPES["Bool"] = &Type{name: "Bool", reflectType: reflect.TypeOf((*Bool)(nil)).Elem()}
@@ -361,6 +367,36 @@ func hashGobEncoder(e gob.GobEncoder) uint32 {
 	}
 	h.Write(b)
 	return h.Sum32()
+}
+
+func (a *Atom) ToString(escape bool) string {
+	return "#object[Atom {:val " + a.value.ToString(escape) + "}]"
+}
+
+func (a *Atom) Equals(other interface{}) bool {
+	return a == other
+}
+
+func (a *Atom) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (a *Atom) GetType() *Type {
+	return TYPES["Atom"]
+}
+
+func (a *Atom) Hash() uint32 {
+	return hashPtr(uintptr(unsafe.Pointer(a)))
+}
+
+func (a *Atom) WithInfo(info *ObjectInfo) Object {
+	return a
+}
+
+func (a *Atom) WithMeta(meta Map) Object {
+	res := *a
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
 }
 
 func (d *Delay) ToString(escape bool) string {
