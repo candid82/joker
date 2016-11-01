@@ -1309,6 +1309,14 @@
   [x & options]
   (apply atom* x options))
 
+(defn swap!
+  "Atomically swaps the value of atom to be:
+  (apply f current-value-of-atom args).
+  Returns the value that was swapped in."
+  {:added "1.0"}
+  [^Atom atom f & args]
+  (apply swap* atom f args))
+
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."

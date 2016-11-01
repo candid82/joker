@@ -572,3 +572,24 @@ func EnsureDeref(args []Object, index int) Deref {
     panic(RT.newArgTypeError(index, c, "Deref"))
   }
 }
+
+func AssertAtom(obj Object, msg string) *Atom {
+  switch c := obj.(type) {
+  case *Atom:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Atom", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureAtom(args []Object, index int) *Atom {
+  switch c := args[index].(type) {
+  case *Atom:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Atom"))
+  }
+}

@@ -341,6 +341,14 @@ var procDeref = func(args []Object) Object {
 	return EnsureDeref(args, 0).Deref()
 }
 
+var procSwap = func(args []Object) Object {
+	a := EnsureAtom(args, 0)
+	f := EnsureCallable(args, 1)
+	fargs := append([]Object{a.value}, args[2:]...)
+	a.value = f.Call(fargs)
+	return a.value
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1318,6 +1326,7 @@ func init() {
 	intern("set-meta*", procSetMeta)
 	intern("atom*", procAtom)
 	intern("deref*", procDeref)
+	intern("swap*", procSwap)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
