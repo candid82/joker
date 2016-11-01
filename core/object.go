@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -193,6 +193,9 @@ type (
 		MetaHolder
 		value     Object
 		validator *Fn
+	}
+	Deref interface {
+		Deref() Object
 	}
 )
 
@@ -399,6 +402,10 @@ func (a *Atom) WithMeta(meta Map) Object {
 	return &res
 }
 
+func (a *Atom) Deref() Object {
+	return a.value
+}
+
 func (d *Delay) ToString(escape bool) string {
 	return "#object[Delay]"
 }
@@ -428,6 +435,10 @@ func (d *Delay) Force() Object {
 		d.value = d.fn.Call([]Object{})
 	}
 	return d.value
+}
+
+func (d *Delay) Deref() Object {
+	return d.Force()
 }
 
 func (t *Type) ToString(escape bool) string {
@@ -646,6 +657,10 @@ func (v *Var) Call(args []Object) Object {
 	return AssertCallable(
 		v.Value,
 		"Var "+v.ToString(false)+" resolves to "+v.Value.ToString(false)+", which is not a Fn").Call(args)
+}
+
+func (v *Var) Deref() Object {
+	return v.Value
 }
 
 func (n Nil) ToString(escape bool) string {

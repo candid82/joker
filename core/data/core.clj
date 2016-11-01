@@ -1284,6 +1284,14 @@
                       (seq ret))))]
     `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
 
+(defn deref
+  "Also reader macro: @var/@atom/@delay. When applied to a var or atom,
+  returns its current state. When applied to a delay, forces
+  it if not already forced."
+  {:added "1.0"}
+  [ref]
+  (deref* ref))
+
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
   more options (in any order):

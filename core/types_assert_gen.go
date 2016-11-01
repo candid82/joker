@@ -551,3 +551,24 @@ func EnsureFn(args []Object, index int) *Fn {
     panic(RT.newArgTypeError(index, c, "Fn"))
   }
 }
+
+func AssertDeref(obj Object, msg string) Deref {
+  switch c := obj.(type) {
+  case Deref:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Deref", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureDeref(args []Object, index int) Deref {
+  switch c := args[index].(type) {
+  case Deref:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Deref"))
+  }
+}

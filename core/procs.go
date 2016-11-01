@@ -337,6 +337,10 @@ var procAtom = func(args []Object) Object {
 	return res
 }
 
+var procDeref = func(args []Object) Object {
+	return EnsureDeref(args, 0).Deref()
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1313,6 +1317,7 @@ func init() {
 	intern("intern*", procIntern)
 	intern("set-meta*", procSetMeta)
 	intern("atom*", procAtom)
+	intern("deref*", procDeref)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
