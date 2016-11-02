@@ -191,8 +191,7 @@ type (
 	}
 	Atom struct {
 		MetaHolder
-		value     Object
-		validator *Fn
+		value Object
 	}
 	Deref interface {
 		Deref() Object

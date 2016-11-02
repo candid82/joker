@@ -330,9 +330,6 @@ var procAtom = func(args []Object) Object {
 		if ok, v := m.Get(MakeKeyword("meta")); ok {
 			res.meta = AssertMap(v, "")
 		}
-		if ok, v := m.Get(MakeKeyword("validator")); ok {
-			res.validator = AssertFn(v, "")
-		}
 	}
 	return res
 }
