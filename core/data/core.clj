@@ -1317,6 +1317,13 @@
   [^Atom atom f & args]
   (apply swap* atom f args))
 
+(defn reset!
+  "Sets the value of atom to newval without regard for the
+  current value. Returns newval."
+  {:added "1.0"}
+  [^Atom atom newval]
+  (reset* atom newval))
+
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."

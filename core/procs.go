@@ -349,6 +349,12 @@ var procSwap = func(args []Object) Object {
 	return a.value
 }
 
+var procReset = func(args []Object) Object {
+	a := EnsureAtom(args, 0)
+	a.value = args[1]
+	return a.value
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1327,6 +1333,7 @@ func init() {
 	intern("atom*", procAtom)
 	intern("deref*", procDeref)
 	intern("swap*", procSwap)
+	intern("reset*", procReset)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
