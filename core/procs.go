@@ -352,6 +352,18 @@ var procReset = func(args []Object) Object {
 	return a.value
 }
 
+var procAlterMeta = func(args []Object) Object {
+	r := EnsureRef(args, 0)
+	f := EnsureFn(args, 1)
+	return r.AlterMeta(f, args[2:])
+}
+
+var procResetMeta = func(args []Object) Object {
+	r := EnsureRef(args, 0)
+	m := EnsureMap(args, 1)
+	return r.ResetMeta(m)
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1331,6 +1343,8 @@ func init() {
 	intern("deref*", procDeref)
 	intern("swap*", procSwap)
 	intern("reset*", procReset)
+	intern("alter-meta*", procAlterMeta)
+	intern("reset-meta*", procResetMeta)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

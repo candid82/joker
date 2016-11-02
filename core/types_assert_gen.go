@@ -593,3 +593,24 @@ func EnsureAtom(args []Object, index int) *Atom {
     panic(RT.newArgTypeError(index, c, "Atom"))
   }
 }
+
+func AssertRef(obj Object, msg string) Ref {
+  switch c := obj.(type) {
+  case Ref:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Ref", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureRef(args []Object, index int) Ref {
+  switch c := args[index].(type) {
+  case Ref:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Ref"))
+  }
+}

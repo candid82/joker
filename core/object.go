@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *ArraySet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -54,6 +54,10 @@ type (
 	Meta interface {
 		GetMeta() Map
 		WithMeta(Map) Object
+	}
+	Ref interface {
+		AlterMeta(fn *Fn, args []Object) Map
+		ResetMeta(m Map) Map
 	}
 	MetaHolder struct {
 		meta Map
@@ -245,6 +249,7 @@ func init() {
 	TYPES["Proc"] = &Type{name: "Proc", reflectType: reflect.TypeOf((*Proc)(nil)).Elem()}
 	TYPES["Ratio"] = &Type{name: "Ratio", reflectType: reflect.TypeOf((*Ratio)(nil))}
 	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
+	TYPES["Ref"] = &Type{name: "Ref", reflectType: reflect.TypeOf((*Ref)(nil)).Elem()}
 	TYPES["Regex"] = &Type{name: "Regex", reflectType: reflect.TypeOf((*Regex)(nil)).Elem()}
 	TYPES["Reversible"] = &Type{name: "Reversible", reflectType: reflect.TypeOf((*Reversible)(nil)).Elem()}
 	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
@@ -642,6 +647,17 @@ func (v *Var) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
+}
+
+func (v *Var) AlterMeta(fn *Fn, args []Object) Map {
+	fargs := append([]Object{v.meta}, args...)
+	v.meta = AssertMap(fn.Call(fargs), "")
+	return v.meta
+}
+
+func (v *Var) ResetMeta(newMeta Map) Map {
+	v.meta = newMeta
+	return v.meta
 }
 
 func (v *Var) GetType() *Type {

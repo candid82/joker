@@ -1319,6 +1319,21 @@
   [^Atom atom newval]
   (reset* atom newval))
 
+(defn alter-meta!
+  "Atomically sets the metadata for a namespace/var/atom to be:
+
+  (apply f its-current-meta args)
+
+  f must be free of side-effects"
+  {:added "1.0"}
+  [^Ref ref f & args]
+  (apply alter-meta* ref f args))
+
+(defn reset-meta!
+  "Atomically resets the metadata for a namespace/var/atom"
+  {:added "1.0"}
+  [^Ref ref metadata-map] (reset-meta* ref metadata-map))
+
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
