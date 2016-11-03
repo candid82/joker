@@ -2730,6 +2730,14 @@
              coll (range (count coll)))
     (map #(if-let [e (find smap %)] (val e) %) coll)))
 
+(defn repeatedly
+  "Takes a function of no args, presumably with side effects, and
+  returns an infinite (or length n if supplied) lazy sequence of calls
+  to it"
+  {:added "1.0"}
+  ([f] (lazy-seq (cons (f) (repeatedly f))))
+  ([n f] (take n (repeatedly f))))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
