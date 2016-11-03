@@ -406,6 +406,17 @@ func (a *Atom) WithMeta(meta Map) Object {
 	return &res
 }
 
+func (a *Atom) AlterMeta(fn *Fn, args []Object) Map {
+	fargs := append([]Object{a.meta}, args...)
+	a.meta = AssertMap(fn.Call(fargs), "")
+	return a.meta
+}
+
+func (a *Atom) ResetMeta(newMeta Map) Map {
+	a.meta = newMeta
+	return a.meta
+}
+
 func (a *Atom) Deref() Object {
 	return a.value
 }
