@@ -2738,6 +2738,13 @@
   ([f] (lazy-seq (cons (f) (repeatedly f))))
   ([n f] (take n (repeatedly f))))
 
+(defn interpose
+  "Returns a lazy seq of the elements of coll separated by sep.
+  Returns a stateful transducer when no collection is provided."
+  {:added "1.0"}
+  [sep coll]
+  (drop 1 (interleave (repeat sep) coll)))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
