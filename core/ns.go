@@ -8,6 +8,7 @@ import (
 
 type (
 	Namespace struct {
+		MetaHolder
 		Name     Symbol
 		mappings map[*string]*Var
 		aliases  map[*string]*Namespace
@@ -32,6 +33,23 @@ func (ns *Namespace) WithInfo(info *ObjectInfo) Object {
 
 func (ns *Namespace) GetType() *Type {
 	return TYPES["Namespace"]
+}
+
+func (ns *Namespace) WithMeta(meta Map) Object {
+	res := *ns
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
+func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
+	fargs := append([]Object{ns.meta}, args...)
+	ns.meta = AssertMap(fn.Call(fargs), "")
+	return ns.meta
+}
+
+func (ns *Namespace) ResetMeta(newMeta Map) Map {
+	ns.meta = newMeta
+	return ns.meta
 }
 
 func (ns *Namespace) Hash() uint32 {
