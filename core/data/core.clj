@@ -2745,6 +2745,12 @@
   [sep coll]
   (drop 1 (interleave (repeat sep) coll)))
 
+(defn empty
+  "Returns an empty collection of the same category as coll, or nil"
+  {:added "1.0"}
+  [coll]
+  (empty* coll))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key

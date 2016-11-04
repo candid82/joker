@@ -93,6 +93,10 @@ func (list *List) Count() int {
 	return list.count
 }
 
+func (list *List) Empty() Collection {
+	return EmptyList
+}
+
 func (list *List) Peek() Object {
 	return list.first
 }

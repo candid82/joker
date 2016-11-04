@@ -439,3 +439,7 @@ func NewVectorFromSeq(seq Seq) *Vector {
 	}
 	return res
 }
+
+func (v *Vector) Empty() Collection {
+	return EmptyVector
+}

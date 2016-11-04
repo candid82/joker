@@ -364,6 +364,15 @@ var procResetMeta = func(args []Object) Object {
 	return r.ResetMeta(m)
 }
 
+var procEmpty = func(args []Object) Object {
+	switch c := args[0].(type) {
+	case Collection:
+		return c.Empty()
+	default:
+		return NIL
+	}
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1345,6 +1354,7 @@ func init() {
 	intern("reset*", procReset)
 	intern("alter-meta*", procAlterMeta)
 	intern("reset-meta*", procResetMeta)
+	intern("empty*", procEmpty)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

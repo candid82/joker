@@ -190,8 +190,10 @@ type (
 		Print(writer io.Writer, printReadably bool)
 	}
 	Collection interface {
+		Object
 		Counted
 		Seqable
+		Empty() Collection
 	}
 	Atom struct {
 		MetaHolder

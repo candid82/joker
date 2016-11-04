@@ -830,3 +830,7 @@ func NewHashMap(keyvals ...Object) *HashMap {
 	}
 	return res.(*HashMap)
 }
+
+func (m *HashMap) Empty() Collection {
+	return EmptyHashMap
+}

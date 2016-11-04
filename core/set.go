@@ -92,3 +92,7 @@ func (set *ArraySet) Call(args []Object) Object {
 	}
 	return NIL
 }
+
+func (set *ArraySet) Empty() Collection {
+	return EmptySet()
+}
