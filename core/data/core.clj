@@ -2208,7 +2208,7 @@
 (defn ns-resolve
   "Returns the var or type to which a symbol will be resolved in the
   namespace (unless found in the environment), else nil.  Note that
-  if the symbol is fully qualified, the var/Class to which it resolves
+  if the symbol is fully qualified, the var/Type to which it resolves
   need not be present in the namespace."
   {:added "1.0"}
   ([ns sym]
@@ -2750,6 +2750,13 @@
   {:added "1.0"}
   [coll]
   (empty* coll))
+
+(defn bound?
+  "Returns true if all of the vars provided as arguments have any bound value.
+  Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided."
+  {:added "1.0"}
+  [& vars]
+  (every? #(bound?* ^Var %) vars))
 
 (defn get-in
   "Returns the value in a nested associative structure,

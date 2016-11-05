@@ -373,6 +373,11 @@ var procEmpty = func(args []Object) Object {
 	}
 }
 
+var procIsBound = func(args []Object) Object {
+	vr := EnsureVar(args, 0)
+	return Bool{B: vr.Value != nil}
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1355,6 +1360,7 @@ func init() {
 	intern("alter-meta*", procAlterMeta)
 	intern("reset-meta*", procResetMeta)
 	intern("empty*", procEmpty)
+	intern("bound?*", procIsBound)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
