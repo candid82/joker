@@ -2779,6 +2779,13 @@
          true))
      false)))
 
+(defn format
+  "Formats a string using java.lang.String.format, see java.util.Formatter for format
+  string syntax"
+  {:added "1.0"}
+  ^String [fmt & args]
+  (apply format* fmt args))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key

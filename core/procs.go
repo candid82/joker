@@ -378,6 +378,26 @@ var procIsBound = func(args []Object) Object {
 	return Bool{B: vr.Value != nil}
 }
 
+func toNative(obj Object) interface{} {
+	switch obj := obj.(type) {
+	case Native:
+		return obj.Native()
+	default:
+		return obj.ToString(false)
+	}
+}
+
+var procFormat = func(args []Object) Object {
+	s := EnsureString(args, 0)
+	objs := args[1:]
+	fargs := make([]interface{}, len(objs))
+	for i, v := range objs {
+		fargs[i] = toNative(v)
+	}
+	res := fmt.Sprintf(s.S, fargs...)
+	return String{S: res}
+}
+
 var procSetMacro Proc = func(args []Object) Object {
 	vr := args[0].(*Var)
 	vr.isMacro = true
@@ -1361,6 +1381,7 @@ func init() {
 	intern("reset-meta*", procResetMeta)
 	intern("empty*", procEmpty)
 	intern("bound?*", procIsBound)
+	intern("format*", procFormat)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

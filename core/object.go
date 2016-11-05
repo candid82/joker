@@ -202,6 +202,9 @@ type (
 	Deref interface {
 		Deref() Object
 	}
+	Native interface {
+		Native() interface{}
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -891,6 +894,10 @@ func (c Char) GetType() *Type {
 	return TYPES["Char"]
 }
 
+func (c Char) Native() interface{} {
+	return c.ch
+}
+
 func (c Char) Hash() uint32 {
 	h := getHash()
 	h.Write([]byte(string(c.ch)))
@@ -929,6 +936,10 @@ func (d Double) GetType() *Type {
 	return TYPES["Double"]
 }
 
+func (d Double) Native() interface{} {
+	return d.D
+}
+
 func (d Double) Hash() uint32 {
 	h := getHash()
 	b := make([]byte, 8)
@@ -958,6 +969,10 @@ func (i Int) GetType() *Type {
 	return TYPES["Int"]
 }
 
+func (i Int) Native() interface{} {
+	return i.I
+}
+
 func (i Int) Hash() uint32 {
 	h := getHash()
 	b := make([]byte, 8)
@@ -985,6 +1000,10 @@ func (b Bool) Equals(other interface{}) bool {
 
 func (b Bool) GetType() *Type {
 	return TYPES["Bool"]
+}
+
+func (b Bool) Native() interface{} {
+	return b.B
 }
 
 func (b Bool) Hash() uint32 {
@@ -1155,6 +1174,10 @@ func (s String) Equals(other interface{}) bool {
 
 func (s String) GetType() *Type {
 	return TYPES["String"]
+}
+
+func (s String) Native() interface{} {
+	return s.S
 }
 
 func (s String) Hash() uint32 {
