@@ -2786,6 +2786,12 @@
   ^String [fmt & args]
   (apply format* fmt args))
 
+(defn printf
+  "Prints formatted output, as per format"
+  {:added "1.0"}
+  [fmt & args]
+  (print (apply format fmt args)))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
