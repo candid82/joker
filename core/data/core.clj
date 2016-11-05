@@ -2763,6 +2763,22 @@
   {:added "1.0"}
   [coll] (when (seq coll) coll))
 
+(defn distinct?
+  "Returns true if no two of the arguments are ="
+  {:tag Bool
+  :added "1.0"}
+  ([x] true)
+  ([x y] (not (= x y)))
+  ([x y & more]
+   (if (not= x y)
+     (loop [s #{x y} [x & etc :as xs] more]
+       (if xs
+         (if (contains? s x)
+           false
+           (recur (conj s x) etc))
+         true))
+     false)))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
