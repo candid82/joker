@@ -2758,6 +2758,11 @@
   [& vars]
   (every? #(bound?* ^Var %) vars))
 
+(defn not-empty
+  "If coll is empty, returns nil, else coll"
+  {:added "1.0"}
+  [coll] (when (seq coll) coll))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
