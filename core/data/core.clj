@@ -2792,6 +2792,15 @@
   [fmt & args]
   (print (apply format fmt args)))
 
+(defmacro defonce
+  "defs name to have the value of the expr if the named var is not bound,
+  else expr is unevaluated"
+  {:added "1.0"}
+  [name expr]
+  `(let [v# (def ~name)]
+     (when-not (bound? v#)
+       (def ~name ~expr))))
+
 (defn get-in
   "Returns the value in a nested associative structure,
   where ks is a sequence of keys. Returns nil if the key
