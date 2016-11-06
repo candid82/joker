@@ -2780,8 +2780,7 @@
      false)))
 
 (defn format
-  "Formats a string using java.lang.String.format, see java.util.Formatter for format
-  string syntax"
+  "Formats a string using fmt.Sprintf"
   {:added "1.0"}
   ^String [fmt & args]
   (apply format* fmt args))
@@ -2800,6 +2799,12 @@
   `(let [v# (def ~name)]
      (when-not (bound? v#)
        (def ~name ~expr))))
+
+(defn load
+  "Loads code from file"
+  {:added "1.0"}
+  [f]
+  (load* f))
 
 (defn get-in
   "Returns the value in a nested associative structure,

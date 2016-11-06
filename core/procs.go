@@ -1211,6 +1211,18 @@ var procSh Proc = func(args []Object) Object {
 	return res
 }
 
+var procLoad Proc = func(args []Object) Object {
+	filename := EnsureString(args, 0)
+	var reader *Reader
+	f, err := os.Open(filename.S)
+	if err != nil {
+		panic(RT.NewError(err.Error()))
+	}
+	reader = NewReader(bufio.NewReader(f))
+	ProcessReader(reader, EVAL)
+	return NIL
+}
+
 func ProcessReader(reader *Reader, phase Phase) {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	for {
@@ -1382,6 +1394,7 @@ func init() {
 	intern("empty*", procEmpty)
 	intern("bound?*", procIsBound)
 	intern("format*", procFormat)
+	intern("load*", procLoad)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
