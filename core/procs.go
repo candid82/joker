@@ -1212,7 +1212,7 @@ var procSh Proc = func(args []Object) Object {
 	return res
 }
 
-var procLoad Proc = func(args []Object) Object {
+var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
 	var reader *Reader
 	f, err := os.Open(filename.S)
@@ -1222,6 +1222,38 @@ var procLoad Proc = func(args []Object) Object {
 	reader = NewReader(bufio.NewReader(f))
 	ProcessReader(reader, filename.S, EVAL)
 	return NIL
+}
+
+var procIndexOf Proc = func(args []Object) Object {
+	s := EnsureString(args, 0)
+	ch := EnsureChar(args, 1)
+	for i, r := range s.S {
+		if r == ch.ch {
+			return Int{I: i}
+		}
+	}
+	return Int{I: -1}
+}
+
+var procLibPath Proc = func(args []Object) Object {
+	sym := EnsureSymbol(args, 0)
+	var file string
+	if GLOBAL_ENV.file.Value == nil {
+		var err error
+		file, err = filepath.Abs("user")
+		if err != nil {
+			panic(RT.NewError(err.Error()))
+		}
+	} else {
+		file = AssertString(GLOBAL_ENV.file.Value, "").S
+	}
+	ns := GLOBAL_ENV.CurrentNamespace.Name
+	parts := strings.Split(ns.Name(), ".")
+	for _ = range parts {
+		file, _ = filepath.Split(file)
+	}
+	path := filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...)
+	return String{S: path + ".joke"}
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) {
@@ -1406,12 +1438,15 @@ func init() {
 	intern("empty*", procEmpty)
 	intern("bound?*", procIsBound)
 	intern("format*", procFormat)
-	intern("load*", procLoad)
+	intern("load-file*", procLoadFile)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
 	intern("slurp*", procSlurp)
 	intern("hash*", procHash)
+
+	intern("index-of*", procIndexOf)
+	intern("lib-path*", procLibPath)
 
 	currentNamespace := GLOBAL_ENV.CurrentNamespace
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
