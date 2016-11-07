@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
@@ -1219,12 +1220,23 @@ var procLoad Proc = func(args []Object) Object {
 		panic(RT.NewError(err.Error()))
 	}
 	reader = NewReader(bufio.NewReader(f))
-	ProcessReader(reader, EVAL)
+	ProcessReader(reader, filename.S, EVAL)
 	return NIL
 }
 
-func ProcessReader(reader *Reader, phase Phase) {
+func ProcessReader(reader *Reader, filename string, phase Phase) {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		if err != nil {
+			panic(RT.NewError(err.Error()))
+		}
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
@@ -1408,6 +1420,6 @@ func init() {
 		panic(RT.NewError("Could not load core.clj"))
 	}
 	reader := bytes.NewReader(data)
-	ProcessReader(NewReader(reader), EVAL)
+	ProcessReader(NewReader(reader), "", EVAL)
 	GLOBAL_ENV.SetCurrentNamespace(currentNamespace)
 }

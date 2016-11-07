@@ -54,6 +54,7 @@ func processFile(filename string, phase Phase) {
 	var reader *Reader
 	if filename == "--" {
 		reader = NewReader(bufio.NewReader(os.Stdin))
+		filename = ""
 	} else {
 		f, err := os.Open(filename)
 		if err != nil {
@@ -62,7 +63,7 @@ func processFile(filename string, phase Phase) {
 		}
 		reader = NewReader(bufio.NewReader(f))
 	}
-	ProcessReader(reader, phase)
+	ProcessReader(reader, filename, phase)
 }
 
 func skipRestOfLine(reader *Reader) {
