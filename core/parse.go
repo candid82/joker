@@ -372,13 +372,13 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	var meta Map
 	switch sym := s.(type) {
 	case Symbol:
-		if sym.ns != nil && (Symbol{name: sym.ns} != ctx.GlobalEnv.CurrentNamespace.Name) {
+		if sym.ns != nil && (Symbol{name: sym.ns} != ctx.GlobalEnv.CurrentNamespace().Name) {
 			panic(&ParseError{
 				msg: "Can't create defs outside of current ns",
 				obj: obj,
 			})
 		}
-		vr := ctx.GlobalEnv.CurrentNamespace.Intern(Symbol{name: sym.name})
+		vr := ctx.GlobalEnv.CurrentNamespace().Intern(Symbol{name: sym.name})
 
 		res := &DefExpr{
 			vr:       vr,
@@ -951,7 +951,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			if sym.ns != nil {
 				ns = *sym.ns
 			}
-			vr = ctx.GlobalEnv.CurrentNamespace.Intern(MakeSymbol(ns + *sym.name))
+			vr = ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
 		} else {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}

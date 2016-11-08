@@ -138,7 +138,7 @@ func repl(phase Phase) {
 	reader := NewReader(NewLineRuneReader(rl))
 
 	for {
-		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace.Name.ToString(false) + "=> ")
+		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}

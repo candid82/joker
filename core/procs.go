@@ -1247,7 +1247,7 @@ var procLibPath Proc = func(args []Object) Object {
 	} else {
 		file = AssertString(GLOBAL_ENV.file.Value, "").S
 	}
-	ns := GLOBAL_ENV.CurrentNamespace.Name
+	ns := GLOBAL_ENV.CurrentNamespace().Name
 	parts := strings.Split(ns.Name(), ".")
 	for _ = range parts {
 		file, _ = filepath.Split(file)
@@ -1448,13 +1448,13 @@ func init() {
 	intern("index-of*", procIndexOf)
 	intern("lib-path*", procLibPath)
 
-	currentNamespace := GLOBAL_ENV.CurrentNamespace
-	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
+	currentNamespace := GLOBAL_ENV.ns.Value
+	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
 	data, err := Asset("data/core.clj")
 	if err != nil {
 		panic(RT.NewError("Could not load core.clj"))
 	}
 	reader := bytes.NewReader(data)
 	ProcessReader(NewReader(reader), "", EVAL)
-	GLOBAL_ENV.SetCurrentNamespace(currentNamespace)
+	GLOBAL_ENV.ns.Value = currentNamespace
 }

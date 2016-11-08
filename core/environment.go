@@ -4,13 +4,13 @@ import "os"
 
 type (
 	Env struct {
-		Namespaces       map[*string]*Namespace
-		CurrentNamespace *Namespace
-		CoreNamespace    *Namespace
-		stdout           *Var
-		stdin            *Var
-		printReadably    *Var
-		file             *Var
+		Namespaces    map[*string]*Namespace
+		CoreNamespace *Namespace
+		stdout        *Var
+		stdin         *Var
+		printReadably *Var
+		file          *Var
+		ns            *Var
 	}
 )
 
@@ -18,9 +18,9 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
 	}
-	currentNamespace := res.EnsureNamespace(currentNs)
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("joker.core"))
-	res.CoreNamespace.Intern(MakeSymbol("*ns*"))
+	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
+	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
 	res.stdout.Value = &File{stdout}
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
@@ -28,8 +28,11 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
-	res.SetCurrentNamespace(currentNamespace)
 	return res
+}
+
+func (env *Env) CurrentNamespace() *Namespace {
+	return AssertNamespace(env.ns.Value, "")
 }
 
 func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
@@ -40,12 +43,6 @@ func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 		env.Namespaces[sym.name] = NewNamespace(sym)
 	}
 	return env.Namespaces[sym.name]
-}
-
-func (env *Env) SetCurrentNamespace(ns *Namespace) {
-	env.CurrentNamespace = ns
-	v, _ := env.Resolve(MakeSymbol("joker.core/*ns*"))
-	v.Value = ns
 }
 
 func (env *Env) ResolveIn(n *Namespace, s Symbol) (*Var, bool) {
@@ -66,7 +63,7 @@ func (env *Env) ResolveIn(n *Namespace, s Symbol) (*Var, bool) {
 }
 
 func (env *Env) Resolve(s Symbol) (*Var, bool) {
-	return env.ResolveIn(env.CurrentNamespace, s)
+	return env.ResolveIn(env.CurrentNamespace(), s)
 }
 
 func (env *Env) FindNamespace(s Symbol) *Namespace {

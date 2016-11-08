@@ -2800,6 +2800,12 @@
      (when-not (bound? v#)
        (def ~name ~expr))))
 
+(defn in-ns
+  "Sets *ns* to the namespace named by the symbol, creating it if needed."
+  {:added "1.0"}
+  [name]
+  (var-set #'joker.core/*ns* (joker.core/create-ns name)))
+
 (defonce ^:dynamic
   ^{:private true
     :doc "A set of symbols representing loaded libs"}
