@@ -3043,7 +3043,8 @@
         (printf "(joker.core/load \"%s\")\n" path))
       (check-cyclic-dependency path)
       (when-not (= path (first *pending-paths*))
-        (binding [*pending-paths* (conj *pending-paths* path)]
+        (binding [*pending-paths* (conj *pending-paths* path)
+                  *ns* *ns*]
           (load-file path))))))
 
 (defn get-in
