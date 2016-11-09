@@ -334,7 +334,7 @@ func parseMap(m Map, pos Position, ctx *ParseContext) *MapExpr {
 	return res
 }
 
-func parseSet(s *ArraySet, pos Position, ctx *ParseContext) Expr {
+func parseSet(s *MapSet, pos Position, ctx *ParseContext) Expr {
 	res := &SetExpr{
 		elements: make([]Expr, s.m.Count()),
 		Position: pos,
@@ -975,7 +975,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	case Map:
 		canHaveMeta = true
 		res = parseMap(v, pos, ctx)
-	case *ArraySet:
+	case *MapSet:
 		canHaveMeta = true
 		res = parseSet(v, pos, ctx)
 	case Seq:

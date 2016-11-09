@@ -10,82 +10,92 @@ type (
 		Gettable
 		Disjoin(key Object) Set
 	}
-	ArraySet struct {
+	MapSet struct {
 		InfoHolder
 		MetaHolder
-		m *ArrayMap
+		m Map
 	}
 )
 
-func (v *ArraySet) WithMeta(meta Map) Object {
+func (v *MapSet) WithMeta(meta Map) Object {
 	res := *v
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
-func (set *ArraySet) Disjoin(key Object) Set {
-	return &ArraySet{m: set.m.Without(key).(*ArrayMap)}
+func (set *MapSet) Disjoin(key Object) Set {
+	return &MapSet{m: set.m.Without(key)}
 }
 
-func (set *ArraySet) Add(obj Object) bool {
-	return set.m.Add(obj, Bool{B: true})
+func (set *MapSet) Add(obj Object) bool {
+	switch m := set.m.(type) {
+	case *ArrayMap:
+		return m.Add(obj, Bool{B: true})
+	case *HashMap:
+		if m.containsKey(obj) {
+			return false
+		}
+		set.m = set.m.Assoc(obj, Bool{B: true}).(Map)
+		return true
+	default:
+		return false
+	}
 }
 
-func (set *ArraySet) Conj(obj Object) Conjable {
-	return &ArraySet{m: set.m.Assoc(obj, Bool{B: true}).(*ArrayMap)}
+func (set *MapSet) Conj(obj Object) Conjable {
+	return &MapSet{m: set.m.Assoc(obj, Bool{B: true}).(Map)}
 }
 
-func EmptySet() *ArraySet {
-	return &ArraySet{m: EmptyArrayMap()}
+func EmptySet() *MapSet {
+	return &MapSet{m: EmptyArrayMap()}
 }
 
-func (set *ArraySet) ToString(escape bool) string {
+func (set *MapSet) ToString(escape bool) string {
 	var b bytes.Buffer
 	b.WriteString("#{")
-	if len(set.m.arr) > 0 {
-		for i := 0; i < len(set.m.arr)-2; i += 2 {
-			b.WriteString(set.m.arr[i].ToString(escape))
+	for iter := iter(set.m.Keys()); iter.HasNext(); {
+		b.WriteString(iter.Next().ToString(escape))
+		if iter.HasNext() {
 			b.WriteRune(' ')
 		}
-		b.WriteString(set.m.arr[len(set.m.arr)-2].ToString(escape))
 	}
 	b.WriteRune('}')
 	return b.String()
 }
 
-func (set *ArraySet) Equals(other interface{}) bool {
+func (set *MapSet) Equals(other interface{}) bool {
 	switch otherSet := other.(type) {
-	case *ArraySet:
+	case *MapSet:
 		return set.m.Equals(otherSet.m)
 	default:
 		return false
 	}
 }
 
-func (set *ArraySet) Get(key Object) (bool, Object) {
-	if set.m.indexOf(key) != -1 {
+func (set *MapSet) Get(key Object) (bool, Object) {
+	if ok, _ := set.m.Get(key); ok {
 		return true, key
 	}
 	return false, nil
 }
 
-func (seq *ArraySet) GetType() *Type {
-	return TYPES["ArraySet"]
+func (seq *MapSet) GetType() *Type {
+	return TYPES["MapSet"]
 }
 
-func (set *ArraySet) Hash() uint32 {
+func (set *MapSet) Hash() uint32 {
 	return hashUnordered(set.Seq(), 2)
 }
 
-func (set *ArraySet) Seq() Seq {
+func (set *MapSet) Seq() Seq {
 	return set.m.Keys()
 }
 
-func (set *ArraySet) Count() int {
+func (set *MapSet) Count() int {
 	return set.m.Count()
 }
 
-func (set *ArraySet) Call(args []Object) Object {
+func (set *MapSet) Call(args []Object) Object {
 	CheckArity(args, 1, 1)
 	if ok, _ := set.Get(args[0]); ok {
 		return args[0]
@@ -93,6 +103,6 @@ func (set *ArraySet) Call(args []Object) Object {
 	return NIL
 }
 
-func (set *ArraySet) Empty() Collection {
+func (set *MapSet) Empty() Collection {
 	return EmptySet()
 }
