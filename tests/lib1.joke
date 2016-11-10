@@ -1,0 +1,5 @@
+(in-ns 'tests.lib1)
+(joker.core/refer 'joker.core)
+(println "in lib1")
+
+(load 'tests.lib2)

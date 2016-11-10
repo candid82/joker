@@ -64,10 +64,6 @@ type (
 		Position
 		binding *Binding
 	}
-	VarExpr struct {
-		Position
-		symbol Symbol
-	}
 	MetaExpr struct {
 		Position
 		meta *MapExpr
@@ -811,14 +807,15 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	expr := Parse(Second(obj.(Seq)), ctx)
-	switch expr.(type) {
-	case *VarExpr:
-		vr := expr.Eval(nil).(*Var)
-		vr.isMacro = true
-		return expr
-	default:
-		panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
+	switch expr := expr.(type) {
+	case *LiteralExpr:
+		switch vr := expr.obj.(type) {
+		case *Var:
+			vr.isMacro = true
+			return expr
+		}
 	}
+	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
 }
 
 func parseList(obj Object, ctx *ParseContext) Expr {
@@ -859,10 +856,22 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseDef(obj, ctx)
 		case "var":
 			checkForm(obj, 2, 2)
-			switch s := Second(seq).(type) {
+			switch sym := Second(seq).(type) {
 			case Symbol:
-				return &VarExpr{
-					symbol:   s,
+				vr, ok := ctx.GlobalEnv.Resolve(sym)
+				if !ok {
+					if LINTER_MODE {
+						ns := ""
+						if sym.ns != nil {
+							ns = *sym.ns
+						}
+						vr = ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
+					} else {
+						panic(&ParseError{obj: obj, msg: "Enable to resolve var " + sym.ToString(false) + " in this context"})
+					}
+				}
+				return &LiteralExpr{
+					obj:      vr,
 					Position: pos,
 				}
 			default:
@@ -917,8 +926,6 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				case *RecurExpr:
 					reportNotAFunction(pos, res.name)
 				case *BindingExpr:
-					reportNotAFunction(pos, res.name)
-				case *VarExpr:
 					reportNotAFunction(pos, res.name)
 				case *ThrowExpr:
 					reportNotAFunction(pos, res.name)

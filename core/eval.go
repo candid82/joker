@@ -231,14 +231,6 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	return expr.vr
 }
 
-func (expr *VarExpr) Eval(env *LocalEnv) Object {
-	res, ok := GLOBAL_ENV.Resolve(expr.symbol)
-	if !ok {
-		panic(RT.NewError("Enable to resolve var " + expr.symbol.ToString(false) + " in this context"))
-	}
-	return res
-}
-
 func (expr *MetaExpr) Eval(env *LocalEnv) Object {
 	meta := Eval(expr.meta, env)
 	res := Eval(expr.expr, env)

@@ -1,0 +1,4 @@
+(in-ns 'tests.lib2)
+(refer 'joker.core)
+
+(println "in lib2")
