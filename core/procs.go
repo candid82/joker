@@ -1251,6 +1251,7 @@ var procLibPath Proc = func(args []Object) Object {
 	parts := strings.Split(ns.Name(), ".")
 	for _ = range parts {
 		file, _ = filepath.Split(file)
+		file = file[:len(file)-1]
 	}
 	path := filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...)
 	return String{S: path + ".joke"}

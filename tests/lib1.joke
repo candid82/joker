@@ -2,4 +2,6 @@
 (joker.core/refer 'joker.core)
 (println "in lib1")
 
-(load 'tests.lib2)
+(require ['tests.lib2])
+
+(def v1 1)

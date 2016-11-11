@@ -2857,7 +2857,7 @@
             "namespace '%s' not found after loading '%s'"
             lib (lib-path* lib))
   (when require
-    (var-set *loaded-libs* (conj *loaded-libs* lib))))
+    (var-set #'*loaded-libs* (conj *loaded-libs* lib))))
 
 (defn- load-all
   "Loads a lib given its name and forces a load of any libs it directly or
@@ -2868,7 +2868,7 @@
   (let [libs (binding [*loaded-libs* #{}]
                (load-one lib need-ns require)
                *loaded-libs*)]
-    (var-set *loaded-libs* (reduce1 conj *loaded-libs* libs))))
+    (var-set #'*loaded-libs* (reduce1 conj *loaded-libs* libs))))
 
 (defn- load-lib
   "Loads a lib with options"
