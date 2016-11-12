@@ -42,7 +42,11 @@ func (ns *Namespace) WithMeta(meta Map) Object {
 }
 
 func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
-	fargs := append([]Object{ns.meta}, args...)
+	meta := ns.meta
+	if meta == nil {
+		meta = NIL
+	}
+	fargs := append([]Object{meta}, args...)
 	ns.meta = AssertMap(fn.Call(fargs), "")
 	return ns.meta
 }

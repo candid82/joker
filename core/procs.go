@@ -438,7 +438,7 @@ var procConj Proc = func(args []Object) Object {
 	case Seq:
 		return c.Cons(args[1])
 	default:
-		panic(RT.NewError("conj's first argument must be a collection"))
+		panic(RT.NewError("conj's first argument must be a collection, got " + c.GetType().ToString(false)))
 	}
 }
 

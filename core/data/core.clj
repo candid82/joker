@@ -3312,6 +3312,15 @@
   {:added "1.0"}
   [coll] (not (seq coll)))
 
+(defmacro add-doc-and-meta {:private true} [name docstring meta]
+  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
+
+(add-doc-and-meta *file*
+  "The path of the file being evaluated, as a String.
+
+  When there is no file, e.g. in the REPL, the value is not defined."
+  {:added "1.0"})
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test

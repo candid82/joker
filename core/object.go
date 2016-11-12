@@ -412,7 +412,11 @@ func (a *Atom) WithMeta(meta Map) Object {
 }
 
 func (a *Atom) AlterMeta(fn *Fn, args []Object) Map {
-	fargs := append([]Object{a.meta}, args...)
+	meta := a.meta
+	if meta == nil {
+		meta = NIL
+	}
+	fargs := append([]Object{meta}, args...)
 	a.meta = AssertMap(fn.Call(fargs), "")
 	return a.meta
 }
@@ -666,7 +670,11 @@ func (v *Var) WithMeta(meta Map) Object {
 }
 
 func (v *Var) AlterMeta(fn *Fn, args []Object) Map {
-	fargs := append([]Object{v.meta}, args...)
+	meta := v.meta
+	if meta == nil {
+		meta = NIL
+	}
+	fargs := append([]Object{meta}, args...)
 	v.meta = AssertMap(fn.Call(fargs), "")
 	return v.meta
 }
