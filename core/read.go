@@ -676,17 +676,22 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 	if isSelfEvaluating(obj) {
 		return obj
 	}
+	if IsSpecialSymbol(obj) {
+		return makeQuote(obj, MakeSymbol("quote"))
+	}
 	info := obj.GetInfo()
 	switch s := obj.(type) {
 	case Symbol:
 		str := *s.name
-		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' {
+		if r, _ := utf8.DecodeLastRuneInString(str); r == '#' && s.ns == nil {
 			sym, ok := env[s.name]
 			if !ok {
 				sym = generateSymbol(str[:len(str)-1] + "__")
 				env[s.name] = sym
 			}
 			obj = DeriveReadObject(obj, sym)
+		} else {
+			obj = DeriveReadObject(obj, GLOBAL_ENV.ResolveSymbol(s))
 		}
 		return makeQuote(obj, MakeSymbol("quote"))
 	case Seq:

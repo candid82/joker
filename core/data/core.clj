@@ -2791,6 +2791,49 @@
   [fmt & args]
   (print (apply format fmt args)))
 
+(defmacro ns
+  "Sets *ns* to the namespace named by name (unevaluated), creating it
+  if needed.  references can be zero or more of:
+  (:require ...) (:use ...) (:load ...)
+  with the syntax of require/use/load
+  respectively, except the arguments are unevaluated and need not be
+  quoted. Use of ns is preferred to
+  individual calls to in-ns/require/use:
+
+  (ns foo.bar
+    (:require [my.lib1 :as lib1])
+    (:use [my.lib2]))"
+  {:arglists '([name docstring? attr-map? references*])
+  :added "1.0"}
+  [name & references]
+  (let [process-reference
+        (fn [[kname & args]]
+          `(~(symbol "joker.core" (joker.core/name kname))
+              ~@(map #(list 'quote %) args)))
+        docstring  (when (string? (first references)) (first references))
+        references (if docstring (next references) references)
+        name (if docstring
+               (vary-meta name assoc :doc docstring)
+               name)
+        metadata   (when (map? (first references)) (first references))
+        references (if metadata (next references) references)
+        name (if metadata
+               (vary-meta name merge metadata)
+               name)
+        name-metadata (meta name)]
+    `(do
+       (joker.core/in-ns '~name)
+       ~@(when name-metadata
+           `((reset-meta! (joker.core/find '~name) ~name-metadata)))
+       ~@(when (not= name 'joker.core)
+           `((joker.core/refer '~'joker.core)))
+       ~@(map process-reference references)
+       (if (= '~name 'joker.core)
+         nil
+         (do
+           (var-set #'*loaded-libs* (conj *loaded-libs* '~name))
+           nil)))))
+
 (defmacro defonce
   "defs name to have the value of the expr if the named var is not bound,
   else expr is unevaluated"

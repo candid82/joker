@@ -1273,3 +1273,12 @@ func IsInstance(t *Type, obj Object) bool {
 		return obj.GetType().reflectType == t.reflectType
 	}
 }
+
+func IsSpecialSymbol(obj Object) bool {
+	switch obj := obj.(type) {
+	case Symbol:
+		return obj.ns == nil && SPECIAL_SYMBOLS[obj.name]
+	default:
+		return false
+	}
+}

@@ -280,13 +280,7 @@ var procRand Proc = func(args []Object) Object {
 }
 
 var procIsSpecialSymbol Proc = func(args []Object) Object {
-	s := args[0]
-	switch s := s.(type) {
-	case Symbol:
-		return Bool{B: s.ns == nil && SPECIAL_SYMBOLS[s.name]}
-	default:
-		return Bool{B: false}
-	}
+	return Bool{B: IsSpecialSymbol(args[0])}
 }
 
 var procSubs Proc = func(args []Object) Object {
