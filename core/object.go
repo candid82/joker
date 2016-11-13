@@ -209,66 +209,78 @@ type (
 
 var TYPES = map[string]*Type{}
 
+func regRefType(name string, inst interface{}) {
+	TYPES[name] = &Type{name: name, reflectType: reflect.TypeOf(inst)}
+}
+
+func regType(name string, inst interface{}) {
+	TYPES[name] = &Type{name: name, reflectType: reflect.TypeOf(inst).Elem()}
+}
+
+func regInterface(name string, inst interface{}) {
+	TYPES[name] = &Type{name: name, reflectType: reflect.TypeOf(inst).Elem()}
+}
+
 func init() {
-	TYPES["ArrayMap"] = &Type{name: "ArrayMap", reflectType: reflect.TypeOf((*ArrayMap)(nil))}
-	TYPES["ArrayMapSeq"] = &Type{name: "ArrayMapSeq", reflectType: reflect.TypeOf((*ArrayMapSeq)(nil))}
-	TYPES["ArrayNodeSeq"] = &Type{name: "ArrayNodeSeq", reflectType: reflect.TypeOf((*ArrayNodeSeq)(nil))}
-	TYPES["ArraySeq"] = &Type{name: "ArraySeq", reflectType: reflect.TypeOf((*ArraySeq)(nil))}
-	TYPES["MapSet"] = &Type{name: "MapSet", reflectType: reflect.TypeOf((*MapSet)(nil))}
-	TYPES["Associative"] = &Type{name: "Associative", reflectType: reflect.TypeOf((*Associative)(nil)).Elem()}
-	TYPES["Atom"] = &Type{name: "Atom", reflectType: reflect.TypeOf((*Atom)(nil)).Elem()}
-	TYPES["BigFloat"] = &Type{name: "BigFloat", reflectType: reflect.TypeOf((*BigFloat)(nil))}
-	TYPES["BigInt"] = &Type{name: "BigInt", reflectType: reflect.TypeOf((*BigInt)(nil))}
-	TYPES["Bool"] = &Type{name: "Bool", reflectType: reflect.TypeOf((*Bool)(nil)).Elem()}
-	TYPES["Buffer"] = &Type{name: "Buffer", reflectType: reflect.TypeOf((*Buffer)(nil))}
-	TYPES["Callable"] = &Type{name: "Callable", reflectType: reflect.TypeOf((*Callable)(nil)).Elem()}
-	TYPES["Char"] = &Type{name: "Char", reflectType: reflect.TypeOf((*Char)(nil)).Elem()}
-	TYPES["Collection"] = &Type{name: "Collection", reflectType: reflect.TypeOf((*Collection)(nil)).Elem()}
-	TYPES["Comparable"] = &Type{name: "Comparable", reflectType: reflect.TypeOf((*Comparable)(nil)).Elem()}
-	TYPES["Comparator"] = &Type{name: "Comparator", reflectType: reflect.TypeOf((*Comparator)(nil)).Elem()}
-	TYPES["ConsSeq"] = &Type{name: "ConsSeq", reflectType: reflect.TypeOf((*ConsSeq)(nil))}
-	TYPES["Counted"] = &Type{name: "Counted", reflectType: reflect.TypeOf((*Counted)(nil)).Elem()}
-	TYPES["Delay"] = &Type{name: "Delay", reflectType: reflect.TypeOf((*Delay)(nil))}
-	TYPES["Double"] = &Type{name: "Double", reflectType: reflect.TypeOf((*Double)(nil)).Elem()}
-	TYPES["Error"] = &Type{name: "Error", reflectType: reflect.TypeOf((*Error)(nil)).Elem()}
-	TYPES["EvalError"] = &Type{name: "EvalError", reflectType: reflect.TypeOf((*EvalError)(nil))}
-	TYPES["ExInfo"] = &Type{name: "ExInfo", reflectType: reflect.TypeOf((*ExInfo)(nil))}
-	TYPES["Fn"] = &Type{name: "Fn", reflectType: reflect.TypeOf((*Fn)(nil))}
-	TYPES["File"] = &Type{name: "File", reflectType: reflect.TypeOf((*File)(nil))}
-	TYPES["HashMap"] = &Type{name: "HashMap", reflectType: reflect.TypeOf((*HashMap)(nil))}
-	TYPES["Indexed"] = &Type{name: "Indexed", reflectType: reflect.TypeOf((*Indexed)(nil)).Elem()}
-	TYPES["Int"] = &Type{name: "Int", reflectType: reflect.TypeOf((*Int)(nil)).Elem()}
-	TYPES["IOReader"] = &Type{name: "IOReader", reflectType: reflect.TypeOf((*io.Reader)(nil)).Elem()}
-	TYPES["Keyword"] = &Type{name: "Keyword", reflectType: reflect.TypeOf((*Keyword)(nil)).Elem()}
-	TYPES["LazySeq"] = &Type{name: "LazySeq", reflectType: reflect.TypeOf((*LazySeq)(nil))}
-	TYPES["List"] = &Type{name: "List", reflectType: reflect.TypeOf((*List)(nil))}
-	TYPES["Map"] = &Type{name: "Map", reflectType: reflect.TypeOf((*Map)(nil)).Elem()}
-	TYPES["MappingSeq"] = &Type{name: "MappingSeq", reflectType: reflect.TypeOf((*MappingSeq)(nil))}
-	TYPES["Named"] = &Type{name: "Named", reflectType: reflect.TypeOf((*Named)(nil)).Elem()}
-	TYPES["Namespace"] = &Type{name: "Namespace", reflectType: reflect.TypeOf((*Namespace)(nil)).Elem()}
-	TYPES["Nil"] = &Type{name: "Nil", reflectType: reflect.TypeOf((*Nil)(nil)).Elem()}
-	TYPES["NodeSeq"] = &Type{name: "NodeSeq", reflectType: reflect.TypeOf((*NodeSeq)(nil))}
-	TYPES["NodeSeq"] = &Type{name: "NodeSeq", reflectType: reflect.TypeOf((*NodeSeq)(nil))}
-	TYPES["Number"] = &Type{name: "Number", reflectType: reflect.TypeOf((*Number)(nil)).Elem()}
-	TYPES["ParseError"] = &Type{name: "ParseError", reflectType: reflect.TypeOf((*ParseError)(nil)).Elem()}
-	TYPES["Proc"] = &Type{name: "Proc", reflectType: reflect.TypeOf((*Proc)(nil)).Elem()}
-	TYPES["Ratio"] = &Type{name: "Ratio", reflectType: reflect.TypeOf((*Ratio)(nil))}
-	TYPES["RecurBindings"] = &Type{name: "RecurBindings", reflectType: reflect.TypeOf((*RecurBindings)(nil)).Elem()}
-	TYPES["Ref"] = &Type{name: "Ref", reflectType: reflect.TypeOf((*Ref)(nil)).Elem()}
-	TYPES["Regex"] = &Type{name: "Regex", reflectType: reflect.TypeOf((*Regex)(nil)).Elem()}
-	TYPES["Reversible"] = &Type{name: "Reversible", reflectType: reflect.TypeOf((*Reversible)(nil)).Elem()}
-	TYPES["Seq"] = &Type{name: "Seq", reflectType: reflect.TypeOf((*Seq)(nil)).Elem()}
-	TYPES["Seqable"] = &Type{name: "Seqable", reflectType: reflect.TypeOf((*Seqable)(nil)).Elem()}
-	TYPES["Sequential"] = &Type{name: "Sequential", reflectType: reflect.TypeOf((*Sequential)(nil)).Elem()}
-	TYPES["Set"] = &Type{name: "Set", reflectType: reflect.TypeOf((*Set)(nil)).Elem()}
-	TYPES["Stack"] = &Type{name: "Stack", reflectType: reflect.TypeOf((*Stack)(nil)).Elem()}
-	TYPES["String"] = &Type{name: "String", reflectType: reflect.TypeOf((*String)(nil)).Elem()}
-	TYPES["Symbol"] = &Type{name: "Symbol", reflectType: reflect.TypeOf((*Symbol)(nil)).Elem()}
-	TYPES["Type"] = &Type{name: "Type", reflectType: reflect.TypeOf((*Type)(nil))}
-	TYPES["Var"] = &Type{name: "Var", reflectType: reflect.TypeOf((*Var)(nil))}
-	TYPES["Vector"] = &Type{name: "Vector", reflectType: reflect.TypeOf((*Vector)(nil))}
-	TYPES["VectorRSeq"] = &Type{name: "VectorRSeq", reflectType: reflect.TypeOf((*VectorRSeq)(nil))}
-	TYPES["VectorSeq"] = &Type{name: "VectorSeq", reflectType: reflect.TypeOf((*VectorSeq)(nil))}
+	regInterface("Associative", (*Associative)(nil))
+	regInterface("Callable", (*Callable)(nil))
+	regInterface("Collection", (*Collection)(nil))
+	regInterface("Comparable", (*Comparable)(nil))
+	regInterface("Comparator", (*Comparator)(nil))
+	regInterface("Counted", (*Counted)(nil))
+	regInterface("Error", (*Error)(nil))
+	regInterface("Indexed", (*Indexed)(nil))
+	regInterface("IOReader", (*io.Reader)(nil))
+	regInterface("Map", (*Map)(nil))
+	regInterface("Named", (*Named)(nil))
+	regInterface("Number", (*Number)(nil))
+	regInterface("Ref", (*Ref)(nil))
+	regInterface("Reversible", (*Reversible)(nil))
+	regInterface("Seq", (*Seq)(nil))
+	regInterface("Seqable", (*Seqable)(nil))
+	regInterface("Sequential", (*Sequential)(nil))
+	regInterface("Set", (*Set)(nil))
+	regInterface("Stack", (*Stack)(nil))
+
+	regRefType("ArrayMap", (*ArrayMap)(nil))
+	regRefType("ArrayMapSeq", (*ArrayMapSeq)(nil))
+	regRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil))
+	regRefType("ArraySeq", (*ArraySeq)(nil))
+	regRefType("MapSet", (*MapSet)(nil))
+	regRefType("Atom", (*Atom)(nil))
+	regRefType("BigFloat", (*BigFloat)(nil))
+	regRefType("BigInt", (*BigInt)(nil))
+	regType("Bool", (*Bool)(nil))
+	regRefType("Buffer", (*Buffer)(nil))
+	regType("Char", (*Char)(nil))
+	regRefType("ConsSeq", (*ConsSeq)(nil))
+	regRefType("Delay", (*Delay)(nil))
+	regType("Double", (*Double)(nil))
+	regRefType("EvalError", (*EvalError)(nil))
+	regRefType("ExInfo", (*ExInfo)(nil))
+	regRefType("Fn", (*Fn)(nil))
+	regRefType("File", (*File)(nil))
+	regRefType("HashMap", (*HashMap)(nil))
+	regType("Int", (*Int)(nil))
+	regType("Keyword", (*Keyword)(nil))
+	regRefType("LazySeq", (*LazySeq)(nil))
+	regRefType("List", (*List)(nil))
+	regRefType("MappingSeq", (*MappingSeq)(nil))
+	regRefType("Namespace", (*Namespace)(nil))
+	regType("Nil", (*Nil)(nil))
+	regRefType("NodeSeq", (*NodeSeq)(nil))
+	regRefType("ParseError", (*ParseError)(nil))
+	regRefType("Proc", (*Proc)(nil))
+	regRefType("Ratio", (*Ratio)(nil))
+	regRefType("RecurBindings", (*RecurBindings)(nil))
+	regType("Regex", (*Regex)(nil))
+	regType("String", (*String)(nil))
+	regType("Symbol", (*Symbol)(nil))
+	regRefType("Type", (*Type)(nil))
+	regRefType("Var", (*Var)(nil))
+	regRefType("Vector", (*Vector)(nil))
+	regRefType("VectorRSeq", (*VectorRSeq)(nil))
+	regRefType("VectorSeq", (*VectorSeq)(nil))
 }
 
 var hasher hash.Hash32 = fnv.New32a()
@@ -411,19 +423,13 @@ func (a *Atom) WithMeta(meta Map) Object {
 	return &res
 }
 
-func (a *Atom) AlterMeta(fn *Fn, args []Object) Map {
-	meta := a.meta
-	if meta == nil {
-		meta = NIL
-	}
-	fargs := append([]Object{meta}, args...)
-	a.meta = AssertMap(fn.Call(fargs), "")
-	return a.meta
-}
-
 func (a *Atom) ResetMeta(newMeta Map) Map {
 	a.meta = newMeta
 	return a.meta
+}
+
+func (a *Atom) AlterMeta(fn *Fn, args []Object) Map {
+	return AlterMeta(&a.MetaHolder, fn, args)
 }
 
 func (a *Atom) Deref() Object {
@@ -648,6 +654,16 @@ func (m MetaHolder) GetMeta() Map {
 	return m.meta
 }
 
+func AlterMeta(m *MetaHolder, fn *Fn, args []Object) Map {
+	meta := m.meta
+	if meta == nil {
+		meta = NIL
+	}
+	fargs := append([]Object{meta}, args...)
+	m.meta = AssertMap(fn.Call(fargs), "")
+	return m.meta
+}
+
 func (sym Symbol) WithMeta(meta Map) Object {
 	res := sym
 	res.meta = SafeMerge(res.meta, meta)
@@ -669,19 +685,13 @@ func (v *Var) WithMeta(meta Map) Object {
 	return &res
 }
 
-func (v *Var) AlterMeta(fn *Fn, args []Object) Map {
-	meta := v.meta
-	if meta == nil {
-		meta = NIL
-	}
-	fargs := append([]Object{meta}, args...)
-	v.meta = AssertMap(fn.Call(fargs), "")
-	return v.meta
-}
-
 func (v *Var) ResetMeta(newMeta Map) Map {
 	v.meta = newMeta
 	return v.meta
+}
+
+func (v *Var) AlterMeta(fn *Fn, args []Object) Map {
+	return AlterMeta(&v.MetaHolder, fn, args)
 }
 
 func (v *Var) GetType() *Type {

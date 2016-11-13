@@ -41,19 +41,13 @@ func (ns *Namespace) WithMeta(meta Map) Object {
 	return &res
 }
 
-func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
-	meta := ns.meta
-	if meta == nil {
-		meta = NIL
-	}
-	fargs := append([]Object{meta}, args...)
-	ns.meta = AssertMap(fn.Call(fargs), "")
-	return ns.meta
-}
-
 func (ns *Namespace) ResetMeta(newMeta Map) Map {
 	ns.meta = newMeta
 	return ns.meta
+}
+
+func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
+	return AlterMeta(&ns.MetaHolder, fn, args)
 }
 
 func (ns *Namespace) Hash() uint32 {

@@ -54,7 +54,7 @@ var procWithMeta Proc = func(args []Object) Object {
 	if args[1].Equals(NIL) {
 		return args[0]
 	}
-	return m.WithMeta(ensureArrayMap(args, 1))
+	return m.WithMeta(EnsureMap(args, 1))
 }
 
 var procIsZero Proc = func(args []Object) Object {

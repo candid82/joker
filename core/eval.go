@@ -234,7 +234,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 func (expr *MetaExpr) Eval(env *LocalEnv) Object {
 	meta := Eval(expr.meta, env)
 	res := Eval(expr.expr, env)
-	return res.(Meta).WithMeta(meta.(*ArrayMap))
+	return res.(Meta).WithMeta(meta.(Map))
 }
 
 func evalSeq(exprs []Expr, env *LocalEnv) []Object {
