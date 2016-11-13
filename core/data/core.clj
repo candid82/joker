@@ -3301,7 +3301,7 @@
   value of condp. A single default expression can follow the clauses,
   and its value will be returned if no clause matches. If no default
   expression is provided and no clause matches, an
-  IllegalArgumentException is thrown."
+  exception is thrown."
   {:added "1.0"}
 
   [pred expr & clauses]
@@ -3389,6 +3389,43 @@
      ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
      ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
+
+(defn partition-all
+  "Returns a lazy sequence of lists like partition, but may include
+  partitions with fewer than n items at the end."
+  {:added "1.0"}
+  ([n coll]
+   (partition-all n n coll))
+  ([n step coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (let [seg (doall (take n s))]
+        (cons seg (partition-all n step (nthrest s step))))))))
+
+(defmacro case
+  "Takes an expression, and a set of clauses.
+
+  Each clause can take the form of either:
+
+  test-expr result-expr
+
+  (test-expr ... test-expr)  result-expr
+
+  If the expression is equal to a value of
+  test-expr, the corresponding result-expr is returned. A single
+  default expression can follow the clauses, and its value will be
+  returned if no clause matches. If no default expression is provided
+  and no clause matches, an exception is thrown."
+  {:added "1.0"}
+  [expr & clauses]
+  (let [parts (partition-all 2 clauses)
+        setized (for [[test then] parts]
+                  (if then
+                    [(if (list? test) (set test) (set [test])) then]
+                    [test]))
+        transformed-clauses (apply concat setized)]
+    `(condp contains? ~expr
+       ~@transformed-clauses)))
 
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
