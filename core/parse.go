@@ -138,7 +138,7 @@ type (
 	}
 )
 
-var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin)
+var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
 var LOCAL_BINDINGS *Bindings = nil
 var SPECIAL_SYMBOLS = make(map[*string]bool)
 

@@ -3326,6 +3326,28 @@
   none were supplied"
   {:added "1.0"})
 
+(add-doc-and-meta *ns*
+  "A Namespace object representing the current namespace."
+  {:added "1.0"})
+
+(add-doc-and-meta *in*
+  "A File object representing standard input for read operations.
+
+  Defaults to stdin."
+  {:added "1.0"})
+
+(add-doc-and-meta *out*
+  "A File object representing standard output for print operations.
+
+  Defaults to stdout."
+  {:added "1.0"})
+
+(add-doc-and-meta *err*
+  "A File object representing standard error for print operations.
+
+  Defaults to stderr."
+  {:added "1.0"})
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test

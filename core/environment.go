@@ -11,6 +11,7 @@ type (
 		CoreNamespace *Namespace
 		stdout        *Var
 		stdin         *Var
+		stderr        *Var
 		printReadably *Var
 		file          *Var
 		args          *Var
@@ -18,7 +19,7 @@ type (
 	}
 )
 
-func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
+func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) *Env {
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
 	}
@@ -29,6 +30,8 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File) *Env {
 	res.stdout.Value = &File{stdout}
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
 	res.stdin.Value = &File{stdin}
+	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
+	res.stderr.Value = &File{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	args := EmptyVector
