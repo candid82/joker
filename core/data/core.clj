@@ -3321,6 +3321,11 @@
   When there is no file, e.g. in the REPL, the value is not defined."
   {:added "1.0"})
 
+(add-doc-and-meta *command-line-args*
+  "A sequence of the supplied command line arguments, or nil if
+  none were supplied"
+  {:added "1.0"})
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
