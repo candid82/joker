@@ -1940,12 +1940,22 @@
   (flush* *out*)
   nil)
 
+(def
+  ^{:doc
+    "When set to true, output will be flushed whenever a newline is printed.
+
+    Defaults to true."
+    :added "1.0"}
+  *flush-on-newline* true)
+
 (defn prn
-  "Same as pr followed by (newline)."
+  "Same as pr followed by (newline). Observes *flush-on-newline*"
   {:added "1.0"}
   [& more]
   (apply pr more)
-  (newline))
+  (newline)
+  (when *flush-on-newline*
+    (flush)))
 
 (defn print
   "Prints the object(s) to the output stream that is the current value
