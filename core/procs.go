@@ -922,6 +922,14 @@ var procNewline Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procFlush Proc = func(args []Object) Object {
+	switch f := args[0].(type) {
+	case *File:
+		f.Sync()
+	}
+	return NIL
+}
+
 func readFromReader(reader io.RuneReader) Object {
 	r := NewReader(reader)
 	obj, err := TryRead(r)
@@ -1391,6 +1399,7 @@ func init() {
 	intern("bigfloat*", procBigFloat)
 	intern("pr*", procPr)
 	intern("newline*", procNewline)
+	intern("flush*", procFlush)
 	intern("read*", procRead)
 	intern("read-line*", procReadLine)
 	intern("read-string*", procReadString)

@@ -1932,6 +1932,14 @@
   []
   (newline*))
 
+(defn flush
+  "Flushes the output stream that is the current value of
+  *out*"
+  {:added "1.0"}
+  []
+  (flush* *out*)
+  nil)
+
 (defn prn
   "Same as pr followed by (newline)."
   {:added "1.0"}
