@@ -679,12 +679,21 @@
   {:added "1.0"}
   [x] (inc* x))
 
-(defn ^:private
-  reduce1
+(defn reduce
+  "f should be a function of 2 arguments. If val is not supplied,
+  returns the result of applying f to the first 2 items in coll, then
+  applying f to that result and the 3rd item, etc. If coll contains no
+  items, f must accept no arguments as well, and reduce returns the
+  result of calling f with no arguments.  If coll has only 1 item, it
+  is returned and f is not called.  If val is supplied, returns the
+  result of applying f to val and the first item in coll, then
+  applying f to that result and the 2nd item, etc. If coll contains no
+  items, returns val and f is not called."
+  {:added "1.0"}
   ([f coll]
    (let [s (seq coll)]
      (if s
-       (reduce1 f (first s) (next s))
+       (reduce f (first s) (next s))
        (f))))
   ([f val coll]
    (let [s (seq coll)]
@@ -696,7 +705,7 @@
   "Returns a seq of the items in coll in reverse order. Not lazy."
   {:added "1.0"}
   [coll]
-  (reduce1 conj () coll))
+  (reduce conj () coll))
 
 (defn +'
   "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
@@ -706,7 +715,7 @@
   ([x] (cast Number x))
   ([x y] (add'* x y))
   ([x y & more]
-   (reduce1 +' (+' x y) more)))
+   (reduce +' (+' x y) more)))
 
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
@@ -716,7 +725,7 @@
   ([x] (cast Number x))
   ([x y] (add* x y))
   ([x y & more]
-   (reduce1 + (+ x y) more)))
+   (reduce + (+ x y) more)))
 
 (defn *'
   "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
@@ -726,7 +735,7 @@
   ([x] (cast Number x))
   ([x y] (multiply'* x y))
   ([x y & more]
-   (reduce1 *' (*' x y) more)))
+   (reduce *' (*' x y) more)))
 
 (defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
@@ -736,7 +745,7 @@
   ([x] (cast Number x))
   ([x y] (multiply* x y))
   ([x y & more]
-   (reduce1 * (* x y) more)))
+   (reduce * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
@@ -745,7 +754,7 @@
   ([x] (/ 1 x))
   ([x y] (divide* x y))
   ([x y & more]
-   (reduce1 / (/ x y) more)))
+   (reduce / (/ x y) more)))
 
 (defn -'
   "If no ys are supplied, returns the negation of x, else subtracts
@@ -755,7 +764,7 @@
   ([x] (subtract'* x))
   ([x y] (subtract'* x y))
   ([x y & more]
-   (reduce1 -' (-' x y) more)))
+   (reduce -' (-' x y) more)))
 
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
@@ -765,7 +774,7 @@
   ([x] (subtract* x))
   ([x y] (subtract* x y))
   ([x y & more]
-   (reduce1 - (- x y) more)))
+   (reduce - (- x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -825,7 +834,7 @@
   ([x] x)
   ([x y] (max* x y))
   ([x y & more]
-   (reduce1 max (max x y) more)))
+   (reduce max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
@@ -833,7 +842,7 @@
   ([x] x)
   ([x y] (min* x y))
   ([x y & more]
-   (reduce1 min (min x y) more)))
+   (reduce min (min x y) more)))
 
 (defn dec'
   "Returns a number one less than num. Supports arbitrary precision.
@@ -879,28 +888,28 @@
   {:added "1.0"}
   ([x y] (bit-and* x y))
   ([x y & more]
-   (reduce1 bit-and (bit-and x y) more)))
+   (reduce bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
   {:added "1.0"}
   ([x y] (bit-or* x y))
   ([x y & more]
-   (reduce1 bit-or (bit-or x y) more)))
+   (reduce bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
   {:added "1.0"}
   ([x y] (bit-xor* x y))
   ([x y & more]
-   (reduce1 bit-xor (bit-xor x y) more)))
+   (reduce bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
   {:added "1.0"}
   ([x y] (bit-and-not* x y))
   ([x y & more]
-   (reduce1 bit-and-not (bit-and-not x y) more)))
+   (reduce bit-and-not (bit-and-not x y) more)))
 
 (defn bit-clear
   "Clear bit at index n"
@@ -1222,7 +1231,7 @@
   where the keys will be the ordinals."
   {:added "1.0"}
   ([f init coll]
-   (reduce1 (fn [ret kv] (f ret (first kv) (second kv))) init coll)))
+   (reduce (fn [ret kv] (f ret (first kv) (second kv))) init coll)))
 
 (defn var-get
   "Gets the value in the var object"
@@ -1401,11 +1410,11 @@
   ([f g h & fs]
    (let [fs (list* f g h fs)]
      (fn
-       ([] (reduce1 #(conj %1 (%2)) [] fs))
-       ([x] (reduce1 #(conj %1 (%2 x)) [] fs))
-       ([x y] (reduce1 #(conj %1 (%2 x y)) [] fs))
-       ([x y z] (reduce1 #(conj %1 (%2 x y z)) [] fs))
-       ([x y z & args] (reduce1 #(conj %1 (apply %2 x y z args)) [] fs))))))
+       ([] (reduce #(conj %1 (%2)) [] fs))
+       ([x] (reduce #(conj %1 (%2 x)) [] fs))
+       ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
+       ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
+       ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
 
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
@@ -1640,7 +1649,7 @@
   {:added "1.0"}
   [& maps]
   (when (some identity maps)
-    (reduce1 #(conj (or %1 {}) %2) maps)))
+    (reduce #(conj (or %1 {}) %2) maps)))
 
 (defn merge-with
   "Returns a map that consists of the rest of the maps conj-ed onto
@@ -1656,8 +1665,8 @@
                             (assoc m k (f (get m k) v))
                             (assoc m k v))))
           merge2 (fn [m1 m2]
-                   (reduce1 merge-entry (or m1 {}) (seq m2)))]
-      (reduce1 merge2 maps))))
+                   (reduce merge-entry (or m1 {}) (seq m2)))]
+      (reduce merge2 maps))))
 
 (defn zipmap
   "Returns a map with the keys mapped to the corresponding vals."
@@ -2046,7 +2055,7 @@
   [coll]
   (if (set? coll)
     (with-meta coll nil)
-    (reduce1 conj #{} coll)))
+    (reduce conj #{} coll)))
 
 (defn ^:private filter-key
   [keyfn pred amap]
@@ -2285,9 +2294,9 @@
                                          (if (:as b)
                                            (conj ret (:as b) gmap)
                                            ret))))
-                              bes (reduce1
+                              bes (reduce
                                    (fn [bes entry]
-                                     (reduce1 #(assoc %1 %2 ((val entry) %2))
+                                     (reduce #(assoc %1 %2 ((val entry) %2))
                                               (dissoc bes (key entry))
                                               ((key entry) bes)))
                                    (dissoc b :as :or)
@@ -2313,7 +2322,7 @@
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
-      (reduce1 process-entry [] bents))))
+      (reduce process-entry [] bents))))
 
 (defmacro let
   "binding => binding-form init-expr
@@ -2427,7 +2436,7 @@
       (let [vs (take-nth 2 (drop 1 bindings))
             bs (take-nth 2 bindings)
             gs (map (fn [b] (if (symbol? b) b (gensym))) bs)
-            bfs (reduce1 (fn [ret [b v g]]
+            bfs (reduce (fn [ret [b v g]]
                            (if (symbol? b)
                              (conj ret g v)
                              (conj ret g v b g)))
@@ -2476,7 +2485,7 @@
                (vector? seq-exprs) "a vector for its binding"
                (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
-                    (reduce1 (fn [groups [k v]]
+                    (reduce (fn [groups [k v]]
                                (if (keyword? k)
                                  (conj (pop groups) (conj (peek groups) [k v]))
                                  (conj groups [k v])))
@@ -2710,7 +2719,7 @@
   ([k x] x)
   ([k x y] (if (> (k x) (k y)) x y))
   ([k x y & more]
-   (reduce1 #(max-key k %1 %2) (max-key k x y) more)))
+   (reduce #(max-key k %1 %2) (max-key k x y) more)))
 
 (defn min-key
   "Returns the x for which (k x), a number, is least."
@@ -2718,7 +2727,7 @@
   ([k x] x)
   ([k x y] (if (< (k x) (k y)) x y))
   ([k x y & more]
-   (reduce1 #(min-key k %1 %2) (min-key k x y) more)))
+   (reduce #(min-key k %1 %2) (min-key k x y) more)))
 
 (defn distinct
   "Returns a lazy sequence of the elements of coll with duplicates removed."
@@ -2741,7 +2750,7 @@
   {:added "1.0"}
   [smap coll]
   (if (vector? coll)
-    (reduce1 (fn [v i]
+    (reduce (fn [v i]
                (if-let [e (find smap (nth v i))]
                  (assoc v i (val e))
                  v))
@@ -2929,7 +2938,7 @@
   (let [libs (binding [*loaded-libs* #{}]
                (load-one lib need-ns require)
                *loaded-libs*)]
-    (var-set #'*loaded-libs* (reduce1 conj *loaded-libs* libs))))
+    (var-set #'*loaded-libs* (reduce conj *loaded-libs* libs))))
 
 (defn- load-lib
   "Loads a lib with options"
@@ -3114,7 +3123,7 @@
   is not present, or the not-found value if supplied."
   {:added "1.0"}
   ([m ks]
-   (reduce1 get m ks))
+   (reduce get m ks))
   ([m ks not-found]
    (loop [sentinel {}
           m m
