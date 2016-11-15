@@ -2859,7 +2859,7 @@
     `(do
        (joker.core/in-ns '~name)
        ~@(when name-metadata
-           `((reset-meta! (joker.core/find '~name) ~name-metadata)))
+           `((reset-meta! (joker.core/find-ns '~name) ~name-metadata)))
        ~@(when (not= name 'joker.core)
            `((joker.core/refer '~'joker.core)))
        ~@(map process-reference references)
