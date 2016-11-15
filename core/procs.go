@@ -1226,6 +1226,13 @@ var procLoadFile Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procReduceKv Proc = func(args []Object) Object {
+	f := EnsureCallable(args, 0)
+	init := args[1]
+	coll := EnsureKVReduce(args, 2)
+	return coll.kvreduce(f, init)
+}
+
 var procIndexOf Proc = func(args []Object) Object {
 	s := EnsureString(args, 0)
 	ch := EnsureChar(args, 1)
@@ -1443,6 +1450,7 @@ func init() {
 	intern("bound?*", procIsBound)
 	intern("format*", procFormat)
 	intern("load-file*", procLoadFile)
+	intern("reduce-kv*", procReduceKv)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

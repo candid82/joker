@@ -443,3 +443,11 @@ func NewVectorFromSeq(seq Seq) *Vector {
 func (v *Vector) Empty() Collection {
 	return EmptyVector
 }
+
+func (v *Vector) kvreduce(c Callable, init Object) Object {
+	res := init
+	for i := 0; i < v.Count(); i++ {
+		res = c.Call([]Object{res, Int{I: i}, v.Nth(i)})
+	}
+	return res
+}

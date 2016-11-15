@@ -614,3 +614,24 @@ func EnsureRef(args []Object, index int) Ref {
     panic(RT.newArgTypeError(index, c, "Ref"))
   }
 }
+
+func AssertKVReduce(obj Object, msg string) KVReduce {
+  switch c := obj.(type) {
+  case KVReduce:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "KVReduce", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureKVReduce(args []Object, index int) KVReduce {
+  switch c := args[index].(type) {
+  case KVReduce:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "KVReduce"))
+  }
+}

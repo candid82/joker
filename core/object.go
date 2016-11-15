@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -205,6 +205,9 @@ type (
 	Native interface {
 		Native() interface{}
 	}
+	KVReduce interface {
+		kvreduce(c Callable, init Object) Object
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -231,6 +234,7 @@ func init() {
 	regInterface("Error", (*Error)(nil))
 	regInterface("Indexed", (*Indexed)(nil))
 	regInterface("IOReader", (*io.Reader)(nil))
+	regInterface("KVReduce", (*KVReduce)(nil))
 	regInterface("Map", (*Map)(nil))
 	regInterface("Named", (*Named)(nil))
 	regInterface("Number", (*Number)(nil))

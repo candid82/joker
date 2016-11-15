@@ -1222,6 +1222,12 @@
          (let [~form temp#]
            ~@body)))))
 
+(defn type
+  "Returns the :type metadata of x, or its Type if none"
+  {:added "1.0"}
+  [x]
+  (or (get (meta x) :type) (type* x)))
+
 (defn reduce-kv
   "Reduces an associative collection. f should be a function of 3
   arguments. Returns the result of applying f to init, the first key
@@ -1231,7 +1237,15 @@
   where the keys will be the ordinals."
   {:added "1.0"}
   ([f init coll]
-   (reduce (fn [ret kv] (f ret (first kv) (second kv))) init coll)))
+   (cond
+     (instance? KVReduce coll)
+     (reduce-kv* f init coll)
+
+     (instance? Map coll)
+     (reduce (fn [ret kv] (f ret (first kv) (second kv))) init coll)
+
+     :else
+     (throw (ex-info (str "Cannot reduce-kv on " (type coll)) {})))))
 
 (defn var-get
   "Gets the value in the var object"
@@ -1833,12 +1847,6 @@
          (when (< ~i n#)
            ~@body
            (recur (inc ~i)))))))
-
-(defn type
-  "Returns the :type metadata of x, or its Type if none"
-  {:added "1.0"}
-  [x]
-  (or (get (meta x) :type) (type* x)))
 
 (defn num
   "Coerce to Number"
