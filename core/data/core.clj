@@ -3444,6 +3444,13 @@
     `(condp contains? ~expr
        ~@transformed-clauses)))
 
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  {:added "1.0"}
+  [to from]
+  (reduce conj to from))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
