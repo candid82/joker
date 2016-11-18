@@ -3498,6 +3498,18 @@
   (filter (complement sequential?)
           (rest (tree-seq sequential? seq x))))
 
+(defn group-by
+  "Returns a map of the elements of coll keyed by the result of
+  f on each element. The value at each key will be a vector of the
+  corresponding elements, in the order they appeared in coll."
+  {:added "1.0"}
+  [f coll]
+  (reduce
+   (fn [ret x]
+     (let [k (f x)]
+       (assoc ret k (conj (get ret k []) x))))
+   {} coll))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
