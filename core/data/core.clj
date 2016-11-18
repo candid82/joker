@@ -3467,6 +3467,15 @@
   ([f c1 c2 c3 & colls]
    (into [] (apply map f c1 c2 c3 colls))))
 
+(defn filterv
+  "Returns a vector of the items in coll for which
+  (pred item) returns true. pred must be free of side-effects."
+  {:added "1.0"}
+  [pred coll]
+  (reduce (fn [v o] (if (pred o) (conj v o) v))
+          []
+          coll))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
