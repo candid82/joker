@@ -1177,6 +1177,15 @@ var procSlurp Proc = func(args []Object) Object {
 	return String{S: string(b)}
 }
 
+var procSpit Proc = func(args []Object) Object {
+	filename := EnsureString(args, 0)
+	content := EnsureString(args, 1)
+	if err := ioutil.WriteFile(filename.S, []byte(content.S), 0666); err != nil {
+		panic(RT.NewError(err.Error()))
+	}
+	return NIL
+}
+
 var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
@@ -1451,10 +1460,11 @@ func init() {
 	intern("format*", procFormat)
 	intern("load-file*", procLoadFile)
 	intern("reduce-kv*", procReduceKv)
+	intern("slurp*", procSlurp)
+	intern("spit*", procSpit)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
-	intern("slurp*", procSlurp)
 	intern("hash*", procHash)
 
 	intern("index-of*", procIndexOf)

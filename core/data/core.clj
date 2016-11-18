@@ -3476,6 +3476,19 @@
           []
           coll))
 
+(defn slurp
+  "Opens file f and reads all its contents, returning a string."
+  {:added "1.0"}
+  [f]
+  (slurp* f))
+
+(defn spit
+  "Opposite of slurp.  Opens file f, writes content, then
+  closes f."
+  {:added "1.0"}
+  [f content]
+  (spit* f content))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
@@ -3562,9 +3575,3 @@
        (if (nil? x)
          (keep f (rest s))
          (cons x (keep f (rest s))))))))
-
-(defn slurp
-  "Opens a file f and reads all its contents, returning a string."
-  {:added "1.0"}
-  [f]
-  (slurp* f))
