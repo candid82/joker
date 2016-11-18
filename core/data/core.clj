@@ -3510,6 +3510,18 @@
        (assoc ret k (conj (get ret k []) x))))
    {} coll))
 
+(defn partition-by
+  "Applies f to each value in coll, splitting it each time f returns a
+  new value.  Returns a lazy seq of partitions."
+  {:added "1.0"}
+  [f coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (let [fst (first s)
+           fv (f fst)
+           run (cons fst (take-while #(= fv (f %)) (next s)))]
+       (cons run (partition-by f (seq (drop (count run) s))))))))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
