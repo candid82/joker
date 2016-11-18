@@ -3489,6 +3489,15 @@
   [f content]
   (spit* f content))
 
+(defn flatten
+  "Takes any nested combination of sequential things (lists, vectors,
+  etc.) and returns their contents as a single, flat sequence.
+  (flatten nil) returns an empty sequence."
+  {:added "1.0"}
+  [x]
+  (filter (complement sequential?)
+          (rest (tree-seq sequential? seq x))))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
