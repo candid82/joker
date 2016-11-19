@@ -657,7 +657,7 @@ var procChar Proc = func(args []Object) Object {
 	}
 }
 
-var procBool Proc = func(args []Object) Object {
+var procBoolean Proc = func(args []Object) Object {
 	return Bool{B: toBool(args[0])}
 }
 
@@ -1421,7 +1421,7 @@ func init() {
 	intern("num*", procNumber)
 	intern("double*", procDouble)
 	intern("char*", procChar)
-	intern("bool*", procBool)
+	intern("boolean*", procBoolean)
 	intern("numerator*", procNumerator)
 	intern("denominator*", procDenominator)
 	intern("bigint*", procBigInt)
