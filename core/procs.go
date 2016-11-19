@@ -709,14 +709,18 @@ var procNth Proc = func(args []Object) Object {
 			return coll.TryNth(n, args[2])
 		}
 		return coll.Nth(n)
-	case Seqable:
-		if len(args) == 3 {
-			return SeqTryNth(coll.Seq(), n, args[2])
+	case Nil:
+		return NIL
+	case Sequential:
+		switch coll := args[0].(type) {
+		case Seqable:
+			if len(args) == 3 {
+				return SeqTryNth(coll.Seq(), n, args[2])
+			}
+			return SeqNth(coll.Seq(), n)
 		}
-		return SeqNth(coll.Seq(), n)
-	default:
-		panic(RT.NewError("nth not supported on this type: " + coll.GetType().ToString(false)))
 	}
+	panic(RT.NewError("nth not supported on this type: " + args[0].GetType().ToString(false)))
 }
 
 var procLt Proc = func(args []Object) Object {

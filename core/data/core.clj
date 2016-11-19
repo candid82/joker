@@ -3546,6 +3546,14 @@
           (when-let [s (seq coll)]
             (reductions f (f init (first s)) (rest s)))))))
 
+(defn rand-nth
+  "Return a random element of the (sequential) collection. Will have
+  the same performance characteristics as nth for the given
+  collection."
+  {:added "1.0"}
+  [coll]
+  (nth coll (rand-int (count coll))))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
