@@ -3531,6 +3531,21 @@
             (assoc counts x (inc (get counts x 0))))
           {} coll))
 
+(defn reductions
+  "Returns a lazy seq of the intermediate values of the reduction (as
+  per reduce) of coll by f, starting with init."
+  {:added "1.0"}
+  ([f coll]
+   (lazy-seq
+    (if-let [s (seq coll)]
+      (reductions f (first s) (rest s))
+      (list (f)))))
+  ([f init coll]
+   (cons init
+         (lazy-seq
+          (when-let [s (seq coll)]
+            (reductions f (f init (first s)) (rest s)))))))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
