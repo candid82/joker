@@ -3794,3 +3794,12 @@
        ~(if (empty? steps)
           g
           (last steps)))))
+
+(defn dedupe
+  "Returns a lazy sequence removing consecutive duplicates in coll."
+  {:added "1.0"}
+  [coll]
+  (lazy-seq
+   (when (seq coll)
+     (cons (first coll)
+           (dedupe (drop-while #(= (first coll) %) (rest coll)))))))
