@@ -1278,6 +1278,12 @@
       (finally
         (replace-bindings* existing-bindings)))))
 
+(def
+  ^{:doc "The same as with-bindings*"
+    :arglists '([binding-map f & args])
+    :added "1.0"}
+  with-redefs-fn with-bindings*)
+
 (defmacro with-bindings
   "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
   Then executes body. Resets the vars back to the original
@@ -1306,6 +1312,12 @@
                              (next (next vvs)))
                       (seq ret))))]
     `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
+
+(defmacro with-redefs
+  "The same as binding"
+  {:added "1.0"}
+  [bindings & body]
+  `(binding ~bindings ~@body))
 
 (defn deref
   "Also reader macro: @var/@atom/@delay. When applied to a var or atom,
@@ -3680,6 +3692,29 @@
        ([x y z] (some #(or (% x) (% y) (% z)) ps))
        ([x y z & args] (or (spn x y z)
                            (some #(some % args) ps)))))))
+
+(defn- ^{:dynamic true} assert-valid-fdecl
+  "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
+  [fdecl]
+  (when (empty? fdecl) (throw (ex-info "Parameter declaration missing" {})))
+  (let [argdecls (map
+                  #(if (seq? %)
+                     (first %)
+                     (throw (ex-info
+                             (if (seq? (first fdecl))
+                               (str "Invalid signature \""
+                                    %
+                                    "\" should be a list")
+                               (str "Parameter declaration \""
+                                    %
+                                    "\" should be a vector"))
+                             {})))
+                  fdecl)
+        bad-args (seq (remove #(vector? %) argdecls))]
+    (when bad-args
+      (throw (ex-info (str "Parameter declaration \"" (first bad-args)
+                           "\" should be a vector")
+                      {})))))
 
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
