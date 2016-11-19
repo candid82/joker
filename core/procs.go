@@ -1199,6 +1199,10 @@ var procShuffle Proc = func(args []Object) Object {
 	return NewVectorFrom(s...)
 }
 
+var procIsRealized Proc = func(args []Object) Object {
+	return Bool{B: EnsurePending(args, 0).IsRealized()}
+}
+
 var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
@@ -1476,6 +1480,7 @@ func init() {
 	intern("slurp*", procSlurp)
 	intern("spit*", procSpit)
 	intern("shuffle*", procShuffle)
+	intern("realized?*", procIsRealized)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)

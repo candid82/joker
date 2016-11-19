@@ -1,5 +1,5 @@
 //go:generate go-bindata -pkg core -o bindata.go data
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -208,6 +208,9 @@ type (
 	KVReduce interface {
 		kvreduce(c Callable, init Object) Object
 	}
+	Pending interface {
+		IsRealized() bool
+	}
 )
 
 var TYPES = map[string]*Type{}
@@ -238,6 +241,7 @@ func init() {
 	regInterface("Map", (*Map)(nil))
 	regInterface("Named", (*Named)(nil))
 	regInterface("Number", (*Number)(nil))
+	regInterface("Pending", (*Pending)(nil))
 	regInterface("Ref", (*Ref)(nil))
 	regInterface("Reversible", (*Reversible)(nil))
 	regInterface("Seq", (*Seq)(nil))
@@ -473,6 +477,10 @@ func (d *Delay) Force() Object {
 
 func (d *Delay) Deref() Object {
 	return d.Force()
+}
+
+func (d *Delay) IsRealized() bool {
+	return d.value != nil
 }
 
 func (t *Type) ToString(escape bool) string {

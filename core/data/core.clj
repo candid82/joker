@@ -3716,6 +3716,11 @@
                            "\" should be a vector")
                       {})))))
 
+(defn realized?
+  "Returns true if a value has been produced for a delay or lazy sequence."
+  {:added "1.0"}
+  [^Pending x] (realized?* x))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test

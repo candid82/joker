@@ -635,3 +635,24 @@ func EnsureKVReduce(args []Object, index int) KVReduce {
     panic(RT.newArgTypeError(index, c, "KVReduce"))
   }
 }
+
+func AssertPending(obj Object, msg string) Pending {
+  switch c := obj.(type) {
+  case Pending:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Pending", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsurePending(args []Object, index int) Pending {
+  switch c := args[index].(type) {
+  case Pending:
+    return c
+  default:
+    panic(RT.newArgTypeError(index, c, "Pending"))
+  }
+}

@@ -127,6 +127,10 @@ func (seq *LazySeq) realize() {
 	}
 }
 
+func (seq *LazySeq) IsRealized() bool {
+	return seq.seq != nil
+}
+
 func (seq *LazySeq) Equals(other interface{}) bool {
 	return IsSeqEqual(seq, other)
 }
