@@ -3573,6 +3573,34 @@
                   (cons (f idx (first s)) (mapi (inc idx) (rest s))))))]
     (mapi 0 coll)))
 
+(defn keep
+  "Returns a lazy sequence of the non-nil results of (f item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects."
+  {:added "1.0"}
+  [f coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (let [x (f (first s))]
+       (if (nil? x)
+         (keep f (rest s))
+         (cons x (keep f (rest s))))))))
+
+(defn keep-indexed
+  "Returns a lazy sequence of the non-nil results of (f index item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects."
+  {:added "1.0"}
+  [f coll]
+  (let [keepi (fn keepi [idx coll]
+                (lazy-seq
+                 (when-let [s (seq coll)]
+                   (let [x (f idx (first s))]
+                     (if (nil? x)
+                       (keepi (inc idx) (rest s))
+                       (cons x (keepi (inc idx) (rest s))))))))]
+    (keepi 0 coll)))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
@@ -3646,16 +3674,3 @@
        ~(if (empty? steps)
           g
           (last steps)))))
-
-(defn keep
-  "Returns a lazy sequence of the non-nil results of (f item). Note,
-  this means false return values will be included.  f must be free of
-  side-effects."
-  {:added "1.0"}
-  [f coll]
-  (lazy-seq
-   (when-let [s (seq coll)]
-     (let [x (f (first s))]
-       (if (nil? x)
-         (keep f (rest s))
-         (cons x (keep f (rest s))))))))
