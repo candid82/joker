@@ -3560,6 +3560,19 @@
   [coll]
   (shuffle* coll))
 
+(defn map-indexed
+  "Returns a lazy sequence consisting of the result of applying f to 0
+  and the first item of coll, followed by applying f to 1 and the second
+  item in coll, etc, until coll is exhausted. Thus function f should
+  accept 2 arguments, index and item."
+  {:added "1.0"}
+  [f coll]
+  (let [mapi (fn mapi [idx coll]
+               (lazy-seq
+                (when-let [s (seq coll)]
+                  (cons (f idx (first s)) (mapi (inc idx) (rest s))))))]
+    (mapi 0 coll)))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test
