@@ -3803,3 +3803,10 @@
    (when (seq coll)
      (cons (first coll)
            (dedupe (drop-while #(= (first coll) %) (rest coll)))))))
+
+(defn random-sample
+  "Returns items from coll with random probability of prob (0.0 -
+  1.0)."
+  {:added "1.0"}
+  [prob coll]
+  (filter (fn [_] (< (rand) prob)) coll))
