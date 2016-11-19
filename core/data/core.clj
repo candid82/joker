@@ -3554,6 +3554,12 @@
   [coll]
   (nth coll (rand-int (count coll))))
 
+(defn shuffle
+  "Return a random permutation of coll"
+  {:added "1.0"}
+  [coll]
+  (shuffle* coll))
+
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
   through each form for which the corresponding test

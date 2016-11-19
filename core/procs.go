@@ -1190,6 +1190,15 @@ var procSpit Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procShuffle Proc = func(args []Object) Object {
+	s := ToSlice(EnsureSeqable(args, 0).Seq())
+	for i := range s {
+		j := rand.Intn(i + 1)
+		s[i], s[j] = s[j], s[i]
+	}
+	return NewVectorFrom(s...)
+}
+
 var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
@@ -1466,6 +1475,7 @@ func init() {
 	intern("reduce-kv*", procReduceKv)
 	intern("slurp*", procSlurp)
 	intern("spit*", procSpit)
+	intern("shuffle*", procShuffle)
 
 	intern("set-macro*", procSetMacro)
 	intern("sh", procSh)
