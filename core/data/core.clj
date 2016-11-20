@@ -3810,3 +3810,11 @@
   {:added "1.0"}
   [prob coll]
   (filter (fn [_] (< (rand) prob)) coll))
+
+(defn run!
+  "Runs the supplied procedure (via reduce), for purposes of side
+  effects, on successive items in the collection. Returns nil"
+  {:added "1.0"}
+  [proc coll]
+  (reduce #(proc %2) nil coll)
+  nil)
