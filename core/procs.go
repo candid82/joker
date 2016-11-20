@@ -935,7 +935,7 @@ var procFlush Proc = func(args []Object) Object {
 }
 
 func readFromReader(reader io.RuneReader) Object {
-	r := NewReader(reader)
+	r := NewReader(reader, "<>")
 	obj, err := TryRead(r)
 	if err != nil {
 		panic(RT.NewError(err.Error()))
@@ -1041,7 +1041,7 @@ func loadReader(reader *Reader) (Object, error) {
 
 var procLoadString Proc = func(args []Object) Object {
 	s := EnsureString(args, 0)
-	obj, err := loadReader(NewReader(strings.NewReader(s.S)))
+	obj, err := loadReader(NewReader(strings.NewReader(s.S), "<string>"))
 	if err != nil {
 		panic(err)
 	}
@@ -1247,7 +1247,7 @@ var procLoadFile Proc = func(args []Object) Object {
 	if err != nil {
 		panic(RT.NewError(err.Error()))
 	}
-	reader = NewReader(bufio.NewReader(f))
+	reader = NewReader(bufio.NewReader(f), filename.S)
 	ProcessReader(reader, filename.S, EVAL)
 	return NIL
 }
@@ -1496,6 +1496,6 @@ func init() {
 		panic(RT.NewError("Could not load core.clj"))
 	}
 	reader := bytes.NewReader(data)
-	ProcessReader(NewReader(reader), "", EVAL)
+	ProcessReader(NewReader(reader, "<core>"), "", EVAL)
 	GLOBAL_ENV.ns.Value = currentNamespace
 }

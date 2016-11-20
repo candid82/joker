@@ -257,8 +257,7 @@ func NewLiteralExpr(obj Object) *LiteralExpr {
 	res := LiteralExpr{obj: obj}
 	info := obj.GetInfo()
 	if info != nil {
-		res.line = info.line
-		res.column = info.column
+		res.Position = info.Position
 	}
 	return &res
 }
@@ -288,12 +287,12 @@ func (err *ParseError) WithInfo(info *ObjectInfo) Object {
 }
 
 func (err ParseError) Error() string {
-	line, column := 0, 0
+	line, column, filename := 0, 0, "<file>"
 	info := err.obj.GetInfo()
 	if info != nil {
-		line, column = info.line, info.column
+		line, column, filename = info.line, info.column, info.Filename()
 	}
-	return fmt.Sprintf("stdin:%d:%d: Parse error: %s", line, column, err.msg)
+	return fmt.Sprintf("%s:%d:%d: Parse error: %s", filename, line, column, err.msg)
 }
 
 func parseSeq(seq Seq, ctx *ParseContext) []Expr {
@@ -356,9 +355,9 @@ func checkForm(obj Object, min int, max int) int {
 func GetPosition(obj Object) Position {
 	info := obj.GetInfo()
 	if info != nil {
-		return Position{line: info.line, column: info.column}
+		return info.Position
 	}
-	return Position{line: 0, column: 0}
+	return Position{}
 }
 
 func parseDef(obj Object, ctx *ParseContext) *DefExpr {
@@ -680,7 +679,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
 			pos := GetPosition(obj)
-			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s form with empty body\n", pos.line, pos.column, formName)
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty body\n", pos.Filename(), pos.line, pos.column, formName)
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
@@ -785,7 +784,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 }
 
 func reportNotAFunction(pos Position, name string) {
-	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: %s is not a function\n", pos.line, pos.column, name)
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s is not a function\n", pos.Filename(), pos.line, pos.column, name)
 }
 
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
@@ -802,7 +801,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return
 	}
-	fmt.Fprintf(os.Stderr, "stdin:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.line, pos.column, len(call.args), call.name)
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.Filename(), pos.line, pos.column, len(call.args), call.name)
 }
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {

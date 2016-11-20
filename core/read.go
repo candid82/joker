@@ -14,9 +14,10 @@ import (
 
 type (
 	ReadError struct {
-		line   int
-		column int
-		msg    string
+		line     int
+		column   int
+		filename *string
+		msg      string
 	}
 	ReadFunc func(reader *Reader) Object
 )
@@ -90,26 +91,32 @@ func escapeString(str string) string {
 
 func MakeReadError(reader *Reader, msg string) ReadError {
 	return ReadError{
-		line:   reader.line,
-		column: reader.column,
-		msg:    msg,
+		line:     reader.line,
+		column:   reader.column,
+		filename: reader.filename,
+		msg:      msg,
 	}
 }
 
 func MakeReadObject(reader *Reader, obj Object) Object {
-	return obj.WithInfo(&ObjectInfo{Position: Position{line: reader.line, column: reader.column}})
+	return obj.WithInfo(&ObjectInfo{Position: Position{line: reader.line, column: reader.column, filename: reader.filename}})
 }
 
 func DeriveReadObject(base Object, obj Object) Object {
 	baseInfo := base.GetInfo()
 	if baseInfo != nil {
-		return obj.WithInfo(&ObjectInfo{Position: Position{line: baseInfo.line, column: baseInfo.column}})
+		bi := *baseInfo
+		return obj.WithInfo(&bi)
 	}
 	return obj
 }
 
 func (err ReadError) Error() string {
-	return fmt.Sprintf("stdin:%d:%d: Read error: %s", err.line, err.column, err.msg)
+	filename := "<file>"
+	if err.filename != nil {
+		filename = *err.filename
+	}
+	return fmt.Sprintf("%s:%d:%d: Read error: %s", filename, err.line, err.column, err.msg)
 }
 
 func isDelimiter(r rune) bool {
@@ -719,7 +726,11 @@ func readTagged(reader *Reader) Object {
 	case Symbol:
 		readFunc := DATA_READERS[s.name]
 		if readFunc == nil {
-			fmt.Fprintf(os.Stderr, "stdin:%d:%d: Read warning: No reader function for tag %s\n", reader.line, reader.column, s.ToString(false))
+			filename := "<file>"
+			if reader.filename != nil {
+				filename = *reader.filename
+			}
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
 			return Read(reader)
 		}
 		return readFunc(reader)

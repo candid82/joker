@@ -5,3 +5,7 @@
 (require ['tests.lib2])
 
 (def v1 1)
+
+(defn f1
+  [s]
+  (count s))

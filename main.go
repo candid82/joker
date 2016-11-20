@@ -53,7 +53,7 @@ func (ctx *ReplContext) PushException(exc Object) {
 func processFile(filename string, phase Phase) {
 	var reader *Reader
 	if filename == "--" {
-		reader = NewReader(bufio.NewReader(os.Stdin))
+		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
 	} else {
 		f, err := os.Open(filename)
@@ -61,7 +61,7 @@ func processFile(filename string, phase Phase) {
 			fmt.Fprintln(os.Stderr, "Error: ", err)
 			return
 		}
-		reader = NewReader(bufio.NewReader(f))
+		reader = NewReader(bufio.NewReader(f), filename)
 	}
 	ProcessReader(reader, filename, phase)
 }
@@ -135,7 +135,7 @@ func repl(phase Phase) {
 	}
 	defer rl.Close()
 
-	reader := NewReader(NewLineRuneReader(rl))
+	reader := NewReader(NewLineRuneReader(rl), "<repl>")
 
 	for {
 		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")

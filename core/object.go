@@ -22,8 +22,9 @@ import (
 
 type (
 	Position struct {
-		line   int
-		column int
+		line     int
+		column   int
+		filename *string
 	}
 	Equality interface {
 		Equals(interface{}) bool
@@ -291,6 +292,13 @@ func init() {
 	regRefType("VectorSeq", (*VectorSeq)(nil))
 }
 
+func (pos Position) Filename() string {
+	if pos.filename == nil {
+		return "<file>"
+	}
+	return *pos.filename
+}
+
 var hasher hash.Hash32 = fnv.New32a()
 
 func newIteratorError() error {
@@ -548,9 +556,9 @@ func (exInfo *ExInfo) Error() string {
 		}
 	}
 	if len(exInfo.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("stdin:%d:%d: Exception: %s\nStacktrace:\n%s", pos.line, pos.column, exInfo.msg.S, exInfo.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: Exception: %s\nStacktrace:\n%s", pos.Filename(), pos.line, pos.column, exInfo.msg.S, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("stdin:%d:%d: Exception: %s", pos.line, pos.column, exInfo.msg.S)
+		return fmt.Sprintf("%s:%d:%d: Exception: %s", pos.Filename(), pos.line, pos.column, exInfo.msg.S)
 	}
 }
 

@@ -13,11 +13,18 @@ type (
 		column         int
 		isEof          bool
 		rewind         int
+		filename       *string
 	}
 )
 
-func NewReader(runeReader io.RuneReader) *Reader {
-	return &Reader{line: 1, runeReader: runeReader, rw: &RuneWindow{}, rewind: -1}
+func NewReader(runeReader io.RuneReader, filename string) *Reader {
+	return &Reader{
+		line:       1,
+		runeReader: runeReader,
+		rw:         &RuneWindow{},
+		rewind:     -1,
+		filename:   STRINGS.Intern(filename),
+	}
 }
 
 func (reader *Reader) Get() rune {

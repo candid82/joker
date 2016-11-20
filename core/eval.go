@@ -72,10 +72,10 @@ func (rt *Runtime) stacktrace() string {
 	name := "global"
 	for _, f := range rt.callstack.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("%s %d:%d\n", name, pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", name, pos.Filename(), pos.line, pos.column))
 		name = f.traceable.Name()
 	}
-	b.WriteString(fmt.Sprintf("%s %d:%d", name, pos.line, pos.column))
+	b.WriteString(fmt.Sprintf("%s %s:%d:%d", name, pos.Filename(), pos.line, pos.column))
 	return b.String()
 }
 
@@ -121,7 +121,7 @@ func (s *Callstack) String() string {
 	var b bytes.Buffer
 	for _, f := range s.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("%s %d:%d\n", f.traceable.Name(), pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", f.traceable.Name(), pos.Filename(), pos.line, pos.column))
 	}
 	if b.Len() > 0 {
 		b.Truncate(b.Len() - 1)
@@ -155,9 +155,9 @@ func (err *EvalError) WithInfo(info *ObjectInfo) Object {
 
 func (err *EvalError) Error() string {
 	if len(err.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("stdin:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.line, err.pos.column, err.msg, err.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.Filename(), err.pos.line, err.pos.column, err.msg, err.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("stdin:%d:%d: Eval error: %s", err.pos.line, err.pos.column, err.msg)
+		return fmt.Sprintf("%s:%d:%d: Eval error: %s", err.pos.Filename(), err.pos.line, err.pos.column, err.msg)
 	}
 }
 
