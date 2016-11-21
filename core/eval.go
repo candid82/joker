@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"unsafe"
 )
 
@@ -72,10 +73,13 @@ func (rt *Runtime) stacktrace() string {
 	name := "global"
 	for _, f := range rt.callstack.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", name, pos.Filename(), pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, pos.Filename(), pos.line, pos.column))
 		name = f.traceable.Name()
+		if strings.HasPrefix(name, "#'") {
+			name = name[2:]
+		}
 	}
-	b.WriteString(fmt.Sprintf("%s %s:%d:%d", name, pos.Filename(), pos.line, pos.column))
+	b.WriteString(fmt.Sprintf("  %s %s:%d:%d", name, pos.Filename(), pos.line, pos.column))
 	return b.String()
 }
 
