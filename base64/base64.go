@@ -14,7 +14,7 @@ var base64DecodeString Proc = func(args []Object) Object {
 	return String{S: string(decoded)}
 }
 
-var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
+var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("base64"))
 
 func internBase64(name string, proc Proc) {
 	base64Namespace.Intern(MakeSymbol(name)).Value = proc

@@ -42,7 +42,7 @@ var readString Proc = func(args []Object) Object {
 	return toObject(v)
 }
 
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
+var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("json"))
 
 func intern(name string, proc Proc) {
 	jsonNamespace.Intern(MakeSymbol(name)).Value = proc

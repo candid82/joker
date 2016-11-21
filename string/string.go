@@ -7,7 +7,7 @@ import (
 	. "github.com/candid/joker/core"
 )
 
-var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
+var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("string"))
 
 func intern(name string, proc Proc) {
 	stringNamespace.Intern(MakeSymbol(name)).Value = proc

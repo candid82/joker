@@ -1,5 +1,5 @@
 (in-ns 'tests.lib1)
-(joker.core/refer 'joker.core)
+(core/refer 'core)
 (println "in lib1")
 
 (require ['tests.lib2])

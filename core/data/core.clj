@@ -452,7 +452,7 @@
           (if (next clauses)
             (second clauses)
             (throw (ex-info "cond requires an even number of forms" {:form (first clauses)})))
-          (cons 'joker.core/cond (next (next clauses))))))
+          (cons 'core/cond (next (next clauses))))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
@@ -2855,7 +2855,7 @@
   [name & references]
   (let [process-reference
         (fn [[kname & args]]
-          `(~(symbol "joker.core" (joker.core/name kname))
+          `(~(symbol "core" (core/name kname))
               ~@(map #(list 'quote %) args)))
         docstring  (when (string? (first references)) (first references))
         references (if docstring (next references) references)
@@ -2869,13 +2869,13 @@
                name)
         name-metadata (meta name)]
     `(do
-       (joker.core/in-ns '~name)
+       (core/in-ns '~name)
        ~@(when name-metadata
-           `((reset-meta! (joker.core/find-ns '~name) ~name-metadata)))
-       ~@(when (not= name 'joker.core)
-           `((joker.core/refer '~'joker.core)))
+           `((reset-meta! (core/find-ns '~name) ~name-metadata)))
+       ~@(when (not= name 'core)
+           `((core/refer '~'core)))
        ~@(map process-reference references)
-       (if (= '~name 'joker.core)
+       (if (= '~name 'core)
          nil
          (do
            (var-set #'*loaded-libs* (conj *loaded-libs* '~name))
@@ -2894,7 +2894,7 @@
   "Sets *ns* to the namespace named by the symbol, creating it if needed."
   {:added "1.0"}
   [name]
-  (var-set #'joker.core/*ns* (joker.core/create-ns name)))
+  (var-set #'core/*ns* (core/create-ns name)))
 
 (defonce ^:dynamic
   ^{:private true
@@ -2988,14 +2988,14 @@
         (throw-if (and need-ns (not (find-ns lib)))
                   "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
-        (printf "(joker.core/in-ns '%s)\n" (ns-name *ns*)))
+        (printf "(core/in-ns '%s)\n" (ns-name *ns*)))
       (when as
         (when *loading-verbosely*
-          (printf "(joker.core/alias '%s '%s)\n" as lib))
+          (printf "(core/alias '%s '%s)\n" as lib))
         (alias as lib))
       (when (or use (:refer filter-opts))
         (when *loading-verbosely*
-          (printf "(joker.core/refer '%s" lib)
+          (printf "(core/refer '%s" lib)
           (doseq [opt filter-opts]
             (printf " %s '%s" (key opt) (print-str (val opt))))
           (printf ")\n"))
@@ -3102,12 +3102,12 @@
 
 (defn use
   "Like 'require, but also refers to each lib's namespace using
-  joker.core/refer. Use :use in the ns macro in preference to calling
+  core/refer. Use :use in the ns macro in preference to calling
   this directly.
 
   'use accepts additional options in libspecs: :exclude, :only, :rename.
   The arguments and semantics for :exclude, :only, and :rename are the same
-  as those documented for joker.core/refer."
+  as those documented for core/refer."
   {:added "1.0"}
   [& args] (apply load-libs :require :use args))
 
@@ -3130,7 +3130,7 @@
   (doseq [^Symbol lib libs]
     (let [^String path (lib-path* lib)]
       (when *loading-verbosely*
-        (printf "(joker.core/load \"%s\")\n" path))
+        (printf "(core/load \"%s\")\n" path))
       (check-cyclic-dependency path)
       (when-not (= path (first *pending-paths*))
         (binding [*pending-paths* (conj *pending-paths* path)

@@ -24,7 +24,7 @@ var args Proc = func(args []Object) Object {
 	return res
 }
 
-var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
+var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("os"))
 
 func intern(name string, proc Proc) {
 	osNamespace.Intern(MakeSymbol(name)).Value = proc
