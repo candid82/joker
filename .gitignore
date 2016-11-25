@@ -4,3 +4,5 @@ bindata.go
 play
 .vscode
 .idea
+
+core/core_data.go

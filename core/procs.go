@@ -1491,11 +1491,7 @@ func init() {
 
 	currentNamespace := GLOBAL_ENV.ns.Value
 	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
-	data, err := Asset("data/core.clj")
-	if err != nil {
-		panic(RT.NewError("Could not load core.clj"))
-	}
-	reader := bytes.NewReader(data)
+	reader := bytes.NewReader(coreData)
 	ProcessReader(NewReader(reader, "<core>"), "", EVAL)
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
