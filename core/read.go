@@ -444,6 +444,9 @@ func readString(reader *Reader, isRegex bool) Object {
 	if isRegex {
 		r, err := regexp.Compile(b.String())
 		if err != nil {
+			if LINTER_MODE {
+				return MakeReadObject(reader, Regex{})
+			}
 			panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
 		}
 		return MakeReadObject(reader, Regex{R: r})
