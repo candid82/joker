@@ -23,6 +23,8 @@ type (
 	}
 )
 
+const VERSION = "v0.5.0"
+
 func NewReplContext(env *Env) *ReplContext {
 	first, _ := env.Resolve(MakeSymbol("core/*1"))
 	second, _ := env.Resolve(MakeSymbol("core/*2"))
@@ -125,7 +127,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 }
 
 func repl(phase Phase) {
-	fmt.Println("Welcome to joker. Use ctrl-c to exit.")
+	fmt.Printf("Welcome to joker %s. Use ctrl-c to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
@@ -152,6 +154,10 @@ func main() {
 		return
 	}
 	if len(os.Args) == 2 {
+		if os.Args[1] == "-v" || os.Args[1] == "--version" {
+			println(VERSION)
+			return
+		}
 		processFile(os.Args[1], EVAL)
 		return
 	}
