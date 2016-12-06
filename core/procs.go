@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -1207,39 +1206,6 @@ var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
 
-var procSh Proc = func(args []Object) Object {
-	strs := make([]string, len(args))
-	for i := range args {
-		strs[i] = EnsureString(args, i).S
-	}
-	cmd := exec.Command(strs[0], strs[1:]...)
-	stdoutReader, err := cmd.StdoutPipe()
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
-	stderrReader, err := cmd.StderrPipe()
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
-	if err = cmd.Start(); err != nil {
-		panic(RT.NewError(err.Error()))
-	}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stdoutReader)
-	stdoutString := buf.String()
-	buf = new(bytes.Buffer)
-	buf.ReadFrom(stderrReader)
-	stderrString := buf.String()
-	if err = cmd.Wait(); err != nil {
-		EmptyArrayMap().Assoc(MakeKeyword("success"), Bool{B: false})
-	}
-	res := EmptyArrayMap()
-	res.Add(MakeKeyword("success"), Bool{B: true})
-	res.Add(MakeKeyword("out"), String{S: stdoutString})
-	res.Add(MakeKeyword("err"), String{S: stderrString})
-	return res
-}
-
 var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
 	var reader *Reader
@@ -1483,7 +1449,6 @@ func init() {
 	intern("realized?*", procIsRealized)
 
 	intern("set-macro*", procSetMacro)
-	intern("sh", procSh)
 	intern("hash*", procHash)
 
 	intern("index-of*", procIndexOf)
