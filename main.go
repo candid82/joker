@@ -6,11 +6,11 @@ import (
 	"io"
 	"os"
 
-	_ "github.com/candid/joker/base64"
-	. "github.com/candid/joker/core"
-	_ "github.com/candid/joker/json"
-	_ "github.com/candid/joker/os"
-	_ "github.com/candid/joker/string"
+	_ "github.com/rbataev/joker/base64"
+	. "github.com/rbataev/joker/core"
+	_ "github.com/rbataev/joker/json"
+	_ "github.com/rbataev/joker/os"
+	_ "github.com/rbataev/joker/string"
 	"gopkg.in/readline.v1"
 )
 

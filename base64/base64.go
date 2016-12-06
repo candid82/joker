@@ -3,7 +3,7 @@ package base64
 import (
 	"encoding/base64"
 
-	. "github.com/candid/joker/core"
+	. "github.com/rbataev/joker/core"
 )
 
 var base64DecodeString Proc = func(args []Object) Object {

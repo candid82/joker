@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	. "github.com/candid/joker/core"
+	. "github.com/rbataev/joker/core"
 )
 
 func toObject(v interface{}) Object {

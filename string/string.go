@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	. "github.com/candid/joker/core"
+	. "github.com/rbataev/joker/core"
 )
 
 var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("string"))

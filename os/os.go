@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	. "github.com/candid/joker/core"
+	. "github.com/rbataev/joker/core"
 )
 
 var env Proc = func(args []Object) Object {
