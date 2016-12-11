@@ -1,25 +1,24 @@
 # Joker
 
-## Intro
 Joker is a small interpreted dialect of Clojure written in Go.
 
-### Project goals
+## Getting Started
+
+Download pre-built binary executable for your platform (links below) or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension.
+
+## Project goals
 
 These are high level goals of the project that guide design and implementation decisions.
 
-- Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at, and the niche Joker trying to fill (or my personal itch I am trying to scratch).
+- Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
 - Provide some tooling for Clojure and its dialects. Joker has linter mode which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
-### Project non-goals
+## Project non-goals
 
 - Performance. If you need it, use Cloiure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
 - Have all Clojure features. Some features are impossible to implement due to a different host language (Go vs Java), others I don't find that important for the use cases I have in mind for Joker. But generally Clojure is a pretty large language at this point and it is simply unfeasible to reach feature parity with it, even with naive implementation.
-
-## Getting Started
-
-Download pre-built binary for your platform (links below) or [build it yourself]()
 
 ## Differences with Clojure
 
@@ -27,18 +26,18 @@ Download pre-built binary for your platform (links below) or [build it yourself]
 
   | Joker type | Corresponding Go type |
   |------------|-----------------------|
-  | BigFloat | big.Float |
-  | BigInt | big.Int |
-  | Bool | bool |
-  | Char | rune |
-  | Double | float64 |
-  | Int | int |
-  | Keyword | n/a |
-  | Nil | n/a |
-  | Ratio | big.Rat |
-  | Regex | regexp.Regexp |
-  | String | string |
-  | Symbol | n/a |
+  | BigFloat   | big.Float             |
+  | BigInt     | big.Int               |
+  | Bool       | bool                  |
+  | Char       | rune                  |
+  | Double     | float64               |
+  | Int        | int                   |
+  | Keyword    | n/a                   |
+  | Nil        | n/a                   |
+  | Ratio      | big.Rat               |
+  | Regex      | regexp.Regexp         |
+  | String     | string                |
+  | Symbol     | n/a                   |
 
   Note that `Nil` is a type that has one value `nil`.
 
@@ -60,22 +59,41 @@ Download pre-built binary for your platform (links below) or [build it yourself]
 1. Miscellaneous:
   1. `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
   1. `refer-clojure` is not a thing. Use `(core/refer 'core)` instead if you really need to.
-  1. `slurp` only takes one argument - a file name (string). No options are supported.
+  1. `slurp` only takes one argument - a filename (string). No options are supported.
   1. `ifn?` is called `callable?`
   1. Map entry is represented as a two-element vector.
 
 
-## Dependencies
-
-The only dependency at the moment is [readline](https://github.com/chzyer/readline)
-
 ## Building
+
+Joker's only dependency is [readline](https://github.com/chzyer/readline)
 
 ```
 go get github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
 go get
 go install
+```
+
+## License
+
+```
+Copyright (c) 2016 Roman Bataev. All rights reserved.
+The use and distribution terms for this software are covered by the
+Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+which can be found in the LICENSE file.
+```
+
+Joker contains parts of Clojure source code (from `clojure.core` namespace). Clojure is licensed as follows:
+
+```
+Copyright (c) Rich Hickey. All rights reserved.
+The use and distribution terms for this software are covered by the
+Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+which can be found in the file epl-v10.html at the root of this distribution.
+By using this software in any fashion, you are agreeing to be bound by
+the terms of this license.
+You must not remove this notice, or any other, from this software.
 ```
 
 

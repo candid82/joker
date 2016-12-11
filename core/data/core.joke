@@ -1,6 +1,6 @@
 ; This code is a modified version of original Clojure's implementation
 ; (https://github.com/clojure/clojure/blob/master/src/clj/clojure/core.clj)
-; which includes the following notice:
+; which is licensed as follows:
 
 ;   Copyright (c) Rich Hickey. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
