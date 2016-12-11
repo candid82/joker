@@ -4,7 +4,7 @@ Joker is a small interpreted dialect of Clojure written in Go.
 
 ## Getting Started
 
-Download pre-built binary executable for your platform (links below) or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension.
+Download pre-built [binary executable](https://github.com/candid82/joker/releases) for your platform or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension.
 
 ## Project goals
 
