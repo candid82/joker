@@ -1299,8 +1299,12 @@ func ProcessReader(reader *Reader, filename string, phase Phase) {
 	}
 }
 
+var privateMeta Map = EmptyArrayMap().Assoc(MakeKeyword("private"), Bool{B: true}).(Map)
+
 func intern(name string, proc Proc) {
-	GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name)).Value = proc
+	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
+	vr.Value = proc
+	vr.meta = privateMeta
 }
 
 func init() {
