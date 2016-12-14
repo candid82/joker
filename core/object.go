@@ -722,14 +722,22 @@ func (v *Var) Hash() uint32 {
 	return hashPtr(uintptr(unsafe.Pointer(v)))
 }
 
+func (v *Var) Resolve() Object {
+	if v.Value == nil {
+		panic(RT.NewError("Unbound var: " + v.ToString(false)))
+	}
+	return v.Value
+}
+
 func (v *Var) Call(args []Object) Object {
+	vl := v.Resolve()
 	return AssertCallable(
-		v.Value,
-		"Var "+v.ToString(false)+" resolves to "+v.Value.ToString(false)+", which is not a Fn").Call(args)
+		vl,
+		"Var "+v.ToString(false)+" resolves to "+vl.ToString(false)+", which is not a Fn").Call(args)
 }
 
 func (v *Var) Deref() Object {
-	return v.Value
+	return v.Resolve()
 }
 
 func (n Nil) ToString(escape bool) string {

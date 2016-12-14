@@ -1133,7 +1133,7 @@ var procNamespaceUnalias Proc = func(args []Object) Object {
 }
 
 var procVarGet Proc = func(args []Object) Object {
-	return EnsureVar(args, 0).Value
+	return EnsureVar(args, 0).Resolve()
 }
 
 var procVarSet Proc = func(args []Object) Object {

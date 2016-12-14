@@ -167,10 +167,7 @@ func (err *EvalError) Error() string {
 
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
-	if expr.vr.Value == nil {
-		panic(RT.NewError("Unbound var: " + expr.vr.ToString(false)))
-	}
-	return expr.vr.Value
+	return expr.vr.Resolve()
 }
 
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
