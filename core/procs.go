@@ -392,12 +392,6 @@ var procFormat = func(args []Object) Object {
 	return String{S: res}
 }
 
-var procSetMacro Proc = func(args []Object) Object {
-	vr := args[0].(*Var)
-	vr.isMacro = true
-	return vr
-}
-
 var procList Proc = func(args []Object) Object {
 	return NewListFrom(args...)
 }
@@ -1452,7 +1446,6 @@ func init() {
 	intern("shuffle*", procShuffle)
 	intern("realized?*", procIsRealized)
 
-	intern("set-macro*", procSetMacro)
 	intern("hash*", procHash)
 
 	intern("index-of*", procIndexOf)

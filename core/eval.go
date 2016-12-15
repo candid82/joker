@@ -228,6 +228,16 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	}
 	if expr.meta != nil {
 		expr.vr.meta = Eval(expr.meta, env).(Map)
+	} else {
+		expr.vr.meta = nil
+	}
+	// isMacro can be set by set-macro* during parse stage
+	if expr.vr.isMacro {
+		if expr.vr.meta == nil {
+			expr.vr.meta = EmptyArrayMap().Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+		} else {
+			expr.vr.meta = expr.vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+		}
 	}
 	return expr.vr
 }

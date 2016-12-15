@@ -389,7 +389,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			switch docstring.(type) {
 			case String:
 				if meta != nil {
-					meta = meta.Assoc(MakeKeyword("doc"), docstring).(*ArrayMap)
+					meta = meta.Assoc(MakeKeyword("doc"), docstring).(Map)
 				} else {
 					meta = EmptyArrayMap().Assoc(MakeKeyword("doc"), docstring).(Map)
 				}
@@ -811,6 +811,11 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 		switch vr := expr.obj.(type) {
 		case *Var:
 			vr.isMacro = true
+			if vr.meta == nil {
+				vr.meta = EmptyArrayMap().Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+			} else {
+				vr.meta = vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+			}
 			return expr
 		}
 	}
@@ -849,8 +854,12 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseLoop(obj, ctx)
 		case "recur":
 			return parseRecur(obj, ctx)
+
+		// Vars' isMacro has to be properly set during parse stage
+		// for linter mode to correctly handle arguments count.
 		case "set-macro*":
 			return parseSetMacro(obj, ctx)
+
 		case "def":
 			return parseDef(obj, ctx)
 		case "var":
