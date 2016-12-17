@@ -32,6 +32,10 @@
 (defn var-doc
   [k v]
   (let [m (meta v)]
+    (when-not (:added m)
+      (println "WARNING: public var without added meta key: " k))
+    (when-not (:doc m)
+      (println "WARNING: public var without doc meta key: " k))
     (-> var-template
         (string/replace "{id}" k)
         (string/replace "{name}" k)

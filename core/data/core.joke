@@ -11,9 +11,6 @@
 ;   You must not remove this notice, or any other, from this software.
 
 
-(def unquote)
-(def unquote-splicing)
-
 (def
   ^{:arglists '([& items])
     :doc "Creates a new list containing the items."
@@ -513,8 +510,10 @@
   [& body]
   (list 'lazy-seq* (list* 'fn [] body)))
 
-(defn chunked-seq? [s]
-  ; Chunked sequences are not currently supported
+(defn chunked-seq?
+  "Always returns false because chunked sequences are not supported"
+  {:added "1.0"}
+  [s]
   false)
 
 (defn concat
@@ -1257,7 +1256,7 @@
   {:added "1.0"}
   [^Var x val] (var-set* x val))
 
-(defn replace-bindings*
+(defn ^:private replace-bindings
   [binding-map]
   (reduce-kv (fn [res k v]
                (let [c (var-get k)]
@@ -1272,11 +1271,11 @@
   values after f returned. Returns whatever f returns."
   {:added "1.0"}
   [binding-map f & args]
-  (let [existing-bindings (replace-bindings* binding-map)]
+  (let [existing-bindings (replace-bindings binding-map)]
     (try
       (apply f args)
       (finally
-        (replace-bindings* existing-bindings)))))
+        (replace-bindings existing-bindings)))))
 
 (def
   ^{:doc "The same as with-bindings*"
@@ -2278,7 +2277,7 @@
   array-map array-map*)
 
 ;redefine let and loop  with destructuring
-(defn destructure [bindings]
+(defn ^:private destructure [bindings]
   (let [bents (partition 2 bindings)
         pb (fn pb [bvec b v]
              (let [pvec
@@ -3394,6 +3393,13 @@
   "A File object representing standard error for print operations.
 
   Defaults to stderr."
+  {:added "1.0"})
+
+(add-doc-and-meta *print-readably*
+  "When set to logical false, strings and characters will be printed with
+  non-alphanumeric characters converted to the appropriate escape sequences.
+
+  Defaults to true"
   {:added "1.0"})
 
 (defn fnil

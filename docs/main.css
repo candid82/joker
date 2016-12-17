@@ -55,7 +55,7 @@ ul.index > li > a:hover {
 
 h2 {
   font-size: 1.2rem;
-  margin-bottom: 0;
+  margin-bottom: 5px;
   padding-top: 15px;
   padding-bottom: 5px;
   border-top: solid 1px #ddd;
@@ -64,7 +64,30 @@ h2 {
 .var-type, .var-added {
   font-size: 0.9rem;
   color: #444;
-  line-height: 1.5
+  line-height: 1.5;
+  border: solid 1px #444;
+  border-radius: 3px;
+  padding: 4px;
+}
+
+.var-type {
+  background-color: #fdf7c7;
+}
+
+.var-type.Function {
+  background-color: #d4f0f5;
+}
+
+.var-type.Macro {
+  background-color: #f7c15f;
+}
+
+.var-type.Object {
+  background-color: #f8f9f8;
+}
+
+.var-added {
+  background-color: #e7fbc8;
 }
 
 code {
@@ -79,6 +102,7 @@ code {
 
 .var-usage {
   margin-bottom: 0;
+  margin-top: 20px;
 }
 
 .var-docstr {

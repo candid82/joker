@@ -1328,3 +1328,10 @@ func IsSpecialSymbol(obj Object) bool {
 		return false
 	}
 }
+
+func MakeMeta(docstring string, added string) Map {
+	res := EmptyArrayMap()
+	res.Add(MakeKeyword("doc"), String{S: docstring})
+	res.Add(MakeKeyword("added"), String{S: added})
+	return res
+}

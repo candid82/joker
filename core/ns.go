@@ -110,6 +110,13 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 	return existingVar
 }
 
+func (ns *Namespace) InternVar(name string, val Object, meta Map) *Var {
+	vr := ns.Intern(MakeSymbol(name))
+	vr.Value = val
+	vr.meta = meta
+	return vr
+}
+
 func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 	if alias.ns != nil {
 		panic(RT.NewError("Alias can't be namespace-qualified"))
