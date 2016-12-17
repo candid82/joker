@@ -1,0 +1,3931 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: core</h1>
+    <ul class="index">
+      <li>
+  <a href="#*">*</a>
+</li>
+<li>
+  <a href="#*'">*'</a>
+</li>
+<li>
+  <a href="#*1">*1</a>
+</li>
+<li>
+  <a href="#*2">*2</a>
+</li>
+<li>
+  <a href="#*3">*3</a>
+</li>
+<li>
+  <a href="#*assert*">*assert*</a>
+</li>
+<li>
+  <a href="#*command-line-args*">*command-line-args*</a>
+</li>
+<li>
+  <a href="#*e">*e</a>
+</li>
+<li>
+  <a href="#*err*">*err*</a>
+</li>
+<li>
+  <a href="#*file*">*file*</a>
+</li>
+<li>
+  <a href="#*flush-on-newline*">*flush-on-newline*</a>
+</li>
+<li>
+  <a href="#*in*">*in*</a>
+</li>
+<li>
+  <a href="#*ns*">*ns*</a>
+</li>
+<li>
+  <a href="#*out*">*out*</a>
+</li>
+<li>
+  <a href="#*print-readably*">*print-readably*</a>
+</li>
+<li>
+  <a href="#+">+</a>
+</li>
+<li>
+  <a href="#+'">+'</a>
+</li>
+<li>
+  <a href="#-">-</a>
+</li>
+<li>
+  <a href="#-'">-'</a>
+</li>
+<li>
+  <a href="#->">-></a>
+</li>
+<li>
+  <a href="#->>">->></a>
+</li>
+<li>
+  <a href="#/">/</a>
+</li>
+<li>
+  <a href="#<"><</a>
+</li>
+<li>
+  <a href="#<="><=</a>
+</li>
+<li>
+  <a href="#=">=</a>
+</li>
+<li>
+  <a href="#==">==</a>
+</li>
+<li>
+  <a href="#>">></a>
+</li>
+<li>
+  <a href="#>=">>=</a>
+</li>
+<li>
+  <a href="#alias">alias</a>
+</li>
+<li>
+  <a href="#all-ns">all-ns</a>
+</li>
+<li>
+  <a href="#alter-meta!">alter-meta!</a>
+</li>
+<li>
+  <a href="#and">and</a>
+</li>
+<li>
+  <a href="#apply">apply</a>
+</li>
+<li>
+  <a href="#array-map">array-map</a>
+</li>
+<li>
+  <a href="#as->">as-></a>
+</li>
+<li>
+  <a href="#assert">assert</a>
+</li>
+<li>
+  <a href="#assoc">assoc</a>
+</li>
+<li>
+  <a href="#assoc-in">assoc-in</a>
+</li>
+<li>
+  <a href="#associative?">associative?</a>
+</li>
+<li>
+  <a href="#atom">atom</a>
+</li>
+<li>
+  <a href="#bigfloat">bigfloat</a>
+</li>
+<li>
+  <a href="#bigfloat?">bigfloat?</a>
+</li>
+<li>
+  <a href="#bigint">bigint</a>
+</li>
+<li>
+  <a href="#binding">binding</a>
+</li>
+<li>
+  <a href="#bit-and">bit-and</a>
+</li>
+<li>
+  <a href="#bit-and-not">bit-and-not</a>
+</li>
+<li>
+  <a href="#bit-clear">bit-clear</a>
+</li>
+<li>
+  <a href="#bit-flip">bit-flip</a>
+</li>
+<li>
+  <a href="#bit-not">bit-not</a>
+</li>
+<li>
+  <a href="#bit-or">bit-or</a>
+</li>
+<li>
+  <a href="#bit-set">bit-set</a>
+</li>
+<li>
+  <a href="#bit-shift-left">bit-shift-left</a>
+</li>
+<li>
+  <a href="#bit-shift-right">bit-shift-right</a>
+</li>
+<li>
+  <a href="#bit-test">bit-test</a>
+</li>
+<li>
+  <a href="#bit-xor">bit-xor</a>
+</li>
+<li>
+  <a href="#boolean">boolean</a>
+</li>
+<li>
+  <a href="#bound?">bound?</a>
+</li>
+<li>
+  <a href="#butlast">butlast</a>
+</li>
+<li>
+  <a href="#callable?">callable?</a>
+</li>
+<li>
+  <a href="#case">case</a>
+</li>
+<li>
+  <a href="#cast">cast</a>
+</li>
+<li>
+  <a href="#char">char</a>
+</li>
+<li>
+  <a href="#char?">char?</a>
+</li>
+<li>
+  <a href="#chunked-seq?">chunked-seq?</a>
+</li>
+<li>
+  <a href="#coll?">coll?</a>
+</li>
+<li>
+  <a href="#comment">comment</a>
+</li>
+<li>
+  <a href="#comp">comp</a>
+</li>
+<li>
+  <a href="#compare">compare</a>
+</li>
+<li>
+  <a href="#complement">complement</a>
+</li>
+<li>
+  <a href="#concat">concat</a>
+</li>
+<li>
+  <a href="#cond">cond</a>
+</li>
+<li>
+  <a href="#cond->">cond-></a>
+</li>
+<li>
+  <a href="#cond->>">cond->></a>
+</li>
+<li>
+  <a href="#condp">condp</a>
+</li>
+<li>
+  <a href="#conj">conj</a>
+</li>
+<li>
+  <a href="#cons">cons</a>
+</li>
+<li>
+  <a href="#constantly">constantly</a>
+</li>
+<li>
+  <a href="#contains?">contains?</a>
+</li>
+<li>
+  <a href="#count">count</a>
+</li>
+<li>
+  <a href="#counted?">counted?</a>
+</li>
+<li>
+  <a href="#create-ns">create-ns</a>
+</li>
+<li>
+  <a href="#cycle">cycle</a>
+</li>
+<li>
+  <a href="#dec">dec</a>
+</li>
+<li>
+  <a href="#dec'">dec'</a>
+</li>
+<li>
+  <a href="#declare">declare</a>
+</li>
+<li>
+  <a href="#dedupe">dedupe</a>
+</li>
+<li>
+  <a href="#defmacro">defmacro</a>
+</li>
+<li>
+  <a href="#defn">defn</a>
+</li>
+<li>
+  <a href="#defn-">defn-</a>
+</li>
+<li>
+  <a href="#defonce">defonce</a>
+</li>
+<li>
+  <a href="#delay">delay</a>
+</li>
+<li>
+  <a href="#delay?">delay?</a>
+</li>
+<li>
+  <a href="#denominator">denominator</a>
+</li>
+<li>
+  <a href="#deref">deref</a>
+</li>
+<li>
+  <a href="#destructure">destructure</a>
+</li>
+<li>
+  <a href="#disj">disj</a>
+</li>
+<li>
+  <a href="#dissoc">dissoc</a>
+</li>
+<li>
+  <a href="#distinct">distinct</a>
+</li>
+<li>
+  <a href="#distinct?">distinct?</a>
+</li>
+<li>
+  <a href="#doall">doall</a>
+</li>
+<li>
+  <a href="#dorun">dorun</a>
+</li>
+<li>
+  <a href="#doseq">doseq</a>
+</li>
+<li>
+  <a href="#dotimes">dotimes</a>
+</li>
+<li>
+  <a href="#double">double</a>
+</li>
+<li>
+  <a href="#drop">drop</a>
+</li>
+<li>
+  <a href="#drop-last">drop-last</a>
+</li>
+<li>
+  <a href="#drop-while">drop-while</a>
+</li>
+<li>
+  <a href="#empty">empty</a>
+</li>
+<li>
+  <a href="#empty?">empty?</a>
+</li>
+<li>
+  <a href="#eval">eval</a>
+</li>
+<li>
+  <a href="#even?">even?</a>
+</li>
+<li>
+  <a href="#every-pred">every-pred</a>
+</li>
+<li>
+  <a href="#every?">every?</a>
+</li>
+<li>
+  <a href="#ex-data">ex-data</a>
+</li>
+<li>
+  <a href="#ex-info">ex-info</a>
+</li>
+<li>
+  <a href="#false?">false?</a>
+</li>
+<li>
+  <a href="#ffirst">ffirst</a>
+</li>
+<li>
+  <a href="#filter">filter</a>
+</li>
+<li>
+  <a href="#filterv">filterv</a>
+</li>
+<li>
+  <a href="#find">find</a>
+</li>
+<li>
+  <a href="#find-ns">find-ns</a>
+</li>
+<li>
+  <a href="#find-var">find-var</a>
+</li>
+<li>
+  <a href="#first">first</a>
+</li>
+<li>
+  <a href="#flatten">flatten</a>
+</li>
+<li>
+  <a href="#float?">float?</a>
+</li>
+<li>
+  <a href="#flush">flush</a>
+</li>
+<li>
+  <a href="#fn">fn</a>
+</li>
+<li>
+  <a href="#fn?">fn?</a>
+</li>
+<li>
+  <a href="#fnext">fnext</a>
+</li>
+<li>
+  <a href="#fnil">fnil</a>
+</li>
+<li>
+  <a href="#for">for</a>
+</li>
+<li>
+  <a href="#force">force</a>
+</li>
+<li>
+  <a href="#format">format</a>
+</li>
+<li>
+  <a href="#frequencies">frequencies</a>
+</li>
+<li>
+  <a href="#gensym">gensym</a>
+</li>
+<li>
+  <a href="#get">get</a>
+</li>
+<li>
+  <a href="#get-in">get-in</a>
+</li>
+<li>
+  <a href="#group-by">group-by</a>
+</li>
+<li>
+  <a href="#hash">hash</a>
+</li>
+<li>
+  <a href="#hash-map">hash-map</a>
+</li>
+<li>
+  <a href="#hash-set">hash-set</a>
+</li>
+<li>
+  <a href="#identical?">identical?</a>
+</li>
+<li>
+  <a href="#identity">identity</a>
+</li>
+<li>
+  <a href="#if-let">if-let</a>
+</li>
+<li>
+  <a href="#if-not">if-not</a>
+</li>
+<li>
+  <a href="#if-some">if-some</a>
+</li>
+<li>
+  <a href="#in-ns">in-ns</a>
+</li>
+<li>
+  <a href="#inc">inc</a>
+</li>
+<li>
+  <a href="#inc'">inc'</a>
+</li>
+<li>
+  <a href="#instance?">instance?</a>
+</li>
+<li>
+  <a href="#int">int</a>
+</li>
+<li>
+  <a href="#integer?">integer?</a>
+</li>
+<li>
+  <a href="#interleave">interleave</a>
+</li>
+<li>
+  <a href="#intern">intern</a>
+</li>
+<li>
+  <a href="#interpose">interpose</a>
+</li>
+<li>
+  <a href="#into">into</a>
+</li>
+<li>
+  <a href="#iterate">iterate</a>
+</li>
+<li>
+  <a href="#juxt">juxt</a>
+</li>
+<li>
+  <a href="#keep">keep</a>
+</li>
+<li>
+  <a href="#keep-indexed">keep-indexed</a>
+</li>
+<li>
+  <a href="#key">key</a>
+</li>
+<li>
+  <a href="#keys">keys</a>
+</li>
+<li>
+  <a href="#keyword">keyword</a>
+</li>
+<li>
+  <a href="#keyword?">keyword?</a>
+</li>
+<li>
+  <a href="#last">last</a>
+</li>
+<li>
+  <a href="#lazy-cat">lazy-cat</a>
+</li>
+<li>
+  <a href="#lazy-seq">lazy-seq</a>
+</li>
+<li>
+  <a href="#let">let</a>
+</li>
+<li>
+  <a href="#list">list</a>
+</li>
+<li>
+  <a href="#list*">list*</a>
+</li>
+<li>
+  <a href="#list?">list?</a>
+</li>
+<li>
+  <a href="#load">load</a>
+</li>
+<li>
+  <a href="#load-file">load-file</a>
+</li>
+<li>
+  <a href="#load-string">load-string</a>
+</li>
+<li>
+  <a href="#loaded-libs">loaded-libs</a>
+</li>
+<li>
+  <a href="#loop">loop</a>
+</li>
+<li>
+  <a href="#macroexpand">macroexpand</a>
+</li>
+<li>
+  <a href="#macroexpand-1">macroexpand-1</a>
+</li>
+<li>
+  <a href="#map">map</a>
+</li>
+<li>
+  <a href="#map-indexed">map-indexed</a>
+</li>
+<li>
+  <a href="#map?">map?</a>
+</li>
+<li>
+  <a href="#mapcat">mapcat</a>
+</li>
+<li>
+  <a href="#mapv">mapv</a>
+</li>
+<li>
+  <a href="#max">max</a>
+</li>
+<li>
+  <a href="#max-key">max-key</a>
+</li>
+<li>
+  <a href="#memoize">memoize</a>
+</li>
+<li>
+  <a href="#merge">merge</a>
+</li>
+<li>
+  <a href="#merge-with">merge-with</a>
+</li>
+<li>
+  <a href="#meta">meta</a>
+</li>
+<li>
+  <a href="#min">min</a>
+</li>
+<li>
+  <a href="#min-key">min-key</a>
+</li>
+<li>
+  <a href="#mod">mod</a>
+</li>
+<li>
+  <a href="#name">name</a>
+</li>
+<li>
+  <a href="#namespace">namespace</a>
+</li>
+<li>
+  <a href="#neg?">neg?</a>
+</li>
+<li>
+  <a href="#newline">newline</a>
+</li>
+<li>
+  <a href="#next">next</a>
+</li>
+<li>
+  <a href="#nfirst">nfirst</a>
+</li>
+<li>
+  <a href="#nil?">nil?</a>
+</li>
+<li>
+  <a href="#nnext">nnext</a>
+</li>
+<li>
+  <a href="#not">not</a>
+</li>
+<li>
+  <a href="#not-any?">not-any?</a>
+</li>
+<li>
+  <a href="#not-empty">not-empty</a>
+</li>
+<li>
+  <a href="#not-every?">not-every?</a>
+</li>
+<li>
+  <a href="#not=">not=</a>
+</li>
+<li>
+  <a href="#ns">ns</a>
+</li>
+<li>
+  <a href="#ns-aliases">ns-aliases</a>
+</li>
+<li>
+  <a href="#ns-interns">ns-interns</a>
+</li>
+<li>
+  <a href="#ns-map">ns-map</a>
+</li>
+<li>
+  <a href="#ns-name">ns-name</a>
+</li>
+<li>
+  <a href="#ns-publics">ns-publics</a>
+</li>
+<li>
+  <a href="#ns-refers">ns-refers</a>
+</li>
+<li>
+  <a href="#ns-resolve">ns-resolve</a>
+</li>
+<li>
+  <a href="#ns-unalias">ns-unalias</a>
+</li>
+<li>
+  <a href="#ns-unmap">ns-unmap</a>
+</li>
+<li>
+  <a href="#nth">nth</a>
+</li>
+<li>
+  <a href="#nthnext">nthnext</a>
+</li>
+<li>
+  <a href="#nthrest">nthrest</a>
+</li>
+<li>
+  <a href="#num">num</a>
+</li>
+<li>
+  <a href="#number?">number?</a>
+</li>
+<li>
+  <a href="#numerator">numerator</a>
+</li>
+<li>
+  <a href="#odd?">odd?</a>
+</li>
+<li>
+  <a href="#or">or</a>
+</li>
+<li>
+  <a href="#partial">partial</a>
+</li>
+<li>
+  <a href="#partition">partition</a>
+</li>
+<li>
+  <a href="#partition-all">partition-all</a>
+</li>
+<li>
+  <a href="#partition-by">partition-by</a>
+</li>
+<li>
+  <a href="#peek">peek</a>
+</li>
+<li>
+  <a href="#pop">pop</a>
+</li>
+<li>
+  <a href="#pos?">pos?</a>
+</li>
+<li>
+  <a href="#pr">pr</a>
+</li>
+<li>
+  <a href="#pr-str">pr-str</a>
+</li>
+<li>
+  <a href="#print">print</a>
+</li>
+<li>
+  <a href="#print-str">print-str</a>
+</li>
+<li>
+  <a href="#printf">printf</a>
+</li>
+<li>
+  <a href="#println">println</a>
+</li>
+<li>
+  <a href="#println-str">println-str</a>
+</li>
+<li>
+  <a href="#prn">prn</a>
+</li>
+<li>
+  <a href="#prn-str">prn-str</a>
+</li>
+<li>
+  <a href="#quot">quot</a>
+</li>
+<li>
+  <a href="#rand">rand</a>
+</li>
+<li>
+  <a href="#rand-int">rand-int</a>
+</li>
+<li>
+  <a href="#rand-nth">rand-nth</a>
+</li>
+<li>
+  <a href="#random-sample">random-sample</a>
+</li>
+<li>
+  <a href="#range">range</a>
+</li>
+<li>
+  <a href="#ratio?">ratio?</a>
+</li>
+<li>
+  <a href="#rational?">rational?</a>
+</li>
+<li>
+  <a href="#re-find">re-find</a>
+</li>
+<li>
+  <a href="#re-matches">re-matches</a>
+</li>
+<li>
+  <a href="#re-pattern">re-pattern</a>
+</li>
+<li>
+  <a href="#re-seq">re-seq</a>
+</li>
+<li>
+  <a href="#read">read</a>
+</li>
+<li>
+  <a href="#read-line">read-line</a>
+</li>
+<li>
+  <a href="#read-string">read-string</a>
+</li>
+<li>
+  <a href="#realized?">realized?</a>
+</li>
+<li>
+  <a href="#reduce">reduce</a>
+</li>
+<li>
+  <a href="#reduce-kv">reduce-kv</a>
+</li>
+<li>
+  <a href="#reductions">reductions</a>
+</li>
+<li>
+  <a href="#refer">refer</a>
+</li>
+<li>
+  <a href="#rem">rem</a>
+</li>
+<li>
+  <a href="#remove">remove</a>
+</li>
+<li>
+  <a href="#remove-ns">remove-ns</a>
+</li>
+<li>
+  <a href="#repeat">repeat</a>
+</li>
+<li>
+  <a href="#repeatedly">repeatedly</a>
+</li>
+<li>
+  <a href="#replace">replace</a>
+</li>
+<li>
+  <a href="#replace-bindings*">replace-bindings*</a>
+</li>
+<li>
+  <a href="#require">require</a>
+</li>
+<li>
+  <a href="#reset!">reset!</a>
+</li>
+<li>
+  <a href="#reset-meta!">reset-meta!</a>
+</li>
+<li>
+  <a href="#resolve">resolve</a>
+</li>
+<li>
+  <a href="#rest">rest</a>
+</li>
+<li>
+  <a href="#reverse">reverse</a>
+</li>
+<li>
+  <a href="#reversible?">reversible?</a>
+</li>
+<li>
+  <a href="#rseq">rseq</a>
+</li>
+<li>
+  <a href="#run!">run!</a>
+</li>
+<li>
+  <a href="#second">second</a>
+</li>
+<li>
+  <a href="#select-keys">select-keys</a>
+</li>
+<li>
+  <a href="#seq">seq</a>
+</li>
+<li>
+  <a href="#seq?">seq?</a>
+</li>
+<li>
+  <a href="#sequence">sequence</a>
+</li>
+<li>
+  <a href="#sequential?">sequential?</a>
+</li>
+<li>
+  <a href="#set">set</a>
+</li>
+<li>
+  <a href="#set?">set?</a>
+</li>
+<li>
+  <a href="#shuffle">shuffle</a>
+</li>
+<li>
+  <a href="#slurp">slurp</a>
+</li>
+<li>
+  <a href="#some">some</a>
+</li>
+<li>
+  <a href="#some->">some-></a>
+</li>
+<li>
+  <a href="#some->>">some->></a>
+</li>
+<li>
+  <a href="#some-fn">some-fn</a>
+</li>
+<li>
+  <a href="#some?">some?</a>
+</li>
+<li>
+  <a href="#sort">sort</a>
+</li>
+<li>
+  <a href="#sort-by">sort-by</a>
+</li>
+<li>
+  <a href="#special-symbol?">special-symbol?</a>
+</li>
+<li>
+  <a href="#spit">spit</a>
+</li>
+<li>
+  <a href="#split-at">split-at</a>
+</li>
+<li>
+  <a href="#split-with">split-with</a>
+</li>
+<li>
+  <a href="#str">str</a>
+</li>
+<li>
+  <a href="#string?">string?</a>
+</li>
+<li>
+  <a href="#subs">subs</a>
+</li>
+<li>
+  <a href="#subvec">subvec</a>
+</li>
+<li>
+  <a href="#swap!">swap!</a>
+</li>
+<li>
+  <a href="#symbol">symbol</a>
+</li>
+<li>
+  <a href="#symbol?">symbol?</a>
+</li>
+<li>
+  <a href="#take">take</a>
+</li>
+<li>
+  <a href="#take-last">take-last</a>
+</li>
+<li>
+  <a href="#take-nth">take-nth</a>
+</li>
+<li>
+  <a href="#take-while">take-while</a>
+</li>
+<li>
+  <a href="#test">test</a>
+</li>
+<li>
+  <a href="#the-ns">the-ns</a>
+</li>
+<li>
+  <a href="#time">time</a>
+</li>
+<li>
+  <a href="#trampoline">trampoline</a>
+</li>
+<li>
+  <a href="#tree-seq">tree-seq</a>
+</li>
+<li>
+  <a href="#true?">true?</a>
+</li>
+<li>
+  <a href="#type">type</a>
+</li>
+<li>
+  <a href="#unquote">unquote</a>
+</li>
+<li>
+  <a href="#unquote-splicing">unquote-splicing</a>
+</li>
+<li>
+  <a href="#unsigned-bit-shift-right">unsigned-bit-shift-right</a>
+</li>
+<li>
+  <a href="#update">update</a>
+</li>
+<li>
+  <a href="#update-in">update-in</a>
+</li>
+<li>
+  <a href="#use">use</a>
+</li>
+<li>
+  <a href="#val">val</a>
+</li>
+<li>
+  <a href="#vals">vals</a>
+</li>
+<li>
+  <a href="#var-get">var-get</a>
+</li>
+<li>
+  <a href="#var-set">var-set</a>
+</li>
+<li>
+  <a href="#var?">var?</a>
+</li>
+<li>
+  <a href="#vary-meta">vary-meta</a>
+</li>
+<li>
+  <a href="#vec">vec</a>
+</li>
+<li>
+  <a href="#vector">vector</a>
+</li>
+<li>
+  <a href="#vector?">vector?</a>
+</li>
+<li>
+  <a href="#when">when</a>
+</li>
+<li>
+  <a href="#when-first">when-first</a>
+</li>
+<li>
+  <a href="#when-let">when-let</a>
+</li>
+<li>
+  <a href="#when-not">when-not</a>
+</li>
+<li>
+  <a href="#when-some">when-some</a>
+</li>
+<li>
+  <a href="#while">while</a>
+</li>
+<li>
+  <a href="#with-bindings">with-bindings</a>
+</li>
+<li>
+  <a href="#with-bindings*">with-bindings*</a>
+</li>
+<li>
+  <a href="#with-in-str">with-in-str</a>
+</li>
+<li>
+  <a href="#with-meta">with-meta</a>
+</li>
+<li>
+  <a href="#with-out-str">with-out-str</a>
+</li>
+<li>
+  <a href="#with-redefs">with-redefs</a>
+</li>
+<li>
+  <a href="#with-redefs-fn">with-redefs-fn</a>
+</li>
+<li>
+  <a href="#xml-seq">xml-seq</a>
+</li>
+<li>
+  <a href="#zero?">zero?</a>
+</li>
+<li>
+  <a href="#zipmap">zipmap</a>
+</li>
+
+    </ul>
+    <ul>
+      <li>
+  <h2 id="*">*</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(*)</code></div>
+<div><code>(* x)</code></div>
+<div><code>(* x y)</code></div>
+<div><code>(* x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the product of nums. (*) returns 1. Does not auto-promote<br>  ints, will overflow. See also: *'</p>
+</li>
+<li>
+  <h2 id="*'">*'</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(*')</code></div>
+<div><code>(*' x)</code></div>
+<div><code>(*' x y)</code></div>
+<div><code>(*' x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the product of nums. (*) returns 1. Supports arbitrary precision.<br>  See also: *</p>
+</li>
+<li>
+  <h2 id="*1">*1</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">bound in a repl to the most recent value printed</p>
+</li>
+<li>
+  <h2 id="*2">*2</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">bound in a repl to the second most recent value printed</p>
+</li>
+<li>
+  <h2 id="*3">*3</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">bound in a repl to the third most recent value printed</p>
+</li>
+<li>
+  <h2 id="*assert*">*assert*</h2>
+  <div class="var-type">Type: Bool</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="*command-line-args*">*command-line-args*</h2>
+  <div class="var-type">Type: Vector</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">A sequence of the supplied command line arguments, or nil if<br>  none were supplied</p>
+</li>
+<li>
+  <h2 id="*e">*e</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">bound in a repl to the most recent exception caught by the repl</p>
+</li>
+<li>
+  <h2 id="*err*">*err*</h2>
+  <div class="var-type">Type: File</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">A File object representing standard error for print operations.<br><br>  Defaults to stderr.</p>
+</li>
+<li>
+  <h2 id="*file*">*file*</h2>
+  <div class="var-type">Type: String</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">The path of the file being evaluated, as a String.<br><br>  When there is no file, e.g. in the REPL, the value is not defined.</p>
+</li>
+<li>
+  <h2 id="*flush-on-newline*">*flush-on-newline*</h2>
+  <div class="var-type">Type: Bool</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">When set to true, output will be flushed whenever a newline is printed.<br><br>    Defaults to true.</p>
+</li>
+<li>
+  <h2 id="*in*">*in*</h2>
+  <div class="var-type">Type: File</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">A File object representing standard input for read operations.<br><br>  Defaults to stdin.</p>
+</li>
+<li>
+  <h2 id="*ns*">*ns*</h2>
+  <div class="var-type">Type: Namespace</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">A Namespace object representing the current namespace.</p>
+</li>
+<li>
+  <h2 id="*out*">*out*</h2>
+  <div class="var-type">Type: File</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">A File object representing standard output for print operations.<br><br>  Defaults to stdout.</p>
+</li>
+<li>
+  <h2 id="*print-readably*">*print-readably*</h2>
+  <div class="var-type">Type: Bool</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="+">+</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(+)</code></div>
+<div><code>(+ x)</code></div>
+<div><code>(+ x y)</code></div>
+<div><code>(+ x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the sum of nums. (+) returns 0. Does not auto-promote<br>  ints, will overflow. See also: +'</p>
+</li>
+<li>
+  <h2 id="+'">+'</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(+')</code></div>
+<div><code>(+' x)</code></div>
+<div><code>(+' x y)</code></div>
+<div><code>(+' x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the sum of nums. (+) returns 0. Supports arbitrary precision.<br>  See also: +</p>
+</li>
+<li>
+  <h2 id="-">-</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(- x)</code></div>
+<div><code>(- x y)</code></div>
+<div><code>(- x y & more)</code></div>
+</pre>
+  <p class="var-docstr">If no ys are supplied, returns the negation of x, else subtracts<br>  the ys from x and returns the result. Does not auto-promote<br>  ints, will overflow. See also: -'</p>
+</li>
+<li>
+  <h2 id="-'">-'</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(-' x)</code></div>
+<div><code>(-' x y)</code></div>
+<div><code>(-' x y & more)</code></div>
+</pre>
+  <p class="var-docstr">If no ys are supplied, returns the negation of x, else subtracts<br>  the ys from x and returns the result. Supports arbitrary precision.<br>  See also: -</p>
+</li>
+<li>
+  <h2 id="->">-></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(-> x & forms)</code></div>
+</pre>
+  <p class="var-docstr">Threads the expr through the forms. Inserts x as the<br>  second item in the first form, making a list of it if it is not a<br>  list already. If there are more forms, inserts the first form as the<br>  second item in second form, etc.</p>
+</li>
+<li>
+  <h2 id="->>">->></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(->> x & forms)</code></div>
+</pre>
+  <p class="var-docstr">Threads the expr through the forms. Inserts x as the<br>  last item in the first form, making a list of it if it is not a<br>  list already. If there are more forms, inserts the first form as the<br>  last item in second form, etc.</p>
+</li>
+<li>
+  <h2 id="/">/</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(/ x)</code></div>
+<div><code>(/ x y)</code></div>
+<div><code>(/ x y & more)</code></div>
+</pre>
+  <p class="var-docstr">If no denominators are supplied, returns 1/numerator,<br>  else returns numerator divided by all of the denominators.</p>
+</li>
+<li>
+  <h2 id="<"><</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(< x)</code></div>
+<div><code>(< x y)</code></div>
+<div><code>(< x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns non-nil if nums are in monotonically increasing order,<br>  otherwise false.</p>
+</li>
+<li>
+  <h2 id="<="><=</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(<= x)</code></div>
+<div><code>(<= x y)</code></div>
+<div><code>(<= x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns non-nil if nums are in monotonically non-decreasing order,<br>  otherwise false.</p>
+</li>
+<li>
+  <h2 id="=">=</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(= x)</code></div>
+<div><code>(= x y)</code></div>
+<div><code>(= x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Equality. Returns true if x equals y, false if not. Works for nil, and compares<br>  numbers and collections in a type-independent manner.  Immutable data<br>  structures define = as a value, not an identity,<br>  comparison.</p>
+</li>
+<li>
+  <h2 id="==">==</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(== x)</code></div>
+<div><code>(== x y)</code></div>
+<div><code>(== x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns non-nil if nums all have the equivalent<br>  value (type-independent), otherwise false</p>
+</li>
+<li>
+  <h2 id=">">></h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(> x)</code></div>
+<div><code>(> x y)</code></div>
+<div><code>(> x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns non-nil if nums are in monotonically decreasing order,<br>  otherwise false.</p>
+</li>
+<li>
+  <h2 id=">=">>=</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(>= x)</code></div>
+<div><code>(>= x y)</code></div>
+<div><code>(>= x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns non-nil if nums are in monotonically non-increasing order,<br>  otherwise false.</p>
+</li>
+<li>
+  <h2 id="alias">alias</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(alias alias namespace-sym)</code></div>
+</pre>
+  <p class="var-docstr">Add an alias in the current namespace to another<br>  namespace. Arguments are two symbols: the alias to be used, and<br>  the symbolic name of the target namespace. Use :as in the ns macro in preference<br>  to calling this directly.</p>
+</li>
+<li>
+  <h2 id="all-ns">all-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(all-ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sequence of all namespaces.</p>
+</li>
+<li>
+  <h2 id="alter-meta!">alter-meta!</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(alter-meta! ref f & args)</code></div>
+</pre>
+  <p class="var-docstr">Atomically sets the metadata for a namespace/var/atom to be:<br><br>  (apply f its-current-meta args)<br><br>  f must be free of side-effects</p>
+</li>
+<li>
+  <h2 id="and">and</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(and)</code></div>
+<div><code>(and x)</code></div>
+<div><code>(and x & next)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates exprs one at a time, from left to right. If a form<br>  returns logical false (nil or false), and returns that value and<br>  doesn't evaluate any of the other expressions, otherwise it returns<br>  the value of the last expr. (and) returns true.</p>
+</li>
+<li>
+  <h2 id="apply">apply</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(apply f args)</code></div>
+<div><code>(apply f x args)</code></div>
+<div><code>(apply f x y args)</code></div>
+<div><code>(apply f x y z args)</code></div>
+<div><code>(apply f a b c d & args)</code></div>
+</pre>
+  <p class="var-docstr">Applies fn f to the argument list formed by prepending intervening arguments to args.</p>
+</li>
+<li>
+  <h2 id="array-map">array-map</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(array-map & keyvals)</code></div>
+</pre>
+  <p class="var-docstr">Constructs an array-map. If any keys are equal, they are handled as<br>         if by repeated uses of assoc.</p>
+</li>
+<li>
+  <h2 id="as->">as-></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(as-> expr name & forms)</code></div>
+</pre>
+  <p class="var-docstr">Binds name to expr, evaluates the first form in the lexical context<br>  of that binding, then binds name to that result, repeating for each<br>  successive form, returning the result of the last form.</p>
+</li>
+<li>
+  <h2 id="assert">assert</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(assert x)</code></div>
+<div><code>(assert x message)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates expr and throws an exception if it does not evaluate to<br>  logical true.</p>
+</li>
+<li>
+  <h2 id="assoc">assoc</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(assoc map key val)</code></div>
+<div><code>(assoc map key val & kvs)</code></div>
+</pre>
+  <p class="var-docstr">`assoc[iate]. When applied to a map, returns a new map of the<br>         same (hashed/sorted) type, that contains the mapping of key(s) to<br>         val(s). When applied to a vector, returns a new vector that<br>         contains val at index. Note - index must be <= (count vector).</p>
+</li>
+<li>
+  <h2 id="assoc-in">assoc-in</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(assoc-in m [k & ks] v)</code></div>
+</pre>
+  <p class="var-docstr">Associates a value in a nested associative structure, where ks is a<br>  sequence of keys and v is the new value and returns a new nested structure.<br>  If any levels do not exist, hash-maps will be created.</p>
+</li>
+<li>
+  <h2 id="associative?">associative?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(associative? coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if coll implements Associative</p>
+</li>
+<li>
+  <h2 id="atom">atom</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(atom x & options)</code></div>
+</pre>
+  <p class="var-docstr">Creates and returns an Atom with an initial value of x and zero or<br>  more options (in any order):<br><br>  :meta metadata-map<br><br>  If metadata-map is supplied, it will become the metadata on the<br>  atom.</p>
+</li>
+<li>
+  <h2 id="bigfloat">bigfloat</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bigfloat x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to BigFloat</p>
+</li>
+<li>
+  <h2 id="bigfloat?">bigfloat?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bigfloat? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is a BigFloat</p>
+</li>
+<li>
+  <h2 id="bigint">bigint</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bigint x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to BigInt</p>
+</li>
+<li>
+  <h2 id="binding">binding</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(binding bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">binding => var-symbol init-expr<br><br>  Creates new bindings for the (already-existing) vars, with the<br>  supplied initial values, executes the exprs in an implicit do, then<br>  re-establishes the bindings that existed before.  The new bindings<br>  are made in parallel (unlike let); all init-exprs are evaluated<br>  before the vars are bound to their new values.</p>
+</li>
+<li>
+  <h2 id="bit-and">bit-and</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-and x y)</code></div>
+<div><code>(bit-and x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise and</p>
+</li>
+<li>
+  <h2 id="bit-and-not">bit-and-not</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-and-not x y)</code></div>
+<div><code>(bit-and-not x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise and with complement</p>
+</li>
+<li>
+  <h2 id="bit-clear">bit-clear</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-clear x n)</code></div>
+</pre>
+  <p class="var-docstr">Clear bit at index n</p>
+</li>
+<li>
+  <h2 id="bit-flip">bit-flip</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-flip x n)</code></div>
+</pre>
+  <p class="var-docstr">Flip bit at index n</p>
+</li>
+<li>
+  <h2 id="bit-not">bit-not</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-not x)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise complement</p>
+</li>
+<li>
+  <h2 id="bit-or">bit-or</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-or x y)</code></div>
+<div><code>(bit-or x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise or</p>
+</li>
+<li>
+  <h2 id="bit-set">bit-set</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-set x n)</code></div>
+</pre>
+  <p class="var-docstr">Set bit at index n</p>
+</li>
+<li>
+  <h2 id="bit-shift-left">bit-shift-left</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-shift-left x n)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise shift left</p>
+</li>
+<li>
+  <h2 id="bit-shift-right">bit-shift-right</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-shift-right x n)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise shift right</p>
+</li>
+<li>
+  <h2 id="bit-test">bit-test</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-test x n)</code></div>
+</pre>
+  <p class="var-docstr">Test bit at index n</p>
+</li>
+<li>
+  <h2 id="bit-xor">bit-xor</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bit-xor x y)</code></div>
+<div><code>(bit-xor x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise exclusive or</p>
+</li>
+<li>
+  <h2 id="boolean">boolean</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(boolean x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to boolean</p>
+</li>
+<li>
+  <h2 id="bound?">bound?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(bound? & vars)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if all of the vars provided as arguments have any bound value.<br>  Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided.</p>
+</li>
+<li>
+  <h2 id="butlast">butlast</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(butlast coll)</code></div>
+</pre>
+  <p class="var-docstr">Return a seq of all but the last item in coll, in linear time.</p>
+</li>
+<li>
+  <h2 id="callable?">callable?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(callable? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x implements Callable. Note that many data structures<br>  (e.g. sets and maps) implement Callable.</p>
+</li>
+<li>
+  <h2 id="case">case</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(case expr & clauses)</code></div>
+</pre>
+  <p class="var-docstr">Takes an expression, and a set of clauses.<br><br>  Each clause can take the form of either:<br><br>  test-expr result-expr<br><br>  (test-expr ... test-expr)  result-expr<br><br>  If the expression is equal to a value of<br>  test-expr, the corresponding result-expr is returned. A single<br>  default expression can follow the clauses, and its value will be<br>  returned if no clause matches. If no default expression is provided<br>  and no clause matches, an exception is thrown.</p>
+</li>
+<li>
+  <h2 id="cast">cast</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cast t x)</code></div>
+</pre>
+  <p class="var-docstr">Throws an error if x is not of a type t, else returns x.</p>
+</li>
+<li>
+  <h2 id="char">char</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(char x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to char</p>
+</li>
+<li>
+  <h2 id="char?">char?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(char? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a Char</p>
+</li>
+<li>
+  <h2 id="chunked-seq?">chunked-seq?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"><div><code>(chunked-seq? s)</code></div>
+</pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="coll?">coll?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(coll? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x implements Collection</p>
+</li>
+<li>
+  <h2 id="comment">comment</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(comment & body)</code></div>
+</pre>
+  <p class="var-docstr">Ignores body, yields nil</p>
+</li>
+<li>
+  <h2 id="comp">comp</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(comp)</code></div>
+<div><code>(comp f)</code></div>
+<div><code>(comp f g)</code></div>
+<div><code>(comp f g h)</code></div>
+<div><code>(comp f1 f2 f3 & fs)</code></div>
+</pre>
+  <p class="var-docstr">Takes a set of functions and returns a fn that is the composition<br>  of those fns.  The returned fn takes a variable number of args,<br>  applies the rightmost of fns to the args, the next<br>  fn (right-to-left) to the result, etc.</p>
+</li>
+<li>
+  <h2 id="compare">compare</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(compare x y)</code></div>
+</pre>
+  <p class="var-docstr">Comparator. Returns a negative number, zero, or a positive number<br>  when x is logically 'less than', 'equal to', or 'greater than'<br>  y. Works for nil, and compares numbers and collections in a type-independent manner. x<br>  must implement Comparable</p>
+</li>
+<li>
+  <h2 id="complement">complement</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(complement f)</code></div>
+</pre>
+  <p class="var-docstr">Takes a fn f and returns a fn that takes the same arguments as f,<br>  has the same effects, if any, and returns the opposite truth value.</p>
+</li>
+<li>
+  <h2 id="concat">concat</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(concat)</code></div>
+<div><code>(concat x)</code></div>
+<div><code>(concat x y)</code></div>
+<div><code>(concat x y & zs)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq representing the concatenation of the elements in the supplied colls.</p>
+</li>
+<li>
+  <h2 id="cond">cond</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cond & clauses)</code></div>
+</pre>
+  <p class="var-docstr">Takes a set of test/expr pairs. It evaluates each test one at a<br>  time.  If a test returns logical true, cond evaluates and returns<br>  the value of the corresponding expr and doesn't evaluate any of the<br>  other tests or exprs. (cond) returns nil.</p>
+</li>
+<li>
+  <h2 id="cond->">cond-></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cond-> expr & clauses)</code></div>
+</pre>
+  <p class="var-docstr">Takes an expression and a set of test/form pairs. Threads expr (via ->)<br>  through each form for which the corresponding test<br>  expression is true. Note that, unlike cond branching, cond-> threading does<br>  not short circuit after the first true test expression.</p>
+</li>
+<li>
+  <h2 id="cond->>">cond->></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cond->> expr & clauses)</code></div>
+</pre>
+  <p class="var-docstr">Takes an expression and a set of test/form pairs. Threads expr (via ->>)<br>  through each form for which the corresponding test expression<br>  is true.  Note that, unlike cond branching, cond->> threading does not short circuit<br>  after the first true test expression.</p>
+</li>
+<li>
+  <h2 id="condp">condp</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(condp pred expr & clauses)</code></div>
+</pre>
+  <p class="var-docstr">Takes a binary predicate, an expression, and a set of clauses.<br>  Each clause can take the form of either:<br><br>  test-expr result-expr<br><br>  test-expr :>> result-fn<br><br>  Note :>> is an ordinary keyword.<br><br>  For each clause, (pred test-expr expr) is evaluated. If it returns<br>  logical true, the clause is a match. If a binary clause matches, the<br>  result-expr is returned, if a ternary clause matches, its result-fn,<br>  which must be a unary function, is called with the result of the<br>  predicate as its argument, the result of that call being the return<br>  value of condp. A single default expression can follow the clauses,<br>  and its value will be returned if no clause matches. If no default<br>  expression is provided and no clause matches, an<br>  exception is thrown.</p>
+</li>
+<li>
+  <h2 id="conj">conj</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(conj coll x)</code></div>
+<div><code>(conj coll x & xs)</code></div>
+</pre>
+  <p class="var-docstr">conj[oin]. Returns a new collection with the xs<br>         'added'. (conj nil item) returns (item).  The 'addition' may<br>         happen at different 'places' depending on the concrete type.</p>
+</li>
+<li>
+  <h2 id="cons">cons</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cons x seq)</code></div>
+</pre>
+  <p class="var-docstr">Returns a new seq where x is the first element and seq is<br>         the rest.</p>
+</li>
+<li>
+  <h2 id="constantly">constantly</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(constantly x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a function that takes any number of arguments and returns x.</p>
+</li>
+<li>
+  <h2 id="contains?">contains?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(contains? coll key)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if key is present in the given collection, otherwise<br>  returns false.  Note that for numerically indexed collections like<br>  vectors, this tests if the numeric key is within the<br>  range of indexes. 'contains?' operates constant or logarithmic time;<br>  it will not perform a linear search for a value.  See also 'some'.</p>
+</li>
+<li>
+  <h2 id="count">count</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(count coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns the number of items in the collection. (count nil) returns<br>  0.  Also works on strings</p>
+</li>
+<li>
+  <h2 id="counted?">counted?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(counted? coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if coll implements count in constant time</p>
+</li>
+<li>
+  <h2 id="create-ns">create-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(create-ns sym)</code></div>
+</pre>
+  <p class="var-docstr">Create a new namespace named by the symbol if one doesn't already<br>  exist, returns it or the already-existing namespace of the same<br>  name.</p>
+</li>
+<li>
+  <h2 id="cycle">cycle</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(cycle coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy (infinite!) sequence of repetitions of the items in coll.</p>
+</li>
+<li>
+  <h2 id="dec">dec</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dec x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a number one less than num. Does not auto-promote<br>  ints, will overflow. See also: dec'</p>
+</li>
+<li>
+  <h2 id="dec'">dec'</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dec' x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a number one less than num. Supports arbitrary precision.<br>  See also: dec</p>
+</li>
+<li>
+  <h2 id="declare">declare</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(declare & names)</code></div>
+</pre>
+  <p class="var-docstr">defs the supplied var names with no bindings, useful for making forward declarations.</p>
+</li>
+<li>
+  <h2 id="dedupe">dedupe</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dedupe coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence removing consecutive duplicates in coll.</p>
+</li>
+<li>
+  <h2 id="defmacro">defmacro</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(defmacro name doc-string? attr-map? [params*] body)</code></div>
+<div><code>(defmacro name doc-string? attr-map? ([params*] body) + attr-map?)</code></div>
+</pre>
+  <p class="var-docstr">Like defn, but the resulting function name is declared as a<br>         macro and will be used as a macro by the compiler when it is<br>         called.</p>
+</li>
+<li>
+  <h2 id="defn">defn</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(defn name doc-string? attr-map? [params*] prepost-map? body)</code></div>
+<div><code>(defn name doc-string? attr-map? ([params*] prepost-map? body) + attr-map?)</code></div>
+</pre>
+  <p class="var-docstr">Same as (def name (fn [params* ] exprs*)) or (def<br>         name (fn ([params* ] exprs*)+)) with any doc-string or attrs added<br>         to the var metadata. prepost-map defines a map with optional keys<br>         :pre and :post that contain collections of pre or post conditions.</p>
+</li>
+<li>
+  <h2 id="defn-">defn-</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(defn- name & decls)</code></div>
+</pre>
+  <p class="var-docstr">same as defn, yielding non-public def</p>
+</li>
+<li>
+  <h2 id="defonce">defonce</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(defonce name expr)</code></div>
+</pre>
+  <p class="var-docstr">defs name to have the value of the expr if the named var is not bound,<br>  else expr is unevaluated</p>
+</li>
+<li>
+  <h2 id="delay">delay</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(delay & body)</code></div>
+</pre>
+  <p class="var-docstr">Takes a body of expressions and yields a Delay object that will<br>  invoke the body only the first time it is forced (with force or deref/@), and<br>  will cache the result and return it on all subsequent force<br>  calls. See also - realized?</p>
+</li>
+<li>
+  <h2 id="delay?">delay?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(delay? x)</code></div>
+</pre>
+  <p class="var-docstr">returns true if x is a Delay created with delay</p>
+</li>
+<li>
+  <h2 id="denominator">denominator</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(denominator r)</code></div>
+</pre>
+  <p class="var-docstr">Returns the denominator part of a Ratio.</p>
+</li>
+<li>
+  <h2 id="deref">deref</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(deref ref)</code></div>
+</pre>
+  <p class="var-docstr">Also reader macro: @var/@atom/@delay. When applied to a var or atom,<br>  returns its current state. When applied to a delay, forces<br>  it if not already forced.</p>
+</li>
+<li>
+  <h2 id="destructure">destructure</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"><div><code>(destructure bindings)</code></div>
+</pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="disj">disj</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(disj set)</code></div>
+<div><code>(disj set key)</code></div>
+<div><code>(disj set key & ks)</code></div>
+</pre>
+  <p class="var-docstr">disj[oin]. Returns a new set of the same (hashed/sorted) type, that<br>  does not contain key(s).</p>
+</li>
+<li>
+  <h2 id="dissoc">dissoc</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dissoc map)</code></div>
+<div><code>(dissoc map key)</code></div>
+<div><code>(dissoc map key & ks)</code></div>
+</pre>
+  <p class="var-docstr">dissoc[iate]. Returns a new map of the same (hashed/sorted) type,<br>  that does not contain a mapping for key(s).</p>
+</li>
+<li>
+  <h2 id="distinct">distinct</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(distinct coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the elements of coll with duplicates removed.</p>
+</li>
+<li>
+  <h2 id="distinct?">distinct?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(distinct? x)</code></div>
+<div><code>(distinct? x y)</code></div>
+<div><code>(distinct? x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if no two of the arguments are =</p>
+</li>
+<li>
+  <h2 id="doall">doall</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(doall coll)</code></div>
+<div><code>(doall n coll)</code></div>
+</pre>
+  <p class="var-docstr">When lazy sequences are produced via functions that have side<br>  effects, any effects other than those needed to produce the first<br>  element in the seq do not occur until the seq is consumed. doall can<br>  be used to force any effects. Walks through the successive nexts of<br>  the seq, retains the head and returns it, thus causing the entire<br>  seq to reside in memory at one time.</p>
+</li>
+<li>
+  <h2 id="dorun">dorun</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dorun coll)</code></div>
+<div><code>(dorun n coll)</code></div>
+</pre>
+  <p class="var-docstr">When lazy sequences are produced via functions that have side<br>  effects, any effects other than those needed to produce the first<br>  element in the seq do not occur until the seq is consumed. dorun can<br>  be used to force any effects. Walks through the successive nexts of<br>  the seq, does not retain the head and returns nil.</p>
+</li>
+<li>
+  <h2 id="doseq">doseq</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(doseq seq-exprs & body)</code></div>
+</pre>
+  <p class="var-docstr">Repeatedly executes body (presumably for side-effects) with<br>  bindings and filtering as provided by "for".  Does not retain<br>  the head of the sequence. Returns nil.</p>
+</li>
+<li>
+  <h2 id="dotimes">dotimes</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(dotimes bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">bindings => name n<br><br>  Repeatedly executes body (presumably for side-effects) with name<br>  bound to integers from 0 through n-1.</p>
+</li>
+<li>
+  <h2 id="double">double</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(double x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to double</p>
+</li>
+<li>
+  <h2 id="drop">drop</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(drop n coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of all but the first n items in coll.</p>
+</li>
+<li>
+  <h2 id="drop-last">drop-last</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(drop-last s)</code></div>
+<div><code>(drop-last n s)</code></div>
+</pre>
+  <p class="var-docstr">Return a lazy sequence of all but the last n (default 1) items in coll</p>
+</li>
+<li>
+  <h2 id="drop-while">drop-while</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(drop-while pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the items in coll starting from the first<br>  item for which (pred item) returns logical false.</p>
+</li>
+<li>
+  <h2 id="empty">empty</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(empty coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns an empty collection of the same category as coll, or nil</p>
+</li>
+<li>
+  <h2 id="empty?">empty?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(empty? coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if coll has no items - same as (not (seq coll)).<br>  Please use the idiom (seq x) rather than (not (empty? x))</p>
+</li>
+<li>
+  <h2 id="eval">eval</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(eval form)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates the form data structure (not text!) and returns the result.</p>
+</li>
+<li>
+  <h2 id="even?">even?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(even? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is even, throws an exception if n is not an integer</p>
+</li>
+<li>
+  <h2 id="every-pred">every-pred</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(every-pred p)</code></div>
+<div><code>(every-pred p1 p2)</code></div>
+<div><code>(every-pred p1 p2 p3)</code></div>
+<div><code>(every-pred p1 p2 p3 & ps)</code></div>
+</pre>
+  <p class="var-docstr">Takes a set of predicates and returns a function f that returns true if all of its<br>  composing predicates return a logical true value against all of its arguments, else it returns<br>  false. Note that f is short-circuiting in that it will stop execution on the first<br>  argument that triggers a logical false result against the original predicates.</p>
+</li>
+<li>
+  <h2 id="every?">every?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(every? pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if (pred x) is logical true for every x in coll, else<br>  false.</p>
+</li>
+<li>
+  <h2 id="ex-data">ex-data</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ex-data ex)</code></div>
+</pre>
+  <p class="var-docstr">Returns exception data (a map) if ex is an ExInfo.<br>  Otherwise returns nil.</p>
+</li>
+<li>
+  <h2 id="ex-info">ex-info</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ex-info msg map)</code></div>
+<div><code>(ex-info msg map cause)</code></div>
+</pre>
+  <p class="var-docstr">Create an instance of ExInfo, an Error that carries a map of additional data.</p>
+</li>
+<li>
+  <h2 id="false?">false?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(false? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is the value false, false otherwise.</p>
+</li>
+<li>
+  <h2 id="ffirst">ffirst</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ffirst x)</code></div>
+</pre>
+  <p class="var-docstr">Same as (first (first x))</p>
+</li>
+<li>
+  <h2 id="filter">filter</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(filter pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the items in coll for which<br>  (pred item) returns true. pred must be free of side-effects.</p>
+</li>
+<li>
+  <h2 id="filterv">filterv</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(filterv pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a vector of the items in coll for which<br>  (pred item) returns true. pred must be free of side-effects.</p>
+</li>
+<li>
+  <h2 id="find">find</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(find map key)</code></div>
+</pre>
+  <p class="var-docstr">Returns the map entry for key, or nil if key not present.</p>
+</li>
+<li>
+  <h2 id="find-ns">find-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(find-ns sym)</code></div>
+</pre>
+  <p class="var-docstr">Returns the namespace named by the symbol or nil if it doesn't exist.</p>
+</li>
+<li>
+  <h2 id="find-var">find-var</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(find-var sym)</code></div>
+</pre>
+  <p class="var-docstr">Returns the global var named by the namespace-qualified symbol, or<br>  nil if no var with that name.</p>
+</li>
+<li>
+  <h2 id="first">first</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(first coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns the first item in the collection. Calls seq on its<br>         argument. If coll is nil, returns nil.</p>
+</li>
+<li>
+  <h2 id="flatten">flatten</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(flatten x)</code></div>
+</pre>
+  <p class="var-docstr">Takes any nested combination of sequential things (lists, vectors,<br>  etc.) and returns their contents as a single, flat sequence.<br>  (flatten nil) returns an empty sequence.</p>
+</li>
+<li>
+  <h2 id="float?">float?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(float? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is a floating point number</p>
+</li>
+<li>
+  <h2 id="flush">flush</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(flush)</code></div>
+</pre>
+  <p class="var-docstr">Flushes the output stream that is the current value of<br>  *out*</p>
+</li>
+<li>
+  <h2 id="fn">fn</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(fn & sigs)</code></div>
+</pre>
+  <p class="var-docstr">params => positional-params* , or positional-params* & next-param<br>  positional-param => binding-form<br>  next-param => binding-form<br>  name => symbol<br><br>  Defines a function</p>
+</li>
+<li>
+  <h2 id="fn?">fn?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(fn? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is Fn, i.e. is an object created via fn.</p>
+</li>
+<li>
+  <h2 id="fnext">fnext</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(fnext x)</code></div>
+</pre>
+  <p class="var-docstr">Same as (first (next x))</p>
+</li>
+<li>
+  <h2 id="fnil">fnil</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(fnil f x)</code></div>
+<div><code>(fnil f x y)</code></div>
+<div><code>(fnil f x y z)</code></div>
+</pre>
+  <p class="var-docstr">Takes a function f, and returns a function that calls f, replacing<br>  a nil first argument to f with the supplied value x. Higher arity<br>  versions can replace arguments in the second and third<br>  positions (y, z). Note that the function f can take any number of<br>  arguments, not just the one(s) being nil-patched.</p>
+</li>
+<li>
+  <h2 id="for">for</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(for seq-exprs body-expr)</code></div>
+</pre>
+  <p class="var-docstr">List comprehension. Takes a vector of one or more<br>  binding-form/collection-expr pairs, each followed by zero or more<br>  modifiers, and yields a lazy sequence of evaluations of expr.<br>  Collections are iterated in a nested fashion, rightmost fastest,<br>  and nested coll-exprs can refer to bindings created in prior<br>  binding-forms.  Supported modifiers are: :let [binding-form expr ...],<br>  :while test, :when test.<br><br>  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))</p>
+</li>
+<li>
+  <h2 id="force">force</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(force x)</code></div>
+</pre>
+  <p class="var-docstr">If x is a Delay, returns the (possibly cached) value of its expression, else returns x</p>
+</li>
+<li>
+  <h2 id="format">format</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(format fmt & args)</code></div>
+</pre>
+  <p class="var-docstr">Formats a string using fmt.Sprintf</p>
+</li>
+<li>
+  <h2 id="frequencies">frequencies</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(frequencies coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map from distinct items in coll to the number of times<br>  they appear.</p>
+</li>
+<li>
+  <h2 id="gensym">gensym</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(gensym)</code></div>
+<div><code>(gensym prefix-string)</code></div>
+</pre>
+  <p class="var-docstr">Returns a new symbol with a unique name. If a prefix string is<br>  supplied, the name is prefix# where # is some unique number. If<br>  prefix is not supplied, the prefix is 'G__'.</p>
+</li>
+<li>
+  <h2 id="get">get</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(get map key)</code></div>
+<div><code>(get map key not-found)</code></div>
+</pre>
+  <p class="var-docstr">Returns the value mapped to key, not-found or nil if key not present.</p>
+</li>
+<li>
+  <h2 id="get-in">get-in</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(get-in m ks)</code></div>
+<div><code>(get-in m ks not-found)</code></div>
+</pre>
+  <p class="var-docstr">Returns the value in a nested associative structure,<br>  where ks is a sequence of keys. Returns nil if the key<br>  is not present, or the not-found value if supplied.</p>
+</li>
+<li>
+  <h2 id="group-by">group-by</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(group-by f coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the elements of coll keyed by the result of<br>  f on each element. The value at each key will be a vector of the<br>  corresponding elements, in the order they appeared in coll.</p>
+</li>
+<li>
+  <h2 id="hash">hash</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(hash x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the hash code of its argument.</p>
+</li>
+<li>
+  <h2 id="hash-map">hash-map</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(hash-map & keyvals)</code></div>
+</pre>
+  <p class="var-docstr">keyval => key val<br>         Returns a new hash map with supplied mappings.  If any keys are<br>         equal, they are handled as if by repeated uses of assoc.</p>
+</li>
+<li>
+  <h2 id="hash-set">hash-set</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(hash-set & keys)</code></div>
+</pre>
+  <p class="var-docstr">Returns a new hash set with supplied keys.  Any equal keys are<br>         handled as if by repeated uses of conj.</p>
+</li>
+<li>
+  <h2 id="identical?">identical?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(identical? x y)</code></div>
+</pre>
+  <p class="var-docstr">Tests if 2 arguments are the same object</p>
+</li>
+<li>
+  <h2 id="identity">identity</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(identity x)</code></div>
+</pre>
+  <p class="var-docstr">Returns its argument.</p>
+</li>
+<li>
+  <h2 id="if-let">if-let</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(if-let bindings then)</code></div>
+<div><code>(if-let bindings then else & oldform)</code></div>
+</pre>
+  <p class="var-docstr">bindings => binding-form test<br><br>  If test is true, evaluates then with binding-form bound to the value of<br>  test, if not, yields else</p>
+</li>
+<li>
+  <h2 id="if-not">if-not</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(if-not test then)</code></div>
+<div><code>(if-not test then else)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates test. If logical false, evaluates and returns then expr,<br>  otherwise else expr, if supplied, else nil.</p>
+</li>
+<li>
+  <h2 id="if-some">if-some</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(if-some bindings then)</code></div>
+<div><code>(if-some bindings then else & oldform)</code></div>
+</pre>
+  <p class="var-docstr">bindings => binding-form test<br><br>  If test is not nil, evaluates then with binding-form bound to the<br>  value of test, if not, yields else</p>
+</li>
+<li>
+  <h2 id="in-ns">in-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(in-ns name)</code></div>
+</pre>
+  <p class="var-docstr">Sets *ns* to the namespace named by the symbol, creating it if needed.</p>
+</li>
+<li>
+  <h2 id="inc">inc</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(inc x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a number one greater than num. Does not auto-promote<br>  ints, will overflow. See also: inc'</p>
+</li>
+<li>
+  <h2 id="inc'">inc'</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(inc' x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a number one greater than num. Supports arbitrary precision.<br>  See also: inc</p>
+</li>
+<li>
+  <h2 id="instance?">instance?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(instance? c x)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates x and tests if it is an instance of type<br>         c. Returns true or false</p>
+</li>
+<li>
+  <h2 id="int">int</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(int x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to int</p>
+</li>
+<li>
+  <h2 id="integer?">integer?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(integer? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is an integer</p>
+</li>
+<li>
+  <h2 id="interleave">interleave</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(interleave)</code></div>
+<div><code>(interleave c1)</code></div>
+<div><code>(interleave c1 c2)</code></div>
+<div><code>(interleave c1 c2 & colls)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq of the first item in each coll, then the second etc.</p>
+</li>
+<li>
+  <h2 id="intern">intern</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(intern ns name)</code></div>
+<div><code>(intern ns name val)</code></div>
+</pre>
+  <p class="var-docstr">Finds or creates a var named by the symbol name in the namespace<br>  ns (which can be a symbol or a namespace), setting its root binding<br>  to val if supplied. The namespace must exist. The var will adopt any<br>  metadata from the name symbol.  Returns the var.</p>
+</li>
+<li>
+  <h2 id="interpose">interpose</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(interpose sep coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq of the elements of coll separated by sep.<br>  Returns a stateful transducer when no collection is provided.</p>
+</li>
+<li>
+  <h2 id="into">into</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(into to from)</code></div>
+</pre>
+  <p class="var-docstr">Returns a new coll consisting of to-coll with all of the items of<br>  from-coll conjoined.</p>
+</li>
+<li>
+  <h2 id="iterate">iterate</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(iterate f x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects</p>
+</li>
+<li>
+  <h2 id="juxt">juxt</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(juxt f)</code></div>
+<div><code>(juxt f g)</code></div>
+<div><code>(juxt f g h)</code></div>
+<div><code>(juxt f g h & fs)</code></div>
+</pre>
+  <p class="var-docstr">Takes a set of functions and returns a fn that is the juxtaposition<br>  of those fns.  The returned fn takes a variable number of args, and<br>  returns a vector containing the result of applying each fn to the<br>  args (left-to-right).<br>  ((juxt a b c) x) => [(a x) (b x) (c x)]</p>
+</li>
+<li>
+  <h2 id="keep">keep</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(keep f coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the non-nil results of (f item). Note,<br>  this means false return values will be included.  f must be free of<br>  side-effects.</p>
+</li>
+<li>
+  <h2 id="keep-indexed">keep-indexed</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(keep-indexed f coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the non-nil results of (f index item). Note,<br>  this means false return values will be included.  f must be free of<br>  side-effects.</p>
+</li>
+<li>
+  <h2 id="key">key</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(key e)</code></div>
+</pre>
+  <p class="var-docstr">Returns the key of the map entry.</p>
+</li>
+<li>
+  <h2 id="keys">keys</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(keys map)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sequence of the map's keys, in the same order as (seq map).</p>
+</li>
+<li>
+  <h2 id="keyword">keyword</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(keyword name)</code></div>
+<div><code>(keyword ns name)</code></div>
+</pre>
+  <p class="var-docstr">Returns a Keyword with the given namespace and name.  Do not use :<br>  in the keyword strings, it will be added automatically.</p>
+</li>
+<li>
+  <h2 id="keyword?">keyword?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(keyword? x)</code></div>
+</pre>
+  <p class="var-docstr">Return true if x is a Keyword</p>
+</li>
+<li>
+  <h2 id="last">last</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(last coll)</code></div>
+</pre>
+  <p class="var-docstr">Return the last item in coll, in linear time.</p>
+</li>
+<li>
+  <h2 id="lazy-cat">lazy-cat</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(lazy-cat & colls)</code></div>
+</pre>
+  <p class="var-docstr">Expands to code which yields a lazy sequence of the concatenation<br>  of the supplied colls.  Each coll expr is not evaluated until it is<br>  needed.<br><br>  (lazy-cat xs ys zs) === (concat (lazy-seq xs) (lazy-seq ys) (lazy-seq zs))</p>
+</li>
+<li>
+  <h2 id="lazy-seq">lazy-seq</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(lazy-seq & body)</code></div>
+</pre>
+  <p class="var-docstr">Takes a body of expressions that returns an ISeq or nil, and yields<br>  a Seqable object that will invoke the body only the first time seq<br>  is called, and will cache the result and return it on all subsequent<br>  seq calls. See also - realized?</p>
+</li>
+<li>
+  <h2 id="let">let</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(let bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">binding => binding-form init-expr<br><br>  Evaluates the exprs in a lexical context in which the symbols in<br>  the binding-forms are bound to their respective init-exprs or parts<br>  therein.</p>
+</li>
+<li>
+  <h2 id="list">list</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(list & items)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new list containing the items.</p>
+</li>
+<li>
+  <h2 id="list*">list*</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(list* args)</code></div>
+<div><code>(list* a args)</code></div>
+<div><code>(list* a b args)</code></div>
+<div><code>(list* a b c args)</code></div>
+<div><code>(list* a b c d & more)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new list containing the items prepended to the rest, the<br>  last of which will be treated as a sequence.</p>
+</li>
+<li>
+  <h2 id="list?">list?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(list? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a List</p>
+</li>
+<li>
+  <h2 id="load">load</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(load & libs)</code></div>
+</pre>
+  <p class="var-docstr">Loads code from libs.</p>
+</li>
+<li>
+  <h2 id="load-file">load-file</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(load-file f)</code></div>
+</pre>
+  <p class="var-docstr">Loads code from file f</p>
+</li>
+<li>
+  <h2 id="load-string">load-string</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(load-string s)</code></div>
+</pre>
+  <p class="var-docstr">Sequentially read and evaluate the set of forms contained in the<br>  string</p>
+</li>
+<li>
+  <h2 id="loaded-libs">loaded-libs</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(loaded-libs)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sorted set of symbols naming the currently loaded libs</p>
+</li>
+<li>
+  <h2 id="loop">loop</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(loop bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates the exprs in a lexical context in which the symbols in<br>  the binding-forms are bound to their respective init-exprs or parts<br>  therein. Acts as a recur target.</p>
+</li>
+<li>
+  <h2 id="macroexpand">macroexpand</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(macroexpand form)</code></div>
+</pre>
+  <p class="var-docstr">Repeatedly calls macroexpand-1 on form until it no longer<br>  represents a macro form, then returns it.  Note neither<br>  macroexpand-1 nor macroexpand expand macros in subforms.</p>
+</li>
+<li>
+  <h2 id="macroexpand-1">macroexpand-1</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(macroexpand-1 form)</code></div>
+</pre>
+  <p class="var-docstr">If form represents a macro form, returns its expansion, else returns form.</p>
+</li>
+<li>
+  <h2 id="map">map</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(map f coll)</code></div>
+<div><code>(map f c1 c2)</code></div>
+<div><code>(map f c1 c2 c3)</code></div>
+<div><code>(map f c1 c2 c3 & colls)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence consisting of the result of applying f to the<br>  set of first items of each coll, followed by applying f to the set<br>  of second items in each coll, until any one of the colls is<br>  exhausted.  Any remaining items in other colls are ignored. Function<br>  f should accept number-of-colls arguments.</p>
+</li>
+<li>
+  <h2 id="map-indexed">map-indexed</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(map-indexed f coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence consisting of the result of applying f to 0<br>  and the first item of coll, followed by applying f to 1 and the second<br>  item in coll, etc, until coll is exhausted. Thus function f should<br>  accept 2 arguments, index and item.</p>
+</li>
+<li>
+  <h2 id="map?">map?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(map? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a map</p>
+</li>
+<li>
+  <h2 id="mapcat">mapcat</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(mapcat f & colls)</code></div>
+</pre>
+  <p class="var-docstr">Returns the result of applying concat to the result of applying map<br>  to f and colls.  Thus function f should return a collection.</p>
+</li>
+<li>
+  <h2 id="mapv">mapv</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(mapv f coll)</code></div>
+<div><code>(mapv f c1 c2)</code></div>
+<div><code>(mapv f c1 c2 c3)</code></div>
+<div><code>(mapv f c1 c2 c3 & colls)</code></div>
+</pre>
+  <p class="var-docstr">Returns a vector consisting of the result of applying f to the<br>  set of first items of each coll, followed by applying f to the set<br>  of second items in each coll, until any one of the colls is<br>  exhausted.  Any remaining items in other colls are ignored. Function<br>  f should accept number-of-colls arguments.</p>
+</li>
+<li>
+  <h2 id="max">max</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(max x)</code></div>
+<div><code>(max x y)</code></div>
+<div><code>(max x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the greatest of the nums.</p>
+</li>
+<li>
+  <h2 id="max-key">max-key</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(max-key k x)</code></div>
+<div><code>(max-key k x y)</code></div>
+<div><code>(max-key k x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the x for which (k x), a number, is greatest.</p>
+</li>
+<li>
+  <h2 id="memoize">memoize</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(memoize f)</code></div>
+</pre>
+  <p class="var-docstr">Returns a memoized version of a referentially transparent function. The<br>  memoized version of the function keeps a cache of the mapping from arguments<br>  to results and, when calls with the same arguments are repeated often, has<br>  higher performance at the expense of higher memory use.</p>
+</li>
+<li>
+  <h2 id="merge">merge</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(merge & maps)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map that consists of the rest of the maps conj-ed onto<br>  the first.  If a key occurs in more than one map, the mapping from<br>  the latter (left-to-right) will be the mapping in the result.</p>
+</li>
+<li>
+  <h2 id="merge-with">merge-with</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(merge-with f & maps)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map that consists of the rest of the maps conj-ed onto<br>  the first.  If a key occurs in more than one map, the mapping(s)<br>  from the latter (left-to-right) will be combined with the mapping in<br>  the result by calling (f val-in-result val-in-latter).</p>
+</li>
+<li>
+  <h2 id="meta">meta</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(meta obj)</code></div>
+</pre>
+  <p class="var-docstr">Returns the metadata of obj, returns nil if there is no metadata.</p>
+</li>
+<li>
+  <h2 id="min">min</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(min x)</code></div>
+<div><code>(min x y)</code></div>
+<div><code>(min x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the least of the nums.</p>
+</li>
+<li>
+  <h2 id="min-key">min-key</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(min-key k x)</code></div>
+<div><code>(min-key k x y)</code></div>
+<div><code>(min-key k x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the x for which (k x), a number, is least.</p>
+</li>
+<li>
+  <h2 id="mod">mod</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(mod num div)</code></div>
+</pre>
+  <p class="var-docstr">Modulus of num and div. Truncates toward negative infinity.</p>
+</li>
+<li>
+  <h2 id="name">name</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(name x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the name String of a string, symbol or keyword.</p>
+</li>
+<li>
+  <h2 id="namespace">namespace</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(namespace x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the namespace String of a symbol or keyword, or nil if not present.</p>
+</li>
+<li>
+  <h2 id="neg?">neg?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(neg? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if num is less than zero, else false</p>
+</li>
+<li>
+  <h2 id="newline">newline</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(newline)</code></div>
+</pre>
+  <p class="var-docstr">Writes a platform-specific newline to *out*</p>
+</li>
+<li>
+  <h2 id="next">next</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(next coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a seq of the items after the first. Calls seq on its<br>         argument.  If there are no more items, returns nil.</p>
+</li>
+<li>
+  <h2 id="nfirst">nfirst</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nfirst x)</code></div>
+</pre>
+  <p class="var-docstr">Same as (next (first x))</p>
+</li>
+<li>
+  <h2 id="nil?">nil?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nil? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is nil, false otherwise.</p>
+</li>
+<li>
+  <h2 id="nnext">nnext</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nnext x)</code></div>
+</pre>
+  <p class="var-docstr">Same as (next (next x))</p>
+</li>
+<li>
+  <h2 id="not">not</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(not x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is logical false, false otherwise.</p>
+</li>
+<li>
+  <h2 id="not-any?">not-any?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(not-any? pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns false if (pred x) is logical true for any x in coll,<br>         else true.</p>
+</li>
+<li>
+  <h2 id="not-empty">not-empty</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(not-empty coll)</code></div>
+</pre>
+  <p class="var-docstr">If coll is empty, returns nil, else coll</p>
+</li>
+<li>
+  <h2 id="not-every?">not-every?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(not-every? pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns false if (pred x) is logical true for every x in<br>         coll, else true.</p>
+</li>
+<li>
+  <h2 id="not=">not=</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(not= x)</code></div>
+<div><code>(not= x y)</code></div>
+<div><code>(not= x y & more)</code></div>
+</pre>
+  <p class="var-docstr">Same as (not (= obj1 obj2))</p>
+</li>
+<li>
+  <h2 id="ns">ns</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns name docstring? attr-map? references*)</code></div>
+</pre>
+  <p class="var-docstr">Sets *ns* to the namespace named by name (unevaluated), creating it<br>  if needed.  references can be zero or more of:<br>  (:require ...) (:use ...) (:load ...)<br>  with the syntax of require/use/load<br>  respectively, except the arguments are unevaluated and need not be<br>  quoted. Use of ns is preferred to<br>  individual calls to in-ns/require/use:<br><br>  (ns foo.bar<br>    (:require [my.lib1 :as lib1])<br>    (:use [my.lib2]))</p>
+</li>
+<li>
+  <h2 id="ns-aliases">ns-aliases</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-aliases ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the aliases for the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-interns">ns-interns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-interns ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the intern mappings for the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-map">ns-map</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-map ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of all the mappings for the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-name">ns-name</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-name ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns the name of the namespace, a symbol.</p>
+</li>
+<li>
+  <h2 id="ns-publics">ns-publics</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-publics ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the public intern mappings for the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-refers">ns-refers</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-refers ns)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the refer mappings for the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-resolve">ns-resolve</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-resolve ns sym)</code></div>
+<div><code>(ns-resolve ns env sym)</code></div>
+</pre>
+  <p class="var-docstr">Returns the var or type to which a symbol will be resolved in the<br>  namespace (unless found in the environment), else nil.  Note that<br>  if the symbol is fully qualified, the var/Type to which it resolves<br>  need not be present in the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-unalias">ns-unalias</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-unalias ns sym)</code></div>
+</pre>
+  <p class="var-docstr">Removes the alias for the symbol from the namespace.</p>
+</li>
+<li>
+  <h2 id="ns-unmap">ns-unmap</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ns-unmap ns sym)</code></div>
+</pre>
+  <p class="var-docstr">Removes the mappings for the symbol from the namespace.</p>
+</li>
+<li>
+  <h2 id="nth">nth</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nth coll index)</code></div>
+<div><code>(nth coll index not-found)</code></div>
+</pre>
+  <p class="var-docstr">Returns the value at the index. get returns nil if index out of<br>  bounds, nth throws an exception unless not-found is supplied.  nth<br>  also works, in O(n) time, for strings and sequences.</p>
+</li>
+<li>
+  <h2 id="nthnext">nthnext</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nthnext coll n)</code></div>
+</pre>
+  <p class="var-docstr">Returns the nth next of coll, (seq coll) when n is 0.</p>
+</li>
+<li>
+  <h2 id="nthrest">nthrest</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(nthrest coll n)</code></div>
+</pre>
+  <p class="var-docstr">Returns the nth rest of coll, coll when n is 0.</p>
+</li>
+<li>
+  <h2 id="num">num</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(num x)</code></div>
+</pre>
+  <p class="var-docstr">Coerce to Number</p>
+</li>
+<li>
+  <h2 id="number?">number?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(number? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a Number</p>
+</li>
+<li>
+  <h2 id="numerator">numerator</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(numerator r)</code></div>
+</pre>
+  <p class="var-docstr">Returns the numerator part of a Ratio.</p>
+</li>
+<li>
+  <h2 id="odd?">odd?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(odd? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is odd, throws an exception if n is not an integer</p>
+</li>
+<li>
+  <h2 id="or">or</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(or)</code></div>
+<div><code>(or x)</code></div>
+<div><code>(or x & next)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates exprs one at a time, from left to right. If a form<br>  returns a logical true value, or returns that value and doesn't<br>  evaluate any of the other expressions, otherwise it returns the<br>  value of the last expression. (or) returns nil.</p>
+</li>
+<li>
+  <h2 id="partial">partial</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(partial f)</code></div>
+<div><code>(partial f arg1)</code></div>
+<div><code>(partial f arg1 arg2)</code></div>
+<div><code>(partial f arg1 arg2 arg3)</code></div>
+<div><code>(partial f arg1 arg2 arg3 & more)</code></div>
+</pre>
+  <p class="var-docstr">Takes a function f and fewer than the normal arguments to f, and<br>  returns a fn that takes a variable number of additional args. When<br>  called, the returned function calls f with args + additional args.</p>
+</li>
+<li>
+  <h2 id="partition">partition</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(partition n coll)</code></div>
+<div><code>(partition n step coll)</code></div>
+<div><code>(partition n step pad coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of lists of n items each, at offsets step<br>  apart. If step is not supplied, defaults to n, i.e. the partitions<br>  do not overlap. If a pad collection is supplied, use its elements as<br>  necessary to complete last partition upto n items. In case there are<br>  not enough padding elements, return a partition with less than n items.</p>
+</li>
+<li>
+  <h2 id="partition-all">partition-all</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(partition-all n coll)</code></div>
+<div><code>(partition-all n step coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of lists like partition, but may include<br>  partitions with fewer than n items at the end.</p>
+</li>
+<li>
+  <h2 id="partition-by">partition-by</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(partition-by f coll)</code></div>
+</pre>
+  <p class="var-docstr">Applies f to each value in coll, splitting it each time f returns a<br>  new value.  Returns a lazy seq of partitions.</p>
+</li>
+<li>
+  <h2 id="peek">peek</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(peek coll)</code></div>
+</pre>
+  <p class="var-docstr">For a list, same as first, for a vector, same as, but much<br>  more efficient than, last. If the collection is empty, returns nil.</p>
+</li>
+<li>
+  <h2 id="pop">pop</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(pop coll)</code></div>
+</pre>
+  <p class="var-docstr">For a list, returns a new list without the first<br>  item, for a vector, returns a new vector without the last item. If<br>  the collection is empty, throws an exception.  Note - not the same<br>  as next/butlast.</p>
+</li>
+<li>
+  <h2 id="pos?">pos?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(pos? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if num is greater than zero, else false</p>
+</li>
+<li>
+  <h2 id="pr">pr</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(pr & args)</code></div>
+</pre>
+  <p class="var-docstr">Prints the object(s) to the output stream that is the current value<br>         of *out*.  Prints the object(s), separated by spaces if there is<br>         more than one.  By default, pr and prn print in a way that objects<br>         can be read by the reader</p>
+</li>
+<li>
+  <h2 id="pr-str">pr-str</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(pr-str & xs)</code></div>
+</pre>
+  <p class="var-docstr">pr to a string, returning it</p>
+</li>
+<li>
+  <h2 id="print">print</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(print & more)</code></div>
+</pre>
+  <p class="var-docstr">Prints the object(s) to the output stream that is the current value<br>  of *out*.  print and println produce output for human consumption.</p>
+</li>
+<li>
+  <h2 id="print-str">print-str</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(print-str & xs)</code></div>
+</pre>
+  <p class="var-docstr">print to a string, returning it</p>
+</li>
+<li>
+  <h2 id="printf">printf</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(printf fmt & args)</code></div>
+</pre>
+  <p class="var-docstr">Prints formatted output, as per format</p>
+</li>
+<li>
+  <h2 id="println">println</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(println & more)</code></div>
+</pre>
+  <p class="var-docstr">Same as print followed by (newline)</p>
+</li>
+<li>
+  <h2 id="println-str">println-str</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(println-str & xs)</code></div>
+</pre>
+  <p class="var-docstr">println to a string, returning it</p>
+</li>
+<li>
+  <h2 id="prn">prn</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(prn & more)</code></div>
+</pre>
+  <p class="var-docstr">Same as pr followed by (newline). Observes *flush-on-newline*</p>
+</li>
+<li>
+  <h2 id="prn-str">prn-str</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(prn-str & xs)</code></div>
+</pre>
+  <p class="var-docstr">prn to a string, returning it</p>
+</li>
+<li>
+  <h2 id="quot">quot</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(quot num div)</code></div>
+</pre>
+  <p class="var-docstr">quot[ient] of dividing numerator by denominator.</p>
+</li>
+<li>
+  <h2 id="rand">rand</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rand)</code></div>
+<div><code>(rand n)</code></div>
+</pre>
+  <p class="var-docstr">Returns a random floating point number between 0 (inclusive) and<br>  n (default 1) (exclusive).</p>
+</li>
+<li>
+  <h2 id="rand-int">rand-int</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rand-int n)</code></div>
+</pre>
+  <p class="var-docstr">Returns a random integer between 0 (inclusive) and n (exclusive).</p>
+</li>
+<li>
+  <h2 id="rand-nth">rand-nth</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rand-nth coll)</code></div>
+</pre>
+  <p class="var-docstr">Return a random element of the (sequential) collection. Will have<br>  the same performance characteristics as nth for the given<br>  collection.</p>
+</li>
+<li>
+  <h2 id="random-sample">random-sample</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(random-sample prob coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns items from coll with random probability of prob (0.0 -<br>  1.0).</p>
+</li>
+<li>
+  <h2 id="range">range</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(range)</code></div>
+<div><code>(range end)</code></div>
+<div><code>(range start end)</code></div>
+<div><code>(range start end step)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq of nums from start (inclusive) to end<br>  (exclusive), by step, where start defaults to 0, step to 1, and end to<br>  infinity. When step is equal to 0, returns an infinite sequence of<br>  start. When start is equal to end, returns empty list.</p>
+</li>
+<li>
+  <h2 id="ratio?">ratio?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(ratio? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is a Ratio</p>
+</li>
+<li>
+  <h2 id="rational?">rational?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rational? n)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if n is a rational number</p>
+</li>
+<li>
+  <h2 id="re-find">re-find</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(re-find re s)</code></div>
+</pre>
+  <p class="var-docstr">Returns the leftmost regex match, if any, of string to pattern.</p>
+</li>
+<li>
+  <h2 id="re-matches">re-matches</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(re-matches re s)</code></div>
+</pre>
+  <p class="var-docstr">Returns the match, if any, of string to pattern.</p>
+</li>
+<li>
+  <h2 id="re-pattern">re-pattern</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(re-pattern s)</code></div>
+</pre>
+  <p class="var-docstr">Returns an instance of Regex</p>
+</li>
+<li>
+  <h2 id="re-seq">re-seq</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(re-seq re s)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sequence of successive matches of pattern in string</p>
+</li>
+<li>
+  <h2 id="read">read</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(read)</code></div>
+<div><code>(read reader)</code></div>
+</pre>
+  <p class="var-docstr">Reads the next object from reader (defaults to *in*)</p>
+</li>
+<li>
+  <h2 id="read-line">read-line</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(read-line)</code></div>
+</pre>
+  <p class="var-docstr">Reads the next line from *in*.</p>
+</li>
+<li>
+  <h2 id="read-string">read-string</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(read-string s)</code></div>
+</pre>
+  <p class="var-docstr">Reads one object from the string s.</p>
+</li>
+<li>
+  <h2 id="realized?">realized?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(realized? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if a value has been produced for a delay or lazy sequence.</p>
+</li>
+<li>
+  <h2 id="reduce">reduce</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reduce f coll)</code></div>
+<div><code>(reduce f val coll)</code></div>
+</pre>
+  <p class="var-docstr">f should be a function of 2 arguments. If val is not supplied,<br>  returns the result of applying f to the first 2 items in coll, then<br>  applying f to that result and the 3rd item, etc. If coll contains no<br>  items, f must accept no arguments as well, and reduce returns the<br>  result of calling f with no arguments.  If coll has only 1 item, it<br>  is returned and f is not called.  If val is supplied, returns the<br>  result of applying f to val and the first item in coll, then<br>  applying f to that result and the 2nd item, etc. If coll contains no<br>  items, returns val and f is not called.</p>
+</li>
+<li>
+  <h2 id="reduce-kv">reduce-kv</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reduce-kv f init coll)</code></div>
+</pre>
+  <p class="var-docstr">Reduces an associative collection. f should be a function of 3<br>  arguments. Returns the result of applying f to init, the first key<br>  and the first value in coll, then applying f to that result and the<br>  2nd key and value, etc. If coll contains no entries, returns init<br>  and f is not called. Note that reduce-kv is supported on vectors,<br>  where the keys will be the ordinals.</p>
+</li>
+<li>
+  <h2 id="reductions">reductions</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reductions f coll)</code></div>
+<div><code>(reductions f init coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq of the intermediate values of the reduction (as<br>  per reduce) of coll by f, starting with init.</p>
+</li>
+<li>
+  <h2 id="refer">refer</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(refer ns-sym & filters)</code></div>
+</pre>
+  <p class="var-docstr">refers to all public vars of ns, subject to filters.<br>  filters can include at most one each of:<br><br>  :exclude list-of-symbols<br>  :only list-of-symbols<br>  :rename map-of-fromsymbol-tosymbol<br><br>  For each public interned var in the namespace named by the symbol,<br>  adds a mapping from the name of the var to the var to the current<br>  namespace.  Throws an exception if name is already mapped to<br>  something else in the current namespace. Filters can be used to<br>  select a subset, via inclusion or exclusion, or to provide a mapping<br>  to a symbol different from the var's name, in order to prevent<br>  clashes. Use :use in the ns macro in preference to calling this directly.</p>
+</li>
+<li>
+  <h2 id="rem">rem</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rem num div)</code></div>
+</pre>
+  <p class="var-docstr">remainder of dividing numerator by denominator.</p>
+</li>
+<li>
+  <h2 id="remove">remove</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(remove pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the items in coll for which<br>  (pred item) returns false. pred must be free of side-effects.</p>
+</li>
+<li>
+  <h2 id="remove-ns">remove-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(remove-ns sym)</code></div>
+</pre>
+  <p class="var-docstr">Removes the namespace named by the symbol. Use with caution.<br>  Cannot be used to remove the clojure namespace.</p>
+</li>
+<li>
+  <h2 id="repeat">repeat</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(repeat x)</code></div>
+<div><code>(repeat n x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy (infinite!, or length n if supplied) sequence of xs.</p>
+</li>
+<li>
+  <h2 id="repeatedly">repeatedly</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(repeatedly f)</code></div>
+<div><code>(repeatedly n f)</code></div>
+</pre>
+  <p class="var-docstr">Takes a function of no args, presumably with side effects, and<br>  returns an infinite (or length n if supplied) lazy sequence of calls<br>  to it</p>
+</li>
+<li>
+  <h2 id="replace">replace</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(replace smap coll)</code></div>
+</pre>
+  <p class="var-docstr">Given a map of replacement pairs and a vector/collection, returns a<br>  vector/seq with any elements = a key in smap replaced with the<br>  corresponding val in smap.</p>
+</li>
+<li>
+  <h2 id="replace-bindings*">replace-bindings*</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"><div><code>(replace-bindings* binding-map)</code></div>
+</pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="require">require</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(require & args)</code></div>
+</pre>
+  <p class="var-docstr">Loads libs, skipping any that are already loaded. Each argument is<br>  either a libspec that identifies a lib, a prefix list that identifies<br>  multiple libs whose names share a common prefix, or a flag that modifies<br>  how all the identified libs are loaded. Use :require in the ns macro<br>  in preference to calling this directly.<br><br>  Libs<br><br>  A 'lib' is a named set of resources in classpath whose contents define a<br>  library of Clojure code. Lib names are symbols and each lib is associated<br>  with a Clojure namespace and a Java package that share its name. A lib's<br>  name also locates its root directory within classpath using Java's<br>  package name to classpath-relative path mapping. All resources in a lib<br>  should be contained in the directory structure under its root directory.<br>  All definitions a lib makes should be in its associated namespace.<br><br>  'require loads a lib by loading its root resource. The root resource path<br>  is derived from the lib name in the following manner:<br>  Consider a lib named by the symbol 'x.y.z; it has the root directory<br>  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root<br>  resource should contain code to create the lib's namespace (usually by using<br>  the ns macro) and load any additional lib resources.<br><br>  Libspecs<br><br>  A libspec is a lib name or a vector containing a lib name followed by<br>  options expressed as sequential keywords and arguments.<br><br>  Recognized options:<br>  :as takes a symbol as its argument and makes that symbol an alias to the<br>    lib's namespace in the current namespace.<br>  :refer takes a list of symbols to refer from the namespace or the :all<br>    keyword to bring in all public vars.<br><br>  Prefix Lists<br><br>  It's common for Clojure code to depend on several libs whose names have<br>  the same prefix. When specifying libs, prefix lists can be used to reduce<br>  repetition. A prefix list contains the shared prefix followed by libspecs<br>  with the shared prefix removed from the lib names. After removing the<br>  prefix, the names that remain must not contain any periods.<br><br>  Flags<br><br>  A flag is a keyword.<br>  Recognized flags: :reload, :reload-all, :verbose<br>  :reload forces loading of all the identified libs even if they are<br>    already loaded<br>  :reload-all implies :reload and also forces loading of all libs that the<br>    identified libs directly or indirectly load via require or use<br>  :verbose triggers printing information about each load, alias, and refer<br><br>  Example:<br><br>  The following would load the libraries clojure.zip and clojure.set<br>  abbreviated as 's'.<br><br>  (require '(clojure zip [set :as s]))</p>
+</li>
+<li>
+  <h2 id="reset!">reset!</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reset! atom newval)</code></div>
+</pre>
+  <p class="var-docstr">Sets the value of atom to newval without regard for the<br>  current value. Returns newval.</p>
+</li>
+<li>
+  <h2 id="reset-meta!">reset-meta!</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reset-meta! ref metadata-map)</code></div>
+</pre>
+  <p class="var-docstr">Atomically resets the metadata for a namespace/var/atom</p>
+</li>
+<li>
+  <h2 id="resolve">resolve</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(resolve sym)</code></div>
+<div><code>(resolve env sym)</code></div>
+</pre>
+  <p class="var-docstr">Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)</p>
+</li>
+<li>
+  <h2 id="rest">rest</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rest coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a possibly empty seq of the items after the first. Calls seq on its<br>         argument.</p>
+</li>
+<li>
+  <h2 id="reverse">reverse</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reverse coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a seq of the items in coll in reverse order. Not lazy.</p>
+</li>
+<li>
+  <h2 id="reversible?">reversible?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(reversible? coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if coll implements Reversible</p>
+</li>
+<li>
+  <h2 id="rseq">rseq</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(rseq rev)</code></div>
+</pre>
+  <p class="var-docstr">Returns, in constant time, a seq of the items in rev (which<br>  can be a vector or sorted-map), in reverse order. If rev is empty returns nil.</p>
+</li>
+<li>
+  <h2 id="run!">run!</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(run! proc coll)</code></div>
+</pre>
+  <p class="var-docstr">Runs the supplied procedure (via reduce), for purposes of side<br>  effects, on successive items in the collection. Returns nil</p>
+</li>
+<li>
+  <h2 id="second">second</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(second x)</code></div>
+</pre>
+  <p class="var-docstr">Same as (first (next x))</p>
+</li>
+<li>
+  <h2 id="select-keys">select-keys</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(select-keys map keyseq)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map containing only those entries in map whose key is in keys</p>
+</li>
+<li>
+  <h2 id="seq">seq</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(seq coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a seq on the collection. If the collection is<br>         empty, returns nil.  (seq nil) returns nil.</p>
+</li>
+<li>
+  <h2 id="seq?">seq?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(seq? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a sequence</p>
+</li>
+<li>
+  <h2 id="sequence">sequence</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(sequence coll)</code></div>
+</pre>
+  <p class="var-docstr">Coerces coll to a (possibly empty) sequence, if it is not already<br>  one. Will not force a lazy seq. (sequence nil) yields ()</p>
+</li>
+<li>
+  <h2 id="sequential?">sequential?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(sequential? coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if coll implements Sequential</p>
+</li>
+<li>
+  <h2 id="set">set</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(set coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a set of the distinct elements of coll.</p>
+</li>
+<li>
+  <h2 id="set?">set?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(set? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x implements Set</p>
+</li>
+<li>
+  <h2 id="shuffle">shuffle</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(shuffle coll)</code></div>
+</pre>
+  <p class="var-docstr">Return a random permutation of coll</p>
+</li>
+<li>
+  <h2 id="slurp">slurp</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(slurp f)</code></div>
+</pre>
+  <p class="var-docstr">Opens file f and reads all its contents, returning a string.</p>
+</li>
+<li>
+  <h2 id="some">some</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(some pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns the first logical true value of (pred x) for any x in coll,<br>  else nil.  One common idiom is to use a set as pred, for example<br>  this will return :fred if :fred is in the sequence, otherwise nil:<br>  (some #{:fred} coll)</p>
+</li>
+<li>
+  <h2 id="some->">some-></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(some-> expr & forms)</code></div>
+</pre>
+  <p class="var-docstr">When expr is not nil, threads it into the first form (via ->),<br>  and when that result is not nil, through the next etc</p>
+</li>
+<li>
+  <h2 id="some->>">some->></h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(some->> expr & forms)</code></div>
+</pre>
+  <p class="var-docstr">When expr is not nil, threads it into the first form (via ->>),<br>  and when that result is not nil, through the next etc</p>
+</li>
+<li>
+  <h2 id="some-fn">some-fn</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(some-fn p)</code></div>
+<div><code>(some-fn p1 p2)</code></div>
+<div><code>(some-fn p1 p2 p3)</code></div>
+<div><code>(some-fn p1 p2 p3 & ps)</code></div>
+</pre>
+  <p class="var-docstr">Takes a set of predicates and returns a function f that returns the first logical true value<br>  returned by one of its composing predicates against any of its arguments, else it returns<br>  logical false. Note that f is short-circuiting in that it will stop execution on the first<br>  argument that triggers a logical true result against the original predicates.</p>
+</li>
+<li>
+  <h2 id="some?">some?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(some? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is not nil, false otherwise.</p>
+</li>
+<li>
+  <h2 id="sort">sort</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(sort coll)</code></div>
+<div><code>(sort comp coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sorted sequence of the items in coll. If no comparator is<br>  supplied, uses compare.</p>
+</li>
+<li>
+  <h2 id="sort-by">sort-by</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(sort-by keyfn coll)</code></div>
+<div><code>(sort-by keyfn comp coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sorted sequence of the items in coll, where the sort<br>  order is determined by comparing (keyfn item).  If no comparator is<br>  supplied, uses compare.</p>
+</li>
+<li>
+  <h2 id="special-symbol?">special-symbol?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(special-symbol? s)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if s names a special form</p>
+</li>
+<li>
+  <h2 id="spit">spit</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(spit f content)</code></div>
+</pre>
+  <p class="var-docstr">Opposite of slurp.  Opens file f, writes content, then<br>  closes f.</p>
+</li>
+<li>
+  <h2 id="split-at">split-at</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(split-at n coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a vector of [(take n coll) (drop n coll)]</p>
+</li>
+<li>
+  <h2 id="split-with">split-with</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(split-with pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a vector of [(take-while pred coll) (drop-while pred coll)]</p>
+</li>
+<li>
+  <h2 id="str">str</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(str & xs)</code></div>
+</pre>
+  <p class="var-docstr">With no args, returns the empty string. With one arg x, returns<br>         string representation of x. (str nil) returns the empty string. With more than<br>         one arg, returns the concatenation of the str values of the args.</p>
+</li>
+<li>
+  <h2 id="string?">string?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(string? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a String</p>
+</li>
+<li>
+  <h2 id="subs">subs</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(subs s start)</code></div>
+<div><code>(subs s start end)</code></div>
+</pre>
+  <p class="var-docstr">Returns the substring of s beginning at start inclusive, and ending<br>  at end (defaults to length of string), exclusive.</p>
+</li>
+<li>
+  <h2 id="subvec">subvec</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(subvec v start)</code></div>
+<div><code>(subvec v start end)</code></div>
+</pre>
+  <p class="var-docstr">Returns a persistent vector of the items in vector from<br>  start (inclusive) to end (exclusive).  If end is not supplied,<br>  defaults to (count vector). This operation is O(1) and very fast, as<br>  the resulting vector shares structure with the original and no<br>  trimming is done.</p>
+</li>
+<li>
+  <h2 id="swap!">swap!</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(swap! atom f & args)</code></div>
+</pre>
+  <p class="var-docstr">Atomically swaps the value of atom to be:<br>  (apply f current-value-of-atom args).<br>  Returns the value that was swapped in.</p>
+</li>
+<li>
+  <h2 id="symbol">symbol</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(symbol name)</code></div>
+<div><code>(symbol ns name)</code></div>
+</pre>
+  <p class="var-docstr">Returns a Symbol with the given namespace and name.</p>
+</li>
+<li>
+  <h2 id="symbol?">symbol?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(symbol? x)</code></div>
+</pre>
+  <p class="var-docstr">Return true if x is a Symbol</p>
+</li>
+<li>
+  <h2 id="take">take</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(take n coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the first n items in coll, or all items if<br>  there are fewer than n.</p>
+</li>
+<li>
+  <h2 id="take-last">take-last</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(take-last n coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a seq of the last n items in coll.  Depending on the type<br>  of coll may be no better than linear time.  For vectors, see also subvec.</p>
+</li>
+<li>
+  <h2 id="take-nth">take-nth</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(take-nth n coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy seq of every nth item in coll.</p>
+</li>
+<li>
+  <h2 id="take-while">take-while</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(take-while pred coll)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of successive items from coll while<br>  (pred item) returns true. pred must be free of side-effects.</p>
+</li>
+<li>
+  <h2 id="test">test</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(test v)</code></div>
+</pre>
+  <p class="var-docstr">test [v] finds fn at key :test in var metadata and calls it,<br>  presuming failure will throw exception</p>
+</li>
+<li>
+  <h2 id="the-ns">the-ns</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(the-ns x)</code></div>
+</pre>
+  <p class="var-docstr">If passed a namespace, returns it. Else, when passed a symbol,<br>  returns the namespace named by it, throwing an exception if not<br>  found.</p>
+</li>
+<li>
+  <h2 id="time">time</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(time expr)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates expr and prints the time it took.  Returns the value of expr.</p>
+</li>
+<li>
+  <h2 id="trampoline">trampoline</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(trampoline f)</code></div>
+<div><code>(trampoline f & args)</code></div>
+</pre>
+  <p class="var-docstr">trampoline can be used to convert algorithms requiring mutual<br>  recursion without stack consumption. Calls f with supplied args, if<br>  any. If f returns a fn, calls that fn with no arguments, and<br>  continues to repeat, until the return value is not a fn, then<br>  returns that non-fn value. Note that if you want to return a fn as a<br>  final value, you must wrap it in some data structure and unpack it<br>  after trampoline returns.</p>
+</li>
+<li>
+  <h2 id="tree-seq">tree-seq</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(tree-seq branch? children root)</code></div>
+</pre>
+  <p class="var-docstr">Returns a lazy sequence of the nodes in a tree, via a depth-first walk.<br>  branch? must be a fn of one arg that returns true if passed a node<br>  that can have children (but may not).  children must be a fn of one<br>  arg that returns a sequence of the children. Will only be called on<br>  nodes for which branch? returns true. Root is the root node of the<br>  tree.</p>
+</li>
+<li>
+  <h2 id="true?">true?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(true? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is the value true, false otherwise.</p>
+</li>
+<li>
+  <h2 id="type">type</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(type x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the :type metadata of x, or its Type if none</p>
+</li>
+<li>
+  <h2 id="unquote">unquote</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="unquote-splicing">unquote-splicing</h2>
+  <div class="var-type">Type: Object</div>
+  <div class="var-added">Added in: </div>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr"></p>
+</li>
+<li>
+  <h2 id="unsigned-bit-shift-right">unsigned-bit-shift-right</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(unsigned-bit-shift-right x n)</code></div>
+</pre>
+  <p class="var-docstr">Bitwise shift right, without sign-extension.</p>
+</li>
+<li>
+  <h2 id="update">update</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(update m k f)</code></div>
+<div><code>(update m k f x)</code></div>
+<div><code>(update m k f x y)</code></div>
+<div><code>(update m k f x y z)</code></div>
+<div><code>(update m k f x y z & more)</code></div>
+</pre>
+  <p class="var-docstr">'Updates' a value in an associative structure, where k is a<br>  key and f is a function that will take the old value<br>  and any supplied args and return the new value, and returns a new<br>  structure.  If the key does not exist, nil is passed as the old value.</p>
+</li>
+<li>
+  <h2 id="update-in">update-in</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(update-in m [k & ks] f & args)</code></div>
+</pre>
+  <p class="var-docstr">'Updates' a value in a nested associative structure, where ks is a<br>  sequence of keys and f is a function that will take the old value<br>  and any supplied args and return the new value, and returns a new<br>  nested structure.  If any levels do not exist, hash-maps will be<br>  created.</p>
+</li>
+<li>
+  <h2 id="use">use</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(use & args)</code></div>
+</pre>
+  <p class="var-docstr">Like 'require, but also refers to each lib's namespace using<br>  core/refer. Use :use in the ns macro in preference to calling<br>  this directly.<br><br>  'use accepts additional options in libspecs: :exclude, :only, :rename.<br>  The arguments and semantics for :exclude, :only, and :rename are the same<br>  as those documented for core/refer.</p>
+</li>
+<li>
+  <h2 id="val">val</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(val e)</code></div>
+</pre>
+  <p class="var-docstr">Returns the value in the map entry.</p>
+</li>
+<li>
+  <h2 id="vals">vals</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(vals map)</code></div>
+</pre>
+  <p class="var-docstr">Returns a sequence of the map's values, in the same order as (seq map).</p>
+</li>
+<li>
+  <h2 id="var-get">var-get</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(var-get x)</code></div>
+</pre>
+  <p class="var-docstr">Gets the value in the var object</p>
+</li>
+<li>
+  <h2 id="var-set">var-set</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(var-set x val)</code></div>
+</pre>
+  <p class="var-docstr">Sets the value in the var object to val.</p>
+</li>
+<li>
+  <h2 id="var?">var?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(var? v)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if v is of type Var</p>
+</li>
+<li>
+  <h2 id="vary-meta">vary-meta</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(vary-meta obj f & args)</code></div>
+</pre>
+  <p class="var-docstr">Returns an object of the same type and value as obj, with<br>  (apply f (meta obj) args) as its metadata.</p>
+</li>
+<li>
+  <h2 id="vec">vec</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(vec coll)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new vector containing the contents of coll.</p>
+</li>
+<li>
+  <h2 id="vector">vector</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(vector & args)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new vector containing the args.</p>
+</li>
+<li>
+  <h2 id="vector?">vector?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(vector? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if x is a vector</p>
+</li>
+<li>
+  <h2 id="when">when</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(when test & body)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates test. If logical true, evaluates body in an implicit do.</p>
+</li>
+<li>
+  <h2 id="when-first">when-first</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(when-first bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">bindings => x xs<br><br>  Roughly the same as (when (seq xs) (let [x (first xs)] body)) but xs is evaluated only once</p>
+</li>
+<li>
+  <h2 id="when-let">when-let</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(when-let bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">bindings => binding-form test<br><br>  When test is true, evaluates body with binding-form bound to the value of test</p>
+</li>
+<li>
+  <h2 id="when-not">when-not</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(when-not test & body)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates test. If logical false, evaluates body in an implicit do.</p>
+</li>
+<li>
+  <h2 id="when-some">when-some</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(when-some bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">bindings => binding-form test<br><br>  When test is not nil, evaluates body with binding-form bound to the<br>  value of test</p>
+</li>
+<li>
+  <h2 id="while">while</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(while test & body)</code></div>
+</pre>
+  <p class="var-docstr">Repeatedly executes body while test expression is true. Presumes<br>  some side-effect will cause test to become false/nil. Returns nil</p>
+</li>
+<li>
+  <h2 id="with-bindings">with-bindings</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-bindings binding-map & body)</code></div>
+</pre>
+  <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>  Then executes body. Resets the vars back to the original<br>  values after body was evaluated. Returns the value of body.</p>
+</li>
+<li>
+  <h2 id="with-bindings*">with-bindings*</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-bindings* binding-map f & args)</code></div>
+</pre>
+  <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>  Then calls f with the supplied arguments. Resets the vars back to the original<br>  values after f returned. Returns whatever f returns.</p>
+</li>
+<li>
+  <h2 id="with-in-str">with-in-str</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-in-str s & body)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates body in a context in which *in* is bound to a fresh<br>  Buffer initialized with the string s.</p>
+</li>
+<li>
+  <h2 id="with-meta">with-meta</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-meta obj m)</code></div>
+</pre>
+  <p class="var-docstr">Returns an object of the same type and value as obj, with<br>         map m as its metadata.</p>
+</li>
+<li>
+  <h2 id="with-out-str">with-out-str</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-out-str & body)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates exprs in a context in which *out* is bound to a fresh<br>  Buffer.  Returns the string created by any nested printing<br>  calls.</p>
+</li>
+<li>
+  <h2 id="with-redefs">with-redefs</h2>
+  <div class="var-type">Type: Macro</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-redefs bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">The same as binding</p>
+</li>
+<li>
+  <h2 id="with-redefs-fn">with-redefs-fn</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(with-redefs-fn binding-map f & args)</code></div>
+</pre>
+  <p class="var-docstr">The same as with-bindings*</p>
+</li>
+<li>
+  <h2 id="xml-seq">xml-seq</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(xml-seq root)</code></div>
+</pre>
+  <p class="var-docstr">A tree seq on the xml elements as per xml/parse</p>
+</li>
+<li>
+  <h2 id="zero?">zero?</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(zero? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns true if num is zero, else false</p>
+</li>
+<li>
+  <h2 id="zipmap">zipmap</h2>
+  <div class="var-type">Type: Function</div>
+  <div class="var-added">Added in: 1.0</div>
+  <pre class="var-usage"><div><code>(zipmap keys vals)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map with the keys mapped to the corresponding vals.</p>
+</li>
+
+    </ul>
+  </div>
+</body>
+</html>

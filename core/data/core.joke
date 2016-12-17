@@ -948,7 +948,7 @@
 
 (defn integer?
   "Returns true if n is an integer"
-  {:static true}
+  {:added "1.0"}
   [n]
   (or (instance? Int n)
       (instance? BigInt n)))
@@ -2500,6 +2500,7 @@
   :while test, :when test.
 
   (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
+  {:added "1.0"}
   [seq-exprs body-expr]
   (assert-args for
                (vector? seq-exprs) "a vector for its binding"
