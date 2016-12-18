@@ -62,6 +62,7 @@ var sh Proc = func(args []Object) Object {
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("os"))
 
 func intern(name string, proc Proc) {
+	osNamespace.ResetMeta(MakeMeta("Provides a platform-independent interface to operating system functionality.", "1.0"))
 	osNamespace.Intern(MakeSymbol(name)).Value = proc
 }
 

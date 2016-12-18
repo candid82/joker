@@ -24,6 +24,7 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 		Namespaces: make(map[*string]*Namespace),
 	}
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("core"))
+	res.CoreNamespace.meta = MakeMeta("Core library of Joker.", "1.0")
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))

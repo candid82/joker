@@ -8,7 +8,7 @@ Download pre-built [binary executable](https://github.com/candid82/joker/release
 
 ## Documentation
 
-[Core namespace reference](https://candid82.github.io/joker/)
+[Standard library reference](https://candid82.github.io/joker/)
 
 ## Project goals
 

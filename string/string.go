@@ -92,6 +92,7 @@ var replace Proc = func(args []Object) Object {
 }
 
 func init() {
+	stringNamespace.ResetMeta(MakeMeta("Implements simple functions to manipulate strings.", "1.0"))
 	intern("pad-right", padRight)
 	intern("pad-left", padLeft)
 	intern("split", split)

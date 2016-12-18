@@ -11,6 +11,18 @@ body {
   margin: 0;
 }
 
+h1 {
+  margin-bottom: 5px;
+}
+
+a {
+  color: #4c880e;
+}
+
+a:visited {
+  color: #690d3f;
+}
+
 .main {
   max-width: 80%;
   margin: auto;
@@ -53,7 +65,7 @@ ul.index > li > a:hover {
   color: #008cff;
 }
 
-h2 {
+h3 {
   font-size: 1.2rem;
   margin-bottom: 5px;
   padding-top: 15px;
@@ -61,13 +73,20 @@ h2 {
   border-top: solid 1px #ddd;
 }
 
+h2 {
+  border-top: solid 1px #ddd;
+  padding-top: 15px;
+}
+
 .var-type, .var-added {
+  display: inline-block;
   font-size: 0.9rem;
   color: #444;
   line-height: 1.5;
   border: solid 1px #444;
   border-radius: 3px;
-  padding: 4px;
+  padding: 2px 4px;
+  margin-bottom: 20px;
 }
 
 .var-type {
@@ -102,7 +121,7 @@ code {
 
 .var-usage {
   margin-bottom: 0;
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .var-docstr {

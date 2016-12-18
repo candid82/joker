@@ -21,5 +21,6 @@ func internBase64(name string, proc Proc) {
 }
 
 func init() {
+	base64Namespace.ResetMeta(MakeMeta("Implements base64 encoding as specified by RFC 4648.", "1.0"))
 	internBase64("decode-string", base64DecodeString)
 }
