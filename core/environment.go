@@ -24,7 +24,7 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 		Namespaces: make(map[*string]*Namespace),
 	}
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("core"))
-	res.CoreNamespace.meta = MakeMeta("Core library of Joker.", "1.0")
+	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
@@ -36,10 +36,10 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	args := EmptyVector
-	for _, arg := range os.Args {
+	for _, arg := range os.Args[1:] {
 		args = args.Conjoin(String{S: arg})
 	}
-	if args.Count() > 1 {
+	if args.Count() > 0 {
 		res.args.Value = args
 	} else {
 		res.args.Value = NIL

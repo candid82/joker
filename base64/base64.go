@@ -16,11 +16,10 @@ var base64DecodeString Proc = func(args []Object) Object {
 
 var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("base64"))
 
-func internBase64(name string, proc Proc) {
-	base64Namespace.Intern(MakeSymbol(name)).Value = proc
-}
-
 func init() {
-	base64Namespace.ResetMeta(MakeMeta("Implements base64 encoding as specified by RFC 4648.", "1.0"))
-	internBase64("decode-string", base64DecodeString)
+	base64Namespace.ResetMeta(MakeMeta(nil, "Implements base64 encoding as specified by RFC 4648.", "1.0"))
+	base64Namespace.InternVar("decode-string", base64DecodeString,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			"Returns the bytes represented by the base64 string s.", "1.0"))
 }

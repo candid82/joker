@@ -92,12 +92,33 @@ var replace Proc = func(args []Object) Object {
 }
 
 func init() {
-	stringNamespace.ResetMeta(MakeMeta("Implements simple functions to manipulate strings.", "1.0"))
-	intern("pad-right", padRight)
-	intern("pad-left", padLeft)
-	intern("split", split)
-	intern("join", join)
-	intern("ends-with?", endsWith)
-	intern("starts-with?", startsWith)
-	intern("replace", replace)
+	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
+	stringNamespace.InternVar("pad-right", padRight,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
+			"Returns s padded with pad at the end to length n.", "1.0"))
+	stringNamespace.InternVar("pad-left", padLeft,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
+			"Returns s padded with pad at the beginning to length n.", "1.0"))
+	stringNamespace.InternVar("split", split,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("re"))),
+			"Splits string on a regular expression. Returns vector of the splits.", "1.0"))
+	stringNamespace.InternVar("join", join,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("separator"), MakeSymbol("coll"))),
+			"Returns a string of all elements in coll, as returned by (seq coll), separated by a separator.", "1.0"))
+	stringNamespace.InternVar("ends-with?", endsWith,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
+			"True if s ends with substr.", "1.0"))
+	stringNamespace.InternVar("starts-with?", startsWith,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
+			"True if s starts with substr.", "1.0"))
+	stringNamespace.InternVar("replace", replace,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("old"), MakeSymbol("new"))),
+			"Replaces all instances of string old with string new in string s.", "1.0"))
 }

@@ -1329,8 +1329,11 @@ func IsSpecialSymbol(obj Object) bool {
 	}
 }
 
-func MakeMeta(docstring string, added string) Map {
+func MakeMeta(arglists Seq, docstring string, added string) Map {
 	res := EmptyArrayMap()
+	if arglists != nil {
+		res.Add(MakeKeyword("arglists"), arglists)
+	}
 	res.Add(MakeKeyword("doc"), String{S: docstring})
 	res.Add(MakeKeyword("added"), String{S: added})
 	return res

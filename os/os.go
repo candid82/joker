@@ -62,12 +62,22 @@ var sh Proc = func(args []Object) Object {
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("os"))
 
 func intern(name string, proc Proc) {
-	osNamespace.ResetMeta(MakeMeta("Provides a platform-independent interface to operating system functionality.", "1.0"))
 	osNamespace.Intern(MakeSymbol(name)).Value = proc
 }
 
 func init() {
-	intern("env", env)
-	intern("args", args)
-	intern("sh", sh)
+	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
+	osNamespace.InternVar("env", env, MakeMeta(NewListFrom(EmptyVector), "Returns a map representing the environment.", "1.0"))
+	osNamespace.InternVar("args", args,
+		MakeMeta(
+			NewListFrom(EmptyVector),
+			"Returns a sequence of the command line arguments, starting with the program name (normally, joker).", "1.0"))
+	osNamespace.InternVar("sh", sh,
+		MakeMeta(
+			NewListFrom(
+				NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("args"))),
+			`Executes the named program with the given arguments. Returns a map with the following keys:
+			:success - whether or not the execution was successful,
+			:out - string capturing stdout of the program,
+			:err - string capturing stderr of the program.`, "1.0"))
 }

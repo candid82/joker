@@ -44,11 +44,10 @@ var readString Proc = func(args []Object) Object {
 
 var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("json"))
 
-func intern(name string, proc Proc) {
-	jsonNamespace.Intern(MakeSymbol(name)).Value = proc
-}
-
 func init() {
-	jsonNamespace.ResetMeta(MakeMeta("Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
-	intern("read-string", readString)
+	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
+	jsonNamespace.InternVar("read-string", readString,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			"Parses the JSON-encoded data and return the result as a Joker value.", "1.0"))
 }
