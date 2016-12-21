@@ -20,6 +20,7 @@
   [v]
   (cond
     (not (bound? v)) "Object"
+    (:special-form (meta v)) "Special form"
     (:macro (meta v)) "Macro"
     (= Fn (type @v)) "Function"
     (= Proc (type @v)) "Function"
@@ -30,10 +31,14 @@
   (string/replace link-item-template "{name}" k))
 
 (defn usage
-  [k arglists]
-  (let [examples (for [arglist arglists]
-                   (string/replace usage-template "{usage}" (str (apply list k arglist))))]
-    (string/join "" examples)))
+  [k m]
+  (if (:special-form m)
+    (let [examples (for [form (:forms m)]
+                     (string/replace usage-template "{usage}" (str form)))]
+      (string/join "" examples))
+    (let [examples (for [arglist (:arglists m)]
+                     (string/replace usage-template "{usage}" (str (apply list k arglist))))]
+      (string/join "" examples))))
 
 (defn var-doc
   [k v]
@@ -46,7 +51,7 @@
         (string/replace "{id}" k)
         (string/replace "{name}" k)
         (string/replace "{type}" (type-name v))
-        (string/replace "{usage}" (usage k (:arglists m)))
+        (string/replace "{usage}" (usage k m))
         (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
         (string/replace "{added}" (str (:added m)))
         (string/replace

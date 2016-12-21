@@ -105,6 +105,10 @@ h2 {
   background-color: #f8f9f8;
 }
 
+.var-type.Special {
+  background-color: #a5f9b4;
+}
+
 .var-added {
   background-color: #e7fbc8;
 }

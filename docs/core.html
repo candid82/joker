@@ -2214,9 +2214,10 @@
 </li>
 <li>
   <h3 id="fn">fn</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-type Special form">Special form</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(fn & sigs)</code></div>
+  <pre class="var-usage"><div><code>(fn name? [params*] exprs*)</code></div>
+<div><code>(fn name? ([params*] exprs*) +)</code></div>
 </pre>
   <p class="var-docstr">params => positional-params* , or positional-params* & next-param<br>  positional-param => binding-form<br>  next-param => binding-form<br>  name => symbol<br><br>  Defines a function</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2441">source</a>
@@ -2599,9 +2600,9 @@
 </li>
 <li>
   <h3 id="let">let</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-type Special form">Special form</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(let bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(let [bindings*] exprs*)</code></div>
 </pre>
   <p class="var-docstr">binding => binding-form init-expr<br><br>  Evaluates the exprs in a lexical context in which the symbols in<br>  the binding-forms are bound to their respective init-exprs or parts<br>  therein.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2357">source</a>
@@ -2675,9 +2676,9 @@
 </li>
 <li>
   <h3 id="loop">loop</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-type Special form">Special form</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(loop bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(loop [bindings*] exprs*)</code></div>
 </pre>
   <p class="var-docstr">Evaluates the exprs in a lexical context in which the symbols in<br>  the binding-forms are bound to their respective init-exprs or parts<br>  therein. Acts as a recur target.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2466">source</a>
