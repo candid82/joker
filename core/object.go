@@ -1118,7 +1118,7 @@ func (k Keyword) Compare(other Object) int {
 func (k Keyword) Call(args []Object) Object {
 	CheckArity(args, 1, 2)
 	switch m := args[0].(type) {
-	case *ArrayMap:
+	case Map:
 		ok, v := m.Get(k)
 		if ok {
 			return v
