@@ -226,18 +226,17 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	if expr.value != nil {
 		expr.vr.Value = Eval(expr.value, env)
 	}
+	meta := EmptyArrayMap()
+	meta.Add(MakeKeyword("line"), Int{I: expr.line})
+	meta.Add(MakeKeyword("column"), Int{I: expr.column})
+	meta.Add(MakeKeyword("file"), String{S: *expr.filename})
+	expr.vr.meta = meta
 	if expr.meta != nil {
-		expr.vr.meta = Eval(expr.meta, env).(Map)
-	} else {
-		expr.vr.meta = nil
+		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
 	}
 	// isMacro can be set by set-macro* during parse stage
 	if expr.vr.isMacro {
-		if expr.vr.meta == nil {
-			expr.vr.meta = EmptyArrayMap().Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
-		} else {
-			expr.vr.meta = expr.vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
-		}
+		expr.vr.meta = expr.vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
 	}
 	return expr.vr
 }
