@@ -22,9 +22,11 @@ import (
 
 type (
 	Position struct {
-		line     int
-		column   int
-		filename *string
+		endLine     int
+		endColumn   int
+		startLine   int
+		startColumn int
+		filename    *string
 	}
 	Equality interface {
 		Equals(interface{}) bool
@@ -556,9 +558,9 @@ func (exInfo *ExInfo) Error() string {
 		}
 	}
 	if len(exInfo.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("%s:%d:%d: Exception: %s\nStacktrace:\n%s", pos.Filename(), pos.line, pos.column, exInfo.msg.S, exInfo.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: Exception: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, exInfo.msg.S, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("%s:%d:%d: Exception: %s", pos.Filename(), pos.line, pos.column, exInfo.msg.S)
+		return fmt.Sprintf("%s:%d:%d: Exception: %s", pos.Filename(), pos.startLine, pos.startColumn, exInfo.msg.S)
 	}
 }
 

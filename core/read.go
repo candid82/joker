@@ -20,6 +20,10 @@ type (
 		msg      string
 	}
 	ReadFunc func(reader *Reader) Object
+	pos      struct {
+		line   int
+		column int
+	}
 )
 
 const EOF = -1
@@ -37,6 +41,17 @@ func readStub(reader *Reader) Object {
 
 var DATA_READERS = map[*string]ReadFunc{}
 var NIL = Nil{}
+var posStack = make([]pos, 0, 8)
+
+func pushPos(reader *Reader) {
+	posStack = append(posStack, pos{line: reader.line, column: reader.column})
+}
+
+func popPos() pos {
+	p := posStack[len(posStack)-1]
+	posStack = posStack[:len(posStack)-1]
+	return p
+}
 
 func init() {
 	DATA_READERS[MakeSymbol("inst").name] = readStub
@@ -99,7 +114,14 @@ func MakeReadError(reader *Reader, msg string) ReadError {
 }
 
 func MakeReadObject(reader *Reader, obj Object) Object {
-	return obj.WithInfo(&ObjectInfo{Position: Position{line: reader.line, column: reader.column, filename: reader.filename}})
+	p := popPos()
+	return obj.WithInfo(&ObjectInfo{Position: Position{
+		startColumn: p.column,
+		startLine:   p.line,
+		endLine:     reader.line,
+		endColumn:   reader.column,
+		filename:    reader.filename,
+	}})
 }
 
 func DeriveReadObject(base Object, obj Object) Object {
@@ -748,13 +770,16 @@ func readDispatch(reader *Reader) Object {
 	case '"':
 		return readString(reader, true)
 	case '\'':
+		popPos()
 		nextObj := Read(reader)
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, MakeSymbol("var")), nextObj))
 	case '^':
+		popPos()
 		return readWithMeta(reader)
 	case '{':
 		return readSet(reader)
 	case '(':
+		popPos()
 		reader.Unget()
 		ARGS = make(map[int]Symbol)
 		fn := Read(reader)
@@ -762,6 +787,7 @@ func readDispatch(reader *Reader) Object {
 		ARGS = nil
 		return res
 	}
+	popPos()
 	reader.Unget()
 	return readTagged(reader)
 }
@@ -780,6 +806,7 @@ func readWithMeta(reader *Reader) Object {
 func Read(reader *Reader) Object {
 	eatWhitespace(reader)
 	r := reader.Get()
+	pushPos(reader)
 	switch {
 	case r == '\\':
 		return readCharacter(reader)
@@ -807,12 +834,15 @@ func Read(reader *Reader) Object {
 	case r == '/' && isDelimiter(reader.Peek()):
 		return MakeReadObject(reader, MakeSymbol("/"))
 	case r == '\'':
+		popPos()
 		nextObj := Read(reader)
 		return makeQuote(nextObj, MakeSymbol("quote"))
 	case r == '@':
+		popPos()
 		nextObj := Read(reader)
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, MakeSymbol("deref")), nextObj))
 	case r == '~':
+		popPos()
 		if reader.Peek() == '@' {
 			reader.Get()
 			nextObj := Read(reader)
@@ -821,9 +851,11 @@ func Read(reader *Reader) Object {
 		nextObj := Read(reader)
 		return makeQuote(nextObj, MakeSymbol("unquote"))
 	case r == '`':
+		popPos()
 		nextObj := Read(reader)
 		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader)
 	case r == '^':
+		popPos()
 		return readWithMeta(reader)
 	case r == '#':
 		return readDispatch(reader)

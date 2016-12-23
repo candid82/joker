@@ -73,13 +73,13 @@ func (rt *Runtime) stacktrace() string {
 	name := "global"
 	for _, f := range rt.callstack.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, pos.Filename(), pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, pos.Filename(), pos.startLine, pos.startColumn))
 		name = f.traceable.Name()
 		if strings.HasPrefix(name, "#'") {
 			name = name[2:]
 		}
 	}
-	b.WriteString(fmt.Sprintf("  %s %s:%d:%d", name, pos.Filename(), pos.line, pos.column))
+	b.WriteString(fmt.Sprintf("  %s %s:%d:%d", name, pos.Filename(), pos.startLine, pos.startColumn))
 	return b.String()
 }
 
@@ -125,7 +125,7 @@ func (s *Callstack) String() string {
 	var b bytes.Buffer
 	for _, f := range s.frames {
 		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", f.traceable.Name(), pos.Filename(), pos.line, pos.column))
+		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", f.traceable.Name(), pos.Filename(), pos.startLine, pos.startColumn))
 	}
 	if b.Len() > 0 {
 		b.Truncate(b.Len() - 1)
@@ -159,9 +159,9 @@ func (err *EvalError) WithInfo(info *ObjectInfo) Object {
 
 func (err *EvalError) Error() string {
 	if len(err.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("%s:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.Filename(), err.pos.line, err.pos.column, err.msg, err.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.Filename(), err.pos.startLine, err.pos.startColumn, err.msg, err.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("%s:%d:%d: Eval error: %s", err.pos.Filename(), err.pos.line, err.pos.column, err.msg)
+		return fmt.Sprintf("%s:%d:%d: Eval error: %s", err.pos.Filename(), err.pos.startLine, err.pos.startColumn, err.msg)
 	}
 }
 
@@ -227,8 +227,8 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 		expr.vr.Value = Eval(expr.value, env)
 	}
 	meta := EmptyArrayMap()
-	meta.Add(MakeKeyword("line"), Int{I: expr.line})
-	meta.Add(MakeKeyword("column"), Int{I: expr.column})
+	meta.Add(MakeKeyword("line"), Int{I: expr.startLine})
+	meta.Add(MakeKeyword("column"), Int{I: expr.startColumn})
 	meta.Add(MakeKeyword("file"), String{S: *expr.filename})
 	expr.vr.meta = meta
 	if expr.meta != nil {

@@ -290,7 +290,7 @@ func (err ParseError) Error() string {
 	line, column, filename := 0, 0, "<file>"
 	info := err.obj.GetInfo()
 	if info != nil {
-		line, column, filename = info.line, info.column, info.Filename()
+		line, column, filename = info.startLine, info.startColumn, info.Filename()
 	}
 	return fmt.Sprintf("%s:%d:%d: Parse error: %s", filename, line, column, err.msg)
 }
@@ -679,7 +679,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
 			pos := GetPosition(obj)
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty body\n", pos.Filename(), pos.line, pos.column, formName)
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty body\n", pos.Filename(), pos.startLine, pos.startColumn, formName)
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
@@ -784,7 +784,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 }
 
 func reportNotAFunction(pos Position, name string) {
-	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s is not a function\n", pos.Filename(), pos.line, pos.column, name)
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s is not a function\n", pos.Filename(), pos.startLine, pos.startColumn, name)
 }
 
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
@@ -801,7 +801,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return
 	}
-	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.Filename(), pos.line, pos.column, len(call.args), call.name)
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.Filename(), pos.startLine, pos.startColumn, len(call.args), call.name)
 }
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
