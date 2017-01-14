@@ -1,0 +1,12 @@
+(ns tests.symbols-lint
+  (:require [tests.ext1]
+            [tests.ext2 :as ext2]
+            [tests.ext3 :as ext3 :refer [e3]]))
+
+(def f [])
+
+(f 1)
+
+(f1 1)
+
+(tests.ext1/f 1)

@@ -944,6 +944,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	return res
 }
 
+func internFakeSymbol(sym Symbol, ctx *ParseContext) *Var {
+	ns := ""
+	if sym.ns != nil {
+		ns = *sym.ns
+	}
+	return ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
+}
+
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
@@ -961,14 +969,14 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	}
 	vr, ok := ctx.GlobalEnv.Resolve(sym)
 	if !ok {
-		if LINTER_MODE {
-			ns := ""
-			if sym.ns != nil {
-				ns = *sym.ns
-			}
-			vr = ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
-		} else {
+		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+		} else {
+			symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+			if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+				fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+			}
+			vr = internFakeSymbol(sym, ctx)
 		}
 	}
 	return &VarRefExpr{
