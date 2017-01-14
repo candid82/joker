@@ -917,13 +917,18 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
-				switch f := c.vr.Value.(type) {
-				case *Fn:
-					reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos)
-				case Callable:
-					return res
-				default:
-					reportNotAFunction(pos, res.name)
+				require, _ := ctx.GlobalEnv.Resolve(MakeSymbol("core/require"))
+				if c.vr.Equals(require) {
+					Eval(res, nil)
+				} else {
+					switch f := c.vr.Value.(type) {
+					case *Fn:
+						reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos)
+					case Callable:
+						return res
+					default:
+						reportNotAFunction(pos, res.name)
+					}
 				}
 			} else {
 				switch expr := c.vr.expr.(type) {

@@ -163,10 +163,11 @@ func main() {
 	}
 	switch os.Args[1] {
 	case "--read":
-		LINTER_MODE = true
 		processFile(os.Args[2], READ)
 	case "--parse":
 		LINTER_MODE = true
+		lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
+		lm.Value = Bool{B: true}
 		processFile(os.Args[2], PARSE)
 	default:
 		processFile(os.Args[1], EVAL)
