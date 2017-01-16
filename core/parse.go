@@ -980,6 +980,10 @@ func isInteropSymbol(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, ".") || strings.HasSuffix(*sym.name, "."))
 }
 
+func isRecordConstructor(sym Symbol) bool {
+	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
+}
+
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
@@ -1000,7 +1004,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		} else {
-			if !isInteropSymbol(sym) && !ctx.isUnknownCallableScope {
+			if !isInteropSymbol(sym) && !isRecordConstructor(sym) && !ctx.isUnknownCallableScope {
 				symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 				if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
 					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
