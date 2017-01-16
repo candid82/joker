@@ -147,6 +147,13 @@ func repl(phase Phase) {
 	}
 }
 
+func configureLinterMode() {
+	ProcessLinterData()
+	LINTER_MODE = true
+	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
+	lm.Value = Bool{B: true}
+}
+
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("core")))
 	if len(os.Args) == 1 {
@@ -165,9 +172,7 @@ func main() {
 	case "--read":
 		processFile(os.Args[2], READ)
 	case "--parse":
-		LINTER_MODE = true
-		lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
-		lm.Value = Bool{B: true}
+		configureLinterMode()
 		processFile(os.Args[2], PARSE)
 	default:
 		processFile(os.Args[1], EVAL)

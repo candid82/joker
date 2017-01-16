@@ -3,6 +3,8 @@
             [tests.ext2 :as ext2]
             [tests.ext3 :as ext3 :refer [e3]]))
 
+
+
 (def f [])
 
 (f 1)
@@ -16,3 +18,5 @@
 (tt/g 3)
 
 (ext2/g 4)
+
+(defprotocol Person)

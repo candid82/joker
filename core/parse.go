@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"strings"
 	"unsafe"
 )
 
@@ -130,11 +131,12 @@ type (
 		frame    int
 	}
 	ParseContext struct {
-		GlobalEnv      *Env
-		localBindings  *Bindings
-		loopBindings   [][]Symbol
-		recur          bool
-		noRecurAllowed bool
+		GlobalEnv              *Env
+		localBindings          *Bindings
+		loopBindings           [][]Symbol
+		recur                  bool
+		noRecurAllowed         bool
+		isUnknownCallableScope bool
 	}
 )
 
@@ -822,6 +824,15 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
 }
 
+func isUnknownCallable(expr Expr) bool {
+	switch c := expr.(type) {
+	case *VarRefExpr:
+		return c.vr.Value == nil
+	default:
+		return false
+	}
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -899,8 +910,16 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseTry(obj, ctx)
 		}
 	}
+	callable := Parse(first, ctx)
+	if isUnknownCallable(callable) {
+		t := ctx.isUnknownCallableScope
+		ctx.isUnknownCallableScope = true
+		defer func() {
+			ctx.isUnknownCallableScope = t
+		}()
+	}
 	res := &CallExpr{
-		callable: Parse(first, ctx),
+		callable: callable,
 		args:     parseSeq(seq.Rest(), ctx),
 		Position: pos,
 		name:     "fn",
@@ -957,6 +976,10 @@ func internFakeSymbol(sym Symbol, ctx *ParseContext) *Var {
 	return ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
 }
 
+func isInteropSymbol(sym Symbol) bool {
+	return sym.ns == nil && (strings.HasPrefix(*sym.name, ".") || strings.HasSuffix(*sym.name, "."))
+}
+
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
@@ -977,9 +1000,11 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		} else {
-			symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
-			if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-				fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+			if !isInteropSymbol(sym) && !ctx.isUnknownCallableScope {
+				symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+				if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+				}
 			}
 			vr = internFakeSymbol(sym, ctx)
 		}

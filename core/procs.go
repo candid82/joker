@@ -1301,6 +1301,19 @@ func intern(name string, proc Proc) {
 	vr.meta = privateMeta
 }
 
+func processData(data []byte) {
+	currentNamespace := GLOBAL_ENV.ns.Value
+	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
+	reader := bytes.NewReader(data)
+	ProcessReader(NewReader(reader, "<core>"), "", EVAL)
+	GLOBAL_ENV.ns.Value = currentNamespace
+}
+
+func ProcessLinterData() {
+	reader := bytes.NewReader(linterData)
+	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+}
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Bool{B: true},
@@ -1452,9 +1465,5 @@ func init() {
 	intern("index-of*", procIndexOf)
 	intern("lib-path*", procLibPath)
 
-	currentNamespace := GLOBAL_ENV.ns.Value
-	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
-	reader := bytes.NewReader(coreData)
-	ProcessReader(NewReader(reader, "<core>"), "", EVAL)
-	GLOBAL_ENV.ns.Value = currentNamespace
+	processData(coreData)
 }

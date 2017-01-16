@@ -1,0 +1,9 @@
+;; This vars are declared for the linter mode to work properly
+(def ^:private defmulti)
+(def ^:private defmethod)
+(def ^:private defprotocol)
+(def ^:private defrecord)
+(def ^:private defproject)
+(def ^:private derive)
+(def ^:private alter-var-root)
+(def ^:private Exception)
