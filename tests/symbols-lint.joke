@@ -16,3 +16,7 @@
 (defprotocol Person)
 (java.security.Security/tt)
 (Security/hh)
+(Integer/parseInt 10)
+(java.lang.Integer/parseInt 10)
+(instance? Integer 10)
+(instance? java.lang.Integer 10)

@@ -148,10 +148,10 @@ func repl(phase Phase) {
 }
 
 func configureLinterMode() {
-	ProcessLinterData()
 	LINTER_MODE = true
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
 	lm.Value = Bool{B: true}
+	ProcessLinterData()
 }
 
 func main() {

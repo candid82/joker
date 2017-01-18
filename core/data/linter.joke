@@ -3,29 +3,77 @@
 (doseq [sym '(ensure unchecked-remainder-int eduction aset aset-float deftype ->VecNode reduced? chunk-first sorted-map comparator chunk-cons unchecked-float proxy-call-with-super deliver unchecked-subtract file-seq char-array line-seq gen-class with-open conj! class biginteger alter unchecked-add compile .. pcalls refer-clojure memfn struct-map aset-double rsubseq with-loading-context proxy sorted? remove-all-methods unquote-splicing tagged-literal byte-array unchecked-dec sorted-set extend await replicate bound-fn* hash-combine unchecked-inc-int ref-max-history vector-of Throwable->map set-error-handler! underive *print-level* add-watch *verbose-defrecords* aset-short *compile-files* float *math-context* construct-proxy methods agent-error agent-errors ifn? doto bound-fn defstruct print-simple bases aset-byte vswap! struct chunk-buffer chunk-next init-proxy longs unchecked-double await-for into-array future send-off ns-imports seque EMPTY-NODE vreset! char-escape-string defmethod with-local-vars thread-bound? chunk send-via hash-ordered-coll unchecked-byte subseq bytes unchecked-long *print-meta* to-array-2d set-error-mode! map-entry? ancestors set-agent-send-executor! error-handler *suppress-read* update-proxy hash-unordered-coll get-thread-bindings shorts ref-min-history create-struct completing int-array *unchecked-math* ref-set sorted-map-by *fn-loader* *use-context-classloader* await1 *print-length* future-cancel object-array accessor shutdown-agents print-ctor *default-data-reader-fn* areduce definline *compile-path* find-protocol-impl volatile? *print-dup* *compiler-options* unquote release-pending-sends re-matcher *agent* extends? supers byte unreduced floats disj! load-reader bean booleans locking error-mode decimal? set-validator! primitives-classnames *warn-on-reflection* alength restart-agent agent defprotocol send alter-var-root ints ->Eduction mix-collection-hash satisfies? reader-conditional cat bigdec to-array unchecked-subtract-int *allow-unresolved-vars* munge *source-path* extend-protocol unchecked-multiply-int aset-boolean chunk-rest isa? float-array *data-readers* get-method future-cancelled? default-data-readers unchecked-multiply namespace-munge future-done? find-keyword ->VecSeq find-protocol-method *read-eval* extend-type aset-int pmap -cache-protocol-fn ensure-reduced reify *clojure-version* unchecked-int gen-interface unchecked-negate chars defmulti prefer-method unchecked-short class? boolean-array ->ArrayChunk persistent! unchecked-dec-int extenders aset-char future? rationalize print-method remove-watch pop-thread-bindings proxy-name ref push-thread-bindings aget ref-history-count pvalues doubles assoc! get-validator definterface future-call long-array descendants resultset-seq add-classpath short char-name-string unchecked-add-int aclone reduced aset-long make-hierarchy dissoc! set-agent-send-off-executor! unchecked-inc letfn clear-agent-errors reader-conditional? proxy-super unchecked-negate-int volatile! proxy-mappings enumeration-seq amap import short-array transient prefers compare-and-set! transduce unchecked-divide-int clojure-version iterator-seq unchecked-char derive chunk-append with-precision re-groups pop! commute remove-method get-proxy-class dosync method-sig sync sorted-set-by long make-array defrecord ->Vec tagged-literal? promise double-array print-dup parents record? -reset-methods io!)]
   (intern *ns* sym))
 
+(def ^:private defproject)
+
 (core/in-ns 'core)
+
+(defn ^:private conj-import*
+  [v sym]
+  (let [r (conj v sym)
+        parts (string/split (name sym) #"\.")]
+    (if (> (count parts) 1)
+      (conj r (symbol (last parts)))
+      r)))
+
 (defmacro import
   [& import-symbols-or-lists]
   (let [specs (map #(if (and (seq? %) (= 'quote (first %))) (second %) %)
-                   import-symbols-or-lists)]
-    `(do ~@(map #(list 'core/require (list 'quote %))
-                (reduce (fn [v spec]
-                          (if (symbol? spec)
-                            (conj v spec)
-                            (let [p (first spec) cs (rest spec)]
-                              (into (into v cs) (map #(symbol (str p "." %)) cs)))))
-                        [] specs)))))
+                   import-symbols-or-lists)
+        syms (reduce (fn [v spec]
+                       (if (symbol? spec)
+                         (conj-import* v spec)
+                         (let [p (first spec) cs (rest spec)]
+                           (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
+                     [] specs)]
+    `(do
+       ~@(map #(list 'core/require (list 'quote %)) syms)
+       ~@(map #(list 'def %) (remove resolve syms)))))
+
 (core/in-ns 'user)
 
-;; Java stuff
-(def ^:private Exception)
-(def ^:private Throwable)
-(def ^:private NumberFormatException)
-(def ^:private java.lang.Boolean)
-(core/create-ns 'System)
-(core/create-ns 'Integer)
-(core/create-ns 'Math)
+(core/import
+ java.lang.AbstractMethodError                           java.lang.AbstractStringBuilder                         java.lang.Appendable
+ java.lang.ApplicationShutdownHooks                      java.lang.ArithmeticException                           java.lang.ArrayIndexOutOfBoundsException
+ java.lang.ArrayStoreException                           java.lang.AssertionError                                java.lang.AssertionStatusDirectives
+ java.lang.AutoCloseable                                 java.lang.Boolean                                       java.lang.BootstrapMethodError
+ java.lang.Byte                                          java.lang.CharSequence                                  java.lang.Character
+ java.lang.CharacterData                                 java.lang.CharacterData00                               java.lang.CharacterData01
+ java.lang.CharacterData02                               java.lang.CharacterData0E                               java.lang.CharacterDataLatin1
+ java.lang.CharacterDataPrivateUse                       java.lang.CharacterDataUndefined                        java.lang.CharacterName
+ java.lang.Class                                         java.lang.ClassCastException                            java.lang.ClassCircularityError
+ java.lang.ClassFormatError                              java.lang.ClassLoader                                   java.lang.ClassLoaderHelper
+ java.lang.ClassNotFoundException                        java.lang.ClassValue                                    java.lang.CloneNotSupportedException
+ java.lang.Cloneable                                     java.lang.Comparable                                    java.lang.Compiler
+ java.lang.ConditionalSpecialCasing                      java.lang.Deprecated                                    java.lang.Double
+ java.lang.Enum                                          java.lang.EnumConstantNotPresentException               java.lang.Error
+ java.lang.Exception                                     java.lang.ExceptionInInitializerError                   java.lang.Float
+ java.lang.FunctionalInterface                           java.lang.IllegalAccessError                            java.lang.IllegalAccessException
+ java.lang.IllegalArgumentException                      java.lang.IllegalMonitorStateException                  java.lang.IllegalStateException
+ java.lang.IllegalThreadStateException                   java.lang.IncompatibleClassChangeError                  java.lang.IndexOutOfBoundsException
+ java.lang.InheritableThreadLocal                        java.lang.InstantiationError                            java.lang.InstantiationException
+ java.lang.Integer                                       java.lang.InternalError                                 java.lang.InterruptedException
+ java.lang.Iterable                                      java.lang.LinkageError                                  java.lang.Long
+ java.lang.Math                                          java.lang.NegativeArraySizeException                    java.lang.NoClassDefFoundError
+ java.lang.NoSuchFieldError                              java.lang.NoSuchFieldException                          java.lang.NoSuchMethodError
+ java.lang.NoSuchMethodException                         java.lang.NullPointerException                          java.lang.Number
+ java.lang.NumberFormatException                         java.lang.Object                                        java.lang.OutOfMemoryError
+ java.lang.Override                                      java.lang.Package                                       java.lang.Process
+ java.lang.ProcessBuilder                                java.lang.ProcessEnvironment                            java.lang.ProcessImpl
+ java.lang.Readable                                      java.lang.ReflectiveOperationException                  java.lang.Runnable
+ java.lang.Runtime                                       java.lang.RuntimeException                              java.lang.RuntimePermission
+ java.lang.SafeVarargs                                   java.lang.SecurityException                             java.lang.SecurityManager
+ java.lang.Short                                         java.lang.Shutdown                                      java.lang.StackOverflowError
+ java.lang.StackTraceElement                             java.lang.StrictMath                                    java.lang.String
+ java.lang.StringBuffer                                  java.lang.StringBuilder                                 java.lang.StringCoding
+ java.lang.StringIndexOutOfBoundsException               java.lang.SuppressWarnings                              java.lang.System
+ java.lang.SystemClassLoaderAction                       java.lang.Terminator                                    java.lang.Thread
+ java.lang.ThreadDeath                                   java.lang.ThreadGroup                                   java.lang.ThreadLocal
+ java.lang.Throwable                                     java.lang.TypeNotPresentException                       java.lang.UNIXProcess
+ java.lang.UnknownError                                  java.lang.UnsatisfiedLinkError                          java.lang.UnsupportedClassVersionError
+ java.lang.UnsupportedOperationException                 java.lang.VerifyError                                   java.lang.VirtualMachineError
+ java.lang.Void)
+
 
 (core/create-ns 'clojure.edn)
 (core/create-ns 'clojure.string)
-(core/create-ns 'user)
+
