@@ -984,6 +984,11 @@ func isRecordConstructor(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
 }
 
+func isJavaSymbol(sym Symbol) bool {
+	return (sym.ns == nil && strings.HasPrefix(*sym.name, "java.")) ||
+		(sym.ns != nil && strings.HasPrefix(*sym.ns, "java."))
+}
+
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
@@ -1004,7 +1009,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		} else {
-			if !isInteropSymbol(sym) && !isRecordConstructor(sym) && !ctx.isUnknownCallableScope {
+			if !ctx.isUnknownCallableScope && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
 				symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 				if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
 					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})

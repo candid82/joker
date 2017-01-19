@@ -32,48 +32,47 @@
 (core/in-ns 'user)
 
 (core/import
- java.lang.AbstractMethodError                           java.lang.AbstractStringBuilder                         java.lang.Appendable
- java.lang.ApplicationShutdownHooks                      java.lang.ArithmeticException                           java.lang.ArrayIndexOutOfBoundsException
- java.lang.ArrayStoreException                           java.lang.AssertionError                                java.lang.AssertionStatusDirectives
- java.lang.AutoCloseable                                 java.lang.Boolean                                       java.lang.BootstrapMethodError
- java.lang.Byte                                          java.lang.CharSequence                                  java.lang.Character
- java.lang.CharacterData                                 java.lang.CharacterData00                               java.lang.CharacterData01
- java.lang.CharacterData02                               java.lang.CharacterData0E                               java.lang.CharacterDataLatin1
- java.lang.CharacterDataPrivateUse                       java.lang.CharacterDataUndefined                        java.lang.CharacterName
- java.lang.Class                                         java.lang.ClassCastException                            java.lang.ClassCircularityError
- java.lang.ClassFormatError                              java.lang.ClassLoader                                   java.lang.ClassLoaderHelper
- java.lang.ClassNotFoundException                        java.lang.ClassValue                                    java.lang.CloneNotSupportedException
- java.lang.Cloneable                                     java.lang.Comparable                                    java.lang.Compiler
- java.lang.ConditionalSpecialCasing                      java.lang.Deprecated                                    java.lang.Double
- java.lang.Enum                                          java.lang.EnumConstantNotPresentException               java.lang.Error
- java.lang.Exception                                     java.lang.ExceptionInInitializerError                   java.lang.Float
- java.lang.FunctionalInterface                           java.lang.IllegalAccessError                            java.lang.IllegalAccessException
- java.lang.IllegalArgumentException                      java.lang.IllegalMonitorStateException                  java.lang.IllegalStateException
- java.lang.IllegalThreadStateException                   java.lang.IncompatibleClassChangeError                  java.lang.IndexOutOfBoundsException
- java.lang.InheritableThreadLocal                        java.lang.InstantiationError                            java.lang.InstantiationException
- java.lang.Integer                                       java.lang.InternalError                                 java.lang.InterruptedException
- java.lang.Iterable                                      java.lang.LinkageError                                  java.lang.Long
- java.lang.Math                                          java.lang.NegativeArraySizeException                    java.lang.NoClassDefFoundError
- java.lang.NoSuchFieldError                              java.lang.NoSuchFieldException                          java.lang.NoSuchMethodError
- java.lang.NoSuchMethodException                         java.lang.NullPointerException                          java.lang.Number
- java.lang.NumberFormatException                         java.lang.Object                                        java.lang.OutOfMemoryError
- java.lang.Override                                      java.lang.Package                                       java.lang.Process
- java.lang.ProcessBuilder                                java.lang.ProcessEnvironment                            java.lang.ProcessImpl
- java.lang.Readable                                      java.lang.ReflectiveOperationException                  java.lang.Runnable
- java.lang.Runtime                                       java.lang.RuntimeException                              java.lang.RuntimePermission
- java.lang.SafeVarargs                                   java.lang.SecurityException                             java.lang.SecurityManager
- java.lang.Short                                         java.lang.Shutdown                                      java.lang.StackOverflowError
- java.lang.StackTraceElement                             java.lang.StrictMath                                    java.lang.String
- java.lang.StringBuffer                                  java.lang.StringBuilder                                 java.lang.StringCoding
- java.lang.StringIndexOutOfBoundsException               java.lang.SuppressWarnings                              java.lang.System
- java.lang.SystemClassLoaderAction                       java.lang.Terminator                                    java.lang.Thread
- java.lang.ThreadDeath                                   java.lang.ThreadGroup                                   java.lang.ThreadLocal
- java.lang.Throwable                                     java.lang.TypeNotPresentException                       java.lang.UNIXProcess
- java.lang.UnknownError                                  java.lang.UnsatisfiedLinkError                          java.lang.UnsupportedClassVersionError
- java.lang.UnsupportedOperationException                 java.lang.VerifyError                                   java.lang.VirtualMachineError
- java.lang.Void)
+ AbstractMethodError                           AbstractStringBuilder                         Appendable
+ ApplicationShutdownHooks                      ArithmeticException                           ArrayIndexOutOfBoundsException
+ ArrayStoreException                           AssertionError                                AssertionStatusDirectives
+ AutoCloseable                                 Boolean                                       BootstrapMethodError
+ Byte                                          CharSequence                                  Character
+ CharacterData                                 CharacterData00                               CharacterData01
+ CharacterData02                               CharacterData0E                               CharacterDataLatin1
+ CharacterDataPrivateUse                       CharacterDataUndefined                        CharacterName
+ Class                                         ClassCastException                            ClassCircularityError
+ ClassFormatError                              ClassLoader                                   ClassLoaderHelper
+ ClassNotFoundException                        ClassValue                                    CloneNotSupportedException
+ Cloneable                                     Comparable                                    Compiler
+ ConditionalSpecialCasing                      Deprecated                                    Double
+ Enum                                          EnumConstantNotPresentException               Error
+ Exception                                     ExceptionInInitializerError                   Float
+ FunctionalInterface                           IllegalAccessError                            IllegalAccessException
+ IllegalArgumentException                      IllegalMonitorStateException                  IllegalStateException
+ IllegalThreadStateException                   IncompatibleClassChangeError                  IndexOutOfBoundsException
+ InheritableThreadLocal                        InstantiationError                            InstantiationException
+ Integer                                       InternalError                                 InterruptedException
+ Iterable                                      LinkageError                                  Long
+ Math                                          NegativeArraySizeException                    NoClassDefFoundError
+ NoSuchFieldError                              NoSuchFieldException                          NoSuchMethodError
+ NoSuchMethodException                         NullPointerException                          Number
+ NumberFormatException                         Object                                        OutOfMemoryError
+ Override                                      Package                                       Process
+ ProcessBuilder                                ProcessEnvironment                            ProcessImpl
+ Readable                                      ReflectiveOperationException                  Runnable
+ Runtime                                       RuntimeException                              RuntimePermission
+ SafeVarargs                                   SecurityException                             SecurityManager
+ Short                                         Shutdown                                      StackOverflowError
+ StackTraceElement                             StrictMath                                    String
+ StringBuffer                                  StringBuilder                                 StringCoding
+ StringIndexOutOfBoundsException               SuppressWarnings                              System
+ SystemClassLoaderAction                       Terminator                                    Thread
+ ThreadDeath                                   ThreadGroup                                   ThreadLocal
+ Throwable                                     TypeNotPresentException                       UNIXProcess
+ UnknownError                                  UnsatisfiedLinkError                          UnsupportedClassVersionError
+ UnsupportedOperationException                 VerifyError                                   VirtualMachineError
+ Void)
 
-
-(core/create-ns 'clojure.edn)
-(core/create-ns 'clojure.string)
+(doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
+  (create-ns sym))
 
