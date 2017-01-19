@@ -172,6 +172,8 @@ func main() {
 	case "--read":
 		processFile(os.Args[2], READ)
 	case "--parse":
+		processFile(os.Args[2], PARSE)
+	case "--lint":
 		configureLinterMode()
 		processFile(os.Args[2], PARSE)
 	default:

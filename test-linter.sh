@@ -4,7 +4,7 @@ filelist=$(find $1 -type f -name "*.clj")
 
 for f in $filelist
 do
-  ERROR=$(./joker --parse $f 2>&1)
+  ERROR=$(./joker --lint $f 2>&1)
   if [ -n "$ERROR" ]; then
     echo $f
     echo "$ERROR"
