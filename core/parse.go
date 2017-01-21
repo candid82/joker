@@ -833,6 +833,15 @@ func isUnknownCallable(expr Expr) bool {
 	}
 }
 
+func areAllLiteralExprs(exprs []Expr) bool {
+	for _, expr := range exprs {
+		if _, ok := expr.(*LiteralExpr); !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -937,7 +946,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
 				require, _ := ctx.GlobalEnv.Resolve(MakeSymbol("core/require"))
-				if c.vr.Equals(require) {
+				if c.vr.Equals(require) && areAllLiteralExprs(res.args) {
 					Eval(res, nil)
 				} else {
 					switch f := c.vr.Value.(type) {
