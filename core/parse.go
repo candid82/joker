@@ -827,7 +827,7 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 func isUnknownCallable(expr Expr) bool {
 	switch c := expr.(type) {
 	case *VarRefExpr:
-		return c.vr.expr == nil
+		return (c.vr.isMacro && c.vr.Value == nil) || c.vr.expr == nil
 	default:
 		return false
 	}

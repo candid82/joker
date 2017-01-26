@@ -5,7 +5,7 @@
             [spec :as s])
   (:import [java.security Security]))
 
-
+(defmacro test-macro [x])
 
 (def f [])
 (f 1)
@@ -23,3 +23,4 @@
 (f j)
 (f1 1)
 (tt/g 3)
+(test-macro uuu)
