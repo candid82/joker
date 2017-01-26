@@ -1,10 +1,10 @@
 # Joker
 
-Joker is a small interpreted dialect of Clojure written in Go.
+Joker is a small Clojure interpreter and linter written in Go.
 
 ## Getting Started
 
-Download pre-built [binary executable](https://github.com/candid82/joker/releases) for your platform or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension.
+Download pre-built [binary executable](https://github.com/candid82/joker/releases) for your platform or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension. See [Linter mode](#linter-mode) if you want to use Joker as a linter.
 
 ## Documentation
 
@@ -16,7 +16,7 @@ These are high level goals of the project that guide design and implementation d
 
 - Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
-- Provide some tooling for Clojure and its dialects. Joker has linter mode which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
+- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
 ## Project non-goals
@@ -67,6 +67,19 @@ These are high level goals of the project that guide design and implementation d
   1. `ifn?` is called `callable?`
   1. Map entry is represented as a two-element vector.
 
+## Linter mode
+
+To run Joker in linter mode pass `--lint` flag. For example, `joker --lint foo.clj` will run linter for the file `foo.clj`. `joker --lint --` will run linter for standard input. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output. Let's say you have file `test.clj` with the following content:
+```
+(let [a 1])
+```
+Executing the following command `joker --lint test.clj` will produce the following output:
+```
+test.clj:1:1: Parse warning: let form with empty body
+```
+The output format is as follows: `<filename>:<line>:<column> <issue type>: <message>`, where `<issue type` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
+There is [Sublime Text plugin](https://github.com/candid82/SublimeLinter-contrib-joker) that integrates Joker linter with Sublime Text. [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
+Please note that Joker lints code in one file at a time and doesn't try to resolve symbols from external namespaces. Because of that and since it's missing some Clojure features it doesn't always provide accurate linting. In general it tries to be unobtrusive and error on the side of false negatives rather than false positives.
 
 ## Building
 
