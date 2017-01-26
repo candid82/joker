@@ -1,17 +1,16 @@
 (ns tests.symbols-lint
   (:require [tests.ext1]
             [tests.ext2 :as ext2]
-            [tests.ext3 :as ext3 :refer [e3]])
+            [tests.ext3 :as ext3 :refer [e3]]
+            [spec :as s])
   (:import [java.security Security]))
 
 
 
 (def f [])
 (f 1)
-(f1 1)
 (tests.ext1/f 1)
 (e3 1)
-(tt/g 3)
 (ext2/g 4)
 (defprotocol Person)
 (java.security.Security/tt)
@@ -20,3 +19,7 @@
 (java.lang.Integer/parseInt 10)
 (instance? Integer 10)
 (instance? java.lang.Integer 10)
+(s/def :t hh)
+(f j)
+(f1 1)
+(tt/g 3)

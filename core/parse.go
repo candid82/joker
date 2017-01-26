@@ -827,7 +827,7 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 func isUnknownCallable(expr Expr) bool {
 	switch c := expr.(type) {
 	case *VarRefExpr:
-		return c.vr.Value == nil
+		return c.vr.expr == nil
 	default:
 		return false
 	}
@@ -853,8 +853,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	}
 	pos := GetPosition(obj)
 	first := seq.First()
-	switch v := first.(type) {
-	case Symbol:
+	if v, ok := first.(Symbol); ok && v.ns == nil {
 		switch *v.name {
 		case "quote":
 			return NewLiteralExpr(Second(seq))
