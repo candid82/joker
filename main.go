@@ -23,7 +23,7 @@ type (
 	}
 )
 
-const VERSION = "v0.6.0"
+const VERSION = "v0.6.1"
 
 func NewReplContext(env *Env) *ReplContext {
 	first, _ := env.Resolve(MakeSymbol("core/*1"))
