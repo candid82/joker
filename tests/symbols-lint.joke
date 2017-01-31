@@ -25,3 +25,4 @@
 (tt/g 3)
 (test-macro uuu)
 (test-macro (f jj))
+(test-macro (load kk))

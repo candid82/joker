@@ -851,6 +851,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	if seq.IsEmpty() {
 		return NewLiteralExpr(obj)
 	}
+
+	currentIsUnknownCallableScope := ctx.isUnknownCallableScope
+	defer func() {
+		ctx.isUnknownCallableScope = currentIsUnknownCallableScope
+	}()
+
+	ctx.isUnknownCallableScope = false
+
 	pos := GetPosition(obj)
 	first := seq.First()
 	if v, ok := first.(Symbol); ok && v.ns == nil {
@@ -918,13 +926,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseTry(obj, ctx)
 		}
 	}
+
+	ctx.isUnknownCallableScope = currentIsUnknownCallableScope
 	callable := Parse(first, ctx)
+
 	if isUnknownCallable(callable) {
-		t := ctx.isUnknownCallableScope
 		ctx.isUnknownCallableScope = true
-		defer func() {
-			ctx.isUnknownCallableScope = t
-		}()
+	} else {
+		ctx.isUnknownCallableScope = false
 	}
 	res := &CallExpr{
 		callable: callable,
