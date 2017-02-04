@@ -145,7 +145,7 @@
 (defn ns-imports [ns])
 (defn seque ([s]) ([n-or-q s]))
 (defn vreset! [vol newval])
-(defn set! var-symbol expr)
+(defn set! [var-symbol expr])
 (defn thread-bound? [& vars])
 (defn chunk [b])
 (defn send-via [executor a f & args])
@@ -332,6 +332,9 @@
 (def defrecord)
 (def .. )
 (def with-open)
+
+;; Clojure core vars not supported by Joker
+(def *warn-on-reflection*)
 
 ;; Add transducer arity to standard functions
 
