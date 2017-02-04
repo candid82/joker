@@ -18,13 +18,20 @@ import (
 )
 
 type (
-	Phase int
+	Phase   int
+	Dialect int
 )
 
 const (
 	READ Phase = iota
 	PARSE
 	EVAL
+)
+
+const (
+	CLJ Dialect = iota
+	CLJS
+	JOKER
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
@@ -1309,8 +1316,18 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
-func ProcessLinterData() {
-	reader := bytes.NewReader(linterData)
+func ProcessLinterData(dialect Dialect) {
+	if dialect == JOKER {
+		return
+	}
+	reader := bytes.NewReader(linter_cljxData)
+	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	switch dialect {
+	case CLJ:
+		reader = bytes.NewReader(linter_cljData)
+	case CLJS:
+		reader = bytes.NewReader(linter_cljsData)
+	}
 	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
 }
 

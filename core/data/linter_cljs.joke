@@ -1,0 +1,2 @@
+(doseq [sym '(js)]
+  (create-ns sym))

@@ -147,11 +147,11 @@ func repl(phase Phase) {
 	}
 }
 
-func configureLinterMode() {
+func configureLinterMode(dialect Dialect) {
 	LINTER_MODE = true
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
 	lm.Value = Bool{B: true}
-	ProcessLinterData()
+	ProcessLinterData(dialect)
 }
 
 func main() {
@@ -174,7 +174,15 @@ func main() {
 	case "--parse":
 		processFile(os.Args[2], PARSE)
 	case "--lint":
-		configureLinterMode()
+		fallthrough
+	case "--lintclj":
+		configureLinterMode(CLJ)
+		processFile(os.Args[2], PARSE)
+	case "--lintcljs":
+		configureLinterMode(CLJS)
+		processFile(os.Args[2], PARSE)
+	case "--lintjoker":
+		configureLinterMode(JOKER)
 		processFile(os.Args[2], PARSE)
 	default:
 		processFile(os.Args[1], EVAL)
