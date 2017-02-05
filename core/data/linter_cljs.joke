@@ -1,2 +1,9 @@
 (doseq [sym '(js)]
   (create-ns sym))
+
+(core/in-ns 'core)
+
+(def default-data-readers
+  {'js #'core/identity})
+
+(core/in-ns 'user)

@@ -336,6 +336,10 @@
 ;; Clojure core vars not supported by Joker
 (def *warn-on-reflection*)
 
+(def default-data-readers
+  {'inst #'core/identity
+   'uuid #'core/identity})
+
 (core/in-ns 'user)
 
 (core/refer 'core)

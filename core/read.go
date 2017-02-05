@@ -39,7 +39,6 @@ func readStub(reader *Reader) Object {
 	return Read(reader)
 }
 
-var DATA_READERS = map[*string]ReadFunc{}
 var NIL = Nil{}
 var posStack = make([]pos, 0, 8)
 
@@ -51,11 +50,6 @@ func popPos() pos {
 	p := posStack[len(posStack)-1]
 	posStack = posStack[:len(posStack)-1]
 	return p
-}
-
-func init() {
-	DATA_READERS[MakeSymbol("inst").name] = readStub
-	DATA_READERS[MakeSymbol("uuid").name] = readStub
 }
 
 func escapeRune(r rune) string {
@@ -745,20 +739,35 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 	}
 }
 
+func handleNoReaderError(reader *Reader, s Symbol) Object {
+	if LINTER_MODE {
+		filename := "<file>"
+		if reader.filename != nil {
+			filename = *reader.filename
+		}
+		fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
+		return Read(reader)
+	}
+	panic(MakeReadError(reader, "No reader function for tag "+s.ToString(false)))
+}
+
 func readTagged(reader *Reader) Object {
 	obj := Read(reader)
 	switch s := obj.(type) {
 	case Symbol:
-		readFunc := DATA_READERS[s.name]
-		if readFunc == nil {
-			filename := "<file>"
-			if reader.filename != nil {
-				filename = *reader.filename
-			}
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
-			return Read(reader)
+		readersVar, ok := GLOBAL_ENV.CoreNamespace.mappings[MakeSymbol("default-data-readers").name]
+		if !ok {
+			handleNoReaderError(reader, s)
 		}
-		return readFunc(reader)
+		readersMap, ok := readersVar.Value.(Map)
+		if !ok {
+			handleNoReaderError(reader, s)
+		}
+		ok, readFunc := readersMap.Get(s)
+		if !ok {
+			handleNoReaderError(reader, s)
+		}
+		return AssertVar(readFunc, "").Call([]Object{Read(reader)})
 	default:
 		panic(MakeReadError(reader, "Reader tag must be a symbol"))
 	}

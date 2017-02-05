@@ -3830,3 +3830,8 @@
   [proc coll]
   (reduce #(proc %2) nil coll)
   nil)
+
+(def ^{:added "1.0"} default-data-readers
+  "Default map of data reader functions provided by Joker. May be
+  overridden by binding *data-readers*."
+  {})
