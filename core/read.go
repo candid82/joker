@@ -757,15 +757,15 @@ func readTagged(reader *Reader) Object {
 	case Symbol:
 		readersVar, ok := GLOBAL_ENV.CoreNamespace.mappings[MakeSymbol("default-data-readers").name]
 		if !ok {
-			handleNoReaderError(reader, s)
+			return handleNoReaderError(reader, s)
 		}
 		readersMap, ok := readersVar.Value.(Map)
 		if !ok {
-			handleNoReaderError(reader, s)
+			return handleNoReaderError(reader, s)
 		}
 		ok, readFunc := readersMap.Get(s)
 		if !ok {
-			handleNoReaderError(reader, s)
+			return handleNoReaderError(reader, s)
 		}
 		return AssertVar(readFunc, "").Call([]Object{Read(reader)})
 	default:
@@ -877,7 +877,14 @@ func Read(reader *Reader) Object {
 func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(ReadError)
+			switch r.(type) {
+			case *EvalError:
+				err = r.(error)
+			case ReadError:
+				err = r.(error)
+			default:
+				panic(r)
+			}
 		}
 	}()
 	eatWhitespace(reader)

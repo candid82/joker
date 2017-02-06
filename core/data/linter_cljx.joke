@@ -1,5 +1,25 @@
 (core/in-ns 'core)
 
+;; Clojure core macros not supported by Joker
+
+(defn doto [x & forms])
+(defn vswap! [vol f & args])
+(defn areduce [a idx ret init expr])
+(defn locking [x & body])
+(defn amap [a idx ret expr])
+
+(def deftype)
+(def memfn)
+(def defmethod)
+(def defprotocol)
+(def extend-protocol)
+(def extend-type)
+(def reify)
+(def defmulti)
+(def letfn)
+(def defrecord)
+(def .. )
+
 ;; Add transducer arity to standard functions
 
 (def __map__ map)
@@ -130,4 +150,3 @@
 
 (core/in-ns 'user)
 
-(core/refer 'core)

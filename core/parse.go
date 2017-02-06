@@ -954,7 +954,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
 				require, _ := ctx.GlobalEnv.Resolve(MakeSymbol("core/require"))
-				if c.vr.Equals(require) && areAllLiteralExprs(res.args) {
+				if c.vr.Value.Equals(require.Value) && areAllLiteralExprs(res.args) {
 					Eval(res, nil)
 				} else {
 					switch f := c.vr.Value.(type) {
