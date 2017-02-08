@@ -2161,6 +2161,10 @@
 
 (def ^:private fake-var)
 
+(defn ^:private get-refer-opt
+  [opts]
+  (:refer opts))
+
 (defn refer
   "refers to all public vars of ns, subject to filters.
   filters can include at most one each of:
@@ -2183,9 +2187,9 @@
         nspublics (ns-publics ns)
         rename (or (:rename fs) {})
         exclude (set (:exclude fs))
-        to-do (if (= :all (:refer fs))
+        to-do (if (= :all (get-refer-opt fs))
                 (keys nspublics)
-                (or (:refer fs) (:only fs) (keys nspublics)))]
+                (or (get-refer-opt fs) (:only fs) (keys nspublics)))]
     (when (and to-do (not (instance? Sequential to-do)))
       (throw (ex-info ":only/:refer value must be a sequential collection of symbols" {})))
     (doseq [sym to-do]
@@ -2963,6 +2967,9 @@
                *loaded-libs*)]
     (var-set #'*loaded-libs* (reduce conj *loaded-libs* libs))))
 
+(def ^:private require-opt-keys
+  [:exclude :only :rename :refer])
+
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
@@ -2978,7 +2985,7 @@
                (or reload (not require) (not loaded))
                load-one)
         need-ns (or as use)
-        filter-opts (select-keys opts '(:exclude :only :rename :refer))
+        filter-opts (select-keys opts require-opt-keys)
         undefined-on-entry (not (find-ns lib))]
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
@@ -2996,7 +3003,7 @@
         (when *loading-verbosely*
           (printf "(core/alias '%s '%s)\n" as lib))
         (alias as lib))
-      (when (or use (:refer filter-opts))
+      (when (or use (get-refer-opt filter-opts))
         (when *loading-verbosely*
           (printf "(core/refer '%s" lib)
           (doseq [opt filter-opts]

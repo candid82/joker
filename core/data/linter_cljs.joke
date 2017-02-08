@@ -5,6 +5,13 @@
 
 (def require-macros require)
 
+(def ^:private require-opt-keys
+  [:exclude :only :rename :refer :refer-macros])
+
+(defn ^:private get-refer-opt
+  [opts]
+  (seq (concat (:refer opts) (:refer-macros opts))))
+
 (def default-data-readers
   {'js #'core/identity
    'inst #'core/identity
