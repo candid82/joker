@@ -32,6 +32,7 @@ const (
 	CLJ Dialect = iota
 	CLJS
 	JOKER
+	EDN
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
@@ -1317,7 +1318,7 @@ func processData(data []byte) {
 }
 
 func ProcessLinterData(dialect Dialect) {
-	if dialect == JOKER {
+	if dialect == JOKER || dialect == EDN {
 		return
 	}
 	reader := bytes.NewReader(linter_cljxData)

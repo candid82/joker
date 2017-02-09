@@ -29,6 +29,7 @@ type (
 const EOF = -1
 
 var LINTER_MODE bool = false
+var DIALECT Dialect
 
 var (
 	ARGS   map[int]Symbol
@@ -741,11 +742,13 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 
 func handleNoReaderError(reader *Reader, s Symbol) Object {
 	if LINTER_MODE {
-		filename := "<file>"
-		if reader.filename != nil {
-			filename = *reader.filename
+		if DIALECT != EDN {
+			filename := "<file>"
+			if reader.filename != nil {
+				filename = *reader.filename
+			}
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
 		}
-		fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
 		return Read(reader)
 	}
 	panic(MakeReadError(reader, "No reader function for tag "+s.ToString(false)))

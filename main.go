@@ -149,6 +149,7 @@ func repl(phase Phase) {
 
 func configureLinterMode(dialect Dialect) {
 	LINTER_MODE = true
+	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
 	lm.Value = Bool{B: true}
 	ProcessLinterData(dialect)
@@ -184,6 +185,9 @@ func main() {
 	case "--lintjoker":
 		configureLinterMode(JOKER)
 		processFile(os.Args[2], PARSE)
+	case "--lintedn":
+		configureLinterMode(EDN)
+		processFile(os.Args[2], READ)
 	default:
 		processFile(os.Args[1], EVAL)
 	}
