@@ -69,7 +69,7 @@ These are high level goals of the project that guide design and implementation d
 
 ## Linter mode
 
-To run Joker in linter mode pass `--lint` flag. For example, `joker --lint foo.clj` will run linter for the file `foo.clj`. `joker --lint --` will run linter for standard input. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output. Let's say you have file `test.clj` with the following content:
+To run Joker in linter mode pass `--lint<dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `<dialect>` is omitted, `clj` is assumed. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lintcljs --` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
 ```
 (let [a 1])
 ```
