@@ -78,7 +78,8 @@ Executing the following command `joker --lint test.clj` will produce the followi
 test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column> <issue type>: <message>`, where `<issue type` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
-There is [Sublime Text plugin](https://github.com/candid82/SublimeLinter-contrib-joker) that integrates Joker linter with Sublime Text. [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
+
+[Flycheck syntax checker](https://github.com/candid82/flycheck-joker) and [Sublime Text plugin](https://github.com/candid82/SublimeLinter-contrib-joker) integrate Joker linter with Emacs and Sublime Text, respectively. [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
 Please note that Joker lints code in one file at a time and doesn't try to resolve symbols from external namespaces. Because of that and since it's missing some Clojure features it doesn't always provide accurate linting. In general it tries to be unobtrusive and error on the side of false negatives rather than false positives.
 
 ## Building
