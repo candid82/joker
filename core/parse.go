@@ -825,12 +825,28 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 }
 
 func isUnknownCallable(expr Expr) bool {
-	switch c := expr.(type) {
-	case *VarRefExpr:
-		return (c.vr.isMacro && c.vr.Value == nil) || c.vr.expr == nil
-	default:
+	if !LINTER_MODE {
 		return false
 	}
+	if c, ok := expr.(*VarRefExpr); ok {
+		if c.vr.isMacro {
+			return true
+		}
+		if c.vr.expr != nil && c.vr.Value == nil {
+			return false
+		}
+		knownMacros, ok := GLOBAL_ENV.Resolve(MakeSymbol("core/*known-macros*"))
+		if !ok {
+			return false
+		}
+		sym := c.vr.name
+		if c.vr.ns != GLOBAL_ENV.CoreNamespace {
+			sym = MakeSymbol(*c.vr.name.name)
+		}
+		ok, _ = knownMacros.Value.(Set).Get(sym)
+		return ok
+	}
+	return false
 }
 
 func areAllLiteralExprs(exprs []Expr) bool {
@@ -985,12 +1001,16 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	return res
 }
 
-func internFakeSymbol(sym Symbol, ctx *ParseContext) *Var {
-	ns := ""
-	if sym.ns != nil {
-		ns = *sym.ns
+func InternFakeSymbol(ns *string, sym *string) *Var {
+	name := *sym
+	if ns != nil {
+		name = *ns + "/" + *sym
 	}
-	return ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
+	fakeSym := Symbol{
+		ns:   nil,
+		name: STRINGS.Intern(name),
+	}
+	return GLOBAL_ENV.CurrentNamespace().Intern(fakeSym)
 }
 
 func isInteropSymbol(sym Symbol) bool {
@@ -1026,13 +1046,17 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		} else {
+			symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 			if !ctx.isUnknownCallableScope && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
-				symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 				if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
 					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 				}
 			}
-			vr = internFakeSymbol(sym, ctx)
+			var nsName *string
+			if symNs != nil && symNs != ctx.GlobalEnv.CurrentNamespace() {
+				nsName = symNs.Name.name
+			}
+			vr = InternFakeSymbol(nsName, sym.name)
 		}
 	}
 	return &VarRefExpr{

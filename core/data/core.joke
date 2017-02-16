@@ -2159,11 +2159,24 @@
                                       (= ns (var-ns* v))))
                 (ns-map ns))))
 
-(def ^:private fake-var)
-
 (defn ^:private get-refer-opt
   [opts]
   (:refer opts))
+
+(defn intern
+  "Finds or creates a var named by the symbol name in the namespace
+  ns (which can be a symbol or a namespace), setting its root binding
+  to val if supplied. The namespace must exist. The var will adopt any
+  metadata from the name symbol.  Returns the var."
+  {:added "1.0"}
+  ([ns ^Symbol name]
+   (let [v (intern* (the-ns ns) name)]
+     (when (meta name) (set-meta* v (meta name)))
+     v))
+  ([ns name val]
+   (let [v (intern* (the-ns ns) name val)]
+     (when (meta name) (set-meta* v (meta name)))
+     v)))
 
 (defn refer
   "refers to all public vars of ns, subject to filters.
@@ -2201,7 +2214,7 @@
                       (str sym " is not public")
                       (str sym " does not exist"))
                     {})))
-          (refer* *ns* (or (rename sym) sym) (or v #'fake-var)))))))
+          (refer* *ns* (or (rename sym) sym) (or v (intern-fake-var* ns-sym sym))))))))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
@@ -3283,21 +3296,6 @@
        ret)))
   ([f & args]
    (trampoline #(apply f args))))
-
-(defn intern
-  "Finds or creates a var named by the symbol name in the namespace
-  ns (which can be a symbol or a namespace), setting its root binding
-  to val if supplied. The namespace must exist. The var will adopt any
-  metadata from the name symbol.  Returns the var."
-  {:added "1.0"}
-  ([ns ^Symbol name]
-   (let [v (intern* (the-ns ns) name)]
-     (when (meta name) (set-meta* v (meta name)))
-     v))
-  ([ns name val]
-   (let [v (intern* (the-ns ns) name val)]
-     (when (meta name) (set-meta* v (meta name)))
-     v)))
 
 (defmacro while
   "Repeatedly executes body while test expression is true. Presumes

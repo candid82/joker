@@ -1161,13 +1161,13 @@ func (rx Regex) Hash() uint32 {
 }
 
 func (s Symbol) ToString(escape bool) string {
-	return s.Name()
-}
-
-func (s Symbol) Name() string {
 	if s.ns != nil {
 		return *s.ns + "/" + *s.name
 	}
+	return *s.name
+}
+
+func (s Symbol) Name() string {
 	return *s.name
 }
 

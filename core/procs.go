@@ -1260,6 +1260,12 @@ var procLibPath Proc = func(args []Object) Object {
 	return String{S: path + ".joke"}
 }
 
+var procInternFakeVar Proc = func(args []Object) Object {
+	nsSym := EnsureSymbol(args, 0)
+	sym := EnsureSymbol(args, 1)
+	return InternFakeSymbol(nsSym.name, sym.name)
+}
+
 func ProcessReader(reader *Reader, filename string, phase Phase) {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1482,6 +1488,7 @@ func init() {
 
 	intern("index-of*", procIndexOf)
 	intern("lib-path*", procLibPath)
+	intern("intern-fake-var*", procInternFakeVar)
 
 	processData(coreData)
 }

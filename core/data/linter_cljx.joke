@@ -1,5 +1,9 @@
 (core/in-ns 'core)
 
+(def *known-macros*
+  #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
+    'clojure.test/deftest})
+
 ;; Clojure core macros not supported by Joker
 
 (defn doto [x & forms])

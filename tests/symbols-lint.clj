@@ -2,12 +2,16 @@
   (:require [tests.ext1]
             [tests.ext2 :as ext2]
             [tests.ext3 :as ext3 :refer [e3]]
-            [spec :as s])
+            [spec :as s]
+            [clojure.test :refer [testing]])
   (:import [java.security Security]))
+
+;; Should PASS
 
 (defmacro test-macro [x])
 
 (def f [])
+
 (f 1)
 (tests.ext1/f 1)
 (e3 1)
@@ -19,10 +23,21 @@
 (java.lang.Integer/parseInt 10)
 (instance? Integer 10)
 (instance? java.lang.Integer 10)
+(test-macro uuu)
+(defrecord u5)
+(defmethod u6)
+(clojure.test/deftest u7)
+
+
+;; Should FAIL
+
 (s/def :t hh)
-(f j)
+(f jj/u1)
+(f u8)
 (f1 1)
 (tt/g 3)
-(test-macro uuu)
-(test-macro (f jj))
-(test-macro (load kk))
+(test-macro (f u2))
+(test-macro (load u3))
+(test-macro (ext2/f u4))
+(testing u8)
+
