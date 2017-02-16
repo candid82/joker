@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	_ "github.com/candid82/joker/base64"
 	. "github.com/candid82/joker/core"
@@ -155,6 +156,18 @@ func configureLinterMode(dialect Dialect) {
 	ProcessLinterData(dialect)
 }
 
+func detectDialect(filename string) Dialect {
+	switch {
+	case strings.HasSuffix(filename, ".edn"):
+		return EDN
+	case strings.HasSuffix(filename, ".cljs"):
+		return CLJS
+	case strings.HasSuffix(filename, ".joke"):
+		return JOKER
+	}
+	return CLJ
+}
+
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("core")))
 	if len(os.Args) == 1 {
@@ -175,7 +188,13 @@ func main() {
 	case "--parse":
 		processFile(os.Args[2], PARSE)
 	case "--lint":
-		fallthrough
+		dialect := detectDialect(os.Args[2])
+		configureLinterMode(dialect)
+		if dialect == EDN {
+			processFile(os.Args[2], READ)
+		} else {
+			processFile(os.Args[2], PARSE)
+		}
 	case "--lintclj":
 		configureLinterMode(CLJ)
 		processFile(os.Args[2], PARSE)
