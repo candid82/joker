@@ -1,8 +1,14 @@
 (core/in-ns 'core)
 
+(def *linter-config*
+  (try
+    (read-string (slurp (str (get (os/env) "HOME") "/.joker")))
+    (catch Error e {})))
+
 (def *known-macros*
   #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
-    'clojure.test/deftest})
+    'clojure.test/deftest 'clojure.test/is 'clojure.test/are 'clojure.core.async/go-loop
+    'clojure.core.async/alt! 'clojure.core.async/alt!! 'clojure.core.async/alts! 'clojure.core.async/alts!!})
 
 ;; Clojure core macros not supported by Joker
 

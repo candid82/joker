@@ -317,10 +317,12 @@
 (def with-open)
 
 (def *known-macros*
-  (core/conj
+  (apply
+   core/conj
    *known-macros*
    'proxy 'defstruct 'with-local-vars 'definline 'gen-interface 'definterface 'proxy-super 'with-open
-   'defproject))
+   'defproject
+   (:known-macros core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
 (def *warn-on-reflection*)

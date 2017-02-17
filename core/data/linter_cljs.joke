@@ -337,6 +337,12 @@
 (defn bytes [x])
 (defn compare-symbols [a b])
 
+(def *known-macros*
+  (apply
+   core/conj
+   *known-macros*
+   (:known-macros core/*linter-config*)))
+
 (core/in-ns 'user)
 
 (core/refer 'core)

@@ -832,16 +832,16 @@ func isUnknownCallable(expr Expr) bool {
 		if c.vr.isMacro {
 			return true
 		}
-		if c.vr.expr != nil && c.vr.Value == nil {
+		if c.vr.expr != nil {
 			return false
+		}
+		sym := MakeSymbol(*c.vr.name.name)
+		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
+			return true
 		}
 		knownMacros, ok := GLOBAL_ENV.Resolve(MakeSymbol("core/*known-macros*"))
 		if !ok {
 			return false
-		}
-		sym := c.vr.name
-		if c.vr.ns != GLOBAL_ENV.CoreNamespace {
-			sym = MakeSymbol(*c.vr.name.name)
 		}
 		ok, _ = knownMacros.Value.(Set).Get(sym)
 		return ok
