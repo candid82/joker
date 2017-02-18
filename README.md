@@ -59,17 +59,17 @@ These are high level goals of the project that guide design and implementation d
 1. Joker is single-threaded with no support for concurrency or parallelism. Therefore no refs, agents, futures, promises, locks, volatiles, transactions, `p*` functions that use multiple threads. Vars always have just one "root" binding.
 1. The following features are not implemented: protocols, records, structmaps, multimethods, chunked seqs, transients, tagged literals and reader conditionals, unchecked arithmetics, primitive arrays, custom data readers, transducers, validators and watch functions for vars and atoms, hierarchies, sorted maps and sets.
 1. Unrelated to the features listed above, the following function from clojure.core namespace are not currently implemented but will probably be implemented in some form in the future: `subseq`, `iterator-seq`, `reduced?`, `reduced`, `mix-collection-hash`, `definline`, `re-groups`, `hash-ordered-coll`, `enumeration-seq`, `compare-and-set!`, `rationalize`, `clojure-version`, `load-reader`, `find-keyword`, `comparator`, `letfn`, `resultset-seq`, `line-seq`, `file-seq`, `sorted?`, `ensure-reduced`, `rsubseq`, `pr-on`, `seque`, `alter-var-root`, `hash-unordered-coll`, `re-matcher`, `unreduced`.
-1. Built-in namespaces don't have `clojure` or `joker` prefix. The core namespace is called `core`. Other namespaces (`string`, `json`, `os`) are in their infancy.
+1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other namespaces (`joker.string`, `joker.json`, `joker.os`, `joker.base64`) are in their infancy.
 1. Miscellaneous:
   1. `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
-  1. `refer-clojure` is not a thing. Use `(core/refer 'core)` instead if you really need to.
+  1. `refer-clojure` is not a thing. Use `(joker.core/refer 'joker.core)` instead if you really need to.
   1. `slurp` only takes one argument - a filename (string). No options are supported.
   1. `ifn?` is called `callable?`
   1. Map entry is represented as a two-element vector.
 
 ## Linter mode
 
-To run Joker in linter mode pass `--lint<dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `<dialect>` is omitted, `clj` is assumed. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lintcljs --` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
+To run Joker in linter mode pass `--lint<dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `<dialect>` is omitted, it will be set based on file extenstion. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lintcljs --` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
 ```
 (let [a 1])
 ```
