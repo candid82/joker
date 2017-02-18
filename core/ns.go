@@ -127,3 +127,7 @@ func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 	}
 	ns.aliases[alias.name] = namespace
 }
+
+func (ns *Namespace) Resolve(name string) *Var {
+	return ns.mappings[STRINGS.Intern(name)]
+}

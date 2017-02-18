@@ -839,8 +839,8 @@ func isUnknownCallable(expr Expr) bool {
 		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
 			return true
 		}
-		knownMacros, ok := GLOBAL_ENV.Resolve(MakeSymbol("core/*known-macros*"))
-		if !ok {
+		knownMacros := GLOBAL_ENV.CoreNamespace.Resolve("*known-macros*")
+		if knownMacros == nil {
 			return false
 		}
 		ok, _ = knownMacros.Value.(Set).Get(sym)
@@ -969,7 +969,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
-				require, _ := ctx.GlobalEnv.Resolve(MakeSymbol("core/require"))
+				require := ctx.GlobalEnv.CoreNamespace.Resolve("require")
 				if c.vr.Value.Equals(require.Value) && areAllLiteralExprs(res.args) {
 					Eval(res, nil)
 				} else {
