@@ -27,10 +27,10 @@ type (
 const VERSION = "v0.6.2"
 
 func NewReplContext(env *Env) *ReplContext {
-	first, _ := env.Resolve(MakeSymbol("core/*1"))
-	second, _ := env.Resolve(MakeSymbol("core/*2"))
-	third, _ := env.Resolve(MakeSymbol("core/*3"))
-	exc, _ := env.Resolve(MakeSymbol("core/*e"))
+	first, _ := env.Resolve(MakeSymbol("joker.core/*1"))
+	second, _ := env.Resolve(MakeSymbol("joker.core/*2"))
+	third, _ := env.Resolve(MakeSymbol("joker.core/*3"))
+	exc, _ := env.Resolve(MakeSymbol("joker.core/*e"))
 	first.Value = NIL
 	second.Value = NIL
 	third.Value = NIL
@@ -151,7 +151,7 @@ func repl(phase Phase) {
 func configureLinterMode(dialect Dialect) {
 	LINTER_MODE = true
 	DIALECT = dialect
-	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("core/*linter-mode*"))
+	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Bool{B: true}
 	ProcessLinterData(dialect)
 }
@@ -169,7 +169,7 @@ func detectDialect(filename string) Dialect {
 }
 
 func main() {
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("core")))
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	if len(os.Args) == 1 {
 		repl(EVAL)
 		return

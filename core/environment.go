@@ -23,7 +23,7 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
 	}
-	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("core"))
+	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("joker.core"))
 	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
@@ -101,7 +101,7 @@ func (env *Env) RemoveNamespace(s Symbol) *Namespace {
 	if s.ns != nil {
 		return nil
 	}
-	if s.Equals(MakeSymbol("core")) {
+	if s.Equals(MakeSymbol("joker.core")) {
 		panic(RT.NewError("Cannot remove core namespace"))
 	}
 	ns := env.Namespaces[s.name]

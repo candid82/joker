@@ -1,3 +1,5 @@
+(alias 'string 'joker.string)
+
 (def index-template
   (slurp "templates/index.html"))
 

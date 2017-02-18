@@ -1,8 +1,8 @@
-(core/in-ns 'core)
+(joker.core/in-ns 'joker.core)
 
 (def *linter-config*
   (try
-    (read-string (slurp (str (get (os/env) "HOME") "/.joker")))
+    (read-string (slurp (str (get (joker.os/env) "HOME") "/.joker")))
     (catch Error e {})))
 
 (def *known-macros*
@@ -158,5 +158,5 @@
   ([xform coll])
   ([xform coll & colls]))
 
-(core/in-ns 'user)
+(joker.core/in-ns 'user)
 

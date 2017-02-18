@@ -94,7 +94,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 		return newVar
 	}
 	if existingVar.ns != ns {
-		if existingVar.ns.Name.Equals(MakeSymbol("core")) {
+		if existingVar.ns.Name.Equals(MakeSymbol("joker.core")) {
 			newVar := &Var{
 				ns:   ns,
 				name: sym,

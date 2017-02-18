@@ -1319,7 +1319,7 @@ func processData(data []byte) {
 	currentNamespace := GLOBAL_ENV.ns.Value
 	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
 	reader := bytes.NewReader(data)
-	ProcessReader(NewReader(reader, "<core>"), "", EVAL)
+	ProcessReader(NewReader(reader, "<joker.core>"), "", EVAL)
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 

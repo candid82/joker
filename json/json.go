@@ -42,7 +42,7 @@ var readString Proc = func(args []Object) Object {
 	return toObject(v)
 }
 
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("json"))
+var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
 func init() {
 	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))

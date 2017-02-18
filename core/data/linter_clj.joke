@@ -2,12 +2,12 @@
 
 (def ^:private defproject)
 
-(core/in-ns 'core)
+(joker.core/in-ns 'joker.core)
 
 (defn ^:private conj-import*
   [v sym]
   (let [r (conj v sym)
-        parts (string/split (name sym) #"\.")]
+        parts (joker.string/split (name sym) #"\.")]
     (if (> (count parts) 1)
       (conj r (symbol (last parts)))
       r)))
@@ -23,12 +23,12 @@
                            (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
                      [] specs)]
     `(do
-       ~@(map #(list 'core/require (list 'quote %)) syms)
+       ~@(map #(list 'joker.core/require (list 'quote %)) syms)
        ~@(map #(list 'def %) (remove resolve syms)))))
 
-(core/in-ns 'user)
+(joker.core/in-ns 'user)
 
-(core/import
+(joker.core/import
  AbstractMethodError                           AbstractStringBuilder                         Appendable
  ApplicationShutdownHooks                      ArithmeticException                           ArrayIndexOutOfBoundsException
  ArrayStoreException                           AssertionError                                AssertionStatusDirectives
@@ -73,7 +73,7 @@
 (doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
   (create-ns sym))
 
-(core/in-ns 'core)
+(joker.core/in-ns 'joker.core)
 
 ;; Clojure core functions not supported by Joker
 
@@ -318,20 +318,20 @@
 
 (def *known-macros*
   (apply
-   core/conj
+   joker.core/conj
    *known-macros*
    'proxy 'defstruct 'with-local-vars 'definline 'gen-interface 'definterface 'proxy-super 'with-open
    'defproject
-   (:known-macros core/*linter-config*)))
+   (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
 (def *warn-on-reflection*)
 
 (def default-data-readers
-  {'inst #'core/identity
-   'uuid #'core/identity})
+  {'inst #'joker.core/identity
+   'uuid #'joker.core/identity})
 
-(core/in-ns 'user)
+(joker.core/in-ns 'user)
 
-(core/refer 'core)
+(joker.core/refer 'joker.core)
 

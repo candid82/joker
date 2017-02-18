@@ -1,7 +1,7 @@
 (doseq [sym '(js)]
   (create-ns sym))
 
-(core/in-ns 'core)
+(joker.core/in-ns 'joker.core)
 
 (def require-macros require)
 
@@ -13,10 +13,10 @@
   (seq (concat (:refer opts) (:refer-macros opts))))
 
 (def default-data-readers
-  {'js #'core/identity
-   'inst #'core/identity
-   'uuid #'core/identity
-   'queue #'core/identity})
+  {'js #'joker.core/identity
+   'inst #'joker.core/identity
+   'uuid #'joker.core/identity
+   'queue #'joker.core/identity})
 
 ;; ClojureScript core functions not supported by Joker
 
@@ -339,11 +339,11 @@
 
 (def *known-macros*
   (apply
-   core/conj
+   joker.core/conj
    *known-macros*
-   (:known-macros core/*linter-config*)))
+   (:known-macros joker.core/*linter-config*)))
 
-(core/in-ns 'user)
+(joker.core/in-ns 'user)
 
-(core/refer 'core)
+(joker.core/refer 'joker.core)
 
