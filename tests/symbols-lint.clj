@@ -3,6 +3,7 @@
             [tests.ext2 :as ext2]
             [tests.ext3 :as ext3 :refer [e3]]
             [spec :as s]
+            [some.core :as core]
             [clojure.test :refer [testing]])
   (:import [java.security Security]))
 
@@ -39,5 +40,5 @@
 (test-macro (f u2))
 (test-macro (load u3))
 (test-macro (ext2/f u4))
-(testing u8)
+(testing u9)
 
