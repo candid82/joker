@@ -80,7 +80,24 @@ test.clj:1:1: Parse warning: let form with empty body
 The output format is as follows: `<filename>:<line>:<column> <issue type>: <message>`, where `<issue type` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
 [Flycheck syntax checker](https://github.com/candid82/flycheck-joker) and [Sublime Text plugin](https://github.com/candid82/SublimeLinter-contrib-joker) integrate Joker linter with Emacs and Sublime Text, respectively. [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
-Please note that Joker lints code in one file at a time and doesn't try to resolve symbols from external namespaces. Because of that and since it's missing some Clojure features it doesn't always provide accurate linting. In general it tries to be unobtrusive and error on the side of false negatives rather than false positives.
+
+### Reducing false positives
+
+Joker lints the code in one file at a time and doesn't try to resolve symbols from external namespaces. Because of that and since it's missing some Clojure(Script) features it doesn't always provide accurate linting. In general it tries to be unobtrusive and error on the side of false negatives rather than false positives. One common scenario that can lead to false positives is resolving symbols inside a macro. Consider the example below:
+
+```
+(ns foo (:require [bar :refer [def-something]]))
+
+(def-something baz ...)
+```
+
+Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The file is called `.joker` and should be in your home directory. It should contain a single map with `:known-macros` key:
+
+```
+{:known-macros [bar/def-something foo/another-macro ...]}
+```
+
+Please note that the symbols are namespace qualified and unquoted. Also, Joker knows about some commonly used macros (outside of `clojure.core` namespace) like `clojure.test/deftest` or `clojure.core.async/go-loop`, so you won't have to add those to your config file.
 
 ## Building
 
