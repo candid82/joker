@@ -24,7 +24,7 @@ type (
 	}
 )
 
-const VERSION = "v0.6.2"
+const VERSION = "v0.7.0"
 
 func NewReplContext(env *Env) *ReplContext {
 	first, _ := env.Resolve(MakeSymbol("joker.core/*1"))
