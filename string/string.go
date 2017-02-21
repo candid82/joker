@@ -2,12 +2,14 @@ package string
 
 import (
 	"bytes"
+	"regexp"
 	"strings"
 
 	. "github.com/candid82/joker/core"
 )
 
 var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
+var newLine *regexp.Regexp
 
 func intern(name string, proc Proc) {
 	stringNamespace.Intern(MakeSymbol(name)).Value = proc
@@ -39,19 +41,28 @@ var padLeft Proc = func(args []Object) Object {
 	}
 }
 
+func splitString(s string, r *regexp.Regexp) Object {
+	indexes := r.FindAllStringIndex(s, -1)
+	lastStart := 0
+	result := EmptyVector
+	for _, el := range indexes {
+		result = result.Conjoin(String{S: s[lastStart:el[0]]})
+		lastStart = el[1]
+	}
+	result = result.Conjoin(String{S: s[lastStart:]})
+	return result
+}
+
 var split Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	str := EnsureString(args, 0).S
 	reg := EnsureRegex(args, 1).R
-	indexes := reg.FindAllStringIndex(str, -1)
-	lastStart := 0
-	result := EmptyVector
-	for _, el := range indexes {
-		result = result.Conjoin(String{S: str[lastStart:el[0]]})
-		lastStart = el[1]
-	}
-	result = result.Conjoin(String{S: str[lastStart:]})
-	return result
+	return splitString(str, reg)
+}
+
+var splitLines Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return splitString(EnsureString(args, 0).S, newLine)
 }
 
 var join Proc = func(args []Object) Object {
@@ -92,6 +103,9 @@ var replace Proc = func(args []Object) Object {
 }
 
 func init() {
+
+	newLine, _ = regexp.Compile("\r?\n")
+
 	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
 	stringNamespace.InternVar("pad-right", padRight,
 		MakeMeta(
@@ -105,6 +119,10 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("re"))),
 			"Splits string on a regular expression. Returns vector of the splits.", "1.0"))
+	stringNamespace.InternVar("split-lines", splitLines,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			"Splits string on \\n or \\r\\n. Returns vector of the splits.", "1.0"))
 	stringNamespace.InternVar("join", join,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("separator"), MakeSymbol("coll"))),

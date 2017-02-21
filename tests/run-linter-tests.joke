@@ -1,0 +1,15 @@
+(let [test-dirs (->> (joker.os/sh "ls" "tests/linter")
+                     :out
+                     (joker.string/split-lines)
+                     (remove #(= "" %)))
+      pwd (get (joker.os/env) "PWD")]
+  (doseq [test-dir test-dirs]
+    (let [dir (str "tests/linter/" test-dir "/")
+          output (:err (joker.os/sh (str pwd "/joker") "--lint" (str dir "input.clj")))
+          expected (slurp (str dir "output.txt"))]
+      (when-not (= expected output)
+        (println "FAILED:" test-dir)
+        (println "EXPECTED:")
+        (println expected)
+        (println "ACTUAL:")
+        (println output)))))
