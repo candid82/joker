@@ -321,7 +321,8 @@
    joker.core/conj
    *known-macros*
    'proxy 'defstruct 'with-local-vars 'definline 'gen-interface 'definterface 'proxy-super 'with-open
-   'defproject
+   'defproject 'clojure.core.async/go-loop 'clojure.core.async/alt! 'clojure.core.async/alt!! 'clojure.core.async/alts!
+   'clojure.core.async/alts!!
    (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
