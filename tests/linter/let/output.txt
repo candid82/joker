@@ -1,1 +1,2 @@
 tests/linter/let/input.clj:7:1: Parse warning: let form with empty body
+tests/linter/let/input.clj:8:1: Parse warning: let form with empty bindings vector

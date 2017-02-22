@@ -653,6 +653,10 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		if b.count%2 != 0 {
 			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
 		}
+		if LINTER_MODE && !isLoop && b.count == 0 {
+			pos := GetPosition(obj)
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty bindings vector\n", pos.Filename(), pos.startLine, pos.startColumn, formName)
+		}
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
 		ctx.PushEmptyLocalFrame()
