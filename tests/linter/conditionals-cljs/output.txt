@@ -1,0 +1,2 @@
+tests/linter/conditionals-cljs/input.cljs:9:10: Parse warning: let form with empty bindings vector
+tests/linter/conditionals-cljs/input.cljs:10:14: Read error: Invalid number: 234ewr
