@@ -129,11 +129,7 @@ func DeriveReadObject(base Object, obj Object) Object {
 }
 
 func (err ReadError) Error() string {
-	filename := "<file>"
-	if err.filename != nil {
-		filename = *err.filename
-	}
-	return fmt.Sprintf("%s:%d:%d: Read error: %s", filename, err.line, err.column, err.msg)
+	return fmt.Sprintf("%s:%d:%d: Read error: %s", filename(err.filename), err.line, err.column, err.msg)
 }
 
 func isDelimiter(r rune) bool {
@@ -740,14 +736,17 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 	}
 }
 
+func filename(f *string) string {
+	if f != nil {
+		return *f
+	}
+	return "<file>"
+}
+
 func handleNoReaderError(reader *Reader, s Symbol) Object {
 	if LINTER_MODE {
 		if DIALECT != EDN {
-			filename := "<file>"
-			if reader.filename != nil {
-				filename = *reader.filename
-			}
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename, reader.line, reader.column, s.ToString(false))
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename(reader.filename), reader.line, reader.column, s.ToString(false))
 		}
 		return Read(reader)
 	}
@@ -776,6 +775,34 @@ func readTagged(reader *Reader) Object {
 	}
 }
 
+func readConditional(reader *Reader) Object {
+	if reader.Peek() == '@' {
+		// Ignoring splicing for now
+		// TODO: implement support for splicing
+		reader.Get()
+	}
+	eatWhitespace(reader)
+	r := reader.Get()
+	if r != '(' {
+		panic(MakeReadError(reader, "Reader conditional body must be a list"))
+	}
+	cond := readList(reader).(*List)
+	if cond.count%2 != 0 {
+		if LINTER_MODE {
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: Reader conditional requires an even number of forms\n", filename(reader.filename), reader.line, reader.column)
+		} else {
+			panic(MakeReadError(reader, "Reader conditional requires an even number of forms"))
+		}
+	}
+	for cond.count > 0 {
+		if ok, _ := GLOBAL_ENV.Features.Get(cond.first); ok {
+			return Second(cond)
+		}
+		cond = cond.rest.rest
+	}
+	return Read(reader)
+}
+
 func readDispatch(reader *Reader) Object {
 	r := reader.Get()
 	switch r {
@@ -798,6 +825,8 @@ func readDispatch(reader *Reader) Object {
 		res := makeFnForm(ARGS, fn)
 		ARGS = nil
 		return res
+	case '?':
+		return readConditional(reader)
 	}
 	popPos()
 	reader.Unget()

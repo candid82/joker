@@ -1,0 +1,4 @@
+tests/linter/conditionals/input.clj:8:9: Read warning: Reader conditional requires an even number of forms
+tests/linter/conditionals/input.clj:9:30: Parse warning: let form with empty bindings vector
+tests/linter/conditionals/input.clj:10:18: Parse warning: let form with empty body
+tests/linter/conditionals/input.clj:11:14: Read error: Invalid number: 234ewr

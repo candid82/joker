@@ -16,12 +16,17 @@ type (
 		file          *Var
 		args          *Var
 		ns            *Var
+		Features      Set
 	}
 )
 
 func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) *Env {
+	features := EmptySet()
+	features.Add(MakeKeyword("default"))
+	features.Add(MakeKeyword("joker"))
 	res := &Env{
 		Namespaces: make(map[*string]*Namespace),
+		Features:   features,
 	}
 	res.CoreNamespace = res.EnsureNamespace(MakeSymbol("joker.core"))
 	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")

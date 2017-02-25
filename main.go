@@ -148,11 +148,25 @@ func repl(phase Phase) {
 	}
 }
 
+func makeDialectKeyword(dialect Dialect) Keyword {
+	switch dialect {
+	case EDN:
+		return MakeKeyword("clj")
+	case CLJ:
+		return MakeKeyword("clj")
+	case CLJS:
+		return MakeKeyword("cljs")
+	default:
+		return MakeKeyword("joker ")
+	}
+}
+
 func configureLinterMode(dialect Dialect) {
 	LINTER_MODE = true
 	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Bool{B: true}
+	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
 	ProcessLinterData(dialect)
 }
 
