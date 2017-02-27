@@ -271,6 +271,9 @@ var procReFind Proc = func(args []Object) Object {
 	re := EnsureRegex(args, 0)
 	s := EnsureString(args, 1)
 	match := re.R.FindStringSubmatch(s.S)
+	if len(match) == 0 {
+		return NIL
+	}
 	if len(match) == 1 {
 		return String{S: match[0]}
 	}
