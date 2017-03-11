@@ -395,7 +395,12 @@ func readSymbol(reader *Reader, first rune) Object {
 			panic(MakeReadError(reader, "Blank namespaces are not allowed"))
 		}
 		if str[0] == ':' {
-			return MakeReadObject(reader, MakeKeyword(*GLOBAL_ENV.CurrentNamespace().Name.name+"/"+str[1:]))
+			sym := MakeSymbol(str[1:])
+			ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), sym)
+			if ns == nil {
+				panic(MakeReadError(reader, fmt.Sprintf("Unable to resolve namespace %s in keyword %s", *sym.ns, ":"+str)))
+			}
+			return MakeReadObject(reader, MakeKeyword(*ns.Name.name+"/"+*sym.name))
 		}
 		return MakeReadObject(reader, MakeKeyword(str))
 	case str == "nil":
