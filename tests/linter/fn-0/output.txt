@@ -1,0 +1,2 @@
+tests/linter/fn-0/input.clj:1:1: Exception: Parameter declaration "2" must be a vector
+Stacktrace:

@@ -192,13 +192,13 @@
   with-meta with-meta*)
 
 (def ^{:private true :dynamic true}
-  assert-valid-fdecl (fn [fdecl]))
+  assert-valid-fdecl (fn [form fdecl]))
 
 (def
   ^{:private true}
   sigs
-  (fn [fdecl]
-    (assert-valid-fdecl fdecl)
+  (fn [form fdecl]
+    (assert-valid-fdecl form fdecl)
     (let [asig
           (fn [fdecl]
             (let [arglist (first fdecl)
@@ -273,7 +273,7 @@
                fdecl (if (map? (last fdecl))
                        (butlast fdecl)
                        fdecl)
-               m (conj {:arglists (list 'quote (sigs fdecl))} m)
+               m (conj {:arglists (list 'quote (sigs &form fdecl))} m)
                m (conj (if (meta name) (meta name) {}) m)]
            (list 'def (with-meta name m)
                  (cons `fn fdecl)))))
@@ -2403,62 +2403,62 @@
 
   Defines a function"
   {:added "1.0", :special-form true,
-   :forms '[(fn name? [params* ] exprs*) (fn name? ([params* ] exprs*)+)]}
+  :forms '[(fn name? [params* ] exprs*) (fn name? ([params* ] exprs*)+)]}
   [& sigs]
-    (let [name (if (symbol? (first sigs)) (first sigs) nil)
-          sigs (if name (next sigs) sigs)
-          sigs (if (vector? (first sigs))
-                 (list sigs)
-                 (if (seq? (first sigs))
-                   sigs
-                   ;; Assume single arity syntax
-                   (throw (ex-info
-                            (if (seq sigs)
-                              (str "Parameter declaration "
-                                   (first sigs)
-                                   " should be a vector")
-                              (str "Parameter declaration missing"))
-                            {}))))
-          psig (fn* [sig]
-                 ;; Ensure correct type before destructuring sig
-                 (when (not (seq? sig))
-                   (throw (ex-info
-                            (str "Invalid signature " sig
-                                 " should be a list")
-                            {})))
-                 (let [[params & body] sig
-                       _ (when (not (vector? params))
-                           (throw (ex-info
+  (let [name (if (symbol? (first sigs)) (first sigs) nil)
+        sigs (if name (next sigs) sigs)
+        sigs (if (vector? (first sigs))
+               (list sigs)
+               (if (seq? (first sigs))
+                 sigs
+                 ;; Assume single arity syntax
+                 (throw (ex-info
+                         (if (seq sigs)
+                           (str "Parameter declaration \""
+                                (first sigs)
+                                "\" must be a vector")
+                           (str "Parameter declaration missing"))
+                         {:form &form}))))
+        psig (fn* [sig]
+                  ;; Ensure correct type before destructuring sig
+                  (when (not (seq? sig))
+                    (throw (ex-info
+                            (str "Invalid signature: \"" sig
+                                 "\" must be a list")
+                            {:form &form})))
+                  (let [[params & body] sig
+                        _ (when (not (vector? params))
+                            (throw (ex-info
                                     (if (seq? (first sigs))
-                                      (str "Parameter declaration " params
-                                           " should be a vector")
-                                      (str "Invalid signature " sig
-                                           " should be a list"))
-                                    {})))
-                       conds (when (and (next body) (map? (first body)))
-                                           (first body))
-                       body (if conds (next body) body)
-                       conds (or conds (meta params))
-                       pre (:pre conds)
-                       post (:post conds)
-                       body (if post
-                              `((let [~'% ~(if (< 1 (count body))
-                                            `(do ~@body)
-                                            (first body))]
-                                 ~@(map (fn* [c] `(assert ~c)) post)
-                                 ~'%))
-                              body)
-                       body (if pre
-                              (concat (map (fn* [c] `(assert ~c)) pre)
-                                      body)
-                              body)]
-                   (maybe-destructured params body)))
-          new-sigs (map psig sigs)]
-      (with-meta
-        (if name
-          (list* 'fn* name new-sigs)
-          (cons 'fn* new-sigs))
-        (meta &form))))
+                                      (str "Parameter declaration \"" params
+                                           "\" must be a vector")
+                                      (str "Invalid signature: \"" sig
+                                           "\" must be a list"))
+                                    {:form &form})))
+                        conds (when (and (next body) (map? (first body)))
+                                (first body))
+                        body (if conds (next body) body)
+                        conds (or conds (meta params))
+                        pre (:pre conds)
+                        post (:post conds)
+                        body (if post
+                               `((let [~'% ~(if (< 1 (count body))
+                                              `(do ~@body)
+                                              (first body))]
+                                   ~@(map (fn* [c] `(assert ~c)) post)
+                                   ~'%))
+                               body)
+                        body (if pre
+                               (concat (map (fn* [c] `(assert ~c)) pre)
+                                       body)
+                               body)]
+                    (maybe-destructured params body)))
+        new-sigs (map psig sigs)]
+    (with-meta
+      (if name
+        (list* 'fn* name new-sigs)
+        (cons 'fn* new-sigs))
+      (meta &form))))
 
 (defmacro loop
   "Evaluates the exprs in a lexical context in which the symbols in
@@ -3712,26 +3712,26 @@
 
 (defn- ^{:dynamic true} assert-valid-fdecl
   "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
-  [fdecl]
-  (when (empty? fdecl) (throw (ex-info "Parameter declaration missing" {})))
+  [form fdecl]
+  (when (empty? fdecl) (throw (ex-info "Parameter declaration missing" {:form form})))
   (let [argdecls (map
                   #(if (seq? %)
                      (first %)
                      (throw (ex-info
                              (if (seq? (first fdecl))
-                               (str "Invalid signature \""
+                               (str "Invalid signature: \""
                                     %
-                                    "\" should be a list")
+                                    "\" must be a list")
                                (str "Parameter declaration \""
                                     %
-                                    "\" should be a vector"))
-                             {})))
+                                    "\" must be a vector"))
+                             {:form form})))
                   fdecl)
         bad-args (seq (remove #(vector? %) argdecls))]
     (when bad-args
       (throw (ex-info (str "Parameter declaration \"" (first bad-args)
-                           "\" should be a vector")
-                      {})))))
+                           "\" must be a vector")
+                      {:form form})))))
 
 (defn realized?
   "Returns true if a value has been produced for a delay or lazy sequence."

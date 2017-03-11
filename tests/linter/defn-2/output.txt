@@ -1,0 +1,2 @@
+tests/linter/defn-2/input.clj:1:1: Exception: Invalid signature: "1" must be a list
+Stacktrace:

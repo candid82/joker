@@ -1,0 +1,2 @@
+tests/linter/fn-1/input.clj:1:1: Exception: Parameter declaration "sdfsf" must be a vector
+Stacktrace:
