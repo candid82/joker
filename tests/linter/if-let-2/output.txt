@@ -1,0 +1,2 @@
+tests/linter/if-let-2/input.clj:1:1: Exception: joker.core/if-let requires exactly 2 forms in binding vector
+Stacktrace:
