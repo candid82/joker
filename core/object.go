@@ -534,7 +534,7 @@ func (rb RecurBindings) Hash() uint32 {
 }
 
 func (exInfo *ExInfo) ToString(escape bool) string {
-	return exInfo.msg.ToString(escape)
+	return exInfo.Error()
 }
 
 func (exInfo *ExInfo) Equals(other interface{}) bool {
@@ -557,10 +557,14 @@ func (exInfo *ExInfo) Error() string {
 			pos = form.GetInfo().Pos()
 		}
 	}
+	prefix := "Exception"
+	if ok, pr := exInfo.data.Get((MakeKeyword("_prefix"))); ok {
+		prefix = pr.ToString(false)
+	}
 	if len(exInfo.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("%s:%d:%d: Exception: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, exInfo.msg.S, exInfo.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: %s: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("%s:%d:%d: Exception: %s", pos.Filename(), pos.startLine, pos.startColumn, exInfo.msg.S)
+		return fmt.Sprintf("%s:%d:%d: %s: %s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S)
 	}
 }
 

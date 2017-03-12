@@ -437,6 +437,8 @@
   ([] (gensym "G__"))
   ([prefix-string] (gensym* prefix-string)))
 
+(def println-err)
+
 (defmacro cond
   "Takes a set of test/expr pairs. It evaluates each test one at a
   time.  If a test returns logical true, cond evaluates and returns
@@ -444,12 +446,15 @@
   other tests or exprs. (cond) returns nil."
   {:added "1.0"}
   [& clauses]
-  (when clauses
+  (if clauses
     (list 'if (first clauses)
           (if (next clauses)
             (second clauses)
             (throw (ex-info "cond requires an even number of forms" {:form (first clauses)})))
-          (cons 'joker.core/cond (next (next clauses))))))
+          (when (next (next clauses))
+            (cons 'joker.core/cond (next (next clauses)))))
+    (when *linter-mode*
+      (println-err (ex-info "Empty cond" {:form &form :_prefix "Parse warning"})))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
@@ -2612,6 +2617,34 @@
   :added "1.0"}
   [& xs]
   (with-out-str
+    (apply println xs)))
+
+(defn pr-err
+  "pr to *err*"
+  {:added "1.0"}
+  [& xs]
+  (binding [*out* *err*]
+    (apply pr xs)))
+
+(defn prn-err
+  "prn to *err*"
+  {:added "1.0"}
+  [& xs]
+  (binding [*out* *err*]
+    (apply prn xs)))
+
+(defn print-err
+  "print to *err*"
+  {:added "1.0"}
+  [& xs]
+  (binding [*out* *err*]
+    (apply print xs)))
+
+(defn println-err
+  "println to *err*"
+  {:added "1.0"}
+  [& xs]
+  (binding [*out* *err*]
     (apply println xs)))
 
 (defn ex-data
