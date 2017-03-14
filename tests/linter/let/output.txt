@@ -1,2 +1,4 @@
 tests/linter/let/input.clj:9:1: Parse warning: let form with empty body
 tests/linter/let/input.clj:10:1: Parse warning: let form with empty bindings vector
+tests/linter/let/input.clj:11:6: Exception: Unsupported binding form, only :as can follow & parameter
+Stacktrace:

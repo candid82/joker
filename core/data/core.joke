@@ -2321,7 +2321,7 @@
                                                     true)
                                (= firstb :as) (pb ret (second bs) gvec)
                                :else (if seen-rest?
-                                       (throw (ex-info "Unsupported binding form, only :as can follow & parameter" {}))
+                                       (throw (ex-info "Unsupported binding form, only :as can follow & parameter" {:form bindings}))
                                        (recur (pb ret firstb  (list `nth gvec n nil))
                                               (inc n)
                                               (next bs)
@@ -2362,7 +2362,7 @@
                  (symbol? b) (-> bvec (conj b) (conj v))
                  (vector? b) (pvec bvec b v)
                  (map? b) (pmap bvec b v)
-                 :else (throw (ex-info (str "Unsupported binding form: " b) {})))))
+                 :else (throw (ex-info (str "Unsupported binding form: " b) {:form b})))))
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
