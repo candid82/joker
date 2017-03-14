@@ -1,0 +1,2 @@
+tests/linter/for-1/input.clj:1:15: Exception: Invalid keyword :le in "for" form
+Stacktrace:

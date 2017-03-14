@@ -2526,16 +2526,15 @@
   (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
   {:added "1.0"}
   [seq-exprs body-expr]
-  (assert-args for
-               (vector? seq-exprs) "a vector for its binding"
-               (even? (count seq-exprs)) "an even number of forms in binding vector")
+  (assert-args
+   (vector? seq-exprs) "a vector for its binding"
+   (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
                     (reduce (fn [groups [k v]]
-                               (if (keyword? k)
-                                 (conj (pop groups) (conj (peek groups) [k v]))
-                                 (conj groups [k v])))
-                             [] (partition 2 seq-exprs)))
-        err (fn [& msg] (throw (ex-info (apply str msg) {})))
+                              (if (keyword? k)
+                                (conj (pop groups) (conj (peek groups) [k v]))
+                                (conj groups [k v])))
+                            [] (partition 2 seq-exprs)))
         emit-bind (fn emit-bind [[[bind expr & mod-pairs]
                                   & [[_ next-expr] :as next-groups]]]
                     (let [giter (gensym "iter__")
@@ -2547,7 +2546,7 @@
                                      (= k :when) `(if ~v
                                                     ~(do-mod etc)
                                                     (recur (rest ~gxs)))
-                                     (keyword? k) (err "Invalid 'for' keyword " k)
+                                     (keyword? k) (throw (ex-info (str "Invalid keyword " k " in \"for\" form") {:form k}))
                                      next-groups
                                      `(let [iterys# ~(emit-bind next-groups)
                                             fs# (seq (iterys# ~next-expr))]

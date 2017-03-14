@@ -1,0 +1,2 @@
+tests/linter/for-3/input.clj:1:1: Exception: for requires an even number of forms in binding vector
+Stacktrace:
