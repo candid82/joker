@@ -991,7 +991,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				case *FnExpr:
 					reportWrongArity(expr, c.vr.isMacro, res, pos)
 				case *LiteralExpr:
-					reportNotAFunction(pos, res.name)
+					if _, ok := expr.obj.(Callable); !ok {
+						reportNotAFunction(pos, res.name)
+					}
 				case *RecurExpr:
 					reportNotAFunction(pos, res.name)
 				case *BindingExpr:
