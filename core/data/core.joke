@@ -2666,11 +2666,11 @@
   ([x]
    (when *assert*
      `(when-not ~x
-        (throw (ex-info (str "Assert failed: " '~x) {})))))
+        (throw (ex-info (str "Assert failed: " '~x) {:form ~x})))))
   ([x message]
    (when *assert*
      `(when-not ~x
-        (throw (ex-info (str "Assert failed: " ~message "\n" '~x)))))))
+        (throw (ex-info (str "Assert failed: " ~message "\n" '~x) {:form ~x}))))))
 
 (defn test
   "test [v] finds fn at key :test in var metadata and calls it,
