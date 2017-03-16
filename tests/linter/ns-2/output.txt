@@ -1,0 +1,2 @@
+tests/linter/ns-2/input.clj:1:1: Eval error: Alias n1 already exists in namespace user, aliasing test.n1
+Stacktrace:

@@ -159,7 +159,11 @@ func (err *EvalError) WithInfo(info *ObjectInfo) Object {
 
 func (err *EvalError) Error() string {
 	if len(err.rt.callstack.frames) > 0 {
-		return fmt.Sprintf("%s:%d:%d: Eval error: %s\nStacktrace:\n%s", err.pos.Filename(), err.pos.startLine, err.pos.startColumn, err.msg, err.rt.stacktrace())
+		pos := err.pos
+		if LINTER_MODE {
+			pos = err.rt.callstack.frames[0].traceable.Pos()
+		}
+		return fmt.Sprintf("%s:%d:%d: Eval error: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, err.msg, err.rt.stacktrace())
 	} else {
 		return fmt.Sprintf("%s:%d:%d: Eval error: %s", err.pos.Filename(), err.pos.startLine, err.pos.startColumn, err.msg)
 	}
