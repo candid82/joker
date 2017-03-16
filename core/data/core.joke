@@ -2200,7 +2200,7 @@
   clashes. Use :use in the ns macro in preference to calling this directly."
   {:added "1.0"}
   [ns-sym & filters]
-  (let [ns (or (find-ns ns-sym) (throw (ex-info (str "No namespace: " ns-sym) {})))
+  (let [ns (or (find-ns ns-sym) (throw (ex-info (str "No namespace: " ns-sym) {:form ns-sym})))
         fs (apply hash-map filters)
         nspublics (ns-publics ns)
         rename (or (:rename fs) {})
@@ -2209,7 +2209,7 @@
                 (keys nspublics)
                 (or (get-refer-opt fs) (:only fs) (keys nspublics)))]
     (when (and to-do (not (instance? Sequential to-do)))
-      (throw (ex-info ":only/:refer value must be a sequential collection of symbols" {})))
+      (throw (ex-info ":only/:refer value must be a sequential collection of symbols" {:form ns-sym})))
     (doseq [sym to-do]
       (when-not (exclude sym)
         (let [v (nspublics sym)]
@@ -2218,7 +2218,7 @@
                     (if (get (ns-interns ns) sym)
                       (str sym " is not public")
                       (str sym " does not exist"))
-                    {})))
+                    {:form ns-sym})))
           (refer* *ns* (or (rename sym) sym) (or v (intern-fake-var* ns-sym sym))))))))
 
 (defn ns-refers
