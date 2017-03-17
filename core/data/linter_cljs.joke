@@ -348,13 +348,14 @@
 (defn system-time [])
 (defn bytes [x])
 (defn compare-symbols [a b])
+(def this-as)
 
 (def *known-macros*
   (apply
    joker.core/conj
    *known-macros*
    'cljs.core.async.macros/go-loop 'cljs.core.async.macros/alt! 'cljs.core.async.macros/alt!! 'cljs.core.async.macros/alts!
-   'cljs.core.async.macros/alts!!
+   'cljs.core.async.macros/alts!! 'this-as
    (:known-macros joker.core/*linter-config*)))
 
 (joker.core/in-ns 'user)
