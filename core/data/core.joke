@@ -1119,7 +1119,9 @@
   second item in second form, etc."
   {:added "1.0"}
   [x & forms]
-  (loop [x x, forms forms]
+  (when (and *linter-mode* (not (seq forms)))
+    (println-err (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
+  (loop [x x forms forms]
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
