@@ -18,6 +18,18 @@
    'uuid #'joker.core/identity
    'queue #'joker.core/identity})
 
+;; ClojureScript core vars not supported by Joker
+
+(def *clojurescript-version*)
+(def *main-cli-fn*)
+(def *print-err-fn*)
+(def *print-fn*)
+(def *print-namespace-maps*)
+(def *print-newline*)
+(def *target*)
+(def *unchecked-if*)
+(def *warn-on-infer*)
+
 ;; ClojureScript core functions not supported by Joker
 
 (defn js->clj ([x]) ([x & opts]))

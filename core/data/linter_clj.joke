@@ -326,7 +326,16 @@
    (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
+
 (def *warn-on-reflection*)
+(def *clojure-version*)
+(def *compile-files*)
+(def *unchecked-math*)
+(def *default-data-reader-fn*)
+(def *compile-path*)
+(def *compiler-options*)
+(def *agent*)
+(def *read-eval*)
 
 (def default-data-readers
   {'inst #'joker.core/identity

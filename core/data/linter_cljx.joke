@@ -29,6 +29,13 @@
 (def defrecord)
 (def .. )
 
+;; Clojure core vars not supported by Joker
+
+(def *print-level*)
+(def *print-meta*)
+(def *print-length*)
+(def *print-dup*)
+
 ;; Add transducer arity to standard functions
 
 (def __map__ map)
