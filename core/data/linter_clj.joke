@@ -307,14 +307,14 @@
 (defn dosync [& exprs])
 (defn sync [flags-ignored-for-now & body])
 (defn io! [& body])
-(def proxy)
-(def defstruct)
-(def with-local-vars)
-(def definline)
-(def gen-interface)
-(def definterface)
-(def proxy-super)
-(def with-open)
+(defn proxy [class-and-interfaces args & fs])
+(defn defstruct [name & keys])
+(defn with-local-vars [name-vals-vec & body])
+(defn definline [name & decl])
+(defn gen-interface [& options])
+(defn definterface [name & sigs])
+(defn proxy-super [meth & args])
+(defn with-open [bindings & body])
 
 (def *known-macros*
   (apply

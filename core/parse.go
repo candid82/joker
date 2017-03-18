@@ -143,6 +143,7 @@ type (
 var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
 var LOCAL_BINDINGS *Bindings = nil
 var SPECIAL_SYMBOLS = make(map[*string]bool)
+var KNOWN_MACROS *Var
 
 func (b *Bindings) ToMap() Map {
 	var res Map = EmptyArrayMap()
@@ -828,6 +829,18 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
 }
 
+func isKnownMacros(sym Symbol) bool {
+	if KNOWN_MACROS == nil {
+		knownMacros := GLOBAL_ENV.CoreNamespace.Resolve("*known-macros*")
+		if knownMacros == nil {
+			return false
+		}
+		KNOWN_MACROS = knownMacros
+	}
+	ok, _ := KNOWN_MACROS.Value.(Set).Get(sym)
+	return ok
+}
+
 func isUnknownCallable(expr Expr) bool {
 	if !LINTER_MODE {
 		return false
@@ -836,19 +849,16 @@ func isUnknownCallable(expr Expr) bool {
 		if c.vr.isMacro {
 			return true
 		}
+		sym := MakeSymbol(*c.vr.name.name)
+		if isKnownMacros(sym) {
+			return true
+		}
 		if c.vr.expr != nil {
 			return false
 		}
-		sym := MakeSymbol(*c.vr.name.name)
 		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
 			return true
 		}
-		knownMacros := GLOBAL_ENV.CoreNamespace.Resolve("*known-macros*")
-		if knownMacros == nil {
-			return false
-		}
-		ok, _ = knownMacros.Value.(Set).Get(sym)
-		return ok
 	}
 	return false
 }

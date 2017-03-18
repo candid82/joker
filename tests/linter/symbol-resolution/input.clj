@@ -25,8 +25,8 @@
 (instance? Integer 10)
 (instance? java.lang.Integer 10)
 (test-macro uuu)
-(defrecord u5)
-(defmethod u6)
+(defrecord u5 1)
+(defmethod u6 1)
 (clojure.test/deftest u7)
 
 

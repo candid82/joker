@@ -348,7 +348,10 @@
 (defn system-time [])
 (defn bytes [x])
 (defn compare-symbols [a b])
-(def this-as)
+
+;; ClojureScript core macros not supported by Joker
+
+(defn this-as [name & body])
 
 (def *known-macros*
   (apply
