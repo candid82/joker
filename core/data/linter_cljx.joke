@@ -5,6 +5,28 @@
     (read-string (slurp (str (get (joker.os/env) "HOME") "/.joker")))
     (catch Error e {})))
 
+(defn ^:private conj-import*
+  [v sym]
+  (let [r (conj v sym)
+        parts (joker.string/split (name sym) #"\.")]
+    (if (> (count parts) 1)
+      (conj r (symbol (last parts)))
+      r)))
+
+(defmacro import
+  [& import-symbols-or-lists]
+  (let [specs (map #(if (and (seq? %) (= 'quote (first %))) (second %) %)
+                   import-symbols-or-lists)
+        syms (reduce (fn [v spec]
+                       (if (symbol? spec)
+                         (conj-import* v spec)
+                         (let [p (first spec) cs (rest spec)]
+                           (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
+                     [] specs)]
+    `(do
+       ~@(map #(list 'joker.core/require (list 'quote %)) syms)
+       ~@(map #(list 'def %) (remove resolve syms)))))
+
 (def *known-macros*
   #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
     'clojure.test/deftest 'clojure.test/is 'clojure.test/are})
@@ -27,6 +49,7 @@
 (defn letfn [fnspecs & body])
 (defn defrecord [name fields & opts+specs])
 (defn .. [x form & more])
+(defn refer-clojure [& filters])
 
 ;; Clojure core vars not supported by Joker
 

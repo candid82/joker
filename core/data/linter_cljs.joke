@@ -352,13 +352,40 @@
 ;; ClojureScript core macros not supported by Joker
 
 (defn this-as [name & body])
+(defn import-macros [ns vars])
+(defn goog-define [sym default])
+(defn coercive-not [x])
+(defn coercive-not= [x y])
+(defn coercive-= [x y])
+(defn coercive-boolean [x])
+(defn js-arguments [])
+(defn js-in [key obj])
+(defn js-debugger [])
+(defn js-comment [comment])
+(defn unsafe-cast [t x])
+(defn js-inline-comment [comment])
+(defn exists? [x])
+(defn caching-hash [coll hash-fn hash-key])
+(defn specify! [expr & impls])
+(defn specify [expr & impls])
+(defn implements? [psym x])
+(defn satisfies? [psym x])
+(defn simple-benchmark [bindings expr iterations & opts])
+(defn gen-apply-to [])
+(defn js-str [s])
+(defn es6-iterable [ty])
+(defn use-macros [& args])
+(defn import [& import-symbols-or-lists])
+(defn copy-arguments [dest])
+(defn divide [x & more])
+(defn unsafe-bit-and [x y & more])
 
 (def *known-macros*
   (apply
    joker.core/conj
    *known-macros*
    'cljs.core.async.macros/go-loop 'cljs.core.async.macros/alt! 'cljs.core.async.macros/alt!! 'cljs.core.async.macros/alts!
-   'cljs.core.async.macros/alts!! 'this-as
+   'cljs.core.async.macros/alts!! 'this-as 'import-macros 'goog-define 'specify! 'specify 'simple-benchmark 'use-macros 'import
    (:known-macros joker.core/*linter-config*)))
 
 (joker.core/in-ns 'user)

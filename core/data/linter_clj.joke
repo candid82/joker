@@ -2,30 +2,6 @@
 
 (def ^:private defproject)
 
-(joker.core/in-ns 'joker.core)
-
-(defn ^:private conj-import*
-  [v sym]
-  (let [r (conj v sym)
-        parts (joker.string/split (name sym) #"\.")]
-    (if (> (count parts) 1)
-      (conj r (symbol (last parts)))
-      r)))
-
-(defmacro import
-  [& import-symbols-or-lists]
-  (let [specs (map #(if (and (seq? %) (= 'quote (first %))) (second %) %)
-                   import-symbols-or-lists)
-        syms (reduce (fn [v spec]
-                       (if (symbol? spec)
-                         (conj-import* v spec)
-                         (let [p (first spec) cs (rest spec)]
-                           (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
-                     [] specs)]
-    `(do
-       ~@(map #(list 'joker.core/require (list 'quote %)) syms)
-       ~@(map #(list 'def %) (remove resolve syms)))))
-
 (joker.core/in-ns 'user)
 
 (joker.core/import
@@ -298,7 +274,6 @@
 ;; Clojure core macros not supported by Joker
 
 (defn gen-class [& options])
-(defn refer-clojure [& filters])
 (defn with-loading-context [& body])
 (defn bound-fn [& fntail])
 (defn future [& body])
