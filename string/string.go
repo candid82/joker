@@ -102,6 +102,12 @@ var replace Proc = func(args []Object) Object {
 	return String{S: strings.Replace(str, old, new, -1)}
 }
 
+var trimSpace Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	str := EnsureString(args, 0).S
+	return String{S: strings.TrimSpace(str)}
+}
+
 func init() {
 
 	newLine, _ = regexp.Compile("\r?\n")
@@ -139,4 +145,8 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("old"), MakeSymbol("new"))),
 			"Replaces all instances of string old with string new in string s.", "1.0"))
+	stringNamespace.InternVar("trim-space", trimSpace,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			"Returns a string s, with all leading and trailing white space removed, as defined by Unicode.", "1.0"))
 }
