@@ -1,0 +1,16 @@
+(load-file "../core/data/linter_cljx.joke")
+(load-file "../core/data/linter_cljs.joke")
+(def interns (ns-interns 'joker.core))
+
+(defn exists?
+  [line]
+  (let [parts (joker.string/split (joker.string/trim-space line) #" ")
+        name (second (rest parts))]
+    (if name
+      (get interns (symbol name))
+      false)))
+
+(let [input (slurp "cljs-macros.input")
+      lines (joker.string/split-lines input)]
+  (doseq [line (remove exists? lines)]
+    (println line)))
