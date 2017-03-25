@@ -53,7 +53,7 @@ func (ctx *ReplContext) PushException(exc Object) {
 	ctx.exc.Value = exc
 }
 
-func processFile(filename string, phase Phase) {
+func processFile(filename string, phase Phase) error {
 	var reader *Reader
 	if filename == "--" {
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
@@ -62,11 +62,11 @@ func processFile(filename string, phase Phase) {
 		f, err := os.Open(filename)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error: ", err)
-			return
+			return err
 		}
 		reader = NewReader(bufio.NewReader(f), filename)
 	}
-	ProcessReader(reader, filename, phase)
+	return ProcessReader(reader, filename, phase)
 }
 
 func skipRestOfLine(reader *Reader) {
@@ -182,6 +182,17 @@ func detectDialect(filename string) Dialect {
 	return CLJ
 }
 
+func lintFile(filename string, dialect Dialect) {
+	phase := PARSE
+	if dialect == EDN {
+		phase = READ
+	}
+	configureLinterMode(dialect)
+	if processFile(filename, phase) == nil {
+		WarnOnUnusedNamespaces()
+	}
+}
+
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	if len(os.Args) == 1 {
@@ -203,24 +214,15 @@ func main() {
 		processFile(os.Args[2], PARSE)
 	case "--lint":
 		dialect := detectDialect(os.Args[2])
-		configureLinterMode(dialect)
-		if dialect == EDN {
-			processFile(os.Args[2], READ)
-		} else {
-			processFile(os.Args[2], PARSE)
-		}
+		lintFile(os.Args[2], dialect)
 	case "--lintclj":
-		configureLinterMode(CLJ)
-		processFile(os.Args[2], PARSE)
+		lintFile(os.Args[2], CLJ)
 	case "--lintcljs":
-		configureLinterMode(CLJS)
-		processFile(os.Args[2], PARSE)
+		lintFile(os.Args[2], CLJS)
 	case "--lintjoker":
-		configureLinterMode(JOKER)
-		processFile(os.Args[2], PARSE)
+		lintFile(os.Args[2], JOKER)
 	case "--lintedn":
-		configureLinterMode(EDN)
-		processFile(os.Args[2], READ)
+		lintFile(os.Args[2], EDN)
 	default:
 		processFile(os.Args[1], EVAL)
 	}

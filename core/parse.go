@@ -256,6 +256,21 @@ func (pos Position) Pos() Position {
 	return pos
 }
 
+func warn(pos Position, msg string) {
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
+}
+
+func WarnOnUnusedNamespaces() {
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if !ns.isUsed {
+			pos := ns.Name.GetInfo()
+			if pos != nil {
+				warn(pos.Position, "unused namespace "+ns.Name.ToString(false))
+			}
+		}
+	}
+}
+
 func NewLiteralExpr(obj Object) *LiteralExpr {
 	res := LiteralExpr{obj: obj}
 	info := obj.GetInfo()
@@ -656,7 +671,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		}
 		if LINTER_MODE && !isLoop && b.count == 0 {
 			pos := GetPosition(obj)
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty bindings vector\n", pos.Filename(), pos.startLine, pos.startColumn, formName)
+			warn(pos, formName+" form with empty bindings vector")
 		}
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
@@ -686,7 +701,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
 			pos := GetPosition(obj)
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s form with empty body\n", pos.Filename(), pos.startLine, pos.startColumn, formName)
+			warn(pos, formName+" form with empty body")
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
@@ -791,7 +806,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 }
 
 func reportNotAFunction(pos Position, name string) {
-	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s is not a function\n", pos.Filename(), pos.startLine, pos.startColumn, name)
+	warn(pos, name+" is not a function")
 }
 
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
@@ -808,7 +823,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return
 	}
-	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: Wrong number of args (%d) passed to %s\n", pos.Filename(), pos.startLine, pos.startColumn, len(call.args), call.name)
+	warn(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
 }
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
@@ -1070,11 +1085,13 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			}
 			var nsName *string
 			if symNs != nil && symNs != ctx.GlobalEnv.CurrentNamespace() {
+				symNs.isUsed = true
 				nsName = symNs.Name.name
 			}
 			vr = InternFakeSymbol(nsName, sym.name)
 		}
 	}
+	vr.ns.isUsed = true
 	return &VarRefExpr{
 		vr:       vr,
 		Position: GetPosition(obj),

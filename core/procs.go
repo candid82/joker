@@ -1061,7 +1061,15 @@ var procFindNamespace Proc = func(args []Object) Object {
 }
 
 var procCreateNamespace Proc = func(args []Object) Object {
-	return GLOBAL_ENV.EnsureNamespace(EnsureSymbol(args, 0))
+	sym := EnsureSymbol(args, 0)
+	return GLOBAL_ENV.EnsureNamespace(sym)
+}
+
+var procInjectNamespace Proc = func(args []Object) Object {
+	sym := EnsureSymbol(args, 0)
+	ns := GLOBAL_ENV.EnsureNamespace(sym)
+	ns.isUsed = true
+	return ns
 }
 
 var procRemoveNamespace Proc = func(args []Object) Object {
@@ -1269,7 +1277,7 @@ var procInternFakeVar Proc = func(args []Object) Object {
 	return InternFakeSymbol(nsSym.name, sym.name)
 }
 
-func ProcessReader(reader *Reader, filename string, phase Phase) {
+func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
@@ -1285,11 +1293,11 @@ func ProcessReader(reader *Reader, filename string, phase Phase) {
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
-			return
+			return nil
 		}
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 		if phase == READ {
 			continue
@@ -1297,7 +1305,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) {
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 		if phase == PARSE {
 			continue
@@ -1305,7 +1313,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) {
 		_, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	}
 }
@@ -1446,6 +1454,7 @@ func init() {
 	intern("load-string*", procLoadString)
 	intern("find-ns*", procFindNamespace)
 	intern("create-ns*", procCreateNamespace)
+	intern("inject-ns*", procInjectNamespace)
 	intern("remove-ns*", procRemoveNamespace)
 	intern("all-ns*", procAllNamespaces)
 	intern("ns-name*", procNamespaceName)

@@ -12,6 +12,7 @@ type (
 		Name     Symbol
 		mappings map[*string]*Var
 		aliases  map[*string]*Namespace
+		isUsed   bool
 	}
 )
 

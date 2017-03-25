@@ -3,7 +3,6 @@
             [tests.ext2 :as ext2]
             [tests.ext3 :as ext3 :refer [e3]]
             [spec :as s]
-            [some.core :as core]
             [clojure.test :refer [testing]])
   (:import [java.security Security]))
 
