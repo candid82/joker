@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"unsafe"
 )
@@ -256,16 +257,36 @@ func (pos Position) Pos() Position {
 	return pos
 }
 
-func warn(pos Position, msg string) {
-	fmt.Fprintf(os.Stderr, "%s:%d:%d: Parse warning: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
+func printError(pos Position, msg string) {
+	fmt.Fprintf(os.Stderr, "%s:%d:%d: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
+}
+
+func printParseWarning(pos Position, msg string) {
+	printError(pos, "Parse warning: "+msg)
+}
+
+func printReadWarning(reader *Reader, msg string) {
+	pos := Position{
+		filename:    reader.filename,
+		startColumn: reader.column,
+		startLine:   reader.line,
+	}
+	printError(pos, "Read warning: "+msg)
 }
 
 func WarnOnUnusedNamespaces() {
-	for _, ns := range GLOBAL_ENV.Namespaces {
+	var namespaces []string
+	for ns := range GLOBAL_ENV.Namespaces {
+		namespaces = append(namespaces, *ns)
+	}
+	sort.Strings(namespaces)
+
+	for _, name := range namespaces {
+		ns := GLOBAL_ENV.Namespaces[STRINGS.Intern(name)]
 		if !ns.isUsed {
 			pos := ns.Name.GetInfo()
 			if pos != nil {
-				warn(pos.Position, "unused namespace "+ns.Name.ToString(false))
+				printParseWarning(pos.Position, "unused namespace "+ns.Name.ToString(false))
 			}
 		}
 	}
@@ -671,7 +692,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		}
 		if LINTER_MODE && !isLoop && b.count == 0 {
 			pos := GetPosition(obj)
-			warn(pos, formName+" form with empty bindings vector")
+			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
@@ -701,7 +722,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
 		if len(res.body) == 0 {
 			pos := GetPosition(obj)
-			warn(pos, formName+" form with empty body")
+			printParseWarning(pos, formName+" form with empty body")
 		}
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
@@ -806,7 +827,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 }
 
 func reportNotAFunction(pos Position, name string) {
-	warn(pos, name+" is not a function")
+	printParseWarning(pos, name+" is not a function")
 }
 
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
@@ -823,7 +844,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return
 	}
-	warn(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
+	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
 }
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
@@ -864,7 +885,15 @@ func isUnknownCallable(expr Expr) bool {
 		if c.vr.isMacro {
 			return true
 		}
-		sym := MakeSymbol(*c.vr.name.name)
+		var sym Symbol
+		if c.vr.ns != GLOBAL_ENV.CurrentNamespace() && c.vr.ns != GLOBAL_ENV.CoreNamespace {
+			sym = Symbol{
+				ns:   c.vr.ns.Name.name,
+				name: c.vr.name.name,
+			}
+		} else {
+			sym = MakeSymbol(*c.vr.name.name)
+		}
 		if isKnownMacros(sym) {
 			return true
 		}
@@ -940,16 +969,18 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			case Symbol:
 				vr, ok := ctx.GlobalEnv.Resolve(sym)
 				if !ok {
-					if LINTER_MODE {
-						ns := ""
-						if sym.ns != nil {
-							ns = *sym.ns
-						}
-						vr = ctx.GlobalEnv.CurrentNamespace().Intern(MakeSymbol(ns + *sym.name))
-					} else {
+					if !LINTER_MODE {
 						panic(&ParseError{obj: obj, msg: "Enable to resolve var " + sym.ToString(false) + " in this context"})
 					}
+					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+					if !ctx.isUnknownCallableScope {
+						if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+							fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+						}
+					}
+					vr = InternFakeSymbol(symNs, sym)
 				}
+				vr.ns.isUsed = true
 				return &LiteralExpr{
 					obj:      vr,
 					Position: pos,
@@ -1032,14 +1063,17 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	return res
 }
 
-func InternFakeSymbol(ns *string, sym *string) *Var {
-	name := *sym
+func InternFakeSymbol(ns *Namespace, sym Symbol) *Var {
 	if ns != nil {
-		name = *ns + "/" + *sym
+		fakeSym := Symbol{
+			ns:   nil,
+			name: sym.name,
+		}
+		return ns.Intern(fakeSym)
 	}
 	fakeSym := Symbol{
 		ns:   nil,
-		name: STRINGS.Intern(name),
+		name: STRINGS.Intern(sym.ToString(false)),
 	}
 	return GLOBAL_ENV.CurrentNamespace().Intern(fakeSym)
 }
@@ -1076,20 +1110,14 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	if !ok {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-		} else {
-			symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
-			if !ctx.isUnknownCallableScope && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
-				if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-				}
-			}
-			var nsName *string
-			if symNs != nil && symNs != ctx.GlobalEnv.CurrentNamespace() {
-				symNs.isUsed = true
-				nsName = symNs.Name.name
-			}
-			vr = InternFakeSymbol(nsName, sym.name)
 		}
+		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+		if !ctx.isUnknownCallableScope && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
+			if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+				fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+			}
+		}
+		vr = InternFakeSymbol(symNs, sym)
 	}
 	vr.ns.isUsed = true
 	return &VarRefExpr{

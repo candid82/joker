@@ -27,7 +27,8 @@
 (defrecord u5 1)
 (defmethod u6 1)
 (clojure.test/deftest u7)
-
+#'s/v
+#'e3
 
 ;; Should FAIL
 
@@ -40,4 +41,6 @@
 (test-macro (load u3))
 (test-macro (ext2/f u4))
 (testing u9)
+#'g
+#'ns/gg
 

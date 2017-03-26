@@ -7,3 +7,5 @@ tests/linter/symbol-resolution/input.clj:40:16: Parse error: Unable to resolve s
 tests/linter/symbol-resolution/input.clj:41:19: Parse error: Unable to resolve symbol: u3
 tests/linter/symbol-resolution/input.clj:42:21: Parse error: Unable to resolve symbol: u4
 tests/linter/symbol-resolution/input.clj:43:10: Parse error: Unable to resolve symbol: u9
+tests/linter/symbol-resolution/input.clj:44:3: Parse error: Unable to resolve symbol: g
+tests/linter/symbol-resolution/input.clj:45:3: Parse error: Unable to resolve symbol: ns/gg

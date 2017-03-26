@@ -1274,7 +1274,7 @@ var procLibPath Proc = func(args []Object) Object {
 var procInternFakeVar Proc = func(args []Object) Object {
 	nsSym := EnsureSymbol(args, 0)
 	sym := EnsureSymbol(args, 1)
-	return InternFakeSymbol(nsSym.name, sym.name)
+	return InternFakeSymbol(GLOBAL_ENV.FindNamespace(nsSym), sym)
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) error {

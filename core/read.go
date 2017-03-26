@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"os"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -398,8 +397,14 @@ func readSymbol(reader *Reader, first rune) Object {
 			sym := MakeSymbol(str[1:])
 			ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), sym)
 			if ns == nil {
-				panic(MakeReadError(reader, fmt.Sprintf("Unable to resolve namespace %s in keyword %s", *sym.ns, ":"+str)))
+				msg := fmt.Sprintf("Unable to resolve namespace %s in keyword %s", *sym.ns, ":"+str)
+				if LINTER_MODE {
+					printReadWarning(reader, msg)
+					return MakeReadObject(reader, MakeKeyword(*sym.name))
+				}
+				panic(MakeReadError(reader, msg))
 			}
+			ns.isUsed = true
 			return MakeReadObject(reader, MakeKeyword(*ns.Name.name+"/"+*sym.name))
 		}
 		return MakeReadObject(reader, MakeKeyword(str))
@@ -754,7 +759,7 @@ func filename(f *string) string {
 func handleNoReaderError(reader *Reader, s Symbol) Object {
 	if LINTER_MODE {
 		if DIALECT != EDN {
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: No reader function for tag %s\n", filename(reader.filename), reader.line, reader.column, s.ToString(false))
+			printReadWarning(reader, "No reader function for tag "+s.ToString(false))
 		}
 		return Read(reader)
 	}
@@ -797,7 +802,7 @@ func readConditional(reader *Reader) Object {
 	cond := readList(reader).(*List)
 	if cond.count%2 != 0 {
 		if LINTER_MODE {
-			fmt.Fprintf(os.Stderr, "%s:%d:%d: Read warning: Reader conditional requires an even number of forms\n", filename(reader.filename), reader.line, reader.column)
+			printReadWarning(reader, "Reader conditional requires an even number of forms")
 		} else {
 			panic(MakeReadError(reader, "Reader conditional requires an even number of forms"))
 		}
