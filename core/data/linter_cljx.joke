@@ -2,7 +2,10 @@
 
 (def *linter-config*
   (try
-    (read-string (slurp (str (get (joker.os/env) "HOME") "/.joker")))
+    (let [env (joker.os/env)]
+      (read-string (slurp (str (or (get env "HOME")
+                                   (get env "USERPROFILE"))
+                               "/.joker"))))
     (catch Error e {})))
 
 (defn ^:private conj-import*
