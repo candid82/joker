@@ -124,6 +124,7 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 		if ns == nil || ns.Name.name == s.ns {
 			return s
 		}
+		ns.isUsed = true
 		return Symbol{
 			name: s.name,
 			ns:   ns.Name.name,
@@ -136,6 +137,7 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 			ns:   currentNs.Name.name,
 		}
 	}
+	vr.ns.isUsed = true
 	return Symbol{
 		name: vr.name.name,
 		ns:   vr.ns.Name.name,
