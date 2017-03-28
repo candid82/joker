@@ -1100,14 +1100,14 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			Position: GetPosition(obj),
 		}
 	}
-	if sym.ns == nil && TYPES[*sym.name] != nil {
-		return &LiteralExpr{
-			Position: GetPosition(obj),
-			obj:      TYPES[*sym.name],
-		}
-	}
 	vr, ok := ctx.GlobalEnv.Resolve(sym)
 	if !ok {
+		if sym.ns == nil && TYPES[*sym.name] != nil {
+			return &LiteralExpr{
+				Position: GetPosition(obj),
+				obj:      TYPES[*sym.name],
+			}
+		}
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
