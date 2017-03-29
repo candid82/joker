@@ -6,6 +6,8 @@ Joker is a small Clojure interpreter and linter written in Go.
 
 Download pre-built [binary executable](https://github.com/candid82/joker/releases) for your platform or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. Joker uses `.joke` filename extension. See [Linter mode](#linter-mode) if you want to use Joker as a linter.
 
+Note that if you have downloaded the binary executable on Windows, you have to manually put it on your PATH - this can be done by editing your system environment variables, and adding the path to the executable (`C:/your/path/here/joker`) to the `PATH` variable.
+
 ## Documentation
 
 [Standard library reference](https://candid82.github.io/joker/)
@@ -21,7 +23,7 @@ These are high level goals of the project that guide design and implementation d
 
 ## Project non-goals
 
-- Performance. If you need it, use Cloiure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
+- Performance. If you need it, use Clojure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
 - Have all Clojure features. Some features are impossible to implement due to a different host language (Go vs Java), others I don't find that important for the use cases I have in mind for Joker. But generally Clojure is a pretty large language at this point and it is simply unfeasible to reach feature parity with it, even with naive implementation.
 
 ## Differences with Clojure
