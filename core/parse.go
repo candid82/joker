@@ -1087,8 +1087,13 @@ func isRecordConstructor(sym Symbol) bool {
 }
 
 func isJavaSymbol(sym Symbol) bool {
-	return (sym.ns == nil && (strings.HasPrefix(*sym.name, "java.") || strings.HasPrefix(*sym.name, "clojure.lang."))) ||
-		(sym.ns != nil && (strings.HasPrefix(*sym.ns, "java.") || strings.HasPrefix(*sym.ns, "clojure.lang.")))
+	s := *sym.name
+	if sym.ns != nil {
+		s = *sym.ns
+	}
+	return strings.HasPrefix(s, "java.") ||
+		strings.HasPrefix(s, "javax.") ||
+		strings.HasPrefix(s, "clojure.lang.")
 }
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {

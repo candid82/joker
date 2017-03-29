@@ -10,11 +10,8 @@
 
 (defn ^:private conj-import*
   [v sym]
-  (let [r (conj v sym)
-        parts (joker.string/split (name sym) #"\.")]
-    (if (> (count parts) 1)
-      (conj r (symbol (last parts)))
-      r)))
+  (let [parts (joker.string/split (name sym) #"\.")]
+    (conj v (symbol (last parts)))))
 
 (defmacro import
   [& import-symbols-or-lists]
