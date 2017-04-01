@@ -7,7 +7,8 @@
             [test.ns6 :as ns6]
             [test.ns7 :as n7]
             [test.ns8 :as n8]
-            [test.ns9 :as n9])
+            [test.ns9 :as n9]
+            [test.n10])
   (:import my.JavaClass))
 
 (f4)
@@ -23,4 +24,4 @@
 
 ::n9/k
 
-; (JavaClass/m)
+`(test.n10/f10)

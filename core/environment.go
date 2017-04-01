@@ -122,6 +122,9 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 	if s.ns != nil {
 		ns := env.NamespaceFor(currentNs, s)
 		if ns == nil || ns.Name.name == s.ns {
+			if ns != nil {
+				ns.isUsed = true
+			}
 			return s
 		}
 		ns.isUsed = true
