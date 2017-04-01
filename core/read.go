@@ -439,7 +439,6 @@ func readRegex(reader *Reader) Object {
 	regex, err := regexp.Compile(b.String())
 	if err != nil {
 		if LINTER_MODE {
-			printReadWarning(reader, "Invalid regex: "+err.Error())
 			return MakeReadObject(reader, Regex{})
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
