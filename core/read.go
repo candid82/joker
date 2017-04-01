@@ -419,11 +419,39 @@ func readSymbol(reader *Reader, first rune) Object {
 	}
 }
 
-func readString(reader *Reader, isRegex bool) Object {
+func readRegex(reader *Reader) Object {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
-		if r == '\\' && !isRegex {
+		if r == EOF {
+			panic(MakeReadError(reader, "Non-terminated regex literal"))
+		}
+		b.WriteRune(r)
+		if r == '\\' {
+			r = reader.Get()
+			if r == EOF {
+				panic(MakeReadError(reader, "Non-terminated regex literal"))
+			}
+			b.WriteRune(r)
+		}
+		r = reader.Get()
+	}
+	regex, err := regexp.Compile(b.String())
+	if err != nil {
+		if LINTER_MODE {
+			printReadWarning(reader, "Invalid regex: "+err.Error())
+			return MakeReadObject(reader, Regex{})
+		}
+		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
+	}
+	return MakeReadObject(reader, Regex{R: regex})
+}
+
+func readString(reader *Reader) Object {
+	var b bytes.Buffer
+	r := reader.Get()
+	for r != '"' {
+		if r == '\\' {
 			r = reader.Get()
 			switch r {
 			case '\\':
@@ -466,16 +494,6 @@ func readString(reader *Reader, isRegex bool) Object {
 		}
 		b.WriteRune(r)
 		r = reader.Get()
-	}
-	if isRegex {
-		r, err := regexp.Compile(b.String())
-		if err != nil {
-			if LINTER_MODE {
-				return MakeReadObject(reader, Regex{})
-			}
-			panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
-		}
-		return MakeReadObject(reader, Regex{R: r})
 	}
 	return MakeReadObject(reader, String{S: b.String()})
 }
@@ -820,7 +838,7 @@ func readDispatch(reader *Reader) Object {
 	r := reader.Get()
 	switch r {
 	case '"':
-		return readString(reader, true)
+		return readRegex(reader)
 	case '\'':
 		popPos()
 		nextObj := Read(reader)
@@ -878,7 +896,7 @@ func Read(reader *Reader) Object {
 	case isSymbolInitial(r):
 		return readSymbol(reader, r)
 	case r == '"':
-		return readString(reader, false)
+		return readString(reader)
 	case r == '(':
 		return readList(reader)
 	case r == '[':
