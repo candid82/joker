@@ -2370,7 +2370,9 @@
         process-entry (fn [bvec b] (pb bvec (first b) (second b)))]
     (if (every? symbol? (map first bents))
       bindings
-      (reduce process-entry [] bents))))
+      (with-meta
+        (reduce process-entry [] bents)
+        (meta bindings)))))
 
 (defmacro let
   "binding => binding-form init-expr
@@ -2484,11 +2486,13 @@
       (let [vs (take-nth 2 (drop 1 bindings))
             bs (take-nth 2 bindings)
             gs (map (fn [b] (if (symbol? b) b (gensym))) bs)
-            bfs (reduce (fn [ret [b v g]]
-                           (if (symbol? b)
-                             (conj ret g v)
-                             (conj ret g v b g)))
-                         [] (map vector bs vs gs))]
+            bfs (with-meta
+                  (reduce (fn [ret [b v g]]
+                            (if (symbol? b)
+                              (conj ret g v)
+                              (conj ret g v (vary-meta b assoc :skip-unused true) g)))
+                          [] (map vector bs vs gs))
+                  {:skip-unused true})]
         `(let ~bfs
            (loop* ~(vec (interleave gs gs))
                   (let ~(vec (interleave bs gs))

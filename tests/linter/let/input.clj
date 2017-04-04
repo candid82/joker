@@ -6,6 +6,6 @@
 (let [{:keys [:t ::g]} {:t 1 :user/g 2}] [t g])
 
 ;; Should FAIL
-(let [a 1])
+(let [_ 1])
 (let [] 1)
 (let [[a & more 1] []] 1)

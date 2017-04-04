@@ -117,9 +117,10 @@ type (
 		Call(args []Object) Object
 	}
 	Binding struct {
-		name  Symbol
-		index int
-		frame int
+		name   Symbol
+		index  int
+		frame  int
+		isUsed bool
 	}
 	Bindings struct {
 		bindings map[*string]*Binding
@@ -141,10 +142,14 @@ type (
 	}
 )
 
-var GLOBAL_ENV = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
-var LOCAL_BINDINGS *Bindings = nil
-var SPECIAL_SYMBOLS = make(map[*string]bool)
-var KNOWN_MACROS *Var
+var (
+	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
+	LOCAL_BINDINGS  *Bindings = nil
+	SPECIAL_SYMBOLS           = make(map[*string]bool)
+	KNOWN_MACROS    *Var
+	UNDERSCORE      = MakeSymbol("_")
+	SKIP_UNUSED     = MakeKeyword("skip-unused")
+)
 
 func (b *Bindings) ToMap() Map {
 	var res Map = EmptyArrayMap()
@@ -676,6 +681,15 @@ func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
 	return (*LoopExpr)(parseLetLoop(obj, true, ctx))
 }
 
+func isSkipUnused(obj Meta) bool {
+	if m := obj.GetMeta(); m != nil {
+		if ok, v := m.Get(SKIP_UNUSED); ok {
+			return toBool(v)
+		}
+	}
+	return false
+}
+
 func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 	formName := "let"
 	if isLoop {
@@ -720,10 +734,22 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		}
 
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
-		if len(res.body) == 0 {
-			pos := GetPosition(obj)
-			printParseWarning(pos, formName+" form with empty body")
+
+		if LINTER_MODE {
+			if len(res.body) == 0 {
+				pos := GetPosition(obj)
+				printParseWarning(pos, formName+" form with empty body")
+			}
+
+			if !isSkipUnused(b) {
+				for _, b := range ctx.localBindings.bindings {
+					if !b.isUsed && !b.name.Equals(UNDERSCORE) {
+						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
+					}
+				}
+			}
 		}
+
 	default:
 		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
 	}
@@ -788,11 +814,12 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			t := fixInfo(s.at(i), info)
 			res = res.Conj(t)
 		}
+		res.(*Vector).meta = s.meta
 		if info := obj.GetInfo(); info != nil {
 			return res.WithInfo(info)
 		}
 		return res.WithInfo(info)
-	case *ArrayMap:
+	case Map:
 		res := EmptyArrayMap()
 		iter := s.Iter()
 		for iter.HasNext() {
@@ -801,6 +828,7 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			value := fixInfo(p.value, info)
 			res.Add(key, value)
 		}
+		res.meta = s.(Meta).GetMeta()
 		if info := obj.GetInfo(); info != nil {
 			return res.WithInfo(info)
 		}
@@ -1100,6 +1128,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
 	if b != nil {
+		b.isUsed = true
 		return &BindingExpr{
 			binding:  b,
 			Position: GetPosition(obj),
