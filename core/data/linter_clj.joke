@@ -56,6 +56,15 @@
 
 (joker.core/in-ns 'joker.core)
 
+;; Unsupported arities
+
+(def __deref__ deref)
+(defn deref
+  ([ref]
+   (__deref__ ref))
+  ([ref timeout-ms timeout-val]))
+
+
 ;; Clojure core functions not supported by Joker
 
 (defn ensure [ref])
