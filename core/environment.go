@@ -140,6 +140,7 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 			ns:   currentNs.Name.name,
 		}
 	}
+	vr.isUsed = true
 	vr.ns.isUsed = true
 	return Symbol{
 		name: vr.name.name,

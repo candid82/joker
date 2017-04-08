@@ -149,6 +149,7 @@ var (
 	KNOWN_MACROS    *Var
 	UNDERSCORE      = MakeSymbol("_")
 	SKIP_UNUSED     = MakeKeyword("skip-unused")
+	PRIVATE         = MakeKeyword("private")
 )
 
 func (b *Bindings) ToMap() Map {
@@ -280,20 +281,45 @@ func printReadWarning(reader *Reader, msg string) {
 }
 
 func WarnOnUnusedNamespaces() {
-	var namespaces []string
-	for ns := range GLOBAL_ENV.Namespaces {
-		namespaces = append(namespaces, *ns)
-	}
-	sort.Strings(namespaces)
+	var names []string
+	positions := make(map[string]Position)
 
-	for _, name := range namespaces {
-		ns := GLOBAL_ENV.Namespaces[STRINGS.Intern(name)]
+	for _, ns := range GLOBAL_ENV.Namespaces {
 		if !ns.isUsed {
 			pos := ns.Name.GetInfo()
 			if pos != nil {
-				printParseWarning(pos.Position, "unused namespace "+ns.Name.ToString(false))
+				name := ns.Name.ToString(false)
+				names = append(names, name)
+				positions[name] = pos.Position
 			}
 		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "unused namespace "+name)
+	}
+}
+
+func WarnOnUnusedVars() {
+	var names []string
+	positions := make(map[string]Position)
+
+	ns := GLOBAL_ENV.Namespaces[STRINGS.Intern("user")]
+
+	for _, vr := range ns.mappings {
+		if vr.ns == ns && !vr.isUsed && vr.isPrivate {
+			pos := vr.GetInfo()
+			if pos != nil {
+				names = append(names, *vr.name.name)
+				positions[*vr.name.name] = pos.Position
+			}
+		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "unused var "+name)
 	}
 }
 
@@ -418,6 +444,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			})
 		}
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(Symbol{name: sym.name})
+		vr.WithInfo(obj.GetInfo())
 
 		res := &DefExpr{
 			vr:       vr,
@@ -444,6 +471,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		vr.expr = res.value
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
+			if ok, p := meta.Get(PRIVATE); ok {
+				vr.isPrivate = toBool(p)
+			}
 		}
 		return res
 	default:
@@ -1008,6 +1038,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					}
 					vr = InternFakeSymbol(symNs, sym)
 				}
+				vr.isUsed = true
 				vr.ns.isUsed = true
 				return &LiteralExpr{
 					obj:      vr,
@@ -1153,6 +1184,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 		vr = InternFakeSymbol(symNs, sym)
 	}
+	vr.isUsed = true
 	vr.ns.isUsed = true
 	return &VarRefExpr{
 		vr:       vr,

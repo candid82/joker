@@ -1,7 +1,5 @@
 ;; This vars are declared for the linter mode to work properly
 
-(def ^:private defproject)
-
 (joker.core/in-ns 'user)
 
 (doseq
@@ -55,6 +53,8 @@
   (inject-ns* sym))
 
 (joker.core/in-ns 'joker.core)
+
+(def ^:private defproject)
 
 ;; Unsupported arities
 

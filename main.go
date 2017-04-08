@@ -190,6 +190,7 @@ func lintFile(filename string, dialect Dialect) {
 	configureLinterMode(dialect)
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
+		WarnOnUnusedVars()
 	}
 }
 
