@@ -2,6 +2,8 @@
 
 (joker.core/in-ns 'user)
 
+(def defproject)
+
 (doseq
   [sym
    '(
@@ -53,8 +55,6 @@
   (inject-ns* sym))
 
 (joker.core/in-ns 'joker.core)
-
-(def ^:private defproject)
 
 ;; Unsupported arities
 
