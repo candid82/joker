@@ -143,13 +143,14 @@ type (
 )
 
 var (
-	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
-	LOCAL_BINDINGS  *Bindings = nil
-	SPECIAL_SYMBOLS           = make(map[*string]bool)
-	KNOWN_MACROS    *Var
-	UNDERSCORE      = MakeSymbol("_")
-	SKIP_UNUSED     = MakeKeyword("skip-unused")
-	PRIVATE         = MakeKeyword("private")
+	GLOBAL_ENV                 = NewEnv(MakeSymbol("user"), os.Stdout, os.Stdin, os.Stderr)
+	LOCAL_BINDINGS   *Bindings = nil
+	SPECIAL_SYMBOLS            = make(map[*string]bool)
+	KNOWN_MACROS     *Var
+	RECURSION_POINTS *Var
+	UNDERSCORE       = MakeSymbol("_")
+	SKIP_UNUSED      = MakeKeyword("skip-unused")
+	PRIVATE          = MakeKeyword("private")
 )
 
 func (b *Bindings) ToMap() Map {
@@ -269,6 +270,10 @@ func printError(pos Position, msg string) {
 
 func printParseWarning(pos Position, msg string) {
 	printError(pos, "Parse warning: "+msg)
+}
+
+func printParseError(pos Position, msg string) {
+	printError(pos, "Parse error: "+msg)
 }
 
 func printReadWarning(reader *Reader, msg string) {
@@ -796,8 +801,13 @@ func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 	}
 	seq := obj.(Seq)
 	args := parseSeq(seq.Rest(), ctx)
-	if len(loopBindings) != len(args) && !LINTER_MODE {
-		panic(&ParseError{obj: obj, msg: fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))})
+	if loopBindings != nil && len(loopBindings) != len(args) {
+		msg := fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))
+		if LINTER_MODE {
+			printParseError(GetPosition(obj), msg)
+		} else {
+			panic(&ParseError{obj: obj, msg: msg})
+		}
 	}
 	ctx.recur = true
 	return &RecurExpr{
@@ -935,6 +945,32 @@ func isKnownMacros(sym Symbol) bool {
 	return ok
 }
 
+func isSymRecursionPoint(sym Symbol) bool {
+	if RECURSION_POINTS == nil {
+		recursionPoints := GLOBAL_ENV.CoreNamespace.Resolve("*recursion-points*")
+		if recursionPoints == nil {
+			return false
+		}
+		RECURSION_POINTS = recursionPoints
+	}
+	ok, _ := RECURSION_POINTS.Value.(Set).Get(sym)
+	return ok
+}
+
+func isExprRecursionPoint(expr Expr) bool {
+	if !LINTER_MODE {
+		return false
+	}
+	if c, ok := expr.(*VarRefExpr); ok {
+		sym := Symbol{
+			ns:   c.vr.ns.Name.name,
+			name: c.vr.name.name,
+		}
+		return isSymRecursionPoint(sym)
+	}
+	return false
+}
+
 func isUnknownCallable(expr Expr) bool {
 	if !LINTER_MODE {
 		return false
@@ -1064,6 +1100,10 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 
 	ctx.isUnknownCallableScope = currentIsUnknownCallableScope
 	callable := Parse(first, ctx)
+
+	// if isExprRecursionPoint(callable) {
+	// 	return parseLoop(obj, ctx)
+	// }
 
 	if isUnknownCallable(callable) {
 		ctx.isUnknownCallableScope = true

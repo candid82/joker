@@ -1,5 +1,12 @@
 (joker.core/in-ns 'joker.core)
 
+(def *known-macros*
+  #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
+    'clojure.test/deftest 'clojure.test/is 'clojure.test/are})
+
+(def *recursion-points*
+  #{'clojure.core.async/go-loop})
+
 (def *linter-config*
   (try
     (let [env (joker.os/env)]
@@ -26,10 +33,6 @@
     `(do
        ~@(map #(list 'joker.core/require (list 'quote %)) syms)
        ~@(map #(list 'def %) (remove resolve syms)))))
-
-(def *known-macros*
-  #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
-    'clojure.test/deftest 'clojure.test/is 'clojure.test/are})
 
 ;; Clojure core macros not supported by Joker
 
