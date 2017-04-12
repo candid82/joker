@@ -70,7 +70,7 @@ These are high level goals of the project that guide design and implementation d
 ## Linter mode
 
 To run Joker in linter mode pass `--lint<dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `<dialect>` is omitted, it will be set based on file extenstion. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lintcljs --` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
-```
+```clojure
 (let [a 1])
 ```
 Executing the following command `joker --lint test.clj` will produce the following output:
@@ -85,7 +85,7 @@ The output format is as follows: `<filename>:<line>:<column> <issue type>: <mess
 
 Joker lints the code in one file at a time and doesn't try to resolve symbols from external namespaces. Because of that and since it's missing some Clojure(Script) features it doesn't always provide accurate linting. In general it tries to be unobtrusive and error on the side of false negatives rather than false positives. One common scenario that can lead to false positives is resolving symbols inside a macro. Consider the example below:
 
-```
+```clojure
 (ns foo (:require [bar :refer [def-something]]))
 
 (def-something baz ...)
@@ -93,7 +93,7 @@ Joker lints the code in one file at a time and doesn't try to resolve symbols fr
 
 Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The file is called `.joker` and should be in your home directory. It should contain a single map with `:known-macros` key:
 
-```
+```clojure
 {:known-macros [bar/def-something foo/another-macro ...]}
 ```
 
