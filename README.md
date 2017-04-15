@@ -2,9 +2,25 @@
 
 Joker is a small Clojure interpreter and linter written in Go.
 
-## Getting Started
+## Installation
 
-Download pre-built [binary executable](https://github.com/candid82/joker/releases) for your platform or [build it yourself](#building). Then run `joker` without arguments to launch REPL or pass the filename of the script you want to execute. If you want to run `joker` from any location, make sure it's on your `PATH`. Joker uses `.joke` filename extension. See [Linter mode](#linter-mode) if you want to use Joker as a linter.
+On macOS, the easiest way to install Joker is via Homebrew:
+
+```
+brew install candid82/brew/joker
+```
+
+On other platforms (or if you prefer manual installation), download a [precompiled binary](https://github.com/candid82/joker/releases) for your platform and put it on your PATH.
+
+You can also [build](#building) Joker from the source code.
+
+## Usage
+
+`joker` - launch REPL
+
+`joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`.
+
+`joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
 ## Documentation
 
