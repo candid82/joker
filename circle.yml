@@ -5,3 +5,4 @@ dependencies:
     - go get -d -v gopkg.in/readline.v1
     - go generate -v ./...
     - go build -v
+    - ./linter-tests.sh
