@@ -3040,6 +3040,9 @@
         need-ns (or as use)
         filter-opts (select-keys opts require-opt-keys)
         undefined-on-entry (not (find-ns lib))]
+    (when (and *linter-mode* loaded)
+      (println-err (ex-info (str "duplicate require for " lib)
+                            {:form lib :_prefix "Parse warning"})))
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
         (try
