@@ -1,0 +1,2 @@
+tests/linter/ns-5/input.clj:3:14: Parse warning: duplicate require for test.ns1
+Stacktrace:
