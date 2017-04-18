@@ -26,4 +26,5 @@
         (println "EXPECTED:")
         (println expected)
         (println "ACTUAL:")
-        (println output-without-stacktraces)))))
+        (println output-without-stacktraces)
+        (joker.os/exit 1)))))

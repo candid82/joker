@@ -26,6 +26,13 @@ var args Proc = func(args []Object) Object {
 	return res
 }
 
+var exit Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	code := EnsureInt(args, 0)
+	os.Exit(code.I)
+	return NIL
+}
+
 var sh Proc = func(args []Object) Object {
 	strs := make([]string, len(args))
 	for i := range args {
@@ -68,6 +75,10 @@ func intern(name string, proc Proc) {
 func init() {
 	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
 	osNamespace.InternVar("env", env, MakeMeta(NewListFrom(EmptyVector), "Returns a map representing the environment.", "1.0"))
+	osNamespace.InternVar("exit", exit,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
+			"Causes the current program to exit with the given status code.", "1.0"))
 	osNamespace.InternVar("args", args,
 		MakeMeta(
 			NewListFrom(EmptyVector),
