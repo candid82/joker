@@ -1084,13 +1084,13 @@ func (b Bool) Compare(other Object) int {
 }
 
 func (k Keyword) ToString(escape bool) string {
-	return ":" + k.Name()
+	if k.ns != nil {
+		return ":" + *k.ns + "/" + *k.name
+	}
+	return ":" + *k.name
 }
 
 func (k Keyword) Name() string {
-	if k.ns != nil {
-		return *k.ns + "/" + *k.name
-	}
 	return *k.name
 }
 

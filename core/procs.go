@@ -541,8 +541,12 @@ var procSymbol Proc = func(args []Object) Object {
 	if len(args) == 1 {
 		return MakeSymbol(EnsureString(args, 0).S)
 	}
+	var ns *string = nil
+	if !args[0].Equals(NIL) {
+		ns = STRINGS.Intern(EnsureString(args, 0).S)
+	}
 	return Symbol{
-		ns:   STRINGS.Intern(EnsureString(args, 0).S),
+		ns:   ns,
 		name: STRINGS.Intern(EnsureString(args, 1).S),
 	}
 }
@@ -562,7 +566,10 @@ var procKeyword Proc = func(args []Object) Object {
 			return NIL
 		}
 	}
-	ns := STRINGS.Intern(EnsureString(args, 0).S)
+	var ns *string = nil
+	if !args[0].Equals(NIL) {
+		ns = STRINGS.Intern(EnsureString(args, 0).S)
+	}
 	name := STRINGS.Intern(EnsureString(args, 1).S)
 	return Keyword{
 		ns:   ns,
