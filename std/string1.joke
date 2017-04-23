@@ -1,0 +1,40 @@
+(ns
+  ^{:go-imports "strings"
+    :doc "Implements simple functions to manipulate strings."}
+  string1)
+
+(defn ^Bool ends-with?
+  "True if s ends with substr."
+  {:added "1.0"
+  :go "strings.HasSuffix(s, substr)"}
+  [^String s ^String substr])
+
+(defn ^String pad-right
+  "Returns s padded with pad at the end to length n."
+  {:added "1.0"
+  :go "padRight(s, pad, n)"}
+  [^String s ^String pad ^Int n])
+
+(defn ^String pad-left
+  "Returns s padded with pad at the beginning to length n."
+  {:added "1.0"
+  :go "padLeft(s, pad, n)"}
+  [^String s ^String pad ^Int n])
+
+(defn split
+  "Splits string on a regular expression. Returns vector of the splits."
+  {:added "1.0"
+  :go "split(s, re)"}
+  [^String s ^Regex re])
+
+(defn split-lines
+  "Splits string on \\n or \\r\\n. Returns vector of the splits."
+  {:added "1.0"
+  :go "split(s, newLine)"}
+  [^String s])
+
+(defn ^String join
+  "Returns a string of all elements in coll, as returned by (seq coll), separated by a separator."
+  {:added "1.0"
+  :go "join(separator, coll)"}
+  [^String separator ^Seqable coll])

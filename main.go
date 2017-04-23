@@ -11,6 +11,7 @@ import (
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/json"
 	_ "github.com/candid82/joker/os"
+	_ "github.com/candid82/joker/std/string1"
 	_ "github.com/candid82/joker/string"
 	"gopkg.in/readline.v1"
 )

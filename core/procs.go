@@ -44,6 +44,22 @@ func ensureArrayMap(args []Object, index int) *ArrayMap {
 	}
 }
 
+func ExtractString(args []Object, index int) string {
+	return EnsureString(args, index).S
+}
+
+func ExtractInt(args []Object, index int) int {
+	return EnsureInt(args, index).I
+}
+
+func ExtractRegex(args []Object, index int) *regexp.Regexp {
+	return EnsureRegex(args, index).R
+}
+
+func ExtractSeqable(args []Object, index int) Seqable {
+	return EnsureSeqable(args, index)
+}
+
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:

@@ -1,0 +1,76 @@
+(require '[string1])
+
+(def rpl joker.string/replace)
+
+(def fn-template
+  (slurp "fn.tmpl"))
+
+(def package-template
+  (slurp "package.tmpl"))
+
+(def intern-template
+  (slurp "intern.tmpl"))
+
+(defn q
+  [s]
+  (str "\"" s "\""))
+
+(defn go-name
+  [fn-name]
+  (let [n (-> fn-name
+              (rpl "-" "_")
+              (rpl "?" "")
+              (str "_"))]
+    (if (joker.string/ends-with? fn-name "?")
+      (str "is" n)
+      n)))
+
+(defn extract-args
+  [args]
+  (joker.string/join
+   "\n  "
+   (map-indexed
+    (fn [i arg]
+      (str arg " := Extract" (:tag (meta arg)) "(args, " (str i) ")"))
+    args)))
+
+(defn generate-fn
+  [ns-sym k v]
+  (let [m (meta v)
+        args (first (:arglists m))
+        go-fn-name (go-name (str k))
+        fn-str (-> fn-template
+                   (rpl "{fnName}" go-fn-name)
+                   (rpl "{arity}" (str (count args)))
+                   (rpl "{args}" (extract-args args))
+                   (rpl "{goExpr}" (:go m))
+                   (rpl "{return}"
+                        (if (:tag m)
+                          (str "return Make" (:tag m) "(res)")
+                          "return res")))
+        intern-str (-> intern-template
+                       (rpl "{nsName}" (str ns-sym))
+                       (rpl "{fnName}" (str k))
+                       (rpl "{goName}" go-fn-name)
+                       (rpl "{fnDocstring}" (:doc m))
+                       (rpl "{added}" (:added m))
+                       (rpl "{args}"
+                            (joker.string/join ", " (for [arg args]
+                                                      (str "MakeSymbol(" (q (str arg)) ")")))))]
+    [fn-str intern-str]))
+
+(defn generate-ns
+  [ns-sym]
+  (let [ns (find-ns ns-sym)
+        m (meta ns)
+        fns (for [[k v] (ns-publics ns)]
+              (generate-fn ns-sym k v))
+        res (-> package-template
+                (rpl "{nsName}" (str ns-sym))
+                (rpl "{imports}" (q (:go-imports m)))
+                (rpl "{fns}" (joker.string/join "\n" (map first fns)))
+                (rpl "{nsDocstring}" (:doc m))
+                (rpl "{interns}" (joker.string/join "\n" (map second fns))))]
+    res))
+
+(spit "string1/string1.go" (generate-ns 'string1))
