@@ -1,4 +1,4 @@
-(require '[string1])
+(require '[string])
 
 (def rpl joker.string/replace)
 
@@ -73,4 +73,4 @@
                 (rpl "{interns}" (joker.string/join "\n" (map second fns))))]
     res))
 
-(spit "string1/string1.go" (generate-ns 'string1))
+(spit "string/string.go" (generate-ns 'string))

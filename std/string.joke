@@ -1,12 +1,18 @@
 (ns
   ^{:go-imports "strings"
     :doc "Implements simple functions to manipulate strings."}
-  string1)
+  string)
 
 (defn ^Bool ends-with?
   "True if s ends with substr."
   {:added "1.0"
   :go "strings.HasSuffix(s, substr)"}
+  [^String s ^String substr])
+
+(defn ^Bool starts-with?
+  "True if s starts with substr."
+  {:added "1.0"
+  :go "strings.HasPrefix(s, substr)"}
   [^String s ^String substr])
 
 (defn ^String pad-right
@@ -38,3 +44,15 @@
   {:added "1.0"
   :go "join(separator, coll)"}
   [^String separator ^Seqable coll])
+
+(defn ^String replace
+  "Replaces all instances of string old with string new in string s."
+  {:added "1.0"
+  :go "strings.Replace(s, old, new, -1)"}
+  [^String s ^String old ^String new])
+
+(defn ^String trim-space
+  "Returns a string s, with all leading and trailing white space removed, as defined by Unicode."
+  {:added "1.0"
+  :go "strings.TrimSpace(s)"}
+  [^String s])
