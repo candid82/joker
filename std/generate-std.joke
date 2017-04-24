@@ -73,4 +73,4 @@
                 (rpl "{interns}" (joker.string/join "\n" (map second fns))))]
     res))
 
-(spit "string/string.go" (generate-ns 'string))
+(spit "string/a_string.go" (generate-ns 'string))
