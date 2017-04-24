@@ -1,0 +1,10 @@
+(ns
+  ^{:go-imports []
+    :doc "Implements base64 encoding as specified by RFC 4648."}
+  base64)
+
+(defn ^String decode-string
+  "Returns the bytes represented by the base64 string s."
+  {:added "1.0"
+  :go "base64DecodeString(s)"}
+  [^String s])
