@@ -1,6 +1,6 @@
-(require
- '[string]
- '[json])
+(def namespaces ['string 'json])
+
+(apply require namespaces)
 
 (def rpl joker.string/replace)
 
@@ -75,5 +75,10 @@
                 (rpl "{interns}" (joker.string/join "\n" (map second fns))))]
     res))
 
-(spit "string/a_string.go" (generate-ns 'string))
-(spit "json/a_json.go" (generate-ns 'json))
+(defn ns-file-name
+  [ns-sym]
+  (str ns-sym "/a_" ns-sym ".go"))
+
+(doseq [ns-sym namespaces]
+  (spit (ns-file-name ns-sym)
+        (generate-ns ns-sym)))
