@@ -1,0 +1,12 @@
+(ns
+  ^{:go-imports []
+    :doc "Implements encoding and decoding of JSON as defined in RFC 4627."}
+  json)
+
+(defn read-string
+  "Parses the JSON-encoded data and return the result as a Joker value."
+  {:added "1.0"
+  :go "readString(s)"}
+  [^String s])
+
+

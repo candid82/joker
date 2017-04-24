@@ -34,20 +34,10 @@ func toObject(v interface{}) Object {
 	}
 }
 
-var readString Proc = func(args []Object) Object {
+func readString(s string) Object {
 	var v interface{}
-	if err := json.Unmarshal([]byte(EnsureString(args, 0).S), &v); err != nil {
+	if err := json.Unmarshal([]byte(s), &v); err != nil {
 		panic(RT.NewError("Invalid json: " + err.Error()))
 	}
 	return toObject(v)
-}
-
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
-
-func init() {
-	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
-	jsonNamespace.InternVar("read-string", readString,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			"Parses the JSON-encoded data and return the result as a Joker value.", "1.0"))
 }
