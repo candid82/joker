@@ -1,0 +1,33 @@
+(ns
+  ^{:go-imports ["os"]
+    :doc "Provides a platform-independent interface to operating system functionality."}
+  os)
+
+(defn env
+  "Returns a map representing the environment."
+  {:added "1.0"
+  :go "env()"}
+  [])
+
+(defn args
+  "Returns a sequence of the command line arguments, starting with the program name (normally, joker)."
+  {:added "1.0"
+  :go "commandArgs()"}
+  [])
+
+(defn exit
+  "Causes the current program to exit with the given status code."
+  {:added "1.0"
+  :go "NIL; os.Exit(code)"}
+  [^Int code])
+
+(defn sh
+  "Executes the named program with the given arguments. Returns a map with the following keys:
+      :success - whether or not the execution was successful,
+      :out - string capturing stdout of the program,
+      :err - string capturing stderr of the program."
+  {:added "1.0"
+  :go "sh(name, arguments)"}
+  [^String name & ^String arguments])
+
+

@@ -1,4 +1,4 @@
-(def namespaces ['string 'json 'base64])
+(def namespaces ['string 'json 'base64 'os])
 
 (apply require namespaces)
 
@@ -33,18 +33,34 @@
    "\n  "
    (map-indexed
     (fn [i arg]
-      (str arg " := Extract" (:tag (meta arg)) "(args, " (str i) ")"))
+      (let [m (meta arg)
+            t (cond-> (:tag m)
+                (:varargs m) (str "s"))]
+        (str arg " := Extract" t "(args, " (str i) ")")))
     args)))
+
+(defn handle-varargs
+  [args]
+  (let [c (count args)]
+    (if (and (> c 1)
+             (= '& (nth args (- c 2))))
+      (let [vargs (vary-meta (last args) assoc :varargs true)]
+        (conj (subvec args 0 (- c 2)) vargs))
+      args)))
 
 (defn generate-fn
   [ns-sym k v]
   (let [m (meta v)
         args (first (:arglists m))
+        handle-args (handle-varargs args)
+        cnt (count handle-args)
+        varargs? (< cnt (count args))
         go-fn-name (go-name (str k))
         fn-str (-> fn-template
                    (rpl "{fnName}" go-fn-name)
-                   (rpl "{arity}" (str (count args)))
-                   (rpl "{args}" (extract-args args))
+                   (rpl "{minArity}" (str (if varargs? (dec cnt) cnt)))
+                   (rpl "{maxArity}" (str (if varargs? 1000 cnt)))
+                   (rpl "{args}" (extract-args handle-args))
                    (rpl "{goExpr}" (:go m))
                    (rpl "{return}"
                         (if (:tag m)

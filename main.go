@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
-	_ "github.com/candid82/joker/os"
 	_ "github.com/candid82/joker/std/base64"
 	_ "github.com/candid82/joker/std/json"
+	_ "github.com/candid82/joker/std/os"
 	_ "github.com/candid82/joker/std/string"
 	"gopkg.in/readline.v1"
 )

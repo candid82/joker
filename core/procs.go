@@ -48,6 +48,14 @@ func ExtractString(args []Object, index int) string {
 	return EnsureString(args, index).S
 }
 
+func ExtractStrings(args []Object, index int) []string {
+	strs := make([]string, 0)
+	for i := index; i < len(args); i++ {
+		strs = append(strs, EnsureString(args, i).S)
+	}
+	return strs
+}
+
 func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
 }
