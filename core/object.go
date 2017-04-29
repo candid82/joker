@@ -74,7 +74,7 @@ type (
 	}
 	Char struct {
 		InfoHolder
-		ch rune
+		Ch rune
 	}
 	Double struct {
 		InfoHolder
@@ -931,15 +931,15 @@ func (bf *BigFloat) Compare(other Object) int {
 
 func (c Char) ToString(escape bool) string {
 	if escape {
-		return escapeRune(c.ch)
+		return escapeRune(c.Ch)
 	}
-	return string(c.ch)
+	return string(c.Ch)
 }
 
 func (c Char) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Char:
-		return c.ch == other.ch
+		return c.Ch == other.Ch
 	default:
 		return false
 	}
@@ -950,21 +950,21 @@ func (c Char) GetType() *Type {
 }
 
 func (c Char) Native() interface{} {
-	return c.ch
+	return c.Ch
 }
 
 func (c Char) Hash() uint32 {
 	h := getHash()
-	h.Write([]byte(string(c.ch)))
+	h.Write([]byte(string(c.Ch)))
 	return h.Sum32()
 }
 
 func (c Char) Compare(other Object) int {
 	c2 := AssertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
-	if c.ch < c2.ch {
+	if c.Ch < c2.Ch {
 		return -1
 	}
-	if c2.ch < c.ch {
+	if c2.Ch < c.Ch {
 		return 1
 	}
 	return 0
@@ -1252,7 +1252,7 @@ func (s String) Count() int {
 func (s String) Seq() Seq {
 	runes := make([]Object, 0, len(s.S))
 	for _, r := range s.S {
-		runes = append(runes, Char{ch: r})
+		runes = append(runes, Char{Ch: r})
 	}
 	return &ArraySeq{arr: runes}
 }
@@ -1264,7 +1264,7 @@ func (s String) Nth(i int) Object {
 	j, r := 0, 't'
 	for j, r = range s.S {
 		if i == j {
-			return Char{ch: r}
+			return Char{Ch: r}
 		}
 	}
 	panic(RT.NewError(fmt.Sprintf("Index %d exceeds string's length %d", i, j+1)))
@@ -1276,7 +1276,7 @@ func (s String) TryNth(i int, d Object) Object {
 	}
 	for j, r := range s.S {
 		if i == j {
-			return Char{ch: r}
+			return Char{Ch: r}
 		}
 	}
 	return d

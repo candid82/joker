@@ -74,6 +74,18 @@ func capitalize(s string) string {
 	return strings.ToUpper(s[0:1]) + strings.ToLower(s[1:])
 }
 
+func escape(s string, cmap Callable) string {
+	var b bytes.Buffer
+	for _, r := range s {
+		if obj := cmap.Call([]Object{Char{Ch: r}}); !obj.Equals(NIL) {
+			b.WriteString(obj.ToString(false))
+		} else {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
 func init() {
 	newLine, _ = regexp.Compile("\r?\n")
 }

@@ -44,6 +44,10 @@ func ensureArrayMap(args []Object, index int) *ArrayMap {
 	}
 }
 
+func ExtractCallable(args []Object, index int) Callable {
+	return EnsureCallable(args, index)
+}
+
 func ExtractObject(args []Object, index int) Object {
 	return args[index]
 }
@@ -664,7 +668,7 @@ var procCompare Proc = func(args []Object) Object {
 var procInt Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Char:
-		return Int{I: int(obj.ch)}
+		return Int{I: int(obj.Ch)}
 	case Number:
 		return obj.Int()
 	default:
@@ -690,7 +694,7 @@ var procChar Proc = func(args []Object) Object {
 		if i < MIN_RUNE || i > MAX_RUNE {
 			panic(RT.NewError(fmt.Sprintf("Value out of range for char: %d", i)))
 		}
-		return Char{ch: rune(i)}
+		return Char{Ch: rune(i)}
 	default:
 		panic(RT.NewError(fmt.Sprintf("Cannot cast %s (type: %s) to Char", c.ToString(true), c.GetType().ToString(false))))
 	}
@@ -1277,7 +1281,7 @@ var procIndexOf Proc = func(args []Object) Object {
 	s := EnsureString(args, 0)
 	ch := EnsureChar(args, 1)
 	for i, r := range s.S {
-		if r == ch.ch {
+		if r == ch.Ch {
 			return Int{I: i}
 		}
 	}

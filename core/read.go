@@ -157,7 +157,7 @@ func peekExpectedDelimiter(reader *Reader) {
 func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 	eatString(reader, ending)
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char{ch: r})
+	return MakeReadObject(reader, Char{Ch: r})
 }
 
 func eatWhitespace(reader *Reader) {
@@ -200,7 +200,7 @@ func readUnicodeCharacter(reader *Reader, length, base int) Object {
 		panic(MakeReadError(reader, "Invalid unicode character: \\o"+str))
 	}
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char{ch: rune(i)})
+	return MakeReadObject(reader, Char{Ch: rune(i)})
 }
 
 func readCharacter(reader *Reader) Object {
@@ -243,7 +243,7 @@ func readCharacter(reader *Reader) Object {
 		}
 	}
 	peekExpectedDelimiter(reader)
-	return MakeReadObject(reader, Char{ch: r})
+	return MakeReadObject(reader, Char{Ch: r})
 }
 
 func scanBigInt(str string, base int, err error, reader *Reader) Object {

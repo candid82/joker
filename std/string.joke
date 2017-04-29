@@ -69,3 +69,13 @@
   {:added "1.0"
   :go "capitalize(s)"}
   [^String s])
+
+(defn ^String escape
+  "Return a new string, using cmap to escape each character ch
+  from s as follows:
+
+  If (cmap ch) is nil, append ch to the new string.
+  If (cmap ch) is non-nil, append (str (cmap ch)) instead."
+  {:added "1.0"
+  :go "escape(s, cmap)"}
+  [^String s ^Callable cmap])
