@@ -56,3 +56,9 @@
   {:added "1.0"
   :go "strings.TrimSpace(s)"}
   [^String s])
+
+(defn ^Bool blank?
+  "True if s is nil, empty, or contains only whitespace."
+  {:added "1.0"
+  :go "isBlank(s)"}
+  [^Object s])

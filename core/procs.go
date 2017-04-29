@@ -44,6 +44,10 @@ func ensureArrayMap(args []Object, index int) *ArrayMap {
 	}
 }
 
+func ExtractObject(args []Object, index int) Object {
+	return args[index]
+}
+
 func ExtractString(args []Object, index int) string {
 	return EnsureString(args, index).S
 }

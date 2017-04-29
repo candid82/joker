@@ -3,6 +3,7 @@ package string
 import (
 	"bytes"
 	"regexp"
+	"unicode"
 
 	. "github.com/candid82/joker/core"
 )
@@ -52,7 +53,19 @@ func join(sep string, seqable Seqable) string {
 	return b.String()
 }
 
-func init() {
+func isBlank(s Object) bool {
+	if s.Equals(NIL) {
+		return true
+	}
+	str := AssertString(s, "").S
+	for _, r := range str {
+		if !unicode.IsSpace(r) {
+			return false
+		}
+	}
+	return true
+}
 
+func init() {
 	newLine, _ = regexp.Compile("\r?\n")
 }
