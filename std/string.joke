@@ -62,3 +62,10 @@
   {:added "1.0"
   :go "isBlank(s)"}
   [^Object s])
+
+(defn ^String capitalize
+  "Converts first character of the string to upper-case, all other
+  characters to lower-case."
+  {:added "1.0"
+  :go "capitalize(s)"}
+  [^String s])

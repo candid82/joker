@@ -3,6 +3,7 @@ package string
 import (
 	"bytes"
 	"regexp"
+	"strings"
 	"unicode"
 
 	. "github.com/candid82/joker/core"
@@ -64,6 +65,13 @@ func isBlank(s Object) bool {
 		}
 	}
 	return true
+}
+
+func capitalize(s string) string {
+	if len(s) < 2 {
+		return strings.ToUpper(s)
+	}
+	return strings.ToUpper(s[0:1]) + strings.ToLower(s[1:])
 }
 
 func init() {
