@@ -79,3 +79,9 @@
   {:added "1.0"
   :go "escape(s, cmap)"}
   [^String s ^Callable cmap])
+
+(defn ^Bool includes?
+  "True if s includes substr."
+  {:added "1.0"
+  :go "strings.Contains(s, substr)"}
+  [^String s ^String substr])
