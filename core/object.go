@@ -1015,6 +1015,10 @@ func (i Int) ToString(escape bool) string {
 	return fmt.Sprintf("%d", i.I)
 }
 
+func MakeInt(i int) Int {
+	return Int{I: i}
+}
+
 func (i Int) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Int:

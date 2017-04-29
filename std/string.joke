@@ -85,3 +85,10 @@
   {:added "1.0"
   :go "strings.Contains(s, substr)"}
   [^String s ^String substr])
+
+(defn index-of
+  "Return index of value (string or char) in s, optionally searching
+  forward from from-index or nil if not found."
+  {:added "1.0"
+  :go "indexOf(s, value)"}
+  [^String s ^Object value])

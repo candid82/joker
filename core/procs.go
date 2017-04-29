@@ -40,7 +40,7 @@ func ensureArrayMap(args []Object, index int) *ArrayMap {
 	case *ArrayMap:
 		return obj
 	default:
-		panic(RT.newArgTypeError(index, obj, "Map"))
+		panic(RT.NewArgTypeError(index, obj, "Map"))
 	}
 }
 
@@ -991,7 +991,7 @@ func EnsureIOReader(args []Object, index int) io.Reader {
 	case io.Reader:
 		return c
 	default:
-		panic(RT.newArgTypeError(index, c, "IOReader"))
+		panic(RT.NewArgTypeError(index, c, "IOReader"))
 	}
 }
 
@@ -1012,7 +1012,7 @@ func EnsureIOWriter(args []Object, index int) io.Writer {
 	case io.Writer:
 		return c
 	default:
-		panic(RT.newArgTypeError(index, c, "IOWriter"))
+		panic(RT.NewArgTypeError(index, c, "IOWriter"))
 	}
 }
 

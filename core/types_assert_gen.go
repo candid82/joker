@@ -23,7 +23,7 @@ func EnsureComparable(args []Object, index int) Comparable {
   case Comparable:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Comparable"))
+    panic(RT.NewArgTypeError(index, c, "Comparable"))
   }
 }
 
@@ -44,7 +44,7 @@ func EnsureVector(args []Object, index int) *Vector {
   case *Vector:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Vector"))
+    panic(RT.NewArgTypeError(index, c, "Vector"))
   }
 }
 
@@ -65,7 +65,7 @@ func EnsureChar(args []Object, index int) Char {
   case Char:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Char"))
+    panic(RT.NewArgTypeError(index, c, "Char"))
   }
 }
 
@@ -86,7 +86,7 @@ func EnsureString(args []Object, index int) String {
   case String:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "String"))
+    panic(RT.NewArgTypeError(index, c, "String"))
   }
 }
 
@@ -107,7 +107,7 @@ func EnsureSymbol(args []Object, index int) Symbol {
   case Symbol:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Symbol"))
+    panic(RT.NewArgTypeError(index, c, "Symbol"))
   }
 }
 
@@ -128,7 +128,7 @@ func EnsureKeyword(args []Object, index int) Keyword {
   case Keyword:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Keyword"))
+    panic(RT.NewArgTypeError(index, c, "Keyword"))
   }
 }
 
@@ -149,7 +149,7 @@ func EnsureRegex(args []Object, index int) Regex {
   case Regex:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Regex"))
+    panic(RT.NewArgTypeError(index, c, "Regex"))
   }
 }
 
@@ -170,7 +170,7 @@ func EnsureBool(args []Object, index int) Bool {
   case Bool:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Bool"))
+    panic(RT.NewArgTypeError(index, c, "Bool"))
   }
 }
 
@@ -191,7 +191,7 @@ func EnsureNumber(args []Object, index int) Number {
   case Number:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Number"))
+    panic(RT.NewArgTypeError(index, c, "Number"))
   }
 }
 
@@ -212,7 +212,7 @@ func EnsureSeqable(args []Object, index int) Seqable {
   case Seqable:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Seqable"))
+    panic(RT.NewArgTypeError(index, c, "Seqable"))
   }
 }
 
@@ -233,7 +233,7 @@ func EnsureCallable(args []Object, index int) Callable {
   case Callable:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Callable"))
+    panic(RT.NewArgTypeError(index, c, "Callable"))
   }
 }
 
@@ -254,7 +254,7 @@ func EnsureType(args []Object, index int) *Type {
   case *Type:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Type"))
+    panic(RT.NewArgTypeError(index, c, "Type"))
   }
 }
 
@@ -275,7 +275,7 @@ func EnsureMeta(args []Object, index int) Meta {
   case Meta:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Meta"))
+    panic(RT.NewArgTypeError(index, c, "Meta"))
   }
 }
 
@@ -296,7 +296,7 @@ func EnsureInt(args []Object, index int) Int {
   case Int:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Int"))
+    panic(RT.NewArgTypeError(index, c, "Int"))
   }
 }
 
@@ -317,7 +317,7 @@ func EnsureStack(args []Object, index int) Stack {
   case Stack:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Stack"))
+    panic(RT.NewArgTypeError(index, c, "Stack"))
   }
 }
 
@@ -338,7 +338,7 @@ func EnsureMap(args []Object, index int) Map {
   case Map:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Map"))
+    panic(RT.NewArgTypeError(index, c, "Map"))
   }
 }
 
@@ -359,7 +359,7 @@ func EnsureSet(args []Object, index int) Set {
   case Set:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Set"))
+    panic(RT.NewArgTypeError(index, c, "Set"))
   }
 }
 
@@ -380,7 +380,7 @@ func EnsureAssociative(args []Object, index int) Associative {
   case Associative:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Associative"))
+    panic(RT.NewArgTypeError(index, c, "Associative"))
   }
 }
 
@@ -401,7 +401,7 @@ func EnsureReversible(args []Object, index int) Reversible {
   case Reversible:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Reversible"))
+    panic(RT.NewArgTypeError(index, c, "Reversible"))
   }
 }
 
@@ -422,7 +422,7 @@ func EnsureNamed(args []Object, index int) Named {
   case Named:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Named"))
+    panic(RT.NewArgTypeError(index, c, "Named"))
   }
 }
 
@@ -443,7 +443,7 @@ func EnsureComparator(args []Object, index int) Comparator {
   case Comparator:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Comparator"))
+    panic(RT.NewArgTypeError(index, c, "Comparator"))
   }
 }
 
@@ -464,7 +464,7 @@ func EnsureRatio(args []Object, index int) *Ratio {
   case *Ratio:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Ratio"))
+    panic(RT.NewArgTypeError(index, c, "Ratio"))
   }
 }
 
@@ -485,7 +485,7 @@ func EnsureNamespace(args []Object, index int) *Namespace {
   case *Namespace:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Namespace"))
+    panic(RT.NewArgTypeError(index, c, "Namespace"))
   }
 }
 
@@ -506,7 +506,7 @@ func EnsureVar(args []Object, index int) *Var {
   case *Var:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Var"))
+    panic(RT.NewArgTypeError(index, c, "Var"))
   }
 }
 
@@ -527,7 +527,7 @@ func EnsureError(args []Object, index int) Error {
   case Error:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Error"))
+    panic(RT.NewArgTypeError(index, c, "Error"))
   }
 }
 
@@ -548,7 +548,7 @@ func EnsureFn(args []Object, index int) *Fn {
   case *Fn:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Fn"))
+    panic(RT.NewArgTypeError(index, c, "Fn"))
   }
 }
 
@@ -569,7 +569,7 @@ func EnsureDeref(args []Object, index int) Deref {
   case Deref:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Deref"))
+    panic(RT.NewArgTypeError(index, c, "Deref"))
   }
 }
 
@@ -590,7 +590,7 @@ func EnsureAtom(args []Object, index int) *Atom {
   case *Atom:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Atom"))
+    panic(RT.NewArgTypeError(index, c, "Atom"))
   }
 }
 
@@ -611,7 +611,7 @@ func EnsureRef(args []Object, index int) Ref {
   case Ref:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Ref"))
+    panic(RT.NewArgTypeError(index, c, "Ref"))
   }
 }
 
@@ -632,7 +632,7 @@ func EnsureKVReduce(args []Object, index int) KVReduce {
   case KVReduce:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "KVReduce"))
+    panic(RT.NewArgTypeError(index, c, "KVReduce"))
   }
 }
 
@@ -653,6 +653,6 @@ func EnsurePending(args []Object, index int) Pending {
   case Pending:
     return c
   default:
-    panic(RT.newArgTypeError(index, c, "Pending"))
+    panic(RT.NewArgTypeError(index, c, "Pending"))
   }
 }

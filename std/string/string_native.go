@@ -86,6 +86,22 @@ func escape(s string, cmap Callable) string {
 	return b.String()
 }
 
+func indexOf(s string, value Object) Object {
+	var res int
+	switch value := value.(type) {
+	case Char:
+		res = strings.IndexRune(s, value.Ch)
+	case String:
+		res = strings.Index(s, value.S)
+	default:
+		panic(RT.NewArgTypeError(1, value, "String or Char"))
+	}
+	if res == -1 {
+		return NIL
+	}
+	return MakeInt(res)
+}
+
 func init() {
 	newLine, _ = regexp.Compile("\r?\n")
 }
