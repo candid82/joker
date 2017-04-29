@@ -1,10 +1,11 @@
 dependencies:
+  cache_directories:
+    - ~/bin
   override:
     - mkdir -p ~/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}
     - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     - go get -d -v gopkg.in/readline.v1
-    - wget -O ~/joker.zip https://github.com/candid82/joker/releases/download/v0.7.2/joker-0.7.2-linux-amd64.zip
-    - unzip ~/joker.zip -d ~/bin
+    - if [ ! -e ~/bin/joker ] wget -O ~/joker.zip https://github.com/candid82/joker/releases/download/v0.7.2/joker-0.7.2-linux-amd64.zip && unzip ~/joker.zip -d ~/bin; fi
     - go generate -v ./...
     - go build -v
     - ./linter-tests.sh
