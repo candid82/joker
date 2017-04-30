@@ -40,10 +40,12 @@
   [^String s])
 
 (defn ^String join
-  "Returns a string of all elements in coll, as returned by (seq coll), separated by a separator."
+  "Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator."
   {:added "1.0"
-  :go "join(separator, coll)"}
-  [^String separator ^Seqable coll])
+  :go {1 "join(\"\", coll)"
+       2 "join(separator, coll)"}}
+  ([^Seqable coll])
+  ([^String separator ^Seqable coll]))
 
 (defn ^String replace
   "Replaces all instances of string old with string new in string s."
