@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	. "github.com/candid82/joker/core"
 )
@@ -88,7 +89,9 @@ func escape(s string, cmap Callable) string {
 
 func indexOf(s string, value Object, from int) Object {
 	var res int
-	s = s[from:]
+	if from != 0 {
+		s = string([]rune(s)[from:])
+	}
 	switch value := value.(type) {
 	case Char:
 		res = strings.IndexRune(s, value.Ch)
@@ -100,7 +103,26 @@ func indexOf(s string, value Object, from int) Object {
 	if res == -1 {
 		return NIL
 	}
-	return MakeInt(res + from)
+	return MakeInt(utf8.RuneCountInString(s[:res]) + from)
+}
+
+func lastIndexOf(s string, value Object, from int) Object {
+	var res int
+	if from != 0 {
+		s = string([]rune(s)[:from])
+	}
+	switch value := value.(type) {
+	case Char:
+		res = strings.LastIndex(s, string(value.Ch))
+	case String:
+		res = strings.LastIndex(s, value.S)
+	default:
+		panic(RT.NewArgTypeError(1, value, "String or Char"))
+	}
+	if res == -1 {
+		return NIL
+	}
+	return MakeInt(utf8.RuneCountInString(s[:res]))
 }
 
 func init() {

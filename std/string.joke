@@ -96,3 +96,12 @@
        3 "indexOf(s, value, from)"}}
   ([^String s ^Object value])
   ([^String s ^Object value ^Int from]))
+
+(defn last-index-of
+  "Return last index of value (string or char) in s, optionally
+  searching backward from from or nil if not found."
+  {:added "1.0"
+  :go {2 "lastIndexOf(s, value, 0)"
+       3 "lastIndexOf(s, value, from)"}}
+  ([^String s ^Object value])
+  ([^String s ^Object value ^Int from]))
