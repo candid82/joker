@@ -363,7 +363,7 @@ func MakeKeyword(nsname string) Keyword {
 	}
 }
 
-func panicArity(n int) {
+func PanicArity(n int) {
 	name := RT.currentExpr.(Traceable).Name()
 	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
@@ -371,7 +371,7 @@ func panicArity(n int) {
 func CheckArity(args []Object, min int, max int) {
 	n := len(args)
 	if n < min || n > max {
-		panicArity(n)
+		PanicArity(n)
 	}
 }
 
@@ -608,7 +608,7 @@ func (fn *Fn) Call(args []Object) Object {
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
-		panicArity(len(args))
+		PanicArity(len(args))
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {

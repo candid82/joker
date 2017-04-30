@@ -86,8 +86,9 @@ func escape(s string, cmap Callable) string {
 	return b.String()
 }
 
-func indexOf(s string, value Object) Object {
+func indexOf(s string, value Object, from int) Object {
 	var res int
+	s = s[from:]
 	switch value := value.(type) {
 	case Char:
 		res = strings.IndexRune(s, value.Ch)
@@ -99,7 +100,7 @@ func indexOf(s string, value Object) Object {
 	if res == -1 {
 		return NIL
 	}
-	return MakeInt(res)
+	return MakeInt(res + from)
 }
 
 func init() {

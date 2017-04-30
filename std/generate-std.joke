@@ -7,6 +7,9 @@
 (def fn-template
   (slurp "fn.tmpl"))
 
+(def arity-template
+  (slurp "arity.tmpl"))
+
 (def package-template
   (slurp "package.tmpl"))
 
@@ -30,7 +33,7 @@
 (defn extract-args
   [args]
   (joker.string/join
-   "\n  "
+   "\n    "
    (map-indexed
     (fn [i arg]
       (let [m (meta arg)
@@ -48,24 +51,40 @@
         (conj (subvec args 0 (- c 2)) vargs))
       args)))
 
+(defn generate-arity
+  [args go tag]
+  (let [handle-args (handle-varargs args)
+        cnt (count handle-args)
+        varargs? (< cnt (count args))
+        go-expr (cond
+                  (string? go) go
+                  varargs? (:varargs go)
+                  :else (get go cnt))]
+    (-> arity-template
+        (rpl "{arity}" (if varargs? "true" (str "c == " (count args))))
+        (rpl "{args}" (extract-args handle-args))
+        (rpl "{goExpr}" go-expr)
+        (rpl "{return}"
+             (if tag
+               (str "return Make" tag "(res)")
+               "return res")))))
+
+(defn generate-arglist
+  [args]
+  (str "NewVectorFrom("
+       (joker.string/join ", " (for [arg args]
+                                 (str "MakeSymbol(" (q (str arg)) ")")))
+       ")"))
+
 (defn generate-fn
   [ns-sym k v]
   (let [m (meta v)
-        args (first (:arglists m))
-        handle-args (handle-varargs args)
-        cnt (count handle-args)
-        varargs? (< cnt (count args))
+        arglists (:arglists m)
         go-fn-name (go-name (str k))
+        arities (joker.string/join "\n  " (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
                    (rpl "{fnName}" go-fn-name)
-                   (rpl "{minArity}" (str (if varargs? (dec cnt) cnt)))
-                   (rpl "{maxArity}" (str (if varargs? 1000 cnt)))
-                   (rpl "{args}" (extract-args handle-args))
-                   (rpl "{goExpr}" (:go m))
-                   (rpl "{return}"
-                        (if (:tag m)
-                          (str "return Make" (:tag m) "(res)")
-                          "return res")))
+                   (rpl "{arities}" arities))
         intern-str (-> intern-template
                        (rpl "{nsName}" (str ns-sym))
                        (rpl "{fnName}" (str k))
@@ -73,8 +92,8 @@
                        (rpl "{fnDocstring}" (:doc m))
                        (rpl "{added}" (:added m))
                        (rpl "{args}"
-                            (joker.string/join ", " (for [arg args]
-                                                      (str "MakeSymbol(" (q (str arg)) ")")))))]
+                            (joker.string/join ", " (for [args arglists]
+                                                      (generate-arglist args)))))]
     [fn-str intern-str]))
 
 (defn generate-ns

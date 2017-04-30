@@ -1,6 +1,9 @@
 var {fnName} Proc = func(args []Object) Object {
-  CheckArity(args, {minArity}, {maxArity})
-  {args}
-  res := {goExpr}
-  {return}
+  c := len(args)
+  switch  {
+  {arities}
+  default:
+    PanicArity(c)
+  }
+  return NIL
 }

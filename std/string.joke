@@ -88,7 +88,9 @@
 
 (defn index-of
   "Return index of value (string or char) in s, optionally searching
-  forward from from-index or nil if not found."
+  forward from from or nil if not found."
   {:added "1.0"
-  :go "indexOf(s, value)"}
-  [^String s ^Object value])
+  :go {2 "indexOf(s, value, 0)"
+       3 "indexOf(s, value, from)"}}
+  ([^String s ^Object value])
+  ([^String s ^Object value ^Int from]))
