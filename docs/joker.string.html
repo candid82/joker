@@ -10,7 +10,22 @@
     <h2>Index</h2>
     <ul class="index">
       <li>
+  <a href="#blank?">blank?</a>
+</li>
+<li>
+  <a href="#capitalize">capitalize</a>
+</li>
+<li>
   <a href="#ends-with?">ends-with?</a>
+</li>
+<li>
+  <a href="#escape">escape</a>
+</li>
+<li>
+  <a href="#includes?">includes?</a>
+</li>
+<li>
+  <a href="#index-of">index-of</a>
 </li>
 <li>
   <a href="#join">join</a>
@@ -40,12 +55,58 @@
     </ul>
     <ul>
       <li>
+  <h3 id="blank?">blank?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(blank? s)</code></div>
+</pre>
+  <p class="var-docstr">True if s is nil, empty, or contains only whitespace.</p>
+  
+</li>
+<li>
+  <h3 id="capitalize">capitalize</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(capitalize s)</code></div>
+</pre>
+  <p class="var-docstr">Converts first character of the string to upper-case, all other<br>  characters to lower-case.</p>
+  
+</li>
+<li>
   <h3 id="ends-with?">ends-with?</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ends-with? s substr)</code></div>
 </pre>
   <p class="var-docstr">True if s ends with substr.</p>
+  
+</li>
+<li>
+  <h3 id="escape">escape</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(escape s cmap)</code></div>
+</pre>
+  <p class="var-docstr">Return a new string, using cmap to escape each character ch<br>  from s as follows:<br><br>  If (cmap ch) is nil, append ch to the new string.<br>  If (cmap ch) is non-nil, append (str (cmap ch)) instead.</p>
+  
+</li>
+<li>
+  <h3 id="includes?">includes?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(includes? s substr)</code></div>
+</pre>
+  <p class="var-docstr">True if s includes substr.</p>
+  
+</li>
+<li>
+  <h3 id="index-of">index-of</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(index-of s value)</code></div>
+<div><code>(index-of s value from)</code></div>
+</pre>
+  <p class="var-docstr">Return index of value (string or char) in s, optionally searching<br>  forward from from or nil if not found.</p>
   
 </li>
 <li>
