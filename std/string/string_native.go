@@ -88,7 +88,7 @@ func capitalize(s string) string {
 	if len(s) < 2 {
 		return strings.ToUpper(s)
 	}
-	return strings.ToUpper(s[0:1]) + strings.ToLower(s[1:])
+	return strings.ToUpper(string([]rune(s)[:1])) + strings.ToLower(string([]rune(s)[1:]))
 }
 
 func escape(s string, cmap Callable) string {
