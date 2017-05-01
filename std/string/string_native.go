@@ -13,21 +13,37 @@ import (
 var newLine *regexp.Regexp
 
 func padRight(s, pad string, n int) string {
-	for {
-		s += pad
-		if len(s) > n {
-			return s[0:n]
-		}
+	toAdd := n - utf8.RuneCountInString(s)
+	if toAdd <= 0 {
+		return s
 	}
+	c := utf8.RuneCountInString(pad)
+	d := toAdd / c
+	r := toAdd % c
+	for i := 0; i < d; i++ {
+		s += pad
+	}
+	if r > 0 {
+		s += string([]rune(pad)[:r])
+	}
+	return s
 }
 
 func padLeft(s, pad string, n int) string {
-	for {
-		s = pad + s
-		if len(s) > n {
-			return s[len(s)-n:]
-		}
+	toAdd := n - utf8.RuneCountInString(s)
+	if toAdd <= 0 {
+		return s
 	}
+	c := utf8.RuneCountInString(pad)
+	d := toAdd / c
+	r := toAdd % c
+	for i := 0; i < d; i++ {
+		s = pad + s
+	}
+	if r > 0 {
+		s = string([]rune(pad)[c-r:]) + s
+	}
+	return s
 }
 
 func split(s string, r *regexp.Regexp) Object {
