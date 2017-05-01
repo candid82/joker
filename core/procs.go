@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type (
@@ -328,17 +329,18 @@ var procIsSpecialSymbol Proc = func(args []Object) Object {
 var procSubs Proc = func(args []Object) Object {
 	s := EnsureString(args, 0).S
 	start := EnsureInt(args, 1).I
-	end := len(s)
+	slen := utf8.RuneCountInString(s)
+	end := slen
 	if len(args) > 2 {
 		end = EnsureInt(args, 2).I
 	}
-	if start < 0 || start > len(s) {
+	if start < 0 || start > slen {
 		panic(RT.NewError(fmt.Sprintf("String index out of range: %d", start)))
 	}
-	if end < 0 || end > len(s) {
+	if end < 0 || end > slen {
 		panic(RT.NewError(fmt.Sprintf("String index out of range: %d", end)))
 	}
-	return String{S: s[start:end]}
+	return String{S: string([]rune(s)[start:end])}
 }
 
 var procIntern = func(args []Object) Object {
