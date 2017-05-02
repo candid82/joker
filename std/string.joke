@@ -105,3 +105,9 @@
        3 "lastIndexOf(s, value, from)"}}
   ([^String s ^Object value])
   ([^String s ^Object value ^Int from]))
+
+(defn ^String lower-case
+  "Converts string to all lower-case."
+  {:added "1.0"
+  :go "strings.ToLower(s)"}
+  [^String s])
