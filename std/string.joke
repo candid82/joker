@@ -48,10 +48,15 @@
   ([^String separator ^Seqable coll]))
 
 (defn ^String replace
-  "Replaces all instances of string old with string new in string s."
+  "Replaces all instances of match (String of Regex) with string repl in string s.
+
+  If match is Regex, $1, $2, etc. in the replacement string repl are
+  substituted with the string that matched the corresponding
+  parenthesized group in the pattern.
+  "
   {:added "1.0"
-  :go "strings.Replace(s, old, new, -1)"}
-  [^String s ^String old ^String new])
+  :go "replace(s, match, repl)"}
+  [^String s ^Object match ^String repl])
 
 (defn ^String trim-space
   "Returns a string s, with all leading and trailing white space removed, as defined by Unicode."

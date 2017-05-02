@@ -141,6 +141,17 @@ func lastIndexOf(s string, value Object, from int) Object {
 	return MakeInt(utf8.RuneCountInString(s[:res]))
 }
 
+func replace(s string, match Object, repl string) string {
+	switch match := match.(type) {
+	case String:
+		return strings.Replace(s, match.S, repl, -1)
+	case Regex:
+		return match.R.ReplaceAllString(s, repl)
+	default:
+		panic(RT.NewArgTypeError(1, match, "String or Regex"))
+	}
+}
+
 func init() {
 	newLine, _ = regexp.Compile("\r?\n")
 }
