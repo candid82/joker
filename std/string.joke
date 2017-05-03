@@ -58,6 +58,17 @@
   :go "replace(s, match, repl)"}
   [^String s ^Object match ^String repl])
 
+(defn ^String replace-first
+  "Replaces the first instance of match (String of Regex) with string repl in string s.
+
+  If match is Regex, $1, $2, etc. in the replacement string repl are
+  substituted with the string that matched the corresponding
+  parenthesized group in the pattern.
+  "
+  {:added "1.0"
+  :go "replaceFirst(s, match, repl)"}
+  [^String s ^Object match ^String repl])
+
 (defn ^String trim-space
   "Returns a string s, with all leading and trailing white space removed, as defined by Unicode."
   {:added "1.0"
