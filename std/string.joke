@@ -127,3 +127,9 @@
   {:added "1.0"
   :go "strings.ToLower(s)"}
   [^String s])
+
+(defn ^String reverse
+  "Returns s with its characters reversed."
+  {:added "1.0"
+  :go "reverse(s)"}
+  [^String s])
