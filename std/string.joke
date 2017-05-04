@@ -30,13 +30,15 @@
 (defn split
   "Splits string on a regular expression. Returns vector of the splits."
   {:added "1.0"
-  :go "split(s, re)"}
-  [^String s ^Regex re])
+  :go {2 "split(s, re, 0)"
+       3 "split(s, re, n)"}}
+  ([^String s ^Regex re])
+  ([^String s ^Regex re ^Int n]))
 
 (defn split-lines
   "Splits string on \\n or \\r\\n. Returns vector of the splits."
   {:added "1.0"
-  :go "split(s, newLine)"}
+  :go "split(s, newLine, 0)"}
   [^String s])
 
 (defn ^String join

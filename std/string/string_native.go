@@ -46,8 +46,8 @@ func padLeft(s, pad string, n int) string {
 	return s
 }
 
-func split(s string, r *regexp.Regexp) Object {
-	indexes := r.FindAllStringIndex(s, -1)
+func split(s string, r *regexp.Regexp, n int) Object {
+	indexes := r.FindAllStringIndex(s, n-1)
 	lastStart := 0
 	result := EmptyVector
 	for _, el := range indexes {
