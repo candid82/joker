@@ -77,6 +77,12 @@
   :go "strings.TrimSpace(s)"}
   [^String s])
 
+(defn ^String trim-newline
+  "Removes all trailing newline \\n or return \\r characters from string."
+  {:added "1.0"
+  :go "strings.TrimRight(s, \"\\n\\r\")"}
+  [^String s])
+
 (defn ^Bool blank?
   "True if s is nil, empty, or contains only whitespace."
   {:added "1.0"
