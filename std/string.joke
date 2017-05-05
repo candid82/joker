@@ -71,8 +71,8 @@
   :go "replaceFirst(s, match, repl)"}
   [^String s ^Object match ^String repl])
 
-(defn ^String trim-space
-  "Returns a string s, with all leading and trailing white space removed, as defined by Unicode."
+(defn ^String trim
+  "Removes whitespace from both ends of string."
   {:added "1.0"
   :go "strings.TrimSpace(s)"}
   [^String s])
