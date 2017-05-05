@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["strings"]
+  ^{:go-imports ["strings" "unicode"]
     :doc "Implements simple functions to manipulate strings."}
   string)
 
@@ -83,6 +83,18 @@
   :go "strings.TrimRight(s, \"\\n\\r\")"}
   [^String s])
 
+(defn ^String trim-left
+  "Removes whitespace from the left side of string."
+  {:added "1.0"
+  :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
+  [^String s])
+
+(defn ^String trim-right
+  "Removes whitespace from the right side of string."
+  {:added "1.0"
+  :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
+  [^String s])
+
 (defn ^Bool blank?
   "True if s is nil, empty, or contains only whitespace."
   {:added "1.0"
@@ -134,6 +146,12 @@
   "Converts string to all lower-case."
   {:added "1.0"
   :go "strings.ToLower(s)"}
+  [^String s])
+
+(defn ^String upper-case
+  "Converts string to all upper-case."
+  {:added "1.0"
+  :go "strings.ToUpper(s)"}
   [^String s])
 
 (defn ^String reverse
