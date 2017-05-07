@@ -31,6 +31,12 @@
   <a href="#join">join</a>
 </li>
 <li>
+  <a href="#last-index-of">last-index-of</a>
+</li>
+<li>
+  <a href="#lower-case">lower-case</a>
+</li>
+<li>
   <a href="#pad-left">pad-left</a>
 </li>
 <li>
@@ -38,6 +44,12 @@
 </li>
 <li>
   <a href="#replace">replace</a>
+</li>
+<li>
+  <a href="#replace-first">replace-first</a>
+</li>
+<li>
+  <a href="#reverse">reverse</a>
 </li>
 <li>
   <a href="#split">split</a>
@@ -49,7 +61,19 @@
   <a href="#starts-with?">starts-with?</a>
 </li>
 <li>
-  <a href="#trim-space">trim-space</a>
+  <a href="#trim">trim</a>
+</li>
+<li>
+  <a href="#trim-left">trim-left</a>
+</li>
+<li>
+  <a href="#trim-newline">trim-newline</a>
+</li>
+<li>
+  <a href="#trim-right">trim-right</a>
+</li>
+<li>
+  <a href="#upper-case">upper-case</a>
 </li>
 
     </ul>
@@ -113,9 +137,29 @@
   <h3 id="join">join</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(join separator coll)</code></div>
+  <pre class="var-usage"><div><code>(join coll)</code></div>
+<div><code>(join separator coll)</code></div>
 </pre>
-  <p class="var-docstr">Returns a string of all elements in coll, as returned by (seq coll), separated by a separator.</p>
+  <p class="var-docstr">Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.</p>
+  
+</li>
+<li>
+  <h3 id="last-index-of">last-index-of</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(last-index-of s value)</code></div>
+<div><code>(last-index-of s value from)</code></div>
+</pre>
+  <p class="var-docstr">Return last index of value (string or char) in s, optionally<br>  searching backward from from or nil if not found.</p>
+  
+</li>
+<li>
+  <h3 id="lower-case">lower-case</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(lower-case s)</code></div>
+</pre>
+  <p class="var-docstr">Converts string to all lower-case.</p>
   
 </li>
 <li>
@@ -140,9 +184,27 @@
   <h3 id="replace">replace</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(replace s old new)</code></div>
+  <pre class="var-usage"><div><code>(replace s match repl)</code></div>
 </pre>
-  <p class="var-docstr">Replaces all instances of string old with string new in string s.</p>
+  <p class="var-docstr">Replaces all instances of match (String of Regex) with string repl in string s.<br><br>  If match is Regex, $1, $2, etc. in the replacement string repl are<br>  substituted with the string that matched the corresponding<br>  parenthesized group in the pattern.<br>  </p>
+  
+</li>
+<li>
+  <h3 id="replace-first">replace-first</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(replace-first s match repl)</code></div>
+</pre>
+  <p class="var-docstr">Replaces the first instance of match (String of Regex) with string repl in string s.<br><br>  If match is Regex, $1, $2, etc. in the replacement string repl are<br>  substituted with the string that matched the corresponding<br>  parenthesized group in the pattern.<br>  </p>
+  
+</li>
+<li>
+  <h3 id="reverse">reverse</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(reverse s)</code></div>
+</pre>
+  <p class="var-docstr">Returns s with its characters reversed.</p>
   
 </li>
 <li>
@@ -150,6 +212,7 @@
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split s re)</code></div>
+<div><code>(split s re n)</code></div>
 </pre>
   <p class="var-docstr">Splits string on a regular expression. Returns vector of the splits.</p>
   
@@ -173,12 +236,48 @@
   
 </li>
 <li>
-  <h3 id="trim-space">trim-space</h3>
+  <h3 id="trim">trim</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trim-space s)</code></div>
+  <pre class="var-usage"><div><code>(trim s)</code></div>
 </pre>
-  <p class="var-docstr">Returns a string s, with all leading and trailing white space removed, as defined by Unicode.</p>
+  <p class="var-docstr">Removes whitespace from both ends of string.</p>
+  
+</li>
+<li>
+  <h3 id="trim-left">trim-left</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(trim-left s)</code></div>
+</pre>
+  <p class="var-docstr">Removes whitespace from the left side of string.</p>
+  
+</li>
+<li>
+  <h3 id="trim-newline">trim-newline</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(trim-newline s)</code></div>
+</pre>
+  <p class="var-docstr">Removes all trailing newline \n or return \r characters from string.</p>
+  
+</li>
+<li>
+  <h3 id="trim-right">trim-right</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(trim-right s)</code></div>
+</pre>
+  <p class="var-docstr">Removes whitespace from the right side of string.</p>
+  
+</li>
+<li>
+  <h3 id="upper-case">upper-case</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(upper-case s)</code></div>
+</pre>
+  <p class="var-docstr">Converts string to all upper-case.</p>
   
 </li>
 
