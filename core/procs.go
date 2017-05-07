@@ -1376,7 +1376,11 @@ func processData(data []byte) {
 }
 
 func ProcessLinterData(dialect Dialect) {
-	if dialect == JOKER || dialect == EDN {
+	if dialect == EDN {
+		return
+	}
+	if dialect == JOKER {
+		GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 		return
 	}
 	reader := bytes.NewReader(linter_cljxData)
