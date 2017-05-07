@@ -1,13 +1,5 @@
 (joker.core/in-ns 'joker.core)
 
-(def *linter-config*
-  (try
-    (let [env (joker.os/env)]
-      (read-string (slurp (str (or (get env "HOME")
-                                   (get env "USERPROFILE"))
-                               "/.joker"))))
-    (catch Error e {})))
-
 (defn ^:private conj-import*
   [v sym]
   (let [parts (joker.string/split (name sym) #"\.")]

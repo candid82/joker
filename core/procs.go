@@ -1375,6 +1375,51 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
+func findConfigFile(filename string) string {
+	filename, err := filepath.Abs(filename)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", err)
+		return ""
+	}
+	for {
+		filename = filepath.Dir(filename)
+		p := filepath.Join(filename, ".joker")
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+		if filename == "/" || filename == "." {
+			home, ok := os.LookupEnv("HOME")
+			if !ok {
+				home, ok = os.LookupEnv("USERPROFILE")
+				if !ok {
+					return ""
+				}
+			}
+			p := filepath.Join(home, ".joker")
+			if _, err := os.Stat(p); err == nil {
+				return p
+			}
+			return ""
+		}
+	}
+}
+
+func ReadConfig(filename string) {
+	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
+	configFileName := findConfigFile(filename)
+	if configFileName == "" {
+		vr.Value = EmptyArrayMap()
+		return
+	}
+	f, err := os.Open(configFileName)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error reading config file "+configFileName+": ", err)
+		vr.Value = EmptyArrayMap()
+		return
+	}
+	vr.Value = readFromReader(bufio.NewReader(f))
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return

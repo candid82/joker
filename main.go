@@ -187,6 +187,7 @@ func lintFile(filename string, dialect Dialect) {
 	if dialect == EDN {
 		phase = READ
 	}
+	ReadConfig(filename)
 	configureLinterMode(dialect)
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
