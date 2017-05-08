@@ -25,7 +25,6 @@
 
 ;; Clojure core macros not supported by Joker
 
-(defn doto [x & forms])
 (defn vswap! [vol f & args])
 (defn areduce [a idx ret init expr])
 (defn locking [x & body])

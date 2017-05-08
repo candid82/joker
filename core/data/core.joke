@@ -2045,6 +2045,21 @@
   ([v start end]
    (subvec* v start end)))
 
+(defmacro doto
+  "Evaluates x then calls all of the methods and functions with the
+  value of x supplied at the front of the given arguments.  The forms
+  are evaluated in order.  Returns x."
+  {:added "1.0"}
+  [x & forms]
+  (let [gx (gensym)]
+    `(let [~gx ~x]
+       ~@(map (fn [f]
+                (if (seq? f)
+                  `(~(first f) ~gx ~@(next f))
+                  `(~f ~gx)))
+              forms)
+       ~gx)))
+
 (defmacro time
   "Evaluates expr and prints the time it took.  Returns the value of expr."
   {:added "1.0"}
