@@ -97,7 +97,13 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column> <issue type>: <message>`, where `<issue type` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
-[Flycheck syntax checker](https://github.com/candid82/flycheck-joker) and [Sublime Text plugin](https://github.com/candid82/SublimeLinter-contrib-joker) integrate Joker linter with Emacs and Sublime Text, respectively. [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
+### Intergration with editors
+
+- Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
+- Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
+- Atom: [linter-joker](https://atom.io/packages/linter-joker)
+
+[Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
 
 ### Reducing false positives
 
