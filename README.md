@@ -115,7 +115,7 @@ Joker lints the code in one file at a time and doesn't try to resolve symbols fr
 (def-something baz ...)
 ```
 
-Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The file is called `.joker` and should be in your home directory. It should contain a single map with `:known-macros` key:
+Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The configuration file is called `.joker` and should be in the same directory as the target file, or in its parent directory, or in its parent's parent directory etc up to the root directory. Joker will also look for `.joker` file in your home directory if it cannot find it in the above directories. The file should contain a single map with `:known-macros` key:
 
 ```clojure
 {:known-macros [bar/def-something foo/another-macro ...]}
