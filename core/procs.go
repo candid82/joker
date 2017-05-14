@@ -1404,20 +1404,54 @@ func findConfigFile(filename string) string {
 	}
 }
 
+func printConfigError(filename, msg string) {
+	fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", msg)
+}
+
 func ReadConfig(filename string) {
-	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
+	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
+	LINTER_CONFIG.Value = EmptyArrayMap()
 	configFileName := findConfigFile(filename)
 	if configFileName == "" {
-		vr.Value = EmptyArrayMap()
 		return
 	}
 	f, err := os.Open(configFileName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error reading config file "+configFileName+": ", err)
-		vr.Value = EmptyArrayMap()
+		printConfigError(configFileName, err.Error())
 		return
 	}
-	vr.Value = readFromReader(bufio.NewReader(f))
+	r := NewReader(bufio.NewReader(f), configFileName)
+	config, err := TryRead(r)
+	if err != nil {
+		printConfigError(configFileName, err.Error())
+		return
+	}
+	configMap, ok := config.(Map)
+	if !ok {
+		printConfigError(configFileName, "config root object must be a map, got "+config.GetType().ToString(false))
+		return
+	}
+	ok, knownMacros := configMap.Get(MakeKeyword("known-macros"))
+	if ok {
+		_, ok := knownMacros.(Seqable)
+		if !ok {
+			printConfigError(configFileName, ":known-macros value must be a vector, got "+knownMacros.GetType().ToString(false))
+			return
+		}
+	}
+	ok, rules := configMap.Get(MakeKeyword("rules"))
+	if ok {
+		m, ok := rules.(Map)
+		if !ok {
+			printConfigError(configFileName, ":rules value must be a map, got "+rules.GetType().ToString(false))
+			return
+		}
+		ok, v := m.Get(MakeKeyword("if-without-else"))
+		if ok {
+			WARNINGS.ifWithoutElse = toBool(v)
+		}
+	}
+	LINTER_CONFIG.Value = config
 }
 
 func ProcessLinterData(dialect Dialect) {

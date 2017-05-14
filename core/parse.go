@@ -140,6 +140,9 @@ type (
 		noRecurAllowed         bool
 		isUnknownCallableScope bool
 	}
+	Warnings struct {
+		ifWithoutElse bool
+	}
 )
 
 var (
@@ -150,6 +153,7 @@ var (
 	UNDERSCORE      = MakeSymbol("_")
 	SKIP_UNUSED     = MakeKeyword("skip-unused")
 	PRIVATE         = MakeKeyword("private")
+	WARNINGS        = Warnings{}
 )
 
 func (b *Bindings) ToMap() Map {
@@ -999,6 +1003,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return NewLiteralExpr(Second(seq))
 		case "if":
 			checkForm(obj, 3, 4)
+			if LINTER_MODE && SeqCount(seq) < 4 && WARNINGS.ifWithoutElse {
+				printParseWarning(pos, "missing else branch")
+			}
 			return &IfExpr{
 				cond:     Parse(Second(seq), ctx),
 				positive: Parse(Third(seq), ctx),

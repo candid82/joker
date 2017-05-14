@@ -29,6 +29,7 @@ const EOF = -1
 
 var LINTER_MODE bool = false
 var DIALECT Dialect
+var LINTER_CONFIG *Var
 
 var (
 	ARGS   map[int]Symbol

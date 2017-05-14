@@ -6,6 +6,8 @@
     (catch Error e
       false)))
 
+(def exit-code 0)
+
 (let [test-dirs (->> (joker.os/sh "ls" "tests/linter")
                      :out
                      (joker.string/split-lines)
@@ -27,4 +29,6 @@
         (println expected)
         (println "ACTUAL:")
         (println output-without-stacktraces)
-        (joker.os/exit 1)))))
+        (var-set #'exit-code 1)))))
+
+(joker.os/exit exit-code)
