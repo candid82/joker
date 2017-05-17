@@ -143,6 +143,11 @@ type (
 	Warnings struct {
 		ifWithoutElse bool
 	}
+	Keywords struct {
+		tag        Keyword
+		skipUnused Keyword
+		private    Keyword
+	}
 )
 
 var (
@@ -151,9 +156,12 @@ var (
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
 	UNDERSCORE      = MakeSymbol("_")
-	SKIP_UNUSED     = MakeKeyword("skip-unused")
-	PRIVATE         = MakeKeyword("private")
 	WARNINGS        = Warnings{}
+	KEYWORDS        = Keywords{
+		tag:        MakeKeyword("tag"),
+		skipUnused: MakeKeyword("skip-unused"),
+		private:    MakeKeyword("private"),
+	}
 )
 
 func (b *Bindings) ToMap() Map {
@@ -475,7 +483,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		vr.expr = res.value
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
-			if ok, p := meta.Get(PRIVATE); ok {
+			if ok, p := meta.Get(KEYWORDS.private); ok {
 				vr.isPrivate = toBool(p)
 			}
 		}
@@ -717,7 +725,7 @@ func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
 
 func isSkipUnused(obj Meta) bool {
 	if m := obj.GetMeta(); m != nil {
-		if ok, v := m.Get(SKIP_UNUSED); ok {
+		if ok, v := m.Get(KEYWORDS.skipUnused); ok {
 			return toBool(v)
 		}
 	}
@@ -892,6 +900,28 @@ func reportNotAFunction(pos Position, name string) {
 	printParseWarning(pos, name+" is not a function")
 }
 
+func inferType(expr Expr) *Type {
+	switch expr := expr.(type) {
+	case *LiteralExpr:
+		return expr.obj.GetType()
+	default:
+		return nil
+	}
+}
+
+func checkTypes(declaredArgs []Symbol, call *CallExpr) {
+	for i, da := range declaredArgs {
+		if m := da.GetMeta(); m != nil {
+			if ok, argType := m.Get(KEYWORDS.tag); ok {
+				passedType := inferType(call.args[i])
+				if passedType != nil && passedType.name != argType.ToString(false) {
+					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, argType.ToString(false), passedType.ToString(false)))
+				}
+			}
+		}
+	}
+}
+
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
 	passedArgsCount := len(call.args)
 	if isMacro {
@@ -899,6 +929,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	}
 	for _, arity := range expr.arities {
 		if len(arity.args) == passedArgsCount {
+			checkTypes(arity.args, call)
 			return
 		}
 	}
