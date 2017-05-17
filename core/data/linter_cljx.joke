@@ -53,9 +53,11 @@
 
 (def __map__ map)
 (defn map
-  ([x])
-  ([x & colls]
-   (apply __map__ x colls)))
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
+   (__map__ x coll))
+  ([^Callable x c & colls]
+   (apply __map__ x c colls)))
 
 (def __filter__ filter)
 (defn filter

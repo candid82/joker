@@ -1524,7 +1524,7 @@
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
   {:added "1.0"}
-  ([^Callable f ^Sequable coll]
+  ([^Callable f ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (cons (f (first s)) (map f (rest s))))))
@@ -1643,7 +1643,7 @@
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   {:added "1.0"}
-  [^Int n ^Sequable coll]
+  [^Int n ^Seqable coll]
   [(take n coll) (drop n coll)])
 
 (defn split-with

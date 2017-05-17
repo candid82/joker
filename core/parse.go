@@ -904,19 +904,32 @@ func inferType(expr Expr) *Type {
 	switch expr := expr.(type) {
 	case *LiteralExpr:
 		return expr.obj.GetType()
+	case *VectorExpr:
+		return TYPES["Vector"]
 	default:
 		return nil
 	}
 }
 
+func getTaggedType(obj Meta) *Type {
+	if m := obj.GetMeta(); m != nil {
+		if ok, typeName := m.Get(KEYWORDS.tag); ok {
+			if typeSym, ok := typeName.(Symbol); ok {
+				if t := TYPES[*typeSym.name]; t != nil {
+					return t
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func checkTypes(declaredArgs []Symbol, call *CallExpr) {
 	for i, da := range declaredArgs {
-		if m := da.GetMeta(); m != nil {
-			if ok, argType := m.Get(KEYWORDS.tag); ok {
-				passedType := inferType(call.args[i])
-				if passedType != nil && passedType.name != argType.ToString(false) {
-					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, argType.ToString(false), passedType.ToString(false)))
-				}
+		if declaredType := getTaggedType(da); declaredType != nil {
+			passedType := inferType(call.args[i])
+			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
+				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, declaredType.ToString(false), passedType.ToString(false)))
 			}
 		}
 	}

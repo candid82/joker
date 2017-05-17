@@ -1326,15 +1326,19 @@ func (x RecurBindings) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
+func IsEqualOrImplements(abstractType *Type, concreteType *Type) bool {
+	if abstractType.reflectType.Kind() == reflect.Interface {
+		return concreteType.reflectType.Implements(abstractType.reflectType)
+	} else {
+		return concreteType.reflectType == abstractType.reflectType
+	}
+}
+
 func IsInstance(t *Type, obj Object) bool {
 	if obj.Equals(NIL) {
 		return false
 	}
-	if t.reflectType.Kind() == reflect.Interface {
-		return obj.GetType().reflectType.Implements(t.reflectType)
-	} else {
-		return obj.GetType().reflectType == t.reflectType
-	}
+	return IsEqualOrImplements(t, obj.GetType())
 }
 
 func IsSpecialSymbol(obj Object) bool {
