@@ -161,6 +161,12 @@ type (
 		ifWithoutElse Keyword
 		_prefix       Keyword
 	}
+	Symbols struct {
+		joker_core Symbol
+		underscore Symbol
+		catch      Symbol
+		finally    Symbol
+	}
 )
 
 var (
@@ -168,7 +174,6 @@ var (
 	LOCAL_BINDINGS  *Bindings = nil
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
-	UNDERSCORE      = MakeSymbol("_")
 	WARNINGS        = Warnings{}
 	KEYWORDS        = Keywords{
 		tag:           MakeKeyword("tag"),
@@ -187,6 +192,12 @@ var (
 		rules:         MakeKeyword("rules"),
 		ifWithoutElse: MakeKeyword("if-without-else"),
 		_prefix:       MakeKeyword("_prefix"),
+	}
+	SYMBOLS = Symbols{
+		joker_core: MakeSymbol("joker.core"),
+		underscore: MakeSymbol("_"),
+		catch:      MakeSymbol("catch"),
+		finally:    MakeSymbol("finally"),
 	}
 )
 
@@ -658,11 +669,11 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 }
 
 func isCatch(obj Object) bool {
-	return IsSeq(obj) && obj.(Seq).First().Equals(MakeSymbol("catch"))
+	return IsSeq(obj) && obj.(Seq).First().Equals(SYMBOLS.catch)
 }
 
 func isFinally(obj Object) bool {
-	return IsSeq(obj) && obj.(Seq).First().Equals(MakeSymbol("finally"))
+	return IsSeq(obj) && obj.(Seq).First().Equals(SYMBOLS.finally)
 }
 
 func resolveType(obj Object, ctx *ParseContext) *Type {
@@ -811,7 +822,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 
 			if !isSkipUnused(b) {
 				for _, b := range ctx.localBindings.bindings {
-					if !b.isUsed && !b.name.Equals(UNDERSCORE) {
+					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) {
 						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
 					}
 				}
@@ -1336,6 +1347,6 @@ func init() {
 	SPECIAL_SYMBOLS[MakeSymbol("do").name] = true
 	SPECIAL_SYMBOLS[MakeSymbol("throw").name] = true
 	SPECIAL_SYMBOLS[MakeSymbol("try").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("catch").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("finally").name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.catch.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.finally.name] = true
 }
