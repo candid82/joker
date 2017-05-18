@@ -231,16 +231,16 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 		expr.vr.Value = Eval(expr.value, env)
 	}
 	meta := EmptyArrayMap()
-	meta.Add(MakeKeyword("line"), Int{I: expr.startLine})
-	meta.Add(MakeKeyword("column"), Int{I: expr.startColumn})
-	meta.Add(MakeKeyword("file"), String{S: *expr.filename})
+	meta.Add(KEYWORDS.line, Int{I: expr.startLine})
+	meta.Add(KEYWORDS.column, Int{I: expr.startColumn})
+	meta.Add(KEYWORDS.file, String{S: *expr.filename})
 	expr.vr.meta = meta
 	if expr.meta != nil {
 		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
 	}
 	// isMacro can be set by set-macro* during parse stage
 	if expr.vr.isMacro {
-		expr.vr.meta = expr.vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 	}
 	return expr.vr
 }

@@ -554,14 +554,14 @@ func (exInfo *ExInfo) Hash() uint32 {
 
 func (exInfo *ExInfo) Error() string {
 	var pos Position
-	ok, form := exInfo.data.Get(MakeKeyword("form"))
+	ok, form := exInfo.data.Get(KEYWORDS.form)
 	if ok {
 		if form.GetInfo() != nil {
 			pos = form.GetInfo().Pos()
 		}
 	}
 	prefix := "Exception"
-	if ok, pr := exInfo.data.Get((MakeKeyword("_prefix"))); ok {
+	if ok, pr := exInfo.data.Get(KEYWORDS._prefix); ok {
 		prefix = pr.ToString(false)
 	}
 	if len(exInfo.rt.callstack.frames) > 0 {
@@ -1353,9 +1353,9 @@ func IsSpecialSymbol(obj Object) bool {
 func MakeMeta(arglists Seq, docstring string, added string) Map {
 	res := EmptyArrayMap()
 	if arglists != nil {
-		res.Add(MakeKeyword("arglists"), arglists)
+		res.Add(KEYWORDS.arglist, arglists)
 	}
-	res.Add(MakeKeyword("doc"), String{S: docstring})
-	res.Add(MakeKeyword("added"), String{S: added})
+	res.Add(KEYWORDS.doc, String{S: docstring})
+	res.Add(KEYWORDS.added, String{S: added})
 	return res
 }

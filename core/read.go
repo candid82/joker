@@ -596,7 +596,7 @@ func readMeta(reader *Reader) *ArrayMap {
 	case *ArrayMap:
 		return v
 	case String, Symbol:
-		return &ArrayMap{arr: []Object{DeriveReadObject(obj, MakeKeyword("tag")), obj}}
+		return &ArrayMap{arr: []Object{DeriveReadObject(obj, KEYWORDS.tag), obj}}
 	case Keyword:
 		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{B: true})}}
 	default:

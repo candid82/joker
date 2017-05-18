@@ -144,9 +144,22 @@ type (
 		ifWithoutElse bool
 	}
 	Keywords struct {
-		tag        Keyword
-		skipUnused Keyword
-		private    Keyword
+		tag           Keyword
+		skipUnused    Keyword
+		private       Keyword
+		line          Keyword
+		column        Keyword
+		file          Keyword
+		macro         Keyword
+		form          Keyword
+		arglist       Keyword
+		doc           Keyword
+		added         Keyword
+		meta          Keyword
+		knownMacros   Keyword
+		rules         Keyword
+		ifWithoutElse Keyword
+		_prefix       Keyword
 	}
 )
 
@@ -158,9 +171,22 @@ var (
 	UNDERSCORE      = MakeSymbol("_")
 	WARNINGS        = Warnings{}
 	KEYWORDS        = Keywords{
-		tag:        MakeKeyword("tag"),
-		skipUnused: MakeKeyword("skip-unused"),
-		private:    MakeKeyword("private"),
+		tag:           MakeKeyword("tag"),
+		skipUnused:    MakeKeyword("skip-unused"),
+		private:       MakeKeyword("private"),
+		line:          MakeKeyword("line"),
+		column:        MakeKeyword("column"),
+		file:          MakeKeyword("file"),
+		macro:         MakeKeyword("macro"),
+		form:          MakeKeyword("form"),
+		arglist:       MakeKeyword("arglists"),
+		doc:           MakeKeyword("doc"),
+		added:         MakeKeyword("added"),
+		meta:          MakeKeyword("meta"),
+		knownMacros:   MakeKeyword("known-macros"),
+		rules:         MakeKeyword("rules"),
+		ifWithoutElse: MakeKeyword("if-without-else"),
+		_prefix:       MakeKeyword("_prefix"),
 	}
 )
 
@@ -472,9 +498,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			switch docstring.(type) {
 			case String:
 				if meta != nil {
-					meta = meta.Assoc(MakeKeyword("doc"), docstring).(Map)
+					meta = meta.Assoc(KEYWORDS.doc, docstring).(Map)
 				} else {
-					meta = EmptyArrayMap().Assoc(MakeKeyword("doc"), docstring).(Map)
+					meta = EmptyArrayMap().Assoc(KEYWORDS.doc, docstring).(Map)
 				}
 			default:
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
@@ -961,9 +987,9 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 		case *Var:
 			vr.isMacro = true
 			if vr.meta == nil {
-				vr.meta = EmptyArrayMap().Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+				vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 			} else {
-				vr.meta = vr.meta.Assoc(MakeKeyword("macro"), Bool{B: true}).(Map)
+				vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 			}
 			return expr
 		}

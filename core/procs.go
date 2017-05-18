@@ -366,7 +366,7 @@ var procAtom = func(args []Object) Object {
 	}
 	if len(args) > 1 {
 		m := NewHashMap(args[1:]...)
-		if ok, v := m.Get(MakeKeyword("meta")); ok {
+		if ok, v := m.Get(KEYWORDS.meta); ok {
 			res.meta = AssertMap(v, "")
 		}
 	}
@@ -1359,7 +1359,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	}
 }
 
-var privateMeta Map = EmptyArrayMap().Assoc(MakeKeyword("private"), Bool{B: true}).(Map)
+var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Bool{B: true}).(Map)
 
 func intern(name string, proc Proc) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
@@ -1431,7 +1431,7 @@ func ReadConfig(filename string) {
 		printConfigError(configFileName, "config root object must be a map, got "+config.GetType().ToString(false))
 		return
 	}
-	ok, knownMacros := configMap.Get(MakeKeyword("known-macros"))
+	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
 		_, ok := knownMacros.(Seqable)
 		if !ok {
@@ -1439,14 +1439,14 @@ func ReadConfig(filename string) {
 			return
 		}
 	}
-	ok, rules := configMap.Get(MakeKeyword("rules"))
+	ok, rules := configMap.Get(KEYWORDS.rules)
 	if ok {
 		m, ok := rules.(Map)
 		if !ok {
 			printConfigError(configFileName, ":rules value must be a map, got "+rules.GetType().ToString(false))
 			return
 		}
-		ok, v := m.Get(MakeKeyword("if-without-else"))
+		ok, v := m.Get(KEYWORDS.ifWithoutElse)
 		if ok {
 			WARNINGS.ifWithoutElse = toBool(v)
 		}
