@@ -42,6 +42,15 @@
 (defn .. [x form & more])
 (defn refer-clojure [& filters])
 
+;; Clojure core functions not supported by Joker
+
+(defn inst-ms [inst])
+(defn inst? [x])
+(defn uuid? [x])
+(defn halt-when
+  ([pred])
+  ([pred retf]))
+
 ;; Clojure core vars not supported by Joker
 
 (def *print-level*)

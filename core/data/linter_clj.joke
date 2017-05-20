@@ -286,6 +286,7 @@
 (defn -reset-methods [protocol])
 (defn bigdec? [x])
 (defn bytes? [x])
+(defn uri? [x])
 
 ;; Clojure core macros not supported by Joker
 

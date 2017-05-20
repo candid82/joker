@@ -3438,6 +3438,11 @@
   {:added "1.0"}
   [coll] (instance? Reversible coll))
 
+(defn indexed?
+  "Return true if coll implements Indexed, indicating efficient lookup by index"
+  {:added "1.0"}
+  [coll] (instance? Indexed coll))
+
 (def
   ^{:doc "bound in a repl to the most recent value printed"
     :added "1.0"}
@@ -3807,6 +3812,18 @@
                        (keepi (inc idx) (rest s))
                        (cons x (keepi (inc idx) (rest s))))))))]
     (keepi 0 coll)))
+
+(defn bounded-count
+  "If coll is counted? returns its count, else will count at most the first n
+  elements of coll using its seq"
+  {:added "1.0"}
+  [n coll]
+  (if (counted? coll)
+    (count coll)
+    (loop [i 0 s (seq coll)]
+      (if (and s (< i n))
+        (recur (inc i) (next s))
+        i))))
 
 (defn every-pred
   "Takes a set of predicates and returns a function f that returns true if all of its
