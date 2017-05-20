@@ -284,6 +284,8 @@
 (defn parents ([tag]) ([h tag]))
 (defn record? [x])
 (defn -reset-methods [protocol])
+(defn bigdec? [x])
+(defn bytes? [x])
 
 ;; Clojure core macros not supported by Joker
 
