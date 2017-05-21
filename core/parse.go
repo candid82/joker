@@ -194,6 +194,20 @@ type (
 		backslash          Symbol
 		deref              Symbol
 	}
+	Str struct {
+		_if       *string
+		quote     *string
+		fn_       *string
+		let_      *string
+		loop_     *string
+		recur     *string
+		setMacro_ *string
+		def       *string
+		_var      *string
+		do        *string
+		throw     *string
+		try       *string
+	}
 )
 
 var (
@@ -201,6 +215,7 @@ var (
 	LOCAL_BINDINGS  *Bindings = nil
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
+	REQUIRE_VAR     *Var
 	WARNINGS        = Warnings{}
 	KEYWORDS        = Keywords{
 		tag:           MakeKeyword("tag"),
@@ -252,6 +267,20 @@ var (
 		defaultDataReaders: MakeSymbol("default-data-readers"),
 		backslash:          MakeSymbol("/"),
 		deref:              MakeSymbol("deref"),
+	}
+	STR = Str{
+		_if:       STRINGS.Intern("if"),
+		quote:     STRINGS.Intern("quote"),
+		fn_:       STRINGS.Intern("fn*"),
+		let_:      STRINGS.Intern("let*"),
+		loop_:     STRINGS.Intern("loop*"),
+		recur:     STRINGS.Intern("recur"),
+		setMacro_: STRINGS.Intern("set-macro*"),
+		def:       STRINGS.Intern("def"),
+		_var:      STRINGS.Intern("var"),
+		do:        STRINGS.Intern("do"),
+		throw:     STRINGS.Intern("throw"),
+		try:       STRINGS.Intern("try"),
 	}
 )
 
@@ -1113,6 +1142,13 @@ func areAllLiteralExprs(exprs []Expr) bool {
 	return true
 }
 
+func getRequireVar(ctx *ParseContext) *Var {
+	if REQUIRE_VAR == nil {
+		REQUIRE_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("require")
+	}
+	return REQUIRE_VAR
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -1133,10 +1169,10 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	pos := GetPosition(obj)
 	first := seq.First()
 	if v, ok := first.(Symbol); ok && v.ns == nil {
-		switch *v.name {
-		case "quote":
+		switch v.name {
+		case STR.quote:
 			return NewLiteralExpr(Second(seq))
-		case "if":
+		case STR._if:
 			checkForm(obj, 3, 4)
 			if LINTER_MODE && SeqCount(seq) < 4 && WARNINGS.ifWithoutElse {
 				printParseWarning(pos, "missing else branch")
@@ -1147,23 +1183,23 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				negative: Parse(Forth(seq), ctx),
 				Position: pos,
 			}
-		case "fn*":
+		case STR.fn_:
 			return parseFn(obj, ctx)
-		case "let*":
+		case STR.let_:
 			return parseLet(obj, ctx)
-		case "loop*":
+		case STR.loop_:
 			return parseLoop(obj, ctx)
-		case "recur":
+		case STR.recur:
 			return parseRecur(obj, ctx)
 
 		// Vars' isMacro has to be properly set during parse stage
 		// for linter mode to correctly handle arguments count.
-		case "set-macro*":
+		case STR.setMacro_:
 			return parseSetMacro(obj, ctx)
 
-		case "def":
+		case STR.def:
 			return parseDef(obj, ctx)
-		case "var":
+		case STR._var:
 			checkForm(obj, 2, 2)
 			switch sym := Second(seq).(type) {
 			case Symbol:
@@ -1189,17 +1225,17 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			default:
 				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
 			}
-		case "do":
+		case STR.do:
 			return &DoExpr{
 				body:     parseBody(seq.Rest(), ctx),
 				Position: pos,
 			}
-		case "throw":
+		case STR.throw:
 			return &ThrowExpr{
 				Position: pos,
 				e:        Parse(Second(seq), ctx),
 			}
-		case "try":
+		case STR.try:
 			return parseTry(obj, ctx)
 		}
 	}
@@ -1230,7 +1266,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
-				require := ctx.GlobalEnv.CoreNamespace.Resolve("require")
+				require := getRequireVar(ctx)
 				if c.vr.Value.Equals(require.Value) && areAllLiteralExprs(res.args) {
 					Eval(res, nil)
 				} else {
