@@ -162,10 +162,37 @@ type (
 		_prefix       Keyword
 	}
 	Symbols struct {
-		joker_core Symbol
-		underscore Symbol
-		catch      Symbol
-		finally    Symbol
+		joker_core         Symbol
+		underscore         Symbol
+		catch              Symbol
+		finally            Symbol
+		amp                Symbol
+		_if                Symbol
+		quote              Symbol
+		fn_                Symbol
+		fn                 Symbol
+		let_               Symbol
+		loop_              Symbol
+		recur              Symbol
+		setMacro_          Symbol
+		def                Symbol
+		_var               Symbol
+		do                 Symbol
+		throw              Symbol
+		try                Symbol
+		unquoteSplicing    Symbol
+		list               Symbol
+		concat             Symbol
+		seq                Symbol
+		apply              Symbol
+		emptySymbol        Symbol
+		unquote            Symbol
+		vector             Symbol
+		hashMap            Symbol
+		hashSet            Symbol
+		defaultDataReaders Symbol
+		backslash          Symbol
+		deref              Symbol
 	}
 )
 
@@ -194,10 +221,37 @@ var (
 		_prefix:       MakeKeyword("_prefix"),
 	}
 	SYMBOLS = Symbols{
-		joker_core: MakeSymbol("joker.core"),
-		underscore: MakeSymbol("_"),
-		catch:      MakeSymbol("catch"),
-		finally:    MakeSymbol("finally"),
+		joker_core:         MakeSymbol("joker.core"),
+		underscore:         MakeSymbol("_"),
+		catch:              MakeSymbol("catch"),
+		finally:            MakeSymbol("finally"),
+		amp:                MakeSymbol("&"),
+		_if:                MakeSymbol("if"),
+		quote:              MakeSymbol("quote"),
+		fn_:                MakeSymbol("fn*"),
+		fn:                 MakeSymbol("fn"),
+		let_:               MakeSymbol("let*"),
+		loop_:              MakeSymbol("loop*"),
+		recur:              MakeSymbol("recur"),
+		setMacro_:          MakeSymbol("set-macro*"),
+		def:                MakeSymbol("def"),
+		_var:               MakeSymbol("var"),
+		do:                 MakeSymbol("do"),
+		throw:              MakeSymbol("throw"),
+		try:                MakeSymbol("try"),
+		unquoteSplicing:    MakeSymbol("unquote-splicing"),
+		list:               MakeSymbol("list"),
+		concat:             MakeSymbol("concat"),
+		seq:                MakeSymbol("seq"),
+		apply:              MakeSymbol("apply"),
+		emptySymbol:        MakeSymbol(""),
+		unquote:            MakeSymbol("unquote"),
+		vector:             MakeSymbol("vector"),
+		hashMap:            MakeSymbol("hash-map"),
+		hashSet:            MakeSymbol("hash-set"),
+		defaultDataReaders: MakeSymbol("default-data-readers"),
+		backslash:          MakeSymbol("/"),
+		deref:              MakeSymbol("deref"),
 	}
 )
 
@@ -560,7 +614,7 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 				panic(&ParseError{obj: ro, msg: "Unsupported binding form: " + sym.ToString(false)})
 			}
 		}
-		if MakeSymbol("&").Equals(sym) {
+		if SYMBOLS.amp.Equals(sym) {
 			if v.count > i+2 {
 				ro := v.at(i + 2)
 				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.ToString(false)})
@@ -1335,18 +1389,18 @@ func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 }
 
 func init() {
-	SPECIAL_SYMBOLS[MakeSymbol("if").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("quote").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("fn*").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("let*").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("loop*").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("recur").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("set-macro*").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("def").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("var").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("do").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("throw").name] = true
-	SPECIAL_SYMBOLS[MakeSymbol("try").name] = true
+	SPECIAL_SYMBOLS[SYMBOLS._if.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.quote.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.fn_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.let_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.loop_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.recur.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.setMacro_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.def.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS._var.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.do.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.throw.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.try.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.catch.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.finally.name] = true
 }
