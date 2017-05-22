@@ -23,6 +23,12 @@
   #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
     'clojure.test/deftest 'clojure.test/is 'clojure.test/are})
 
+;; Redefine some core functions with type hints
+(defn cons [x ^Seqable seq] (cons* x seq))
+(defn first [^Seqable coll] (first* coll))
+(defn next [^Seqable coll] (next* coll))
+(defn rest [^Seqable coll] (rest* coll))
+
 ;; Clojure core macros not supported by Joker
 
 (defn vswap! [vol f & args])

@@ -1,2 +1,6 @@
 (split-at 1 2)
 (map (fn []) 2)
+(cons 1 2)
+(first 2)
+(next 1)
+(rest 2)
