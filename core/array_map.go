@@ -54,7 +54,7 @@ func (seq *ArrayMapSeq) WithMeta(meta Map) Object {
 }
 
 func (seq *ArrayMapSeq) GetType() *Type {
-	return TYPES["ArrayMapSeq"]
+	return TYPE.ArrayMapSeq
 }
 
 func (seq *ArrayMapSeq) Hash() uint32 {
@@ -244,7 +244,7 @@ func (m *ArrayMap) Equals(other interface{}) bool {
 }
 
 func (m *ArrayMap) GetType() *Type {
-	return TYPES["ArrayMap"]
+	return TYPE.ArrayMap
 }
 
 func (m *ArrayMap) Hash() uint32 {

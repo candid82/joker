@@ -50,7 +50,7 @@ func (list *List) Equals(other interface{}) bool {
 }
 
 func (list *List) GetType() *Type {
-	return TYPES["List"]
+	return TYPE.List
 }
 
 func (list *List) Hash() uint32 {

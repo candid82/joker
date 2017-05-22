@@ -477,7 +477,7 @@ func (err *ParseError) GetInfo() *ObjectInfo {
 }
 
 func (err *ParseError) GetType() *Type {
-	return TYPES["ParseError"]
+	return TYPE.ParseError
 }
 
 func (err *ParseError) Hash() uint32 {
@@ -769,7 +769,7 @@ func resolveType(obj Object, ctx *ParseContext) *Type {
 		}
 	}
 	if LINTER_MODE {
-		return TYPES["Error"]
+		return TYPE.Error
 	}
 	panic(&ParseError{obj: obj, msg: "Unable to resolve type: " + obj.ToString(false)})
 }
@@ -1025,7 +1025,7 @@ func inferType(expr Expr) *Type {
 	case *LiteralExpr:
 		return expr.obj.GetType()
 	case *VectorExpr:
-		return TYPES["Vector"]
+		return TYPE.Vector
 	default:
 		return nil
 	}
@@ -1035,7 +1035,7 @@ func getTaggedType(obj Meta) *Type {
 	if m := obj.GetMeta(); m != nil {
 		if ok, typeName := m.Get(KEYWORDS.tag); ok {
 			if typeSym, ok := typeName.(Symbol); ok {
-				if t := TYPES[*typeSym.name]; t != nil {
+				if t := TYPES[typeSym.name]; t != nil {
 					return t
 				}
 			}
@@ -1345,10 +1345,10 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	}
 	vr, ok := ctx.GlobalEnv.Resolve(sym)
 	if !ok {
-		if sym.ns == nil && TYPES[*sym.name] != nil {
+		if sym.ns == nil && TYPES[sym.name] != nil {
 			return &LiteralExpr{
 				Position: GetPosition(obj),
-				obj:      TYPES[*sym.name],
+				obj:      TYPES[sym.name],
 			}
 		}
 		if !LINTER_MODE {

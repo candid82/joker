@@ -1198,8 +1198,8 @@ var procVarSet Proc = func(args []Object) Object {
 var procNsResolve Proc = func(args []Object) Object {
 	ns := EnsureNamespace(args, 0)
 	sym := EnsureSymbol(args, 1)
-	if sym.ns == nil && TYPES[*sym.name] != nil {
-		return TYPES[*sym.name]
+	if sym.ns == nil && TYPES[sym.name] != nil {
+		return TYPES[sym.name]
 	}
 	if vr, ok := GLOBAL_ENV.ResolveIn(ns, sym); ok {
 		return vr

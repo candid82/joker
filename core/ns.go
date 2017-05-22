@@ -33,7 +33,7 @@ func (ns *Namespace) WithInfo(info *ObjectInfo) Object {
 }
 
 func (ns *Namespace) GetType() *Type {
-	return TYPES["Namespace"]
+	return TYPE.Namespace
 }
 
 func (ns *Namespace) WithMeta(meta Map) Object {

@@ -24,7 +24,7 @@ func (b *Buffer) GetInfo() *ObjectInfo {
 }
 
 func (b *Buffer) GetType() *Type {
-	return TYPES["Buffer"]
+	return TYPE.Buffer
 }
 
 func (b *Buffer) Hash() uint32 {

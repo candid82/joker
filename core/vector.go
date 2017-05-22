@@ -136,7 +136,7 @@ func (v *Vector) Equals(other interface{}) bool {
 }
 
 func (v *Vector) GetType() *Type {
-	return TYPES["Vector"]
+	return TYPE.Vector
 }
 
 func (v *Vector) Hash() uint32 {
@@ -162,7 +162,7 @@ func (vseq *VectorSeq) WithMeta(meta Map) Object {
 }
 
 func (vseq *VectorSeq) GetType() *Type {
-	return TYPES["VectorSeq"]
+	return TYPE.VectorSeq
 }
 
 func (vseq *VectorSeq) Hash() uint32 {
@@ -212,7 +212,7 @@ func (vseq *VectorRSeq) WithMeta(meta Map) Object {
 }
 
 func (vseq *VectorRSeq) GetType() *Type {
-	return TYPES["VectorRSeq"]
+	return TYPE.VectorRSeq
 }
 
 func (vseq *VectorRSeq) Hash() uint32 {

@@ -89,7 +89,7 @@ func (seq *MappingSeq) WithMeta(meta Map) Object {
 }
 
 func (seq *MappingSeq) GetType() *Type {
-	return TYPES["MappingSeq"]
+	return TYPE.MappingSeq
 }
 
 func (seq *MappingSeq) Hash() uint32 {
@@ -146,7 +146,7 @@ func (seq *LazySeq) WithMeta(meta Map) Object {
 }
 
 func (seq *LazySeq) GetType() *Type {
-	return TYPES["LazySeq"]
+	return TYPE.LazySeq
 }
 
 func (seq *LazySeq) Hash() uint32 {
@@ -193,7 +193,7 @@ func (seq *ArraySeq) WithMeta(meta Map) Object {
 }
 
 func (seq *ArraySeq) GetType() *Type {
-	return TYPES["ArraySeq"]
+	return TYPE.ArraySeq
 }
 
 func (seq *ArraySeq) Hash() uint32 {
@@ -256,7 +256,7 @@ func (seq *ConsSeq) ToString(escape bool) string {
 }
 
 func (seq *ConsSeq) GetType() *Type {
-	return TYPES["ConsSeq"]
+	return TYPE.ConsSeq
 }
 
 func (seq *ConsSeq) Hash() uint32 {

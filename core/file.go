@@ -24,7 +24,7 @@ func (f *File) GetInfo() *ObjectInfo {
 }
 
 func (f *File) GetType() *Type {
-	return TYPES["File"]
+	return TYPE.File
 }
 
 func (f *File) Hash() uint32 {

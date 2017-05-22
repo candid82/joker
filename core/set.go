@@ -80,7 +80,7 @@ func (set *MapSet) Get(key Object) (bool, Object) {
 }
 
 func (seq *MapSet) GetType() *Type {
-	return TYPES["MapSet"]
+	return TYPE.MapSet
 }
 
 func (set *MapSet) Hash() uint32 {

@@ -175,7 +175,7 @@ func (s *ArrayNodeSeq) ToString(escape bool) string {
 }
 
 func (s *ArrayNodeSeq) GetType() *Type {
-	return TYPES["ArrayNodeSeq"]
+	return TYPE.ArrayNodeSeq
 }
 
 func (s *ArrayNodeSeq) Hash() uint32 {
@@ -260,7 +260,7 @@ func (s *NodeSeq) ToString(escape bool) string {
 }
 
 func (s *NodeSeq) GetType() *Type {
-	return TYPES["NodeSeq"]
+	return TYPE.NodeSeq
 }
 
 func (s *NodeSeq) Hash() uint32 {
@@ -687,7 +687,7 @@ func (m *HashMap) Equals(other interface{}) bool {
 }
 
 func (m *HashMap) GetType() *Type {
-	return TYPES["HashMap"]
+	return TYPE.HashMap
 }
 
 func (m *HashMap) Hash() uint32 {

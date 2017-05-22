@@ -146,7 +146,7 @@ func (err *EvalError) GetInfo() *ObjectInfo {
 }
 
 func (err *EvalError) GetType() *Type {
-	return TYPES["EvalError"]
+	return TYPE.EvalError
 }
 
 func (err *EvalError) Hash() uint32 {
