@@ -1431,6 +1431,16 @@ func ReadConfig(filename string) {
 		printConfigError(configFileName, "config root object must be a map, got "+config.GetType().ToString(false))
 		return
 	}
+	ok, ignoredUnusedNamespaces := configMap.Get(MakeKeyword("ignored-unused-namespaces"))
+	if ok {
+		seq, ok := ignoredUnusedNamespaces.(Seqable)
+		if ok {
+			WARNINGS.ignoredUnusedNamespaces = seq
+		} else {
+			printConfigError(configFileName, ":ignored-unused-namespaces value must be a vector, got "+ignoredUnusedNamespaces.GetType().ToString(false))
+			return
+		}
+	}
 	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
 		_, ok := knownMacros.(Seqable)
