@@ -142,6 +142,7 @@ type (
 	}
 	Warnings struct {
 		ifWithoutElse bool
+		ignoredUnusedNamespaces Seqable
 	}
 )
 
@@ -284,12 +285,26 @@ func printReadWarning(reader *Reader, msg string) {
 	printError(pos, "Read warning: "+msg)
 }
 
+func isIgnoredUnsusedNamespace(ns *Namespace) bool {
+	if WARNINGS.ignoredUnusedNamespaces == nil {
+		return false
+	}
+	vec := NewVectorFromSeq(WARNINGS.ignoredUnusedNamespaces.Seq())
+	for i := 0; i < vec.Count(); i++ {
+		v := vec.at(i)
+		if v.ToString(false) == ns.Name.ToString(false) {
+			return true
+		}
+	}
+	return false
+}
+
 func WarnOnUnusedNamespaces() {
 	var names []string
 	positions := make(map[string]Position)
 
 	for _, ns := range GLOBAL_ENV.Namespaces {
-		if !ns.isUsed {
+		if !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
 			if pos != nil {
 				name := ns.Name.ToString(false)
