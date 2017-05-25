@@ -1,0 +1,6 @@
+tests/linter/types/input.clj:1:13: Parse warning: arg[1] of #'joker.core/split-at must have type Seqable, got Int
+tests/linter/types/input.clj:2:14: Parse warning: arg[1] of #'joker.core/map must have type Seqable, got Int
+tests/linter/types/input.clj:3:9: Parse warning: arg[1] of #'joker.core/cons must have type Seqable, got Int
+tests/linter/types/input.clj:4:8: Parse warning: arg[0] of #'joker.core/first must have type Seqable, got Int
+tests/linter/types/input.clj:5:7: Parse warning: arg[0] of #'joker.core/next must have type Seqable, got Int
+tests/linter/types/input.clj:6:7: Parse warning: arg[0] of #'joker.core/rest must have type Seqable, got Int
