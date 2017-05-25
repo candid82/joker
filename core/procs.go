@@ -1435,7 +1435,7 @@ func ReadConfig(filename string) {
 	if ok {
 		seq, ok := ignoredUnusedNamespaces.(Seqable)
 		if ok {
-			WARNINGS.ignoredUnusedNamespaces = seq
+			WARNINGS.ignoredUnusedNamespaces = NewSetFromSeq(seq.Seq())
 		} else {
 			printConfigError(configFileName, ":ignored-unused-namespaces value must be a vector, got "+ignoredUnusedNamespaces.GetType().ToString(false))
 			return

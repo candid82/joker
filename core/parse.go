@@ -141,8 +141,8 @@ type (
 		isUnknownCallableScope bool
 	}
 	Warnings struct {
-		ifWithoutElse bool
-		ignoredUnusedNamespaces Seqable
+		ifWithoutElse           bool
+		ignoredUnusedNamespaces Set
 	}
 	Keywords struct {
 		tag           Keyword
@@ -417,14 +417,8 @@ func isIgnoredUnsusedNamespace(ns *Namespace) bool {
 	if WARNINGS.ignoredUnusedNamespaces == nil {
 		return false
 	}
-	vec := NewVectorFromSeq(WARNINGS.ignoredUnusedNamespaces.Seq())
-	for i := 0; i < vec.Count(); i++ {
-		v := vec.at(i)
-		if v.ToString(false) == ns.Name.ToString(false) {
-			return true
-		}
-	}
-	return false
+	ok, _ := WARNINGS.ignoredUnusedNamespaces.Get(ns.Name)
+	return ok
 }
 
 func WarnOnUnusedNamespaces() {

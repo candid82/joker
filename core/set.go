@@ -106,3 +106,12 @@ func (set *MapSet) Call(args []Object) Object {
 func (set *MapSet) Empty() Collection {
 	return EmptySet()
 }
+
+func NewSetFromSeq(s Seq) *MapSet {
+	res := EmptySet()
+	for !s.IsEmpty() {
+		res.Add(s.First())
+		s = s.Rest()
+	}
+	return res
+}

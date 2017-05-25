@@ -8,7 +8,8 @@
             [test.ns7 :as n7]
             [test.ns8 :as n8]
             [test.ns9 :as n9]
-            [test.n10])
+            [test.n10]
+            [ignored.test])
   (:import my.JavaClass))
 
 (f4)
