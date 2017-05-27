@@ -4,6 +4,7 @@
 (def k :t)
 ;; Should PASS
 
+(spit "test" "test" :append true)
 (map identity)
 (f1)
 (f2 1)
