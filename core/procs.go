@@ -1256,6 +1256,12 @@ var procIsRealized Proc = func(args []Object) Object {
 	return Bool{B: EnsurePending(args, 0).IsRealized()}
 }
 
+var procDeriveInfo Proc = func(args []Object) Object {
+	dest := args[0]
+	src := args[1]
+	return dest.WithInfo(src.GetInfo())
+}
+
 var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
@@ -1629,6 +1635,7 @@ func init() {
 	intern("spit*", procSpit)
 	intern("shuffle*", procShuffle)
 	intern("realized?*", procIsRealized)
+	intern("derive-info__", procDeriveInfo)
 
 	intern("hash*", procHash)
 

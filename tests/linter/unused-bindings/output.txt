@@ -1,3 +1,4 @@
 tests/linter/unused-bindings/input.clj:11:7: Parse warning: unused binding: a
 tests/linter/unused-bindings/input.clj:12:7: Parse warning: unused binding: a
 tests/linter/unused-bindings/input.clj:16:9: Parse warning: unused binding: a
+tests/linter/unused-bindings/input.clj:21:17: Parse warning: unused binding: b

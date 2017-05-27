@@ -17,3 +17,5 @@
   (if 1
     (recur b)
     1))
+
+(let [{:keys [a b]} {}] (println a))
