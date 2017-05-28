@@ -683,6 +683,11 @@ func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 	defer ctx.PopLocalFrame()
 	ctx.PushLoopBindings(args)
 	defer ctx.PopLoopBindings()
+
+	noRecurAllowed := ctx.noRecurAllowed
+	ctx.noRecurAllowed = false
+	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
+
 	arity := FnArityExpr{args: args, body: parseBody(body, ctx)}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -795,9 +800,6 @@ func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
 	}
 	ctx.PushLocalFrame([]Symbol{excSymbol.(Symbol)})
 	defer ctx.PopLocalFrame()
-	noRecurAllowed := ctx.noRecurAllowed
-	ctx.noRecurAllowed = true
-	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 	return &CatchExpr{
 		Position:  GetPosition(obj),
 		excType:   excType,
@@ -807,9 +809,6 @@ func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
 }
 
 func parseFinally(body Seq, ctx *ParseContext) []Expr {
-	noRecurAllowed := ctx.noRecurAllowed
-	ctx.noRecurAllowed = true
-	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 	return parseBody(body, ctx)
 }
 
@@ -822,6 +821,11 @@ func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 	res := &TryExpr{Position: GetPosition(obj)}
 	lastType := Regular
 	seq := obj.(Seq).Rest()
+
+	noRecurAllowed := ctx.noRecurAllowed
+	ctx.noRecurAllowed = true
+	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
+
 	for !seq.IsEmpty() {
 		obj = seq.First()
 		if lastType == Finally {
@@ -902,6 +906,10 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		if isLoop {
 			ctx.PushLoopBindings(res.names)
 			defer ctx.PopLoopBindings()
+
+			noRecurAllowed := ctx.noRecurAllowed
+			ctx.noRecurAllowed = false
+			defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 		}
 
 		res.body = parseBody(obj.(Seq).Rest().Rest(), ctx)
