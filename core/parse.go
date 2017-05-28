@@ -1158,6 +1158,21 @@ func getRequireVar(ctx *ParseContext) *Var {
 	return REQUIRE_VAR
 }
 
+func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
+	switch expr := expr.(type) {
+	case *FnExpr:
+		reportWrongArity(expr, isMacro, call, pos)
+	case *LiteralExpr:
+		if _, ok := expr.obj.(Callable); !ok {
+			reportNotAFunction(pos, call.name)
+		}
+	case *RecurExpr:
+		reportNotAFunction(pos, call.name)
+	case *ThrowExpr:
+		reportNotAFunction(pos, call.name)
+	}
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -1289,21 +1304,10 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					}
 				}
 			} else {
-				switch expr := c.vr.expr.(type) {
-				case *FnExpr:
-					reportWrongArity(expr, c.vr.isMacro, res, pos)
-				case *LiteralExpr:
-					if _, ok := expr.obj.(Callable); !ok {
-						reportNotAFunction(pos, res.name)
-					}
-				case *RecurExpr:
-					reportNotAFunction(pos, res.name)
-				case *BindingExpr:
-					reportNotAFunction(pos, res.name)
-				case *ThrowExpr:
-					reportNotAFunction(pos, res.name)
-				}
+				checkCall(c.vr.expr, c.vr.isMacro, res, pos)
 			}
+		default:
+			checkCall(res.callable, false, res, pos)
 		}
 	}
 	return res
