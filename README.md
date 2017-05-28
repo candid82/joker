@@ -124,10 +124,18 @@ Symbol `baz` is introduced inside `def-something` macro. The code it totally val
 
 Please note that the symbols are namespace qualified and unquoted. Also, Joker knows about some commonly used macros (outside of `clojure.core` namespace) like `clojure.test/deftest` or `clojure.core.async/go-loop`, so you won't have to add those to your config file.
 
-Additionally, if you want to ignore an unused namespace requirement you can add the `:ignored-unused-namespaces` key to your `.joker` file:
+Additionally, if you want Joker to ignore some unused namespaces (for example, if they are required for their side effects) you can add the `:ignored-unused-namespaces` key to your `.joker` file:
 
 ```clojure
 {:ignored-unused-namespaces [foo.bar.baz]}
+```
+
+### Optional rules
+
+Joker currently supports one warning that is turned off by default: `if` without the `else` branch. To enable this warning, add the following to your `.joker` file:
+
+```
+:rules {:if-without-else true}
 ```
 
 ## Building
