@@ -158,7 +158,7 @@
   ^{:arglists '([msg map] [msg map cause])
     :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
     :added "1.0"}
-  ex-info ex-info*)
+  ex-info ex-info__)
 
 (def
   ^{:arglists '([map key val] [map key val & kvs])
@@ -892,75 +892,75 @@
   "remainder of dividing numerator by denominator."
   {:added "1.0"}
   [num div]
-  (rem* num div))
+  (rem__ num div))
 
 (defn bit-not
   "Bitwise complement"
   {:added "1.0"}
-  [x] (bit-not* x))
+  [x] (bit-not__ x))
 
 (defn bit-and
   "Bitwise and"
   {:added "1.0"}
-  ([x y] (bit-and* x y))
+  ([x y] (bit-and__ x y))
   ([x y & more]
    (reduce bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
   {:added "1.0"}
-  ([x y] (bit-or* x y))
+  ([x y] (bit-or__ x y))
   ([x y & more]
    (reduce bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
   {:added "1.0"}
-  ([x y] (bit-xor* x y))
+  ([x y] (bit-xor_ x y))
   ([x y & more]
    (reduce bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
   {:added "1.0"}
-  ([x y] (bit-and-not* x y))
+  ([x y] (bit-and-not__ x y))
   ([x y & more]
    (reduce bit-and-not (bit-and-not x y) more)))
 
 (defn bit-clear
   "Clear bit at index n"
   {:added "1.0"}
-  [x n] (bit-clear* x n))
+  [x n] (bit-clear__ x n))
 
 (defn bit-set
   "Set bit at index n"
   {:added "1.0"}
-  [x n] (bit-set* x n))
+  [x n] (bit-set__ x n))
 
 (defn bit-flip
   "Flip bit at index n"
   {:added "1.0"}
-  [x n] (bit-flip* x n))
+  [x n] (bit-flip__ x n))
 
 (defn bit-test
   "Test bit at index n"
   {:added "1.0"}
-  [x n] (bit-test* x n))
+  [x n] (bit-test__ x n))
 
 (defn bit-shift-left
   "Bitwise shift left"
   {:added "1.0"}
-  [x n] (bit-shift-left* x n))
+  [x n] (bit-shift-left__ x n))
 
 (defn bit-shift-right
   "Bitwise shift right"
   {:added "1.0"}
-  [x n] (bit-shift-right* x n))
+  [x n] (bit-shift-right__ x n))
 
 (defn unsigned-bit-shift-right
   "Bitwise shift right, without sign-extension."
   {:added "1.0"}
-  [x n] (unsigned-bit-shift-right* x n))
+  [x n] (unsigned-bit-shift-right__ x n))
 
 (defn integer?
   "Returns true if n is an integer"
@@ -1041,7 +1041,7 @@
   "For a list, same as first, for a vector, same as, but much
   more efficient than, last. If the collection is empty, returns nil."
   {:added "1.0"}
-  [coll] (peek* coll))
+  [coll] (peek__ coll))
 
 (defn pop
   "For a list, returns a new list without the first
@@ -1049,7 +1049,7 @@
   the collection is empty, throws an exception.  Note - not the same
   as next/butlast."
   {:added "1.0"}
-  [coll] (pop* coll))
+  [coll] (pop__ coll))
 
 (defn contains?
   "Returns true if key is present in the given collection, otherwise
@@ -1058,15 +1058,15 @@
   range of indexes. 'contains?' operates constant or logarithmic time;
   it will not perform a linear search for a value.  See also 'some'."
   {:added "1.0"}
-  [coll key] (contains?* coll key))
+  [coll key] (contains?__ coll key))
 
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present."
   {:added "1.0"}
   ([map key]
-   (get* map key))
+   (get__ map key))
   ([map key not-found]
-   (get* map key not-found)))
+   (get__ map key not-found)))
 
 (defn dissoc
   "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
@@ -1074,9 +1074,9 @@
   {:added "1.0"}
   ([map] map)
   ([map key]
-   (dissoc* map key))
+   (dissoc__ map key))
   ([map key & ks]
-   (let [ret (dissoc* map key)]
+   (let [ret (dissoc__ map key)]
      (if ks
        (recur ret (first ks) (next ks))
        ret))))
@@ -1087,10 +1087,10 @@
   {:added "1.0"}
   ([set] set)
   ([set key]
-   (disj* set key))
+   (disj__ set key))
   ([set key & ks]
    (when set
-     (let [ret (disj* set key)]
+     (let [ret (disj__ set key)]
        (if ks
          (recur ret (first ks) (next ks))
          ret)))))
@@ -1098,7 +1098,7 @@
 (defn find
   "Returns the map entry for key, or nil if key not present."
   {:added "1.0"}
-  [map key] (find* map key))
+  [map key] (find__ map key))
 
 (defn select-keys
   "Returns a map containing only those entries in map whose key is in keys"
@@ -1106,7 +1106,7 @@
   [map keyseq]
   (loop [ret {} keys (seq keyseq)]
     (if keys
-      (let [entry (find* map (first keys))]
+      (let [entry (find__ map (first keys))]
         (recur
          (if entry
            (conj ret entry)
@@ -1117,12 +1117,12 @@
 (defn keys
   "Returns a sequence of the map's keys, in the same order as (seq map)."
   {:added "1.0"}
-  [map] (keys* map))
+  [map] (keys__ map))
 
 (defn vals
   "Returns a sequence of the map's values, in the same order as (seq map)."
   {:added "1.0"}
-  [map] (vals* map))
+  [map] (vals__ map))
 
 (defn key
   "Returns the key of the map entry."
@@ -1148,14 +1148,14 @@
   {:tag String
   :added "1.0"}
   [x]
-  (if (string? x) x (name* x)))
+  (if (string? x) x (name__ x)))
 
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."
   {:tag String
   :added "1.0"}
   [^Named x]
-  (namespace* x))
+  (namespace__ x))
 
 (defn ident?
   "Return true if x is a symbol or keyword"
@@ -1321,7 +1321,7 @@
   "Returns the :type metadata of x, or its Type if none"
   {:added "1.0"}
   [x]
-  (or (get (meta x) :type) (type* x)))
+  (or (get (meta x) :type) (type__ x)))
 
 (defn reduce-kv
   "Reduces an associative collection. f should be a function of 3
@@ -1334,7 +1334,7 @@
   ([f init coll]
    (cond
      (instance? KVReduce coll)
-     (reduce-kv* f init coll)
+     (reduce-kv__ f init coll)
 
      (instance? Map coll)
      (reduce (fn [ret kv] (f ret (first kv) (second kv))) init coll)
@@ -1345,12 +1345,12 @@
 (defn var-get
   "Gets the value in the var object"
   {:added "1.0"}
-  [^Var x] (var-get* x))
+  [^Var x] (var-get__ x))
 
 (defn var-set
   "Sets the value in the var object to val."
   {:added "1.0"}
-  [^Var x val] (var-set* x val))
+  [^Var x val] (var-set__ x val))
 
 (defn ^:private replace-bindings
   [binding-map]
@@ -1420,7 +1420,7 @@
   it if not already forced."
   {:added "1.0"}
   [ref]
-  (deref* ref))
+  (deref__ ref))
 
 (defn atom
   "Creates and returns an Atom with an initial value of x and zero or
@@ -1432,7 +1432,7 @@
   atom."
   {:added "1.0"}
   [x & options]
-  (apply atom* x options))
+  (apply atom__ x options))
 
 (defn swap!
   "Atomically swaps the value of atom to be:
@@ -1440,14 +1440,14 @@
   Returns the value that was swapped in."
   {:added "1.0"}
   [^Atom atom f & args]
-  (apply swap* atom f args))
+  (apply swap__ atom f args))
 
 (defn reset!
   "Sets the value of atom to newval without regard for the
   current value. Returns newval."
   {:added "1.0"}
   [^Atom atom newval]
-  (reset* atom newval))
+  (reset__ atom newval))
 
 (defn alter-meta!
   "Atomically sets the metadata for a namespace/var/atom to be:
@@ -1468,7 +1468,7 @@
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
   {:added "1.0"}
-  [sym] (find-var* sym))
+  [sym] (find-var__ sym))
 
 (defn comp
   "Takes a set of functions and returns a fn that is the composition
@@ -1814,7 +1814,7 @@
   ([coll]
    (sort compare coll))
   ([^Comparator comp coll]
-   (sort* comp coll)))
+   (sort__ comp coll)))
 
 (defn sort-by
   "Returns a sorted sequence of the items in coll, where the sort
@@ -1899,7 +1899,7 @@
 (defn eval
   "Evaluates the form data structure (not text!) and returns the result."
   {:added "1.0"}
-  [form] (eval* form))
+  [form] (eval__ form))
 
 (defmacro doseq
   "Repeatedly executes body (presumably for side-effects) with
@@ -1959,22 +1959,22 @@
   "Coerce to Number"
   {:tag Number
   :added "1.0"}
-  [x] (num* x))
+  [x] (num__ x))
 
 (defn double
   "Coerce to double"
   {:added "1.0"}
-  [^Number x] (double* x))
+  [^Number x] (double__ x))
 
 (defn char
   "Coerce to char"
   {:added "1.0"}
-  [x] (char* x))
+  [x] (char__ x))
 
 (defn boolean
   "Coerce to boolean"
   {:added "1.0"}
-  [x] (boolean* x))
+  [x] (boolean__ x))
 
 (defn number?
   "Returns true if x is a Number"
@@ -2001,14 +2001,14 @@
   {:tag BigInt
   :added "1.0"}
   [r]
-  (numerator* r))
+  (numerator__ r))
 
 (defn denominator
   "Returns the denominator part of a Ratio."
   {:tag BigInt
   :added "1.0"}
   [r]
-  (denominator* r))
+  (denominator__ r))
 
 (defn bigfloat?
   "Returns true if n is a BigFloat"
@@ -2039,7 +2039,7 @@
   {:tag BigFloat
   :added "1.0"}
   [x]
-  (bigfloat* x))
+  (bigfloat__ x))
 
 (def
   ^{:arglists '([& args])
@@ -2048,20 +2048,20 @@
          more than one.  By default, pr and prn print in a way that objects
          can be read by the reader"
          :added "1.0"}
-  pr pr*)
+  pr pr__)
 
 (defn newline
   "Writes a platform-specific newline to *out*"
   {:added "1.0"}
   []
-  (newline*))
+  (newline__))
 
 (defn flush
   "Flushes the output stream that is the current value of
   *out*"
   {:added "1.0"}
   []
-  (flush* *out*)
+  (flush__ *out*)
   nil)
 
 (def
@@ -2070,15 +2070,15 @@
 
     Defaults to true."
     :added "1.0"}
-  *flush-on-newline* true)
+  *flush-on-newline__ true)
 
 (defn prn
-  "Same as pr followed by (newline). Observes *flush-on-newline*"
+  "Same as pr followed by (newline). Observes *flush-on-newline__"
   {:added "1.0"}
   [& more]
   (apply pr more)
   (newline)
-  (when *flush-on-newline*
+  (when *flush-on-newline__
     (flush)))
 
 (defn print
@@ -2100,19 +2100,19 @@
   "Reads the next object from reader (defaults to *in*)"
   {:added "1.0"}
   ([] (read *in*))
-  ([reader] (read* reader)))
+  ([reader] (read__ reader)))
 
 (def
   ^{:arglists '([])
     :doc "Reads the next line from *in*."
     :added "1.0"}
-  read-line read-line*)
+  read-line read-line__)
 
 (def
   ^{:arglists '([s])
     :doc "Reads one object from the string s."
     :added "1.0"}
-  read-string read-string*)
+  read-string read-string__)
 
 (defn subvec
   "Returns a persistent vector of the items in vector from
@@ -2145,16 +2145,16 @@
   "Evaluates expr and prints the time it took.  Returns the value of expr."
   {:added "1.0"}
   [expr]
-  `(let [start# (nano-time*)
+  `(let [start# (nano-time__)
          ret# ~expr]
-     (prn (str "Elapsed time: " (/ (double (- (nano-time*) start#)) 1000000.0) " msecs"))
+     (prn (str "Elapsed time: " (/ (double (- (nano-time__) start#)) 1000000.0) " msecs"))
      ret#))
 
 (defn macroexpand-1
   "If form represents a macro form, returns its expansion, else returns form."
   {:added "1.0"}
   [form]
-  (macroexpand-1* form))
+  (macroexpand-1__ form))
 
 (defn macroexpand
   "Repeatedly calls macroexpand-1 on form until it no longer
@@ -2172,7 +2172,7 @@
   string"
   {:added "1.0"}
   [s]
-  (load-string* s))
+  (load-string__ s))
 
 (defn set?
   "Returns true if x implements Set"
@@ -2199,25 +2199,25 @@
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
   {:added "1.0"}
-  [sym] (find-ns* sym))
+  [sym] (find-ns__ sym))
 
 (defn create-ns
   "Create a new namespace named by the symbol if one doesn't already
   exist, returns it or the already-existing namespace of the same
   name."
   {:added "1.0"}
-  [sym] (create-ns* sym))
+  [sym] (create-ns__ sym))
 
 (defn remove-ns
   "Removes the namespace named by the symbol. Use with caution.
   Cannot be used to remove the clojure namespace."
   {:added "1.0"}
-  [sym] (remove-ns* sym))
+  [sym] (remove-ns__ sym))
 
 (defn all-ns
   "Returns a sequence of all namespaces."
   {:added "1.0"}
-  [] (all-ns*))
+  [] (all-ns__))
 
 (defn the-ns
   "If passed a namespace, returns it. Else, when passed a symbol,
@@ -2233,19 +2233,19 @@
   "Returns the name of the namespace, a symbol."
   {:added "1.0"}
   [ns]
-  (ns-name* (the-ns ns)))
+  (ns-name__ (the-ns ns)))
 
 (defn ns-map
   "Returns a map of all the mappings for the namespace."
   {:added "1.0"}
   [ns]
-  (ns-map* (the-ns ns)))
+  (ns-map__ (the-ns ns)))
 
 (defn ns-unmap
   "Removes the mappings for the symbol from the namespace."
   {:added "1.0"}
   [ns sym]
-  (ns-unmap* (the-ns ns) sym))
+  (ns-unmap__ (the-ns ns) sym))
 
 (defn ^:private public?
   [v]
@@ -2257,7 +2257,7 @@
   [ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
-                                      (= ns (var-ns* v))
+                                      (= ns (var-ns__ v))
                                       (public? v)))
                 (ns-map ns))))
 
@@ -2267,7 +2267,7 @@
   [ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
-                                      (= ns (var-ns* v))))
+                                      (= ns (var-ns__ v))))
                 (ns-map ns))))
 
 (defn ^:private get-refer-opt
@@ -2281,11 +2281,11 @@
   metadata from the name symbol.  Returns the var."
   {:added "1.0"}
   ([ns ^Symbol name]
-   (let [v (intern* (the-ns ns) name)]
+   (let [v (intern__ (the-ns ns) name)]
      (when (meta name) (set-meta__ v (meta name)))
      v))
   ([ns name val]
-   (let [v (intern* (the-ns ns) name val)]
+   (let [v (intern__ (the-ns ns) name val)]
      (when (meta name) (set-meta__ v (meta name)))
      v)))
 
@@ -2325,7 +2325,7 @@
                       (str sym " is not public")
                       (str sym " does not exist"))
                     {:form ns-sym})))
-          (refer* *ns* (or (rename sym) sym) (or v (intern-fake-var* ns-sym sym))))))))
+          (refer__ *ns* (or (rename sym) sym) (or v (intern-fake-var__ ns-sym sym))))))))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
@@ -2333,7 +2333,7 @@
   [ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
-                                      (not= ns (var-ns* v))))
+                                      (not= ns (var-ns__ v))))
                 (ns-map ns))))
 
 (defn alias
@@ -2343,19 +2343,19 @@
   to calling this directly."
   {:added "1.0"}
   [alias namespace-sym]
-  (alias* *ns* alias (the-ns namespace-sym)))
+  (alias__ *ns* alias (the-ns namespace-sym)))
 
 (defn ns-aliases
   "Returns a map of the aliases for the namespace."
   {:added "1.0"}
   [ns]
-  (ns-aliases* (the-ns ns)))
+  (ns-aliases__ (the-ns ns)))
 
 (defn ns-unalias
   "Removes the alias for the symbol from the namespace."
   {:added "1.0"}
   [ns sym]
-  (ns-unalias* (the-ns ns) sym))
+  (ns-unalias__ (the-ns ns) sym))
 
 (defn take-nth
   "Returns a lazy seq of every nth item in coll."
@@ -2392,7 +2392,7 @@
     (ns-resolve ns nil sym))
   ([ns env sym]
     (when-not (contains? env sym)
-      (ns-resolve* (the-ns ns) sym))))
+      (ns-resolve__ (the-ns ns) sym))))
 
 (defn resolve
   "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
@@ -2405,7 +2405,7 @@
     :doc "Constructs an array-map. If any keys are equal, they are handled as
          if by repeated uses of assoc."
          :added "1.0"}
-  array-map array-map*)
+  array-map array-map__)
 
 ;redefine let and loop  with destructuring
 (defn ^:private destructure [bindings]
@@ -2453,7 +2453,7 @@
                            gmapseq (with-meta gmap {:tag 'Seq})
                            defaults (:or b)]
                        (loop [ret (-> bvec (conj gmap) (conj v)
-                                      (conj gmap) (conj `(if (seq? ~gmap) (apply array-map* (seq ~gmapseq)) ~gmap))
+                                      (conj gmap) (conj `(if (seq? ~gmap) (apply array-map__ (seq ~gmapseq)) ~gmap))
                                       ((fn [ret]
                                          (if (:as b)
                                            (conj ret (:as b) gmap)
@@ -2710,7 +2710,7 @@
   calls."
   {:added "1.0"}
   [& body]
-  `(binding [*out* (buffer*)]
+  `(binding [*out* (buffer__)]
      ~@body
      (str *out*)))
 
@@ -2719,7 +2719,7 @@
   Buffer initialized with the string s."
   {:added "1.0"}
   [s & body]
-  `(binding [*in* (buffer* ~s)]
+  `(binding [*in* (buffer__ ~s)]
      ~@body))
 
 (defn pr-str
@@ -2788,12 +2788,12 @@
   {:added "1.0"}
   [ex]
   (when (instance? ExInfo ex)
-    (ex-data* ^ExInfo ex)))
+    (ex-data__ ^ExInfo ex)))
 
 (defn hash
   "Returns the hash code of its argument."
   {:added "1.0"}
-  [x] (hash* x))
+  [x] (hash__ x))
 
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
@@ -2825,7 +2825,7 @@
   [s]
   (if (instance? Regex s)
     s
-    (regex* s)))
+    (regex__ s)))
 
 (defn re-seq
   "Returns a sequence of successive matches of pattern in string"
@@ -2837,7 +2837,7 @@
   "Returns the leftmost regex match, if any, of string to pattern."
   {:added "1.0"}
   [^Regex re s]
-  (re-find* re s))
+  (re-find__ re s))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern."
@@ -2854,7 +2854,7 @@
   "Returns a random floating point number between 0 (inclusive) and
   n (default 1) (exclusive)."
   {:added "1.0"}
-  ([] (rand*))
+  ([] (rand__))
   ([n] (* n (rand))))
 
 (defn rand-int
@@ -2907,7 +2907,7 @@
   "Returns true if s names a special form"
   {:added "1.0"}
   [s]
-  (special-symbol?* s))
+  (special-symbol?__ s))
 
 (defn var?
   "Returns true if v is of type Var"
@@ -2918,8 +2918,8 @@
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
   {:added "1.0"}
-  (^String [^String s start] (subs* s start))
-  (^String [^String s start end] (subs* s start end)))
+  (^String [^String s start] (subs__ s start))
+  (^String [^String s start end] (subs__ s start end)))
 
 (defn max-key
   "Returns the x for which (k x), a number, is greatest."
@@ -2984,14 +2984,14 @@
   "Returns an empty collection of the same category as coll, or nil"
   {:added "1.0"}
   [coll]
-  (empty* coll))
+  (empty__ coll))
 
 (defn bound?
   "Returns true if all of the vars provided as arguments have any bound value.
   Implies that deref'ing the provided vars will succeed. Returns true if no vars are provided."
   {:added "1.0"}
   [& vars]
-  (every? #(bound?* ^Var %) vars))
+  (every? #(bound?__ ^Var %) vars))
 
 (defn not-empty
   "If coll is empty, returns nil, else coll"
@@ -3018,7 +3018,7 @@
   "Formats a string using fmt.Sprintf"
   {:added "1.0"}
   ^String [fmt & args]
-  (apply format* fmt args))
+  (apply format__ fmt args))
 
 (defn printf
   "Prints formatted output, as per format"
@@ -3133,7 +3133,7 @@
   (load lib)
   (throw-if (and need-ns (not (find-ns lib)))
             "namespace '%s' not found after loading '%s'"
-            lib (lib-path* lib))
+            lib (lib-path__ lib))
   (when require
     (var-set #'*loaded-libs* (conj *loaded-libs* lib))))
 
@@ -3154,7 +3154,7 @@
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
-  (throw-if (and prefix (pos? (index-of* (name lib) \.)))
+  (throw-if (and prefix (pos? (index-of__ (name lib) \.)))
             "Found lib name '%s' containing period with prefix '%s'.  lib names inside prefix lists must not contain periods"
             (name lib) prefix)
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
@@ -3315,14 +3315,14 @@
   "Loads code from file f"
   {:added "1.0"}
   [f]
-  (load-file* f))
+  (load-file__ f))
 
 (defn load
   "Loads code from libs."
   {:added "1.0"}
   [& libs]
   (doseq [^Symbol lib libs]
-    (let [^String path (lib-path* lib)]
+    (let [^String path (lib-path__ lib)]
       (when *loading-verbosely*
         (printf "(joker.core/load \"%s\")\n" path))
       (check-cyclic-dependency path)
@@ -3692,14 +3692,14 @@
   "Opens file f and reads all its contents, returning a string."
   {:added "1.0"}
   [f]
-  (slurp* f))
+  (slurp__ f))
 
 (defn spit
   "Opposite of slurp.  Opens file f, writes content, then
   closes f."
   {:added "1.0"}
   [f content]
-  (spit* f content))
+  (spit__ f content))
 
 (defn flatten
   "Takes any nested combination of sequential things (lists, vectors,
@@ -3770,7 +3770,7 @@
   "Return a random permutation of coll"
   {:added "1.0"}
   [coll]
-  (shuffle* coll))
+  (shuffle__ coll))
 
 (defn map-indexed
   "Returns a lazy sequence consisting of the result of applying f to 0
@@ -3931,7 +3931,7 @@
 (defn realized?
   "Returns true if a value has been produced for a delay or lazy sequence."
   {:added "1.0"}
-  [^Pending x] (realized?* x))
+  [^Pending x] (realized?__ x))
 
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)

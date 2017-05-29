@@ -1,5 +1,5 @@
 (doseq [sym '(js)]
-  (inject-ns* sym))
+  (inject-ns__ sym))
 
 (joker.core/in-ns 'joker.core)
 

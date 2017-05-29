@@ -47,12 +47,12 @@
      UnknownError                                  UnsatisfiedLinkError                          UnsupportedClassVersionError
      UnsupportedOperationException                 VerifyError                                   VirtualMachineError
      Void)]
-  (inject-ns* sym)
+  (inject-ns__ sym)
   (when-not (resolve sym)
-    (intern* *ns* sym)))
+    (intern__ *ns* sym)))
 
 (doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
-  (inject-ns* sym))
+  (inject-ns__ sym))
 
 (joker.core/in-ns 'joker.core)
 
