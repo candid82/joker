@@ -11,6 +11,7 @@ import (
 type (
 	Expr interface {
 		Eval(env *LocalEnv) Object
+		InferType() *Type
 		Pos() Position
 	}
 	LiteralExpr struct {
@@ -1037,17 +1038,6 @@ func reportNotAFunction(pos Position, name string) {
 	printParseWarning(pos, name+" is not a function")
 }
 
-func inferType(expr Expr) *Type {
-	switch expr := expr.(type) {
-	case *LiteralExpr:
-		return expr.obj.GetType()
-	case *VectorExpr:
-		return TYPE.Vector
-	default:
-		return nil
-	}
-}
-
 func getTaggedType(obj Meta) *Type {
 	if m := obj.GetMeta(); m != nil {
 		if ok, typeName := m.Get(KEYWORDS.tag); ok {
@@ -1064,7 +1054,7 @@ func getTaggedType(obj Meta) *Type {
 func checkTypes(declaredArgs []Symbol, call *CallExpr) {
 	for i, da := range declaredArgs {
 		if declaredType := getTaggedType(da); declaredType != nil {
-			passedType := inferType(call.args[i])
+			passedType := call.args[i].InferType()
 			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
 				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, declaredType.ToString(false), passedType.ToString(false)))
 			}

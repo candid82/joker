@@ -146,7 +146,7 @@ type (
 	ExInfo struct {
 		InfoHolder
 		msg   String
-		data  *ArrayMap
+		data  Map
 		cause Error
 		rt    *Runtime
 	}

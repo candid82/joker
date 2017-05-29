@@ -31,6 +31,9 @@
 (defn rest [^Seqable coll] (rest__ coll))
 (defn seq [^Seqable coll] (seq__ coll))
 (defn instance? [^Type c x] (instance?__ c x))
+(defn ex-info
+  ([^String msg ^Map map] (ex-info__ msg map))
+  ([^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
 
 ;; Clojure core macros not supported by Joker
 

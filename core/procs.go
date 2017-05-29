@@ -260,7 +260,7 @@ var procExInfo Proc = func(args []Object) Object {
 	CheckArity(args, 2, 3)
 	res := &ExInfo{
 		msg:  EnsureString(args, 0),
-		data: ensureArrayMap(args, 1),
+		data: EnsureMap(args, 1),
 		rt:   RT.clone(),
 	}
 	if len(args) == 3 {

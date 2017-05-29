@@ -8,3 +8,6 @@
 (ffirst 1)
 (nfirst 1)
 (instance? 1 2)
+(ex-info {} "")
+(def c 1)
+(first c)
