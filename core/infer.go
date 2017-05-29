@@ -37,7 +37,10 @@ func (expr *RecurExpr) InferType() *Type {
 }
 
 func (expr *VarRefExpr) InferType() *Type {
-	return expr.vr.expr.InferType()
+	if expr.vr.expr != nil {
+		return expr.vr.expr.InferType()
+	}
+	return nil
 }
 
 func (expr *BindingExpr) InferType() *Type {

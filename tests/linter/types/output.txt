@@ -4,3 +4,10 @@ tests/linter/types/input.clj:3:9: Parse warning: arg[1] of #'joker.core/cons mus
 tests/linter/types/input.clj:4:8: Parse warning: arg[0] of #'joker.core/first must have type Seqable, got Int
 tests/linter/types/input.clj:5:7: Parse warning: arg[0] of #'joker.core/next must have type Seqable, got Int
 tests/linter/types/input.clj:6:7: Parse warning: arg[0] of #'joker.core/rest must have type Seqable, got Int
+tests/linter/types/input.clj:7:9: Parse warning: arg[0] of #'joker.core/second must have type Seqable, got Int
+tests/linter/types/input.clj:8:9: Parse warning: arg[0] of #'joker.core/ffirst must have type Seqable, got Int
+tests/linter/types/input.clj:9:9: Parse warning: arg[0] of #'joker.core/nfirst must have type Seqable, got Int
+tests/linter/types/input.clj:10:12: Parse warning: arg[0] of #'joker.core/instance? must have type Type, got Int
+tests/linter/types/input.clj:11:10: Parse warning: arg[0] of #'joker.core/ex-info must have type String, got Map
+tests/linter/types/input.clj:11:13: Parse warning: arg[1] of #'joker.core/ex-info must have type Map, got String
+tests/linter/types/input.clj:13:8: Parse warning: arg[0] of #'joker.core/first must have type Seqable, got Int
