@@ -15,14 +15,14 @@
   ^{:arglists '([& items])
     :doc "Creates a new list containing the items."
     :added "1.0"}
-  list list**)
+  list list__)
 
 (def
   ^{:arglists '([x seq])
     :doc "Returns a new seq where x is the first element and seq is
          the rest."
          :added "1.0"}
-  cons cons*)
+  cons cons__)
 
 ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
@@ -40,9 +40,9 @@
 (def
   ^{:added "1.0"}
   fn (fn* fn [&form &env & decl]
-          (with-meta*
+          (with-meta__
             (cons 'fn* decl)
-            (meta* &form))))
+            (meta__ &form))))
 
 (set-macro* #'fn)
 
@@ -51,21 +51,21 @@
     :doc "Returns the first item in the collection. Calls seq on its
          argument. If coll is nil, returns nil."
          :added "1.0"}
-  first first*)
+  first first__)
 
 (def
   ^{:arglists '([coll])
     :doc "Returns a seq of the items after the first. Calls seq on its
          argument.  If there are no more items, returns nil."
          :added "1.0"}
-  next next*)
+  next next__)
 
 (def
   ^{:arglists '([coll])
     :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
          argument."
          :added "1.0"}
-  rest rest*)
+  rest rest__)
 
 (def
   ^{:arglists '([coll x] [coll x & xs])
@@ -74,11 +74,11 @@
          happen at different 'places' depending on the concrete type."
          :added "1.0"}
   conj (fn conj
-         ([coll x] (conj* coll x))
+         ([coll x] (conj__ coll x))
          ([coll x & xs]
           (if xs
-            (recur (conj* coll x) (first xs) (next xs))
-            (conj* coll x)))))
+            (recur (conj__ coll x) (first xs) (next xs))
+            (conj__ coll x)))))
 
 (def
   ^{:doc "Same as (first (next x))"
@@ -115,14 +115,14 @@
     :doc "Returns a seq on the collection. If the collection is
          empty, returns nil.  (seq nil) returns nil."
          :added "1.0"}
-  seq seq*)
+  seq seq__)
 
 (def
   ^{:arglists '([c x])
     :doc "Evaluates x and tests if it is an instance of type
          c. Returns true or false"
          :added "1.0"}
-  instance? instance?*)
+  instance? instance?__)
 
 (def
   ^{:arglists '([x])
@@ -169,9 +169,9 @@
          :added "1.0"}
   assoc
   (fn assoc
-    ([map key val] (assoc* map key val))
+    ([map key val] (assoc__ map key val))
     ([map key val & kvs]
-     (let [ret (assoc* map key val)]
+     (let [ret (assoc__ map key val)]
        (if kvs
          (if (next kvs)
            (recur ret (first kvs) (second kvs) (nnext kvs))
@@ -182,14 +182,14 @@
   ^{:arglists '([obj])
     :doc "Returns the metadata of obj, returns nil if there is no metadata."
     :added "1.0"}
-  meta meta*)
+  meta meta__)
 
 (def
   ^{:arglists '([obj m])
     :doc "Returns an object of the same type and value as obj, with
          map m as its metadata."
          :added "1.0"}
-  with-meta with-meta*)
+  with-meta with-meta__)
 
 (def ^{:private true :dynamic true}
   assert-valid-fdecl (fn [form fdecl]))
@@ -203,8 +203,8 @@
           (fn [fdecl]
             (let [arglist (first fdecl)
                   ;elide implicit macro args
-                  arglist (if (=* '&form (first arglist))
-                            (subvec* arglist 2 (count* arglist))
+                  arglist (if (=__ '&form (first arglist))
+                            (subvec__ arglist 2 (count__ arglist))
                             arglist)
                   body (next fdecl)]
               (if (map? (first body))
@@ -284,13 +284,13 @@
   "Throws an error if x is not of a type t, else returns x."
   {:added "1.0"}
   [^Type t x]
-  (cast* t x))
+  (cast__ t x))
 
 (def
   ^{:arglists '([coll])
     :doc "Creates a new vector containing the contents of coll."
     :added "1.0"}
-  vec vec*)
+  vec vec__)
 
 (defn vector
   "Creates a new vector containing the args."
@@ -304,20 +304,20 @@
          Returns a new hash map with supplied mappings.  If any keys are
          equal, they are handled as if by repeated uses of assoc."
          :added "1.0"}
-  hash-map hash-map*)
+  hash-map hash-map__)
 
 (def
   ^{:arglists '([& keys])
     :doc "Returns a new hash set with supplied keys.  Any equal keys are
          handled as if by repeated uses of conj."
          :added "1.0"}
-  hash-set hash-set*)
+  hash-set hash-set__)
 
 (defn nil?
   "Returns true if x is nil, false otherwise."
   {:tag Bool
   :added "1.0"}
-  [x] (=* x nil))
+  [x] (=__ x nil))
 
 (def
 
@@ -383,13 +383,13 @@
   "Returns true if x is the value false, false otherwise."
   {:tag Bool
   :added "1.0"}
-  [x] (=* x false))
+  [x] (=__ x false))
 
 (defn true?
   "Returns true if x is the value true, false otherwise."
   {:tag Bool
   :added "1.0"}
-  [x] (=* x true))
+  [x] (=__ x true))
 
 (defn boolean?
   "Return true if x is a Bool"
@@ -422,7 +422,7 @@
          one arg, returns the concatenation of the str values of the args."
          :added "1.0"
          :tag String}
-  str str*)
+  str str__)
 
 (defn symbol?
   "Return true if x is a Symbol"
@@ -438,8 +438,8 @@
   "Returns a Symbol with the given namespace and name."
   {:tag Symbol
   :added "1.0"}
-  ([name] (if (symbol? name) name (symbol* name)))
-  ([ns name] (symbol* ns name)))
+  ([name] (if (symbol? name) name (symbol__ name)))
+  ([ns name] (symbol__ ns name)))
 
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
@@ -447,7 +447,7 @@
   prefix is not supplied, the prefix is 'G__'."
   {:added "1.0"}
   ([] (gensym "G__"))
-  ([prefix-string] (gensym* prefix-string)))
+  ([prefix-string] (gensym__ prefix-string)))
 
 (def println-err)
 
@@ -474,9 +474,9 @@
   {:tag Keyword
   :added "1.0"}
   ([name] (cond (keyword? name) name
-            (symbol? name) (keyword* name)
-            (string? name) (keyword* name)))
-  ([ns name] (keyword* ns name)))
+            (symbol? name) (keyword__ name)
+            (string? name) (keyword__ name)))
+  ([ns name] (keyword__ ns name)))
 
 (defn spread
   {:private true}
@@ -501,15 +501,15 @@
   "Applies fn f to the argument list formed by prepending intervening arguments to args."
   {:added "1.0"}
   ([^Fn f args]
-   (apply* f (seq args)))
+   (apply__ f (seq args)))
   ([^Fn f x args]
-   (apply* f (list* x args)))
+   (apply__ f (list* x args)))
   ([^Fn f x y args]
-   (apply* f (list* x y args)))
+   (apply__ f (list* x y args)))
   ([^Fn f x y z args]
-   (apply* f (list* x y z args)))
+   (apply__ f (list* x y z args)))
   ([^Fn f a b c d & args]
-   (apply* f (cons a (cons b (cons c (cons d (spread args))))))))
+   (apply__ f (cons a (cons b (cons c (cons d (spread args))))))))
 
 (defn vary-meta
   "Returns an object of the same type and value as obj, with
@@ -525,7 +525,7 @@
   seq calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'lazy-seq* (list* 'fn [] body)))
+  (list 'lazy-seq__ (list* 'fn [] body)))
 
 (defn chunked-seq?
   "Always returns false because chunked sequences are not supported"
@@ -562,7 +562,7 @@
   calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'delay* (list* 'fn [] body)))
+  (list 'delay__ (list* 'fn [] body)))
 
 (defn delay?
   "returns true if x is a Delay created with delay"
@@ -574,7 +574,7 @@
   "If x is a Delay, returns the (possibly cached) value of its expression, else returns x"
   {:added "1.0"}
   [x]
-  (force* x))
+  (force__ x))
 
 (defmacro if-not
   "Evaluates test. If logical false, evaluates and returns then expr,
@@ -588,7 +588,7 @@
   "Tests if 2 arguments are the same object"
   {:added "1.0"}
   [x y]
-  (identical* x y))
+  (identical__ x y))
 
 (defn =
   "Equality. Returns true if x equals y, false if not. Works for nil, and compares
@@ -597,12 +597,12 @@
   comparison."
   {:added "1.0"}
   ([x] true)
-  ([x y] (=* x y))
+  ([x y] (=__ x y))
   ([x y & more]
-   (if (=* x y)
+   (if (=__ x y)
      (if (next more)
        (recur y (first more) (next more))
-       (=* y (first more)))
+       (=__ y (first more)))
      false)))
 
 (defn not=
@@ -620,7 +620,7 @@
   y. Works for nil, and compares numbers and collections in a type-independent manner. x
   must implement Comparable"
   {:added "1.0"}
-  [x y] (compare* x y))
+  [x y] (compare__ x y))
 
 (defmacro and
   "Evaluates exprs one at a time, from left to right. If a form
@@ -649,33 +649,33 @@
 (defn zero?
   "Returns true if num is zero, else false"
   {:added "1.0"}
-  [x] (zero?* x))
+  [x] (zero?__ x))
 
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings"
   {:added "1.0"}
-  [coll] (count* coll))
+  [coll] (count__ coll))
 
 (defn int
   "Coerce to int"
   {:added "1.0"}
-  [x] (int* x))
+  [x] (int__ x))
 
 (defn nth
   "Returns the value at the index. get returns nil if index out of
   bounds, nth throws an exception unless not-found is supplied.  nth
   also works, in O(n) time, for strings and sequences."
   {:added "1.0"}
-  ([coll index] (nth* coll index))
-  ([coll index not-found] (nth* coll index not-found)))
+  ([coll index] (nth__ coll index))
+  ([coll index not-found] (nth__ coll index not-found)))
 
 (defn <
   "Returns non-nil if nums are in monotonically increasing order,
   otherwise false."
   {:added "1.0"}
   ([x] true)
-  ([x y] (<* x y))
+  ([x y] (<__ x y))
   ([x y & more]
    (if (< x y)
      (if (next more)
@@ -687,13 +687,13 @@
   "Returns a number one greater than num. Supports arbitrary precision.
   See also: inc"
   {:added "1.0"}
-  [x] (inc'* x))
+  [x] (inc'__ x))
 
 (defn inc
   "Returns a number one greater than num. Does not auto-promote
   ints, will overflow. See also: inc'"
   {:added "1.0"}
-  [x] (inc* x))
+  [x] (inc__ x))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
@@ -729,7 +729,7 @@
   {:added "1.0"}
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (add'* x y))
+  ([x y] (add'__ x y))
   ([x y & more]
    (reduce +' (+' x y) more)))
 
@@ -739,7 +739,7 @@
   {:added "1.0"}
   ([] 0)
   ([x] (cast Number x))
-  ([x y] (add* x y))
+  ([x y] (add__ x y))
   ([x y & more]
    (reduce + (+ x y) more)))
 
@@ -749,7 +749,7 @@
   {:added "1.0"}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (multiply'* x y))
+  ([x y] (multiply'__ x y))
   ([x y & more]
    (reduce *' (*' x y) more)))
 
@@ -759,7 +759,7 @@
   {:added "1.0"}
   ([] 1)
   ([x] (cast Number x))
-  ([x y] (multiply* x y))
+  ([x y] (multiply__ x y))
   ([x y & more]
    (reduce * (* x y) more)))
 
@@ -768,7 +768,7 @@
   else returns numerator divided by all of the denominators."
   {:added "1.0"}
   ([x] (/ 1 x))
-  ([x y] (divide* x y))
+  ([x y] (divide__ x y))
   ([x y & more]
    (reduce / (/ x y) more)))
 
@@ -777,8 +777,8 @@
   the ys from x and returns the result. Supports arbitrary precision.
   See also: -"
   {:added "1.0"}
-  ([x] (subtract'* x))
-  ([x y] (subtract'* x y))
+  ([x] (subtract'__ x))
+  ([x y] (subtract'__ x y))
   ([x y & more]
    (reduce -' (-' x y) more)))
 
@@ -787,8 +787,8 @@
   the ys from x and returns the result. Does not auto-promote
   ints, will overflow. See also: -'"
   {:added "1.0"}
-  ([x] (subtract* x))
-  ([x y] (subtract* x y))
+  ([x] (subtract__ x))
+  ([x y] (subtract__ x y))
   ([x y & more]
    (reduce - (- x y) more)))
 
@@ -797,7 +797,7 @@
   otherwise false."
   {:added "1.0"}
   ([x] true)
-  ([x y] (<=* x y))
+  ([x y] (<=__ x y))
   ([x y & more]
    (if (<= x y)
      (if (next more)
@@ -810,7 +810,7 @@
   otherwise false."
   {:added "1.0"}
   ([x] true)
-  ([x y] (>* x y))
+  ([x y] (>__ x y))
   ([x y & more]
    (if (> x y)
      (if (next more)
@@ -823,7 +823,7 @@
   otherwise false."
   {:added "1.0"}
   ([x] true)
-  ([x y] (>=* x y))
+  ([x y] (>=__ x y))
   ([x y & more]
    (if (>= x y)
      (if (next more)
@@ -836,7 +836,7 @@
   value (type-independent), otherwise false"
   {:added "1.0"}
   ([x] true)
-  ([x y] (==* x y))
+  ([x y] (==__ x y))
   ([x y & more]
    (if (== x y)
      (if (next more)
@@ -848,7 +848,7 @@
   "Returns the greatest of the nums."
   {:added "1.0"}
   ([x] x)
-  ([x y] (max* x y))
+  ([x y] (max__ x y))
   ([x y & more]
    (reduce max (max x y) more)))
 
@@ -856,7 +856,7 @@
   "Returns the least of the nums."
   {:added "1.0"}
   ([x] x)
-  ([x y] (min* x y))
+  ([x y] (min__ x y))
   ([x y & more]
    (reduce min (min x y) more)))
 
@@ -864,29 +864,29 @@
   "Returns a number one less than num. Supports arbitrary precision.
   See also: dec"
   {:added "1.0"}
-  [x] (dec'* x))
+  [x] (dec'__ x))
 
 (defn dec
   "Returns a number one less than num. Does not auto-promote
   ints, will overflow. See also: dec'"
   {:added "1.0"}
-  [x] (dec* x))
+  [x] (dec__ x))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:added "1.0"}
-  [x] (pos* x))
+  [x] (pos__ x))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
   {:added "1.0"}
-  [x] (neg* x))
+  [x] (neg__ x))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
   {:added "1.0"}
   [num div]
-  (quot* num div))
+  (quot__ num div))
 
 (defn rem
   "remainder of dividing numerator by denominator."
@@ -974,7 +974,7 @@
   {:added "1.0"}
   [n]
   (if (integer? n)
-    (zero? (bit-and (int* n) 1))
+    (zero? (bit-and (int__ n) 1))
     (throw (ex-info (str "Argument must be an integer: " n) {}))))
 
 (defn odd?
@@ -1141,7 +1141,7 @@
   can be a vector or sorted-map), in reverse order. If rev is empty returns nil."
   {:added "1.0"}
   [^Reversible rev]
-  (rseq* rev))
+  (rseq__ rev))
 
 (defn name
   "Returns the name String of a string, symbol or keyword."
@@ -1457,12 +1457,12 @@
   f must be free of side-effects"
   {:added "1.0"}
   [^Ref ref f & args]
-  (apply alter-meta* ref f args))
+  (apply alter-meta__ ref f args))
 
 (defn reset-meta!
   "Atomically resets the metadata for a namespace/var/atom"
   {:added "1.0"}
-  [^Ref ref metadata-map] (reset-meta* ref metadata-map))
+  [^Ref ref metadata-map] (reset-meta__ ref metadata-map))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
@@ -1949,7 +1949,7 @@
    (= 2 (count bindings)) "exactly 2 forms in binding vector")
   (let [i (first bindings)
         n (second bindings)]
-    `(let [n# (int* ~n)]
+    `(let [n# (int__ ~n)]
        (loop [~i 0]
          (when (< ~i n#)
            ~@body
@@ -2032,7 +2032,7 @@
   {:tag BigInt
   :added "1.0"}
   [x]
-  (bigint* x))
+  (bigint__ x))
 
 (defn bigfloat
   "Coerce to BigFloat"
@@ -2124,7 +2124,7 @@
   ([v start]
    (subvec v start (count v)))
   ([v start end]
-   (subvec* v start end)))
+   (subvec__ v start end)))
 
 (defmacro doto
   "Evaluates x then calls all of the methods and functions with the
@@ -2282,11 +2282,11 @@
   {:added "1.0"}
   ([ns ^Symbol name]
    (let [v (intern* (the-ns ns) name)]
-     (when (meta name) (set-meta* v (meta name)))
+     (when (meta name) (set-meta__ v (meta name)))
      v))
   ([ns name val]
    (let [v (intern* (the-ns ns) name val)]
-     (when (meta name) (set-meta* v (meta name)))
+     (when (meta name) (set-meta__ v (meta name)))
      v)))
 
 (defn refer
@@ -2831,7 +2831,7 @@
   "Returns a sequence of successive matches of pattern in string"
   {:added "1.0"}
   [^Regex re s]
-  (re-seq* re s))
+  (re-seq__ re s))
 
 (defn re-find
   "Returns the leftmost regex match, if any, of string to pattern."
