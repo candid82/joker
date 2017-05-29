@@ -4,3 +4,7 @@
 (first 2)
 (next 1)
 (rest 2)
+(second 1)
+(ffirst 1)
+(nfirst 1)
+(instance? 1 2)

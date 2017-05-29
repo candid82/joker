@@ -73,6 +73,7 @@
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
          :added "1.0"}
+  ; TODO: types
   conj (fn conj
          ([coll x] (conj__ coll x))
          ([coll x & xs]
@@ -84,31 +85,31 @@
   ^{:doc "Same as (first (next x))"
     :arglists '([x])
     :added "1.0"}
-  second (fn second [x] (first (next x))))
+  second (fn second [^Seqable x] (first (next x))))
 
 (def
   ^{:doc "Same as (first (first x))"
     :arglists '([x])
     :added "1.0"}
-  ffirst (fn ffirst [x] (first (first x))))
+  ffirst (fn ffirst [^Seqable x] (first (first x))))
 
 (def
   ^{:doc "Same as (next (first x))"
     :arglists '([x])
     :added "1.0"}
-  nfirst (fn nfirst [x] (next (first x))))
+  nfirst (fn nfirst [^Seqable x] (next (first x))))
 
 (def
   ^{:doc "Same as (first (next x))"
     :arglists '([x])
     :added "1.0"}
-  fnext (fn fnext [x] (first (next x))))
+  fnext (fn fnext [^Seqable x] (first (next x))))
 
 (def
   ^{:doc "Same as (next (next x))"
     :arglists '([x])
     :added "1.0"}
-  nnext (fn nnext [x] (next (next x))))
+  nnext (fn nnext [^Seqable x] (next (next x))))
 
 (def
   ^{:arglists '([coll])

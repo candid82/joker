@@ -29,6 +29,8 @@
 (defn first [^Seqable coll] (first__ coll))
 (defn next [^Seqable coll] (next__ coll))
 (defn rest [^Seqable coll] (rest__ coll))
+(defn seq [^Seqable coll] (seq__ coll))
+(defn instance? [^Type c x] (instance?__ c x))
 
 ;; Clojure core macros not supported by Joker
 
