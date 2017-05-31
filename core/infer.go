@@ -9,11 +9,11 @@ func (expr *VectorExpr) InferType() *Type {
 }
 
 func (expr *MapExpr) InferType() *Type {
-	return TYPE.Map
+	return TYPE.ArrayMap
 }
 
 func (expr *SetExpr) InferType() *Type {
-	return TYPE.Set
+	return TYPE.MapSet
 }
 
 func (expr *IfExpr) InferType() *Type {

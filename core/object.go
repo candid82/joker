@@ -229,6 +229,7 @@ type (
 		IOReader      *Type
 		KVReduce      *Type
 		Map           *Type
+		Meta          *Type
 		Named         *Type
 		Number        *Type
 		Pending       *Type
@@ -315,6 +316,7 @@ func init() {
 		IOReader:      regInterface("IOReader", (*io.Reader)(nil)),
 		KVReduce:      regInterface("KVReduce", (*KVReduce)(nil)),
 		Map:           regInterface("Map", (*Map)(nil)),
+		Meta:          regInterface("Meta", (*Meta)(nil)),
 		Named:         regInterface("Named", (*Named)(nil)),
 		Number:        regInterface("Number", (*Number)(nil)),
 		Pending:       regInterface("Pending", (*Pending)(nil)),

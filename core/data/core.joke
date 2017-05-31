@@ -170,8 +170,8 @@
          :added "1.0"}
   assoc
   (fn assoc
-    ([map key val] (assoc__ map key val))
-    ([map key val & kvs]
+    ([^Associative map key val] (assoc__ map key val))
+    ([^Associative map key val & kvs]
      (let [ret (assoc__ map key val)]
        (if kvs
          (if (next kvs)
@@ -224,7 +224,7 @@
   ^{:arglists '([coll])
     :doc "Return the last item in coll, in linear time."
     :added "1.0"}
-  last (fn last [s]
+  last (fn last [^Seqable s]
          (if (next s)
            (recur (next s))
            (first s))))
@@ -233,7 +233,7 @@
   ^{:arglists '([coll])
     :doc "Return a seq of all but the last item in coll, in linear time."
     :added "1.0"}
-  butlast (fn butlast [s]
+  butlast (fn butlast [^Seqable s]
             (loop [ret [] s s]
               (if (next s)
                 (recur (conj ret (first s)) (next s))
