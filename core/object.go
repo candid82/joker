@@ -128,13 +128,14 @@ type (
 	Var struct {
 		InfoHolder
 		MetaHolder
-		ns        *Namespace
-		name      Symbol
-		Value     Object
-		expr      Expr
-		isMacro   bool
-		isPrivate bool
-		isUsed    bool
+		ns         *Namespace
+		name       Symbol
+		Value      Object
+		expr       Expr
+		isMacro    bool
+		isPrivate  bool
+		isUsed     bool
+		taggedType *Type
 	}
 	Proc func([]Object) Object
 	Fn   struct {

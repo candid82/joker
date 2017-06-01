@@ -35,6 +35,7 @@
   ([^String msg ^Map map] (ex-info__ msg map))
   ([^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
 (defn with-meta [^Meta obj ^Map m] (with-meta__ obj m))
+(defn vec [^Seqable coll] (vec__ coll))
 
 ;; Clojure core macros not supported by Joker
 

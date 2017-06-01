@@ -439,6 +439,7 @@
   "Returns a Symbol with the given namespace and name."
   {:tag Symbol
   :added "1.0"}
+  ;; TODO: types
   ([name] (if (symbol? name) name (symbol__ name)))
   ([ns name] (symbol__ ns name)))
 

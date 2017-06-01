@@ -616,6 +616,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			if ok, p := meta.Get(KEYWORDS.private); ok {
 				vr.isPrivate = toBool(p)
 			}
+			vr.taggedType = getTaggedType(sym)
 		}
 		return res
 	default:

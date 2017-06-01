@@ -19,3 +19,4 @@
 (last 1)
 (butlast 1)
 (cast 1 2)
+(vec 1)
