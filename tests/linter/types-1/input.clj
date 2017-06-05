@@ -20,3 +20,5 @@
 (butlast 1)
 (cast 1 2)
 (vec 1)
+(list* 1)
+(apply 1 2)

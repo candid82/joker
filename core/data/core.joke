@@ -475,6 +475,7 @@
   in the keyword strings, it will be added automatically."
   {:tag Keyword
   :added "1.0"}
+  ;; TODO: types
   ([name] (cond (keyword? name) name
             (symbol? name) (keyword__ name)
             (string? name) (keyword__ name)))
@@ -492,25 +493,25 @@
   "Creates a new list containing the items prepended to the rest, the
   last of which will be treated as a sequence."
   {:added "1.0"}
-  ([args] (seq args))
-  ([a args] (cons a args))
-  ([a b args] (cons a (cons b args)))
-  ([a b c args] (cons a (cons b (cons c args))))
+  ([^Seqable args] (seq args))
+  ([a ^Seqable args] (cons a args))
+  ([a b ^Seqable args] (cons a (cons b args)))
+  ([a b c ^Seqable args] (cons a (cons b (cons c args))))
   ([a b c d & more]
    (cons a (cons b (cons c (cons d (spread more)))))))
 
 (defn apply
   "Applies fn f to the argument list formed by prepending intervening arguments to args."
   {:added "1.0"}
-  ([^Fn f args]
+  ([^Callable f ^Seqable args]
    (apply__ f (seq args)))
-  ([^Fn f x args]
+  ([^Callable f x ^Seqable args]
    (apply__ f (list* x args)))
-  ([^Fn f x y args]
+  ([^Callable f x y ^Seqable args]
    (apply__ f (list* x y args)))
-  ([^Fn f x y z args]
+  ([^Callable f x y z ^Seqable args]
    (apply__ f (list* x y z args)))
-  ([^Fn f a b c d & args]
+  ([^Callable f a b c d & args]
    (apply__ f (cons a (cons b (cons c (cons d (spread args))))))))
 
 (defn vary-meta
