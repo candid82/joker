@@ -360,7 +360,7 @@ func isSymbolInitial(r rune) bool {
 	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.', '%', '$', '|':
 		return true
 	}
-	return unicode.IsLetter(r)
+	return unicode.IsLetter(r) || r > 255
 }
 
 func isSymbolRune(r rune) bool {
