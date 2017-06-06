@@ -37,9 +37,9 @@ func (expr *RecurExpr) InferType() *Type {
 }
 
 func (expr *VarRefExpr) InferType() *Type {
-	if expr.vr.taggedType != nil {
-		return expr.vr.taggedType
-	}
+	// if expr.vr.taggedType != nil {
+	// 	return expr.vr.taggedType
+	// }
 	if expr.vr.expr != nil {
 		return expr.vr.expr.InferType()
 	}
