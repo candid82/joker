@@ -518,7 +518,7 @@
   "Returns an object of the same type and value as obj, with
   (apply f (meta obj) args) as its metadata."
   {:added "1.0"}
-  [obj f & args]
+  [obj ^Callable f & args]
   (with-meta obj (apply f (meta obj) args)))
 
 (defmacro lazy-seq
@@ -540,14 +540,14 @@
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   {:added "1.0"}
   ([] (lazy-seq nil))
-  ([x] (lazy-seq x))
-  ([x y]
+  ([^Seqable x] (lazy-seq x))
+  ([^Seqable x ^Seqable y]
    (lazy-seq
     (let [s (seq x)]
       (if s
         (cons (first s) (concat (rest s) y))
         y))))
-  ([x y & zs]
+  ([^Seqable x ^Seqable y & zs]
    (let [cat (fn cat [xys zs]
                (lazy-seq
                 (let [xys (seq xys)]
@@ -650,19 +650,21 @@
       (if or# or# (or ~@next)))))
 
 (defn zero?
-  "Returns true if num is zero, else false"
+  "Returns true if x is zero, else false"
   {:added "1.0"}
-  [x] (zero?__ x))
+  [^Number x] (zero?__ x))
 
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings"
   {:added "1.0"}
+  ;; TODO: types
   [coll] (count__ coll))
 
 (defn int
   "Coerce to int"
   {:added "1.0"}
+  ;; TODO: types
   [x] (int__ x))
 
 (defn nth
@@ -670,8 +672,9 @@
   bounds, nth throws an exception unless not-found is supplied.  nth
   also works, in O(n) time, for strings and sequences."
   {:added "1.0"}
-  ([coll index] (nth__ coll index))
-  ([coll index not-found] (nth__ coll index not-found)))
+  ;; TODO: types
+  ([coll ^Number index] (nth__ coll index))
+  ([coll ^Number index not-found] (nth__ coll index not-found)))
 
 (defn <
   "Returns non-nil if nums are in monotonically increasing order,

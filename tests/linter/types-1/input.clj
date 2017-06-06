@@ -22,3 +22,8 @@
 (vec 1)
 (list* 1)
 (apply 1 2)
+(vary-meta {} 1)
+(concat 1 2)
+(zero? "a")
+(nth [] "a")
+(apply 1 2 3 4 5 6)
