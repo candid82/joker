@@ -1,4 +1,3 @@
 tests/linter/types-2/input.clj:9:6: Parse warning: arg[0] of #'joker.core/seq must have type Seqable, got Int
 tests/linter/types-2/input.clj:10:6: Parse warning: arg[0] of #'joker.core/seq must have type Seqable, got Fn
 tests/linter/types-2/input.clj:12:6: Parse warning: arg[0] of #'joker.core/seq must have type Seqable, got Int
-tests/linter/types-2/input.clj:14:6: Parse warning: arg[0] of #'joker.core/seq must have type Seqable, got Int
