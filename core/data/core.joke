@@ -680,9 +680,9 @@
   "Returns non-nil if nums are in monotonically increasing order,
   otherwise false."
   {:added "1.0"}
-  ([x] true)
-  ([x y] (<__ x y))
-  ([x y & more]
+  ([^Number x] true)
+  ([^Number x ^Number y] (<__ x y))
+  ([^Number x ^Number y & more]
    (if (< x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -693,13 +693,13 @@
   "Returns a number one greater than num. Supports arbitrary precision.
   See also: inc"
   {:added "1.0"}
-  [x] (inc'__ x))
+  [^Number x] (inc'__ x))
 
 (defn inc
   "Returns a number one greater than num. Does not auto-promote
   ints, will overflow. See also: inc'"
   {:added "1.0"}
-  [x] (inc__ x))
+  [^Number x] (inc__ x))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
@@ -712,12 +712,12 @@
   applying f to that result and the 2nd item, etc. If coll contains no
   items, returns val and f is not called."
   {:added "1.0"}
-  ([f coll]
+  ([^Callable f ^Seqable coll]
    (let [s (seq coll)]
      (if s
        (reduce f (first s) (next s))
        (f))))
-  ([f val coll]
+  ([^Callable f val ^Seqable coll]
    (let [s (seq coll)]
      (if s
        (recur f (f val (first s)) (next s))
