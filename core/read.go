@@ -390,6 +390,8 @@ func readSymbol(reader *Reader, first rune) Object {
 	reader.Unget()
 	str := b.String()
 	switch {
+	case str == "":
+		panic(MakeReadError(reader, "Invalid keyword: :"))
 	case first == ':':
 		if str[0] == '/' {
 			panic(MakeReadError(reader, "Blank namespaces are not allowed"))

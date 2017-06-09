@@ -1,0 +1,1 @@
+tests/linter/reader/input.clj:1:8: Read error: Invalid keyword: :
