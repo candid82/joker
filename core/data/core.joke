@@ -726,7 +726,7 @@
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
   {:added "1.0"}
-  [coll]
+  [^Seqable coll]
   (reduce conj () coll))
 
 (defn +'
@@ -734,9 +734,9 @@
   See also: +"
   {:added "1.0"}
   ([] 0)
-  ([x] (cast Number x))
-  ([x y] (add'__ x y))
-  ([x y & more]
+  ([^Number x] (cast Number x))
+  ([^Number x ^Number y] (add'__ x y))
+  ([^Number x ^Number y & more]
    (reduce +' (+' x y) more)))
 
 (defn +
@@ -744,9 +744,9 @@
   ints, will overflow. See also: +'"
   {:added "1.0"}
   ([] 0)
-  ([x] (cast Number x))
-  ([x y] (add__ x y))
-  ([x y & more]
+  ([^Number x] (cast Number x))
+  ([^Number x ^Number y] (add__ x y))
+  ([^Number x ^Number y & more]
    (reduce + (+ x y) more)))
 
 (defn *'
@@ -754,9 +754,9 @@
   See also: *"
   {:added "1.0"}
   ([] 1)
-  ([x] (cast Number x))
-  ([x y] (multiply'__ x y))
-  ([x y & more]
+  ([^Number x] (cast Number x))
+  ([^Number x ^Number y] (multiply'__ x y))
+  ([^Number x ^Number y & more]
    (reduce *' (*' x y) more)))
 
 (defn *
@@ -764,18 +764,18 @@
   ints, will overflow. See also: *'"
   {:added "1.0"}
   ([] 1)
-  ([x] (cast Number x))
-  ([x y] (multiply__ x y))
-  ([x y & more]
+  ([^Number x] (cast Number x))
+  ([^Number x ^Number y] (multiply__ x y))
+  ([^Number x ^Number y & more]
    (reduce * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
   else returns numerator divided by all of the denominators."
   {:added "1.0"}
-  ([x] (/ 1 x))
-  ([x y] (divide__ x y))
-  ([x y & more]
+  ([^Number x] (/ 1 x))
+  ([^Number x ^Number y] (divide__ x y))
+  ([^Number x ^Number y & more]
    (reduce / (/ x y) more)))
 
 (defn -'
@@ -783,9 +783,9 @@
   the ys from x and returns the result. Supports arbitrary precision.
   See also: -"
   {:added "1.0"}
-  ([x] (subtract'__ x))
-  ([x y] (subtract'__ x y))
-  ([x y & more]
+  ([^Number x] (subtract'__ x))
+  ([^Number x ^Number y] (subtract'__ x y))
+  ([^Number x ^Number y & more]
    (reduce -' (-' x y) more)))
 
 (defn -
@@ -793,18 +793,18 @@
   the ys from x and returns the result. Does not auto-promote
   ints, will overflow. See also: -'"
   {:added "1.0"}
-  ([x] (subtract__ x))
-  ([x y] (subtract__ x y))
-  ([x y & more]
+  ([^Number x] (subtract__ x))
+  ([^Number x ^Number y] (subtract__ x y))
+  ([^Number x ^Number y & more]
    (reduce - (- x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
   otherwise false."
   {:added "1.0"}
-  ([x] true)
-  ([x y] (<=__ x y))
-  ([x y & more]
+  ([^Number x] true)
+  ([^Number x ^Number y] (<=__ x y))
+  ([^Number x ^Number y & more]
    (if (<= x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -815,9 +815,9 @@
   "Returns non-nil if nums are in monotonically decreasing order,
   otherwise false."
   {:added "1.0"}
-  ([x] true)
-  ([x y] (>__ x y))
-  ([x y & more]
+  ([^Number x] true)
+  ([^Number x ^Number y] (>__ x y))
+  ([^Number x ^Number y & more]
    (if (> x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -828,9 +828,9 @@
   "Returns non-nil if nums are in monotonically non-increasing order,
   otherwise false."
   {:added "1.0"}
-  ([x] true)
-  ([x y] (>=__ x y))
-  ([x y & more]
+  ([^Number x] true)
+  ([^Number x ^Number y] (>=__ x y))
+  ([^Number x ^Number y & more]
    (if (>= x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -841,9 +841,9 @@
   "Returns non-nil if nums all have the equivalent
   value (type-independent), otherwise false"
   {:added "1.0"}
-  ([x] true)
-  ([x y] (==__ x y))
-  ([x y & more]
+  ([^Number x] true)
+  ([^Number x ^Number y] (==__ x y))
+  ([^Number x ^Number y & more]
    (if (== x y)
      (if (next more)
        (recur y (first more) (next more))
