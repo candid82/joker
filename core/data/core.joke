@@ -853,120 +853,120 @@
 (defn max
   "Returns the greatest of the nums."
   {:added "1.0"}
-  ([x] x)
-  ([x y] (max__ x y))
-  ([x y & more]
+  ([^Number x] x)
+  ([^Number x ^Number y] (max__ x y))
+  ([^Number x ^Number y & more]
    (reduce max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
   {:added "1.0"}
-  ([x] x)
-  ([x y] (min__ x y))
-  ([x y & more]
+  ([^Number x] x)
+  ([^Number x ^Number y] (min__ x y))
+  ([^Number x ^Number y & more]
    (reduce min (min x y) more)))
 
 (defn dec'
   "Returns a number one less than num. Supports arbitrary precision.
   See also: dec"
   {:added "1.0"}
-  [x] (dec'__ x))
+  [^Number x] (dec'__ x))
 
 (defn dec
   "Returns a number one less than num. Does not auto-promote
   ints, will overflow. See also: dec'"
   {:added "1.0"}
-  [x] (dec__ x))
+  [^Number x] (dec__ x))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:added "1.0"}
-  [x] (pos__ x))
+  [^Number x] (pos__ x))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
   {:added "1.0"}
-  [x] (neg__ x))
+  [^Number x] (neg__ x))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
   {:added "1.0"}
-  [num div]
+  [^Number num ^Number div]
   (quot__ num div))
 
 (defn rem
   "remainder of dividing numerator by denominator."
   {:added "1.0"}
-  [num div]
+  [^Number num ^Number div]
   (rem__ num div))
 
 (defn bit-not
   "Bitwise complement"
   {:added "1.0"}
-  [x] (bit-not__ x))
+  [^Int x] (bit-not__ x))
 
 (defn bit-and
   "Bitwise and"
   {:added "1.0"}
-  ([x y] (bit-and__ x y))
-  ([x y & more]
+  ([^Int x ^Int y] (bit-and__ x y))
+  ([^Int x ^Int y & more]
    (reduce bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
   {:added "1.0"}
-  ([x y] (bit-or__ x y))
-  ([x y & more]
+  ([^Int x ^Int y] (bit-or__ x y))
+  ([^Int x ^Int y & more]
    (reduce bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
   {:added "1.0"}
-  ([x y] (bit-xor_ x y))
-  ([x y & more]
+  ([^Int x ^Int y] (bit-xor_ x y))
+  ([^Int x ^Int y & more]
    (reduce bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
   {:added "1.0"}
-  ([x y] (bit-and-not__ x y))
-  ([x y & more]
+  ([^Int x ^Int y] (bit-and-not__ x y))
+  ([^Int x ^Int y & more]
    (reduce bit-and-not (bit-and-not x y) more)))
 
 (defn bit-clear
   "Clear bit at index n"
   {:added "1.0"}
-  [x n] (bit-clear__ x n))
+  [^Int x ^Int n] (bit-clear__ x n))
 
 (defn bit-set
   "Set bit at index n"
   {:added "1.0"}
-  [x n] (bit-set__ x n))
+  [^Int x ^Int n] (bit-set__ x n))
 
 (defn bit-flip
   "Flip bit at index n"
   {:added "1.0"}
-  [x n] (bit-flip__ x n))
+  [^Int x ^Int n] (bit-flip__ x n))
 
 (defn bit-test
   "Test bit at index n"
   {:added "1.0"}
-  [x n] (bit-test__ x n))
+  [^Int x ^Int n] (bit-test__ x n))
 
 (defn bit-shift-left
   "Bitwise shift left"
   {:added "1.0"}
-  [x n] (bit-shift-left__ x n))
+  [^Int x ^Int n] (bit-shift-left__ x n))
 
 (defn bit-shift-right
   "Bitwise shift right"
   {:added "1.0"}
-  [x n] (bit-shift-right__ x n))
+  [^Int x ^Int n] (bit-shift-right__ x n))
 
 (defn unsigned-bit-shift-right
   "Bitwise shift right, without sign-extension."
   {:added "1.0"}
-  [x n] (unsigned-bit-shift-right__ x n))
+  [^Int x ^Int n] (unsigned-bit-shift-right__ x n))
 
 (defn integer?
   "Returns true if n is an integer"
