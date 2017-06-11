@@ -24,10 +24,12 @@ tests/linter/types-1/input.clj:22:6: Parse warning: arg[0] of #'joker.core/vec m
 tests/linter/types-1/input.clj:23:8: Parse warning: arg[0] of #'joker.core/list* must have type Seqable, got Int
 tests/linter/types-1/input.clj:24:8: Parse warning: arg[0] of #'joker.core/apply must have type Callable, got Int
 tests/linter/types-1/input.clj:24:10: Parse warning: arg[1] of #'joker.core/apply must have type Seqable, got Int
+tests/linter/types-1/input.clj:25:15: Parse warning: arg[1] of #'joker.core/vary-meta must have type Callable, got Int
 tests/linter/types-1/input.clj:26:9: Parse warning: arg[0] of #'joker.core/concat must have type Seqable, got Int
 tests/linter/types-1/input.clj:26:11: Parse warning: arg[1] of #'joker.core/concat must have type Seqable, got Int
 tests/linter/types-1/input.clj:27:8: Parse warning: arg[0] of #'joker.core/zero? must have type Number, got String
 tests/linter/types-1/input.clj:28:9: Parse warning: arg[1] of #'joker.core/nth must have type Number, got String
+tests/linter/types-1/input.clj:29:8: Parse warning: arg[0] of #'joker.core/apply must have type Callable, got Int
 tests/linter/types-1/input.clj:30:4: Parse warning: arg[0] of #'joker.core/< must have type Number, got String
 tests/linter/types-1/input.clj:30:8: Parse warning: arg[1] of #'joker.core/< must have type Number, got String
 tests/linter/types-1/input.clj:31:7: Parse warning: arg[0] of #'joker.core/inc' must have type Number, got String

@@ -1076,6 +1076,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	}
 	v := expr.variadic
 	if v != nil && passedArgsCount >= len(v.args)-1 {
+		checkTypes(v.args, call)
 		return
 	}
 	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
