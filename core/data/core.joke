@@ -978,6 +978,7 @@
 (defn even?
   "Returns true if n is even, throws an exception if n is not an integer"
   {:added "1.0"}
+  ;; TODO: types (Int, BigInt)
   [n]
   (if (integer? n)
     (zero? (bit-and (int__ n) 1))
@@ -986,6 +987,7 @@
 (defn odd?
   "Returns true if n is odd, throws an exception if n is not an integer"
   {:added "1.0"}
+  ;; TODO: types (Int, BigInt)
   [n] (not (even? n)))
 
 (defn int?
@@ -1025,7 +1027,7 @@
   "Takes a fn f and returns a fn that takes the same arguments as f,
   has the same effects, if any, and returns the opposite truth value."
   {:added "1.0"}
-  [f]
+  [^Callable f]
   (fn
     ([] (not (f)))
     ([x] (not (f x)))
@@ -1047,7 +1049,7 @@
   "For a list, same as first, for a vector, same as, but much
   more efficient than, last. If the collection is empty, returns nil."
   {:added "1.0"}
-  [coll] (peek__ coll))
+  [^Stack coll] (peek__ coll))
 
 (defn pop
   "For a list, returns a new list without the first
@@ -1055,7 +1057,7 @@
   the collection is empty, throws an exception.  Note - not the same
   as next/butlast."
   {:added "1.0"}
-  [coll] (pop__ coll))
+  [^Stack coll] (pop__ coll))
 
 (defn contains?
   "Returns true if key is present in the given collection, otherwise
@@ -1064,7 +1066,7 @@
   range of indexes. 'contains?' operates constant or logarithmic time;
   it will not perform a linear search for a value.  See also 'some'."
   {:added "1.0"}
-  [coll key] (contains?__ coll key))
+  [^Gettable coll key] (contains?__ coll key))
 
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present."
@@ -1078,10 +1080,10 @@
   "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
   that does not contain a mapping for key(s)."
   {:added "1.0"}
-  ([map] map)
-  ([map key]
+  ([^Map map] map)
+  ([^Map map key]
    (dissoc__ map key))
-  ([map key & ks]
+  ([^Map map key & ks]
    (let [ret (dissoc__ map key)]
      (if ks
        (recur ret (first ks) (next ks))
@@ -1091,10 +1093,10 @@
   "disj[oin]. Returns a new set of the same (hashed/sorted) type, that
   does not contain key(s)."
   {:added "1.0"}
-  ([set] set)
-  ([set key]
+  ([^Set set] set)
+  ([^Set set key]
    (disj__ set key))
-  ([set key & ks]
+  ([^Set set key & ks]
    (when set
      (let [ret (disj__ set key)]
        (if ks

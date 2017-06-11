@@ -92,3 +92,9 @@ tests/linter/types-1/input.clj:64:18: Parse warning: arg[0] of #'joker.core/bit-
 tests/linter/types-1/input.clj:64:22: Parse warning: arg[1] of #'joker.core/bit-shift-right must have type Int, got String
 tests/linter/types-1/input.clj:65:27: Parse warning: arg[0] of #'joker.core/unsigned-bit-shift-right must have type Int, got String
 tests/linter/types-1/input.clj:65:31: Parse warning: arg[1] of #'joker.core/unsigned-bit-shift-right must have type Int, got String
+tests/linter/types-1/input.clj:66:13: Parse warning: arg[0] of #'joker.core/complement must have type Callable, got Int
+tests/linter/types-1/input.clj:67:7: Parse warning: arg[0] of #'joker.core/peek must have type Stack, got Int
+tests/linter/types-1/input.clj:68:6: Parse warning: arg[0] of #'joker.core/pop must have type Stack, got Int
+tests/linter/types-1/input.clj:69:12: Parse warning: arg[0] of #'joker.core/contains? must have type Gettable, got Int
+tests/linter/types-1/input.clj:70:9: Parse warning: arg[0] of #'joker.core/dissoc must have type Map, got Int
+tests/linter/types-1/input.clj:71:7: Parse warning: arg[0] of #'joker.core/disj must have type Set, got Int

@@ -226,6 +226,7 @@ type (
 		Comparator    *Type
 		Counted       *Type
 		Error         *Type
+		Gettable      *Type
 		Indexed       *Type
 		IOReader      *Type
 		KVReduce      *Type
@@ -313,6 +314,7 @@ func init() {
 		Comparator:    regInterface("Comparator", (*Comparator)(nil)),
 		Counted:       regInterface("Counted", (*Counted)(nil)),
 		Error:         regInterface("Error", (*Error)(nil)),
+		Gettable:      regInterface("Gettable", (*Gettable)(nil)),
 		Indexed:       regInterface("Indexed", (*Indexed)(nil)),
 		IOReader:      regInterface("IOReader", (*io.Reader)(nil)),
 		KVReduce:      regInterface("KVReduce", (*KVReduce)(nil)),
