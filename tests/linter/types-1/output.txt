@@ -100,3 +100,13 @@ tests/linter/types-1/input.clj:68:6: Parse warning: arg[0] of #'joker.core/pop m
 tests/linter/types-1/input.clj:69:12: Parse warning: arg[0] of #'joker.core/contains? must have type Gettable, got Int
 tests/linter/types-1/input.clj:70:9: Parse warning: arg[0] of #'joker.core/dissoc must have type Map, got Int
 tests/linter/types-1/input.clj:71:7: Parse warning: arg[0] of #'joker.core/disj must have type Set, got Int
+tests/linter/types-1/input.clj:72:7: Parse warning: arg[0] of #'joker.core/find must have type Associative, got Int
+tests/linter/types-1/input.clj:73:14: Parse warning: arg[0] of #'joker.core/select-keys must have type Associative, got Int
+tests/linter/types-1/input.clj:73:16: Parse warning: arg[1] of #'joker.core/select-keys must have type Seqable, got Int
+tests/linter/types-1/input.clj:74:7: Parse warning: arg[0] of #'joker.core/keys must have type Map, got Int
+tests/linter/types-1/input.clj:75:7: Parse warning: arg[0] of #'joker.core/vals must have type Map, got Int
+tests/linter/types-1/input.clj:76:7: Parse warning: arg[0] of #'joker.core/rseq must have type Reversible, got Int
+tests/linter/types-1/input.clj:77:12: Parse warning: arg[0] of #'joker.core/namespace must have type Named, got Int
+tests/linter/types-1/input.clj:78:12: Parse warning: arg[0] of #'joker.core/reduce-kv must have type Callable, got Int
+tests/linter/types-1/input.clj:79:10: Parse warning: arg[0] of #'joker.core/var-get must have type Var, got Int
+tests/linter/types-1/input.clj:80:10: Parse warning: arg[0] of #'joker.core/var-set must have type Var, got Int
