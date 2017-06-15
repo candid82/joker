@@ -1106,12 +1106,12 @@
 (defn find
   "Returns the map entry for key, or nil if key not present."
   {:added "1.0"}
-  [map key] (find__ map key))
+  [^Associative map key] (find__ map key))
 
 (defn select-keys
   "Returns a map containing only those entries in map whose key is in keys"
   {:added "1.0"}
-  [map keyseq]
+  [^Associative map ^Seqable keyseq]
   (loop [ret {} keys (seq keyseq)]
     (if keys
       (let [entry (find__ map (first keys))]
@@ -1125,12 +1125,12 @@
 (defn keys
   "Returns a sequence of the map's keys, in the same order as (seq map)."
   {:added "1.0"}
-  [map] (keys__ map))
+  [^Map map] (keys__ map))
 
 (defn vals
   "Returns a sequence of the map's values, in the same order as (seq map)."
   {:added "1.0"}
-  [map] (vals__ map))
+  [^Map map] (vals__ map))
 
 (defn key
   "Returns the key of the map entry."
@@ -1155,6 +1155,7 @@
   "Returns the name String of a string, symbol or keyword."
   {:tag String
   :added "1.0"}
+  ;; TODO: types
   [x]
   (if (string? x) x (name__ x)))
 
@@ -1339,7 +1340,8 @@
   and f is not called. Note that reduce-kv is supported on vectors,
   where the keys will be the ordinals."
   {:added "1.0"}
-  ([f init coll]
+  ;; TODO: types
+  ([^Callable f init coll]
    (cond
      (instance? KVReduce coll)
      (reduce-kv__ f init coll)
