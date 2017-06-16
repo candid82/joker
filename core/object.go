@@ -225,6 +225,7 @@ type (
 		Comparable    *Type
 		Comparator    *Type
 		Counted       *Type
+		Deref         *Type
 		Error         *Type
 		Gettable      *Type
 		Indexed       *Type
@@ -313,6 +314,7 @@ func init() {
 		Comparable:    regInterface("Comparable", (*Comparable)(nil)),
 		Comparator:    regInterface("Comparator", (*Comparator)(nil)),
 		Counted:       regInterface("Counted", (*Counted)(nil)),
+		Deref:         regInterface("Deref", (*Deref)(nil)),
 		Error:         regInterface("Error", (*Error)(nil)),
 		Gettable:      regInterface("Gettable", (*Gettable)(nil)),
 		Indexed:       regInterface("Indexed", (*Indexed)(nil)),

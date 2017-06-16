@@ -110,3 +110,17 @@ tests/linter/types-1/input.clj:77:12: Parse warning: arg[0] of #'joker.core/name
 tests/linter/types-1/input.clj:78:12: Parse warning: arg[0] of #'joker.core/reduce-kv must have type Callable, got Int
 tests/linter/types-1/input.clj:79:10: Parse warning: arg[0] of #'joker.core/var-get must have type Var, got Int
 tests/linter/types-1/input.clj:80:10: Parse warning: arg[0] of #'joker.core/var-set must have type Var, got Int
+tests/linter/types-1/input.clj:81:17: Parse warning: arg[0] of #'joker.core/with-bindings* must have type Map, got Int
+tests/linter/types-1/input.clj:81:19: Parse warning: arg[1] of #'joker.core/with-bindings* must have type Callable, got Int
+tests/linter/types-1/input.clj:82:8: Parse warning: arg[0] of #'joker.core/deref must have type Deref, got Int
+tests/linter/types-1/input.clj:83:8: Parse warning: arg[0] of #'joker.core/swap! must have type Atom, got String
+tests/linter/types-1/input.clj:83:12: Parse warning: arg[1] of #'joker.core/swap! must have type Callable, got Int
+tests/linter/types-1/input.clj:84:9: Parse warning: arg[0] of #'joker.core/reset! must have type Atom, got Int
+tests/linter/types-1/input.clj:85:14: Parse warning: arg[0] of #'joker.core/alter-meta! must have type Ref, got Int
+tests/linter/types-1/input.clj:85:16: Parse warning: arg[1] of #'joker.core/alter-meta! must have type Callable, got Int
+tests/linter/types-1/input.clj:86:14: Parse warning: arg[0] of #'joker.core/reset-meta! must have type Ref, got Int
+tests/linter/types-1/input.clj:86:16: Parse warning: arg[1] of #'joker.core/reset-meta! must have type Map, got Int
+tests/linter/types-1/input.clj:87:11: Parse warning: arg[0] of #'joker.core/find-var must have type Symbol, got Int
+tests/linter/types-1/input.clj:88:7: Parse warning: arg[0] of #'joker.core/comp must have type Callable, got Int
+tests/linter/types-1/input.clj:88:9: Parse warning: arg[1] of #'joker.core/comp must have type Callable, got Int
+tests/linter/types-1/input.clj:88:11: Parse warning: arg[2] of #'joker.core/comp must have type Callable, got Int

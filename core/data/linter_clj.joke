@@ -60,9 +60,9 @@
 
 (def __deref__ deref)
 (defn deref
-  ([ref]
+  ([^Deref ref]
    (__deref__ ref))
-  ([ref timeout-ms timeout-val]))
+  ([^Deref ref ^Int timeout-ms timeout-val]))
 
 
 ;; Clojure core functions not supported by Joker

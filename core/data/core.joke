@@ -1376,7 +1376,7 @@
   Then calls f with the supplied arguments. Resets the vars back to the original
   values after f returned. Returns whatever f returns."
   {:added "1.0"}
-  [binding-map f & args]
+  [^Map binding-map ^Callable f & args]
   (let [existing-bindings (replace-bindings binding-map)]
     (try
       (apply f args)
@@ -1429,7 +1429,7 @@
   returns its current state. When applied to a delay, forces
   it if not already forced."
   {:added "1.0"}
-  [ref]
+  [^Deref ref]
   (deref__ ref))
 
 (defn atom
@@ -1449,7 +1449,7 @@
   (apply f current-value-of-atom args).
   Returns the value that was swapped in."
   {:added "1.0"}
-  [^Atom atom f & args]
+  [^Atom atom ^Callable f & args]
   (apply swap__ atom f args))
 
 (defn reset!
@@ -1466,19 +1466,19 @@
 
   f must be free of side-effects"
   {:added "1.0"}
-  [^Ref ref f & args]
+  [^Ref ref ^Callable f & args]
   (apply alter-meta__ ref f args))
 
 (defn reset-meta!
   "Atomically resets the metadata for a namespace/var/atom"
   {:added "1.0"}
-  [^Ref ref metadata-map] (reset-meta__ ref metadata-map))
+  [^Ref ref ^Map metadata-map] (reset-meta__ ref metadata-map))
 
 (defn find-var
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
   {:added "1.0"}
-  [sym] (find-var__ sym))
+  [^Symbol sym] (find-var__ sym))
 
 (defn comp
   "Takes a set of functions and returns a fn that is the composition
@@ -1487,22 +1487,22 @@
   fn (right-to-left) to the result, etc."
   {:added "1.0"}
   ([] identity)
-  ([f] f)
-  ([f g]
+  ([^Callable f] f)
+  ([^Callable f ^Callable g]
    (fn
      ([] (f (g)))
      ([x] (f (g x)))
      ([x y] (f (g x y)))
      ([x y z] (f (g x y z)))
      ([x y z & args] (f (apply g x y z args)))))
-  ([f g h]
+  ([^Callable f ^Callable g ^Callable h]
    (fn
      ([] (f (g (h))))
      ([x] (f (g (h x))))
      ([x y] (f (g (h x y))))
      ([x y z] (f (g (h x y z))))
      ([x y z & args] (f (g (apply h x y z args))))))
-  ([f1 f2 f3 & fs]
+  ([^Callable f1 ^Callable f2 ^Callable f3 & fs]
    (let [fs (reverse (list* f1 f2 f3 fs))]
      (fn [& args]
        (loop [ret (apply (first fs) args) fs (next fs)]
