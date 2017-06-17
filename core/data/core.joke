@@ -1517,28 +1517,28 @@
   args (left-to-right).
   ((juxt a b c) x) => [(a x) (b x) (c x)]"
   {:added "1.0"}
-  ([f]
+  ([^Callable f]
    (fn
      ([] [(f)])
      ([x] [(f x)])
      ([x y] [(f x y)])
      ([x y z] [(f x y z)])
      ([x y z & args] [(apply f x y z args)])))
-  ([f g]
+  ([^Callable f ^Callable g]
    (fn
      ([] [(f) (g)])
      ([x] [(f x) (g x)])
      ([x y] [(f x y) (g x y)])
      ([x y z] [(f x y z) (g x y z)])
      ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
-  ([f g h]
+  ([^Callable f ^Callable g ^Callable h]
    (fn
      ([] [(f) (g) (h)])
      ([x] [(f x) (g x) (h x)])
      ([x y] [(f x y) (g x y) (h x y)])
      ([x y z] [(f x y z) (g x y z) (h x y z)])
      ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
-  ([f g h & fs]
+  ([^Callable f ^Callable g ^Callable h & fs]
    (let [fs (list* f g h fs)]
      (fn
        ([] (reduce #(conj %1 (%2)) [] fs))
@@ -1552,20 +1552,21 @@
   returns a fn that takes a variable number of additional args. When
   called, the returned function calls f with args + additional args."
   {:added "1.0"}
-  ([f] f)
-  ([f arg1]
+  ([^Callable f] f)
+  ([^Callable f arg1]
    (fn [& args] (apply f arg1 args)))
-  ([f arg1 arg2]
+  ([^Callable f arg1 arg2]
    (fn [& args] (apply f arg1 arg2 args)))
-  ([f arg1 arg2 arg3]
+  ([^Callable f arg1 arg2 arg3]
    (fn [& args] (apply f arg1 arg2 arg3 args)))
-  ([f arg1 arg2 arg3 & more]
+  ([^Callable f arg1 arg2 arg3 & more]
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 (defn sequence
   "Coerces coll to a (possibly empty) sequence, if it is not already
   one. Will not force a lazy seq. (sequence nil) yields ()"
   {:added "1.0"}
+  ;; TODO: types (Seq or Seqable)
   [coll]
   (if (seq? coll)
     coll
@@ -1576,7 +1577,7 @@
   false."
   {:tag Bool
   :added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   (cond
     (nil? (seq coll)) true
     (pred (first coll)) (recur pred (next coll))
@@ -1596,7 +1597,7 @@
   this will return :fred if :fred is in the sequence, otherwise nil:
   (some #{:fred} coll)"
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   (when (seq coll)
     (or (pred (first coll)) (recur pred (next coll)))))
 
@@ -1619,19 +1620,19 @@
    (lazy-seq
     (when-let [s (seq coll)]
       (cons (f (first s)) (map f (rest s))))))
-  ([f c1 c2]
+  ([^Callable f ^Seqable c1 ^Seqable c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
       (when (and s1 s2)
         (cons (f (first s1) (first s2))
               (map f (rest s1) (rest s2)))))))
-  ([f c1 c2 c3]
+  ([^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2) s3 (seq c3)]
       (when (and  s1 s2 s3)
         (cons (f (first s1) (first s2) (first s3))
               (map f (rest s1) (rest s2) (rest s3)))))))
-  ([f c1 c2 c3 & colls]
+  ([^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3 & colls]
    (let [step (fn step [cs]
                 (lazy-seq
                  (let [ss (map seq cs)]
@@ -1643,14 +1644,14 @@
   "Returns the result of applying concat to the result of applying map
   to f and colls.  Thus function f should return a collection."
   {:added "1.0"}
-  [f & colls]
+  [^Callable f & colls]
   (apply concat (apply map f colls)))
 
 (defn filter
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  ([pred coll]
+  ([^Callable pred ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [f (first s) r (rest s)]
@@ -1662,14 +1663,14 @@
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns false. pred must be free of side-effects."
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   (filter (complement pred) coll))
 
 (defn take
   "Returns a lazy sequence of the first n items in coll, or all items if
   there are fewer than n."
   {:added "1.0"}
-  [n coll]
+  [^Number n ^Seqable coll]
   (lazy-seq
    (when (pos? n)
      (when-let [s (seq coll)]
@@ -1679,7 +1680,7 @@
   "Returns a lazy sequence of successive items from coll while
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (when (pred (first s))
@@ -1688,7 +1689,7 @@
 (defn drop
   "Returns a lazy sequence of all but the first n items in coll."
   {:added "1.0"}
-  [n coll]
+  [^Number n ^Seqable coll]
   (let [step (fn [n coll]
                (let [s (seq coll)]
                  (if (and (pos? n) s)
@@ -1699,15 +1700,15 @@
 (defn drop-last
   "Return a lazy sequence of all but the last n (default 1) items in coll"
   {:added "1.0"}
-  ([s] (drop-last 1 s))
-  ([n s] (map (fn [x _] x) s (drop n s))))
+  ([^Seqable s] (drop-last 1 s))
+  ([^Number n ^Seqable s] (map (fn [x _] x) s (drop n s))))
 
 (defn take-last
   "Returns a seq of the last n items in coll.  Depending on the type
   of coll may be no better than linear time.  For vectors, see also subvec."
   {:added "1.0"}
-  [n coll]
-  (loop [s (seq coll), lead (seq (drop n coll))]
+  [^Number n ^Seqable coll]
+  (loop [s (seq coll) lead (seq (drop n coll))]
     (if lead
       (recur (next s) (next lead))
       s)))
@@ -1716,7 +1717,7 @@
   "Returns a lazy sequence of the items in coll starting from the first
   item for which (pred item) returns logical false."
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   (let [step (fn [pred coll]
                (let [s (seq coll)]
                  (if (and s (pred (first s)))
@@ -1727,32 +1728,33 @@
 (defn cycle
   "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
   {:added "1.0"}
-  [coll] (lazy-seq
-          (when-let [s (seq coll)]
-            (concat s (cycle s)))))
+  [^Seqable coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (concat s (cycle s)))))
 
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   {:added "1.0"}
-  [^Int n ^Seqable coll]
+  [^Number n ^Seqable coll]
   [(take n coll) (drop n coll)])
 
 (defn split-with
   "Returns a vector of [(take-while pred coll) (drop-while pred coll)]"
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred ^Seqable coll]
   [(take-while pred coll) (drop-while pred coll)])
 
 (defn repeat
   "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
   {:added "1.0"}
   ([x] (lazy-seq (cons x (repeat x))))
-  ([n x] (take n (repeat x))))
+  ([^Number n x] (take n (repeat x))))
 
 (defn iterate
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   {:added "1.0"}
-  [f x] (cons x (lazy-seq (iterate f (f x)))))
+  [^Callable f x] (cons x (lazy-seq (iterate f (f x)))))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -1761,9 +1763,9 @@
   start. When start is equal to end, returns empty list."
   {:added "1.0"}
   ([] (iterate inc 0))
-  ([end] (range 0 end 1))
-  ([start end] (range start end 1))
-  ([start end step]
+  ([^Number end] (range 0 end 1))
+  ([^Number start ^Number end] (range start end 1))
+  ([^Number start ^Number end ^Number step]
    (lazy-seq
     (let [comp (cond
                  (or (zero? step) (= start end)) not=

@@ -36,6 +36,8 @@
   ([^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
 (defn with-meta [^Meta obj ^Map m] (with-meta__ obj m))
 (defn vec [^Seqable coll] (vec__ coll))
+(defn not-every? [^Callable pred ^Seqable coll] (not (every? pred coll)))
+(defn not-any? [^Callable pred ^Seqable coll] (not (some pred coll)))
 
 ;; Clojure core macros not supported by Joker
 
@@ -87,38 +89,38 @@
 
 (def __filter__ filter)
 (defn filter
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__filter__ x coll)))
 
 (def __remove__ remove)
 (defn remove
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__remove__ x coll)))
 
 (def __take__ take)
 (defn take
-  ([x])
-  ([x coll]
+  ([^Number x])
+  ([^Number x ^Seqable coll]
    (__take__ x coll)))
 
 (def __take-while__ take-while)
 (defn take-while
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__take-while__ x coll)))
 
 (def __drop__ drop)
 (defn drop
-  ([x])
-  ([x coll]
+  ([^Number x])
+  ([^Number x ^Seqable coll]
    (__drop__ x coll)))
 
 (def __drop-while__ drop-while)
 (defn drop-while
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__drop-while__ x coll)))
 
 (def __take-nth__ take-nth)
