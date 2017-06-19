@@ -13,6 +13,7 @@ type (
 		Eval(env *LocalEnv) Object
 		InferType() *Type
 		Pos() Position
+		Dump(includePosition bool) Map
 	}
 	LiteralExpr struct {
 		Position
@@ -162,6 +163,17 @@ type (
 		rules         Keyword
 		ifWithoutElse Keyword
 		_prefix       Keyword
+		pos           Keyword
+		startLine     Keyword
+		endLine       Keyword
+		startColumn   Keyword
+		endColumn     Keyword
+		filename      Keyword
+		object        Keyword
+		type_         Keyword
+		var_          Keyword
+		value         Keyword
+		vector        Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -236,6 +248,17 @@ var (
 		rules:         MakeKeyword("rules"),
 		ifWithoutElse: MakeKeyword("if-without-else"),
 		_prefix:       MakeKeyword("_prefix"),
+		pos:           MakeKeyword("pos"),
+		startLine:     MakeKeyword("start-line"),
+		endLine:       MakeKeyword("end-line"),
+		startColumn:   MakeKeyword("start-column"),
+		endColumn:     MakeKeyword("end-column"),
+		filename:      MakeKeyword("filename"),
+		object:        MakeKeyword("object"),
+		type_:         MakeKeyword("type"),
+		var_:          MakeKeyword("var"),
+		value:         MakeKeyword("value"),
+		vector:        MakeKeyword("vector"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),

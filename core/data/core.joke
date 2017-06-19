@@ -1780,6 +1780,7 @@
   the first.  If a key occurs in more than one map, the mapping from
   the latter (left-to-right) will be the mapping in the result."
   {:added "1.0"}
+  ;; TODO: types (define first few arities explicitly?)
   [& maps]
   (when (some identity maps)
     (reduce #(conj (or %1 {}) %2) maps)))
@@ -1790,7 +1791,7 @@
   from the latter (left-to-right) will be combined with the mapping in
   the result by calling (f val-in-result val-in-latter)."
   {:added "1.0"}
-  [f & maps]
+  [^Callable f & maps]
   (when (some identity maps)
     (let [merge-entry (fn [m e]
                         (let [k (key e) v (val e)]
@@ -1804,7 +1805,7 @@
 (defn zipmap
   "Returns a map with the keys mapped to the corresponding vals."
   {:added "1.0"}
-  [keys vals]
+  [^Seqable keys ^Seqable vals]
   (loop [map {}
          ks (seq keys)
          vs (seq vals)]
@@ -1823,9 +1824,9 @@
   "Returns a sorted sequence of the items in coll. If no comparator is
   supplied, uses compare."
   {:added "1.0"}
-  ([coll]
+  ([^Seqable coll]
    (sort compare coll))
-  ([^Comparator comp coll]
+  ([^Comparator comp ^Seqable coll]
    (sort__ comp coll)))
 
 (defn sort-by
@@ -1833,9 +1834,9 @@
   order is determined by comparing (keyfn item).  If no comparator is
   supplied, uses compare."
   {:added "1.0"}
-  ([keyfn coll]
+  ([^Callable keyfn ^Seqable coll]
    (sort-by keyfn compare coll))
-  ([keyfn ^Comparator comp coll]
+  ([^Callable keyfn ^Comparator comp ^Seqable coll]
    (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))
 
 (defn dorun
@@ -1845,10 +1846,10 @@
   be used to force any effects. Walks through the successive nexts of
   the seq, does not retain the head and returns nil."
   {:added "1.0"}
-  ([coll]
+  ([^Seqable coll]
    (when (seq coll)
      (recur (next coll))))
-  ([n coll]
+  ([^Number n ^Seqable coll]
    (when (and (seq coll) (pos? n))
      (recur (dec n) (next coll)))))
 
@@ -1860,17 +1861,17 @@
   the seq, retains the head and returns it, thus causing the entire
   seq to reside in memory at one time."
   {:added "1.0"}
-  ([coll]
+  ([^Seqable coll]
    (dorun coll)
    coll)
-  ([n coll]
+  ([^Number n ^Seqable coll]
    (dorun n coll)
    coll))
 
 (defn nthnext
   "Returns the nth next of coll, (seq coll) when n is 0."
   {:added "1.0"}
-  [coll n]
+  [^Seqable coll ^Number n]
   (loop [n n xs (seq coll)]
     (if (and xs (pos? n))
       (recur (dec n) (next xs))
@@ -1879,7 +1880,7 @@
 (defn nthrest
   "Returns the nth rest of coll, coll when n is 0."
   {:added "1.0"}
-  [coll n]
+  [^Seqable coll ^Number n]
   (loop [n n xs coll]
     (if (and (pos? n) (seq xs))
       (recur (dec n) (rest xs))
@@ -1892,15 +1893,15 @@
   necessary to complete last partition upto n items. In case there are
   not enough padding elements, return a partition with less than n items."
   {:added "1.0"}
-  ([n coll]
+  ([^Number n ^Seqable coll]
    (partition n n coll))
-  ([n step coll]
+  ([^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (doall (take n s))]
         (when (= n (count p))
           (cons p (partition n step (nthrest s step))))))))
-  ([n step pad coll]
+  ([^Number n ^Number step ^Seqable pad ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (doall (take n s))]
@@ -1971,7 +1972,7 @@
   "Coerce to Number"
   {:tag Number
   :added "1.0"}
-  [x] (num__ x))
+  [^Number x] (num__ x))
 
 (defn double
   "Coerce to double"
@@ -1981,6 +1982,7 @@
 (defn char
   "Coerce to char"
   {:added "1.0"}
+  ;; TODO: types (Char or Number)
   [x] (char__ x))
 
 (defn boolean
@@ -1997,7 +1999,7 @@
 (defn mod
   "Modulus of num and div. Truncates toward negative infinity."
   {:added "1.0"}
-  [num div]
+  [^Number num ^Number div]
   (let [m (rem num div)]
     (if (or (zero? m) (= (pos? num) (pos? div)))
       m
@@ -2012,14 +2014,14 @@
   "Returns the numerator part of a Ratio."
   {:tag BigInt
   :added "1.0"}
-  [r]
+  [^Ratio r]
   (numerator__ r))
 
 (defn denominator
   "Returns the denominator part of a Ratio."
   {:tag BigInt
   :added "1.0"}
-  [r]
+  [^Ratio r]
   (denominator__ r))
 
 (defn bigfloat?

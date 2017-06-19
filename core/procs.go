@@ -1324,6 +1324,12 @@ var procInternFakeVar Proc = func(args []Object) Object {
 	return InternFakeSymbol(GLOBAL_ENV.FindNamespace(nsSym), sym)
 }
 
+var procParse Proc = func(args []Object) Object {
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	res := Parse(args[0], parseContext)
+	return res.Dump(false)
+}
+
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1642,6 +1648,7 @@ func init() {
 	intern("index-of__", procIndexOf)
 	intern("lib-path__", procLibPath)
 	intern("intern-fake-var__", procInternFakeVar)
+	intern("parse__", procParse)
 
 	processData(coreData)
 }

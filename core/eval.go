@@ -309,6 +309,10 @@ func (expr *TryExpr) Eval(env *LocalEnv) (obj Object) {
 	return evalBody(expr.body, env)
 }
 
+func (expr *CatchExpr) Eval(env *LocalEnv) (obj Object) {
+	panic(RT.NewError("This should never happen!"))
+}
+
 func evalBody(body []Expr, env *LocalEnv) Object {
 	var res Object = NIL
 	for _, expr := range body {
@@ -361,6 +365,10 @@ func (expr *FnExpr) Eval(env *LocalEnv) Object {
 	}
 	res.env = env
 	return res
+}
+
+func (expr *FnArityExpr) Eval(env *LocalEnv) Object {
+	panic(RT.NewError("This should never happen!"))
 }
 
 func (expr *LetExpr) Eval(env *LocalEnv) Object {
