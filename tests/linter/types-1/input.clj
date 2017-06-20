@@ -121,3 +121,4 @@
 (mod "1" "2")
 (numerator "1")
 (denominator "1")
+(read-string 1)

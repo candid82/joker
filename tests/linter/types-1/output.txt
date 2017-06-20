@@ -189,3 +189,4 @@ tests/linter/types-1/input.clj:121:6: Parse warning: arg[0] of #'joker.core/mod 
 tests/linter/types-1/input.clj:121:10: Parse warning: arg[1] of #'joker.core/mod must have type Number, got String
 tests/linter/types-1/input.clj:122:12: Parse warning: arg[0] of #'joker.core/numerator must have type Ratio, got String
 tests/linter/types-1/input.clj:123:14: Parse warning: arg[0] of #'joker.core/denominator must have type Ratio, got String
+tests/linter/types-1/input.clj:124:14: Parse warning: arg[0] of #'joker.core/read-string must have type String, got Int

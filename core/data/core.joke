@@ -2046,6 +2046,7 @@
   {:tag BigInt
   :added "1.0"}
   [x]
+  ;; TODO: types (Number or String)
   (bigint__ x))
 
 (defn bigfloat
@@ -2053,6 +2054,7 @@
   {:tag BigFloat
   :added "1.0"}
   [x]
+  ;; TODO: types (Number or String)
   (bigfloat__ x))
 
 (def

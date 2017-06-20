@@ -38,6 +38,7 @@
 (defn vec [^Seqable coll] (vec__ coll))
 (defn not-every? [^Callable pred ^Seqable coll] (not (every? pred coll)))
 (defn not-any? [^Callable pred ^Seqable coll] (not (some pred coll)))
+(defn read-string [^String s] (read-string__ s))
 
 ;; Clojure core macros not supported by Joker
 
