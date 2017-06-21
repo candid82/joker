@@ -2137,9 +2137,9 @@
   the resulting vector shares structure with the original and no
   trimming is done."
   {:added "1.0"}
-  ([v start]
+  ([^Vector v ^Int start]
    (subvec v start (count v)))
-  ([v start end]
+  ([^Vector v ^Int start ^Int end]
    (subvec__ v start end)))
 
 (defmacro doto
@@ -2187,7 +2187,7 @@
   "Sequentially read and evaluate the set of forms contained in the
   string"
   {:added "1.0"}
-  [s]
+  [^String s]
   (load-string__ s))
 
 (defn set?
@@ -2198,7 +2198,7 @@
 (defn set
   "Returns a set of the distinct elements of coll."
   {:added "1.0"}
-  [coll]
+  [^Seqable coll]
   (if (set? coll)
     (with-meta coll nil)
     (reduce conj #{} coll)))
@@ -2215,20 +2215,20 @@
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
   {:added "1.0"}
-  [sym] (find-ns__ sym))
+  [^Symbol sym] (find-ns__ sym))
 
 (defn create-ns
   "Create a new namespace named by the symbol if one doesn't already
   exist, returns it or the already-existing namespace of the same
   name."
   {:added "1.0"}
-  [sym] (create-ns__ sym))
+  [^Symbol sym] (create-ns__ sym))
 
 (defn remove-ns
   "Removes the namespace named by the symbol. Use with caution.
   Cannot be used to remove the clojure namespace."
   {:added "1.0"}
-  [sym] (remove-ns__ sym))
+  [^Symbol sym] (remove-ns__ sym))
 
 (defn all-ns
   "Returns a sequence of all namespaces."
@@ -2241,6 +2241,7 @@
   found."
   {:added "1.0"}
   ^Namespace [x]
+  ;; TODO: types (Namespace or Symbol)
   (if (instance? Namespace x)
     x
     (or (find-ns x) (throw (ex-info (str "No namespace: " x " found") {})))))
@@ -2249,18 +2250,21 @@
   "Returns the name of the namespace, a symbol."
   {:added "1.0"}
   [ns]
+  ;; TODO: types (Namespace or Symbol)
   (ns-name__ (the-ns ns)))
 
 (defn ns-map
   "Returns a map of all the mappings for the namespace."
   {:added "1.0"}
   [ns]
+  ;; TODO: types (Namespace or Symbol)
   (ns-map__ (the-ns ns)))
 
 (defn ns-unmap
   "Removes the mappings for the symbol from the namespace."
   {:added "1.0"}
-  [ns sym]
+  [ns ^Symbol sym]
+  ;; TODO: types (Namespace or Symbol)
   (ns-unmap__ (the-ns ns) sym))
 
 (defn ^:private public?
@@ -2271,6 +2275,7 @@
   "Returns a map of the public intern mappings for the namespace."
   {:added "1.0"}
   [ns]
+  ;; TODO: types (Namespace or Symbol)
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
                                       (= ns (var-ns__ v))
@@ -2281,6 +2286,7 @@
   "Returns a map of the intern mappings for the namespace."
   {:added "1.0"}
   [ns]
+  ;; TODO: types (Namespace or Symbol)
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
                                       (= ns (var-ns__ v))))
@@ -2297,10 +2303,12 @@
   metadata from the name symbol.  Returns the var."
   {:added "1.0"}
   ([ns ^Symbol name]
+   ;; TODO: types (Namespace or Symbol)
    (let [v (intern__ (the-ns ns) name)]
      (when (meta name) (set-meta__ v (meta name)))
      v))
-  ([ns name val]
+  ([ns ^Symbol name val]
+    ;; TODO: types (Namespace or Symbol)
    (let [v (intern__ (the-ns ns) name val)]
      (when (meta name) (set-meta__ v (meta name)))
      v)))

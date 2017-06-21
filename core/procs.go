@@ -519,9 +519,9 @@ var procCount Proc = func(args []Object) Object {
 
 var procSubvec Proc = func(args []Object) Object {
 	// TODO: implement proper Subvector structure
-	v := args[0].(*Vector)
-	start := args[1].(Int).I
-	end := args[2].(Int).I
+	v := EnsureVector(args, 0)
+	start := EnsureInt(args, 1).I
+	end := EnsureInt(args, 2).I
 	if start > end {
 		panic(RT.NewError(fmt.Sprintf("subvec's start index (%d) is greater than end index (%d)", start, end)))
 	}
