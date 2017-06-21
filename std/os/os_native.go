@@ -45,11 +45,9 @@ func sh(name string, args []string) Object {
 	buf = new(bytes.Buffer)
 	buf.ReadFrom(stderrReader)
 	stderrString := buf.String()
-	if err = cmd.Wait(); err != nil {
-		EmptyArrayMap().Assoc(MakeKeyword("success"), Bool{B: false})
-	}
+	err = cmd.Wait()
 	res := EmptyArrayMap()
-	res.Add(MakeKeyword("success"), Bool{B: true})
+	res.Add(MakeKeyword("success"), Bool{B: err == nil})
 	res.Add(MakeKeyword("out"), String{S: stdoutString})
 	res.Add(MakeKeyword("err"), String{S: stderrString})
 	return res
