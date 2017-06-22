@@ -126,8 +126,8 @@
 
 (def __take-nth__ take-nth)
 (defn take-nth
-  ([x])
-  ([x coll]
+  ([^Number x])
+  ([^Number x ^Seqable coll]
    (__take-nth__ x coll)))
 
 (def __distinct__ distinct)

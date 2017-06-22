@@ -130,3 +130,7 @@
 (remove-ns 1)
 (ns-unmap 1 2)
 (intern 1 2 3)
+(refer 1)
+(alias 1 2)
+(ns-unalias 1 2)
+(take-nth "1" 1)
