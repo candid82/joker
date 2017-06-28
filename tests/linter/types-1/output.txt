@@ -200,3 +200,8 @@ tests/linter/types-1/input.clj:129:12: Parse warning: arg[0] of #'joker.core/cre
 tests/linter/types-1/input.clj:130:12: Parse warning: arg[0] of #'joker.core/remove-ns must have type Symbol, got Int
 tests/linter/types-1/input.clj:131:13: Parse warning: arg[1] of #'joker.core/ns-unmap must have type Symbol, got Int
 tests/linter/types-1/input.clj:132:11: Parse warning: arg[1] of #'joker.core/intern must have type Symbol, got Int
+tests/linter/types-1/input.clj:133:8: Parse warning: arg[0] of #'joker.core/refer must have type Symbol, got Int
+tests/linter/types-1/input.clj:134:8: Parse warning: arg[0] of #'joker.core/alias must have type Symbol, got Int
+tests/linter/types-1/input.clj:135:15: Parse warning: arg[1] of #'joker.core/ns-unalias must have type Symbol, got Int
+tests/linter/types-1/input.clj:136:11: Parse warning: arg[0] of #'joker.core/take-nth must have type Number, got String
+tests/linter/types-1/input.clj:136:15: Parse warning: arg[1] of #'joker.core/take-nth must have type Seqable, got Int
