@@ -48,6 +48,9 @@ func sh(name string, args []string) Object {
 	err = cmd.Wait()
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Bool{B: err == nil})
+	if err != nil {
+		res.Add(MakeKeyword("err-msg"), String{S: err.Error()})
+	}
 	res.Add(MakeKeyword("out"), String{S: stdoutString})
 	res.Add(MakeKeyword("err"), String{S: stderrString})
 	return res
