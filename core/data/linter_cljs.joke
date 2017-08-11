@@ -236,7 +236,7 @@
 (defn hash-string* [s])
 (defn key-test [key other])
 (defn find-ns-obj* [ctxt xs])
-(defn array [var-args])
+(defn array [& var-args])
 (defn remove-method [multifn dispatch-val])
 (defn balance-right-del [key val left del])
 (defn volatile! [val])
