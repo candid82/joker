@@ -56,7 +56,7 @@ func (rt *Runtime) NewArgTypeError(index int, obj Object, expectedType string) *
 	return rt.NewError(fmt.Sprintf("Arg[%d] of %s must have type %s, got %s", index, name, expectedType, obj.GetType().ToString(false)))
 }
 
-func (rt *Runtime) newErrorWithPos(msg string, pos Position) *EvalError {
+func (rt *Runtime) NewErrorWithPos(msg string, pos Position) *EvalError {
 	return &EvalError{
 		msg: msg,
 		pos: pos,
@@ -266,7 +266,7 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 		args := evalSeq(expr.args, env)
 		return callable.Call(args)
 	default:
-		panic(RT.newErrorWithPos(callable.ToString(false)+" is not a Fn", expr.callable.Pos()))
+		panic(RT.NewErrorWithPos(callable.ToString(false)+" is not a Fn", expr.callable.Pos()))
 	}
 }
 

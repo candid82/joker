@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"os"
 	"unsafe"
 )
 
@@ -98,12 +97,12 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 				name: sym,
 			}
 			ns.mappings[sym.name] = newVar
-			fmt.Fprintf(os.Stderr, "WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
-				sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false))
+			printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
+				sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
 			return newVar
 		}
-		panic(RT.NewError(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",
-			sym.ToString(false), existingVar.ToString(false), ns.ToString(false))))
+		panic(RT.NewErrorWithPos(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",
+			sym.ToString(false), existingVar.ToString(false), ns.ToString(false)), sym.GetInfo().Pos()))
 	}
 	return existingVar
 }

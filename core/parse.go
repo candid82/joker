@@ -608,7 +608,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				obj: obj,
 			})
 		}
-		vr := ctx.GlobalEnv.CurrentNamespace().Intern(Symbol{name: sym.name})
+		symWithoutNs := sym
+		symWithoutNs.ns = nil
+		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
 		vr.WithInfo(obj.GetInfo())
 
 		res := &DefExpr{
