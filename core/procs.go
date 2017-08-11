@@ -565,7 +565,10 @@ var procStr Proc = func(args []Object) Object {
 	var buffer bytes.Buffer
 	for _, obj := range args {
 		if !obj.Equals(NIL) {
-			buffer.WriteString(obj.ToString(false))
+			t := obj.GetType()
+			// TODO: this is a hack. Rethink escape parameter in ToString
+			escaped := (t == TYPE.String) || (t == TYPE.Char) || (t == TYPE.Regex)
+			buffer.WriteString(obj.ToString(!escaped))
 		}
 	}
 	return String{S: buffer.String()}
