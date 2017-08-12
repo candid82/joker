@@ -12,7 +12,7 @@ import (
 	_ "github.com/candid82/joker/std/json"
 	_ "github.com/candid82/joker/std/os"
 	_ "github.com/candid82/joker/std/string"
-	"gopkg.in/readline.v1"
+	"github.com/chzyer/readline"
 )
 
 type (

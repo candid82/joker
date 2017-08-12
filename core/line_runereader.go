@@ -1,9 +1,10 @@
 package core
 
 import (
-	"gopkg.in/readline.v1"
 	"io"
 	"unicode/utf8"
+
+	"github.com/chzyer/readline"
 )
 
 type (
