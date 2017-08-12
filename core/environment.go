@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -16,9 +17,22 @@ type (
 		file          *Var
 		args          *Var
 		ns            *Var
+		version       *Var
 		Features      Set
 	}
 )
+
+func versionMap() Map {
+	res := EmptyArrayMap()
+	parts := strings.Split(VERSION[1:], ".")
+	i, _ := strconv.ParseInt(parts[0], 10, 64)
+	res.Add(MakeKeyword("major"), Int{I: int(i)})
+	i, _ = strconv.ParseInt(parts[1], 10, 64)
+	res.Add(MakeKeyword("minor"), Int{I: int(i)})
+	i, _ = strconv.ParseInt(parts[2], 10, 64)
+	res.Add(MakeKeyword("incremental"), Int{I: int(i)})
+	return res
+}
 
 func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) *Env {
 	features := EmptySet()
@@ -39,6 +53,8 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
 	res.stderr.Value = &File{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
+	res.version = res.CoreNamespace.Intern(MakeSymbol("*joker-version*"))
+	res.version.Value = versionMap()
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	args := EmptyVector
 	for _, arg := range os.Args[1:] {
