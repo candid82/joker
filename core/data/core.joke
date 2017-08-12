@@ -4015,7 +4015,7 @@
 
 (defmacro some->
   "When expr is not nil, threads it into the first form (via ->),
-  and when that result is not nil, through the next etc"
+  and when that result is not nil, through the next etc."
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)))
@@ -4031,7 +4031,7 @@
 
 (defmacro some->>
   "When expr is not nil, threads it into the first form (via ->>),
-  and when that result is not nil, through the next etc"
+  and when that result is not nil, through the next etc."
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)))
@@ -4063,7 +4063,7 @@
 
 (defn run!
   "Runs the supplied procedure (via reduce), for purposes of side
-  effects, on successive items in the collection. Returns nil"
+  effects, on successive items in the collection. Returns nil."
   {:added "1.0"}
   [proc coll]
   (reduce #(proc %2) nil coll)
@@ -4073,3 +4073,9 @@
   "Default map of data reader functions provided by Joker. May be
   overridden by binding *data-readers*."
   {})
+
+(defn joker-version
+  "Returns joker version as a printable string."
+  {:added "1.0"}
+  []
+  (joker-version__))

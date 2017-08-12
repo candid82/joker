@@ -29,6 +29,8 @@ const (
 	EVAL
 )
 
+const VERSION = "v0.8.2"
+
 const (
 	CLJ Dialect = iota
 	CLJS
@@ -1265,6 +1267,10 @@ var procDeriveInfo Proc = func(args []Object) Object {
 	return dest.WithInfo(src.GetInfo())
 }
 
+var procJokerVersion Proc = func(args []Object) Object {
+	return String{S: VERSION[1:]}
+}
+
 var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
@@ -1645,6 +1651,7 @@ func init() {
 	intern("shuffle__", procShuffle)
 	intern("realized?__", procIsRealized)
 	intern("derive-info__", procDeriveInfo)
+	intern("joker-version__", procJokerVersion)
 
 	intern("hash__", procHash)
 
