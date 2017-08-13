@@ -1,0 +1,8 @@
+(ns joker.time)
+
+(def nanosecond 1)
+(def microsecond (* 1000 nanosecond))
+(def millisecond (* 1000 microsecond))
+(def second (* 1000 millisecond))
+(def minute (* 60 second))
+(def hour (* 60 minute))

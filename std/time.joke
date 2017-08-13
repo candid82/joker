@@ -1,0 +1,11 @@
+(ns
+  ^{:go-imports []
+    :doc "Provides functionality for measuring and displaying time."}
+  time)
+
+(defn sleep
+  "Pauses the execution thread for at least the duration d (expressed in nanoseconds).
+  A negative or zero duration causes sleep to return immediately."
+  {:added "1.0"
+  :go "sleep(d)"}
+  [^Int d])
