@@ -89,8 +89,8 @@ func (seq *ArrayMapSeq) Cons(obj Object) Seq {
 
 func (iter *ArrayMapIterator) Next() *Pair {
 	res := Pair{
-		key:   iter.m.arr[iter.current],
-		value: iter.m.arr[iter.current+1],
+		Key:   iter.m.arr[iter.current],
+		Value: iter.m.arr[iter.current+1],
 	}
 	iter.current += 2
 	return &res
@@ -204,7 +204,7 @@ func (m *ArrayMap) Merge(other Map) Map {
 	res := m.Clone()
 	for iter := other.Iter(); iter.HasNext(); {
 		p := iter.Next()
-		res.Set(p.key, p.value)
+		res.Set(p.Key, p.Value)
 	}
 	return res
 }

@@ -96,7 +96,7 @@ func (iter *NodeIterator) advance() bool {
 		nodeOrVal := iter.array[iter.i+1]
 		iter.i += 2
 		if key != nil {
-			iter.nextEntry = &Pair{key: key.(Object), value: nodeOrVal.(Object)}
+			iter.nextEntry = &Pair{Key: key.(Object), Value: nodeOrVal.(Object)}
 			return true
 		} else if nodeOrVal != nil {
 			iter1 := nodeOrVal.(Node).iter()
@@ -461,8 +461,8 @@ func (n *HashCollisionNode) find(shift uint, hash uint32, key Object) *Pair {
 		return nil
 	}
 	return &Pair{
-		key:   n.array[idx].(Object),
-		value: n.array[idx+1].(Object),
+		Key:   n.array[idx].(Object),
+		Value: n.array[idx+1].(Object),
 	}
 }
 
@@ -661,8 +661,8 @@ func (b *BitmapIndexedNode) find(shift uint, hash uint32, key Object) *Pair {
 	}
 	if key.Equals(keyOrNull) {
 		return &Pair{
-			key:   keyOrNull.(Object),
-			value: valOrNode.(Object),
+			Key:   keyOrNull.(Object),
+			Value: valOrNode.(Object),
 		}
 	}
 	return nil
@@ -744,7 +744,7 @@ func (m *HashMap) EntryAt(key Object) *Vector {
 	if m.root != nil {
 		p := m.root.find(0, key.Hash(), key)
 		if p != nil {
-			return NewVectorFrom(p.key, p.value)
+			return NewVectorFrom(p.Key, p.Value)
 		}
 	}
 	return nil
@@ -753,7 +753,7 @@ func (m *HashMap) EntryAt(key Object) *Vector {
 func (m *HashMap) Get(key Object) (bool, Object) {
 	if m.root != nil {
 		if res := m.root.find(0, key.Hash(), key); res != nil {
-			return true, res.value
+			return true, res.Value
 		}
 	}
 	return false, nil
@@ -798,7 +798,7 @@ func (m *HashMap) Merge(other Map) Map {
 	var res Associative = m
 	for iter := other.Iter(); iter.HasNext(); {
 		p := iter.Next()
-		res = res.Assoc(p.key, p.value)
+		res = res.Assoc(p.Key, p.Value)
 	}
 	return res.(Map)
 }

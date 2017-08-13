@@ -20,8 +20,8 @@ type (
 	EmptyMapIterator struct {
 	}
 	Pair struct {
-		key   Object
-		value Object
+		Key   Object
+		Value Object
 	}
 )
 
@@ -64,8 +64,8 @@ func mapEquals(m Map, other interface{}) bool {
 		}
 		for iter := m.Iter(); iter.HasNext(); {
 			p := iter.Next()
-			success, value := otherMap.Get(p.key)
-			if !success || !value.Equals(p.value) {
+			success, value := otherMap.Get(p.Key)
+			if !success || !value.Equals(p.Value) {
 				return false
 			}
 		}
@@ -81,9 +81,9 @@ func mapToString(m Map, escape bool) string {
 	if m.Count() > 0 {
 		for iter := m.Iter(); ; {
 			p := iter.Next()
-			b.WriteString(p.key.ToString(escape))
+			b.WriteString(p.Key.ToString(escape))
 			b.WriteRune(' ')
-			b.WriteString(p.value.ToString(escape))
+			b.WriteString(p.Value.ToString(escape))
 			if iter.HasNext() {
 				b.WriteString(", ")
 			} else {

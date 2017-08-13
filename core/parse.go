@@ -558,8 +558,8 @@ func parseMap(m Map, pos Position, ctx *ParseContext) *MapExpr {
 	}
 	for iter, i := m.Iter(), 0; iter.HasNext(); i++ {
 		p := iter.Next()
-		res.keys[i] = Parse(p.key, ctx)
-		res.values[i] = Parse(p.value, ctx)
+		res.keys[i] = Parse(p.Key, ctx)
+		res.values[i] = Parse(p.Value, ctx)
 	}
 	return res
 }
@@ -1030,8 +1030,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 		iter := s.Iter()
 		for iter.HasNext() {
 			p := iter.Next()
-			key := fixInfo(p.key, info)
-			value := fixInfo(p.value, info)
+			key := fixInfo(p.Key, info)
+			value := fixInfo(p.Value, info)
 			res.Add(key, value)
 		}
 		res.meta = s.(Meta).GetMeta()

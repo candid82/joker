@@ -9,4 +9,10 @@
   :go "readString(s)"}
   [^String s])
 
+(defn write-string
+  "Returns the JSON encoding of v."
+  {:added "1.0"
+  :go "writeString(v)"}
+  [^Object v])
+
 
