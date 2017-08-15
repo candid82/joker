@@ -50,8 +50,8 @@
     (when-not (:doc m)
       (println "WARNING: public var without doc meta key: " k))
     (-> var-template
-        (string/replace "{id}" k)
-        (string/replace "{name}" k)
+        (string/replace "{id}" (str k))
+        (string/replace "{name}" (str k))
         (string/replace "{type}" (type-name v))
         (string/replace "{usage}" (usage k m))
         (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
@@ -84,7 +84,7 @@
         vars-doc (string/join
                   ""
                   (for [[k v] (sort (ns-publics ns-sym))]
-                    (var-doc (str k) v)))
+                    (var-doc k v)))
         var-links-doc (string/join
                        ""
                        (for [k (sort (keys (ns-publics ns-sym)))]

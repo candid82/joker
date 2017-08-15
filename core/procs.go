@@ -1661,5 +1661,5 @@ func init() {
 	intern("parse__", procParse)
 
 	processData(coreData)
-	// processData(timeData)
+	processData(timeData)
 }

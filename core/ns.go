@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strings"
 	"unsafe"
 )
 
@@ -97,8 +98,10 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 				name: sym,
 			}
 			ns.mappings[sym.name] = newVar
-			printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
-				sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
+			if !strings.HasPrefix(ns.Name.Name(), "joker.") {
+				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
+					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
+			}
 			return newVar
 		}
 		panic(RT.NewErrorWithPos(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",

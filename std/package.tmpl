@@ -9,10 +9,6 @@ import (
 
 var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.{nsName}"))
 
-func intern(name string, proc Proc) {
-  {nsName}Namespace.Intern(MakeSymbol(name)).Value = proc
-}
-
 {fns}
 
 func init() {

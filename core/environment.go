@@ -53,8 +53,10 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
 	res.stderr.Value = &File{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
-	res.version = res.CoreNamespace.Intern(MakeSymbol("*joker-version*"))
-	res.version.Value = versionMap()
+	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
+		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
+			:incremental and :qualifier keys. Feature releases may increment
+			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	args := EmptyVector
 	for _, arg := range os.Args[1:] {
