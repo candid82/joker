@@ -317,6 +317,9 @@ func (ops RatioOps) Multiply(x, y Number) Number {
 // Divide
 
 func (ops IntOps) Divide(x, y Number) Number {
+	if y.Int().I == 0 {
+		panic(RT.NewError("Division by zero"))
+	}
 	b := big.NewRat(int64(x.Int().I), int64(y.Int().I))
 	if b.IsInt() {
 		return Int{I: int(b.Num().Int64())}
@@ -330,6 +333,9 @@ func (ops DoubleOps) Divide(x, y Number) Number {
 }
 
 func (ops BigIntOps) Divide(x, y Number) Number {
+	if y.Ratio().Num().Int64() == 0 {
+		panic(RT.NewError("Division by zero"))
+	}
 	b := big.Rat{}
 	b.Quo(x.Ratio(), y.Ratio())
 	if b.IsInt() {
@@ -348,6 +354,9 @@ func (ops BigFloatOps) Divide(x, y Number) Number {
 }
 
 func (ops RatioOps) Divide(x, y Number) Number {
+	if y.Ratio().Num().Int64() == 0 {
+		panic(RT.NewError("Division by zero"))
+	}
 	r := big.Rat{}
 	r.Quo(x.Ratio(), y.Ratio())
 	res := Ratio{r: r}
