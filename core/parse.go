@@ -230,6 +230,7 @@ var (
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
 	REQUIRE_VAR     *Var
+	ALIAS_VAR       *Var
 	WARNINGS        = Warnings{}
 	KEYWORDS        = Keywords{
 		tag:           MakeKeyword("tag"),
@@ -1077,34 +1078,36 @@ func getTaggedType(obj Meta) *Type {
 	return nil
 }
 
-func checkTypes(declaredArgs []Symbol, call *CallExpr) {
+func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
+	res := false
 	for i, da := range declaredArgs {
 		if declaredType := getTaggedType(da); declaredType != nil {
 			passedType := call.args[i].InferType()
 			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
 				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, declaredType.ToString(false), passedType.ToString(false)))
+				res = true
 			}
 		}
 	}
+	return res
 }
 
-func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) {
+func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) bool {
 	passedArgsCount := len(call.args)
 	if isMacro {
 		passedArgsCount += 2
 	}
 	for _, arity := range expr.arities {
 		if len(arity.args) == passedArgsCount {
-			checkTypes(arity.args, call)
-			return
+			return checkTypes(arity.args, call)
 		}
 	}
 	v := expr.variadic
 	if v != nil && passedArgsCount >= len(v.args)-1 {
-		checkTypes(v.args, call)
-		return
+		return checkTypes(v.args, call)
 	}
 	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
+	return true
 }
 
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
@@ -1181,6 +1184,13 @@ func getRequireVar(ctx *ParseContext) *Var {
 		REQUIRE_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("require")
 	}
 	return REQUIRE_VAR
+}
+
+func getAliasVar(ctx *ParseContext) *Var {
+	if ALIAS_VAR == nil {
+		ALIAS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("alias")
+	}
+	return ALIAS_VAR
 }
 
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
@@ -1315,18 +1325,19 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
-				require := getRequireVar(ctx)
-				if c.vr.Value.Equals(require.Value) && areAllLiteralExprs(res.args) {
-					Eval(res, nil)
-				} else {
-					switch f := c.vr.Value.(type) {
-					case *Fn:
-						reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos)
-					case Callable:
-						return res
-					default:
-						reportNotAFunction(pos, res.name)
+				switch f := c.vr.Value.(type) {
+				case *Fn:
+					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
+						require := getRequireVar(ctx)
+						alias := getAliasVar(ctx)
+						if (c.vr.Value.Equals(require.Value) || c.vr.Value.Equals(alias.Value)) && areAllLiteralExprs(res.args) {
+							Eval(res, nil)
+						}
 					}
+				case Callable:
+					return res
+				default:
+					reportNotAFunction(pos, res.name)
 				}
 			} else {
 				checkCall(c.vr.expr, c.vr.isMacro, res, pos)
