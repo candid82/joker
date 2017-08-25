@@ -1403,12 +1403,9 @@ func findConfigFile(filename string) string {
 		return ""
 	}
 	for {
+		oldFilename := filename
 		filename = filepath.Dir(filename)
-		p := filepath.Join(filename, ".joker")
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-		if filename == "/" || filename == "." {
+		if filename == oldFilename {
 			home, ok := os.LookupEnv("HOME")
 			if !ok {
 				home, ok = os.LookupEnv("USERPROFILE")
@@ -1421,6 +1418,10 @@ func findConfigFile(filename string) string {
 				return p
 			}
 			return ""
+		}
+		p := filepath.Join(filename, ".joker")
+		if _, err := os.Stat(p); err == nil {
+			return p
 		}
 	}
 }
