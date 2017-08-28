@@ -381,11 +381,11 @@
 (defn unsafe-bit-and [x y & more])
 
 (def *known-macros*
-  (apply
-   joker.core/conj
+  (merge
    *known-macros*
-   'cljs.core.async.macros/go-loop 'cljs.core.async.macros/alt! 'cljs.core.async.macros/alt!! 'cljs.core.async.macros/alts!
-   'cljs.core.async.macros/alts!! 'this-as 'import-macros 'goog-define 'specify! 'specify 'simple-benchmark 'use-macros 'import
+   {'cljs.core.async.macros/go-loop nil 'cljs.core.async.macros/alt! nil 'cljs.core.async.macros/alt!! nil
+    'cljs.core.async.macros/alts! nil 'cljs.core.async.macros/alts!! nil 'this-as nil 'import-macros nil
+    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil 'import nil}
    (:known-macros joker.core/*linter-config*)))
 
 (joker.core/in-ns 'user)

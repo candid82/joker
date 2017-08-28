@@ -3,6 +3,7 @@ package core
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -1430,6 +1431,27 @@ func printConfigError(filename, msg string) {
 	fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", msg)
 }
 
+func knownMacrosToMap(km Object) (Map, error) {
+	s := km.(Seqable).Seq()
+	res := EmptyArrayMap()
+	for !s.IsEmpty() {
+		obj := s.First()
+		switch obj := obj.(type) {
+		case Symbol:
+			res.Add(obj, NIL)
+		case *Vector:
+			if obj.Count() != 2 {
+				return nil, errors.New(":known-macros item must be a symbol or a vector with two elements")
+			}
+			res.Add(obj.at(0), obj.at(1))
+		default:
+			return nil, errors.New(":known-macros item must be a symbol or a vector, got " + obj.GetType().ToString(false))
+		}
+		s = s.Rest()
+	}
+	return res, nil
+}
+
 func ReadConfig(filename string) {
 	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
 	LINTER_CONFIG.Value = EmptyArrayMap()
@@ -1470,6 +1492,12 @@ func ReadConfig(filename string) {
 			printConfigError(configFileName, ":known-macros value must be a vector, got "+knownMacros.GetType().ToString(false))
 			return
 		}
+		m, err := knownMacrosToMap(knownMacros)
+		if err != nil {
+			printConfigError(configFileName, err.Error())
+			return
+		}
+		configMap = configMap.Assoc(KEYWORDS.knownMacros, m).(Map)
 	}
 	ok, rules := configMap.Get(KEYWORDS.rules)
 	if ok {
@@ -1483,7 +1511,7 @@ func ReadConfig(filename string) {
 			WARNINGS.ifWithoutElse = toBool(v)
 		}
 	}
-	LINTER_CONFIG.Value = config
+	LINTER_CONFIG.Value = configMap
 }
 
 func ProcessLinterData(dialect Dialect) {

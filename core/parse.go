@@ -1148,25 +1148,32 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
 }
 
-func isKnownMacros(sym Symbol) bool {
+func isKnownMacros(sym Symbol) (bool, Seq) {
 	if KNOWN_MACROS == nil {
 		knownMacros := GLOBAL_ENV.CoreNamespace.Resolve("*known-macros*")
 		if knownMacros == nil {
-			return false
+			return false, nil
 		}
 		KNOWN_MACROS = knownMacros
 	}
-	ok, _ := KNOWN_MACROS.Value.(Set).Get(sym)
-	return ok
+	if ok, v := KNOWN_MACROS.Value.(Map).Get(sym); ok {
+		switch v := v.(type) {
+		case Seqable:
+			return true, v.Seq()
+		default:
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
-func isUnknownCallable(expr Expr) bool {
+func isUnknownCallable(expr Expr) (bool, Seq) {
 	if !LINTER_MODE {
-		return false
+		return false, nil
 	}
 	if c, ok := expr.(*VarRefExpr); ok {
 		if c.vr.isMacro {
-			return true
+			return true, nil
 		}
 		var sym Symbol
 		if c.vr.ns != GLOBAL_ENV.CurrentNamespace() && c.vr.ns != GLOBAL_ENV.CoreNamespace {
@@ -1177,17 +1184,18 @@ func isUnknownCallable(expr Expr) bool {
 		} else {
 			sym = MakeSymbol(*c.vr.name.name)
 		}
-		if isKnownMacros(sym) {
-			return true
+		b, s := isKnownMacros(sym)
+		if b {
+			return b, s
 		}
 		if c.vr.expr != nil {
-			return false
+			return false, nil
 		}
 		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func areAllLiteralExprs(exprs []Expr) bool {
@@ -1321,13 +1329,21 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 
 	ctx.isUnknownCallableScope = currentIsUnknownCallableScope
 	callable := Parse(first, ctx)
-
-	if isUnknownCallable(callable) {
+	unknown, syms := isUnknownCallable(callable)
+	if unknown {
 		ctx.isUnknownCallableScope = true
-		ctx.linterBindings = ctx.linterBindings.PushFrame()
-		defer func() {
-			ctx.linterBindings = ctx.linterBindings.PopFrame()
-		}()
+		if syms != nil {
+			ctx.linterBindings = ctx.linterBindings.PushFrame()
+			defer func() {
+				ctx.linterBindings = ctx.linterBindings.PopFrame()
+			}()
+			for !syms.IsEmpty() {
+				if sym, ok := syms.First().(Symbol); ok {
+					ctx.linterBindings.AddBinding(sym, 0)
+				}
+				syms = syms.Rest()
+			}
+		}
 	} else {
 		ctx.isUnknownCallableScope = false
 	}

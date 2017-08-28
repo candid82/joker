@@ -310,12 +310,11 @@
 (defn with-open [bindings & body])
 
 (def *known-macros*
-  (apply
-   joker.core/conj
+  (merge
    *known-macros*
-   'proxy 'defstruct 'with-local-vars 'definline 'gen-interface 'definterface 'proxy-super 'with-open
-   'defproject 'clojure.core.async/go-loop 'clojure.core.async/alt! 'clojure.core.async/alt!! 'clojure.core.async/alts!
-   'clojure.core.async/alts!!
+   {'proxy nil 'defstruct nil 'with-local-vars nil 'definline nil 'gen-interface nil 'definterface nil
+    'proxy-super nil 'with-open nil 'defproject nil 'clojure.core.async/go-loop nil 'clojure.core.async/alt! nil
+    'clojure.core.async/alt!! nil 'clojure.core.async/alts! nil 'clojure.core.async/alts!! nil}
    (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker

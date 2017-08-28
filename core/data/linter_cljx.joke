@@ -20,8 +20,8 @@
        ~@(map #(list 'def %) (remove resolve syms)))))
 
 (def *known-macros*
-  #{'deftype 'memfn 'defmethod 'defprotocol 'extend-protocol 'extend-type 'reify 'defmulti 'letfn 'defrecord '..
-    'clojure.test/deftest 'clojure.test/is 'clojure.test/are})
+  {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
+   'letfn nil 'defrecord nil '.. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil})
 
 ;; Redefine some core functions with type hints
 
