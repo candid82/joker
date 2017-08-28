@@ -24,15 +24,17 @@
 (instance? Integer 10)
 (instance? java.lang.Integer 10)
 (test-macro uuu)
+(test-macro [foo 1])
 (defrecord u5 1)
 (defmethod u6 1)
 (clojure.test/deftest u7)
 #'s/v
 #'e3
+uuu
 
 ;; Should FAIL
 
-uuu
+foo
 (s/def :t hh)
 (f jj/u1)
 (f u8)

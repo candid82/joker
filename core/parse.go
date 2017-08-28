@@ -560,6 +560,23 @@ func parseSeq(seq Seq, ctx *ParseContext) []Expr {
 	return res
 }
 
+func parseSeqInUnknownScope(seq Seq, ctx *ParseContext) []Expr {
+	res := make([]Expr, 0)
+	for !seq.IsEmpty() {
+		obj := seq.First()
+		var expr Expr
+		switch obj.(type) {
+		case Symbol:
+			expr = doParseSymbol(obj, ctx, true)
+		default:
+			expr = Parse(obj, ctx)
+		}
+		res = append(res, expr)
+		seq = seq.Rest()
+	}
+	return res
+}
+
 func parseVector(v *Vector, pos Position, ctx *ParseContext) Expr {
 	r := make([]Expr, v.count)
 	for i := 0; i < v.count; i++ {
@@ -1330,13 +1347,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	ctx.isUnknownCallableScope = currentIsUnknownCallableScope
 	callable := Parse(first, ctx)
 	unknown, syms := isUnknownCallable(callable)
+	var args []Expr
 	if unknown {
 		ctx.isUnknownCallableScope = true
+		ctx.linterBindings = ctx.linterBindings.PushFrame()
+		defer func() {
+			ctx.linterBindings = ctx.linterBindings.PopFrame()
+		}()
 		if syms != nil {
-			ctx.linterBindings = ctx.linterBindings.PushFrame()
-			defer func() {
-				ctx.linterBindings = ctx.linterBindings.PopFrame()
-			}()
 			for !syms.IsEmpty() {
 				if sym, ok := syms.First().(Symbol); ok {
 					ctx.linterBindings.AddBinding(sym, 0)
@@ -1344,12 +1362,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				syms = syms.Rest()
 			}
 		}
+		args = parseSeqInUnknownScope(seq.Rest(), ctx)
 	} else {
 		ctx.isUnknownCallableScope = false
+		args = parseSeq(seq.Rest(), ctx)
 	}
 	res := &CallExpr{
 		callable: callable,
-		args:     parseSeq(seq.Rest(), ctx),
+		args:     args,
 		Position: pos,
 		name:     "fn",
 	}
@@ -1423,6 +1443,10 @@ func isJavaSymbol(sym Symbol) bool {
 }
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
+	return doParseSymbol(obj, ctx, false)
+}
+
+func doParseSymbol(obj Object, ctx *ParseContext, internFakeVars bool) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
 	if b != nil {
@@ -1450,13 +1474,16 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 				if isSpecial {
 					return NewSurrogateExpr(sym)
 				}
-			} else {
-				if ctx.linterBindings.GetBinding(sym) == nil && !isSpecial {
-					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-				}
-				if isSpecial {
+				if !internFakeVars {
+					ctx.linterBindings.AddBinding(sym, 0)
 					return NewSurrogateExpr(sym)
 				}
+			} else {
+				linterBinding := ctx.linterBindings.GetBinding(sym)
+				if linterBinding == nil && !isSpecial {
+					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+				}
+				return NewSurrogateExpr(sym)
 			}
 		}
 		vr = InternFakeSymbol(symNs, sym)
