@@ -17,7 +17,8 @@ type (
 	}
 	LiteralExpr struct {
 		Position
-		obj Object
+		obj         Object
+		isSurrogate bool
 	}
 	VectorExpr struct {
 		Position
@@ -138,6 +139,7 @@ type (
 		GlobalEnv              *Env
 		localBindings          *Bindings
 		loopBindings           [][]Symbol
+		linterBindings         *Bindings
 		recur                  bool
 		noRecurAllowed         bool
 		isUnknownCallableScope bool
@@ -372,42 +374,47 @@ func (ctx *ParseContext) GetLoopBindings() []Symbol {
 	return ctx.loopBindings[n-1]
 }
 
-func (ctx *ParseContext) AddLocalBinding(sym Symbol, index int) {
-	ctx.localBindings.bindings[sym.name] = &Binding{
+func (b *Bindings) PushFrame() *Bindings {
+	frame := 0
+	if b != nil {
+		frame = b.frame + 1
+	}
+	return &Bindings{
+		bindings: make(map[*string]*Binding),
+		parent:   b,
+		frame:    frame,
+	}
+}
+
+func (b *Bindings) PopFrame() *Bindings {
+	return b.parent
+}
+
+func (b *Bindings) AddBinding(sym Symbol, index int) {
+	b.bindings[sym.name] = &Binding{
 		name:  sym,
-		frame: ctx.localBindings.frame,
+		frame: b.frame,
 		index: index,
 	}
 }
 
 func (ctx *ParseContext) PushEmptyLocalFrame() {
-	frame := 0
-	if ctx.localBindings != nil {
-		frame = ctx.localBindings.frame + 1
-	}
-	ctx.localBindings = &Bindings{
-		bindings: make(map[*string]*Binding),
-		parent:   ctx.localBindings,
-		frame:    frame,
-	}
+	ctx.localBindings = ctx.localBindings.PushFrame()
 }
 
 func (ctx *ParseContext) PushLocalFrame(names []Symbol) {
 	ctx.PushEmptyLocalFrame()
 	for i, sym := range names {
-		ctx.AddLocalBinding(sym, i)
+		ctx.localBindings.AddBinding(sym, i)
 	}
 }
 
 func (ctx *ParseContext) PopLocalFrame() {
-	ctx.localBindings = ctx.localBindings.parent
+	ctx.localBindings = ctx.localBindings.PopFrame()
 }
 
-func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
-	if sym.ns != nil {
-		return nil
-	}
-	env := ctx.localBindings
+func (b *Bindings) GetBinding(sym Symbol) *Binding {
+	env := b
 	for env != nil {
 		if b, ok := env.bindings[sym.name]; ok {
 			return b
@@ -415,6 +422,13 @@ func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
 		env = env.parent
 	}
 	return nil
+}
+
+func (ctx *ParseContext) GetLocalBinding(sym Symbol) *Binding {
+	if sym.ns != nil {
+		return nil
+	}
+	return ctx.localBindings.GetBinding(sym)
 }
 
 func (pos Position) Pos() Position {
@@ -496,6 +510,12 @@ func NewLiteralExpr(obj Object) *LiteralExpr {
 		res.Position = info.Position
 	}
 	return &res
+}
+
+func NewSurrogateExpr(obj Object) *LiteralExpr {
+	res := NewLiteralExpr(obj)
+	res.isSurrogate = true
+	return res
 }
 
 func (err *ParseError) ToString(escape bool) string {
@@ -928,7 +948,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 				}
 			}
 			res.values[i] = Parse(b.at(i*2+1), ctx)
-			ctx.AddLocalBinding(res.names[i], i)
+			ctx.localBindings.AddBinding(res.names[i], i)
 		}
 
 		if isLoop {
@@ -1198,7 +1218,7 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 	case *FnExpr:
 		reportWrongArity(expr, isMacro, call, pos)
 	case *LiteralExpr:
-		if _, ok := expr.obj.(Callable); !ok {
+		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
 			reportNotAFunction(pos, call.name)
 		}
 	case *RecurExpr:
@@ -1304,6 +1324,10 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 
 	if isUnknownCallable(callable) {
 		ctx.isUnknownCallableScope = true
+		ctx.linterBindings = ctx.linterBindings.PushFrame()
+		defer func() {
+			ctx.linterBindings = ctx.linterBindings.PopFrame()
+		}()
 	} else {
 		ctx.isUnknownCallableScope = false
 	}
@@ -1404,10 +1428,15 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
-		if !ctx.isUnknownCallableScope && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
-			if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+			if ctx.isUnknownCallableScope {
+				ctx.linterBindings.AddBinding(sym, 0)
+				return NewSurrogateExpr(sym)
+			}
+			if ctx.linterBindings.GetBinding(sym) == nil && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
 				fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 			}
+			return NewSurrogateExpr(sym)
 		}
 		vr = InternFakeSymbol(symNs, sym)
 	}

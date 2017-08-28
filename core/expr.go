@@ -1,6 +1,9 @@
 package core
 
 func (expr *LiteralExpr) InferType() *Type {
+	if expr.isSurrogate {
+		return nil
+	}
 	return expr.obj.GetType()
 }
 

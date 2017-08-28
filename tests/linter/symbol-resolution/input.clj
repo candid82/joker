@@ -32,6 +32,7 @@
 
 ;; Should FAIL
 
+uuu
 (s/def :t hh)
 (f jj/u1)
 (f u8)
