@@ -1429,14 +1429,19 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+			isSpecial := isInteropSymbol(sym) || isRecordConstructor(sym) || isJavaSymbol(sym)
 			if ctx.isUnknownCallableScope {
-				ctx.linterBindings.AddBinding(sym, 0)
-				return NewSurrogateExpr(sym)
+				if isSpecial {
+					return NewSurrogateExpr(sym)
+				}
+			} else {
+				if ctx.linterBindings.GetBinding(sym) == nil && !isSpecial {
+					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+				}
+				if isSpecial {
+					return NewSurrogateExpr(sym)
+				}
 			}
-			if ctx.linterBindings.GetBinding(sym) == nil && !isInteropSymbol(sym) && !isRecordConstructor(sym) && !isJavaSymbol(sym) {
-				fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-			}
-			return NewSurrogateExpr(sym)
 		}
 		vr = InternFakeSymbol(symNs, sym)
 	}

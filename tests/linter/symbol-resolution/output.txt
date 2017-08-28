@@ -1,4 +1,3 @@
-tests/linter/symbol-resolution/input.clj:35:1: Parse error: Unable to resolve symbol: uuu
 tests/linter/symbol-resolution/input.clj:36:11: Parse error: Unable to resolve symbol: hh
 tests/linter/symbol-resolution/input.clj:37:4: Parse error: Unable to resolve symbol: jj/u1
 tests/linter/symbol-resolution/input.clj:38:4: Parse error: Unable to resolve symbol: u8
