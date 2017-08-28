@@ -40,6 +40,9 @@
 (defn not-any? [^Callable pred ^Seqable coll] (not (some pred coll)))
 (defn read-string [^String s] (read-string__ s))
 
+;; Clojure special forms not supported by Joker
+(defn new [& args])
+
 ;; Clojure core macros not supported by Joker
 
 (defn vswap! [vol f & args])
