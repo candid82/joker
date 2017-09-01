@@ -452,6 +452,15 @@ func printReadWarning(reader *Reader, msg string) {
 	printError(pos, "Read warning: "+msg)
 }
 
+func printReadError(reader *Reader, msg string) {
+	pos := Position{
+		filename:    reader.filename,
+		startColumn: reader.column,
+		startLine:   reader.line,
+	}
+	printError(pos, "Read error: "+msg)
+}
+
 func isIgnoredUnsusedNamespace(ns *Namespace) bool {
 	if WARNINGS.ignoredUnusedNamespaces == nil {
 		return false

@@ -36,10 +36,6 @@ var (
 	GENSYM int
 )
 
-func readStub(reader *Reader) Object {
-	return Read(reader)
-}
-
 var NIL = Nil{}
 var posStack = make([]pos, 0, 8)
 
@@ -505,8 +501,15 @@ func readList(reader *Reader) Object {
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ')' {
-		obj := Read(reader)
-		s = append(s, obj)
+		obj, multi := Read(reader)
+		if multi {
+			v := obj.(*Vector)
+			for i := 0; i < v.Count(); i++ {
+				s = append(s, v.at(i))
+			}
+		} else {
+			s = append(s, obj)
+		}
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
@@ -520,54 +523,63 @@ func readList(reader *Reader) Object {
 }
 
 func readVector(reader *Reader) Object {
-	result := EmptyVector
+	res := EmptyVector
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ']' {
-		obj := Read(reader)
-		result = result.Conjoin(obj)
-		eatWhitespace(reader)
-		r = reader.Peek()
-	}
-	reader.Get()
-	return MakeReadObject(reader, result)
-}
-
-func readHashMap(reader *Reader, hashMap *HashMap) Object {
-	eatWhitespace(reader)
-	r := reader.Peek()
-	for r != '}' {
-		key := Read(reader)
-		value := Read(reader)
-		if hashMap.containsKey(key) {
-			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
+		obj, multi := Read(reader)
+		if multi {
+			v := obj.(*Vector)
+			for i := 0; i < v.Count(); i++ {
+				res = res.Conjoin(v.at(i))
+			}
+		} else {
+			res = res.Conjoin(obj)
 		}
-		hashMap = hashMap.Assoc(key, value).(*HashMap)
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
 	reader.Get()
-	return MakeReadObject(reader, hashMap)
+	return MakeReadObject(reader, res)
 }
 
 func readMap(reader *Reader) Object {
-	m := EmptyArrayMap()
 	eatWhitespace(reader)
 	r := reader.Peek()
+	objs := []Object{}
 	for r != '}' {
-		key := Read(reader)
-		value := Read(reader)
-		if !m.Add(key, value) {
-			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
-		}
-		if len(m.arr) > HASHMAP_THRESHOLD {
-			hashMap := NewHashMap(m.arr...)
-			return readHashMap(reader, hashMap)
+		obj, multi := Read(reader)
+		if !multi {
+			objs = append(objs, obj)
+		} else {
+			v := obj.(*Vector)
+			for i := 0; i < v.Count(); i++ {
+				objs = append(objs, v.at(i))
+			}
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()
 	}
 	reader.Get()
+	if len(objs)%2 != 0 {
+		panic(MakeReadError(reader, "Map literal must contain an even number of forms"))
+	}
+	if len(objs) > HASHMAP_THRESHOLD {
+		hashMap := NewHashMap()
+		for i := 0; i < len(objs); i += 2 {
+			if hashMap.containsKey(objs[i]) {
+				panic(MakeReadError(reader, "Duplicate key "+objs[i].ToString(false)))
+			}
+			hashMap = hashMap.Assoc(objs[i], objs[i+1]).(*HashMap)
+		}
+		return MakeReadObject(reader, hashMap)
+	}
+	m := EmptyArrayMap()
+	for i := 0; i < len(objs); i += 2 {
+		if !m.Add(objs[i], objs[i+1]) {
+			panic(MakeReadError(reader, "Duplicate key "+objs[i].ToString(false)))
+		}
+	}
 	return MakeReadObject(reader, m)
 }
 
@@ -576,9 +588,18 @@ func readSet(reader *Reader) Object {
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != '}' {
-		obj := Read(reader)
-		if !set.Add(obj) {
-			panic(MakeReadError(reader, "Duplicate set element "+obj.ToString(false)))
+		obj, multi := Read(reader)
+		if !multi {
+			if !set.Add(obj) {
+				panic(MakeReadError(reader, "Duplicate set element "+obj.ToString(false)))
+			}
+		} else {
+			v := obj.(*Vector)
+			for i := 0; i < v.Count(); i++ {
+				if !set.Add(v.at(i)) {
+					panic(MakeReadError(reader, "Duplicate set element "+v.at(i).ToString(false)))
+				}
+			}
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()
@@ -593,7 +614,7 @@ func makeQuote(obj Object, quote Symbol) Object {
 }
 
 func readMeta(reader *Reader) *ArrayMap {
-	obj := Read(reader)
+	obj := readFirst(reader)
 	switch v := obj.(type) {
 	case *ArrayMap:
 		return v
@@ -670,7 +691,7 @@ func readArgSymbol(reader *Reader) Object {
 	if unicode.IsSpace(r) || isTerminatingMacro(r) {
 		return MakeReadObject(reader, registerArg(1))
 	}
-	obj := Read(reader)
+	obj := readFirst(reader)
 	if obj.Equals(SYMBOLS.amp) {
 		return MakeReadObject(reader, registerArg(-1))
 	}
@@ -781,13 +802,13 @@ func handleNoReaderError(reader *Reader, s Symbol) Object {
 		if DIALECT != EDN {
 			printReadWarning(reader, "No reader function for tag "+s.ToString(false))
 		}
-		return Read(reader)
+		return readFirst(reader)
 	}
 	panic(MakeReadError(reader, "No reader function for tag "+s.ToString(false)))
 }
 
 func readTagged(reader *Reader) Object {
-	obj := Read(reader)
+	obj := readFirst(reader)
 	switch s := obj.(type) {
 	case Symbol:
 		readersVar, ok := GLOBAL_ENV.CoreNamespace.mappings[SYMBOLS.defaultDataReaders.name]
@@ -802,17 +823,17 @@ func readTagged(reader *Reader) Object {
 		if !ok {
 			return handleNoReaderError(reader, s)
 		}
-		return AssertVar(readFunc, "").Call([]Object{Read(reader)})
+		return AssertVar(readFunc, "").Call([]Object{readFirst(reader)})
 	default:
 		panic(MakeReadError(reader, "Reader tag must be a symbol"))
 	}
 }
 
-func readConditional(reader *Reader) Object {
+func readConditional(reader *Reader) (Object, bool) {
+	isSplicing := false
 	if reader.Peek() == '@' {
-		// Ignoring splicing for now
-		// TODO: implement support for splicing
 		reader.Get()
+		isSplicing = true
 	}
 	eatWhitespace(reader)
 	r := reader.Get()
@@ -822,53 +843,67 @@ func readConditional(reader *Reader) Object {
 	cond := readList(reader).(*List)
 	if cond.count%2 != 0 {
 		if LINTER_MODE {
-			printReadWarning(reader, "Reader conditional requires an even number of forms")
+			printReadError(reader, "Reader conditional requires an even number of forms")
 		} else {
 			panic(MakeReadError(reader, "Reader conditional requires an even number of forms"))
 		}
 	}
 	for cond.count > 0 {
 		if ok, _ := GLOBAL_ENV.Features.Get(cond.first); ok {
-			return Second(cond)
+			v := Second(cond)
+			if isSplicing {
+				s, ok := v.(Seqable)
+				if !ok {
+					msg := "Spliced form in reader conditional must be Seqable, got " + v.GetType().ToString(false)
+					if LINTER_MODE {
+						printReadError(reader, msg)
+						return EmptyVector, true
+					} else {
+						panic(MakeReadError(reader, msg))
+					}
+				}
+				return NewVectorFromSeq(s.Seq()), true
+			}
+			return v, false
 		}
 		cond = cond.rest.rest
 	}
-	return Read(reader)
+	return EmptyVector, true
 }
 
-func readDispatch(reader *Reader) Object {
+func readDispatch(reader *Reader) (Object, bool) {
 	r := reader.Get()
 	switch r {
 	case '"':
-		return readRegex(reader)
+		return readRegex(reader), false
 	case '\'':
 		popPos()
-		nextObj := Read(reader)
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj))
+		nextObj := readFirst(reader)
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj)), false
 	case '^':
 		popPos()
-		return readWithMeta(reader)
+		return readWithMeta(reader), false
 	case '{':
-		return readSet(reader)
+		return readSet(reader), false
 	case '(':
 		popPos()
 		reader.Unget()
 		ARGS = make(map[int]Symbol)
-		fn := Read(reader)
+		fn := readFirst(reader)
 		res := makeFnForm(ARGS, fn)
 		ARGS = nil
-		return res
+		return res, false
 	case '?':
 		return readConditional(reader)
 	}
 	popPos()
 	reader.Unget()
-	return readTagged(reader)
+	return readTagged(reader), false
 }
 
 func readWithMeta(reader *Reader) Object {
 	meta := readMeta(reader)
-	nextObj := Read(reader)
+	nextObj := readFirst(reader)
 	switch v := nextObj.(type) {
 	case Meta:
 		return DeriveReadObject(nextObj, v.WithMeta(meta))
@@ -877,60 +912,72 @@ func readWithMeta(reader *Reader) Object {
 	}
 }
 
-func Read(reader *Reader) Object {
+func readFirst(reader *Reader) Object {
+	obj, multi := Read(reader)
+	if !multi {
+		return obj
+	}
+	v := obj.(*Vector)
+	if v.Count() == 0 {
+		return readFirst(reader)
+	}
+	return v.at(0)
+}
+
+func Read(reader *Reader) (Object, bool) {
 	eatWhitespace(reader)
 	r := reader.Get()
 	pushPos(reader)
 	switch {
 	case r == '\\':
-		return readCharacter(reader)
+		return readCharacter(reader), false
 	case unicode.IsDigit(r):
 		reader.Unget()
-		return readNumber(reader)
+		return readNumber(reader), false
 	case r == '-':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
-			return readNumber(reader)
+			return readNumber(reader), false
 		}
-		return readSymbol(reader, '-')
+		return readSymbol(reader, '-'), false
 	case r == '%' && ARGS != nil:
-		return readArgSymbol(reader)
+		return readArgSymbol(reader), false
 	case isSymbolInitial(r):
-		return readSymbol(reader, r)
+		return readSymbol(reader, r), false
 	case r == '"':
-		return readString(reader)
+		return readString(reader), false
 	case r == '(':
-		return readList(reader)
+		return readList(reader), false
 	case r == '[':
-		return readVector(reader)
+		return readVector(reader), false
 	case r == '{':
-		return readMap(reader)
+		return readMap(reader), false
 	case r == '/' && isDelimiter(reader.Peek()):
-		return MakeReadObject(reader, SYMBOLS.backslash)
+		return MakeReadObject(reader, SYMBOLS.backslash), false
 	case r == '\'':
 		popPos()
-		nextObj := Read(reader)
-		return makeQuote(nextObj, SYMBOLS.quote)
+		nextObj := readFirst(reader)
+		return makeQuote(nextObj, SYMBOLS.quote), false
 	case r == '@':
 		popPos()
-		nextObj := Read(reader)
-		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj))
+		nextObj := readFirst(reader)
+		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj)), false
 	case r == '~':
 		popPos()
 		if reader.Peek() == '@' {
 			reader.Get()
-			nextObj := Read(reader)
-			return makeQuote(nextObj, SYMBOLS.unquoteSplicing)
+			nextObj := readFirst(reader)
+			return makeQuote(nextObj, SYMBOLS.unquoteSplicing), false
 		}
-		nextObj := Read(reader)
-		return makeQuote(nextObj, SYMBOLS.unquote)
+		nextObj := readFirst(reader)
+		return makeQuote(nextObj, SYMBOLS.unquote), false
 	case r == '`':
 		popPos()
-		nextObj := Read(reader)
-		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader)
+		nextObj := readFirst(reader)
+		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader), false
 	case r == '^':
 		popPos()
-		return readWithMeta(reader)
+		return readWithMeta(reader), false
 	case r == '#':
 		return readDispatch(reader)
 	case r == EOF:
@@ -956,5 +1003,13 @@ func TryRead(reader *Reader) (obj Object, err error) {
 	if reader.Peek() == EOF {
 		return NIL, io.EOF
 	}
-	return Read(reader), nil
+	for {
+		obj, multi := Read(reader)
+		if !multi {
+			return obj, nil
+		}
+		if obj.(*Vector).Count() > 0 {
+			return NIL, MakeReadError(reader, "Reader conditional splicing not allowed at the top level.")
+		}
+	}
 }

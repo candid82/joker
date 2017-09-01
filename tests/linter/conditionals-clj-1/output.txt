@@ -1,0 +1,4 @@
+tests/linter/conditionals-clj-1/input.clj:15:9: Read error: Reader conditional requires an even number of forms
+tests/linter/conditionals-clj-1/input.clj:16:30: Parse warning: let form with empty bindings vector
+tests/linter/conditionals-clj-1/input.clj:17:12: Read error: Spliced form in reader conditional must be Seqable, got Int
+tests/linter/conditionals-clj-1/input.clj:18:14: Read error: Invalid number: 234ewr

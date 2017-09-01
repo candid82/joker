@@ -1,0 +1,1 @@
+tests/linter/conditionals-clj-2/input.clj:1:29: Read error: Reader conditional splicing not allowed at the top level.

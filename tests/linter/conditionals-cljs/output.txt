@@ -1,2 +1,3 @@
-tests/linter/conditionals-cljs/input.cljs:9:10: Parse warning: let form with empty bindings vector
-tests/linter/conditionals-cljs/input.cljs:10:14: Read error: Invalid number: 234ewr
+tests/linter/conditionals-cljs/input.cljs:10:10: Parse warning: let form with empty bindings vector
+tests/linter/conditionals-cljs/input.cljs:11:12: Read error: Spliced form in reader conditional must be Seqable, got Int
+tests/linter/conditionals-cljs/input.cljs:12:14: Read error: Invalid number: 234ewr
