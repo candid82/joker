@@ -233,6 +233,7 @@ var (
 	KNOWN_MACROS    *Var
 	REQUIRE_VAR     *Var
 	ALIAS_VAR       *Var
+	CREATE_NS_VAR   *Var
 	WARNINGS        = Warnings{}
 	KEYWORDS        = Keywords{
 		tag:           MakeKeyword("tag"),
@@ -1230,6 +1231,13 @@ func getAliasVar(ctx *ParseContext) *Var {
 	return ALIAS_VAR
 }
 
+func getCreateNsVar(ctx *ParseContext) *Var {
+	if CREATE_NS_VAR == nil {
+		CREATE_NS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("create-ns")
+	}
+	return CREATE_NS_VAR
+}
+
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 	switch expr := expr.(type) {
 	case *FnExpr:
@@ -1379,7 +1387,11 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
 						require := getRequireVar(ctx)
 						alias := getAliasVar(ctx)
-						if (c.vr.Value.Equals(require.Value) || c.vr.Value.Equals(alias.Value)) && areAllLiteralExprs(res.args) {
+						createNs := getCreateNsVar(ctx)
+						if (c.vr.Value.Equals(require.Value) ||
+							c.vr.Value.Equals(alias.Value) ||
+							c.vr.Value.Equals(createNs.Value)) &&
+							areAllLiteralExprs(res.args) {
 							Eval(res, nil)
 						}
 					}
