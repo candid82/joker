@@ -2349,7 +2349,11 @@
                       (str sym " is not public")
                       (str sym " does not exist"))
                     {:form ns-sym})))
-          (refer__ *ns* (or (rename sym) sym) (or v (intern-fake-var__ ns-sym sym))))))))
+          (refer__ *ns* (or (rename sym) sym)
+                   (or v (intern-fake-var__
+                          ns-sym
+                          sym
+                          (first (filter #(= sym %) (:refer-macros fs)))))))))))
 
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."

@@ -1331,7 +1331,10 @@ var procLibPath Proc = func(args []Object) Object {
 var procInternFakeVar Proc = func(args []Object) Object {
 	nsSym := EnsureSymbol(args, 0)
 	sym := EnsureSymbol(args, 1)
-	return InternFakeSymbol(GLOBAL_ENV.FindNamespace(nsSym), sym)
+	isMacro := toBool(args[2])
+	res := InternFakeSymbol(GLOBAL_ENV.FindNamespace(nsSym), sym)
+	res.isMacro = isMacro
+	return res
 }
 
 var procParse Proc = func(args []Object) Object {
