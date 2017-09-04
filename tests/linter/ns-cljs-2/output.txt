@@ -1,0 +1,2 @@
+tests/linter/ns-cljs-2/input.cljs:1:14: Parse warning: No namespace: clojure.spec.gen.test found
+Stacktrace:

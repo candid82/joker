@@ -2244,7 +2244,13 @@
   ;; TODO: types (Namespace or Symbol)
   (if (instance? Namespace x)
     x
-    (or (find-ns x) (throw (ex-info (str "No namespace: " x " found") {:form x})))))
+    (or (find-ns x)
+        (if *linter-mode*
+          (do
+            (println-err (ex-info (str "No namespace: " x " found")
+                                  {:form x :_prefix "Parse warning"}))
+            (create-ns__ x))
+          (throw (ex-info (str "No namespace: " x " found") {:form x}))))))
 
 (defn ns-name
   "Returns the name of the namespace, a symbol."
