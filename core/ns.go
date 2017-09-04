@@ -123,7 +123,12 @@ func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 	}
 	existing := ns.aliases[alias.name]
 	if existing != nil && existing != namespace {
-		panic(RT.NewError("Alias " + alias.ToString(false) + " already exists in namespace " + ns.Name.ToString(false) + ", aliasing " + existing.Name.ToString(false)))
+		msg := "Alias " + alias.ToString(false) + " already exists in namespace " + ns.Name.ToString(false) + ", aliasing " + existing.Name.ToString(false)
+		if LINTER_MODE {
+			printParseError(GetPosition(alias), msg)
+			return
+		}
+		panic(RT.NewError(msg))
 	}
 	ns.aliases[alias.name] = namespace
 }

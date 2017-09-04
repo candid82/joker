@@ -444,6 +444,10 @@ func printParseWarning(pos Position, msg string) {
 	printError(pos, "Parse warning: "+msg)
 }
 
+func printParseError(pos Position, msg string) {
+	printError(pos, "Parse error: "+msg)
+}
+
 func printReadWarning(reader *Reader, msg string) {
 	pos := Position{
 		filename:    reader.filename,
