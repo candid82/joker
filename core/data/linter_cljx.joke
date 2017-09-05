@@ -21,7 +21,7 @@
 
 (def *known-macros*
   {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
-   'letfn nil 'defrecord nil '.. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil})
+   'letfn nil 'defrecord nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil})
 
 ;; Redefine some core functions with type hints
 
@@ -60,6 +60,7 @@
 (defn letfn [fnspecs & body])
 (defn defrecord [name fields & opts+specs])
 (defn .. [x form & more])
+(defn . [x m & args])
 (defn refer-clojure [& filters])
 
 ;; Clojure core functions not supported by Joker
