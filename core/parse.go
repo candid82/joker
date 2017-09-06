@@ -1468,6 +1468,16 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		if !LINTER_MODE {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
+		if DIALECT == CLJS && sym.ns == nil {
+			ns := ctx.GlobalEnv.FindNamespace(sym)
+			if ns == nil {
+				ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
+			}
+			if ns != nil {
+				ns.isUsed = true
+				return NewSurrogateExpr(obj)
+			}
+		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
 			isSpecial := isInteropSymbol(sym) || isRecordConstructor(sym) || isJavaSymbol(sym)

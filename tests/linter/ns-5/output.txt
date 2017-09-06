@@ -1,2 +1,5 @@
 tests/linter/ns-5/input.clj:3:14: Parse warning: duplicate require for test.ns1
 Stacktrace:
+tests/linter/ns-5/input.clj:7:2: Parse error: Unable to resolve symbol: left-pad
+tests/linter/ns-5/input.clj:8:2: Parse error: Unable to resolve symbol: lp
+tests/linter/ns-5/input.clj:4:14: Parse warning: unused namespace left-pad
