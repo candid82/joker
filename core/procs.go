@@ -1488,6 +1488,13 @@ func ReadConfig(filename string) {
 			return
 		}
 	}
+	ok, knownNamespaces := configMap.Get(MakeKeyword("known-namespaces"))
+	if ok {
+		if _, ok := knownNamespaces.(Seqable); !ok {
+			printConfigError(configFileName, ":known-namespaces value must be a vector, got "+knownNamespaces.GetType().ToString(false))
+			return
+		}
+	}
 	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
 		_, ok := knownMacros.(Seqable)

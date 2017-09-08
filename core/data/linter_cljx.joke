@@ -23,6 +23,9 @@
   {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
    'letfn nil 'defrecord nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil})
 
+(doseq [sym (:known-namespaces joker.core/*linter-config*)]
+  (inject-ns__ sym))
+
 ;; Redefine some core functions with type hints
 
 (defn cons [x ^Seqable seq] (cons__ x seq))
