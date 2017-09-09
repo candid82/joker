@@ -6,3 +6,4 @@ tests/linter/function-call/input.clj:21:1: Parse warning: #'user/v1 is not a fun
 tests/linter/function-call/input.clj:22:1: Parse warning: 1 is not a function
 tests/linter/function-call/input.clj:23:1: Parse warning:  is not a function
 tests/linter/function-call/input.clj:24:1: Parse warning: Wrong number of args (1) passed to fn
+tests/linter/function-call/input.clj:25:1: Parse warning: Wrong number of args (1) passed to #'joker.string/split

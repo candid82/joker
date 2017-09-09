@@ -1144,6 +1144,19 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	return true
 }
 
+func checkArglist(arglist Seq, passedArgsCount int) bool {
+	for !arglist.IsEmpty() {
+		if v, ok := arglist.First().(*Vector); ok {
+			if v.Count() == passedArgsCount ||
+				v.Count() >= 2 && v.Nth(v.Count()-2).Equals(SYMBOLS.amp) && passedArgsCount >= (v.Count()-2) {
+				return true
+			}
+		}
+		arglist = arglist.Rest()
+	}
+	return false
+}
+
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	expr := Parse(Second(obj.(Seq)), ctx)
 	switch expr := expr.(type) {
@@ -1400,6 +1413,15 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 						}
 					}
 				case Callable:
+					if m := c.vr.GetMeta(); m != nil {
+						if ok, arglist := m.Get(KEYWORDS.arglist); ok {
+							if arglist, ok := arglist.(Seq); ok {
+								if !checkArglist(arglist, len(res.args)) {
+									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.name))
+								}
+							}
+						}
+					}
 					return res
 				default:
 					reportNotAFunction(pos, res.name)
