@@ -1262,6 +1262,14 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
 			reportNotAFunction(pos, call.name)
+			return
+		}
+		switch expr.obj.(type) {
+		case Keyword:
+			argsCount := len(call.args)
+			if argsCount == 0 || argsCount > 2 {
+				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.name))
+			}
 		}
 	case *RecurExpr:
 		reportNotAFunction(pos, call.name)

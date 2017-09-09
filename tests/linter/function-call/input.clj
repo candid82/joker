@@ -12,6 +12,8 @@
 ((fn []))
 (#{} 1)
 ({1 2} 1)
+(:t 1 2)
+(:t 1)
 
 ;; Should FAIL
 (map)
@@ -23,4 +25,5 @@
 ("")
 ((fn []) 1)
 (joker.string/split "asdf")
-
+(:t)
+(:t 1 2 3)
