@@ -21,7 +21,17 @@
 
 (def *known-macros*
   {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
-   'letfn nil 'defrecord nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil})
+   'letfn nil 'defrecord nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
+
+(defn ^:private taggify__
+  [x]
+  (list 'tag__ x))
+
+(def default-data-readers
+  (apply merge
+   {'inst #'joker.core/identity
+    'uuid #'joker.core/identity}
+   (map (fn [sym] {sym #'joker.core/taggify__}) (:known-tags joker.core/*linter-config*))))
 
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
@@ -45,6 +55,9 @@
 
 ;; Clojure special forms not supported by Joker
 (defn new [& args])
+
+;; Fake "macro" to handle tagged literals
+(defn tag__ [x])
 
 ;; Clojure core macros not supported by Joker
 

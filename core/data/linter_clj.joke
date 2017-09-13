@@ -329,10 +329,6 @@
 (def *agent*)
 (def *read-eval*)
 
-(def default-data-readers
-  {'inst #'joker.core/identity
-   'uuid #'joker.core/identity})
-
 (joker.core/in-ns 'user)
 
 (joker.core/refer 'joker.core)

@@ -13,10 +13,9 @@
   (seq (concat (:refer opts) (:refer-macros opts))))
 
 (def default-data-readers
-  {'js #'joker.core/identity
-   'inst #'joker.core/identity
-   'uuid #'joker.core/identity
-   'queue #'joker.core/identity})
+  (merge default-data-readers
+         {'js #'joker.core/identity
+          'queue #'joker.core/identity}))
 
 ;; ClojureScript core vars not supported by Joker
 

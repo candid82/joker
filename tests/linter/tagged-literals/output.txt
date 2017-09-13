@@ -1,0 +1,3 @@
+tests/linter/tagged-literals/input.clj:12:2: Read warning: No reader function for tag t
+tests/linter/tagged-literals/input.clj:13:2: Read warning: No reader function for tag g
+tests/linter/tagged-literals/input.clj:13:5: Parse error: Unable to resolve symbol: a

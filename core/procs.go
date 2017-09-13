@@ -1495,6 +1495,13 @@ func ReadConfig(filename string) {
 			return
 		}
 	}
+	ok, knownTags := configMap.Get(MakeKeyword("known-tags"))
+	if ok {
+		if _, ok := knownTags.(Seqable); !ok {
+			printConfigError(configFileName, ":known-tags value must be a vector, got "+knownTags.GetType().ToString(false))
+			return
+		}
+	}
 	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
 		_, ok := knownMacros.(Seqable)
