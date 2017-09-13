@@ -6,7 +6,6 @@
 (extend-type)
 (defmulti)
 (letfn)
-(defrecord)
 (..)
 (proxy)
 (defstruct)
@@ -15,3 +14,4 @@
 (definterface)
 (proxy-super)
 (with-open)
+(defrecord)
