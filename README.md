@@ -1,4 +1,4 @@
-# Joker
+<img src="https://user-images.githubusercontent.com/882970/30468883-8dde7fbc-99a2-11e7-85a4-e62bc3ff5e94.png" width="100px"/>
 
 [![CircleCI](https://circleci.com/gh/candid82/joker.svg?style=svg)](https://circleci.com/gh/candid82/joker)
 
