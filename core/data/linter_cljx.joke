@@ -23,7 +23,7 @@
   {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
    'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
-(defn ^:private validate-fields
+(defn ^:private validate-fields__
   [fields name]
   (when-not (vector? fields)
     (throw (ex-info "No fields vector given." {:form fields})))
@@ -38,41 +38,48 @@
                    (apply str (interpose ", " non-syms)))
               {:form fields})))))
 
-(defn ^:private parse-opts [s]
+(defn ^:private parse-opts__ [s]
   (loop [opts {} [k v & rs :as s] s]
     (if (keyword? k)
       (recur (assoc opts k v) rs)
       [opts s])))
 
-(defn ^:private parse-impls [specs]
+(defn ^:private parse-impls__ [specs]
   (loop [ret {} s specs]
     (if (seq s)
       (recur (assoc ret (first s) (take-while seq? (next s)))
              (drop-while seq? (next s)))
       ret)))
 
-(defn ^:private parse-opts+specs [opts+specs]
-  (let [[opts specs] (parse-opts opts+specs)
-        impls (parse-impls specs)
-        methods (map (fn [[name params & body]]
-                       (cons name (maybe-destructured params body)))
-                     (apply concat (vals impls)))]
+(defn ^:private parse-opts+specs__ [opts+specs]
+  (let [[opts specs] (parse-opts__ opts+specs)
+        impls (map (fn [[k v]]
+                     [k (map (fn [[name params & body]]
+                               (cons name (maybe-destructured params body)))
+                             v)])
+                   (parse-impls__ specs))]
     (when-let [bad-opts (seq (remove #{:no-print :load-ns} (keys opts)))]
       (throw (ex-info (apply print-str "Unsupported option(s) -" bad-opts) {:form opts+specs})))
-    methods))
+    impls))
 
-(defn ^:private defns
+(defn ^:private defns__
   [specs]
   (for [[name params & body] specs]
-    `(defn ~name ~params ~@body)))
+    `(fn ~name ~params ~@body)))
+
+(defn ^:private defimpls__
+  [impls]
+  (apply concat
+         (for [[i specs] impls]
+           (cons i (defns__ specs)))))
 
 (defmacro defrecord
   [name fields & opts+specs]
-  (validate-fields fields name)
-  (let [methods (parse-opts+specs opts+specs)]
+  (validate-fields__ fields name)
+  (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
-       ~@(defns methods))))
+       ~@(defimpls__ impls))))
 
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
