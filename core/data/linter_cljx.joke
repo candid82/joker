@@ -21,7 +21,7 @@
 
 (def *known-macros*
   {'deftype nil 'memfn nil 'defmethod nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
-   'letfn nil 'defrecord nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
+   'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
   [x]
@@ -33,8 +33,68 @@
     'uuid #'joker.core/identity}
    (map (fn [sym] {sym #'joker.core/taggify__}) (:known-tags joker.core/*linter-config*))))
 
+
+(defn ^:private validate-fields__
+  [fields name]
+  (when-not (vector? fields)
+    (throw (ex-info "No fields vector given." {:form fields})))
+  (let [specials '#{__meta __hash __hasheq __extmap}]
+    (when (some specials fields)
+      (throw (ex-info (str "The names in " specials " cannot be used as field names for types or records.") {:form fields}))))
+  (let [non-syms (remove symbol? fields)]
+    (when (seq non-syms)
+      (throw (ex-info
+              (str "defrecord and deftype fields must be symbols, "
+                   *ns* "." name " had: "
+                   (apply str (interpose ", " non-syms)))
+              {:form fields})))))
+
+(defn ^:private parse-opts__ [s]
+  (loop [opts {} [k v & rs :as s] s]
+    (if (keyword? k)
+      (recur (assoc opts k v) rs)
+      [opts s])))
+
+(defn ^:private parse-impls__ [specs]
+  (loop [ret {} s specs]
+    (if (seq s)
+      (recur (assoc ret (first s) (take-while seq? (next s)))
+             (drop-while seq? (next s)))
+      ret)))
+
+(defn ^:private parse-opts+specs__ [opts+specs]
+  (let [[opts specs] (parse-opts__ opts+specs)
+        impls (map (fn [[k v]]
+                     [k (map (fn [[name params & body]]
+                               (cons name (maybe-destructured params body)))
+                             v)])
+                   (parse-impls__ specs))]
+    (when-let [bad-opts (seq (remove #{:no-print :load-ns} (keys opts)))]
+      (throw (ex-info (apply print-str "Unsupported option(s) -" bad-opts) {:form opts+specs})))
+    impls))
+
+(defn ^:private defns__
+  [specs]
+  (for [[name params & body] specs]
+    `(fn ~name ~params ~@body)))
+
+(defn ^:private defimpls__
+  [impls]
+  (apply concat
+         (for [[i specs] impls]
+           (cons i (defns__ specs)))))
+
+(defmacro defrecord
+  [name fields & opts+specs]
+  (validate-fields__ fields name)
+  (let [impls (parse-opts+specs__ opts+specs)]
+    `(defn ~(symbol (str  "->" name))
+       ~fields
+       ~@(defimpls__ impls))))
+
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
+
 
 ;; Redefine some core functions with type hints
 
@@ -74,7 +134,6 @@
 (defn reify [& body])
 (defn defmulti [mm-name & options])
 (defn letfn [fnspecs & body])
-(defn defrecord [name fields & opts+specs])
 (defn .. [x form & more])
 (defn . [x m & args])
 (defn refer-clojure [& filters])

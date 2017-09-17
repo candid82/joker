@@ -1,0 +1,3 @@
+tests/linter/defrecord/input.clj:13:22: Parse error: Unable to resolve symbol: c
+tests/linter/defrecord/input.clj:19:24: Parse error: Unable to resolve symbol: d
+tests/linter/defrecord/input.clj:22:3: Parse error: Unable to resolve symbol: TestProtocol2
