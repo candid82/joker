@@ -1,4 +1,3 @@
-(deftype)
 (memfn)
 (defmethod)
 (defprotocol)
@@ -15,3 +14,4 @@
 (proxy-super)
 (with-open)
 (defrecord)
+

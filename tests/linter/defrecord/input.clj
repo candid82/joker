@@ -29,3 +29,8 @@
 
 (map->TestRecord 1 2)
 (->TestRecord 1)
+
+(defrecord ^:private TestRecord1 [])
+(deftype TestType [])
+
+(->TestType)
