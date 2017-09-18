@@ -90,6 +90,8 @@
   (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
+       (def ~name)
+       (defn ~(symbol (str  "map->" name)) [m])
        ~@(defimpls__ impls))))
 
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]

@@ -23,3 +23,9 @@
   (test-method2 [x y]
     (println x)))
 
+(instance? TestRecord 1)
+(map->TestRecord 1)
+(->TestRecord 1 2)
+
+(map->TestRecord 1 2)
+(->TestRecord 1)
