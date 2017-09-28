@@ -75,8 +75,8 @@
 
 (defn ^:private defns__
   [specs]
-  (for [[name params & body] specs]
-    `(fn ~name ~params ~@body)))
+  (for [[_ params & body] specs]
+    `(fn ~params ~@body)))
 
 (defn ^:private defimpls__
   [impls]
