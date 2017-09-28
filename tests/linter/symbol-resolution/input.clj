@@ -25,7 +25,6 @@
 (instance? java.lang.Integer 10)
 (test-macro uuu)
 (defrecord u5 [])
-(defmethod u6 1)
 (clojure.test/deftest u7)
 #'s/v
 #'e3
@@ -42,6 +41,7 @@ uuu
 (test-macro (load u3))
 (test-macro (ext2/f u4))
 (testing u9)
+(defmethod u6 1 [])
 #'g
 #'ns/gg
 
