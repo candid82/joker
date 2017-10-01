@@ -20,7 +20,7 @@
        ~@(map #(list 'def %) (remove resolve syms)))))
 
 (def *known-macros*
-  {'memfn nil 'defprotocol nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
+  {'memfn nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
    'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
@@ -84,6 +84,14 @@
          (for [[i specs] impls]
            (cons i (defns__ specs)))))
 
+(defn ^:private defmethods__
+  [sigs]
+  (for [sig (vals sigs)]
+    (derive-info__
+     `(defn ~(:name sig) ~(or (:doc sig) "")
+        ~@(map list (:arglists sig)))
+     (:name sig))))
+
 (defmacro defrecord
   [name fields & opts+specs]
   (validate-fields__ fields name)
@@ -102,6 +110,37 @@
        ~fields
        (def ~(symbol (str name)))
        ~@(defimpls__ impls))))
+
+(defmacro defprotocol
+  [name & opts+sigs]
+  (let [[_ sigs]
+        (loop [opts {} sigs opts+sigs]
+          (condp #(%1 %2) (first sigs)
+            string? (recur (assoc opts :doc (first sigs)) (next sigs))
+            keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
+            [opts sigs]))
+        sigs (when sigs
+               (reduce (fn [m s]
+                         (let [name-meta (meta (first s))
+                               mname (with-meta (first s) nil)
+                               [arglists doc]
+                               (loop [as [] rs (rest s)]
+                                 (if (vector? (first rs))
+                                   (recur (conj as (first rs)) (next rs))
+                                   [(seq as) (first rs)]))]
+                           (when (some #{0} (map count arglists))
+                             (println-err (ex-info (str "Definition of function " mname " in protocol " name " must take at least one arg.") {:form mname})))
+                           (when (m (keyword mname))
+                             (println-err (ex-info (str "Function " mname " in protocol " name " was redefined. Specify all arities in single definition.") {:form mname})))
+                           (assoc m (keyword mname)
+                                  (merge name-meta
+                                         {:name (vary-meta mname assoc :doc doc :arglists arglists)
+                                          :arglists arglists
+                                          :doc doc}))))
+                       {} sigs))]
+    `(do
+       (def ~name)
+       ~@(defmethods__ sigs))))
 
 (defmacro defmethod
   [multifn dispatch-val & fn-tail]
@@ -141,7 +180,6 @@
 (defn locking [x & body])
 (defn amap [a idx ret expr])
 (defn memfn [name & args])
-(defn defprotocol [name & body])
 (defn extend-protocol [p & specs])
 (defn extend-type [t & specs])
 (defn reify [& body])

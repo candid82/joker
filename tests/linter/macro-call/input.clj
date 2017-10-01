@@ -1,5 +1,4 @@
 (memfn)
-(defprotocol)
 (extend-protocol)
 (extend-type)
 (defmulti)
