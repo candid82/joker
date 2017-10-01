@@ -20,7 +20,7 @@
        ~@(map #(list 'def %) (remove resolve syms)))))
 
 (def *known-macros*
-  {'memfn nil 'extend-protocol nil 'extend-type nil 'reify nil 'defmulti nil
+  {'memfn nil 'extend-protocol nil 'reify nil 'defmulti nil
    'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
@@ -146,6 +146,27 @@
   [multifn dispatch-val & fn-tail]
   `(do ~multifn (fn ~@fn-tail)))
 
+(defn- emit-hinted-impl [c [p fs]]
+  (let [hint (fn [specs]
+               (let [specs (if (vector? (first specs))
+                             (list specs)
+                             specs)]
+                 (map (fn [[[target & args] & body]]
+                        (cons (apply vector (vary-meta target assoc :tag c) args)
+                              body))
+                      specs)))]
+    [p (zipmap (map #(-> % first name keyword) fs)
+               (map #(derive-info__ (cons `fn (hint (drop 1 %))) (first %)) fs))]))
+
+
+(defn ^:private extend__ [atype & proto+mmaps])
+
+(defmacro extend-type
+  [t & specs]
+  (let [impls (parse-impls__ specs)]
+    `(extend__ ~t
+       ~@(mapcat (partial emit-hinted-impl t) impls))))
+
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
 
@@ -181,7 +202,6 @@
 (defn amap [a idx ret expr])
 (defn memfn [name & args])
 (defn extend-protocol [p & specs])
-(defn extend-type [t & specs])
 (defn reify [& body])
 (defn defmulti [mm-name & options])
 (defn letfn [fnspecs & body])

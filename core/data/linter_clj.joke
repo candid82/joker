@@ -101,7 +101,7 @@
 (defn byte-array ([size-or-seq]) ([size init-val-or-seq]))
 (defn unchecked-dec [x])
 (defn sorted-set [& keys])
-(defn extend [atype & proto+mmaps])
+(def extend extend__)
 (defn await [& agents])
 (defn replicate [n x])
 (defn bound-fn* [f])
