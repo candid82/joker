@@ -1,0 +1,2 @@
+tests/linter/reify/input.clj:11:4: Exception: Parameter declaration "" must be a vector
+Stacktrace:
