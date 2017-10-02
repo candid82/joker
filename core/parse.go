@@ -1460,7 +1460,7 @@ func InternFakeSymbol(ns *Namespace, sym Symbol) *Var {
 }
 
 func isInteropSymbol(sym Symbol) bool {
-	return sym.ns == nil && (strings.HasPrefix(*sym.name, ".") || strings.HasSuffix(*sym.name, "."))
+	return sym.ns == nil && (strings.HasPrefix(*sym.name, ".") || strings.HasSuffix(*sym.name, ".") || strings.Contains(*sym.name, "$"))
 }
 
 func isRecordConstructor(sym Symbol) bool {
