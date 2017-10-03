@@ -126,7 +126,7 @@ Please note that the symbols are namespace qualified and unquoted. Also, Joker k
 
 Joker also allows to specify symbols that are introduced by a macro:
 
-```
+```clojure
 {:known-macros [[riemann.streams/where [service event]]]}
 ```
 
@@ -138,11 +138,23 @@ Additionally, if you want Joker to ignore some unused namespaces (for example, i
 {:ignored-unused-namespaces [foo.bar.baz]}
 ```
 
+Sometimes your code may refer to a namespace that is not explicitly required in the same file. This is rarely needed, but if you face such situation you can add that namespace to `:known-namespaces` list to avoid "No namespace found" or "Unable to resolve symbol" warnings:
+
+```clojure
+{:known-namespaces [clojure.spec.gen.test]}
+```
+
+If your code uses tagged literals that Joker doesn't know about, add them to `:known-tags` list:
+
+```clojure
+{:known-tags [db/fn]}
+```
+
 ### Optional rules
 
 Joker currently supports one warning that is turned off by default: `if` without the `else` branch. To enable this warning, add the following to your `.joker` file:
 
-```
+```clojure
 :rules {:if-without-else true}
 ```
 
