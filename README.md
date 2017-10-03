@@ -79,11 +79,11 @@ These are high level goals of the project that guide design and implementation d
 1. Unrelated to the features listed above, the following function from clojure.core namespace are not currently implemented but will probably be implemented in some form in the future: `subseq`, `iterator-seq`, `reduced?`, `reduced`, `mix-collection-hash`, `definline`, `re-groups`, `hash-ordered-coll`, `enumeration-seq`, `compare-and-set!`, `rationalize`, `load-reader`, `find-keyword`, `comparator`, `letfn`, `resultset-seq`, `line-seq`, `file-seq`, `sorted?`, `ensure-reduced`, `rsubseq`, `pr-on`, `seque`, `alter-var-root`, `hash-unordered-coll`, `re-matcher`, `unreduced`.
 1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other namespaces (`joker.string`, `joker.json`, `joker.os`, `joker.base64`) are in their infancy.
 1. Miscellaneous:
-  1. `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
-  1. `refer-clojure` is not a thing. Use `(joker.core/refer 'joker.core)` instead if you really need to.
-  1. `slurp` only takes one argument - a filename (string). No options are supported.
-  1. `ifn?` is called `callable?`
-  1. Map entry is represented as a two-element vector.
+  - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
+  - `refer-clojure` is not a thing. Use `(joker.core/refer 'joker.core)` instead if you really need to.
+  - `slurp` only takes one argument - a filename (string). No options are supported.
+  - `ifn?` is called `callable?`
+  - Map entry is represented as a two-element vector.
 
 ## Linter mode
 
