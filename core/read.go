@@ -445,6 +445,25 @@ func readRegex(reader *Reader) Object {
 	return MakeReadObject(reader, Regex{R: regex})
 }
 
+func readUnicodeCharacterInString(reader *Reader, initial rune, length, base int, exactLength bool) rune {
+	n := initial
+	var b bytes.Buffer
+	for i := 0; i < length && n != '"'; i++ {
+		b.WriteRune(n)
+		n = reader.Get()
+	}
+	reader.Unget()
+	str := b.String()
+	if exactLength && len(str) != length {
+		panic(MakeReadError(reader, fmt.Sprintf("Invalid character length: %d, should be: %d", len(str), length)))
+	}
+	i, err := strconv.ParseInt(str, base, 32)
+	if err != nil {
+		panic(MakeReadError(reader, "Invalid unicode code: "+str))
+	}
+	return rune(i)
+}
+
 func readString(reader *Reader) Object {
 	var b bytes.Buffer
 	r := reader.Get()
@@ -467,24 +486,14 @@ func readString(reader *Reader) Object {
 			case 'f':
 				r = '\f'
 			case 'u':
-				var b bytes.Buffer
 				n := reader.Get()
-				for i := 0; i < 4 && n != '"'; i++ {
-					b.WriteRune(n)
-					n = reader.Get()
-				}
-				reader.Unget()
-				str := b.String()
-				if len(str) != 4 {
-					panic(MakeReadError(reader, "Invalid unicode escape: \\u"+str))
-				}
-				i, err := strconv.ParseInt(str, 16, 32)
-				if err != nil {
-					panic(MakeReadError(reader, "Invalid unicode escape: \\u"+str))
-				}
-				r = rune(i)
+				r = readUnicodeCharacterInString(reader, n, 4, 16, true)
 			default:
-				panic(MakeReadError(reader, "Unsupported escape character: \\"+string(r)))
+				if unicode.IsDigit(r) {
+					r = readUnicodeCharacterInString(reader, r, 3, 8, false)
+				} else {
+					panic(MakeReadError(reader, "Unsupported escape character: \\"+string(r)))
+				}
 			}
 		}
 		if r == EOF {
