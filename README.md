@@ -12,6 +12,8 @@ On macOS, the easiest way to install Joker is via Homebrew:
 brew install candid82/brew/joker
 ```
 
+If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker/).
+
 On other platforms (or if you prefer manual installation), download a [precompiled binary](https://github.com/candid82/joker/releases) for your platform and put it on your PATH.
 
 You can also [build](#building) Joker from the source code.
