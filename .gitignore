@@ -3,5 +3,5 @@ bindata.go
 play
 .vscode
 .idea
-a_*.go
+core/a_*.go
 
