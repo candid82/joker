@@ -157,10 +157,14 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 	return MakeReadObject(reader, Char{Ch: r})
 }
 
+func isWhitespace(r rune) bool {
+	return unicode.IsSpace(r) || r == ','
+}
+
 func eatWhitespace(reader *Reader) {
 	r := reader.Get()
 	for r != EOF {
-		if unicode.IsSpace(r) || r == ',' {
+		if isWhitespace(r) {
 			r = reader.Get()
 			continue
 		}
@@ -552,7 +556,34 @@ func readVector(reader *Reader) Object {
 	return MakeReadObject(reader, res)
 }
 
+func resolveKey(key Object, nsname string) Object {
+	if nsname == "" {
+		return key
+	}
+	switch key := key.(type) {
+	case Keyword:
+		if key.ns == nil {
+			return DeriveReadObject(key, MakeKeyword(nsname+"/"+key.Name()))
+		}
+		if key.Namespace() == "_" {
+			return DeriveReadObject(key, MakeKeyword(key.Name()))
+		}
+	case Symbol:
+		if key.ns == nil {
+			return DeriveReadObject(key, MakeSymbol(nsname+"/"+key.Name()))
+		}
+		if key.Namespace() == "_" {
+			return DeriveReadObject(key, MakeSymbol(key.Name()))
+		}
+	}
+	return key
+}
+
 func readMap(reader *Reader) Object {
+	return readMapWithNamespace(reader, "")
+}
+
+func readMapWithNamespace(reader *Reader, nsname string) Object {
 	eatWhitespace(reader)
 	r := reader.Peek()
 	objs := []Object{}
@@ -576,17 +607,19 @@ func readMap(reader *Reader) Object {
 	if len(objs) > HASHMAP_THRESHOLD {
 		hashMap := NewHashMap()
 		for i := 0; i < len(objs); i += 2 {
-			if hashMap.containsKey(objs[i]) {
-				panic(MakeReadError(reader, "Duplicate key "+objs[i].ToString(false)))
+			key := resolveKey(objs[i], nsname)
+			if hashMap.containsKey(key) {
+				panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
 			}
-			hashMap = hashMap.Assoc(objs[i], objs[i+1]).(*HashMap)
+			hashMap = hashMap.Assoc(key, objs[i+1]).(*HashMap)
 		}
 		return MakeReadObject(reader, hashMap)
 	}
 	m := EmptyArrayMap()
 	for i := 0; i < len(objs); i += 2 {
-		if !m.Add(objs[i], objs[i+1]) {
-			panic(MakeReadError(reader, "Duplicate key "+objs[i].ToString(false)))
+		key := resolveKey(objs[i], nsname)
+		if !m.Add(key, objs[i+1]) {
+			panic(MakeReadError(reader, "Duplicate key "+key.ToString(false)))
 		}
 	}
 	return MakeReadObject(reader, m)
@@ -880,6 +913,67 @@ func readConditional(reader *Reader) (Object, bool) {
 	return EmptyVector, true
 }
 
+func readNamespacedMap(reader *Reader) Object {
+	auto := reader.Get() == ':'
+	if !auto {
+		reader.Unget()
+	}
+	var sym Object
+	r := reader.Get()
+	if isWhitespace(r) {
+		if !auto {
+			reader.Unget()
+			panic(MakeReadError(reader, "Namespaced map must specify a namespace"))
+		}
+		for isWhitespace(r) {
+			r = reader.Get()
+		}
+		if r != '{' {
+			reader.Unget()
+			panic(MakeReadError(reader, "Namespaced map must specify a namespace"))
+		}
+	} else if r != '{' {
+		reader.Unget()
+		sym, _ = Read(reader)
+		r = reader.Get()
+		for isWhitespace(r) {
+			r = reader.Get()
+		}
+	}
+	if r != '{' {
+		panic(MakeReadError(reader, "Namespaced map must specify a map"))
+	}
+	var nsname string
+	if auto {
+		if sym == nil {
+			nsname = GLOBAL_ENV.CurrentNamespace().Name.Name()
+		} else {
+			sym, ok := sym.(Symbol)
+			if !ok || sym.ns != nil {
+				panic(MakeReadError(reader, "Namespaced map must specify a valid namespace: "+sym.ToString(false)))
+			}
+			ns := GLOBAL_ENV.CurrentNamespace().aliases[sym.name]
+			if ns == nil {
+				ns = GLOBAL_ENV.Namespaces[sym.name]
+			}
+			if ns == nil {
+				panic(MakeReadError(reader, "Unknown auto-resolved namespace alias: "+sym.ToString(false)))
+			}
+			nsname = ns.Name.Name()
+		}
+	} else {
+		if sym == nil {
+			panic(MakeReadError(reader, "Namespaced map must specify a valid namespace"))
+		}
+		sym, ok := sym.(Symbol)
+		if !ok || sym.ns != nil {
+			panic(MakeReadError(reader, "Namespaced map must specify a valid namespace: "+sym.ToString(false)))
+		}
+		nsname = sym.Name()
+	}
+	return readMapWithNamespace(reader, nsname)
+}
+
 func readDispatch(reader *Reader) (Object, bool) {
 	r := reader.Get()
 	switch r {
@@ -904,6 +998,8 @@ func readDispatch(reader *Reader) (Object, bool) {
 		return res, false
 	case '?':
 		return readConditional(reader)
+	case ':':
+		return readNamespacedMap(reader), false
 	}
 	popPos()
 	reader.Unget()
