@@ -363,8 +363,7 @@
                             d))]
                (list 'do
                      (cons `defn decl)
-                     (list 'set-macro* (list 'var name))
-                     (list 'var name)))))
+                     (list 'set-macro* (list 'var name))))))
 
 (set-macro* #'defmacro)
 

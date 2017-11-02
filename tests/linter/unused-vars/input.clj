@@ -7,4 +7,6 @@
 
 (def ^:private v3)
 (def ^:private v4 1)
+(defmacro ^:private m [x] x)
+
 

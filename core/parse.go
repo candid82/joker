@@ -1164,6 +1164,7 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 		switch vr := expr.obj.(type) {
 		case *Var:
 			vr.isMacro = true
+			vr.isUsed = false
 			if vr.meta == nil {
 				vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 			} else {
