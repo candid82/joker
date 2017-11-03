@@ -1,0 +1,40 @@
+;; Additional restriction on arities where it makes sense
+
+(joker.core/in-ns 'joker.core)
+
+(def __=__ =)
+(defn =
+  [x y & more]
+  (apply __=__ x y more))
+
+(def __not=__ not=)
+(defn not=
+  [x y & more]
+  (apply __not=__ x y more))
+
+(def __<__ <)
+(defn <
+  [^Number x ^Number y & more]
+  (apply __<__ x y more))
+
+(def __>__ >)
+(defn >
+  [^Number x ^Number y & more]
+  (apply __>__ x y more))
+
+(def __<=__ <=)
+(defn <=
+  [^Number x ^Number y & more]
+  (apply __<=__ x y more))
+
+(def __>=__ >=)
+(defn >=
+  [^Number x ^Number y & more]
+  (apply __>=__ x y more))
+
+(def __==__ ==)
+(defn ==
+  [^Number x ^Number y & more]
+  (apply __==__ x y more))
+
+(joker.core/in-ns 'user)

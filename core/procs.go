@@ -1535,11 +1535,13 @@ func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return
 	}
+	reader := bytes.NewReader(linter_allData)
+	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
 	if dialect == JOKER {
 		GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 		return
 	}
-	reader := bytes.NewReader(linter_cljxData)
+	reader = bytes.NewReader(linter_cljxData)
 	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
 	switch dialect {
 	case CLJ:

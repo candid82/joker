@@ -9,3 +9,10 @@ tests/linter/function-call/input.clj:26:1: Parse warning: Wrong number of args (
 tests/linter/function-call/input.clj:27:1: Parse warning: Wrong number of args (1) passed to #'joker.string/split
 tests/linter/function-call/input.clj:28:1: Parse warning: Wrong number of args (0) passed to :t
 tests/linter/function-call/input.clj:29:1: Parse warning: Wrong number of args (3) passed to :t
+tests/linter/function-call/input.clj:30:1: Parse warning: Wrong number of args (1) passed to #'joker.core/=
+tests/linter/function-call/input.clj:31:1: Parse warning: Wrong number of args (1) passed to #'joker.core/not=
+tests/linter/function-call/input.clj:32:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<
+tests/linter/function-call/input.clj:33:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>
+tests/linter/function-call/input.clj:34:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<=
+tests/linter/function-call/input.clj:35:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>=
+tests/linter/function-call/input.clj:36:1: Parse warning: Wrong number of args (1) passed to #'joker.core/==
