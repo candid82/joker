@@ -9,21 +9,6 @@ import (
 
 var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
-var write_string_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    v := ExtractObject(args, 0)
-    res := writeString(v)
-    return res
-
-  default:
-    PanicArity(c)
-  }
-  return NIL
-}
-
 var read_string_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -39,19 +24,34 @@ var read_string_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var write_string_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    v := ExtractObject(args, 0)
+    res := writeString(v)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
 jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
 
-jsonNamespace.InternVar("write-string", write_string_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-    `Returns the JSON encoding of v.`, "1.0"))
-
 jsonNamespace.InternVar("read-string", read_string_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("s"))),
     `Parses the JSON-encoded data and return the result as a Joker value.`, "1.0"))
+
+jsonNamespace.InternVar("write-string", write_string_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("v"))),
+    `Returns the JSON encoding of v.`, "1.0"))
 
 }

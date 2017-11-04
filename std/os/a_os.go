@@ -9,14 +9,13 @@ import (
 
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
-var sh_ Proc = func(args []Object) Object {
+var args_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
-  case true:
-    CheckArity(args, 1,999)
-    name := ExtractString(args, 0)
-    arguments := ExtractStrings(args, 1)
-    res := sh(name, arguments)
+  case c == 0:
+    
+    
+    res := commandArgs()
     return res
 
   default:
@@ -40,21 +39,6 @@ var env_ Proc = func(args []Object) Object {
   return NIL
 }
 
-var args_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 0:
-    
-    
-    res := commandArgs()
-    return res
-
-  default:
-    PanicArity(c)
-  }
-  return NIL
-}
-
 var exit_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -70,10 +54,41 @@ var exit_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var sh_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case true:
+    CheckArity(args, 1,999)
+    name := ExtractString(args, 0)
+    arguments := ExtractStrings(args, 1)
+    res := sh(name, arguments)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
 osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
+
+osNamespace.InternVar("args", args_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom()),
+    `Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+
+osNamespace.InternVar("env", env_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom()),
+    `Returns a map representing the environment.`, "1.0"))
+
+osNamespace.InternVar("exit", exit_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("code"))),
+    `Causes the current program to exit with the given status code.`, "1.0"))
 
 osNamespace.InternVar("sh", sh_,
   MakeMeta(
@@ -82,20 +97,5 @@ osNamespace.InternVar("sh", sh_,
       :success - whether or not the execution was successful,
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
-
-osNamespace.InternVar("env", env_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom()),
-    `Returns a map representing the environment.`, "1.0"))
-
-osNamespace.InternVar("args", args_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom()),
-    `Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
-
-osNamespace.InternVar("exit", exit_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("code"))),
-    `Causes the current program to exit with the given status code.`, "1.0"))
 
 }

@@ -103,7 +103,7 @@
   [ns-sym]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        fns (for [[k v] (ns-publics ns)]
+        fns (for [[k v] (sort-by first (ns-publics ns))]
               (generate-fn ns-sym k v))
         res (-> package-template
                 (rpl "{nsName}" (str ns-sym))
