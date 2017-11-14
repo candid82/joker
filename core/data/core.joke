@@ -2406,14 +2406,14 @@
   "Returns a lazy seq of the first item in each coll, then the second etc."
   {:added "1.0"}
   ([] ())
-  ([c1] (lazy-seq c1))
-  ([c1 c2]
+  ([^Seqable c1] (lazy-seq c1))
+  ([^Seqable c1 ^Seqable c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
       (when (and s1 s2)
         (cons (first s1) (cons (first s2)
                                (interleave (rest s1) (rest s2))))))))
-  ([c1 c2 & colls]
+  ([^Seqable c1 ^Seqable c2 & colls]
    (lazy-seq
     (let [ss (map seq (conj colls c2 c1))]
       (when (every? identity ss)
@@ -2425,17 +2425,18 @@
   if the symbol is fully qualified, the var/Type to which it resolves
   need not be present in the namespace."
   {:added "1.0"}
-  ([ns sym]
+  ;; TODO: ns is namespace or symbol
+  ([ns ^Symbol sym]
     (ns-resolve ns nil sym))
-  ([ns env sym]
+  ([ns ^Gettable env ^Symbol sym]
     (when-not (contains? env sym)
       (ns-resolve__ (the-ns ns) sym))))
 
 (defn resolve
   "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
   {:added "1.0"}
-  ([sym] (ns-resolve *ns* sym))
-  ([env sym] (ns-resolve *ns* env sym)))
+  ([^Symbol sym] (ns-resolve *ns* sym))
+  ([^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
 
 (def
   ^{:arglists '([& keyvals])
@@ -2859,6 +2860,7 @@
   "Returns an instance of Regex"
   {:tag Regex
   :added "1.0"}
+  ;; TODO: Regex or String
   [s]
   (if (instance? Regex s)
     s
@@ -2867,7 +2869,7 @@
 (defn re-seq
   "Returns a sequence of successive matches of pattern in string"
   {:added "1.0"}
-  [^Regex re s]
+  [^Regex re ^String s]
   (re-seq__ re s))
 
 (defn re-find
