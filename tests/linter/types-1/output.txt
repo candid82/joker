@@ -205,3 +205,13 @@ tests/linter/types-1/input.clj:134:8: Parse warning: arg[0] of #'joker.core/alia
 tests/linter/types-1/input.clj:135:15: Parse warning: arg[1] of #'joker.core/ns-unalias must have type Symbol, got Int
 tests/linter/types-1/input.clj:136:11: Parse warning: arg[0] of #'joker.core/take-nth must have type Number, got String
 tests/linter/types-1/input.clj:136:15: Parse warning: arg[1] of #'joker.core/take-nth must have type Seqable, got Int
+tests/linter/types-1/input.clj:137:13: Parse warning: arg[0] of #'joker.core/interleave must have type Seqable, got Int
+tests/linter/types-1/input.clj:137:15: Parse warning: arg[1] of #'joker.core/interleave must have type Seqable, got Int
+tests/linter/types-1/input.clj:138:19: Parse warning: arg[1] of #'joker.core/ns-resolve must have type Symbol, got Int
+tests/linter/types-1/input.clj:139:19: Parse warning: arg[1] of #'joker.core/ns-resolve must have type Gettable, got Int
+tests/linter/types-1/input.clj:139:21: Parse warning: arg[2] of #'joker.core/ns-resolve must have type Symbol, got Int
+tests/linter/types-1/input.clj:140:10: Parse warning: arg[0] of #'joker.core/resolve must have type Symbol, got Int
+tests/linter/types-1/input.clj:141:10: Parse warning: arg[0] of #'joker.core/resolve must have type Gettable, got Int
+tests/linter/types-1/input.clj:141:12: Parse warning: arg[1] of #'joker.core/resolve must have type Symbol, got Int
+tests/linter/types-1/input.clj:142:9: Parse warning: arg[0] of #'joker.core/re-seq must have type Regex, got Int
+tests/linter/types-1/input.clj:142:11: Parse warning: arg[1] of #'joker.core/re-seq must have type String, got Int
