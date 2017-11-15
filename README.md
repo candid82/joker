@@ -97,7 +97,7 @@ Executing the following command `joker --lint test.clj` will produce the followi
 ```
 test.clj:1:1: Parse warning: let form with empty body
 ```
-The output format is as follows: `<filename>:<line>:<column> <issue type>: <message>`, where `<issue type` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
+The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
 ### Intergration with editors
 
