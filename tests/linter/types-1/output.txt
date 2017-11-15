@@ -215,3 +215,16 @@ tests/linter/types-1/input.clj:141:10: Parse warning: arg[0] of #'joker.core/res
 tests/linter/types-1/input.clj:141:12: Parse warning: arg[1] of #'joker.core/resolve must have type Symbol, got Int
 tests/linter/types-1/input.clj:142:9: Parse warning: arg[0] of #'joker.core/re-seq must have type Regex, got Int
 tests/linter/types-1/input.clj:142:11: Parse warning: arg[1] of #'joker.core/re-seq must have type String, got Int
+tests/linter/types-1/input.clj:143:10: Parse warning: arg[0] of #'joker.core/re-find must have type Regex, got Int
+tests/linter/types-1/input.clj:143:12: Parse warning: arg[1] of #'joker.core/re-find must have type String, got Int
+tests/linter/types-1/input.clj:144:13: Parse warning: arg[0] of #'joker.core/re-matches must have type Regex, got Int
+tests/linter/types-1/input.clj:144:15: Parse warning: arg[1] of #'joker.core/re-matches must have type String, got Int
+tests/linter/types-1/input.clj:145:7: Parse warning: arg[0] of #'joker.core/rand must have type Number, got String
+tests/linter/types-1/input.clj:146:11: Parse warning: arg[0] of #'joker.core/rand-int must have type Number, got String
+tests/linter/types-1/input.clj:147:11: Parse warning: arg[0] of #'joker.core/tree-seq must have type Callable, got Int
+tests/linter/types-1/input.clj:147:13: Parse warning: arg[1] of #'joker.core/tree-seq must have type Callable, got Int
+tests/linter/types-1/input.clj:148:7: Parse warning: arg[0] of #'joker.core/subs must have type String, got Int
+tests/linter/types-1/input.clj:148:9: Parse warning: arg[1] of #'joker.core/subs must have type Int, got String
+tests/linter/types-1/input.clj:148:13: Parse warning: arg[2] of #'joker.core/subs must have type Int, got String
+tests/linter/types-1/input.clj:149:10: Parse warning: arg[0] of #'joker.core/max-key must have type Callable, got Int
+tests/linter/types-1/input.clj:150:10: Parse warning: arg[0] of #'joker.core/min-key must have type Callable, got Int

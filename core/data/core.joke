@@ -2875,13 +2875,13 @@
 (defn re-find
   "Returns the leftmost regex match, if any, of string to pattern."
   {:added "1.0"}
-  [^Regex re s]
+  [^Regex re ^String s]
   (re-find__ re s))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern."
   {:added "1.0"}
-  [^Regex re s]
+  [^Regex re ^String s]
   (let [m (re-find re s)
         c (if (instance? String m)
             (count m)
@@ -2894,12 +2894,12 @@
   n (default 1) (exclusive)."
   {:added "1.0"}
   ([] (rand__))
-  ([n] (* n (rand))))
+  ([^Number n] (* n (rand))))
 
 (defn rand-int
   "Returns a random integer between 0 (inclusive) and n (exclusive)."
   {:added "1.0"}
-  [n] (int (rand n)))
+  [^Number n] (int (rand n)))
 
 (defmacro defn-
   "same as defn, yielding non-public def"
@@ -2915,7 +2915,7 @@
   nodes for which branch? returns true. Root is the root node of the
   tree."
   {:added "1.0"}
-  [branch? children root]
+  [^Callable branch? ^Callable children root]
   (let [walk (fn walk [node]
                (lazy-seq
                 (cons node
@@ -2957,23 +2957,23 @@
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
   {:added "1.0"}
-  (^String [^String s start] (subs__ s start))
-  (^String [^String s start end] (subs__ s start end)))
+  (^String [^String s ^Int start] (subs__ s start))
+  (^String [^String s ^Int start ^Int end] (subs__ s start end)))
 
 (defn max-key
   "Returns the x for which (k x), a number, is greatest."
   {:added "1.0"}
-  ([k x] x)
-  ([k x y] (if (> (k x) (k y)) x y))
-  ([k x y & more]
+  ([^Callable k x] x)
+  ([^Callable k x y] (if (> (k x) (k y)) x y))
+  ([^Callable k x y & more]
    (reduce #(max-key k %1 %2) (max-key k x y) more)))
 
 (defn min-key
   "Returns the x for which (k x), a number, is least."
   {:added "1.0"}
-  ([k x] x)
-  ([k x y] (if (< (k x) (k y)) x y))
-  ([k x y & more]
+  ([^Callable k x] x)
+  ([^Callable k x y] (if (< (k x) (k y)) x y))
+  ([^Callable k x y & more]
    (reduce #(min-key k %1 %2) (min-key k x y) more)))
 
 (defn distinct
