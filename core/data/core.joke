@@ -2979,7 +2979,7 @@
 (defn distinct
   "Returns a lazy sequence of the elements of coll with duplicates removed."
   {:added "1.0"}
-  [coll]
+  [^Seqable coll]
   (let [step (fn step [xs seen]
                (lazy-seq
                 ((fn [[f :as xs] seen]
@@ -2995,7 +2995,7 @@
   vector/seq with any elements = a key in smap replaced with the
   corresponding val in smap."
   {:added "1.0"}
-  [smap coll]
+  [^Associative smap ^Seqable coll]
   (if (vector? coll)
     (reduce (fn [v i]
                (if-let [e (find smap (nth v i))]
@@ -3009,14 +3009,14 @@
   returns an infinite (or length n if supplied) lazy sequence of calls
   to it"
   {:added "1.0"}
-  ([f] (lazy-seq (cons (f) (repeatedly f))))
-  ([n f] (take n (repeatedly f))))
+  ([^Callable f] (lazy-seq (cons (f) (repeatedly f))))
+  ([^Number n ^Callable f] (take n (repeatedly f))))
 
 (defn interpose
   "Returns a lazy seq of the elements of coll separated by sep.
   Returns a stateful transducer when no collection is provided."
   {:added "1.0"}
-  [sep coll]
+  [sep ^Seqable coll]
   (drop 1 (interleave (repeat sep) coll)))
 
 (defn empty
@@ -3035,7 +3035,7 @@
 (defn not-empty
   "If coll is empty, returns nil, else coll"
   {:added "1.0"}
-  [coll] (when (seq coll) coll))
+  [^Seqable coll] (when (seq coll) coll))
 
 (defn distinct?
   "Returns true if no two of the arguments are ="
@@ -3056,13 +3056,13 @@
 (defn format
   "Formats a string using fmt.Sprintf"
   {:added "1.0"}
-  ^String [fmt & args]
+  ^String [^String fmt & args]
   (apply format__ fmt args))
 
 (defn printf
   "Prints formatted output, as per format"
   {:added "1.0"}
-  [fmt & args]
+  [^String fmt & args]
   (print (apply format fmt args)))
 
 (defmacro ns
@@ -3120,7 +3120,7 @@
 (defn in-ns
   "Sets *ns* to the namespace named by the symbol, creating it if needed."
   {:added "1.0"}
-  [name]
+  [^Symbol name]
   (var-set #'joker.core/*ns* (joker.core/create-ns name)))
 
 (defonce ^:dynamic

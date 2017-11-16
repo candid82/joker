@@ -228,3 +228,13 @@ tests/linter/types-1/input.clj:148:9: Parse warning: arg[1] of #'joker.core/subs
 tests/linter/types-1/input.clj:148:13: Parse warning: arg[2] of #'joker.core/subs must have type Int, got String
 tests/linter/types-1/input.clj:149:10: Parse warning: arg[0] of #'joker.core/max-key must have type Callable, got Int
 tests/linter/types-1/input.clj:150:10: Parse warning: arg[0] of #'joker.core/min-key must have type Callable, got Int
+tests/linter/types-1/input.clj:151:11: Parse warning: arg[0] of #'joker.core/distinct must have type Seqable, got Int
+tests/linter/types-1/input.clj:152:10: Parse warning: arg[0] of #'joker.core/replace must have type Associative, got Int
+tests/linter/types-1/input.clj:152:12: Parse warning: arg[1] of #'joker.core/replace must have type Seqable, got Int
+tests/linter/types-1/input.clj:153:13: Parse warning: arg[0] of #'joker.core/repeatedly must have type Number, got String
+tests/linter/types-1/input.clj:153:17: Parse warning: arg[1] of #'joker.core/repeatedly must have type Callable, got Int
+tests/linter/types-1/input.clj:154:14: Parse warning: arg[1] of #'joker.core/interpose must have type Seqable, got Int
+tests/linter/types-1/input.clj:155:12: Parse warning: arg[0] of #'joker.core/not-empty must have type Seqable, got Int
+tests/linter/types-1/input.clj:156:9: Parse warning: arg[0] of #'joker.core/format must have type String, got Int
+tests/linter/types-1/input.clj:157:9: Parse warning: arg[0] of #'joker.core/printf must have type String, got Int
+tests/linter/types-1/input.clj:158:8: Parse warning: arg[0] of #'joker.core/in-ns must have type Symbol, got Int

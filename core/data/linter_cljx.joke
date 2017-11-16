@@ -293,19 +293,19 @@
 (def __distinct__ distinct)
 (defn distinct
   ([])
-  ([coll]
+  ([^Seqable coll]
    (__distinct__ coll)))
 
 (def __replace__ replace)
 (defn replace
-  ([x])
-  ([x coll]
+  ([^Associative x])
+  ([^Associative x ^Seqable coll]
    (__replace__ x coll)))
 
 (def __interpose__ interpose)
 (defn interpose
   ([x])
-  ([x coll]
+  ([x ^Seqable coll]
    (__interpose__ x coll)))
 
 (def __into__ into)
