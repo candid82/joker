@@ -28,7 +28,14 @@ func fromObject(obj Object) interface{} {
 		res := make(map[string]interface{})
 		for iter := obj.Iter(); iter.HasNext(); {
 			p := iter.Next()
-			res[p.Key.ToString(false)] = fromObject(p.Value)
+			var k string
+			switch p.Key.(type) {
+			case Keyword:
+				k = p.Key.ToString(false)[1:]
+			default:
+				k = p.Key.ToString(false)
+			}
+			res[k] = fromObject(p.Value)
 		}
 		return res
 	default:
