@@ -238,3 +238,4 @@ tests/linter/types-1/input.clj:155:12: Parse warning: arg[0] of #'joker.core/not
 tests/linter/types-1/input.clj:156:9: Parse warning: arg[0] of #'joker.core/format must have type String, got Int
 tests/linter/types-1/input.clj:157:9: Parse warning: arg[0] of #'joker.core/printf must have type String, got Int
 tests/linter/types-1/input.clj:158:8: Parse warning: arg[0] of #'joker.core/in-ns must have type Symbol, got Int
+tests/linter/types-1/input.clj:159:12: Parse warning: arg[0] of #'joker.core/load-file must have type String, got Int

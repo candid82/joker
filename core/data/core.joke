@@ -3353,7 +3353,7 @@
 (defn load-file
   "Loads code from file f"
   {:added "1.0"}
-  [f]
+  [^String f]
   (load-file__ f))
 
 (defn load

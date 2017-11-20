@@ -156,3 +156,4 @@
 (format 1 2)
 (printf 1 2)
 (in-ns 1)
+(load-file 1)
