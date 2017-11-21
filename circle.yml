@@ -6,6 +6,7 @@ dependencies:
     - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     - go get -d -v github.com/chzyer/readline
     - go get -d -v gopkg.in/yaml.v2
+    - go get -d -v github.com/spf13/pflag
     - go generate -v ./...
     - go build -v
     - ./linter-tests.sh
