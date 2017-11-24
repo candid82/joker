@@ -15,6 +15,7 @@ import (
 	_ "github.com/candid82/joker/std/time"
 	_ "github.com/candid82/joker/std/yaml"
 	"github.com/chzyer/readline"
+	"github.com/spf13/pflag"
 )
 
 type (
@@ -182,12 +183,12 @@ func detectDialect(filename string) Dialect {
 	return CLJ
 }
 
-func lintFile(filename string, dialect Dialect) {
+func lintFile(filename string, dialect Dialect, workingDir string) {
 	phase := PARSE
 	if dialect == EDN {
 		phase = READ
 	}
-	ReadConfig(filename)
+	ReadConfig(filename, workingDir)
 	configureLinterMode(dialect)
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
@@ -195,37 +196,79 @@ func lintFile(filename string, dialect Dialect) {
 	}
 }
 
+var versionFlag = pflag.BoolP("version", "v", false, "display version information")
+var readFlag = pflag.Bool("read", false, "read the file")
+var parseFlag = pflag.Bool("parse", false, "parse the file")
+var lintFlag = pflag.Bool("lint", false, "lint the file")
+
+var lintDialect = pflag.String("dialect", "", "dialect to lint as. Valid options are clj, cljs, joker and edn")
+var lintWorkingDir = pflag.String("working-dir", "", "override the working directory for the linter")
+
+// these flags are here to support the preexisting `--lint<dialect>` flags:
+var lintCljFlag = pflag.Bool("lintclj", false, "lint as clojure")
+var lintCljsFlag = pflag.Bool("lintcljs", false, "lint as clojurescript")
+var lintJokerFlag = pflag.Bool("lintjoker", false, "lint as joker")
+var lintEDNFlag = pflag.Bool("lintedn", false, "lint as edn")
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Joker - %s\n\n", VERSION)
+	fmt.Fprintln(os.Stderr, "usage: joker                                   starts a repl")
+	fmt.Fprintln(os.Stderr, "   or: joker [arguments] <filename>            execute a script")
+	fmt.Fprintln(os.Stderr, "\nArguments:")
+	pflag.PrintDefaults()
+}
+
+func init() {
+	pflag.Usage = usage
+	pflag.Parse()
+
+	switch {
+	case *lintCljFlag:
+		*lintFlag = true
+		*lintDialect = "clj"
+	case *lintCljsFlag:
+		*lintFlag = true
+		*lintDialect = "cljs"
+	case *lintJokerFlag:
+		*lintFlag = true
+		*lintDialect = "joker"
+	case *lintEDNFlag:
+		*lintFlag = true
+		*lintDialect = "edn"
+	}
+}
+
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-	if len(os.Args) == 1 {
-		repl(EVAL)
-		return
-	}
-	if len(os.Args) == 2 {
-		if os.Args[1] == "-v" || os.Args[1] == "--version" {
-			println(VERSION)
-			return
+	switch {
+	case *versionFlag:
+		println(VERSION)
+	case *readFlag:
+		processFile(pflag.Arg(0), READ)
+	case *parseFlag:
+		processFile(pflag.Arg(0), PARSE)
+	case *lintFlag:
+		var dialect Dialect
+		switch strings.ToLower(*lintDialect) {
+		case "clj":
+			dialect = CLJ
+		case "cljs":
+			dialect = CLJS
+		case "joker":
+			dialect = JOKER
+		case "edn":
+			dialect = EDN
+		default:
+			dialect = detectDialect(pflag.Arg(0))
 		}
-		processFile(os.Args[1], EVAL)
-		return
-	}
-	switch os.Args[1] {
-	case "--read":
-		processFile(os.Args[2], READ)
-	case "--parse":
-		processFile(os.Args[2], PARSE)
-	case "--lint":
-		dialect := detectDialect(os.Args[2])
-		lintFile(os.Args[2], dialect)
-	case "--lintclj":
-		lintFile(os.Args[2], CLJ)
-	case "--lintcljs":
-		lintFile(os.Args[2], CLJS)
-	case "--lintjoker":
-		lintFile(os.Args[2], JOKER)
-	case "--lintedn":
-		lintFile(os.Args[2], EDN)
+		filename := pflag.Arg(0)
+		if filename == "" {
+			filename = "--"
+		}
+		lintFile(filename, dialect, *lintWorkingDir)
+	case len(pflag.Args()) > 0:
+		processFile(pflag.Arg(0), EVAL)
 	default:
-		processFile(os.Args[1], EVAL)
+		repl(EVAL)
 	}
 }

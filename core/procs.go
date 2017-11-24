@@ -1400,11 +1400,20 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
-func findConfigFile(filename string) string {
+func findConfigFile(filename string, workingDir string) string {
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", err)
 		return ""
+	}
+
+	if workingDir != "" {
+		workingDir, err = filepath.Abs(workingDir)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error resolving working directory"+workingDir+": ", err)
+			return ""
+		}
+		filename = filepath.Join(workingDir, ".joker")
 	}
 	for {
 		oldFilename := filename
@@ -1455,10 +1464,10 @@ func knownMacrosToMap(km Object) (Map, error) {
 	return res, nil
 }
 
-func ReadConfig(filename string) {
+func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
 	LINTER_CONFIG.Value = EmptyArrayMap()
-	configFileName := findConfigFile(filename)
+	configFileName := findConfigFile(filename, workingDir)
 	if configFileName == "" {
 		return
 	}

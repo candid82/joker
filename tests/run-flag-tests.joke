@@ -1,0 +1,111 @@
+(def exit-code 0)
+
+(defn clean
+  [output]
+    (let [output (if (nil? output) "" output)]
+    (->> output
+        (joker.string/split-lines)
+        (remove #(joker.string/starts-with? % "  "))
+        (remove #(= % ""))
+        (joker.string/join "\n"))))
+
+(defn test-flags
+  [description flags expected]
+  (let [pwd (get (joker.os/env) "PWD")
+        flag-parts (joker.string/split flags #" ")
+        stdin? (some #(= "<" %) flag-parts)
+        cmd (str pwd "/joker")
+        output (if stdin?
+                 (:err (joker.os/sh "sh" "-c" (str cmd " " flags)))
+                 (:err (apply (partial joker.os/sh cmd) flag-parts)))
+        output (clean output)]
+    (when-not (= output expected)
+      (println "FAILED: testing" description "(" flags ")")
+      (println "EXPECTED")
+      (println expected)
+      (println "ACTUAL")
+      (println output)
+      (println "")
+      (var-set #'exit-code 1))))
+
+(defn testing
+  [description & tests]
+  (let [tests (partition 2 tests)]
+    (doall (map (fn [[flags expected]] 
+                  (test-flags description flags expected)) tests))))
+
+(testing "auto detect dialect from filename"
+  "--lint tests/flags/input.clj"
+  ""
+  "--lint tests/flags/input-warning.clj"
+  "tests/flags/input-warning.clj:1:7: Parse warning: unused binding: a")
+
+(testing "specify joker dialect"
+  "--lintjoker tests/flags/input.joke"
+  ""
+
+  "--lint --dialect joker tests/flags/input.joke"
+  ""
+
+  "--lintjoker tests/flags/input.clj"
+  "tests/flags/input.clj:1:2: Parse error: Unable to resolve symbol: clojure.string/split"
+
+  "--lint --dialect joker tests/flags/input.cljs"
+  "tests/flags/input.cljs:1:7: Parse error: Unable to resolve symbol: js/console")
+
+(testing "specify clj dialect"
+  "--lintclj tests/flags/input.clj"
+  ""
+
+  "--lint --dialect clj tests/flags/input.clj"
+  ""
+
+  "--lintclj tests/flags/input.edn"
+  "tests/flags/input.edn:1:17: Read warning: No reader function for tag foo/bar"
+
+  "--lint --dialect clj tests/flags/input.cljs"
+  "tests/flags/input.cljs:1:7: Parse error: Unable to resolve symbol: js/console")
+
+(testing "specify cljs dialect"
+  "--lintcljs tests/flags/input.cljs"
+  ""
+
+  "--lint --dialect cljs tests/flags/input.cljs"
+  ""
+
+  "--lintcljs tests/flags/input.edn"
+  "tests/flags/input.edn:1:17: Read warning: No reader function for tag foo/bar"
+
+  "--lintcljs tests/flags/input.clj"
+  "tests/flags/input.clj:1:2: Parse error: Unable to resolve symbol: clojure.string/split")
+
+(testing "reading from stdin"
+  "--lint --dialect edn < tests/flags/input.edn"
+  ""
+
+  "--lint --dialect clj < tests/flags/input.edn"
+  "<stdin>:1:17: Read warning: No reader function for tag foo/bar"
+
+  "--lint --dialect clj < tests/flags/input.clj"
+  ""
+
+  "--lint --dialect cljs < tests/flags/input.clj"
+  "<stdin>:1:2: Parse error: Unable to resolve symbol: clojure.string/split"
+
+  "--lint --dialect cljs < tests/flags/input.cljs"
+  ""
+
+  "--lint --dialect joker < tests/flags/input.cljs"
+  "<stdin>:1:7: Parse error: Unable to resolve symbol: js/console"
+
+  "--lint --dialect joker < tests/flags/input.joke"
+  "")
+
+(testing "working direction override"
+  "--lint --dialect clj < tests/flags/macro.clj"
+  "<stdin>:4:11: Parse error: Unable to resolve symbol: something"
+
+  "--lint --dialect clj --working-dir tests/flags/config < tests/flags/macro.clj"
+  "")
+
+(joker.os/exit exit-code)
