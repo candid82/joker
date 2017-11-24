@@ -183,12 +183,12 @@ func detectDialect(filename string) Dialect {
 	return CLJ
 }
 
-func lintFile(filename string, dialect Dialect) {
+func lintFile(filename string, dialect Dialect, workingDir string) {
 	phase := PARSE
 	if dialect == EDN {
 		phase = READ
 	}
-	ReadConfig(filename)
+	ReadConfig(filename, workingDir)
 	configureLinterMode(dialect)
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
@@ -202,6 +202,7 @@ var parseFlag = pflag.Bool("parse", false, "parse the file")
 var lintFlag = pflag.Bool("lint", false, "lint the file")
 
 var lintDialect = pflag.String("dialect", "", "dialect to lint as. Valid options are clj, cljs, joker and edn")
+var lintWorkingDir = pflag.String("working-dir", "", "override the working directory for the linter")
 
 // these flags are here to support the preexisting `--lint<dialect>` flags:
 var lintCljFlag = pflag.Bool("lintclj", false, "lint as clojure")
@@ -231,7 +232,7 @@ func init() {
 	case *lintJokerFlag:
 		*lintFlag = true
 		*lintDialect = "joker"
-	case *lintJokerFlag:
+	case *lintEDNFlag:
 		*lintFlag = true
 		*lintDialect = "edn"
 	}
@@ -242,8 +243,6 @@ func main() {
 	switch {
 	case *versionFlag:
 		println(VERSION)
-	case len(pflag.Args()) == 0:
-		repl(EVAL)
 	case *readFlag:
 		processFile(pflag.Arg(0), READ)
 	case *parseFlag:
@@ -262,8 +261,14 @@ func main() {
 		default:
 			dialect = detectDialect(pflag.Arg(0))
 		}
-		lintFile(pflag.Arg(0), dialect)
-	default:
+		filename := pflag.Arg(0)
+		if filename == "" {
+			filename = "--"
+		}
+		lintFile(filename, dialect, *lintWorkingDir)
+	case len(pflag.Args()) > 0:
 		processFile(pflag.Arg(0), EVAL)
+	default:
+		repl(EVAL)
 	}
 }

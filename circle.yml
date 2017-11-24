@@ -10,3 +10,4 @@ dependencies:
     - go generate -v ./...
     - go build -v
     - ./linter-tests.sh
+    - ./flag-tests.sh
