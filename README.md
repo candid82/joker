@@ -104,7 +104,7 @@ The output format is as follows: `<filename>:<line>:<column>: <issue type>: <mes
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
 - Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
 - Atom: [linter-joker](https://atom.io/packages/linter-joker)
-- Vim: [syntastic-joker](https://github.com/aclaimant/syntastic-joker)
+- Vim: [syntastic-joker](https://github.com/aclaimant/syntastic-joker), [ale](https://github.com/w0rp/ale)
 
 [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
 
