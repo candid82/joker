@@ -34,6 +34,9 @@ func SafeMerge(m1, m2 Map) Map {
 	if m1 == nil {
 		return m2
 	}
+	if m2 == nil {
+		return m1
+	}
 	return m1.Merge(m2)
 }
 
