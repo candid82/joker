@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-filelist=$(find $1 -type f -name "$2")
+filelist=$(find $1 -type f -name "$2" -not -name "project.clj" -not -name "user.clj")
 
 for f in $filelist
 do
