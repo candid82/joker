@@ -44,4 +44,9 @@ uuu
 (defmethod u6 1 [])
 #'g
 #'ns/gg
+(joker.string/split "1" #"2")
+(joker.os/env)
+(joker.time/sleep 10)
+(joker.json/read-string "")
+(joker.base64/decode-string "")
 

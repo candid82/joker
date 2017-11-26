@@ -24,7 +24,6 @@
 (1)
 ("")
 ((fn []) 1)
-(joker.string/split "asdf")
 (:t)
 (:t 1 2 3)
 (= 1)

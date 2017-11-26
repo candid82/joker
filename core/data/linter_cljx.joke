@@ -370,3 +370,9 @@
 
 (joker.core/in-ns 'user)
 
+(remove-ns 'joker.string)
+(remove-ns 'joker.yaml)
+(remove-ns 'joker.json)
+(remove-ns 'joker.os)
+(remove-ns 'joker.base64)
+(remove-ns 'joker.time)

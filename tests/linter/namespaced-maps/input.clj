@@ -1,3 +1,4 @@
+(require 'joker.string)
 (alias 's 'joker.string)
 ;; Should PASS
 #:t{:g 1}

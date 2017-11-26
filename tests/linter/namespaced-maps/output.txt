@@ -1,1 +1,1 @@
-tests/linter/namespaced-maps/input.clj:10:5: Parse error: Unable to resolve symbol: user/g
+tests/linter/namespaced-maps/input.clj:11:5: Parse error: Unable to resolve symbol: user/g

@@ -10,3 +10,8 @@ tests/linter/symbol-resolution/input.clj:43:10: Parse error: Unable to resolve s
 tests/linter/symbol-resolution/input.clj:44:12: Parse error: Unable to resolve symbol: u6
 tests/linter/symbol-resolution/input.clj:45:3: Parse error: Unable to resolve symbol: g
 tests/linter/symbol-resolution/input.clj:46:3: Parse error: Unable to resolve symbol: ns/gg
+tests/linter/symbol-resolution/input.clj:47:2: Parse error: Unable to resolve symbol: joker.string/split
+tests/linter/symbol-resolution/input.clj:48:2: Parse error: Unable to resolve symbol: joker.os/env
+tests/linter/symbol-resolution/input.clj:49:2: Parse error: Unable to resolve symbol: joker.time/sleep
+tests/linter/symbol-resolution/input.clj:50:2: Parse error: Unable to resolve symbol: joker.json/read-string
+tests/linter/symbol-resolution/input.clj:51:2: Parse error: Unable to resolve symbol: joker.base64/decode-string

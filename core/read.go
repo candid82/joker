@@ -959,6 +959,7 @@ func readNamespacedMap(reader *Reader) Object {
 			if ns == nil {
 				panic(MakeReadError(reader, "Unknown auto-resolved namespace alias: "+sym.ToString(false)))
 			}
+			ns.isUsed = true
 			nsname = ns.Name.Name()
 		}
 	} else {
