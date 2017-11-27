@@ -239,3 +239,15 @@ tests/linter/types-1/input.clj:156:9: Parse warning: arg[0] of #'joker.core/form
 tests/linter/types-1/input.clj:157:9: Parse warning: arg[0] of #'joker.core/printf must have type String, got Int
 tests/linter/types-1/input.clj:158:8: Parse warning: arg[0] of #'joker.core/in-ns must have type Symbol, got Int
 tests/linter/types-1/input.clj:159:12: Parse warning: arg[0] of #'joker.core/load-file must have type String, got Int
+tests/linter/types-1/input.clj:160:11: Parse warning: arg[1] of #'joker.core/get-in must have type Seqable, got Int
+tests/linter/types-1/input.clj:161:11: Parse warning: arg[1] of #'joker.core/get-in must have type Seqable, got Int
+tests/linter/types-1/input.clj:162:11: Parse warning: arg[0] of #'joker.core/assoc-in must have type Associative, got Int
+tests/linter/types-1/input.clj:162:13: Parse warning: arg[1] of #'joker.core/assoc-in must have type Seqable, got Int
+tests/linter/types-1/input.clj:163:12: Parse warning: arg[0] of #'joker.core/update-in must have type Associative, got Int
+tests/linter/types-1/input.clj:163:14: Parse warning: arg[1] of #'joker.core/update-in must have type Seqable, got Int
+tests/linter/types-1/input.clj:163:16: Parse warning: arg[2] of #'joker.core/update-in must have type Callable, got Int
+tests/linter/types-1/input.clj:164:9: Parse warning: arg[0] of #'joker.core/update must have type Associative, got Int
+tests/linter/types-1/input.clj:164:13: Parse warning: arg[2] of #'joker.core/update must have type Callable, got Int
+tests/linter/types-1/input.clj:165:13: Parse warning: arg[0] of #'joker.core/trampoline must have type Callable, got Int
+tests/linter/types-1/input.clj:166:10: Parse warning: arg[0] of #'joker.core/memoize must have type Callable, got Int
+tests/linter/types-1/input.clj:167:9: Parse warning: arg[0] of #'joker.core/empty? must have type Seqable, got Int

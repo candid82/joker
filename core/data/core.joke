@@ -3377,9 +3377,9 @@
   where ks is a sequence of keys. Returns nil if the key
   is not present, or the not-found value if supplied."
   {:added "1.0"}
-  ([m ks]
+  ([m ^Seqable ks]
    (reduce get m ks))
-  ([m ks not-found]
+  ([m ^Seqable ks not-found]
    (loop [sentinel {}
           m m
           ks (seq ks)]
@@ -3395,10 +3395,11 @@
   sequence of keys and v is the new value and returns a new nested structure.
   If any levels do not exist, hash-maps will be created."
   {:added "1.0"}
-  [m [k & ks] v]
-  (if ks
-    (assoc m k (assoc-in (get m k) ks v))
-    (assoc m k v)))
+  [^Associative m ^Seqable ks v]
+  (let [[k & ks] ks]
+    (if ks
+      (assoc m k (assoc-in (get m k) ks v))
+      (assoc m k v))))
 
 (defn update-in
   "'Updates' a value in a nested associative structure, where ks is a
@@ -3407,10 +3408,11 @@
   nested structure.  If any levels do not exist, hash-maps will be
   created."
   {:added "1.0"}
-  ([m [k & ks] f & args]
-   (if ks
-     (assoc m k (apply update-in (get m k) ks f args))
-     (assoc m k (apply f (get m k) args)))))
+  ([^Associative m ^Seqable ks ^Callable f & args]
+   (let [[k & ks] ks]
+     (if ks
+       (assoc m k (apply update-in (get m k) ks f args))
+       (assoc m k (apply f (get m k) args))))))
 
 (defn update
   "'Updates' a value in an associative structure, where k is a
@@ -3418,15 +3420,15 @@
   and any supplied args and return the new value, and returns a new
   structure.  If the key does not exist, nil is passed as the old value."
   {:added "1.0"}
-  ([m k f]
+  ([^Associative m k ^Callable f]
    (assoc m k (f (get m k))))
-  ([m k f x]
+  ([^Associative m k ^Callable f x]
    (assoc m k (f (get m k) x)))
-  ([m k f x y]
+  ([^Associative m k ^Callable f x y]
    (assoc m k (f (get m k) x y)))
-  ([m k f x y z]
+  ([^Associative m k ^Callable f x y z]
    (assoc m k (f (get m k) x y z)))
-  ([m k f x y z & more]
+  ([^Associative m k ^Callable f x y z & more]
    (assoc m k (apply f (get m k) x y z more))))
 
 (defn coll?
@@ -3511,12 +3513,12 @@
   final value, you must wrap it in some data structure and unpack it
   after trampoline returns."
   {:added "1.0"}
-  ([f]
+  ([^Callable f]
    (let [ret (f)]
      (if (fn? ret)
        (recur ret)
        ret)))
-  ([f & args]
+  ([^Callable f & args]
    (trampoline #(apply f args))))
 
 (defmacro while
@@ -3535,7 +3537,7 @@
   to results and, when calls with the same arguments are repeated often, has
   higher performance at the expense of higher memory use."
   {:added "1.0"}
-  [f]
+  [^Callable f]
   (let [mem (atom {})]
     (fn [& args]
       (if-let [e (find @mem args)]
@@ -3589,7 +3591,7 @@
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
   {:added "1.0"}
-  [coll] (not (seq coll)))
+  [^Seqable coll] (not (seq coll)))
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
   `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
