@@ -711,12 +711,12 @@
   applying f to that result and the 2nd item, etc. If coll contains no
   items, returns val and f is not called."
   {:added "1.0"}
-  ([^Callable f ^Seqable coll]
+  ([^Callable f coll]
    (let [s (seq coll)]
      (if s
        (reduce f (first s) (next s))
        (f))))
-  ([^Callable f val ^Seqable coll]
+  ([^Callable f val coll]
    (let [s (seq coll)]
      (if s
        (recur f (f val (first s)) (next s))
@@ -3643,18 +3643,18 @@
   positions (y, z). Note that the function f can take any number of
   arguments, not just the one(s) being nil-patched."
   {:added "1.0"}
-  ([f x]
+  ([^Callable f x]
    (fn
      ([a] (f (if (nil? a) x a)))
      ([a b] (f (if (nil? a) x a) b))
      ([a b c] (f (if (nil? a) x a) b c))
      ([a b c & ds] (apply f (if (nil? a) x a) b c ds))))
-  ([f x y]
+  ([^Callable f x y]
    (fn
      ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) c))
      ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
-  ([f x y z]
+  ([^Callable f x y z]
    (fn
      ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
@@ -3664,9 +3664,9 @@
   "Returns a lazy sequence of lists like partition, but may include
   partitions with fewer than n items at the end."
   {:added "1.0"}
-  ([n coll]
+  ([^Number n ^Seqable coll]
    (partition-all n n coll))
-  ([n step coll]
+  ([^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [seg (doall (take n s))]
@@ -3711,20 +3711,20 @@
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
   {:added "1.0"}
-  ([f coll]
+  ([^Callable f coll]
    (reduce (fn [v o] (conj v (f o))) [] coll))
-  ([f c1 c2]
+  ([^Callable f c1 c2]
    (into [] (map f c1 c2)))
-  ([f c1 c2 c3]
+  ([^Callable f c1 c2 c3]
    (into [] (map f c1 c2 c3)))
-  ([f c1 c2 c3 & colls]
+  ([^Callable f c1 c2 c3 & colls]
    (into [] (apply map f c1 c2 c3 colls))))
 
 (defn filterv
   "Returns a vector of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  [pred coll]
+  [^Callable pred coll]
   (reduce (fn [v o] (if (pred o) (conj v o) v))
           []
           coll))
@@ -3732,14 +3732,14 @@
 (defn slurp
   "Opens file f and reads all its contents, returning a string."
   {:added "1.0"}
-  [f]
+  [^String f]
   (slurp__ f))
 
 (defn spit
   "Opposite of slurp.  Opens file f, writes content, then
   closes f."
   {:added "1.0"}
-  [f content]
+  [^String f ^String content]
   (spit__ f content))
 
 (defn flatten
@@ -3756,7 +3756,7 @@
   f on each element. The value at each key will be a vector of the
   corresponding elements, in the order they appeared in coll."
   {:added "1.0"}
-  [f coll]
+  [^Callable f coll]
   (reduce
    (fn [ret x]
      (let [k (f x)]
@@ -3767,7 +3767,7 @@
   "Applies f to each value in coll, splitting it each time f returns a
   new value.  Returns a lazy seq of partitions."
   {:added "1.0"}
-  [f coll]
+  [^Callable f ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (let [fst (first s)
@@ -3788,12 +3788,12 @@
   "Returns a lazy seq of the intermediate values of the reduction (as
   per reduce) of coll by f, starting with init."
   {:added "1.0"}
-  ([f coll]
+  ([^Callable f ^Seqable coll]
    (lazy-seq
     (if-let [s (seq coll)]
       (reductions f (first s) (rest s))
       (list (f)))))
-  ([f init coll]
+  ([^Callable f init ^Seqable coll]
    (cons init
          (lazy-seq
           (when-let [s (seq coll)]

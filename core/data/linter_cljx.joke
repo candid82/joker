@@ -229,7 +229,7 @@
   ([pred retf]))
 
 ;; Clojure core functions with arities not supported by Joker
-(defn spit [f content & options])
+(defn spit [^String f ^String content & options])
 
 ;; Clojure core vars not supported by Joker
 
@@ -316,16 +316,16 @@
 
 (def __partition-by__ partition-by)
 (defn partition-by
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__partition-by__ x coll)))
 
 (def __partition-all__ partition-all)
 (defn partition-all
-  ([n])
-  ([n coll]
+  ([^Number n])
+  ([^Number n ^Seqable coll]
    (__partition-all__ n coll))
-  ([n step coll]
+  ([^Number n ^Number step ^Seqable coll]
    (__partition-all__ n step coll)))
 
 (def __map-indexed__ map-indexed)
