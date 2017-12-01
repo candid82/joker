@@ -330,20 +330,20 @@
 
 (def __map-indexed__ map-indexed)
 (defn map-indexed
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__map-indexed__ x coll)))
 
 (def __keep__ keep)
 (defn keep
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__keep__ x coll)))
 
 (def __keep-indexed__ keep-indexed)
 (defn keep-indexed
-  ([x])
-  ([x coll]
+  ([^Callable x])
+  ([^Callable x ^Seqable coll]
    (__keep-indexed__ x coll)))
 
 (defn cat
@@ -352,13 +352,13 @@
 (def __dedupe__ dedupe)
 (defn dedupe
   ([])
-  ([coll]
+  ([^Seqable coll]
    (__dedupe__ coll)))
 
 (def __random-sample__ random-sample)
 (defn random-sample
-  ([x])
-  ([x coll]
+  ([^Number x])
+  ([^Number x ^Seqable coll]
    (__random-sample__ x coll)))
 
 (def __sequence__ sequence)
