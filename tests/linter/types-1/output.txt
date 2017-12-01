@@ -284,3 +284,6 @@ tests/linter/types-1/input.clj:186:9: Parse warning: arg[0] of #'joker.core/dedu
 tests/linter/types-1/input.clj:187:16: Parse warning: arg[0] of #'joker.core/random-sample must have type Number, got String
 tests/linter/types-1/input.clj:187:20: Parse warning: arg[1] of #'joker.core/random-sample must have type Seqable, got Int
 tests/linter/types-1/input.clj:188:7: Parse warning: arg[0] of #'joker.core/run! must have type Callable, got Int
+tests/linter/types-1/input.clj:189:12: Parse warning: arg[0] of #'joker.core/halt-when must have type Callable, got Int
+tests/linter/types-1/input.clj:189:14: Parse warning: arg[1] of #'joker.core/halt-when must have type Callable, got Int
+tests/linter/types-1/input.clj:190:6: Parse warning: arg[0] of #'joker.core/cat must have type Callable, got Int

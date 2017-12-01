@@ -186,3 +186,5 @@
 (dedupe 1)
 (random-sample "1" 1)
 (run! 1 2)
+(halt-when 1 2)
+(cat 1)

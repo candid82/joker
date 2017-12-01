@@ -225,8 +225,8 @@
 (defn inst? [x])
 (defn uuid? [x])
 (defn halt-when
-  ([pred])
-  ([pred retf]))
+  ([^Callable pred])
+  ([^Callable pred ^Callable retf]))
 
 ;; Clojure core functions with arities not supported by Joker
 (defn spit [^String f ^String content & options])
@@ -347,7 +347,7 @@
    (__keep-indexed__ x coll)))
 
 (defn cat
-  [x])
+  [^Callable x])
 
 (def __dedupe__ dedupe)
 (defn dedupe
