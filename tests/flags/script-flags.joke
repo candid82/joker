@@ -1,0 +1,1 @@
+(println (subvec (joker.os/args) 2))

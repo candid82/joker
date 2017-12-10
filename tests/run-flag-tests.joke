@@ -10,14 +10,14 @@
          (joker.string/join "\n"))))
 
 (defn test-flags
-  [description flags expected]
+  [out description flags expected]
   (let [pwd (get (joker.os/env) "PWD")
-        flag-parts (joker.string/split flags #" ")
+        flag-parts (joker.string/split flags #"\s+")
         stdin? (some #(= "<" %) flag-parts)
         cmd (str pwd "/joker")
         output (if stdin?
-                 (:err (joker.os/sh "sh" "-c" (str cmd " " flags)))
-                 (:err (apply (partial joker.os/sh cmd) flag-parts)))
+                 (out (joker.os/sh "sh" "-c" (str cmd " " flags)))
+                 (out (apply (partial joker.os/sh cmd) flag-parts)))
         output (clean output)]
     (when-not (= output expected)
       (println "FAILED: testing" description "(" flags ")")
@@ -29,18 +29,18 @@
       (var-set #'exit-code 1))))
 
 (defn testing
-  [description & tests]
+  [out description & tests]
   (let [tests (partition 2 tests)]
     (doseq [[flags expected] tests]
-      (test-flags description flags expected))))
+      (test-flags out description flags expected))))
 
-(testing "auto detect dialect from filename"
+(testing :err "auto detect dialect from filename"
   "--lint tests/flags/input.clj"
   ""
   "--lint tests/flags/input-warning.clj"
   "tests/flags/input-warning.clj:1:7: Parse warning: unused binding: a")
 
-(testing "specify joker dialect"
+(testing :err "specify joker dialect"
   "--lintjoker tests/flags/input.joke"
   ""
 
@@ -53,7 +53,7 @@
   "--lint --dialect joker tests/flags/input.cljs"
   "tests/flags/input.cljs:1:7: Parse error: Unable to resolve symbol: js/console")
 
-(testing "specify clj dialect"
+(testing :err "specify clj dialect"
   "--lintclj tests/flags/input.clj"
   ""
 
@@ -66,7 +66,7 @@
   "--lint --dialect clj tests/flags/input.cljs"
   "tests/flags/input.cljs:1:7: Parse error: Unable to resolve symbol: js/console")
 
-(testing "specify cljs dialect"
+(testing :err "specify cljs dialect"
   "--lintcljs tests/flags/input.cljs"
   ""
 
@@ -79,7 +79,7 @@
   "--lintcljs tests/flags/input.clj"
   "tests/flags/input.clj:1:2: Parse error: Unable to resolve symbol: clojure.string/split")
 
-(testing "reading from stdin"
+(testing :err "reading from stdin"
   "--lint --dialect edn -- < tests/flags/input.edn"
   ""
 
@@ -101,11 +101,33 @@
   "--lint --dialect joker -- < tests/flags/input.joke"
   "")
 
-(testing "working directory override"
+(testing :err "working directory override"
   "--lint --dialect clj -- < tests/flags/macro.clj"
   "<stdin>:4:11: Parse error: Unable to resolve symbol: something"
 
   "--lint --dialect clj --working-dir tests/flags/config -- < tests/flags/macro.clj"
   "")
+
+(testing :out "script args don't cause errors"
+  "tests/flags/script-flags.joke -go-style-flag -otherflag"
+  "[-go-style-flag -otherflag]"
+
+  "tests/flags/script-flags.joke --unix-style-flag --otherflag"
+  "[--unix-style-flag --otherflag]"
+
+  "tests/flags/script-flags.joke --unix-style-flag-with-value foobar"
+  "[--unix-style-flag-with-value foobar]"
+
+  "tests/flags/script-flags.joke --unix-style-flag-with-value=foobar"
+  "[--unix-style-flag-with-value=foobar]"
+
+  "tests/flags/script-flags.joke --short-hand-flags -a -b -c"
+  "[--short-hand-flags -a -b -c]"
+
+  "tests/flags/script-flags.joke --short-hand-flags -abc"
+  "[--short-hand-flags -abc]"
+
+  "tests/flags/script-flags.joke -- something that is not a flag"
+  "[-- something that is not a flag]")
 
 (joker.os/exit exit-code)
