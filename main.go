@@ -266,5 +266,10 @@ func main() {
 		lintFile(filename, dialect, workingDir)
 		return
 	}
-	processFile(filename, phase)
+	if phase == EVAL {
+		// First argument is a filename, subsequent arguments are script arguments.
+		processFile(os.Args[1], phase)
+	} else {
+		processFile(filename, phase)
+	}
 }
