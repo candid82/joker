@@ -1095,14 +1095,7 @@ func Read(reader *Reader) (Object, bool) {
 func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			switch r.(type) {
-			case *EvalError:
-				err = r.(error)
-			case ReadError:
-				err = r.(error)
-			default:
-				panic(r)
-			}
+			err = r.(error)
 		}
 	}()
 	eatWhitespace(reader)

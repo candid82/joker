@@ -37,6 +37,7 @@ const (
 	CLJS
 	JOKER
 	EDN
+	UNKNOWN
 )
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
