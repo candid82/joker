@@ -1,17 +1,23 @@
-tests/linter/function-call/input.clj:19:1: Parse warning: Wrong number of args (0) passed to #'joker.core/map
-tests/linter/function-call/input.clj:20:1: Parse warning: #'joker.core/*assert* is not a function
-tests/linter/function-call/input.clj:21:1: Parse warning: Wrong number of args (1) passed to #'user/f1
-tests/linter/function-call/input.clj:22:1: Parse warning: Wrong number of args (0) passed to #'user/f2
-tests/linter/function-call/input.clj:23:1: Parse warning: #'user/v1 is not a function
-tests/linter/function-call/input.clj:24:1: Parse warning: 1 is not a function
-tests/linter/function-call/input.clj:25:1: Parse warning:  is not a function
-tests/linter/function-call/input.clj:26:1: Parse warning: Wrong number of args (1) passed to fn
-tests/linter/function-call/input.clj:27:1: Parse warning: Wrong number of args (0) passed to :t
-tests/linter/function-call/input.clj:28:1: Parse warning: Wrong number of args (3) passed to :t
-tests/linter/function-call/input.clj:29:1: Parse warning: Wrong number of args (1) passed to #'joker.core/=
-tests/linter/function-call/input.clj:30:1: Parse warning: Wrong number of args (1) passed to #'joker.core/not=
-tests/linter/function-call/input.clj:31:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<
-tests/linter/function-call/input.clj:32:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>
-tests/linter/function-call/input.clj:33:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<=
-tests/linter/function-call/input.clj:34:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>=
-tests/linter/function-call/input.clj:35:1: Parse warning: Wrong number of args (1) passed to #'joker.core/==
+tests/linter/function-call/input.clj:21:1: Parse warning: Wrong number of args (0) passed to #'joker.core/map
+tests/linter/function-call/input.clj:22:1: Parse warning: #'joker.core/*assert* is not a function
+tests/linter/function-call/input.clj:23:1: Parse warning: Wrong number of args (1) passed to #'user/f1
+tests/linter/function-call/input.clj:24:1: Parse warning: Wrong number of args (0) passed to #'user/f2
+tests/linter/function-call/input.clj:25:1: Parse warning: #'user/v1 is not a function
+tests/linter/function-call/input.clj:26:1: Parse warning: 1 is not a function
+tests/linter/function-call/input.clj:27:1: Parse warning:  is not a function
+tests/linter/function-call/input.clj:28:1: Parse warning: Wrong number of args (1) passed to fn
+tests/linter/function-call/input.clj:29:1: Parse warning: Wrong number of args (0) passed to :t
+tests/linter/function-call/input.clj:30:1: Parse warning: Wrong number of args (3) passed to :t
+tests/linter/function-call/input.clj:31:1: Parse warning: Wrong number of args (0) passed to a map
+tests/linter/function-call/input.clj:32:1: Parse warning: Wrong number of args (3) passed to a map
+tests/linter/function-call/input.clj:33:1: Parse warning: Wrong number of args (0) passed to a set
+tests/linter/function-call/input.clj:34:1: Parse warning: Wrong number of args (2) passed to a set
+tests/linter/function-call/input.clj:35:1: Parse warning: Wrong number of args (0) passed to a vector
+tests/linter/function-call/input.clj:36:1: Parse warning: Wrong number of args (2) passed to a vector
+tests/linter/function-call/input.clj:37:1: Parse warning: Wrong number of args (1) passed to #'joker.core/=
+tests/linter/function-call/input.clj:38:1: Parse warning: Wrong number of args (1) passed to #'joker.core/not=
+tests/linter/function-call/input.clj:39:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<
+tests/linter/function-call/input.clj:40:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>
+tests/linter/function-call/input.clj:41:1: Parse warning: Wrong number of args (1) passed to #'joker.core/<=
+tests/linter/function-call/input.clj:42:1: Parse warning: Wrong number of args (1) passed to #'joker.core/>=
+tests/linter/function-call/input.clj:43:1: Parse warning: Wrong number of args (1) passed to #'joker.core/==

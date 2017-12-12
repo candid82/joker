@@ -1257,9 +1257,22 @@ func getCreateNsVar(ctx *ParseContext) *Var {
 }
 
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
+	argsCount := len(call.args)
 	switch expr := expr.(type) {
 	case *FnExpr:
 		reportWrongArity(expr, isMacro, call, pos)
+	case *MapExpr:
+		if argsCount == 0 || argsCount > 2 {
+			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a map", argsCount))
+		}
+	case *SetExpr:
+		if argsCount == 0 || argsCount > 1 {
+			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a set", argsCount))
+		}
+	case *VectorExpr:
+		if argsCount == 0 || argsCount > 1 {
+			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a vector", argsCount))
+		}
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
 			reportNotAFunction(pos, call.name)
@@ -1267,7 +1280,6 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 		}
 		switch expr.obj.(type) {
 		case Keyword:
-			argsCount := len(call.args)
 			if argsCount == 0 || argsCount > 2 {
 				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.name))
 			}
