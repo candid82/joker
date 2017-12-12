@@ -1269,10 +1269,6 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 		if argsCount == 0 || argsCount > 1 {
 			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a set", argsCount))
 		}
-	case *VectorExpr:
-		if argsCount == 0 || argsCount > 1 {
-			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a vector", argsCount))
-		}
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
 			reportNotAFunction(pos, call.name)
