@@ -1214,7 +1214,7 @@
   second item in second form, etc."
   {:added "1.0"}
   [x & forms]
-  (when (and *linter-mode* (not (seq forms)))
+  (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
@@ -1232,7 +1232,7 @@
   last item in second form, etc."
   {:added "1.0"}
   [x & forms]
-  (when (and *linter-mode* (not (seq forms)))
+  (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in ->>" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
@@ -3982,7 +3982,7 @@
   {:added "1.0"}
   [expr & clauses]
   (assert (even? (count clauses)))
-  (when (and *linter-mode* (not (seq clauses)))
+  (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (-> ~g ~step) ~g))
@@ -4001,7 +4001,7 @@
   {:added "1.0"}
   [expr & clauses]
   (assert (even? (count clauses)))
-  (when (and *linter-mode* (not (seq clauses)))
+  (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (->> ~g ~step) ~g))
@@ -4018,7 +4018,7 @@
   successive form, returning the result of the last form."
   {:added "1.0"}
   [expr name & forms]
-  (when (and *linter-mode* (not (seq forms)))
+  (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in as->" {:form &form :_prefix "Parse warning"})))
   `(let [~name ~expr
          ~@(interleave (repeat name) (butlast forms))]
@@ -4031,7 +4031,7 @@
   and when that result is not nil, through the next etc."
   {:added "1.0"}
   [expr & forms]
-  (when (and *linter-mode* (not (seq forms)))
+  (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in some->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))
@@ -4047,7 +4047,7 @@
   and when that result is not nil, through the next etc."
   {:added "1.0"}
   [expr & forms]
-  (when (and *linter-mode* (not (seq forms)))
+  (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-err (ex-info "No forms in some->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))
