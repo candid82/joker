@@ -15,3 +15,8 @@ tests/linter/symbol-resolution/input.clj:48:2: Parse error: Unable to resolve sy
 tests/linter/symbol-resolution/input.clj:49:2: Parse error: Unable to resolve symbol: joker.time/sleep
 tests/linter/symbol-resolution/input.clj:50:2: Parse error: Unable to resolve symbol: joker.json/read-string
 tests/linter/symbol-resolution/input.clj:51:2: Parse error: Unable to resolve symbol: joker.base64/decode-string
+tests/linter/symbol-resolution/input.clj:52:2: Parse error: Unable to resolve symbol: pprint
+tests/linter/symbol-resolution/input.clj:53:2: Parse error: Unable to resolve symbol: pr-err
+tests/linter/symbol-resolution/input.clj:54:2: Parse error: Unable to resolve symbol: prn-err
+tests/linter/symbol-resolution/input.clj:55:2: Parse error: Unable to resolve symbol: print-err
+tests/linter/symbol-resolution/input.clj:56:2: Parse error: Unable to resolve symbol: println-err
