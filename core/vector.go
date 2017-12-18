@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"io"
 )
 
 type (
@@ -155,6 +156,10 @@ func (vseq *VectorSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
 }
 
+func (seq *VectorSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
+}
+
 func (vseq *VectorSeq) WithMeta(meta Map) Object {
 	res := *vseq
 	res.meta = SafeMerge(res.meta, meta)
@@ -203,6 +208,10 @@ func (vseq *VectorRSeq) Equals(other interface{}) bool {
 
 func (vseq *VectorRSeq) ToString(escape bool) string {
 	return SeqToString(vseq, escape)
+}
+
+func (seq *VectorRSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (vseq *VectorRSeq) WithMeta(meta Map) Object {
@@ -450,4 +459,16 @@ func (v *Vector) kvreduce(c Callable, init Object) Object {
 		res = c.Call([]Object{res, Int{I: i}, v.Nth(i)})
 	}
 	return res
+}
+
+func (v *Vector) Pprint(w io.Writer, indent int) int {
+	fmt.Fprint(w, "[")
+	for i := 0; i < v.count-1; i++ {
+		pprintObject(v.at(i), indent+1, w)
+		fmt.Fprint(w, "\n")
+		writeIndent(w, indent+1)
+	}
+	i := pprintObject(v.at(v.count-1), indent+1, w)
+	fmt.Fprint(w, "]")
+	return i + 1
 }

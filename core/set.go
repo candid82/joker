@@ -2,6 +2,8 @@ package core
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 )
 
 type (
@@ -114,4 +116,18 @@ func NewSetFromSeq(s Seq) *MapSet {
 		s = s.Rest()
 	}
 	return res
+}
+
+func (set *MapSet) Pprint(w io.Writer, indent int) int {
+	var i int
+	fmt.Fprint(w, "#{")
+	for iter := iter(set.m.Keys()); iter.HasNext(); {
+		i = pprintObject(iter.Next(), indent+2, w)
+		if iter.HasNext() {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+2)
+		}
+	}
+	fmt.Fprint(w, "}")
+	return i + 1
 }

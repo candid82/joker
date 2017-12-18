@@ -1,5 +1,7 @@
 package core
 
+import "io"
+
 type List struct {
 	InfoHolder
 	MetaHolder
@@ -43,6 +45,10 @@ func (list *List) Conj(obj Object) Conjable {
 
 func (list *List) ToString(escape bool) string {
 	return SeqToString(list, escape)
+}
+
+func (seq *List) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (list *List) Equals(other interface{}) bool {

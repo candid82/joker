@@ -1,6 +1,10 @@
 package core
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"io"
+)
 
 type (
 	Map interface {
@@ -104,4 +108,23 @@ func callMap(m Map, args []Object) Object {
 		return args[1]
 	}
 	return NIL
+}
+
+func pprintMap(m Map, w io.Writer, indent int) int {
+	var i int
+	fmt.Fprint(w, "{")
+	for iter := m.Iter(); ; {
+		p := iter.Next()
+		i = pprintObject(p.Key, indent+1, w)
+		fmt.Fprint(w, " ")
+		i = pprintObject(p.Value, i+1, w)
+		if iter.HasNext() {
+			fmt.Fprint(w, ",\n")
+			writeIndent(w, indent+1)
+		} else {
+			break
+		}
+	}
+	fmt.Fprint(w, "}")
+	return i + 1
 }

@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"io"
 )
 
 type (
@@ -82,6 +83,10 @@ func (seq *MappingSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
+func (seq *MappingSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
+}
+
 func (seq *MappingSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -139,6 +144,10 @@ func (seq *LazySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
+func (seq *LazySeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
+}
+
 func (seq *LazySeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -184,6 +193,10 @@ func (seq *ArraySeq) Equals(other interface{}) bool {
 
 func (seq *ArraySeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
+}
+
+func (seq *ArraySeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (seq *ArraySeq) WithMeta(meta Map) Object {
@@ -253,6 +266,10 @@ func (seq *ConsSeq) Equals(other interface{}) bool {
 
 func (seq *ConsSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
+}
+
+func (seq *ConsSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (seq *ConsSeq) GetType() *Type {
@@ -376,4 +393,18 @@ func hashOrdered(seq Seq) uint32 {
 		seq = seq.Rest()
 	}
 	return h.Sum32()
+}
+
+func pprintSeq(seq Seq, w io.Writer, indent int) int {
+	var i int
+	fmt.Fprint(w, "(")
+	for iter := iter(seq); iter.HasNext(); {
+		i = pprintObject(iter.Next(), indent, w)
+		if iter.HasNext() {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+		}
+	}
+	fmt.Fprint(w, ")")
+	return i + 1
 }

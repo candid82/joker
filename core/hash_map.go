@@ -1,5 +1,7 @@
 package core
 
+import "io"
+
 type (
 	Box struct {
 		val interface{}
@@ -174,6 +176,10 @@ func (s *ArrayNodeSeq) ToString(escape bool) string {
 	return SeqToString(s, escape)
 }
 
+func (seq *ArrayNodeSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
+}
+
 func (s *ArrayNodeSeq) GetType() *Type {
 	return TYPE.ArrayNodeSeq
 }
@@ -257,6 +263,10 @@ func (s *NodeSeq) Equals(other interface{}) bool {
 
 func (s *NodeSeq) ToString(escape bool) string {
 	return SeqToString(s, escape)
+}
+
+func (seq *NodeSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (s *NodeSeq) GetType() *Type {

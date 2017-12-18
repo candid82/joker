@@ -195,6 +195,9 @@ type (
 	Printer interface {
 		Print(writer io.Writer, printReadably bool)
 	}
+	Pprinter interface {
+		Pprint(writer io.Writer, indent int) int
+	}
 	Collection interface {
 		Object
 		Counted

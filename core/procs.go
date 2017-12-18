@@ -949,6 +949,14 @@ var procType Proc = func(args []Object) Object {
 	return args[0].GetType()
 }
 
+var procPprint Proc = func(args []Object) Object {
+	obj := args[0]
+	w := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
+	pprintObject(obj, 0, w)
+	fmt.Fprint(w, "\n")
+	return NIL
+}
+
 func printObject(obj Object, w io.Writer) {
 	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
 	switch obj := obj.(type) {
@@ -1657,6 +1665,7 @@ func init() {
 	intern("bigint__", procBigInt)
 	intern("bigfloat__", procBigFloat)
 	intern("pr__", procPr)
+	intern("pprint__", procPprint)
 	intern("newline__", procNewline)
 	intern("flush__", procFlush)
 	intern("read__", procRead)

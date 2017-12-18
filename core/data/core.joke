@@ -2065,6 +2065,11 @@
          :added "1.0"}
   pr pr__)
 
+(defn pprint
+  "Pretty prints x to the output stream that is the current value of *out*."
+  [x]
+  (pprint__ x))
+
 (defn newline
   "Writes a platform-specific newline to *out*"
   {:added "1.0"}

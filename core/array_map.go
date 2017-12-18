@@ -1,5 +1,7 @@
 package core
 
+import "io"
+
 type (
 	ArrayMap struct {
 		InfoHolder
@@ -48,6 +50,10 @@ func (seq *ArrayMapSeq) Equals(other interface{}) bool {
 
 func (seq *ArrayMapSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
+}
+
+func (seq *ArrayMapSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
 }
 
 func (seq *ArrayMapSeq) WithMeta(meta Map) Object {
@@ -264,4 +270,8 @@ func (m *ArrayMap) Call(args []Object) Object {
 
 func (m *ArrayMap) Empty() Collection {
 	return EmptyArrayMap()
+}
+
+func (m *ArrayMap) Pprint(w io.Writer, indent int) int {
+	return pprintMap(m, w, indent)
 }
