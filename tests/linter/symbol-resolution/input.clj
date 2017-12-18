@@ -49,4 +49,9 @@ uuu
 (joker.time/sleep 10)
 (joker.json/read-string "")
 (joker.base64/decode-string "")
+(pprint 1)
+(pr-err 1)
+(prn-err 1)
+(print-err 1)
+(println-err 1)
 
