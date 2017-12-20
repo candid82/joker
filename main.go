@@ -227,6 +227,7 @@ func main() {
 	phase := EVAL
 	lint := false
 	dialect := UNKNOWN
+	expr := ""
 	length := len(os.Args) - 1
 	for i := 1; i < length; i++ {
 		switch os.Args[i] {
@@ -256,6 +257,10 @@ func main() {
 			if i < length-1 {
 				dialect = dialectFromArg(os.Args[i+1])
 			}
+		case "-e":
+			if i < length {
+				expr = os.Args[i+1]
+			}
 		}
 	}
 	filename := os.Args[length]
@@ -267,8 +272,13 @@ func main() {
 		return
 	}
 	if phase == EVAL {
-		// First argument is a filename, subsequent arguments are script arguments.
-		processFile(os.Args[1], phase)
+		if expr == "" {
+			// First argument is a filename, subsequent arguments are script arguments.
+			processFile(os.Args[1], phase)
+		} else {
+			reader := NewReader(strings.NewReader(expr), "<expr>")
+			ProcessReader(reader, "", phase)
+		}
 	} else {
 		processFile(filename, phase)
 	}
