@@ -119,7 +119,7 @@ func NewSetFromSeq(s Seq) *MapSet {
 }
 
 func (set *MapSet) Pprint(w io.Writer, indent int) int {
-	var i int
+	i := indent + 1
 	fmt.Fprint(w, "#{")
 	for iter := iter(set.m.Keys()); iter.HasNext(); {
 		i = pprintObject(iter.Next(), indent+2, w)

@@ -462,13 +462,16 @@ func (v *Vector) kvreduce(c Callable, init Object) Object {
 }
 
 func (v *Vector) Pprint(w io.Writer, indent int) int {
+	ind := indent + 1
 	fmt.Fprint(w, "[")
-	for i := 0; i < v.count-1; i++ {
-		pprintObject(v.at(i), indent+1, w)
-		fmt.Fprint(w, "\n")
-		writeIndent(w, indent+1)
+	if v.count > 0 {
+		for i := 0; i < v.count-1; i++ {
+			pprintObject(v.at(i), indent+1, w)
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+		}
+		ind = pprintObject(v.at(v.count-1), indent+1, w)
 	}
-	i := pprintObject(v.at(v.count-1), indent+1, w)
 	fmt.Fprint(w, "]")
-	return i + 1
+	return ind + 1
 }

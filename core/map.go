@@ -111,18 +111,20 @@ func callMap(m Map, args []Object) Object {
 }
 
 func pprintMap(m Map, w io.Writer, indent int) int {
-	var i int
+	i := indent + 1
 	fmt.Fprint(w, "{")
-	for iter := m.Iter(); ; {
-		p := iter.Next()
-		i = pprintObject(p.Key, indent+1, w)
-		fmt.Fprint(w, " ")
-		i = pprintObject(p.Value, i+1, w)
-		if iter.HasNext() {
-			fmt.Fprint(w, ",\n")
-			writeIndent(w, indent+1)
-		} else {
-			break
+	if m.Count() > 0 {
+		for iter := m.Iter(); ; {
+			p := iter.Next()
+			i = pprintObject(p.Key, indent+1, w)
+			fmt.Fprint(w, " ")
+			i = pprintObject(p.Value, i+1, w)
+			if iter.HasNext() {
+				fmt.Fprint(w, ",\n")
+				writeIndent(w, indent+1)
+			} else {
+				break
+			}
 		}
 	}
 	fmt.Fprint(w, "}")

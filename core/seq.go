@@ -396,7 +396,7 @@ func hashOrdered(seq Seq) uint32 {
 }
 
 func pprintSeq(seq Seq, w io.Writer, indent int) int {
-	var i int
+	i := indent + 1
 	fmt.Fprint(w, "(")
 	for iter := iter(seq); iter.HasNext(); {
 		i = pprintObject(iter.Next(), indent, w)

@@ -844,3 +844,7 @@ func NewHashMap(keyvals ...Object) *HashMap {
 func (m *HashMap) Empty() Collection {
 	return EmptyHashMap
 }
+
+func (m *HashMap) Pprint(w io.Writer, indent int) int {
+	return pprintMap(m, w, indent)
+}
