@@ -20,7 +20,7 @@ type (
 	}
 )
 
-const (
+var (
 	HASHMAP_THRESHOLD int = 16
 )
 

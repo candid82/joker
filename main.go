@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"os"
+	"strconv"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -260,6 +262,19 @@ func main() {
 		case "-e":
 			if i < length {
 				expr = os.Args[i+1]
+			}
+		case "--hashmap-threshold":
+			if i < length {
+				i, err := strconv.Atoi(os.Args[i+1])
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error: ", err)
+					return
+				}
+				if i < 0 {
+					HASHMAP_THRESHOLD = math.MaxInt64
+				} else {
+					HASHMAP_THRESHOLD = i
+				}
 			}
 		}
 	}
