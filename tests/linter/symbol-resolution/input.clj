@@ -28,6 +28,7 @@
 (clojure.test/deftest u7)
 #'s/v
 #'e3
+(case 1 r 2 1 3)
 
 ;; Should FAIL
 
@@ -54,4 +55,6 @@ uuu
 (prn-err 1)
 (print-err 1)
 (println-err 1)
+(case 1 r 2 1 h)
+
 

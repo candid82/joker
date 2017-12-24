@@ -3696,7 +3696,7 @@
   (let [parts (partition-all 2 clauses)
         setized (for [[test then] parts]
                   (if then
-                    [(if (list? test) (set test) (set [test])) then]
+                    [(if (list? test) (list 'quote (set test)) (list 'quote (set [test]))) then]
                     [test]))
         transformed-clauses (apply concat setized)]
     `(condp contains? ~expr
