@@ -1003,12 +1003,12 @@ func readFromReader(reader io.RuneReader) Object {
 	return obj
 }
 
-func EnsureIOReader(args []Object, index int) io.Reader {
+func EnsureRuneReader(args []Object, index int) io.RuneReader {
 	switch c := args[index].(type) {
-	case io.Reader:
+	case io.RuneReader:
 		return c
 	default:
-		panic(RT.NewArgTypeError(index, c, "IOReader"))
+		panic(RT.NewArgTypeError(index, c, "RuneReader"))
 	}
 }
 
@@ -1046,8 +1046,8 @@ func AssertIOWriter(obj Object, msg string) io.Writer {
 }
 
 var procRead Proc = func(args []Object) Object {
-	f := EnsureIOReader(args, 0)
-	return readFromReader(bufio.NewReader(f))
+	f := EnsureRuneReader(args, 0)
+	return readFromReader(f)
 }
 
 var procReadString Proc = func(args []Object) Object {

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bufio"
 	"os"
 	"strconv"
 	"strings"
@@ -49,7 +50,7 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
 	res.stdout.Value = &File{stdout}
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &File{stdin}
+	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
 	res.stderr.Value = &File{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))

@@ -221,69 +221,70 @@ type (
 		IsRealized() bool
 	}
 	Types struct {
-		Associative   *Type
-		Callable      *Type
-		Collection    *Type
-		Comparable    *Type
-		Comparator    *Type
-		Counted       *Type
-		Deref         *Type
-		Error         *Type
-		Gettable      *Type
-		Indexed       *Type
-		IOReader      *Type
-		KVReduce      *Type
-		Map           *Type
-		Meta          *Type
-		Named         *Type
-		Number        *Type
-		Pending       *Type
-		Ref           *Type
-		Reversible    *Type
-		Seq           *Type
-		Seqable       *Type
-		Sequential    *Type
-		Set           *Type
-		Stack         *Type
-		ArrayMap      *Type
-		ArrayMapSeq   *Type
-		ArrayNodeSeq  *Type
-		ArraySeq      *Type
-		MapSet        *Type
-		Atom          *Type
-		BigFloat      *Type
-		BigInt        *Type
-		Bool          *Type
-		Buffer        *Type
-		Char          *Type
-		ConsSeq       *Type
-		Delay         *Type
-		Double        *Type
-		EvalError     *Type
-		ExInfo        *Type
-		Fn            *Type
-		File          *Type
-		HashMap       *Type
-		Int           *Type
-		Keyword       *Type
-		LazySeq       *Type
-		List          *Type
-		MappingSeq    *Type
-		Namespace     *Type
-		Nil           *Type
-		NodeSeq       *Type
-		ParseError    *Type
-		Proc          *Type
-		Ratio         *Type
-		RecurBindings *Type
-		Regex         *Type
-		String        *Type
-		Symbol        *Type
-		Type          *Type
-		Var           *Type
-		Vector        *Type
-		VectorRSeq    *Type
-		VectorSeq     *Type
+		Associative    *Type
+		Callable       *Type
+		Collection     *Type
+		Comparable     *Type
+		Comparator     *Type
+		Counted        *Type
+		Deref          *Type
+		Error          *Type
+		Gettable       *Type
+		Indexed        *Type
+		IOReader       *Type
+		KVReduce       *Type
+		Map            *Type
+		Meta           *Type
+		Named          *Type
+		Number         *Type
+		Pending        *Type
+		Ref            *Type
+		Reversible     *Type
+		Seq            *Type
+		Seqable        *Type
+		Sequential     *Type
+		Set            *Type
+		Stack          *Type
+		ArrayMap       *Type
+		ArrayMapSeq    *Type
+		ArrayNodeSeq   *Type
+		ArraySeq       *Type
+		MapSet         *Type
+		Atom           *Type
+		BigFloat       *Type
+		BigInt         *Type
+		Bool           *Type
+		Buffer         *Type
+		Char           *Type
+		ConsSeq        *Type
+		Delay          *Type
+		Double         *Type
+		EvalError      *Type
+		ExInfo         *Type
+		Fn             *Type
+		File           *Type
+		BufferedReader *Type
+		HashMap        *Type
+		Int            *Type
+		Keyword        *Type
+		LazySeq        *Type
+		List           *Type
+		MappingSeq     *Type
+		Namespace      *Type
+		Nil            *Type
+		NodeSeq        *Type
+		ParseError     *Type
+		Proc           *Type
+		Ratio          *Type
+		RecurBindings  *Type
+		Regex          *Type
+		String         *Type
+		Symbol         *Type
+		Type           *Type
+		Var            *Type
+		Vector         *Type
+		VectorRSeq     *Type
+		VectorSeq      *Type
 	}
 )
 
@@ -310,69 +311,70 @@ func regInterface(name string, inst interface{}) *Type {
 
 func init() {
 	TYPE = Types{
-		Associative:   regInterface("Associative", (*Associative)(nil)),
-		Callable:      regInterface("Callable", (*Callable)(nil)),
-		Collection:    regInterface("Collection", (*Collection)(nil)),
-		Comparable:    regInterface("Comparable", (*Comparable)(nil)),
-		Comparator:    regInterface("Comparator", (*Comparator)(nil)),
-		Counted:       regInterface("Counted", (*Counted)(nil)),
-		Deref:         regInterface("Deref", (*Deref)(nil)),
-		Error:         regInterface("Error", (*Error)(nil)),
-		Gettable:      regInterface("Gettable", (*Gettable)(nil)),
-		Indexed:       regInterface("Indexed", (*Indexed)(nil)),
-		IOReader:      regInterface("IOReader", (*io.Reader)(nil)),
-		KVReduce:      regInterface("KVReduce", (*KVReduce)(nil)),
-		Map:           regInterface("Map", (*Map)(nil)),
-		Meta:          regInterface("Meta", (*Meta)(nil)),
-		Named:         regInterface("Named", (*Named)(nil)),
-		Number:        regInterface("Number", (*Number)(nil)),
-		Pending:       regInterface("Pending", (*Pending)(nil)),
-		Ref:           regInterface("Ref", (*Ref)(nil)),
-		Reversible:    regInterface("Reversible", (*Reversible)(nil)),
-		Seq:           regInterface("Seq", (*Seq)(nil)),
-		Seqable:       regInterface("Seqable", (*Seqable)(nil)),
-		Sequential:    regInterface("Sequential", (*Sequential)(nil)),
-		Set:           regInterface("Set", (*Set)(nil)),
-		Stack:         regInterface("Stack", (*Stack)(nil)),
-		ArrayMap:      regRefType("ArrayMap", (*ArrayMap)(nil)),
-		ArrayMapSeq:   regRefType("ArrayMapSeq", (*ArrayMapSeq)(nil)),
-		ArrayNodeSeq:  regRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil)),
-		ArraySeq:      regRefType("ArraySeq", (*ArraySeq)(nil)),
-		MapSet:        regRefType("MapSet", (*MapSet)(nil)),
-		Atom:          regRefType("Atom", (*Atom)(nil)),
-		BigFloat:      regRefType("BigFloat", (*BigFloat)(nil)),
-		BigInt:        regRefType("BigInt", (*BigInt)(nil)),
-		Bool:          regType("Bool", (*Bool)(nil)),
-		Buffer:        regRefType("Buffer", (*Buffer)(nil)),
-		Char:          regType("Char", (*Char)(nil)),
-		ConsSeq:       regRefType("ConsSeq", (*ConsSeq)(nil)),
-		Delay:         regRefType("Delay", (*Delay)(nil)),
-		Double:        regType("Double", (*Double)(nil)),
-		EvalError:     regRefType("EvalError", (*EvalError)(nil)),
-		ExInfo:        regRefType("ExInfo", (*ExInfo)(nil)),
-		Fn:            regRefType("Fn", (*Fn)(nil)),
-		File:          regRefType("File", (*File)(nil)),
-		HashMap:       regRefType("HashMap", (*HashMap)(nil)),
-		Int:           regType("Int", (*Int)(nil)),
-		Keyword:       regType("Keyword", (*Keyword)(nil)),
-		LazySeq:       regRefType("LazySeq", (*LazySeq)(nil)),
-		List:          regRefType("List", (*List)(nil)),
-		MappingSeq:    regRefType("MappingSeq", (*MappingSeq)(nil)),
-		Namespace:     regRefType("Namespace", (*Namespace)(nil)),
-		Nil:           regType("Nil", (*Nil)(nil)),
-		NodeSeq:       regRefType("NodeSeq", (*NodeSeq)(nil)),
-		ParseError:    regRefType("ParseError", (*ParseError)(nil)),
-		Proc:          regRefType("Proc", (*Proc)(nil)),
-		Ratio:         regRefType("Ratio", (*Ratio)(nil)),
-		RecurBindings: regRefType("RecurBindings", (*RecurBindings)(nil)),
-		Regex:         regType("Regex", (*Regex)(nil)),
-		String:        regType("String", (*String)(nil)),
-		Symbol:        regType("Symbol", (*Symbol)(nil)),
-		Type:          regRefType("Type", (*Type)(nil)),
-		Var:           regRefType("Var", (*Var)(nil)),
-		Vector:        regRefType("Vector", (*Vector)(nil)),
-		VectorRSeq:    regRefType("VectorRSeq", (*VectorRSeq)(nil)),
-		VectorSeq:     regRefType("VectorSeq", (*VectorSeq)(nil)),
+		Associative:    regInterface("Associative", (*Associative)(nil)),
+		Callable:       regInterface("Callable", (*Callable)(nil)),
+		Collection:     regInterface("Collection", (*Collection)(nil)),
+		Comparable:     regInterface("Comparable", (*Comparable)(nil)),
+		Comparator:     regInterface("Comparator", (*Comparator)(nil)),
+		Counted:        regInterface("Counted", (*Counted)(nil)),
+		Deref:          regInterface("Deref", (*Deref)(nil)),
+		Error:          regInterface("Error", (*Error)(nil)),
+		Gettable:       regInterface("Gettable", (*Gettable)(nil)),
+		Indexed:        regInterface("Indexed", (*Indexed)(nil)),
+		IOReader:       regInterface("IOReader", (*io.Reader)(nil)),
+		KVReduce:       regInterface("KVReduce", (*KVReduce)(nil)),
+		Map:            regInterface("Map", (*Map)(nil)),
+		Meta:           regInterface("Meta", (*Meta)(nil)),
+		Named:          regInterface("Named", (*Named)(nil)),
+		Number:         regInterface("Number", (*Number)(nil)),
+		Pending:        regInterface("Pending", (*Pending)(nil)),
+		Ref:            regInterface("Ref", (*Ref)(nil)),
+		Reversible:     regInterface("Reversible", (*Reversible)(nil)),
+		Seq:            regInterface("Seq", (*Seq)(nil)),
+		Seqable:        regInterface("Seqable", (*Seqable)(nil)),
+		Sequential:     regInterface("Sequential", (*Sequential)(nil)),
+		Set:            regInterface("Set", (*Set)(nil)),
+		Stack:          regInterface("Stack", (*Stack)(nil)),
+		ArrayMap:       regRefType("ArrayMap", (*ArrayMap)(nil)),
+		ArrayMapSeq:    regRefType("ArrayMapSeq", (*ArrayMapSeq)(nil)),
+		ArrayNodeSeq:   regRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil)),
+		ArraySeq:       regRefType("ArraySeq", (*ArraySeq)(nil)),
+		MapSet:         regRefType("MapSet", (*MapSet)(nil)),
+		Atom:           regRefType("Atom", (*Atom)(nil)),
+		BigFloat:       regRefType("BigFloat", (*BigFloat)(nil)),
+		BigInt:         regRefType("BigInt", (*BigInt)(nil)),
+		Bool:           regType("Bool", (*Bool)(nil)),
+		Buffer:         regRefType("Buffer", (*Buffer)(nil)),
+		Char:           regType("Char", (*Char)(nil)),
+		ConsSeq:        regRefType("ConsSeq", (*ConsSeq)(nil)),
+		Delay:          regRefType("Delay", (*Delay)(nil)),
+		Double:         regType("Double", (*Double)(nil)),
+		EvalError:      regRefType("EvalError", (*EvalError)(nil)),
+		ExInfo:         regRefType("ExInfo", (*ExInfo)(nil)),
+		Fn:             regRefType("Fn", (*Fn)(nil)),
+		File:           regRefType("File", (*File)(nil)),
+		BufferedReader: regRefType("BufferedReader", (*BufferedReader)(nil)),
+		HashMap:        regRefType("HashMap", (*HashMap)(nil)),
+		Int:            regType("Int", (*Int)(nil)),
+		Keyword:        regType("Keyword", (*Keyword)(nil)),
+		LazySeq:        regRefType("LazySeq", (*LazySeq)(nil)),
+		List:           regRefType("List", (*List)(nil)),
+		MappingSeq:     regRefType("MappingSeq", (*MappingSeq)(nil)),
+		Namespace:      regRefType("Namespace", (*Namespace)(nil)),
+		Nil:            regType("Nil", (*Nil)(nil)),
+		NodeSeq:        regRefType("NodeSeq", (*NodeSeq)(nil)),
+		ParseError:     regRefType("ParseError", (*ParseError)(nil)),
+		Proc:           regRefType("Proc", (*Proc)(nil)),
+		Ratio:          regRefType("Ratio", (*Ratio)(nil)),
+		RecurBindings:  regRefType("RecurBindings", (*RecurBindings)(nil)),
+		Regex:          regType("Regex", (*Regex)(nil)),
+		String:         regType("String", (*String)(nil)),
+		Symbol:         regType("Symbol", (*Symbol)(nil)),
+		Type:           regRefType("Type", (*Type)(nil)),
+		Var:            regRefType("Var", (*Var)(nil)),
+		Vector:         regRefType("Vector", (*Vector)(nil)),
+		VectorRSeq:     regRefType("VectorRSeq", (*VectorRSeq)(nil)),
+		VectorSeq:      regRefType("VectorSeq", (*VectorSeq)(nil)),
 	}
 }
 
