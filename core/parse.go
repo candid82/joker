@@ -42,6 +42,7 @@ type (
 	DefExpr struct {
 		Position
 		vr    *Var
+		name  Symbol
 		value Expr
 		meta  Expr
 	}
@@ -176,6 +177,7 @@ type (
 		var_          Keyword
 		value         Keyword
 		vector        Keyword
+		name          Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -263,6 +265,7 @@ var (
 		var_:          MakeKeyword("var"),
 		value:         MakeKeyword("value"),
 		vector:        MakeKeyword("vector"),
+		name:          MakeKeyword("name"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
@@ -650,6 +653,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 
 		res := &DefExpr{
 			vr:       vr,
+			name:     sym,
 			value:    nil,
 			Position: GetPosition(obj),
 		}

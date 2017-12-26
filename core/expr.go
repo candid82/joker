@@ -90,6 +90,7 @@ func (expr *DefExpr) InferType() *Type {
 func (expr *DefExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "def", pos)
 	res.Add(KEYWORDS.var_, expr.vr)
+	res.Add(KEYWORDS.name, expr.name)
 	if expr.value != nil {
 		res.Add(KEYWORDS.value, expr.value.Dump(pos))
 	}
