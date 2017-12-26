@@ -1347,6 +1347,13 @@ var procInternFakeVar Proc = func(args []Object) Object {
 }
 
 var procParse Proc = func(args []Object) Object {
+	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
+	lm.Value = Bool{B: true}
+	LINTER_MODE = true
+	defer func() {
+		LINTER_MODE = false
+		lm.Value = Bool{B: false}
+	}()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	res := Parse(args[0], parseContext)
 	return res.Dump(false)
