@@ -1,2 +1,1 @@
 tests/linter/defn-3/input.clj:1:1: Exception: Parameter declaration "1" must be a vector
-Stacktrace:

@@ -645,7 +645,7 @@ func (exInfo *ExInfo) Error() string {
 	if ok, pr := exInfo.data.Get(KEYWORDS._prefix); ok {
 		prefix = pr.ToString(false)
 	}
-	if len(exInfo.rt.callstack.frames) > 0 {
+	if len(exInfo.rt.callstack.frames) > 0 && !LINTER_MODE {
 		return fmt.Sprintf("%s:%d:%d: %s: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S, exInfo.rt.stacktrace())
 	} else {
 		return fmt.Sprintf("%s:%d:%d: %s: %s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S)

@@ -1,2 +1,1 @@
 tests/linter/extend-type/input.clj:8:4: Exception: Parameter declaration missing
-Stacktrace:

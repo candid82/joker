@@ -19,16 +19,13 @@
                      (str dir "input.clj")
                      (str dir "input.cljs"))
           output (:err (joker.os/sh (str pwd "/joker") "--lint" filename))
-          output-lines (joker.string/split-lines output)
-          output-lines-without-stacktraces (remove #(joker.string/starts-with? % "  ") output-lines)
-          output-without-stacktraces (joker.string/join "\n" output-lines-without-stacktraces)
           expected (slurp (str dir "output.txt"))]
-      (when-not (= expected output-without-stacktraces)
+      (when-not (= expected output)
         (println "FAILED:" test-dir)
         (println "EXPECTED:")
         (println expected)
         (println "ACTUAL:")
-        (println output-without-stacktraces)
+        (println output)
         (var-set #'exit-code 1)))))
 
 (joker.os/exit exit-code)

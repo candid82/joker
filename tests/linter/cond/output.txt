@@ -1,4 +1,2 @@
 tests/linter/cond/input.clj:5:1: Parse warning: Empty cond
-Stacktrace:
 tests/linter/cond/input.clj:6:7: Exception: cond requires an even number of forms
-Stacktrace:

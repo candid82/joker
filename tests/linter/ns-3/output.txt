@@ -1,2 +1,1 @@
 tests/linter/ns-3/input.clj:1:1: Eval error: No value supplied for key true
-Stacktrace:

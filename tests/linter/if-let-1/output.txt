@@ -1,2 +1,1 @@
 tests/linter/if-let-1/input.clj:1:1: Exception: joker.core/if-let requires a vector for its binding
-Stacktrace:

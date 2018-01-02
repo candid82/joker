@@ -1,6 +1,3 @@
 tests/linter/defprotocol/input.clj:10:4: Exception: Definition of function m4 in protocol P must take at least one arg.
-Stacktrace:
 tests/linter/defprotocol/input.clj:12:4: Exception: Function m1 in protocol P was redefined. Specify all arities in single definition.
-Stacktrace:
 tests/linter/defprotocol/input.clj:8:4: Exception: Parameter declaration missing
-Stacktrace:
