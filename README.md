@@ -32,6 +32,8 @@ You can also [build](#building) Joker from the source code.
 
 `joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`.
 
+`joker -e <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`
+
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
 ## Documentation
@@ -44,7 +46,13 @@ These are high level goals of the project that guide design and implementation d
 
 - Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
-- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
+- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Joker can also be used for pretty printing EDN data structures (very basic algorithm at the moment). For example, the following command can be used to pretty print EDN data structure (read from stdin):
+
+```
+joker --hashmap-threshold -1 -e "(pprint (read))"
+```
+
+ There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
 ## Project non-goals
@@ -163,11 +171,19 @@ If your code uses tagged literals that Joker doesn't know about, add them to `:k
 
 ### Optional rules
 
-Joker currently supports one warning that is turned off by default: `if` without the `else` branch. To enable this warning, add the following to your `.joker` file:
+Joker supports a few configurable linting rules. To turn them on or off set their values to `true` or `false` in `:rules` map in `.joker` file. For example:
 
 ```clojure
-:rules {:if-without-else true}
+:rules {:if-without-else true
+        :no-forms-threading false}
 ```
+
+Below is the list of all configurable rules.
+
+|         Rule         |                      Description                      | Default value |
+|----------------------|-------------------------------------------------------|---------------|
+| `if-without-else`    | warn on `if` without the `else` branch                | false         |
+| `no-forms-threading` | warn on threading macros with no forms, i.e. `(-> a)` | true          |
 
 ## Building
 
