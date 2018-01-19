@@ -1451,12 +1451,28 @@
   [^Atom atom ^Callable f & args]
   (apply swap__ atom f args))
 
+(defn swap-vals!
+  "Atomically swaps the value of atom to be:
+  (apply f current-value-of-atom args). Note that f may be called
+  multiple times, and thus should be free of side effects.
+  Returns [old new], the value of the atom before and after the swap."
+  {:added "1.0"}
+  [^Atom atom ^Callable f & args]
+  (apply swap-vals__ atom f args))
+
 (defn reset!
   "Sets the value of atom to newval without regard for the
   current value. Returns newval."
   {:added "1.0"}
   [^Atom atom newval]
   (reset__ atom newval))
+
+(defn reset-vals!
+  "Sets the value of atom to newval. Returns [old new], the value of the
+  atom before and after the reset."
+  {:added "1.0"}
+  [^Atom atom newval]
+  (reset-vals__ atom newval))
 
 (defn alter-meta!
   "Atomically sets the metadata for a namespace/var/atom to be:

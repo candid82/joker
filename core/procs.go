@@ -389,10 +389,26 @@ var procSwap = func(args []Object) Object {
 	return a.value
 }
 
+var procSwapVals = func(args []Object) Object {
+	a := EnsureAtom(args, 0)
+	f := EnsureCallable(args, 1)
+	fargs := append([]Object{a.value}, args[2:]...)
+	oldValue := a.value
+	a.value = f.Call(fargs)
+	return NewVectorFrom(oldValue, a.value)
+}
+
 var procReset = func(args []Object) Object {
 	a := EnsureAtom(args, 0)
 	a.value = args[1]
 	return a.value
+}
+
+var procResetVals = func(args []Object) Object {
+	a := EnsureAtom(args, 0)
+	oldValue := a.value
+	a.value = args[1]
+	return NewVectorFrom(oldValue, a.value)
 }
 
 var procAlterMeta = func(args []Object) Object {
@@ -1712,7 +1728,9 @@ func init() {
 	intern("atom__", procAtom)
 	intern("deref__", procDeref)
 	intern("swap__", procSwap)
+	intern("swap-vals__", procSwapVals)
 	intern("reset__", procReset)
+	intern("reset-vals__", procResetVals)
 	intern("alter-meta__", procAlterMeta)
 	intern("reset-meta__", procResetMeta)
 	intern("empty__", procEmpty)
