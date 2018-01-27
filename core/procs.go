@@ -81,6 +81,10 @@ func ExtractSeqable(args []Object, index int) Seqable {
 	return EnsureSeqable(args, index)
 }
 
+func ExtractMap(args []Object, index int) Map {
+	return EnsureMap(args, index)
+}
+
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:

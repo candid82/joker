@@ -1,4 +1,4 @@
-(def namespaces ['string 'json 'base64 'os 'time 'yaml])
+(def namespaces ['string 'json 'base64 'os 'time 'yaml 'http])
 
 (apply require namespaces)
 
