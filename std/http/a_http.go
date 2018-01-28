@@ -32,6 +32,13 @@ httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implement
 httpNamespace.InternVar("send", send_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("request"))),
-    `Sends an HTTP request and returns an HTTP response`, "1.0"))
+    `Sends an HTTP request and returns an HTTP response.
+  request is a map with the following keys:
+  - url
+  - method (defaults to get)
+  - body
+  - host (overrides Host header if provided)
+  - headers (a map).
+  All keys except for url are optional.`, "1.0"))
 
 }

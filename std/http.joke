@@ -4,7 +4,14 @@
   http)
 
 (defn send
-  "Sends an HTTP request and returns an HTTP response"
+  "Sends an HTTP request and returns an HTTP response.
+  request is a map with the following keys:
+  - url
+  - method (defaults to get)
+  - body
+  - host (overrides Host header if provided)
+  - headers (a map).
+  All keys except for url are optional."
   {:added "1.0"
   :go "sendRequest(request)"}
   [^Map request])
