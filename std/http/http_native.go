@@ -43,9 +43,7 @@ func sendRequest(request Map) Map {
 		reqBody = strings.NewReader(AssertString(b, "body must be a string").S)
 	}
 	req, err := http.NewRequest(method, url, reqBody)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	if ok, headers := request.Get(MakeKeyword("headers")); ok {
 		h := AssertMap(headers, "headers must be a map")
 		for iter := h.Iter(); iter.HasNext(); {
@@ -57,15 +55,18 @@ func sendRequest(request Map) Map {
 		req.Host = AssertString(host, "host must be a string").S
 	}
 	resp, err := client.Do(req)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	defer resp.Body.Close()
 	res := EmptyArrayMap()
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
+	PanicOnErr(err)
+	res.Add(MakeKeyword("body"), MakeString(string(body)))
+	res.Add(MakeKeyword("status"), MakeInt(resp.StatusCode))
+	respHeaders := EmptyArrayMap()
+	for k, v := range resp.Header {
+		respHeaders.Add(MakeString(k), MakeString(strings.Join(v, ",")))
 	}
-	res.Add(MakeKeyword("body"), String{S: string(body)})
+	res.Add(MakeKeyword("headers"), respHeaders)
+	res.Add(MakeKeyword("content-length"), MakeInt(int(resp.ContentLength)))
 	return res
 }

@@ -414,3 +414,9 @@ func TryEval(expr Expr) (obj Object, err error) {
 	}()
 	return Eval(expr, nil), nil
 }
+
+func PanicOnErr(err error) {
+	if err != nil {
+		panic(RT.NewError(err.Error()))
+	}
+}

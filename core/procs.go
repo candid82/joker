@@ -1017,9 +1017,7 @@ var procFlush Proc = func(args []Object) Object {
 func readFromReader(reader io.RuneReader) Object {
 	r := NewReader(reader, "<>")
 	obj, err := TryRead(r)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	return obj
 }
 
@@ -1263,9 +1261,7 @@ var procBuffer Proc = func(args []Object) Object {
 
 var procSlurp Proc = func(args []Object) Object {
 	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	return String{S: string(b)}
 }
 
@@ -1309,9 +1305,7 @@ var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
 	var reader *Reader
 	f, err := os.Open(filename.S)
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	reader = NewReader(bufio.NewReader(f), filename.S)
 	ProcessReader(reader, filename.S, EVAL)
 	return NIL
@@ -1341,9 +1335,7 @@ var procLibPath Proc = func(args []Object) Object {
 	if GLOBAL_ENV.file.Value == nil {
 		var err error
 		file, err = filepath.Abs("user")
-		if err != nil {
-			panic(RT.NewError(err.Error()))
-		}
+		PanicOnErr(err)
 	} else {
 		file = AssertString(GLOBAL_ENV.file.Value, "").S
 	}
@@ -1387,9 +1379,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			parseContext.GlobalEnv.file.Value = currentFilename
 		}()
 		s, err := filepath.Abs(filename)
-		if err != nil {
-			panic(RT.NewError(err.Error()))
-		}
+		PanicOnErr(err)
 		parseContext.GlobalEnv.file.Value = String{S: s}
 	}
 	for {

@@ -34,11 +34,16 @@ httpNamespace.InternVar("send", send_,
     NewListFrom(NewVectorFrom(MakeSymbol("request"))),
     `Sends an HTTP request and returns an HTTP response.
   request is a map with the following keys:
-  - url
-  - method (defaults to get)
-  - body
-  - host (overrides Host header if provided)
-  - headers (a map).
-  All keys except for url are optional.`, "1.0"))
+  - url (string)
+  - method (string, keyword or symbol, defaults to :get)
+  - body (string)
+  - host (string, overrides Host header if provided)
+  - headers (map).
+  All keys except for url are optional.
+  response is a map with the following keys:
+  - status (int)
+  - body (string)
+  - headers (map)
+  - content-length (int)`, "1.0"))
 
 }

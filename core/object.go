@@ -488,9 +488,7 @@ func hashPtr(ptr uintptr) uint32 {
 func hashGobEncoder(e gob.GobEncoder) uint32 {
 	h := getHash()
 	b, err := e.GobEncode()
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	h.Write(b)
 	return h.Sum32()
 }

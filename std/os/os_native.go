@@ -29,13 +29,9 @@ func commandArgs() Object {
 func sh(name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	stdoutReader, err := cmd.StdoutPipe()
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
-	if err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	PanicOnErr(err)
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
 	}
