@@ -30,4 +30,8 @@
   :go "sh(name, arguments)"}
   [^String name & ^String arguments])
 
-
+(defn mkdir
+  "Creates a new directory with the specified name and permission bits."
+  {:added "1.0"
+  :go "mkdir(name, perm)"}
+  [^String name ^Int perm])

@@ -54,6 +54,22 @@ var exit_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var mkdir_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    name := ExtractString(args, 0)
+    perm := ExtractInt(args, 1)
+    res := mkdir(name, perm)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var sh_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -89,6 +105,11 @@ osNamespace.InternVar("exit", exit_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("code"))),
     `Causes the current program to exit with the given status code.`, "1.0"))
+
+osNamespace.InternVar("mkdir", mkdir_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
+    `Creates a new directory with the specified name and permission bits.`, "1.0"))
 
 osNamespace.InternVar("sh", sh_,
   MakeMeta(

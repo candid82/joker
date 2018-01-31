@@ -51,3 +51,9 @@ func sh(name string, args []string) Object {
 	res.Add(MakeKeyword("err"), String{S: stderrString})
 	return res
 }
+
+func mkdir(name string, perm int) Object {
+	err := os.Mkdir(name, os.FileMode(perm))
+	PanicOnErr(err)
+	return NIL
+}

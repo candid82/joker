@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cd ../std
+cd std
 joker generate-std.joke
