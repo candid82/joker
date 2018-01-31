@@ -8,10 +8,10 @@
 
 (def exit-code 0)
 
-(let [test-dirs (->> (joker.os/sh "ls" "tests/linter")
-                     :out
-                     (joker.string/split-lines)
-                     (remove #(= "" %)))
+(let [test-dirs (->> (joker.os/ls "tests/linter")
+                     (filter :dir?)
+                     (map :name))
+      _ (println test-dirs)
       pwd (get (joker.os/env) "PWD")]
   (doseq [test-dir test-dirs]
     (let [dir (str "tests/linter/" test-dir "/")
