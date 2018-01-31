@@ -54,6 +54,21 @@ var exit_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var ls_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    dirname := ExtractString(args, 0)
+    res := readDir(dirname)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var mkdir_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -105,6 +120,11 @@ osNamespace.InternVar("exit", exit_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("code"))),
     `Causes the current program to exit with the given status code.`, "1.0"))
+
+osNamespace.InternVar("ls", ls_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
+    `Reads the directory named by dirname and returns a list of directory entries sorted by filename.`, "1.0"))
 
 osNamespace.InternVar("mkdir", mkdir_,
   MakeMeta(

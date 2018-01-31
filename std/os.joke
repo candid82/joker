@@ -35,3 +35,9 @@
   {:added "1.0"
   :go "mkdir(name, perm)"}
   [^String name ^Int perm])
+
+(defn ls
+  "Reads the directory named by dirname and returns a list of directory entries sorted by filename."
+  {:added "1.0"
+  :go "readDir(dirname)"}
+  [^String dirname])

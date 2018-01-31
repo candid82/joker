@@ -2,6 +2,7 @@ package os
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -56,4 +57,25 @@ func mkdir(name string, perm int) Object {
 	err := os.Mkdir(name, os.FileMode(perm))
 	PanicOnErr(err)
 	return NIL
+}
+
+func readDir(dirname string) Object {
+	files, err := ioutil.ReadDir(dirname)
+	PanicOnErr(err)
+	res := EmptyVector
+	name := MakeKeyword("name")
+	size := MakeKeyword("size")
+	mode := MakeKeyword("mode")
+	isDir := MakeKeyword("dir?")
+	modTime := MakeKeyword("modtime")
+	for _, f := range files {
+		m := EmptyArrayMap()
+		m.Add(name, MakeString(f.Name()))
+		m.Add(size, MakeInt(int(f.Size())))
+		m.Add(mode, MakeInt(int(f.Mode())))
+		m.Add(isDir, MakeBool(f.IsDir()))
+		m.Add(modTime, MakeInt(int(f.ModTime().Unix())))
+		res = res.Conjoin(m)
+	}
+	return res
 }
