@@ -15,7 +15,22 @@ var decode_string_ Proc = func(args []Object) Object {
   case c == 1:
     
     s := ExtractString(args, 0)
-    res := base64DecodeString(s)
+    res := decodeString(s)
+    return MakeString(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var encode_string_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    s := ExtractString(args, 0)
+    res := encodeString(s)
     return MakeString(res)
 
   default:
@@ -33,5 +48,10 @@ base64Namespace.InternVar("decode-string", decode_string_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("s"))),
     `Returns the bytes represented by the base64 string s.`, "1.0"))
+
+base64Namespace.InternVar("encode-string", encode_string_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+    `Returns the base64 encoding of s.`, "1.0"))
 
 }

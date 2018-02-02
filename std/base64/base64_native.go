@@ -6,10 +6,14 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-func base64DecodeString(s string) string {
+func decodeString(s string) string {
 	decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		panic(RT.NewError("Invalid bas64 string: " + err.Error()))
 	}
 	return string(decoded)
+}
+
+func encodeString(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
 }

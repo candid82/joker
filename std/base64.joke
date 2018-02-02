@@ -6,5 +6,11 @@
 (defn ^String decode-string
   "Returns the bytes represented by the base64 string s."
   {:added "1.0"
-  :go "base64DecodeString(s)"}
+  :go "decodeString(s)"}
+  [^String s])
+
+(defn ^String encode-string
+  "Returns the base64 encoding of s."
+  {:added "1.0"
+  :go "encodeString(s)"}
   [^String s])
