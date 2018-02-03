@@ -300,6 +300,27 @@ func EnsureInt(args []Object, index int) Int {
   }
 }
 
+func AssertDouble(obj Object, msg string) Double {
+  switch c := obj.(type) {
+  case Double:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Double", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureDouble(args []Object, index int) Double {
+  switch c := args[index].(type) {
+  case Double:
+    return c
+  default:
+    panic(RT.NewArgTypeError(index, c, "Double"))
+  }
+}
+
 func AssertStack(obj Object, msg string) Stack {
   switch c := obj.(type) {
   case Stack:

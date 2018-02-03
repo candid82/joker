@@ -73,6 +73,10 @@ func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
 }
 
+func ExtractDouble(args []Object, index int) float64 {
+	return EnsureDouble(args, index).D
+}
+
 func ExtractRegex(args []Object, index int) *regexp.Regexp {
 	return EnsureRegex(args, index).R
 }

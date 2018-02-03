@@ -1,0 +1,10 @@
+(ns
+  ^{:go-imports ["math"]
+    :doc "Provides basic constants and mathematical functions."}
+  math)
+
+(defn ^Double sin
+  "Returns the sine of the radian argument x."
+  {:added "1.0"
+  :go "math.Sin(x)"}
+  [^Double x])
