@@ -24,6 +24,21 @@ var args_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var cwd_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 0:
+    
+    
+    res := getwd()
+    return MakeString(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var env_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -110,6 +125,12 @@ osNamespace.InternVar("args", args_,
   MakeMeta(
     NewListFrom(NewVectorFrom()),
     `Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+
+osNamespace.InternVar("cwd", cwd_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom()),
+    `Returns a rooted path name corresponding to the current directory. If the current directory can
+  be reached via multiple paths (due to symbolic links), cwd may return any one of them.`, "1.0"))
 
 osNamespace.InternVar("env", env_,
   MakeMeta(

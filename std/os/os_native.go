@@ -79,3 +79,9 @@ func readDir(dirname string) Object {
 	}
 	return res
 }
+
+func getwd() string {
+	res, err := os.Getwd()
+	PanicOnErr(err)
+	return res
+}
