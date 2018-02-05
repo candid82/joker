@@ -1756,4 +1756,5 @@ func init() {
 
 	processData(coreData)
 	processData(timeData)
+	processData(mathData)
 }
