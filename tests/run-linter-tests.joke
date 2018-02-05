@@ -11,7 +11,6 @@
 (let [test-dirs (->> (joker.os/ls "tests/linter")
                      (filter :dir?)
                      (map :name))
-      _ (println test-dirs)
       pwd (get (joker.os/env) "PWD")]
   (doseq [test-dir test-dirs]
     (let [dir (str "tests/linter/" test-dir "/")

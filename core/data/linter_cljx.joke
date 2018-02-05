@@ -376,6 +376,7 @@
 (remove-ns 'joker.os)
 (remove-ns 'joker.base64)
 (remove-ns 'joker.time)
+(remove-ns 'joker.math)
 (ns-unmap 'joker.core 'pprint)
 (ns-unmap 'user 'pprint)
 (ns-unmap 'joker.core 'pr-err)

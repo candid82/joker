@@ -484,7 +484,7 @@ func WarnOnUnusedNamespaces() {
 	for _, ns := range GLOBAL_ENV.Namespaces {
 		if !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
-			if pos != nil {
+			if pos != nil && pos.Filename() != "<joker.core>" {
 				name := ns.Name.ToString(false)
 				names = append(names, name)
 				positions[name] = pos.Position
