@@ -24,6 +24,22 @@ var cos_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var hypot_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    p := ExtractNumber(args, 0)
+    q := ExtractNumber(args, 1)
+    res := hypot(p, q)
+    return MakeDouble(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var sin_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -48,6 +64,11 @@ mathNamespace.InternVar("cos", cos_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("x"))),
     `Returns the cosine of the radian argument x.`, "1.0"))
+
+mathNamespace.InternVar("hypot", hypot_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
+    `Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
 
 mathNamespace.InternVar("sin", sin_,
   MakeMeta(

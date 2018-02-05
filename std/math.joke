@@ -14,3 +14,9 @@
   {:added "1.0"
   :go "cos(x)"}
   [^Number x])
+
+(defn ^Double hypot
+  "Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow."
+  {:added "1.0"
+  :go "hypot(p, q)"}
+  [^Number p, ^Number q])
