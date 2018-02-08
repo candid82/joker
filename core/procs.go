@@ -275,18 +275,19 @@ var procUnsignedBitShiftRight Proc = func(args []Object) Object {
 var procExInfo Proc = func(args []Object) Object {
 	CheckArity(args, 2, 3)
 	res := &ExInfo{
-		msg:  EnsureString(args, 0),
-		data: EnsureMap(args, 1),
-		rt:   RT.clone(),
+		rt: RT.clone(),
 	}
+	res.Add(KEYWORDS.message, EnsureString(args, 0))
+	res.Add(KEYWORDS.data, EnsureMap(args, 1))
 	if len(args) == 3 {
-		res.cause = EnsureError(args, 2)
+		res.Add(MakeKeyword("cause"), EnsureError(args, 2))
 	}
 	return res
 }
 
 var procExData Proc = func(args []Object) Object {
-	return args[0].(*ExInfo).data
+	_, res := args[0].(*ExInfo).Get(KEYWORDS.data)
+	return res
 }
 
 var procRegex Proc = func(args []Object) Object {

@@ -157,7 +157,9 @@ type (
 		column        Keyword
 		file          Keyword
 		macro         Keyword
+		message       Keyword
 		form          Keyword
+		data          Keyword
 		arglist       Keyword
 		doc           Keyword
 		added         Keyword
@@ -245,7 +247,9 @@ var (
 		column:        MakeKeyword("column"),
 		file:          MakeKeyword("file"),
 		macro:         MakeKeyword("macro"),
+		message:       MakeKeyword("message"),
 		form:          MakeKeyword("form"),
+		data:          MakeKeyword("data"),
 		arglist:       MakeKeyword("arglists"),
 		doc:           MakeKeyword("doc"),
 		added:         MakeKeyword("added"),

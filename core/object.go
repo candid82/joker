@@ -144,11 +144,8 @@ type (
 		env    *LocalEnv
 	}
 	ExInfo struct {
-		InfoHolder
-		msg   String
-		data  Map
-		cause Error
-		rt    *Runtime
+		ArrayMap
+		rt *Runtime
 	}
 	RecurBindings []Object
 	Delay         struct {
@@ -633,20 +630,22 @@ func (exInfo *ExInfo) Hash() uint32 {
 
 func (exInfo *ExInfo) Error() string {
 	var pos Position
-	ok, form := exInfo.data.Get(KEYWORDS.form)
+	_, data := exInfo.Get(KEYWORDS.data)
+	ok, form := data.(Map).Get(KEYWORDS.form)
 	if ok {
 		if form.GetInfo() != nil {
 			pos = form.GetInfo().Pos()
 		}
 	}
 	prefix := "Exception"
-	if ok, pr := exInfo.data.Get(KEYWORDS._prefix); ok {
+	if ok, pr := data.(Map).Get(KEYWORDS._prefix); ok {
 		prefix = pr.ToString(false)
 	}
+	_, msg := exInfo.Get(KEYWORDS.message)
 	if len(exInfo.rt.callstack.frames) > 0 && !LINTER_MODE {
-		return fmt.Sprintf("%s:%d:%d: %s: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S, exInfo.rt.stacktrace())
+		return fmt.Sprintf("%s:%d:%d: %s: %s\nStacktrace:\n%s", pos.Filename(), pos.startLine, pos.startColumn, prefix, msg.(String).S, exInfo.rt.stacktrace())
 	} else {
-		return fmt.Sprintf("%s:%d:%d: %s: %s", pos.Filename(), pos.startLine, pos.startColumn, prefix, exInfo.msg.S)
+		return fmt.Sprintf("%s:%d:%d: %s: %s", pos.Filename(), pos.startLine, pos.startColumn, prefix, msg.(String).S)
 	}
 }
 

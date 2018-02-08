@@ -147,7 +147,7 @@
   ^{:arglists '([x])
     :doc "Returns true if x is a map"
     :added "1.0"}
-  map? (fn map? [x] (instance? ArrayMap x)))
+  map? (fn map? [x] (instance? Map x)))
 
 (def
   ^{:arglists '([x])
