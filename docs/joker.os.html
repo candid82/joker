@@ -13,10 +13,19 @@
   <a href="#args">args</a>
 </li>
 <li>
+  <a href="#cwd">cwd</a>
+</li>
+<li>
   <a href="#env">env</a>
 </li>
 <li>
   <a href="#exit">exit</a>
+</li>
+<li>
+  <a href="#ls">ls</a>
+</li>
+<li>
+  <a href="#mkdir">mkdir</a>
 </li>
 <li>
   <a href="#sh">sh</a>
@@ -31,6 +40,15 @@
   <pre class="var-usage"><div><code>(args)</code></div>
 </pre>
   <p class="var-docstr">Returns a sequence of the command line arguments, starting with the program name (normally, joker).</p>
+  
+</li>
+<li>
+  <h3 id="cwd">cwd</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(cwd)</code></div>
+</pre>
+  <p class="var-docstr">Returns a rooted path name corresponding to the current directory. If the current directory can<br>  be reached via multiple paths (due to symbolic links), cwd may return any one of them.</p>
   
 </li>
 <li>
@@ -49,6 +67,24 @@
   <pre class="var-usage"><div><code>(exit code)</code></div>
 </pre>
   <p class="var-docstr">Causes the current program to exit with the given status code.</p>
+  
+</li>
+<li>
+  <h3 id="ls">ls</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(ls dirname)</code></div>
+</pre>
+  <p class="var-docstr">Reads the directory named by dirname and returns a list of directory entries sorted by filename.</p>
+  
+</li>
+<li>
+  <h3 id="mkdir">mkdir</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new directory with the specified name and permission bits.</p>
   
 </li>
 <li>
