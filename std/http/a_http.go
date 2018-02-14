@@ -24,6 +24,22 @@ var send_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var start_server_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    addr := ExtractString(args, 0)
+    handler := ExtractCallable(args, 1)
+    res := startServer(addr, handler)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
@@ -45,5 +61,10 @@ httpNamespace.InternVar("send", send_,
   - body (string)
   - headers (map)
   - content-length (int)`, "1.0"))
+
+httpNamespace.InternVar("start-server", start_server_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
+    `Starts HTTP server on the TCP network address addr.`, "1.0"))
 
 }

@@ -35,7 +35,7 @@ func getOrPanic(m Map, k Object, errMsg string) Object {
 	panic(RT.NewError(errMsg))
 }
 
-func sendRequest(request Map) Map {
+func mapToReq(request Map) *http.Request {
 	method := strings.ToUpper(extractMethod(request))
 	url := AssertString(getOrPanic(request, MakeKeyword("url"), ":url key must be present in request map"), "url must be a string").S
 	var reqBody io.Reader
@@ -54,8 +54,32 @@ func sendRequest(request Map) Map {
 	if ok, host := request.Get(MakeKeyword("host")); ok {
 		req.Host = AssertString(host, "host must be a string").S
 	}
-	resp, err := client.Do(req)
+	return req
+}
+
+func reqToMap(host String, port String, req *http.Request) Map {
+	defer req.Body.Close()
+	res := EmptyArrayMap()
+	body, err := ioutil.ReadAll(req.Body)
 	PanicOnErr(err)
+	res.Add(MakeKeyword("request-method"), MakeKeyword(strings.ToLower(req.Method)))
+	res.Add(MakeKeyword("body"), MakeString(string(body)))
+	res.Add(MakeKeyword("uri"), MakeString(req.URL.Path))
+	res.Add(MakeKeyword("query-string"), MakeString(req.URL.RawQuery))
+	res.Add(MakeKeyword("server-name"), host)
+	res.Add(MakeKeyword("server-port"), port)
+	res.Add(MakeKeyword("remote-addr"), MakeString(req.RemoteAddr[:strings.LastIndexByte(req.RemoteAddr, byte(':'))]))
+	res.Add(MakeKeyword("protocol"), MakeString(req.Proto))
+	res.Add(MakeKeyword("scheme"), MakeKeyword("http"))
+	headers := EmptyArrayMap()
+	for k, v := range req.Header {
+		headers.Add(MakeString(strings.ToLower(k)), MakeString(strings.Join(v, ",")))
+	}
+	res.Add(MakeKeyword("headers"), headers)
+	return res
+}
+
+func respToMap(resp *http.Response) Map {
 	defer resp.Body.Close()
 	res := EmptyArrayMap()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -69,4 +93,31 @@ func sendRequest(request Map) Map {
 	res.Add(MakeKeyword("headers"), respHeaders)
 	res.Add(MakeKeyword("content-length"), MakeInt(int(resp.ContentLength)))
 	return res
+}
+
+func mapToResp(response Map, w http.ResponseWriter) {
+	if ok, b := response.Get(MakeKeyword("body")); ok {
+		io.WriteString(w, AssertString(b, "HTTP response body must be a string").S)
+	}
+}
+
+func sendRequest(request Map) Map {
+	resp, err := client.Do(mapToReq(request))
+	PanicOnErr(err)
+	return respToMap(resp)
+}
+
+func startServer(addr string, handler Callable) Object {
+	i := strings.LastIndexByte(addr, byte(':'))
+	host, port := MakeString(addr), MakeString("")
+	if i != -1 {
+		host = MakeString(addr[:i])
+		port = MakeString(addr[i+1:])
+	}
+	err := http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		response := handler.Call([]Object{reqToMap(host, port, req)})
+		mapToResp(AssertMap(response, "HTTP response must be a map"), w)
+	}))
+	PanicOnErr(err)
+	return NIL
 }
