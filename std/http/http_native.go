@@ -96,8 +96,33 @@ func respToMap(resp *http.Response) Map {
 }
 
 func mapToResp(response Map, w http.ResponseWriter) {
+	if ok, h := response.Get(MakeKeyword("headers")); ok {
+		header := w.Header()
+		h := AssertMap(h, "HTTP response headers must be a map")
+		for iter := h.Iter(); iter.HasNext(); {
+			p := iter.Next()
+			hname := AssertString(p.Key, "HTTP response header name must be a string").S
+			switch pvalue := p.Value.(type) {
+			case String:
+				header.Add(hname, pvalue.S)
+			case Seqable:
+				s := pvalue.Seq()
+				for !s.IsEmpty() {
+					header.Add(hname, AssertString(s.First(), "HTTP response header name must be a string").S)
+					s = s.Rest()
+				}
+			default:
+				panic(RT.NewError("HTTP response header name must be a string or a seq of strings"))
+			}
+		}
+	}
+	if ok, s := response.Get(MakeKeyword("status")); ok {
+		w.WriteHeader(AssertInt(s, "HTTP response status must be an integer").I)
+	}
 	if ok, b := response.Get(MakeKeyword("body")); ok {
 		io.WriteString(w, AssertString(b, "HTTP response body must be a string").S)
+	} else {
+		io.WriteString(w, "")
 	}
 }
 
