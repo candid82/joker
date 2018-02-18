@@ -3711,8 +3711,9 @@
   {:added "1.0"}
   [expr & clauses]
   (let [parts (partition-all 2 clauses)
-        setized (for [[test then] parts]
-                  (if then
+        setized (for [p parts
+                      :let [[test then] p]]
+                  (if (= 2 (count p))
                     [(if (list? test) (list 'quote (set test)) (list 'quote (set [test]))) then]
                     [test]))
         transformed-clauses (apply concat setized)]
