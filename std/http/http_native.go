@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -96,6 +97,14 @@ func respToMap(resp *http.Response) Map {
 }
 
 func mapToResp(response Map, w http.ResponseWriter) {
+	status := 0
+	if ok, s := response.Get(MakeKeyword("status")); ok {
+		status = AssertInt(s, "HTTP response status must be an integer").I
+	}
+	body := ""
+	if ok, b := response.Get(MakeKeyword("body")); ok {
+		body = AssertString(b, "HTTP response body must be a string").S
+	}
 	if ok, h := response.Get(MakeKeyword("headers")); ok {
 		header := w.Header()
 		h := AssertMap(h, "HTTP response headers must be a map")
@@ -108,22 +117,18 @@ func mapToResp(response Map, w http.ResponseWriter) {
 			case Seqable:
 				s := pvalue.Seq()
 				for !s.IsEmpty() {
-					header.Add(hname, AssertString(s.First(), "HTTP response header name must be a string").S)
+					header.Add(hname, AssertString(s.First(), "HTTP response header value must be a string").S)
 					s = s.Rest()
 				}
 			default:
-				panic(RT.NewError("HTTP response header name must be a string or a seq of strings"))
+				panic(RT.NewError("HTTP response header value must be a string or a seq of strings"))
 			}
 		}
 	}
-	if ok, s := response.Get(MakeKeyword("status")); ok {
-		w.WriteHeader(AssertInt(s, "HTTP response status must be an integer").I)
+	if status != 0 {
+		w.WriteHeader(status)
 	}
-	if ok, b := response.Get(MakeKeyword("body")); ok {
-		io.WriteString(w, AssertString(b, "HTTP response body must be a string").S)
-	} else {
-		io.WriteString(w, "")
-	}
+	io.WriteString(w, body)
 }
 
 func sendRequest(request Map) Map {
@@ -140,6 +145,13 @@ func startServer(addr string, handler Callable) Object {
 		port = MakeString(addr[i+1:])
 	}
 	err := http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				w.WriteHeader(500)
+				io.WriteString(w, "Internal server error")
+				fmt.Fprintln(os.Stderr, r)
+			}
+		}()
 		response := handler.Call([]Object{reqToMap(host, port, req)})
 		mapToResp(AssertMap(response, "HTTP response must be a map"), w)
 	}))
