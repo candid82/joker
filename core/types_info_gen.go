@@ -77,6 +77,11 @@ func (x Bool) WithInfo(info *ObjectInfo) Object {
   return x
 }
 
+func (x Time) WithInfo(info *ObjectInfo) Object {
+  x.info = info
+  return x
+}
+
 func (x Keyword) WithInfo(info *ObjectInfo) Object {
   x.info = info
   return x

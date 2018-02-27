@@ -174,6 +174,27 @@ func EnsureBool(args []Object, index int) Bool {
   }
 }
 
+func AssertTime(obj Object, msg string) Time {
+  switch c := obj.(type) {
+  case Time:
+    return c
+  default:
+    if msg == "" {
+      msg = fmt.Sprintf("Expected %s, got %s", "Time", obj.GetType().ToString(false))
+    }
+    panic(RT.NewError(msg))
+  }
+}
+
+func EnsureTime(args []Object, index int) Time {
+  switch c := args[index].(type) {
+  case Time:
+    return c
+  default:
+    panic(RT.NewArgTypeError(index, c, "Time"))
+  }
+}
+
 func AssertNumber(obj Object, msg string) Number {
   switch c := obj.(type) {
   case Number:

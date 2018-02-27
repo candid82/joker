@@ -1,6 +1,6 @@
 //go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
 
@@ -17,6 +17,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 	"unsafe"
 )
 
@@ -123,6 +124,10 @@ type (
 	Regex struct {
 		InfoHolder
 		R *regexp.Regexp
+	}
+	Time struct {
+		InfoHolder
+		T time.Time
 	}
 	Var struct {
 		InfoHolder
@@ -251,6 +256,7 @@ type (
 		BigFloat       *Type
 		BigInt         *Type
 		Bool           *Type
+		Time           *Type
 		Buffer         *Type
 		Char           *Type
 		ConsSeq        *Type
@@ -341,6 +347,7 @@ func init() {
 		BigFloat:       regRefType("BigFloat", (*BigFloat)(nil)),
 		BigInt:         regRefType("BigInt", (*BigInt)(nil)),
 		Bool:           regType("Bool", (*Bool)(nil)),
+		Time:           regType("Time", (*Time)(nil)),
 		Buffer:         regRefType("Buffer", (*Buffer)(nil)),
 		Char:           regType("Char", (*Char)(nil)),
 		ConsSeq:        regRefType("ConsSeq", (*ConsSeq)(nil)),
@@ -1052,6 +1059,10 @@ func MakeBool(b bool) Bool {
 	return Bool{B: b}
 }
 
+func MakeTime(t time.Time) Time {
+	return Time{T: t}
+}
+
 func MakeDouble(d float64) Double {
 	return Double{D: d}
 }
@@ -1165,6 +1176,42 @@ func (b Bool) Compare(other Object) int {
 		return 0
 	}
 	if b.B {
+		return 1
+	}
+	return -1
+}
+
+func (t Time) ToString(escape bool) string {
+	return t.T.String()
+}
+
+func (t Time) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case Time:
+		return t.T.Equal(other.T)
+	default:
+		return false
+	}
+}
+
+func (t Time) GetType() *Type {
+	return TYPE.Time
+}
+
+func (t Time) Native() interface{} {
+	return t.T
+}
+
+func (t Time) Hash() uint32 {
+	return hashGobEncoder(t.T)
+}
+
+func (t Time) Compare(other Object) int {
+	t2 := AssertTime(other, "Cannot compare Time and "+other.GetType().ToString(false))
+	if t.T.Equal(t2.T) {
+		return 0
+	}
+	if t2.T.Before(t.T) {
 		return 1
 	}
 	return -1

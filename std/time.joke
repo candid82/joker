@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports []
+  ^{:go-imports ["time"]
     :doc "Provides functionality for measuring and displaying time."}
   time)
 
@@ -9,3 +9,9 @@
   {:added "1.0"
   :go "sleep(d)"}
   [^Int d])
+
+(defn ^Time now
+  "Now returns the current local time."
+  {:added "1.0"
+  :go "time.Now()"}
+  [])

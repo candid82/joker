@@ -3,11 +3,26 @@
 package time
 
 import (
-  
+  "time"
   . "github.com/candid82/joker/core"
 )
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
+
+var now_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 0:
+    
+    
+    res := time.Now()
+    return MakeTime(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
 
 var sleep_ Proc = func(args []Object) Object {
   c := len(args)
@@ -28,6 +43,11 @@ var sleep_ Proc = func(args []Object) Object {
 func init() {
 
 timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
+
+timeNamespace.InternVar("now", now_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom()),
+    `Now returns the current local time.`, "1.0"))
 
 timeNamespace.InternVar("sleep", sleep_,
   MakeMeta(
