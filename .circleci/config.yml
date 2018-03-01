@@ -12,7 +12,7 @@ jobs:
           command: mkdir -p /go/src/github.com/${CIRCLE_PROJECT_USERNAME}
       - run:
           name: ln
-          command: ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+          command: ln -s /home/circleci/project /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
       - run:
           name: go get readline
           command: go get -d -v github.com/chzyer/readline
