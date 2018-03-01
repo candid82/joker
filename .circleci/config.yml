@@ -24,7 +24,7 @@ jobs:
           command: go generate -v ./...
       - run:
           name: go build
-          command: go build -v
+          command: go build -v github.com/candid82/joker
       - run:
           name: linter tests
           command: ./linter-tests.sh
