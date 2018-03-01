@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run:
-        command: pwd
+          command: pwd
       - run:
           name: mkdir
           command: mkdir -p /go/src/github.com/${CIRCLE_PROJECT_USERNAME}
