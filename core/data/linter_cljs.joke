@@ -370,6 +370,10 @@
     'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil 'import nil}
    (:known-macros joker.core/*linter-config*)))
 
+(defn- lib-name__
+  [lib]
+  (derive-info__ (symbol lib) lib))
+
 (joker.core/in-ns 'user)
 
 (joker.core/refer 'joker.core)

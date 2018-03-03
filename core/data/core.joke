@@ -3212,6 +3212,10 @@
 (def ^:private require-opt-keys
   [:exclude :only :rename :refer])
 
+(defn- lib-name__
+  [lib]
+  lib)
+
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
@@ -3219,6 +3223,7 @@
             "Found lib name '%s' containing period with prefix '%s'.  lib names inside prefix lists must not contain periods"
             (name lib) prefix)
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
+        lib (lib-name__ lib)
         opts (apply hash-map options)
         {:keys [as reload reload-all require use verbose]} opts
         loaded (contains? *loaded-libs* lib)

@@ -1,0 +1,2 @@
+tests/linter/ns-cljs-4/input.cljs:3:14: Parse warning: unused namespace app.state
+tests/linter/ns-cljs-4/input.cljs:2:14: Parse warning: unused namespace firebase
