@@ -1,2 +1,4 @@
-tests/linter/ns-cljs-4/input.cljs:3:14: Parse warning: unused namespace app.state
-tests/linter/ns-cljs-4/input.cljs:2:14: Parse warning: unused namespace firebase
+tests/linter/ns-cljs-4/input.cljs:6:14: Parse warning: duplicate require for m1
+tests/linter/ns-cljs-4/input.cljs:2:14: Parse warning: unused namespace m1
+tests/linter/ns-cljs-4/input.cljs:3:14: Parse warning: unused namespace m2_t
+tests/linter/ns-cljs-4/input.cljs:5:14: Parse warning: unused namespace ns1

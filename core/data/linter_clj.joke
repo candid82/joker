@@ -332,5 +332,7 @@
 
 (joker.core/in-ns 'user)
 
+(remove-ns 'joker.string)
+
 (joker.core/refer 'joker.core)
 

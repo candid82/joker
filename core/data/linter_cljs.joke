@@ -372,9 +372,13 @@
 
 (defn- lib-name__
   [lib]
-  (derive-info__ (symbol lib) lib))
+  (if (string? lib)
+    (derive-info__ (symbol (joker.string/replace lib "/" "_")) lib)
+    lib))
 
 (joker.core/in-ns 'user)
+
+(remove-ns 'joker.string)
 
 (joker.core/refer 'joker.core)
 
