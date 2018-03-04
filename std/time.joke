@@ -11,7 +11,20 @@
   [^Int d])
 
 (defn ^Time now
-  "Now returns the current local time."
+  "Returns the current local time."
   {:added "1.0"
   :go "time.Now()"}
   [])
+
+(defn ^Time from-unix
+  "Returns the local Time corresponding to the given Unix time, sec seconds and
+  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999]."
+  {:added "1.0"
+  :go "time.Unix(int64(sec), int64(nsec))"}
+  [^Int sec ^Int nsec])
+
+(defn ^Int unix
+  "Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC."
+  {:added "1.0"
+  :go "int(t.Unix())"}
+  [^Time t])

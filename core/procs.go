@@ -73,6 +73,10 @@ func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
 }
 
+func ExtractTime(args []Object, index int) time.Time {
+	return EnsureTime(args, index).T
+}
+
 func ExtractDouble(args []Object, index int) float64 {
 	return EnsureDouble(args, index).D
 }

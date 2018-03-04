@@ -9,6 +9,22 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
+var from_unix_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    sec := ExtractInt(args, 0)
+    nsec := ExtractInt(args, 1)
+    res := time.Unix(int64(sec), int64(nsec))
+    return MakeTime(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var now_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -39,20 +55,46 @@ var sleep_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var unix_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    t := ExtractTime(args, 0)
+    res := int(t.Unix())
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
 timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
+timeNamespace.InternVar("from-unix", from_unix_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
+    `Returns the local Time corresponding to the given Unix time, sec seconds and
+  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].`, "1.0"))
+
 timeNamespace.InternVar("now", now_,
   MakeMeta(
     NewListFrom(NewVectorFrom()),
-    `Now returns the current local time.`, "1.0"))
+    `Returns the current local time.`, "1.0"))
 
 timeNamespace.InternVar("sleep", sleep_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("d"))),
     `Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately.`, "1.0"))
+
+timeNamespace.InternVar("unix", unix_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+    `Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.`, "1.0"))
 
 }
