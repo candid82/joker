@@ -40,6 +40,21 @@ var now_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var parse_duration_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    s := ExtractString(args, 0)
+    t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var sleep_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -48,6 +63,22 @@ var sleep_ Proc = func(args []Object) Object {
     d := ExtractInt(args, 0)
     res := sleep(d)
     return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var sub_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    t := ExtractTime(args, 0)
+    u := ExtractTime(args, 1)
+    res := int(t.Sub(u))
+    return MakeInt(res)
 
   default:
     PanicArity(c)
@@ -86,11 +117,23 @@ timeNamespace.InternVar("now", now_,
     NewListFrom(NewVectorFrom()),
     `Returns the current local time.`, "1.0"))
 
+timeNamespace.InternVar("parse-duration", parse_duration_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+    `Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
+  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
+  ns, us (or µs), ms, s, m, h.`, "1.0"))
+
 timeNamespace.InternVar("sleep", sleep_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("d"))),
     `Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately.`, "1.0"))
+
+timeNamespace.InternVar("sub", sub_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("u"))),
+    `Returns the duration t-u in nanoseconds.`, "1.0"))
 
 timeNamespace.InternVar("unix", unix_,
   MakeMeta(

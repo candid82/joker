@@ -59,14 +59,17 @@
         go-expr (cond
                   (string? go) go
                   varargs? (:varargs go)
-                  :else (get go cnt))]
+                  :else (get go cnt))
+        go-res (if (joker.string/starts-with? go-expr "!")
+                 (subs go-expr 1)
+                 (str "res := " go-expr))]
     (-> arity-template
         (rpl "{arity}" (if varargs? "true" (str "c == " (count args))))
         (rpl "{arityCheck}" (if varargs?
                               (str "CheckArity(args, " (dec cnt) "," 999 ")")
                               ""))
         (rpl "{args}" (extract-args handle-args))
-        (rpl "{goExpr}" go-expr)
+        (rpl "{goExpr}" go-res)
         (rpl "{return}"
              (if tag
                (str "return Make" tag "(res)")

@@ -28,3 +28,17 @@
   {:added "1.0"
   :go "int(t.Unix())"}
   [^Time t])
+
+(defn ^Int sub
+  "Returns the duration t-u in nanoseconds."
+  {:added "1.0"
+  :go "int(t.Sub(u))"}
+  [^Time t ^Time u])
+
+(defn ^Int parse-duration
+  "Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
+  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
+  ns, us (or µs), ms, s, m, h."
+  {:added "1.0"
+  :go "!t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)"}
+  [^String s])
