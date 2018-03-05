@@ -25,6 +25,21 @@ var from_unix_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var hours_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    d := ExtractInt(args, 0)
+    res := time.Duration(d).Hours()
+    return MakeDouble(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var now_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -47,6 +62,21 @@ var parse_duration_ Proc = func(args []Object) Object {
     
     s := ExtractString(args, 0)
     t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var since_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    t := ExtractTime(args, 0)
+    res := int(time.Since(t))
     return MakeInt(res)
 
   default:
@@ -101,6 +131,21 @@ var unix_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var until_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    t := ExtractTime(args, 0)
+    res := int(time.Until(t))
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
@@ -111,6 +156,11 @@ timeNamespace.InternVar("from-unix", from_unix_,
     NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
     `Returns the local Time corresponding to the given Unix time, sec seconds and
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].`, "1.0"))
+
+timeNamespace.InternVar("hours", hours_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+    `Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0"))
 
 timeNamespace.InternVar("now", now_,
   MakeMeta(
@@ -123,6 +173,11 @@ timeNamespace.InternVar("parse-duration", parse_duration_,
     `Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h.`, "1.0"))
+
+timeNamespace.InternVar("since", since_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+    `Returns the time in nanoseconds elapsed since t.`, "1.0"))
 
 timeNamespace.InternVar("sleep", sleep_,
   MakeMeta(
@@ -139,5 +194,10 @@ timeNamespace.InternVar("unix", unix_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("t"))),
     `Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.`, "1.0"))
+
+timeNamespace.InternVar("until", until_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+    `Returns the duration in nanoseconds until t.`, "1.0"))
 
 }
