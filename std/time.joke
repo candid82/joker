@@ -35,6 +35,12 @@
   :go "int(t.Sub(u))"}
   [^Time t ^Time u])
 
+(defn ^Time add
+  "Returns the time t+d."
+  {:added "1.0"
+  :go "t.Add(time.Duration(d))"}
+  [^Time t ^Int d])
+
 (defn ^Int parse-duration
   "Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
@@ -60,3 +66,34 @@
   {:added "1.0"
   :go "time.Duration(d).Hours()"}
   [^Int d])
+
+(defn ^Double minutes
+  "Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes."
+  {:added "1.0"
+  :go "time.Duration(d).Minutes()"}
+  [^Int d])
+
+(defn ^Int round
+  "Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
+  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged."
+  {:added "1.0"
+  :go "int(time.Duration(d).Round(time.Duration(m)))"}
+  [^Int d ^Int m])
+
+(defn ^Double seconds
+  "Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds."
+  {:added "1.0"
+  :go "time.Duration(d).Seconds()"}
+  [^Int d])
+
+(defn ^String string
+  "Returns a string representing the duration in the form 72h3m0.5s."
+  {:added "1.0"
+  :go "time.Duration(d).String()"}
+  [^Int d])
+
+(defn ^Int truncate
+  "Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged."
+  {:added "1.0"
+  :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
+  [^Int d ^Int m])

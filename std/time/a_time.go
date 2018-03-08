@@ -9,6 +9,22 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
+var add_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    t := ExtractTime(args, 0)
+    d := ExtractInt(args, 1)
+    res := t.Add(time.Duration(d))
+    return MakeTime(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var from_unix_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -32,6 +48,21 @@ var hours_ Proc = func(args []Object) Object {
     
     d := ExtractInt(args, 0)
     res := time.Duration(d).Hours()
+    return MakeDouble(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var minutes_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    d := ExtractInt(args, 0)
+    res := time.Duration(d).Minutes()
     return MakeDouble(res)
 
   default:
@@ -70,6 +101,37 @@ var parse_duration_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var round_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    d := ExtractInt(args, 0)
+    m := ExtractInt(args, 1)
+    res := int(time.Duration(d).Round(time.Duration(m)))
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var seconds_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    d := ExtractInt(args, 0)
+    res := time.Duration(d).Seconds()
+    return MakeDouble(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var since_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -100,6 +162,21 @@ var sleep_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var string_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    d := ExtractInt(args, 0)
+    res := time.Duration(d).String()
+    return MakeString(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var sub_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -108,6 +185,22 @@ var sub_ Proc = func(args []Object) Object {
     t := ExtractTime(args, 0)
     u := ExtractTime(args, 1)
     res := int(t.Sub(u))
+    return MakeInt(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var truncate_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    d := ExtractInt(args, 0)
+    m := ExtractInt(args, 1)
+    res := int(time.Duration(d).Truncate(time.Duration(m)))
     return MakeInt(res)
 
   default:
@@ -151,6 +244,11 @@ func init() {
 
 timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
+timeNamespace.InternVar("add", add_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
+    `Returns the time t+d.`, "1.0"))
+
 timeNamespace.InternVar("from-unix", from_unix_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
@@ -161,6 +259,11 @@ timeNamespace.InternVar("hours", hours_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("d"))),
     `Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0"))
+
+timeNamespace.InternVar("minutes", minutes_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+    `Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes.`, "1.0"))
 
 timeNamespace.InternVar("now", now_,
   MakeMeta(
@@ -174,6 +277,17 @@ timeNamespace.InternVar("parse-duration", parse_duration_,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h.`, "1.0"))
 
+timeNamespace.InternVar("round", round_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+    `Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
+  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.`, "1.0"))
+
+timeNamespace.InternVar("seconds", seconds_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+    `Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds.`, "1.0"))
+
 timeNamespace.InternVar("since", since_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("t"))),
@@ -185,10 +299,20 @@ timeNamespace.InternVar("sleep", sleep_,
     `Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately.`, "1.0"))
 
+timeNamespace.InternVar("string", string_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+    `Returns a string representing the duration in the form 72h3m0.5s.`, "1.0"))
+
 timeNamespace.InternVar("sub", sub_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("u"))),
     `Returns the duration t-u in nanoseconds.`, "1.0"))
+
+timeNamespace.InternVar("truncate", truncate_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+    `Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged.`, "1.0"))
 
 timeNamespace.InternVar("unix", unix_,
   MakeMeta(
