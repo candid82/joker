@@ -12,6 +12,9 @@
       <li>
   <a href="#send">send</a>
 </li>
+<li>
+  <a href="#start-server">start-server</a>
+</li>
 
     </ul>
     <ul>
@@ -22,6 +25,15 @@
   <pre class="var-usage"><div><code>(send request)</code></div>
 </pre>
   <p class="var-docstr">Sends an HTTP request and returns an HTTP response.<br>  request is a map with the following keys:<br>  - url (string)<br>  - method (string, keyword or symbol, defaults to :get)<br>  - body (string)<br>  - host (string, overrides Host header if provided)<br>  - headers (map).<br>  All keys except for url are optional.<br>  response is a map with the following keys:<br>  - status (int)<br>  - body (string)<br>  - headers (map)<br>  - content-length (int)</p>
+  
+</li>
+<li>
+  <h3 id="start-server">start-server</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(start-server addr handler)</code></div>
+</pre>
+  <p class="var-docstr">Starts HTTP server on the TCP network address addr.</p>
   
 </li>
 
