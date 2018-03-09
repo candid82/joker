@@ -78,6 +78,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
   | Regex      | regexp.Regexp         |
   | String     | string                |
   | Symbol     | n/a                   |
+  | Time       | time.Time             |
 
   Note that `Nil` is a type that has one value `nil`.
 
@@ -95,7 +96,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 1. Joker is single-threaded with no support for concurrency or parallelism. Therefore no refs, agents, futures, promises, locks, volatiles, transactions, `p*` functions that use multiple threads. Vars always have just one "root" binding.
 1. The following features are not implemented: protocols, records, structmaps, multimethods, chunked seqs, transients, tagged literals, unchecked arithmetics, primitive arrays, custom data readers, transducers, validators and watch functions for vars and atoms, hierarchies, sorted maps and sets.
 1. Unrelated to the features listed above, the following function from clojure.core namespace are not currently implemented but will probably be implemented in some form in the future: `subseq`, `iterator-seq`, `reduced?`, `reduced`, `mix-collection-hash`, `definline`, `re-groups`, `hash-ordered-coll`, `enumeration-seq`, `compare-and-set!`, `rationalize`, `load-reader`, `find-keyword`, `comparator`, `letfn`, `resultset-seq`, `line-seq`, `file-seq`, `sorted?`, `ensure-reduced`, `rsubseq`, `pr-on`, `seque`, `alter-var-root`, `hash-unordered-coll`, `re-matcher`, `unreduced`.
-1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other namespaces (`joker.string`, `joker.json`, `joker.os`, `joker.base64`) are in their infancy.
+1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other built-in namespaces include `joker.string`, `joker.json`, `joker.os`, `joker.base64` etc. See [standard library reference](https://candid82.github.io/joker/) for details.
 1. Miscellaneous:
   - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
   - `refer-clojure` is not a thing. Use `(joker.core/refer 'joker.core)` instead if you really need to.
