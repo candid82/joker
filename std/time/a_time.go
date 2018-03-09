@@ -25,6 +25,22 @@ var add_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var format_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    t := ExtractTime(args, 0)
+    layout := ExtractString(args, 1)
+    res := t.Format(layout)
+    return MakeString(res)
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var from_unix_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -248,6 +264,15 @@ timeNamespace.InternVar("add", add_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
     `Returns the time t+d.`, "1.0"))
+
+timeNamespace.InternVar("format", format_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("layout"))),
+    `Returns a textual representation of the time value formatted according to layout,
+  which defines the format by showing how the reference time, defined to be
+  Mon Jan 2 15:04:05 -0700 MST 2006
+  would be displayed if it were the value; it serves as an example of the desired output.
+  The same display rules will then be applied to the time value..`, "1.0"))
 
 timeNamespace.InternVar("from-unix", from_unix_,
   MakeMeta(

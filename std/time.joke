@@ -61,6 +61,16 @@
   :go "int(time.Until(t))"}
   [^Time t])
 
+(defn ^String format
+  "Returns a textual representation of the time value formatted according to layout,
+  which defines the format by showing how the reference time, defined to be
+  Mon Jan 2 15:04:05 -0700 MST 2006
+  would be displayed if it were the value; it serves as an example of the desired output.
+  The same display rules will then be applied to the time value.."
+  {:added "1.0"
+  :go "t.Format(layout)"}
+  [^Time t ^String layout])
+
 (defn ^Double hours
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of hours."
   {:added "1.0"
