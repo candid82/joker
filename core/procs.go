@@ -1439,7 +1439,11 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
-func findConfigFile(filename string, workingDir string) string {
+func findConfigFile(filename string, workingDir string, findDir bool) string {
+	configName := ".joker"
+	if findDir {
+		configName = ".jokerd"
+	}
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", err)
@@ -1452,7 +1456,7 @@ func findConfigFile(filename string, workingDir string) string {
 			fmt.Fprintln(os.Stderr, "Error resolving working directory"+workingDir+": ", err)
 			return ""
 		}
-		filename = filepath.Join(workingDir, ".joker")
+		filename = filepath.Join(workingDir, configName)
 	}
 	for {
 		oldFilename := filename
@@ -1465,15 +1469,19 @@ func findConfigFile(filename string, workingDir string) string {
 					return ""
 				}
 			}
-			p := filepath.Join(home, ".joker")
-			if _, err := os.Stat(p); err == nil {
-				return p
+			p := filepath.Join(home, configName)
+			if info, err := os.Stat(p); err == nil {
+				if !findDir || info.IsDir() {
+					return p
+				}
 			}
 			return ""
 		}
-		p := filepath.Join(filename, ".joker")
-		if _, err := os.Stat(p); err == nil {
-			return p
+		p := filepath.Join(filename, configName)
+		if info, err := os.Stat(p); err == nil {
+			if !findDir || info.IsDir() {
+				return p
+			}
 		}
 	}
 }
@@ -1506,7 +1514,7 @@ func knownMacrosToMap(km Object) (Map, error) {
 func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
 	LINTER_CONFIG.Value = EmptyArrayMap()
-	configFileName := findConfigFile(filename, workingDir)
+	configFileName := findConfigFile(filename, workingDir, false)
 	if configFileName == "" {
 		return
 	}
@@ -1598,6 +1606,41 @@ func ProcessLinterData(dialect Dialect) {
 		reader = bytes.NewReader(linter_cljsData)
 	}
 	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+}
+
+func NewReaderFromFile(filename string) (*Reader, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error: ", err)
+		return nil, err
+	}
+	return NewReader(bufio.NewReader(f), filename), nil
+}
+
+func ProcessLinterFile(configDir string, filename string) {
+	linterFileName := filepath.Join(configDir, filename)
+	if _, err := os.Stat(linterFileName); err == nil {
+		if reader, err := NewReaderFromFile(linterFileName); err == nil {
+			ProcessReader(reader, linterFileName, EVAL)
+		}
+	}
+}
+
+func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
+	if dialect == EDN || dialect == JOKER {
+		return
+	}
+	configDir := findConfigFile(filename, workingDir, true)
+	if configDir == "" {
+		return
+	}
+	ProcessLinterFile(configDir, "linter.cljc")
+	switch dialect {
+	case CLJS:
+		ProcessLinterFile(configDir, "linter.cljs")
+	case CLJ:
+		ProcessLinterFile(configDir, "linter.clj")
+	}
 }
 
 func init() {

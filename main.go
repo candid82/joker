@@ -63,12 +63,11 @@ func processFile(filename string, phase Phase) error {
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
 	} else {
-		f, err := os.Open(filename)
+		var err error
+		reader, err = NewReaderFromFile(filename)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: ", err)
 			return err
 		}
-		reader = NewReader(bufio.NewReader(f), filename)
 	}
 	return ProcessReader(reader, filename, phase)
 }
@@ -165,13 +164,14 @@ func makeDialectKeyword(dialect Dialect) Keyword {
 	}
 }
 
-func configureLinterMode(dialect Dialect) {
+func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	LINTER_MODE = true
 	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Bool{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
 	ProcessLinterData(dialect)
+	ProcessLinterFiles(dialect, filename, workingDir)
 }
 
 func detectDialect(filename string) Dialect {
@@ -192,7 +192,7 @@ func lintFile(filename string, dialect Dialect, workingDir string) {
 		phase = READ
 	}
 	ReadConfig(filename, workingDir)
-	configureLinterMode(dialect)
+	configureLinterMode(dialect, filename, workingDir)
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
 		WarnOnUnusedVars()

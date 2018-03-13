@@ -1527,17 +1527,12 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-			isSpecial := isInteropSymbol(sym) || isJavaSymbol(sym)
-			if ctx.isUnknownCallableScope {
-				if isSpecial {
-					return NewSurrogateExpr(sym)
-				}
-			} else {
-				if ctx.linterBindings.GetBinding(sym) == nil && !isSpecial {
+			if isInteropSymbol(sym) || isJavaSymbol(sym) {
+				return NewSurrogateExpr(sym)
+			}
+			if !ctx.isUnknownCallableScope {
+				if ctx.linterBindings.GetBinding(sym) == nil {
 					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-				}
-				if isSpecial {
-					return NewSurrogateExpr(sym)
 				}
 			}
 		}
