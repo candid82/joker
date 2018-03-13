@@ -1,1 +1,3 @@
-(defmacro transform [apath transform-fn structure])
+(defn transform [apath transform-fn structure])
+(def MAP-VALS)
+(def ALL)
