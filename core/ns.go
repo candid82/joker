@@ -107,6 +107,9 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 		panic(RT.NewErrorWithPos(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",
 			sym.ToString(false), existingVar.ToString(false), ns.ToString(false)), sym.GetInfo().Pos()))
 	}
+	if LINTER_MODE && existingVar.expr != nil && !existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
+		printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+	}
 	return existingVar
 }
 

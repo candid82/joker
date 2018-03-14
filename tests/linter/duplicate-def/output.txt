@@ -1,0 +1,2 @@
+tests/linter/duplicate-def/input.clj:8:6: Parse warning: Duplicate def of #'user/a
+tests/linter/duplicate-def/input.clj:11:7: Parse warning: Duplicate def of #'user/f1
