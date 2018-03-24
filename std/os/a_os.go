@@ -116,6 +116,21 @@ var sh_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var stat_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 1:
+    
+    filename := ExtractString(args, 0)
+    res := stat(filename)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 
 func init() {
 
@@ -159,5 +174,15 @@ osNamespace.InternVar("sh", sh_,
       :success - whether or not the execution was successful,
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
+
+osNamespace.InternVar("stat", stat_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
+    `Returns a map describing the named file. The info map has the following attributes:
+  :name - base name of the file
+  :size - length in bytes for regular files; system-dependent for others
+  :mode - file mode bits
+  :modtime - modification time
+  :dir? - true if file is a directory`, "1.0"))
 
 }

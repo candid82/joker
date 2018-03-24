@@ -48,3 +48,14 @@
   {:added "1.0"
   :go "getwd()"}
   [])
+
+(defn stat
+  "Returns a map describing the named file. The info map has the following attributes:
+  :name - base name of the file
+  :size - length in bytes for regular files; system-dependent for others
+  :mode - file mode bits
+  :modtime - modification time
+  :dir? - true if file is a directory"
+  {:added "1.0"
+  :go "stat(filename)"}
+  [^String filename])
