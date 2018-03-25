@@ -1,0 +1,16 @@
+(ns
+  ^{:go-imports ["html"]
+    :doc "Provides functions for escaping and unescaping HTML text."}
+  html)
+
+(defn ^String escape
+  "Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and \"."
+  {:added "1.0"
+  :go "html.EscapeString(s)"}
+  [^String s])
+
+(defn ^String unescape
+  "Unescapes entities like &lt; to become <."
+  {:added "1.0"
+  :go "html.UnescapeString(s)"}
+  [^String s])
