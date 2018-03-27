@@ -40,6 +40,8 @@ You can also [build](#building) Joker from the source code.
 
 [Standard library reference](https://candid82.github.io/joker/)
 
+[Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
+
 ## Project goals
 
 These are high level goals of the project that guide design and implementation decisions.
