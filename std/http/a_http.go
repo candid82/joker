@@ -24,6 +24,22 @@ var send_ Proc = func(args []Object) Object {
   return NIL
 }
 
+var start_file_server_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case c == 2:
+    
+    addr := ExtractString(args, 0)
+    root := ExtractString(args, 1)
+    res := startFileServer(addr, root)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
 var start_server_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
@@ -61,6 +77,12 @@ httpNamespace.InternVar("send", send_,
   - body (string)
   - headers (map)
   - content-length (int)`, "1.0"))
+
+httpNamespace.InternVar("start-file-server", start_file_server_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("root"))),
+    `Starts HTTP server on the TCP network address addr that
+  serves HTTP requests with the contents of the file system rooted at root.`, "1.0"))
 
 httpNamespace.InternVar("start-server", start_server_,
   MakeMeta(

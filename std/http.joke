@@ -26,3 +26,10 @@
   {:added "1.0"
   :go "startServer(addr, handler)"}
   [^String addr ^Callable handler])
+
+(defn start-file-server
+  "Starts HTTP server on the TCP network address addr that
+  serves HTTP requests with the contents of the file system rooted at root."
+  {:added "1.0"
+  :go "startFileServer(addr, root)"}
+  [^String addr ^String root])

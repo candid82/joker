@@ -158,3 +158,9 @@ func startServer(addr string, handler Callable) Object {
 	PanicOnErr(err)
 	return NIL
 }
+
+func startFileServer(addr string, root string) Object {
+	err := http.ListenAndServe(addr, http.FileServer(http.Dir(root)))
+	PanicOnErr(err)
+	return NIL
+}
