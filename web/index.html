@@ -1,0 +1,45 @@
+<head>
+	<meta charset="utf-8">
+	<title>Joker</title>
+	<meta name="author" content="Joker Team">
+	<meta name="robots" content="index, follow">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="canonical" href="https://joker-lang.org/">
+	<link rel="stylesheet" href="/css/styles.css" media="all">
+</head>
+<body>
+	<header>
+		<a id="logo" href="/">
+			<img src="/images/logo.svg" alt="joker">
+		</a>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about/">About</a></li>
+				<li><a href="/docs/">Docs</a></li>
+			</ul>
+		</nav>
+	</header>
+	<div class="main">
+		<p>
+			Joker is a small interpreted dialect of Clojure written in Go. It is also a Clojure(Script) linter.
+		</p>
+		<div class="left">
+			<p>Write scripts in Clojure</p>
+			<img src="/images/script-showcase.png">
+			<ul>
+				<li>Fast startup time.</li>
+				<li>Sane error messages and stacktraces.</li>
+				<li>Common scripting functions are included in standard library: send HTTP requests, read and parse JSON, YAML, work with file system, start external processes etc.</li>
+			</ul>
+		</div>
+		<div class="right">
+			<p>Check your Clojure(Script) code on the fly</p>
+			<img src="/images/linter-showcase.png">
+			<ul>
+				<li>Works with all major editors</li>
+				<li>Checks for syntax errors, function arity mismatches, unresolvable symbols, unused namespaces, vars, bindings and much more</li>
+			</ul>
+		</div>
+	</div>
+</body>
