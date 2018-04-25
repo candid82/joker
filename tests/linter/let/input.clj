@@ -11,4 +11,5 @@
 ;; Should FAIL
 (let [_ 1])
 (let [] 1)
+(let [foo/bar 2] bar)
 (let [[a & more 1] []] 1)

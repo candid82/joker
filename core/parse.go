@@ -961,6 +961,14 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			s := b.at(i * 2)
 			switch sym := s.(type) {
 			case Symbol:
+				if sym.ns != nil {
+					msg := "Can't let qualified name: " + sym.ToString(false)
+					if LINTER_MODE {
+						printParseError(GetPosition(s), msg)
+					} else {
+						panic(&ParseError{obj: s, msg: msg})
+					}
+				}
 				res.names[i] = sym
 			default:
 				if LINTER_MODE {
