@@ -50,7 +50,6 @@ type (
 		Position
 		callable Expr
 		args     []Expr
-		name     string
 	}
 	MacroCallExpr struct {
 		Position
@@ -1134,7 +1133,7 @@ func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 		if declaredType := getTaggedType(da); declaredType != nil {
 			passedType := call.args[i].InferType()
 			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
-				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, declaredType.ToString(false), passedType.ToString(false)))
+				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), declaredType.ToString(false), passedType.ToString(false)))
 				res = true
 			}
 		}
@@ -1156,7 +1155,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return checkTypes(v.args, call)
 	}
-	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
+	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
 	return true
 }
 
@@ -1287,19 +1286,19 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 		}
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
-			reportNotAFunction(pos, call.name)
+			reportNotAFunction(pos, call.Name())
 			return
 		}
 		switch expr.obj.(type) {
 		case Keyword:
 			if argsCount == 0 || argsCount > 2 {
-				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.name))
+				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.Name()))
 			}
 		}
 	case *RecurExpr:
-		reportNotAFunction(pos, call.name)
+		reportNotAFunction(pos, call.Name())
 	case *ThrowExpr:
-		reportNotAFunction(pos, call.name)
+		reportNotAFunction(pos, call.Name())
 	}
 }
 
@@ -1418,15 +1417,6 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		callable: callable,
 		args:     parseSeq(seq.Rest(), ctx),
 		Position: pos,
-		name:     "fn",
-	}
-	switch c := res.callable.(type) {
-	case *VarRefExpr:
-		res.name = c.vr.ToString(false)
-	case *BindingExpr:
-		res.name = c.binding.name.ToString(false)
-	case *LiteralExpr:
-		res.name = c.obj.ToString(false)
 	}
 	if LINTER_MODE {
 		switch c := res.callable.(type) {
@@ -1450,14 +1440,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 						if ok, arglist := m.Get(KEYWORDS.arglist); ok {
 							if arglist, ok := arglist.(Seq); ok {
 								if !checkArglist(arglist, len(res.args)) {
-									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.name))
+									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.Name()))
 								}
 							}
 						}
 					}
 					return res
 				default:
-					reportNotAFunction(pos, res.name)
+					reportNotAFunction(pos, res.Name())
 				}
 			} else {
 				checkCall(c.vr.expr, c.vr.isMacro, res, pos)

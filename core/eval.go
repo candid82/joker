@@ -91,7 +91,7 @@ func (rt *Runtime) pushFrame() {
 	if rt.currentExpr != nil {
 		tr = rt.currentExpr.(Traceable)
 	} else {
-		tr = &CallExpr{name: "noname frame"}
+		tr = &CallExpr{}
 	}
 	rt.callstack.pushFrame(Frame{traceable: tr})
 }
@@ -270,8 +270,24 @@ func (expr *CallExpr) Eval(env *LocalEnv) Object {
 	}
 }
 
+func varCallableString(v *Var) string {
+	if v.ns == GLOBAL_ENV.CoreNamespace {
+		return "core/" + v.name.ToString(false)
+	}
+	return v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+}
+
 func (expr *CallExpr) Name() string {
-	return expr.name
+	switch c := expr.callable.(type) {
+	case *VarRefExpr:
+		return varCallableString(c.vr)
+	case *BindingExpr:
+		return c.binding.name.ToString(false)
+	case *LiteralExpr:
+		return c.obj.ToString(false)
+	default:
+		return "fn"
+	}
 }
 
 func (expr *ThrowExpr) Eval(env *LocalEnv) Object {
