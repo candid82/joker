@@ -30,7 +30,7 @@ const (
 	EVAL
 )
 
-const VERSION = "v0.9.1"
+const VERSION = "v0.9.2"
 
 const (
 	CLJ Dialect = iota
