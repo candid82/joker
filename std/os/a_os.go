@@ -107,7 +107,24 @@ var sh_ Proc = func(args []Object) Object {
     CheckArity(args, 1,999)
     name := ExtractString(args, 0)
     arguments := ExtractStrings(args, 1)
-    res := sh(name, arguments)
+    res := sh("", name, arguments)
+    return res
+
+  default:
+    PanicArity(c)
+  }
+  return NIL
+}
+
+var sh_from_ Proc = func(args []Object) Object {
+  c := len(args)
+  switch  {
+  case true:
+    CheckArity(args, 2,999)
+    dir := ExtractString(args, 0)
+    name := ExtractString(args, 1)
+    arguments := ExtractStrings(args, 2)
+    res := sh(dir, name, arguments)
     return res
 
   default:
@@ -171,6 +188,15 @@ osNamespace.InternVar("sh", sh_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
     `Executes the named program with the given arguments. Returns a map with the following keys:
+      :success - whether or not the execution was successful,
+      :out - string capturing stdout of the program,
+      :err - string capturing stderr of the program.`, "1.0"))
+
+osNamespace.InternVar("sh-from", sh_from_,
+  MakeMeta(
+    NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
+    `Executes the named program with the given arguments and working directory set to dir.
+  Returns a map with the following keys:
       :success - whether or not the execution was successful,
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))

@@ -27,8 +27,9 @@ func commandArgs() Object {
 	return res
 }
 
-func sh(name string, args []string) Object {
+func sh(dir string, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
 	stdoutReader, err := cmd.StdoutPipe()
 	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
