@@ -4,6 +4,3 @@ play
 .vscode
 .idea
 core/a_*.go
-
-
-release.joke
