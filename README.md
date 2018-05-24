@@ -172,6 +172,20 @@ If your code uses tagged literals that Joker doesn't know about, add them to `:k
 {:known-tags [db/fn]}
 ```
 
+If you use `:refer :all` Joker won't be able to properly resolve symbols because it doesn't know what vars are declared in the required namespace (i.e. `clojure.test`). There are generally three options here:
+
+1. Refer specific symbols. For example: `[clojure.test :refer [deftest testing is are]]`. This is usually not too tedious, and you only need to do it once per file.
+2. Use alias and qualified symbols:
+
+```clojure
+(:require [clojure.test :as t])
+(t/deftest ...)
+```
+
+3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file. So Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. Note that such declarations become valid even if you don't require the namespace they come from, so this feature should be used sparingly (see [this discussion](https://github.com/candid82/joker/issues/52) for more details).
+
+I generally prefer first option for `clojure.test` namespace.
+
 ### Optional rules
 
 Joker supports a few configurable linting rules. To turn them on or off set their values to `true` or `false` in `:rules` map in `.joker` file. For example:
