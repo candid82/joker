@@ -1514,6 +1514,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
 		if DIALECT == CLJS && sym.ns == nil {
+			// Check if this is a "callable namespace"
 			ns := ctx.GlobalEnv.FindNamespace(sym)
 			if ns == nil {
 				ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
@@ -1521,6 +1522,11 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			if ns != nil {
 				ns.isUsed = true
 				return NewSurrogateExpr(obj)
+			}
+			// See if this is a JS interop (i.e. Math.PI)
+			parts := strings.Split(sym.Name(), ".")
+			if len(parts) > 1 {
+				return parseSymbol(DeriveReadObject(obj, MakeSymbol(parts[0])), ctx)
 			}
 		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
