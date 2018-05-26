@@ -1,1 +1,1 @@
-tests/linter/cljs-interop/input.cljs:6:1: Parse error: Unable to resolve symbol: g
+tests/linter/cljs-interop/input.cljs:10:1: Parse error: Unable to resolve symbol: g

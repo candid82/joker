@@ -357,7 +357,6 @@
 (defn js-str [s])
 (defn es6-iterable [ty])
 (defn use-macros [& args])
-(defn import [& import-symbols-or-lists])
 (defn copy-arguments [dest])
 (defn divide [x & more])
 (defn unsafe-bit-and [x y & more])
@@ -367,7 +366,7 @@
    *known-macros*
    {'cljs.core.async.macros/go-loop nil 'cljs.core.async.macros/alt! nil 'cljs.core.async.macros/alt!! nil
     'cljs.core.async.macros/alts! nil 'cljs.core.async.macros/alts!! nil 'this-as nil 'import-macros nil
-    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil 'import nil}
+    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil}
    (:known-macros joker.core/*linter-config*)))
 
 (defn- lib-name__
