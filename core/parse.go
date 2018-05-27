@@ -999,7 +999,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 
 			if !isSkipUnused(b) {
 				for _, b := range ctx.localBindings.bindings {
-					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) {
+					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) && !isSkipUnused(b.name) {
 						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
 					}
 				}

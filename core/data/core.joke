@@ -2469,7 +2469,11 @@
 
 ;redefine let and loop  with destructuring
 (defn ^:private destructure [bindings]
-  (let [bents (partition 2 bindings)
+  (let [mark-as (fn [s]
+                  (if (and *linter-mode* (false? (:unused-as (:rules *linter-config*))))
+                    (vary-meta s assoc :skip-unused true)
+                    s))
+        bents (partition 2 bindings)
         pb (fn pb [bvec b v]
              (let [pvec
                    (fn [bvec b val]
@@ -2491,7 +2495,7 @@
                                                     n
                                                     (nnext bs)
                                                     true)
-                               (= firstb :as) (pb ret (second bs) gvec)
+                               (= firstb :as) (pb ret (mark-as (second bs)) gvec)
                                :else (if seen-rest?
                                        (throw (ex-info "Unsupported binding form, only :as can follow & parameter" {:form bindings}))
                                        (recur (pb (if has-rest
@@ -2516,7 +2520,7 @@
                                       (conj gmap) (conj `(if (seq? ~gmap) (apply array-map__ (seq ~gmapseq)) ~gmap))
                                       ((fn [ret]
                                          (if (:as b)
-                                           (conj ret (:as b) gmap)
+                                           (conj ret (mark-as (:as b)) gmap)
                                            ret))))
                               bes (let [transforms
                                         (reduce
