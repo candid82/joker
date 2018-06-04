@@ -14,7 +14,7 @@ type (
 		InferType() *Type
 		Pos() Position
 		Dump(includePosition bool) Map
-		Serialize() []byte
+		Pack(p []byte, env *PackEnv) []byte
 	}
 	LiteralExpr struct {
 		Position

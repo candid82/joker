@@ -43,6 +43,7 @@ type (
 		WithInfo(*ObjectInfo) Object
 		GetType() *Type
 		Hash() uint32
+		Pack(p []byte) []byte
 	}
 	Conjable interface {
 		Object
