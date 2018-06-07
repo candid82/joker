@@ -70,19 +70,36 @@ func unpackObject(p []byte, header *PackHeader) (Object, []byte) {
 	}
 }
 
+func boolToByte(b bool) byte {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func byteToBool(b byte) bool {
+	if b == 1 {
+		return true
+	}
+	return false
+}
+
 func (expr *LiteralExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, LITERAL)
 	p = expr.Pos().Pack(p, env)
+	p = append(p, boolToByte(expr.isSurrogate))
 	p = expr.obj.Pack(p)
 	return p
 }
 
 func unpackLiteral(p []byte, header *PackHeader) *LiteralExpr {
 	pos, p := unpackPosition(p, header)
-	obj, p := unpackObject(p, header)
+	isSurrogate := byteToBool(p[0])
+	obj, p := unpackObject(p[1:], header)
 	return &LiteralExpr{
-		obj:      obj,
-		Position: pos,
+		obj:         obj,
+		Position:    pos,
+		isSurrogate: isSurrogate,
 	}
 }
 
