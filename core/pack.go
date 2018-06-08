@@ -3,8 +3,11 @@ package core
 import "encoding/binary"
 
 const (
-	LITERAL byte = iota
-	INT     byte = iota
+	SEQEND       = 0
+	LITERAL_EXPR = 1
+	VECTOR_EXPR  = 2
+	MAP_EXPR     = 3
+	INT          = 4
 )
 
 type (
@@ -85,28 +88,87 @@ func byteToBool(b byte) bool {
 }
 
 func (expr *LiteralExpr) Pack(p []byte, env *PackEnv) []byte {
-	p = append(p, LITERAL)
+	p = append(p, LITERAL_EXPR)
 	p = expr.Pos().Pack(p, env)
 	p = append(p, boolToByte(expr.isSurrogate))
 	p = expr.obj.Pack(p)
 	return p
 }
 
-func unpackLiteral(p []byte, header *PackHeader) *LiteralExpr {
+func unpackLiteralExpr(p []byte, header *PackHeader) (*LiteralExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	isSurrogate := byteToBool(p[0])
 	obj, p := unpackObject(p[1:], header)
-	return &LiteralExpr{
+	res := &LiteralExpr{
 		obj:         obj,
 		Position:    pos,
 		isSurrogate: isSurrogate,
 	}
+	return res, p
 }
 
-func UnpackExpr(p []byte, header *PackHeader) Expr {
+func packSeq(p []byte, s []Expr, env *PackEnv) []byte {
+	for _, e := range s {
+		p = e.Pack(p, env)
+	}
+	p = append(p, SEQEND)
+	return p
+}
+
+func unpackSeq(p []byte, header *PackHeader) ([]Expr, []byte) {
+	var res []Expr
+	for p[0] != SEQEND {
+		var e Expr
+		e, p = UnpackExpr(p, header)
+		res = append(res, e)
+	}
+	return res, p[1:]
+}
+
+func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, VECTOR_EXPR)
+	p = expr.Pos().Pack(p, env)
+	return packSeq(p, expr.v, env)
+}
+
+func unpackVectorExpr(p []byte, header *PackHeader) (*VectorExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	v, p := unpackSeq(p, header)
+	res := &VectorExpr{
+		Position: pos,
+		v:        v,
+	}
+	return res, p
+}
+
+func (expr *MapExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, MAP_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSeq(p, expr.keys, env)
+	p = packSeq(p, expr.values, env)
+	return p
+}
+
+func unpackMapExpr(p []byte, header *PackHeader) (*MapExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	ks, p := unpackSeq(p, header)
+	vs, p := unpackSeq(p, header)
+	res := &MapExpr{
+		Position: pos,
+		keys:     ks,
+		values:   vs,
+	}
+	return res, p
+}
+
+func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
-	case LITERAL:
-		return unpackLiteral(p[1:], header)
+	case LITERAL_EXPR:
+		return unpackLiteralExpr(p[1:], header)
+	case VECTOR_EXPR:
+		return unpackVectorExpr(p[1:], header)
+	case MAP_EXPR:
+		return unpackMapExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
