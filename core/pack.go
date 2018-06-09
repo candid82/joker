@@ -7,7 +7,9 @@ const (
 	LITERAL_EXPR = 1
 	VECTOR_EXPR  = 2
 	MAP_EXPR     = 3
-	INT          = 4
+	SET_EXPR     = 4
+	IF_EXPR      = 5
+	INT          = 100
 )
 
 type (
@@ -131,6 +133,22 @@ func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
 	return packSeq(p, expr.v, env)
 }
 
+func unpackSetExpr(p []byte, header *PackHeader) (*SetExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	v, p := unpackSeq(p, header)
+	res := &SetExpr{
+		Position: pos,
+		elements: v,
+	}
+	return res, p
+}
+
+func (expr *SetExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, SET_EXPR)
+	p = expr.Pos().Pack(p, env)
+	return packSeq(p, expr.elements, env)
+}
+
 func unpackVectorExpr(p []byte, header *PackHeader) (*VectorExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	v, p := unpackSeq(p, header)
@@ -161,6 +179,29 @@ func unpackMapExpr(p []byte, header *PackHeader) (*MapExpr, []byte) {
 	return res, p
 }
 
+func (expr *IfExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, IF_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.cond.Pack(p, env)
+	p = expr.positive.Pack(p, env)
+	p = expr.negative.Pack(p, env)
+	return p
+}
+
+func unpackIfExpr(p []byte, header *PackHeader) (*IfExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	cond, p := UnpackExpr(p, header)
+	positive, p := UnpackExpr(p, header)
+	negative, p := UnpackExpr(p, header)
+	res := &IfExpr{
+		Position: pos,
+		positive: positive,
+		negative: negative,
+		cond:     cond,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -169,6 +210,10 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackVectorExpr(p[1:], header)
 	case MAP_EXPR:
 		return unpackMapExpr(p[1:], header)
+	case SET_EXPR:
+		return unpackSetExpr(p[1:], header)
+	case IF_EXPR:
+		return unpackIfExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
