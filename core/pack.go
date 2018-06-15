@@ -10,6 +10,7 @@ const (
 	SET_EXPR     = 4
 	IF_EXPR      = 5
 	DEF_EXPR     = 6
+	CALL_EXPR    = 7
 	INT          = 100
 )
 
@@ -289,6 +290,26 @@ func unpackDefExpr(p []byte, header *PackHeader) (*DefExpr, []byte) {
 	return res, p
 }
 
+func (expr *CallExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, CALL_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.callable.Pack(p, env)
+	p = packSeq(p, expr.args, env)
+	return p
+}
+
+func unpackCallExpr(p []byte, header *PackHeader) (*CallExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	callable, p := UnpackExpr(p, header)
+	args, p := unpackSeq(p, header)
+	res := &CallExpr{
+		Position: pos,
+		callable: callable,
+		args:     args,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -303,6 +324,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackIfExpr(p[1:], header)
 	case DEF_EXPR:
 		return unpackDefExpr(p[1:], header)
+	case CALL_EXPR:
+		return unpackCallExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
