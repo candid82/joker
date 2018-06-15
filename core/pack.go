@@ -11,6 +11,8 @@ const (
 	IF_EXPR      = 5
 	DEF_EXPR     = 6
 	CALL_EXPR    = 7
+	RECUR_EXPR   = 8
+	META_EXPR    = 9
 	INT          = 100
 )
 
@@ -310,6 +312,43 @@ func unpackCallExpr(p []byte, header *PackHeader) (*CallExpr, []byte) {
 	return res, p
 }
 
+func (expr *RecurExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, RECUR_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSeq(p, expr.args, env)
+	return p
+}
+
+func unpackRecurExpr(p []byte, header *PackHeader) (*RecurExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	args, p := unpackSeq(p, header)
+	res := &RecurExpr{
+		Position: pos,
+		args:     args,
+	}
+	return res, p
+}
+
+func (expr *MetaExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, META_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.meta.Pack(p, env)
+	p = expr.expr.Pack(p, env)
+	return p
+}
+
+func unpackMetaExpr(p []byte, header *PackHeader) (*MetaExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	meta, p := unpackMapExpr(p, header)
+	expr, p := UnpackExpr(p, header)
+	res := &MetaExpr{
+		Position: pos,
+		meta:     meta,
+		expr:     expr,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -326,6 +365,10 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackDefExpr(p[1:], header)
 	case CALL_EXPR:
 		return unpackCallExpr(p[1:], header)
+	case RECUR_EXPR:
+		return unpackRecurExpr(p[1:], header)
+	case META_EXPR:
+		return unpackMetaExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
