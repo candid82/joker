@@ -13,6 +13,7 @@ const (
 	CALL_EXPR    = 7
 	RECUR_EXPR   = 8
 	META_EXPR    = 9
+	DO_EXPR      = 10
 	INT          = 100
 )
 
@@ -349,6 +350,23 @@ func unpackMetaExpr(p []byte, header *PackHeader) (*MetaExpr, []byte) {
 	return res, p
 }
 
+func (expr *DoExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, DO_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSeq(p, expr.body, env)
+	return p
+}
+
+func unpackDoExpr(p []byte, header *PackHeader) (*DoExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	body, p := unpackSeq(p, header)
+	res := &DoExpr{
+		Position: pos,
+		body:     body,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -369,6 +387,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackRecurExpr(p[1:], header)
 	case META_EXPR:
 		return unpackMetaExpr(p[1:], header)
+	case DO_EXPR:
+		return unpackDoExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
