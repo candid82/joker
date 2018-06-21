@@ -3,18 +3,19 @@ package core
 import "encoding/binary"
 
 const (
-	SEQEND       = 0
-	LITERAL_EXPR = 1
-	VECTOR_EXPR  = 2
-	MAP_EXPR     = 3
-	SET_EXPR     = 4
-	IF_EXPR      = 5
-	DEF_EXPR     = 6
-	CALL_EXPR    = 7
-	RECUR_EXPR   = 8
-	META_EXPR    = 9
-	DO_EXPR      = 10
-	INT          = 100
+	SEQEND        = 0
+	LITERAL_EXPR  = 1
+	VECTOR_EXPR   = 2
+	MAP_EXPR      = 3
+	SET_EXPR      = 4
+	IF_EXPR       = 5
+	DEF_EXPR      = 6
+	CALL_EXPR     = 7
+	RECUR_EXPR    = 8
+	META_EXPR     = 9
+	DO_EXPR       = 10
+	FN_ARITY_EXPR = 11
+	INT           = 100
 )
 
 type (
@@ -195,6 +196,24 @@ func unpackSeq(p []byte, header *PackHeader) ([]Expr, []byte) {
 	return res, p[1:]
 }
 
+func packSymbolSeq(p []byte, s []Symbol, env *PackEnv) []byte {
+	for _, e := range s {
+		p = e.Pack(p, env)
+	}
+	p = append(p, SEQEND)
+	return p
+}
+
+func unpackSymbolSeq(p []byte, header *PackHeader) ([]Symbol, []byte) {
+	var res []Symbol
+	for p[0] != SEQEND {
+		var e Symbol
+		e, p = unpackSymbol(p, header)
+		res = append(res, e)
+	}
+	return res, p[1:]
+}
+
 func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, VECTOR_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -367,6 +386,26 @@ func unpackDoExpr(p []byte, header *PackHeader) (*DoExpr, []byte) {
 	return res, p
 }
 
+func (expr *FnArityExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, FN_ARITY_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSymbolSeq(p, expr.args, env)
+	p = packSeq(p, expr.body, env)
+	return p
+}
+
+func unpackFnArityExpr(p []byte, header *PackHeader) (*FnArityExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	args, p := unpackSymbolSeq(p, header)
+	body, p := unpackSeq(p, header)
+	res := &FnArityExpr{
+		Position: pos,
+		body:     body,
+		args:     args,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -389,6 +428,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackMetaExpr(p[1:], header)
 	case DO_EXPR:
 		return unpackDoExpr(p[1:], header)
+	case FN_ARITY_EXPR:
+		return unpackFnArityExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
