@@ -15,6 +15,7 @@ const (
 	META_EXPR     = 9
 	DO_EXPR       = 10
 	FN_ARITY_EXPR = 11
+	FN_EXPR       = 12
 	INT           = 100
 )
 
@@ -214,6 +215,24 @@ func unpackSymbolSeq(p []byte, header *PackHeader) ([]Symbol, []byte) {
 	return res, p[1:]
 }
 
+func packFnArityExprSeq(p []byte, s []FnArityExpr, env *PackEnv) []byte {
+	for _, e := range s {
+		p = e.Pack(p, env)
+	}
+	p = append(p, SEQEND)
+	return p
+}
+
+func unpackFnArityExprSeq(p []byte, header *PackHeader) ([]FnArityExpr, []byte) {
+	var res []FnArityExpr
+	for p[0] != SEQEND {
+		var e *FnArityExpr
+		e, p = unpackFnArityExpr(p, header)
+		res = append(res, *e)
+	}
+	return res, p[1:]
+}
+
 func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, VECTOR_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -406,6 +425,29 @@ func unpackFnArityExpr(p []byte, header *PackHeader) (*FnArityExpr, []byte) {
 	return res, p
 }
 
+func (expr *FnExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, FN_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packFnArityExprSeq(p, expr.arities, env)
+	p = expr.variadic.Pack(p, env)
+	p = expr.self.Pack(p, env)
+	return p
+}
+
+func unpackFnExpr(p []byte, header *PackHeader) (*FnExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	arities, p := unpackFnArityExprSeq(p, header)
+	variadic, p := unpackFnArityExpr(p, header)
+	self, p := unpackSymbol(p, header)
+	res := &FnExpr{
+		Position: pos,
+		arities:  arities,
+		variadic: variadic,
+		self:     self,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -430,6 +472,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackDoExpr(p[1:], header)
 	case FN_ARITY_EXPR:
 		return unpackFnArityExpr(p[1:], header)
+	case FN_EXPR:
+		return unpackFnExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
