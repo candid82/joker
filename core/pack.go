@@ -16,6 +16,7 @@ const (
 	DO_EXPR       = 10
 	FN_ARITY_EXPR = 11
 	FN_EXPR       = 12
+	LET_EXPR      = 13
 	INT           = 100
 )
 
@@ -448,6 +449,29 @@ func unpackFnExpr(p []byte, header *PackHeader) (*FnExpr, []byte) {
 	return res, p
 }
 
+func (expr *LetExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, LET_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSymbolSeq(p, expr.names, env)
+	p = packSeq(p, expr.values, env)
+	p = packSeq(p, expr.body, env)
+	return p
+}
+
+func unpackLetExpr(p []byte, header *PackHeader) (*LetExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	names, p := unpackSymbolSeq(p, header)
+	values, p := unpackSeq(p, header)
+	body, p := unpackSeq(p, header)
+	res := &LetExpr{
+		Position: pos,
+		names:    names,
+		values:   values,
+		body:     body,
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -474,6 +498,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackFnArityExpr(p[1:], header)
 	case FN_EXPR:
 		return unpackFnExpr(p[1:], header)
+	case LET_EXPR:
+		return unpackLetExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
