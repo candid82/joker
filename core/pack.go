@@ -19,6 +19,7 @@ const (
 	LET_EXPR      = 13
 	THROW_EXPR    = 14
 	CATCH_EXPR    = 15
+	TRY_EXPR      = 16
 	INT           = 100
 )
 
@@ -232,6 +233,24 @@ func unpackFnArityExprSeq(p []byte, header *PackHeader) ([]FnArityExpr, []byte) 
 		var e *FnArityExpr
 		e, p = unpackFnArityExpr(p, header)
 		res = append(res, *e)
+	}
+	return res, p[1:]
+}
+
+func packCatchExprSeq(p []byte, s []*CatchExpr, env *PackEnv) []byte {
+	for _, e := range s {
+		p = e.Pack(p, env)
+	}
+	p = append(p, SEQEND)
+	return p
+}
+
+func unpackCatchExprSeq(p []byte, header *PackHeader) ([]*CatchExpr, []byte) {
+	var res []*CatchExpr
+	for p[0] != SEQEND {
+		var e *CatchExpr
+		e, p = unpackCatchExpr(p, header)
+		res = append(res, e)
 	}
 	return res, p[1:]
 }
@@ -491,6 +510,29 @@ func unpackThrowExpr(p []byte, header *PackHeader) (*ThrowExpr, []byte) {
 	return res, p
 }
 
+func (expr *TryExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, TRY_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSeq(p, expr.body, env)
+	p = packCatchExprSeq(p, expr.catches, env)
+	p = packSeq(p, expr.finallyExpr, env)
+	return p
+}
+
+func unpackTryExpr(p []byte, header *PackHeader) (*TryExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	body, p := unpackSeq(p, header)
+	catches, p := unpackCatchExprSeq(p, header)
+	finallyExpr, p := unpackSeq(p, header)
+	res := &TryExpr{
+		Position:    pos,
+		body:        body,
+		catches:     catches,
+		finallyExpr: finallyExpr,
+	}
+	return res, p
+}
+
 func (expr *CatchExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, CATCH_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -547,6 +589,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackThrowExpr(p[1:], header)
 	case CATCH_EXPR:
 		return unpackCatchExpr(p[1:], header)
+	case TRY_EXPR:
+		return unpackTryExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
