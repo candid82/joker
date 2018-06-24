@@ -1,6 +1,9 @@
 package core
 
-import "encoding/binary"
+import (
+	"bytes"
+	"encoding/binary"
+)
 
 const (
 	SEQEND        = 0
@@ -20,7 +23,6 @@ const (
 	THROW_EXPR    = 14
 	CATCH_EXPR    = 15
 	TRY_EXPR      = 16
-	INT           = 100
 )
 
 type (
@@ -154,27 +156,33 @@ func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 	return res, p
 }
 
-func unpackObject(p []byte, header *PackHeader) (Object, []byte) {
-	switch p[0] {
-	case INT:
-		return unpackInt(p[1:])
-	default:
-		panic(RT.NewError("Unknown pack tag"))
-	}
+func packObject(obj Object, p []byte) []byte {
+	var buf *bytes.Buffer
+	printObject(obj, buf)
+	bb := buf.Bytes()
+	p = appendInt(p, len(bb))
+	p = append(p, bb...)
+	return p
+}
+
+func unpackObject(p []byte) (Object, []byte) {
+	size, p := extractInt(p)
+	obj := readFromReader(bytes.NewReader(p[4 : size+4]))
+	return obj, p[size+4:]
 }
 
 func (expr *LiteralExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, LITERAL_EXPR)
 	p = expr.Pos().Pack(p, env)
 	p = appendBool(p, expr.isSurrogate)
-	p = expr.obj.Pack(p, env)
+	p = packObject(expr.obj, p)
 	return p
 }
 
 func unpackLiteralExpr(p []byte, header *PackHeader) (*LiteralExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	isSurrogate, p := extractBool(p)
-	obj, p := unpackObject(p, header)
+	obj, p := unpackObject(p)
 	res := &LiteralExpr{
 		obj:         obj,
 		Position:    pos,
