@@ -17,6 +17,8 @@ const (
 	FN_ARITY_EXPR = 11
 	FN_EXPR       = 12
 	LET_EXPR      = 13
+	THROW_EXPR    = 14
+	CATCH_EXPR    = 15
 	INT           = 100
 )
 
@@ -472,6 +474,47 @@ func unpackLetExpr(p []byte, header *PackHeader) (*LetExpr, []byte) {
 	return res, p
 }
 
+func (expr *ThrowExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, THROW_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.e.Pack(p, env)
+	return p
+}
+
+func unpackThrowExpr(p []byte, header *PackHeader) (*ThrowExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	e, p := UnpackExpr(p, header)
+	res := &ThrowExpr{
+		Position: pos,
+		e:        e,
+	}
+	return res, p
+}
+
+func (expr *CatchExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, CATCH_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.excType.name)))
+	p = expr.excSymbol.Pack(p, env)
+	p = packSeq(p, expr.body, env)
+	return p
+}
+
+func unpackCatchExpr(p []byte, header *PackHeader) (*CatchExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	i, p := extractUInt16(p)
+	typeName := header.Strings[i]
+	excSymbol, p := unpackSymbol(p, header)
+	body, p := unpackSeq(p, header)
+	res := &CatchExpr{
+		Position:  pos,
+		excSymbol: excSymbol,
+		body:      body,
+		excType:   TYPES[typeName],
+	}
+	return res, p
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -500,6 +543,10 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackFnExpr(p[1:], header)
 	case LET_EXPR:
 		return unpackLetExpr(p[1:], header)
+	case THROW_EXPR:
+		return unpackThrowExpr(p[1:], header)
+	case CATCH_EXPR:
+		return unpackCatchExpr(p[1:], header)
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
