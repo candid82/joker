@@ -23,6 +23,7 @@ const (
 	THROW_EXPR    = 14
 	CATCH_EXPR    = 15
 	TRY_EXPR      = 16
+	NULL          = 100
 )
 
 type (
@@ -32,7 +33,8 @@ type (
 	}
 
 	PackHeader struct {
-		Strings []*string
+		GlobalEnv *Env
+		Strings   []*string
 	}
 )
 
@@ -269,12 +271,12 @@ func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
 	return packSeq(p, expr.v, env)
 }
 
-func unpackSetExpr(p []byte, header *PackHeader) (*SetExpr, []byte) {
+func unpackVectorExpr(p []byte, header *PackHeader) (*VectorExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	v, p := unpackSeq(p, header)
-	res := &SetExpr{
+	res := &VectorExpr{
 		Position: pos,
-		elements: v,
+		v:        v,
 	}
 	return res, p
 }
@@ -285,12 +287,12 @@ func (expr *SetExpr) Pack(p []byte, env *PackEnv) []byte {
 	return packSeq(p, expr.elements, env)
 }
 
-func unpackVectorExpr(p []byte, header *PackHeader) (*VectorExpr, []byte) {
+func unpackSetExpr(p []byte, header *PackHeader) (*SetExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	v, p := unpackSeq(p, header)
-	res := &VectorExpr{
+	res := &SetExpr{
 		Position: pos,
-		v:        v,
+		elements: v,
 	}
 	return res, p
 }
@@ -342,8 +344,9 @@ func (expr *DefExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, DEF_EXPR)
 	p = expr.Pos().Pack(p, env)
 	p = expr.name.Pack(p, env)
-	p = expr.value.Pack(p, env)
-	p = expr.meta.Pack(p, env)
+	p = PackExpr(expr.value, p, env)
+	p = PackExpr(expr.meta, p, env)
+	p = expr.vr.info.Pack(p, env)
 	return p
 }
 
@@ -352,8 +355,14 @@ func unpackDefExpr(p []byte, header *PackHeader) (*DefExpr, []byte) {
 	name, p := unpackSymbol(p, header)
 	value, p := UnpackExpr(p, header)
 	meta, p := UnpackExpr(p, header)
+	varInfo, p := unpackObjectInfo(p, header)
+	varName := name
+	varName.ns = nil
+	vr := header.GlobalEnv.CurrentNamespace().Intern(varName)
+	vr.WithInfo(varInfo)
 	res := &DefExpr{
 		Position: pos,
+		vr:       vr,
 		name:     name,
 		value:    value,
 		meta:     meta,
@@ -565,6 +574,13 @@ func unpackCatchExpr(p []byte, header *PackHeader) (*CatchExpr, []byte) {
 	return res, p
 }
 
+func PackExpr(expr Expr, p []byte, env *PackEnv) []byte {
+	if expr == nil {
+		return append(p, NULL)
+	}
+	return expr.Pack(p, env)
+}
+
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 	switch p[0] {
 	case LITERAL_EXPR:
@@ -599,6 +615,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackCatchExpr(p[1:], header)
 	case TRY_EXPR:
 		return unpackTryExpr(p[1:], header)
+	case NULL:
+		return nil, p[1:]
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}
