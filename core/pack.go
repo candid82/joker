@@ -23,6 +23,7 @@ const (
 	THROW_EXPR    = 14
 	CATCH_EXPR    = 15
 	TRY_EXPR      = 16
+	VARREF_EXPR   = 17
 	NULL          = 100
 )
 
@@ -403,6 +404,25 @@ func unpackRecurExpr(p []byte, header *PackHeader) (*RecurExpr, []byte) {
 	res := &RecurExpr{
 		Position: pos,
 		args:     args,
+	}
+	return res, p
+}
+
+func (expr *VarRefExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, VARREF_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.vr.ns.Name.Pack(p, env)
+	p = expr.vr.name.Pack(p, env)
+	return p
+}
+
+func unpackVarRefExpr(p []byte, header *PackHeader) (*VarRefExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	nsName, p := unpackSymbol(p, header)
+	name, p := unpackSymbol(p, header)
+	res := &VarRefExpr{
+		Position: pos,
+		vr:       GLOBAL_ENV.FindNamespace(nsName).mappings[name.name],
 	}
 	return res, p
 }
