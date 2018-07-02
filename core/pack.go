@@ -24,18 +24,22 @@ const (
 	CATCH_EXPR    = 15
 	TRY_EXPR      = 16
 	VARREF_EXPR   = 17
+	BINDING_EXPR  = 18
 	NULL          = 100
 )
 
 type (
 	PackEnv struct {
-		Strings         map[*string]uint16
-		nextStringIndex uint16
+		Strings          map[*string]uint16
+		Bindings         map[*Binding]int
+		nextStringIndex  uint16
+		nextBindingIndex int
 	}
 
 	PackHeader struct {
 		GlobalEnv *Env
 		Strings   []*string
+		Binding   []Binding
 	}
 )
 
@@ -47,6 +51,16 @@ func (env *PackEnv) stringIndex(s *string) uint16 {
 	env.Strings[s] = env.nextStringIndex
 	env.nextStringIndex++
 	return env.nextStringIndex - 1
+}
+
+func (env *PackEnv) bindingIndex(b *Binding) int {
+	index, ok := env.Bindings[b]
+	if ok {
+		return index
+	}
+	env.Bindings[b] = env.nextBindingIndex
+	env.nextBindingIndex++
+	return env.nextBindingIndex - 1
 }
 
 func appendBool(p []byte, b bool) []byte {
@@ -427,6 +441,23 @@ func unpackVarRefExpr(p []byte, header *PackHeader) (*VarRefExpr, []byte) {
 	return res, p
 }
 
+func (expr *BindingExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, BINDING_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = appendInt(p, env.bindingIndex(expr.binding))
+	return p
+}
+
+func unpackBindingExpr(p []byte, header *PackHeader) (*BindingExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	index, p := extractInt(p)
+	res := &BindingExpr{
+		Position: pos,
+		binding:  &header.Binding[index],
+	}
+	return res, p
+}
+
 func (expr *MetaExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, META_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -635,6 +666,10 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackCatchExpr(p[1:], header)
 	case TRY_EXPR:
 		return unpackTryExpr(p[1:], header)
+	case VARREF_EXPR:
+		return unpackVarRefExpr(p[1:], header)
+	case BINDING_EXPR:
+		return unpackBindingExpr(p[1:], header)
 	case NULL:
 		return nil, p[1:]
 	default:
