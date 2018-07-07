@@ -25,6 +25,7 @@ const (
 	TRY_EXPR      = 16
 	VARREF_EXPR   = 17
 	BINDING_EXPR  = 18
+	LOOP_EXPR     = 19
 	NULL          = 100
 )
 
@@ -561,6 +562,29 @@ func unpackLetExpr(p []byte, header *PackHeader) (*LetExpr, []byte) {
 	return res, p
 }
 
+func (expr *LoopExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, LOOP_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSymbolSeq(p, expr.names, env)
+	p = packSeq(p, expr.values, env)
+	p = packSeq(p, expr.body, env)
+	return p
+}
+
+func unpackLoopExpr(p []byte, header *PackHeader) (*LoopExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	names, p := unpackSymbolSeq(p, header)
+	values, p := unpackSeq(p, header)
+	body, p := unpackSeq(p, header)
+	res := &LoopExpr{
+		Position: pos,
+		names:    names,
+		values:   values,
+		body:     body,
+	}
+	return res, p
+}
+
 func (expr *ThrowExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, THROW_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -660,6 +684,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackFnExpr(p[1:], header)
 	case LET_EXPR:
 		return unpackLetExpr(p[1:], header)
+	case LOOP_EXPR:
+		return unpackLoopExpr(p[1:], header)
 	case THROW_EXPR:
 		return unpackThrowExpr(p[1:], header)
 	case CATCH_EXPR:
