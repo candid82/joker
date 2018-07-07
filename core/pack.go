@@ -44,6 +44,13 @@ type (
 	}
 )
 
+func NewPackEnv() *PackEnv {
+	return &PackEnv{
+		Strings:  make(map[*string]uint16),
+		Bindings: make(map[*Binding]int),
+	}
+}
+
 func (env *PackEnv) stringIndex(s *string) uint16 {
 	index, ok := env.Strings[s]
 	if ok {
@@ -144,10 +151,16 @@ func unpackInt(p []byte) (Int, []byte) {
 }
 
 func (info *ObjectInfo) Pack(p []byte, env *PackEnv) []byte {
+	if info == nil {
+		return append(p, NULL)
+	}
 	return info.Pos().Pack(p, env)
 }
 
 func unpackObjectInfo(p []byte, header *PackHeader) (*ObjectInfo, []byte) {
+	if p[0] == NULL {
+		return nil, p[1:]
+	}
 	pos, p := unpackPosition(p, header)
 	return &ObjectInfo{Position: pos}, p
 }
@@ -175,8 +188,8 @@ func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 }
 
 func packObject(obj Object, p []byte) []byte {
-	var buf *bytes.Buffer
-	printObject(obj, buf)
+	var buf bytes.Buffer
+	printObject(obj, &buf)
 	bb := buf.Bytes()
 	p = appendInt(p, len(bb))
 	p = append(p, bb...)
@@ -520,7 +533,11 @@ func (expr *FnExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, FN_EXPR)
 	p = expr.Pos().Pack(p, env)
 	p = packFnArityExprSeq(p, expr.arities, env)
-	p = expr.variadic.Pack(p, env)
+	if expr.variadic == nil {
+		p = append(p, NULL)
+	} else {
+		p = expr.variadic.Pack(p, env)
+	}
 	p = expr.self.Pack(p, env)
 	return p
 }
@@ -528,7 +545,12 @@ func (expr *FnExpr) Pack(p []byte, env *PackEnv) []byte {
 func unpackFnExpr(p []byte, header *PackHeader) (*FnExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	arities, p := unpackFnArityExprSeq(p, header)
-	variadic, p := unpackFnArityExpr(p, header)
+	var variadic *FnArityExpr
+	if p[0] == NULL {
+		p = p[1:]
+	} else {
+		variadic, p = unpackFnArityExpr(p, header)
+	}
 	self, p := unpackSymbol(p, header)
 	res := &FnExpr{
 		Position: pos,
@@ -602,29 +624,6 @@ func unpackThrowExpr(p []byte, header *PackHeader) (*ThrowExpr, []byte) {
 	return res, p
 }
 
-func (expr *TryExpr) Pack(p []byte, env *PackEnv) []byte {
-	p = append(p, TRY_EXPR)
-	p = expr.Pos().Pack(p, env)
-	p = packSeq(p, expr.body, env)
-	p = packCatchExprSeq(p, expr.catches, env)
-	p = packSeq(p, expr.finallyExpr, env)
-	return p
-}
-
-func unpackTryExpr(p []byte, header *PackHeader) (*TryExpr, []byte) {
-	pos, p := unpackPosition(p, header)
-	body, p := unpackSeq(p, header)
-	catches, p := unpackCatchExprSeq(p, header)
-	finallyExpr, p := unpackSeq(p, header)
-	res := &TryExpr{
-		Position:    pos,
-		body:        body,
-		catches:     catches,
-		finallyExpr: finallyExpr,
-	}
-	return res, p
-}
-
 func (expr *CatchExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, CATCH_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -645,6 +644,29 @@ func unpackCatchExpr(p []byte, header *PackHeader) (*CatchExpr, []byte) {
 		excSymbol: excSymbol,
 		body:      body,
 		excType:   TYPES[typeName],
+	}
+	return res, p
+}
+
+func (expr *TryExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, TRY_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = packSeq(p, expr.body, env)
+	p = packCatchExprSeq(p, expr.catches, env)
+	p = packSeq(p, expr.finallyExpr, env)
+	return p
+}
+
+func unpackTryExpr(p []byte, header *PackHeader) (*TryExpr, []byte) {
+	pos, p := unpackPosition(p, header)
+	body, p := unpackSeq(p, header)
+	catches, p := unpackCatchExprSeq(p, header)
+	finallyExpr, p := unpackSeq(p, header)
+	res := &TryExpr{
+		Position:    pos,
+		body:        body,
+		catches:     catches,
+		finallyExpr: finallyExpr,
 	}
 	return res, p
 }

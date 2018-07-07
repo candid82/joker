@@ -1384,6 +1384,37 @@ var procParse Proc = func(args []Object) Object {
 	return res.Dump(false)
 }
 
+func PackReader(reader *Reader, filename string) error {
+	var p []byte
+	packEnv := NewPackEnv()
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		expr, err := TryParse(obj, parseContext)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		p = PackExpr(expr, p, packEnv)
+	}
+}
+
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1436,6 +1467,7 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
 	reader := bytes.NewReader(data)
 	ProcessReader(NewReader(reader, "<joker.core>"), "", EVAL)
+	PackReader(NewReader(bytes.NewReader(data), "<joker.core>"), "")
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
