@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	SEQEND        = 0
 	LITERAL_EXPR  = 1
 	VECTOR_EXPR   = 2
 	MAP_EXPR      = 3
@@ -27,6 +26,7 @@ const (
 	BINDING_EXPR  = 18
 	LOOP_EXPR     = 19
 	NULL          = 100
+	NOT_NULL      = 101
 )
 
 type (
@@ -40,15 +40,85 @@ type (
 	PackHeader struct {
 		GlobalEnv *Env
 		Strings   []*string
-		Binding   []Binding
+		Bindings  []Binding
 	}
 )
+
+func (b *Binding) Pack(p []byte, env *PackEnv) []byte {
+	p = b.name.Pack(p, env)
+	p = appendInt(p, b.index)
+	p = appendInt(p, b.frame)
+	p = appendBool(p, b.isUsed)
+	return p
+}
+
+func unpackBinding(p []byte, header *PackHeader) (Binding, []byte) {
+	name, p := unpackSymbol(p, header)
+	index, p := extractInt(p)
+	frame, p := extractInt(p)
+	isUsed, p := extractBool(p)
+	return Binding{
+		name:   name,
+		index:  index,
+		frame:  frame,
+		isUsed: isUsed,
+	}, p
+}
 
 func NewPackEnv() *PackEnv {
 	return &PackEnv{
 		Strings:  make(map[*string]uint16),
 		Bindings: make(map[*Binding]int),
 	}
+}
+
+func (env *PackEnv) Pack(p []byte) []byte {
+	var bp []byte
+	bp = appendInt(bp, len(env.Bindings))
+	for k, v := range env.Bindings {
+		bp = appendInt(bp, v)
+		bp = k.Pack(bp, env)
+	}
+	p = appendInt(p, len(env.Strings))
+	for k, v := range env.Strings {
+		p = appendUint16(p, v)
+		if k == nil {
+			p = appendInt(p, -1)
+		} else {
+			p = appendInt(p, len(*k))
+			p = append(p, *k...)
+		}
+	}
+	p = append(p, bp...)
+	return p
+}
+
+func UnpackHeader(p []byte, env *Env) *PackHeader {
+	stringCount, p := extractInt(p)
+	strs := make([]*string, stringCount)
+	for i := 0; i < stringCount; i++ {
+		index, p := extractUInt16(p)
+		length, p := extractInt(p)
+		if length == -1 {
+			strs[index] = nil
+		} else {
+			strs[index] = STRINGS.Intern(string(p[:length]))
+			p = p[length:]
+		}
+	}
+	header := &PackHeader{
+		GlobalEnv: env,
+		Strings:   strs,
+	}
+	bindingCount, p := extractInt(p)
+	bindings := make([]Binding, bindingCount)
+	for i := 0; i < bindingCount; i++ {
+		index, p := extractInt(p)
+		b, p := unpackBinding(p, header)
+		bindings[index] = b
+	}
+	header.Bindings = bindings
+	return header
 }
 
 func (env *PackEnv) stringIndex(s *string) uint16 {
@@ -154,6 +224,7 @@ func (info *ObjectInfo) Pack(p []byte, env *PackEnv) []byte {
 	if info == nil {
 		return append(p, NULL)
 	}
+	p = append(p, NOT_NULL)
 	return info.Pos().Pack(p, env)
 }
 
@@ -161,6 +232,7 @@ func unpackObjectInfo(p []byte, header *PackHeader) (*ObjectInfo, []byte) {
 	if p[0] == NULL {
 		return nil, p[1:]
 	}
+	p = p[1:]
 	pos, p := unpackPosition(p, header)
 	return &ObjectInfo{Position: pos}, p
 }
@@ -223,75 +295,73 @@ func unpackLiteralExpr(p []byte, header *PackHeader) (*LiteralExpr, []byte) {
 }
 
 func packSeq(p []byte, s []Expr, env *PackEnv) []byte {
+	p = appendInt(p, len(s))
 	for _, e := range s {
 		p = e.Pack(p, env)
 	}
-	p = append(p, SEQEND)
 	return p
 }
 
 func unpackSeq(p []byte, header *PackHeader) ([]Expr, []byte) {
-	var res []Expr
-	for p[0] != SEQEND {
-		var e Expr
-		e, p = UnpackExpr(p, header)
-		res = append(res, e)
+	c, p := extractInt(p)
+	res := make([]Expr, c)
+	for i := 0; i < c; i++ {
+		res[i], p = UnpackExpr(p, header)
 	}
-	return res, p[1:]
+	return res, p
 }
 
 func packSymbolSeq(p []byte, s []Symbol, env *PackEnv) []byte {
+	p = appendInt(p, len(s))
 	for _, e := range s {
 		p = e.Pack(p, env)
 	}
-	p = append(p, SEQEND)
 	return p
 }
 
 func unpackSymbolSeq(p []byte, header *PackHeader) ([]Symbol, []byte) {
-	var res []Symbol
-	for p[0] != SEQEND {
-		var e Symbol
-		e, p = unpackSymbol(p, header)
-		res = append(res, e)
+	c, p := extractInt(p)
+	res := make([]Symbol, c)
+	for i := 0; i < c; i++ {
+		res[i], p = unpackSymbol(p, header)
 	}
-	return res, p[1:]
+	return res, p
 }
 
 func packFnArityExprSeq(p []byte, s []FnArityExpr, env *PackEnv) []byte {
+	p = appendInt(p, len(s))
 	for _, e := range s {
 		p = e.Pack(p, env)
 	}
-	p = append(p, SEQEND)
 	return p
 }
 
 func unpackFnArityExprSeq(p []byte, header *PackHeader) ([]FnArityExpr, []byte) {
-	var res []FnArityExpr
-	for p[0] != SEQEND {
+	c, p := extractInt(p)
+	res := make([]FnArityExpr, c)
+	for i := 0; i < c; i++ {
 		var e *FnArityExpr
 		e, p = unpackFnArityExpr(p, header)
-		res = append(res, *e)
+		res[i] = *e
 	}
-	return res, p[1:]
+	return res, p
 }
 
 func packCatchExprSeq(p []byte, s []*CatchExpr, env *PackEnv) []byte {
+	p = appendInt(p, len(s))
 	for _, e := range s {
 		p = e.Pack(p, env)
 	}
-	p = append(p, SEQEND)
 	return p
 }
 
 func unpackCatchExprSeq(p []byte, header *PackHeader) ([]*CatchExpr, []byte) {
-	var res []*CatchExpr
-	for p[0] != SEQEND {
-		var e *CatchExpr
-		e, p = unpackCatchExpr(p, header)
-		res = append(res, e)
+	c, p := extractInt(p)
+	res := make([]*CatchExpr, c)
+	for i := 0; i < c; i++ {
+		res[i], p = unpackCatchExpr(p, header)
 	}
-	return res, p[1:]
+	return res, p
 }
 
 func (expr *VectorExpr) Pack(p []byte, env *PackEnv) []byte {
@@ -373,8 +443,8 @@ func (expr *DefExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, DEF_EXPR)
 	p = expr.Pos().Pack(p, env)
 	p = expr.name.Pack(p, env)
-	p = PackExpr(expr.value, p, env)
-	p = PackExpr(expr.meta, p, env)
+	p = PackExprOrNull(expr.value, p, env)
+	p = PackExprOrNull(expr.meta, p, env)
 	p = expr.vr.info.Pack(p, env)
 	return p
 }
@@ -382,8 +452,8 @@ func (expr *DefExpr) Pack(p []byte, env *PackEnv) []byte {
 func unpackDefExpr(p []byte, header *PackHeader) (*DefExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	name, p := unpackSymbol(p, header)
-	value, p := UnpackExpr(p, header)
-	meta, p := UnpackExpr(p, header)
+	value, p := UnpackExprOrNull(p, header)
+	meta, p := UnpackExprOrNull(p, header)
 	varInfo, p := unpackObjectInfo(p, header)
 	varName := name
 	varName.ns = nil
@@ -467,7 +537,7 @@ func unpackBindingExpr(p []byte, header *PackHeader) (*BindingExpr, []byte) {
 	index, p := extractInt(p)
 	res := &BindingExpr{
 		Position: pos,
-		binding:  &header.Binding[index],
+		binding:  &header.Bindings[index],
 	}
 	return res, p
 }
@@ -536,6 +606,7 @@ func (expr *FnExpr) Pack(p []byte, env *PackEnv) []byte {
 	if expr.variadic == nil {
 		p = append(p, NULL)
 	} else {
+		p = append(p, NOT_NULL)
 		p = expr.variadic.Pack(p, env)
 	}
 	p = expr.self.Pack(p, env)
@@ -549,6 +620,7 @@ func unpackFnExpr(p []byte, header *PackHeader) (*FnExpr, []byte) {
 	if p[0] == NULL {
 		p = p[1:]
 	} else {
+		p = p[1:]
 		variadic, p = unpackFnArityExpr(p, header)
 	}
 	self, p := unpackSymbol(p, header)
@@ -671,11 +743,19 @@ func unpackTryExpr(p []byte, header *PackHeader) (*TryExpr, []byte) {
 	return res, p
 }
 
-func PackExpr(expr Expr, p []byte, env *PackEnv) []byte {
+func PackExprOrNull(expr Expr, p []byte, env *PackEnv) []byte {
 	if expr == nil {
 		return append(p, NULL)
 	}
+	p = append(p, NOT_NULL)
 	return expr.Pack(p, env)
+}
+
+func UnpackExprOrNull(p []byte, header *PackHeader) (Expr, []byte) {
+	if p[0] == NULL {
+		return nil, p[1:]
+	}
+	return UnpackExpr(p[1:], header)
 }
 
 func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
@@ -718,8 +798,6 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackVarRefExpr(p[1:], header)
 	case BINDING_EXPR:
 		return unpackBindingExpr(p[1:], header)
-	case NULL:
-		return nil, p[1:]
 	default:
 		panic(RT.NewError("Unknown pack tag"))
 	}

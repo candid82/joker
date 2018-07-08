@@ -1400,6 +1400,8 @@ func PackReader(reader *Reader, filename string) error {
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
+			var hp []byte
+			packEnv.Pack(hp)
 			return nil
 		}
 		if err != nil {
@@ -1411,7 +1413,7 @@ func PackReader(reader *Reader, filename string) error {
 			fmt.Fprintln(os.Stderr, err)
 			return err
 		}
-		p = PackExpr(expr, p, packEnv)
+		p = expr.Pack(p, packEnv)
 	}
 }
 
