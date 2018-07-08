@@ -1,4 +1,4 @@
-(doseq [sym '(js)]
+(doseq [sym '(js Math)]
   (inject-ns__ sym))
 
 (joker.core/in-ns 'joker.core)
