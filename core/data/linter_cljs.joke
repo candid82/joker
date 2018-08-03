@@ -366,7 +366,8 @@
    *known-macros*
    {'cljs.core.async.macros/go-loop nil 'cljs.core.async.macros/alt! nil 'cljs.core.async.macros/alt!! nil
     'cljs.core.async.macros/alts! nil 'cljs.core.async.macros/alts!! nil 'this-as nil 'import-macros nil
-    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil}
+    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil
+    'cljs.test/deftest nil 'cljs.test/is nil 'cljs.test/are nil}
    (:known-macros joker.core/*linter-config*)))
 
 (defn- lib-name__
