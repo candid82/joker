@@ -170,8 +170,6 @@
 (partition-all "1" "2" 1)
 (mapv 1 [])
 (filterv 1 [])
-(slurp 1)
-(spit 1 2)
 (group-by 1 [])
 (partition-by 1 2)
 (reductions 1 2)
