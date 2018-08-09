@@ -65,6 +65,9 @@
    (__deref__ ref))
   ([^Deref ref ^Int timeout-ms timeout-val]))
 
+(defn spit [f content & options])
+(defn slurp [f & options])
+
 
 ;; Clojure core functions not supported by Joker
 
