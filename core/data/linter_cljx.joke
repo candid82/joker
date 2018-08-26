@@ -228,9 +228,6 @@
   ([^Callable pred])
   ([^Callable pred ^Callable retf]))
 
-;; Clojure core functions with arities not supported by Joker
-(defn spit [^String f ^String content & options])
-
 ;; Clojure core vars not supported by Joker
 
 (def *print-level*)
