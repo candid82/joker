@@ -1,0 +1,34 @@
+(ns
+  ^{:go-imports ["net/url"]
+    :doc "Parses URLs and implements query escaping."}
+  url)
+
+(defn ^String path-escape
+  "Escapes the string so it can be safely placed inside a URL path segment."
+  {:added "1.0"
+  :go "url.PathEscape(s)"}
+  [^String s])
+
+(defn ^String path-unescape
+  "Does the inverse transformation of path-escape, converting each 3-byte encoded
+  substring of the form \"%AB\" into the hex-decoded byte 0xAB. It also converts
+  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.
+
+  PathUnescape is identical to QueryUnescape except that it does not unescape '+' to ' ' (space)."
+  {:added "1.0"
+  :go "pathUnescape(s)"}
+  [^String s])
+
+(defn ^String query-escape
+  "Escapes the string so it can be safely placed inside a URL query."
+  {:added "1.0"
+  :go "url.QueryEscape(s)"}
+  [^String s])
+
+(defn ^String query-unescape
+  "Does the inverse transformation of query-escape, converting each 3-byte encoded
+  substring of the form \"%AB\" into the hex-decoded byte 0xAB. It also converts
+  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits."
+  {:added "1.0"
+  :go "queryUnescape(s)"}
+  [^String s])
