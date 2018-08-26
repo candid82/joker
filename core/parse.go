@@ -1042,6 +1042,8 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 		if !ok || !vr.isMacro || vr.Value == nil {
 			return nil
 		}
+		vr.isUsed = true
+		vr.ns.isUsed = true
 		return vr.Value.(Callable)
 	default:
 		return nil
