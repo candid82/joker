@@ -85,8 +85,15 @@ func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 	}
 	if env.Namespaces[sym.name] == nil {
 		env.Namespaces[sym.name] = NewNamespace(sym)
+		return env.Namespaces[sym.name]
 	}
-	return env.Namespaces[sym.name]
+	res := env.Namespaces[sym.name]
+	// In linter mode the latest reference to the ns overrides position info.
+	// This is for the cases when (ns ...) is called in .jokerd/linter.clj file and alike.
+	if LINTER_MODE {
+		res.Name = res.Name.WithInfo(sym.GetInfo()).(Symbol)
+	}
+	return res
 }
 
 func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
