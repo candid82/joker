@@ -451,6 +451,7 @@
   ([prefix-string] (gensym__ prefix-string)))
 
 (def println-err)
+(def println-linter__)
 
 (defmacro cond
   "Takes a set of test/expr pairs. It evaluates each test one at a
@@ -467,7 +468,7 @@
           (when (next (next clauses))
             (cons 'joker.core/cond (next (next clauses)))))
     (when *linter-mode*
-      (println-err (ex-info "Empty cond" {:form &form :_prefix "Parse warning"})))))
+      (println-linter__ (ex-info "Empty cond" {:form &form :_prefix "Parse warning"})))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
@@ -1215,7 +1216,7 @@
   {:added "1.0"}
   [x & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
       (let [form (first forms)
@@ -1233,7 +1234,7 @@
   {:added "1.0"}
   [x & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in ->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in ->>" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
       (let [form (first forms)
@@ -2275,7 +2276,7 @@
     (or (find-ns x)
         (if *linter-mode*
           (do
-            (println-err (ex-info (str "No namespace: " x " found")
+            (println-linter__ (ex-info (str "No namespace: " x " found")
                                   {:form x :_prefix "Parse warning"}))
             (create-ns__ x))
           (throw (ex-info (str "No namespace: " x " found") {:form x}))))))
@@ -2853,6 +2854,11 @@
   (binding [*out* *err*]
     (apply println xs)))
 
+(defn ^:private println-linter__
+  [& xs]
+  (inc-problem-count__)
+  (apply println-err xs))
+
 (defn ex-data
   "Returns exception data (a map) if ex is an ExInfo.
   Otherwise returns nil."
@@ -3257,7 +3263,7 @@
         filter-opts (select-keys opts require-opt-keys)
         undefined-on-entry (not (find-ns lib))]
     (when (and *linter-mode* loaded)
-      (println-err (ex-info (str "duplicate require for " lib)
+      (println-linter__ (ex-info (str "duplicate require for " lib)
                             {:form lib :_prefix "Parse warning"})))
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
@@ -4039,7 +4045,7 @@
   [expr & clauses]
   (assert (even? (count clauses)))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (-> ~g ~step) ~g))
                    (partition 2 clauses))]
@@ -4058,7 +4064,7 @@
   [expr & clauses]
   (assert (even? (count clauses)))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (->> ~g ~step) ~g))
                    (partition 2 clauses))]
@@ -4075,7 +4081,7 @@
   {:added "1.0"}
   [expr name & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in as->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in as->" {:form &form :_prefix "Parse warning"})))
   `(let [~name ~expr
          ~@(interleave (repeat name) (butlast forms))]
      ~(if (empty? forms)
@@ -4088,7 +4094,7 @@
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in some->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in some->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))
                    forms)]
@@ -4104,7 +4110,7 @@
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in some->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in some->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))
                    forms)]

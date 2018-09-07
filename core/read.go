@@ -28,6 +28,7 @@ type (
 const EOF = -1
 
 var LINTER_MODE bool = false
+var PROBLEM_COUNT = 0
 var DIALECT Dialect
 var LINTER_CONFIG *Var
 
@@ -1095,6 +1096,7 @@ func Read(reader *Reader) (Object, bool) {
 func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+			PROBLEM_COUNT++
 			err = r.(error)
 		}
 	}()
@@ -1108,6 +1110,7 @@ func TryRead(reader *Reader) (obj Object, err error) {
 			return obj, nil
 		}
 		if obj.(*Vector).Count() > 0 {
+			PROBLEM_COUNT++
 			return NIL, MakeReadError(reader, "Reader conditional splicing not allowed at the top level.")
 		}
 	}

@@ -1392,6 +1392,11 @@ var procParse Proc = func(args []Object) Object {
 	return res.Dump(false)
 }
 
+var procIncProblemCount Proc = func(args []Object) Object {
+	PROBLEM_COUNT++
+	return NIL
+}
+
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1809,6 +1814,7 @@ func init() {
 	intern("lib-path__", procLibPath)
 	intern("intern-fake-var__", procInternFakeVar)
 	intern("parse__", procParse)
+	intern("inc-problem-count__", procIncProblemCount)
 
 	processData(coreData)
 	processData(timeData)

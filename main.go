@@ -288,6 +288,9 @@ func main() {
 			dialect = detectDialect(filename)
 		}
 		lintFile(filename, dialect, workingDir)
+		if PROBLEM_COUNT > 0 {
+			os.Exit(1)
+		}
 		return
 	}
 	if phase == EVAL {
