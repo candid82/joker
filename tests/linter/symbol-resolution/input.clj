@@ -3,7 +3,7 @@
             [tests.ext2 :as ext2]
             [tests.ext3 :as ext3 :refer [e3]]
             [spec :as s]
-            [clojure.test :refer [testing]])
+            [clojure.test :refer [testing is]])
   (:import [java.security Security]))
 
 ;; Should PASS
@@ -29,10 +29,11 @@
 #'s/v
 #'e3
 (case 1 r 2 1 3)
+uuu
+(is (thrown? c body))
 
 ;; Should FAIL
 
-uuu
 (s/def :t hh)
 (f jj/u1)
 (f u8)
@@ -56,5 +57,3 @@ uuu
 (print-err 1)
 (println-err 1)
 (case 1 r 2 1 h)
-
-

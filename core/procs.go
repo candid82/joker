@@ -30,7 +30,7 @@ const (
 	EVAL
 )
 
-const VERSION = "v0.9.4"
+const VERSION = "v0.9.6"
 
 const (
 	CLJ Dialect = iota
@@ -1149,7 +1149,15 @@ var procFindNamespace Proc = func(args []Object) Object {
 
 var procCreateNamespace Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
-	return GLOBAL_ENV.EnsureNamespace(sym)
+	res := GLOBAL_ENV.EnsureNamespace(sym)
+	// In linter mode the latest create-ns call overrides position info.
+	// This is for the cases when (ns ...) is called in .jokerd/linter.clj file and alike.
+	// Also, isUsed needs to be reset in this case.
+	if LINTER_MODE {
+		res.Name = res.Name.WithInfo(sym.GetInfo()).(Symbol)
+		res.isUsed = false
+	}
+	return res
 }
 
 var procInjectNamespace Proc = func(args []Object) Object {
@@ -1415,6 +1423,11 @@ func PackReader(reader *Reader, filename string) error {
 		}
 		p = expr.Pack(p, packEnv)
 	}
+}
+
+var procIncProblemCount Proc = func(args []Object) Object {
+	PROBLEM_COUNT++
+	return NIL
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
@@ -1835,6 +1848,7 @@ func init() {
 	intern("lib-path__", procLibPath)
 	intern("intern-fake-var__", procInternFakeVar)
 	intern("parse__", procParse)
+	intern("inc-problem-count__", procIncProblemCount)
 
 	processData(coreData)
 	processData(timeData)

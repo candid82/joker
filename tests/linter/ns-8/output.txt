@@ -1,0 +1,1 @@
+tests/linter/ns-8/input.clj:2:18: Exception: Unsupported option(s) supplied: :default

@@ -1,0 +1,1 @@
+tests/linter/learned-macros/input.clj:2:12: Parse warning: unused namespace rum.core1
