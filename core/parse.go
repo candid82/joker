@@ -179,6 +179,7 @@ type (
 		value         Keyword
 		vector        Keyword
 		name          Keyword
+		dynamic       Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -269,6 +270,7 @@ var (
 		value:         MakeKeyword("value"),
 		vector:        MakeKeyword("vector"),
 		name:          MakeKeyword("name"),
+		dynamic:       MakeKeyword("dynamic"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),

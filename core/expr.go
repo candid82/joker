@@ -141,10 +141,20 @@ func (expr *VarRefExpr) InferType() *Type {
 	// if expr.vr.taggedType != nil {
 	// 	return expr.vr.taggedType
 	// }
-	if expr.vr.expr != nil {
-		return expr.vr.expr.InferType()
+	if expr.vr.expr == nil {
+		return nil
 	}
-	return nil
+
+	// Skip inference for dynamic vars
+	m := expr.vr.GetMeta()
+	if m != nil {
+		b, _ := m.Get(MakeKeyword("dynamic"))
+		if b {
+			return nil
+		}
+	}
+
+	return expr.vr.expr.InferType()
 }
 
 func (expr *VarRefExpr) Dump(pos bool) Map {
