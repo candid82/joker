@@ -138,6 +138,7 @@ type (
 		expr       Expr
 		isMacro    bool
 		isPrivate  bool
+		isDynamic  bool
 		isUsed     bool
 		taggedType *Type
 	}

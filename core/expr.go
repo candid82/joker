@@ -144,16 +144,9 @@ func (expr *VarRefExpr) InferType() *Type {
 	if expr.vr.expr == nil {
 		return nil
 	}
-
-	// Skip inference for dynamic vars
-	m := expr.vr.GetMeta()
-	if m != nil {
-		b, _ := m.Get(MakeKeyword("dynamic"))
-		if b {
-			return nil
-		}
+	if expr.vr.isDynamic {
+		return nil
 	}
-
 	return expr.vr.expr.InferType()
 }
 
