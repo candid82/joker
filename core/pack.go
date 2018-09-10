@@ -93,7 +93,7 @@ func (env *PackEnv) Pack(p []byte) []byte {
 	return p
 }
 
-func UnpackHeader(p []byte, env *Env) *PackHeader {
+func UnpackHeader(p []byte, env *Env) (*PackHeader, []byte) {
 	stringCount, p := extractInt(p)
 	strs := make([]*string, stringCount)
 	for i := 0; i < stringCount; i++ {
@@ -111,6 +111,7 @@ func UnpackHeader(p []byte, env *Env) *PackHeader {
 		Strings:   strs,
 	}
 	bindingCount, p := extractInt(p)
+	println(bindingCount)
 	bindings := make([]Binding, bindingCount)
 	for i := 0; i < bindingCount; i++ {
 		index, p := extractInt(p)
@@ -118,7 +119,7 @@ func UnpackHeader(p []byte, env *Env) *PackHeader {
 		bindings[index] = b
 	}
 	header.Bindings = bindings
-	return header
+	return header, p
 }
 
 func (env *PackEnv) stringIndex(s *string) uint16 {

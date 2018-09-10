@@ -1392,7 +1392,7 @@ var procParse Proc = func(args []Object) Object {
 	return res.Dump(false)
 }
 
-func PackReader(reader *Reader, filename string) error {
+func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
@@ -1409,17 +1409,17 @@ func PackReader(reader *Reader, filename string) error {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
 			var hp []byte
-			packEnv.Pack(hp)
-			return nil
+			hp = packEnv.Pack(hp)
+			return append(hp, p...), nil
 		}
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			return err
+			return nil, err
 		}
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			return err
+			return nil, err
 		}
 		p = expr.Pack(p, packEnv)
 	}
@@ -1482,7 +1482,15 @@ func processData(data []byte) {
 	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
 	reader := bytes.NewReader(data)
 	ProcessReader(NewReader(reader, "<joker.core>"), "", EVAL)
-	PackReader(NewReader(bytes.NewReader(data), "<joker.core>"), "")
+
+	p, err := PackReader(NewReader(bytes.NewReader(data), "<joker.core>"), "")
+	PanicOnErr(err)
+
+	header, p := UnpackHeader(p, GLOBAL_ENV)
+	for len(p) > 0 {
+		_, p = UnpackExpr(p, header)
+	}
+
 	GLOBAL_ENV.ns.Value = currentNamespace
 }
 
