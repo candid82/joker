@@ -61,7 +61,7 @@ func (ctx *ReplContext) PushException(exc Object) {
 
 func processFile(filename string, phase Phase) error {
 	var reader *Reader
-	if filename == "--" {
+	if filename == "-" || filename == "--" {
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
 	} else {
