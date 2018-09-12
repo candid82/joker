@@ -62,6 +62,9 @@ func (ctx *ReplContext) PushException(exc Object) {
 func processFile(filename string, phase Phase) error {
 	var reader *Reader
 	if filename == "-" || filename == "--" {
+		if filename == "--" {
+			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead");
+		}
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
 	} else {
