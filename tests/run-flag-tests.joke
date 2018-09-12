@@ -80,32 +80,32 @@
   "tests/flags/input.clj:1:2: Parse error: Unable to resolve symbol: clojure.string/split")
 
 (testing :err "reading from stdin"
-  "--lint --dialect edn -- < tests/flags/input.edn"
+  "--lint --dialect edn - < tests/flags/input.edn"
   ""
 
-  "--lint --dialect clj -- < tests/flags/input.edn"
+  "--lint --dialect clj - < tests/flags/input.edn"
   "<stdin>:1:17: Read warning: No reader function for tag foo/bar"
 
-  "--lint --dialect clj -- < tests/flags/input.clj"
+  "--lint --dialect clj - < tests/flags/input.clj"
   ""
 
-  "--lint --dialect cljs -- < tests/flags/input.clj"
+  "--lint --dialect cljs - < tests/flags/input.clj"
   "<stdin>:1:2: Parse error: Unable to resolve symbol: clojure.string/split"
 
-  "--lint --dialect cljs -- < tests/flags/input.cljs"
+  "--lint --dialect cljs - < tests/flags/input.cljs"
   ""
 
-  "--lint --dialect joker -- < tests/flags/input.cljs"
+  "--lint --dialect joker - < tests/flags/input.cljs"
   "<stdin>:1:7: Parse error: Unable to resolve symbol: js/console"
 
-  "--lint --dialect joker -- < tests/flags/input.joke"
+  "--lint --dialect joker - < tests/flags/input.joke"
   "")
 
 (testing :err "working directory override"
-  "--lint --dialect clj -- < tests/flags/macro.clj"
+  "--lint --dialect clj - < tests/flags/macro.clj"
   "<stdin>:4:11: Parse error: Unable to resolve symbol: something"
 
-  "--lint --dialect clj --working-dir tests/flags/config -- < tests/flags/macro.clj"
+  "--lint --dialect clj --working-dir tests/flags/config - < tests/flags/macro.clj"
   "")
 
 (testing :out "script args don't cause errors"
