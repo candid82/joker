@@ -434,6 +434,8 @@ func check(e error) {
 }
 
 func main() {
+	SetExitJoker(my_exit)
+
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	if len(os.Args) > 1 && os.Args[1] == "--debug" { debug = true }  // peek to see if it's the first arg
@@ -567,8 +569,4 @@ func finish() {
 func my_exit(rc int) {
 	finish()
 	os.Exit(rc)
-}
-
-func ExitJoker(rc int) {
-	my_exit(rc)
 }

@@ -18,7 +18,7 @@
 (defn exit
   "Causes the current program to exit with the given status code."
   {:added "1.0"
-  :go "NIL; os.Exit(code)"}
+  :go "NIL; ExitJoker(code)"}
   [^Int code])
 
 (defn sh
