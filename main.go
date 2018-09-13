@@ -254,7 +254,7 @@ var (
 	debug bool  // Hidden option
 	helpFlag bool
 	versionFlag bool
-	phase Phase = EVAL
+	phase Phase = EVAL  // --read, --parse, --evaluate
 	workingDir string
 	lintFlag bool
 	dialect Dialect
@@ -263,6 +263,10 @@ var (
 	filename string
 	remainingArgs []string
 )
+
+func notOption(arg string) bool {
+	return arg == "-" || !strings.HasPrefix(arg, "-") 
+}
 
 func parseArgs(args []string) {
 	length := len(args)
@@ -289,7 +293,7 @@ func parseArgs(args []string) {
 		case "--evaluate":
 			phase = EVAL
 		case "--working-dir":
-			if i < length-1 {
+			if i < length-1 && notOption(args[i+1]) {
 				i += 1  // shift
 				workingDir = args[i]
 			} else {
@@ -310,14 +314,14 @@ func parseArgs(args []string) {
 			lintFlag = true
 			dialect = EDN
 		case "--dialect":
-			if i < length-1 {
+			if i < length-1 && notOption(args[i+1]) {
 				i += 1  // shift
 				dialect = dialectFromArg(args[i])
 			} else {
 				missing = true
 			}
 		case "--hashmap-threshold":
-			if i < length-1 {
+			if i < length-1 && notOption(args[i+1]) {
 				i += 1  // shift
 				thresh, err := strconv.Atoi(args[i])
 				if err != nil {
@@ -333,7 +337,7 @@ func parseArgs(args []string) {
 				missing = true
 			}
 		case "-e", "--expr":
-			if i < length-1 {
+			if i < length-1 && notOption(args[i+1]) {
 				i += 1  // shift
 				expr = args[i]
 				if i < length-1 && args[i+1] == "--" {
@@ -380,7 +384,7 @@ func parseArgs(args []string) {
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
-	if os.Args[1] == "--debug" { debug = true }  // peek to see if it's the first arg
+	if len(os.Args) > 1 && os.Args[1] == "--debug" { debug = true }  // peek to see if it's the first arg
 
 	parseArgs(os.Args)
 
