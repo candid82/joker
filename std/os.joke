@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["os"]
+  ^{:go-imports []
     :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
