@@ -220,23 +220,32 @@ func dialectFromArg(arg string) Dialect {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Joker - %s\n\n", VERSION)
-	fmt.Fprintln(os.Stderr, "Usage: joker [joker-args]                                 starts a repl")
-	fmt.Fprintln(os.Stderr, "Usage: joker [joker-args] --repl [-- <repl-args>]         starts a repl with arguments to Eval phase")
-	fmt.Fprintln(os.Stderr, "   or: joker [joker-args] --expr <expr> [-- <expr-args>]  execute an expression")
-	fmt.Fprintln(os.Stderr, "   or: joker [joker-args] <filename> [<script-args>]      execute a script; '-' denotes stdin")
-	fmt.Fprintln(os.Stderr, "\nOptions (<joker-args>):")
-/*
---help,-h;Print this help message and exit
---version,-v;Print version number and exit
---read;Read, but do not parse nor evaluate, the input
---parse;Read and parse, but do not evaluate, the input
---evaluate;Read, parse, and evaluate the input (default)
---working-dir <directory>;Specify working directory for lint configuration (requires --lint)
---lint;Lint (read, parse, and run checks on), but do not evaluate, the input
---dialect <dialect>;Set input dialect ("clj", "cljs", "joker", "edn") for linting -- default is inferred from <filename> suffix, if any
---hashmap-threshold <n>;Set HASHMAP_THRESHOLD accordingly (internal magic of some sort)
--e <expr>;Same as --expr <expr>
-*/
+	fmt.Fprintln(os.Stderr, "Usage: joker [args]                                 starts a repl")
+	fmt.Fprintln(os.Stderr, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
+	fmt.Fprintln(os.Stderr, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
+	fmt.Fprintln(os.Stderr, "   or: joker [args] <filename> [<script-args>]      input from file")
+	fmt.Fprintln(os.Stderr, "   or: joker [args] --lint <filename>               lint the code in file")
+	fmt.Fprintln(os.Stderr, "\nNotes:")
+	fmt.Fprintln(os.Stderr, "  -e is a synonym for --expr")
+	fmt.Fprintln(os.Stderr, "  '-' for <filename> means read from standard input (stdin)")
+	fmt.Fprintln(os.Stderr, "\nOptions (<args>):")
+	fmt.Fprintln(os.Stderr, "  --help, -h")
+	fmt.Fprintln(os.Stderr, "    Print this help message and exit.")
+	fmt.Fprintln(os.Stderr, "  --version, -v")
+	fmt.Fprintln(os.Stderr, "    Print version number and exit.")
+	fmt.Fprintln(os.Stderr, "  --read")
+	fmt.Fprintln(os.Stderr, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(os.Stderr, "  --parse")
+	fmt.Fprintln(os.Stderr, "    Read and parse, but do not evaluate, the input.")
+	fmt.Fprintln(os.Stderr, "  --evaluate")
+	fmt.Fprintln(os.Stderr, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(os.Stderr, "  --working-dir <directory>")
+	fmt.Fprintln(os.Stderr, "    Specify working directory for lint configuration (requires --lint).")
+	fmt.Fprintln(os.Stderr, "  --dialect <dialect>")
+	fmt.Fprintln(os.Stderr, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
+	fmt.Fprintln(os.Stderr, "    default is inferred from <filename> suffix, if any.")
+	fmt.Fprintln(os.Stderr, "  --hashmap-threshold <n>")
+	fmt.Fprintln(os.Stderr, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
 }
 
 var (
