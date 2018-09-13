@@ -395,6 +395,7 @@ func main() {
 	} // peek to see if it's the first arg
 
 	parseArgs(os.Args)
+	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 
 	if debug {
 		fmt.Fprintf(os.Stderr, "debug=%v\n", debug)
