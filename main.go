@@ -387,6 +387,7 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--debug" { debug = true }  // peek to see if it's the first arg
 
 	parseArgs(os.Args)
+	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 
 	if debug {
 		fmt.Fprintf(os.Stderr, "debug=%v\n", debug)
