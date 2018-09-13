@@ -320,7 +320,7 @@ func Third(seq Seq) Object {
 	return seq.Rest().Rest().First()
 }
 
-func Forth(seq Seq) Object {
+func Fourth(seq Seq) Object {
 	return seq.Rest().Rest().Rest().First()
 }
 

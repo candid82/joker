@@ -667,7 +667,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		if count == 3 {
 			res.value = Parse(Third(seq), ctx)
 		} else if count == 4 {
-			res.value = Parse(Forth(seq), ctx)
+			res.value = Parse(Fourth(seq), ctx)
 			docstring := Third(seq)
 			switch docstring.(type) {
 			case String:
@@ -1341,7 +1341,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return &IfExpr{
 				cond:     Parse(Second(seq), ctx),
 				positive: Parse(Third(seq), ctx),
-				negative: Parse(Forth(seq), ctx),
+				negative: Parse(Fourth(seq), ctx),
 				Position: pos,
 			}
 		case STR.fn_:
