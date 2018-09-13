@@ -66,7 +66,7 @@ func processFile(filename string, phase Phase) error {
 	var reader *Reader
 	if filename == "-" || filename == "--" {
 		if filename == "--" {
-			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead");
+			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead")
 		}
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
@@ -259,6 +259,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  --cpuprofile-rate <rate>")
 	fmt.Fprintln(os.Stderr, "    Specify rate (hz, aka samples per second) for the 'runtime/pprof' CPU")
 	fmt.Fprintln(os.Stderr, "    profiler to use.")
+	fmt.Fprintln(os.Stderr, "  --memprofile <name>")
+	fmt.Fprintln(os.Stderr, "    Write memory profile to specified file.")
 }
 
 var (
@@ -277,6 +279,7 @@ var (
 	cpuProfileName string
 	cpuProfileRate int
 	cpuProfileRateFlag bool
+	memProfileName string
 )
 
 func notOption(arg string) bool {
@@ -399,6 +402,13 @@ func parseArgs(args []string) {
 			} else {
 				missing = true
 			}
+		case "--memprofile":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1  // shift
+				memProfileName = args[i]
+			} else {
+				missing = true
+			}
 		default:
 			if strings.HasPrefix(args[i], "-") {
 				fmt.Fprintf(os.Stderr, "Error: Unrecognized option '%s'\n", args[i])
@@ -464,11 +474,11 @@ func main() {
 
 	if len(remainingArgs) > 0 {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
 			ExitJoker(4)
 		}
 		if phase != EVAL {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
 			ExitJoker(5)
 		}
 	}
@@ -483,7 +493,7 @@ func main() {
 		case "runtime/pprof":
 			f, err := os.Create(cpuProfileName)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Could not create CPU profile `%s': %v\n",
+				fmt.Fprintf(os.Stderr, "Error: Could not create CPU profile `%s': %v\n",
 					cpuProfileName, err)
 				cpuProfileName = ""
 				ExitJoker(96)
@@ -493,31 +503,33 @@ func main() {
 			}
 			pprof.StartCPUProfile(f)
 			fmt.Fprintf(os.Stderr, "Profiling started at rate=%d. See file `%s'.\n",
-				cpuProfileRate, cpuProfileName);
+				cpuProfileRate, cpuProfileName)
 			defer finish()
 		default:
 			fmt.Fprintf(os.Stderr,
 				"Unrecognized profiler: %s\n  Use 'pkg/profile' or 'runtime/pprof'.\n",
-				profilerType);
+				profilerType)
 			ExitJoker(96)
 		}
+	} else if memProfileName != "" {
+		defer finish()
 	}
 
 	if expr != "" {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n")
 			ExitJoker(6)
 		}
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n")
 			ExitJoker(7)
 		}
 		if workingDir != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n")
 			ExitJoker(8)
 		}
 		if filename != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n")
 			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(expr), "<expr>")
@@ -527,7 +539,7 @@ func main() {
 
 	if lintFlag {
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n")
 			ExitJoker(10)
 		}
 		if dialect == UNKNOWN {
@@ -541,7 +553,7 @@ func main() {
 	}
 
 	if workingDir != "" {
-		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n");
+		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n")
 		ExitJoker(11)
 	}
 
@@ -560,8 +572,24 @@ func finish() {
 		runningProfile = nil
 	} else if cpuProfileName != "" {
 		pprof.StopCPUProfile()
-		fmt.Fprintf(os.Stderr, "Profiling stopped. See file `%s'.\n", cpuProfileName);
+		fmt.Fprintf(os.Stderr, "Profiling stopped. See file `%s'.\n", cpuProfileName)
 		cpuProfileName = ""
+	}
+
+	if memProfileName != "" {
+		f, err := os.Create(memProfileName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Could not create memory profile `%s': %v\n",
+				memProfileName, err)
+		}
+		runtime.GC()  // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Could not write memory profile `%s': %v\n",
+				memProfileName, err)
+		}
+		f.Close()
+		fmt.Fprintf(os.Stderr, "Memory profile written to `%s'.\n", memProfileName)
+		memProfileName = ""
 	}
 }
 
