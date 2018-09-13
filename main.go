@@ -427,12 +427,6 @@ func parseArgs(args []string) {
 
 var runningProfile interface { Stop() }
 
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
-}
-
 func main() {
 	SetExitJoker(my_exit)
 
@@ -488,7 +482,12 @@ func main() {
 			defer finish()
 		case "runtime/pprof":
 			f, err := os.Create(cpuProfileName)
-			check(err)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Could not create CPU profile `%s': %v\n",
+					cpuProfileName, err)
+				cpuProfileName = ""
+				ExitJoker(96)
+			}
 			if (cpuProfileRateFlag) {
 				runtime.SetCPUProfileRate(cpuProfileRate)
 			}
