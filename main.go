@@ -261,6 +261,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "    profiler to use.")
 	fmt.Fprintln(os.Stderr, "  --memprofile <name>")
 	fmt.Fprintln(os.Stderr, "    Write memory profile to specified file.")
+	fmt.Fprintln(os.Stderr, "  --memprofile-rate <rate>")
+	fmt.Fprintln(os.Stderr, "    Specify rate (one sample per <rate>) for the memory profiler to use.")
 }
 
 var (
@@ -406,6 +408,20 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1  // shift
 				memProfileName = args[i]
+			} else {
+				missing = true
+			}
+		case "--memprofile-rate":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1  // shift
+				rate, err := strconv.Atoi(args[i])
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error: ", err)
+					return
+				}
+				if rate > 0 {
+					runtime.MemProfileRate = rate
+				}
 			} else {
 				missing = true
 			}
@@ -588,7 +604,8 @@ func finish() {
 				memProfileName, err)
 		}
 		f.Close()
-		fmt.Fprintf(os.Stderr, "Memory profile written to `%s'.\n", memProfileName)
+		fmt.Fprintf(os.Stderr, "Memory profile rate=%d written to `%s'.\n",
+			runtime.MemProfileRate, memProfileName)
 		memProfileName = ""
 	}
 }
