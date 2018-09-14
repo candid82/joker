@@ -41,7 +41,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 		args = args.Conjoin(String{S: arg})
 	}
 	if args.Count() > 0 {
-		env.args.Value = args.Seq()
+		env.args.Value = args
 	} else {
 		env.args.Value = NIL
 	}
