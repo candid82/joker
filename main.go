@@ -136,7 +136,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 }
 
 func repl(phase Phase) {
-	fmt.Printf("Welcome to joker %s. Use ctrl-c to exit.\n", VERSION)
+	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
@@ -218,75 +218,247 @@ func dialectFromArg(arg string) Dialect {
 	return UNKNOWN
 }
 
-func main() {
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-	if len(os.Args) == 1 {
-		repl(EVAL)
-		return
-	}
-	if len(os.Args) == 2 {
-		if os.Args[1] == "-v" || os.Args[1] == "--version" {
-			println(VERSION)
-			return
+func usage(out *os.File) {
+	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
+	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
+	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
+	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
+	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
+	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
+	fmt.Fprintln(out, "\nNotes:")
+	fmt.Fprintln(out, "  -e is a synonym for --expr.")
+	fmt.Fprintln(out, "  '-' for <filename> means read from standard input (stdin).")
+	fmt.Fprintln(out, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
+	fmt.Fprintln(out, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
+	fmt.Fprintln(out, "\nOptions (<args>):")
+	fmt.Fprintln(out, "  --help, -h")
+	fmt.Fprintln(out, "    Print this help message and exit.")
+	fmt.Fprintln(out, "  --version, -v")
+	fmt.Fprintln(out, "    Print version number and exit.")
+	fmt.Fprintln(out, "  --read")
+	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(out, "  --parse")
+	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
+	fmt.Fprintln(out, "  --evaluate")
+	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(out, "  --working-dir <directory>")
+	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
+	fmt.Fprintln(out, "  --dialect <dialect>")
+	fmt.Fprintln(out, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
+	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
+	fmt.Fprintln(out, "  --hashmap-threshold <n>")
+	fmt.Fprintln(out, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
+}
+
+var (
+	debug         bool // Hidden option
+	helpFlag      bool
+	versionFlag   bool
+	phase         Phase = EVAL // --read, --parse, --evaluate
+	workingDir    string
+	lintFlag      bool
+	dialect       Dialect = UNKNOWN
+	expr          string
+	replFlag      bool
+	filename      string
+	remainingArgs []string
+)
+
+func notOption(arg string) bool {
+	return arg == "-" || !strings.HasPrefix(arg, "-")
+}
+
+func parseArgs(args []string) {
+	length := len(args)
+	stop := false
+	missing := false
+	noFileFlag := false
+	var i int
+	for i = 1; i < length; i++ { // shift
+		if debug {
+			fmt.Fprintf(os.Stderr, "arg[%d]=%s\n", i, args[i])
 		}
-		processFile(os.Args[1], EVAL)
-		return
-	}
-	workingDir := ""
-	phase := EVAL
-	lint := false
-	dialect := UNKNOWN
-	expr := ""
-	length := len(os.Args) - 1
-	for i := 1; i < length; i++ {
-		switch os.Args[i] {
+		switch args[i] {
+		case "--", "-":
+			stop = true // "-" is stdin. "--" is stdin for now; later will formally end options processing
+		case "--debug":
+			debug = true
+		case "--help", "-h":
+			helpFlag = true
+			return // don't bother parsing anything else
+		case "--version", "-v":
+			versionFlag = true
 		case "--read":
 			phase = READ
 		case "--parse":
 			phase = PARSE
+		case "--evaluate":
+			phase = EVAL
 		case "--working-dir":
-			if i < length-1 {
-				workingDir = os.Args[i+1]
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				workingDir = args[i]
+			} else {
+				missing = true
 			}
 		case "--lint":
-			lint = true
+			lintFlag = true
 		case "--lintclj":
-			lint = true
+			lintFlag = true
 			dialect = CLJ
 		case "--lintcljs":
-			lint = true
+			lintFlag = true
 			dialect = CLJS
 		case "--lintjoker":
-			lint = true
+			lintFlag = true
 			dialect = JOKER
 		case "--lintedn":
-			lint = true
+			lintFlag = true
 			dialect = EDN
 		case "--dialect":
-			if i < length-1 {
-				dialect = dialectFromArg(os.Args[i+1])
-			}
-		case "-e":
-			if i < length {
-				expr = os.Args[i+1]
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				dialect = dialectFromArg(args[i])
+			} else {
+				missing = true
 			}
 		case "--hashmap-threshold":
-			if i < length {
-				i, err := strconv.Atoi(os.Args[i+1])
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				thresh, err := strconv.Atoi(args[i])
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error: ", err)
 					return
 				}
-				if i < 0 {
+				if thresh < 0 {
 					HASHMAP_THRESHOLD = math.MaxInt64
 				} else {
-					HASHMAP_THRESHOLD = i
+					HASHMAP_THRESHOLD = thresh
 				}
+			} else {
+				missing = true
 			}
+		case "-e", "--expr":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				expr = args[i]
+				if i < length-1 && args[i+1] == "--" {
+					i += 2 // shift 2
+					noFileFlag = true
+					stop = true
+				}
+			} else {
+				missing = true
+			}
+		case "--repl":
+			replFlag = true
+			if i < length-1 && args[i+1] == "--" {
+				i += 2 // shift 2
+				noFileFlag = true
+				stop = true
+			}
+		default:
+			if strings.HasPrefix(args[i], "-") {
+				fmt.Fprintf(os.Stderr, "Error: Unrecognized option '%s'\n", args[i])
+				os.Exit(2)
+			}
+			stop = true
+		}
+		if stop || missing {
+			break
 		}
 	}
-	filename := os.Args[length]
-	if lint {
+	if missing {
+		fmt.Fprintf(os.Stderr, "Error: Missing argument for '%s' option\n", args[i])
+		os.Exit(3)
+	}
+	if i < length && !noFileFlag {
+		if debug {
+			fmt.Fprintf(os.Stderr, "filename=%s\n", args[i])
+		}
+		filename = args[i]
+		i += 1 // shift
+	}
+	if i < length {
+		if debug {
+			fmt.Fprintf(os.Stderr, "remaining=%v\n", args[i:])
+		}
+		remainingArgs = args[i:]
+	}
+}
+
+func main() {
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
+
+	if len(os.Args) > 1 && os.Args[1] == "--debug" {
+		debug = true
+	} // peek to see if it's the first arg
+
+	parseArgs(os.Args)
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "debug=%v\n", debug)
+		fmt.Fprintf(os.Stderr, "helpFlag=%v\n", helpFlag)
+		fmt.Fprintf(os.Stderr, "versionFlag=%v\n", versionFlag)
+		fmt.Fprintf(os.Stderr, "phase=%v\n", phase)
+		fmt.Fprintf(os.Stderr, "lintFlag=%v\n", lintFlag)
+		fmt.Fprintf(os.Stderr, "dialect=%v\n", dialect)
+		fmt.Fprintf(os.Stderr, "workingDir=%v\n", workingDir)
+		fmt.Fprintf(os.Stderr, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
+		fmt.Fprintf(os.Stderr, "expr=%v\n", expr)
+		fmt.Fprintf(os.Stderr, "replFlag=%v\n", replFlag)
+		fmt.Fprintf(os.Stderr, "filename=%v\n", filename)
+		fmt.Fprintf(os.Stderr, "remainingArgs=%v\n", remainingArgs)
+	}
+
+	if helpFlag {
+		usage(os.Stdout)
+		return
+	}
+
+	if versionFlag {
+		println(VERSION)
+		return
+	}
+
+	if len(remainingArgs) > 0 {
+		if lintFlag {
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
+			os.Exit(4)
+		}
+		if phase != EVAL {
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
+			os.Exit(5)
+		}
+	}
+
+	if expr != "" {
+		if lintFlag {
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n")
+			os.Exit(6)
+		}
+		if replFlag {
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n")
+			os.Exit(7)
+		}
+		if workingDir != "" {
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n")
+			os.Exit(8)
+		}
+		if filename != "" {
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n")
+			os.Exit(9)
+		}
+		reader := NewReader(strings.NewReader(expr), "<expr>")
+		ProcessReader(reader, "", phase)
+		return
+	}
+
+	if lintFlag {
+		if replFlag {
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n")
+			os.Exit(10)
+		}
 		if dialect == UNKNOWN {
 			dialect = detectDialect(filename)
 		}
@@ -296,15 +468,17 @@ func main() {
 		}
 		return
 	}
-	if phase == EVAL {
-		if expr == "" {
-			// First argument is a filename, subsequent arguments are script arguments.
-			processFile(os.Args[1], phase)
-		} else {
-			reader := NewReader(strings.NewReader(expr), "<expr>")
-			ProcessReader(reader, "", phase)
-		}
-	} else {
-		processFile(filename, phase)
+
+	if workingDir != "" {
+		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n")
+		os.Exit(11)
 	}
+
+	if filename != "" {
+		processFile(filename, phase)
+		return
+	}
+
+	repl(phase)
+	return
 }
