@@ -63,7 +63,7 @@ func processFile(filename string, phase Phase) error {
 	var reader *Reader
 	if filename == "-" || filename == "--" {
 		if filename == "--" {
-			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead");
+			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead")
 		}
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
@@ -218,54 +218,54 @@ func dialectFromArg(arg string) Dialect {
 	return UNKNOWN
 }
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "Joker - %s\n\n", VERSION)
-	fmt.Fprintln(os.Stderr, "Usage: joker [args]                                 starts a repl")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] <filename> [<script-args>]      input from file")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --lint <filename>               lint the code in file")
-	fmt.Fprintln(os.Stderr, "\nNotes:")
-	fmt.Fprintln(os.Stderr, "  -e is a synonym for --expr.")
-	fmt.Fprintln(os.Stderr, "  '-' for <filename> means read from standard input (stdin).")
-	fmt.Fprintln(os.Stderr, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
-	fmt.Fprintln(os.Stderr, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
-	fmt.Fprintln(os.Stderr, "\nOptions (<args>):")
-	fmt.Fprintln(os.Stderr, "  --help, -h")
-	fmt.Fprintln(os.Stderr, "    Print this help message and exit.")
-	fmt.Fprintln(os.Stderr, "  --version, -v")
-	fmt.Fprintln(os.Stderr, "    Print version number and exit.")
-	fmt.Fprintln(os.Stderr, "  --read")
-	fmt.Fprintln(os.Stderr, "    Read, but do not parse nor evaluate, the input.")
-	fmt.Fprintln(os.Stderr, "  --parse")
-	fmt.Fprintln(os.Stderr, "    Read and parse, but do not evaluate, the input.")
-	fmt.Fprintln(os.Stderr, "  --evaluate")
-	fmt.Fprintln(os.Stderr, "    Read, parse, and evaluate the input (default unless --lint in effect).")
-	fmt.Fprintln(os.Stderr, "  --working-dir <directory>")
-	fmt.Fprintln(os.Stderr, "    Specify working directory for lint configuration (requires --lint).")
-	fmt.Fprintln(os.Stderr, "  --dialect <dialect>")
-	fmt.Fprintln(os.Stderr, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
-	fmt.Fprintln(os.Stderr, "    default is inferred from <filename> suffix, if any.")
-	fmt.Fprintln(os.Stderr, "  --hashmap-threshold <n>")
-	fmt.Fprintln(os.Stderr, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
+func usage(out *os.File) {
+	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
+	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
+	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
+	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
+	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
+	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
+	fmt.Fprintln(out, "\nNotes:")
+	fmt.Fprintln(out, "  -e is a synonym for --expr.")
+	fmt.Fprintln(out, "  '-' for <filename> means read from standard input (stdin).")
+	fmt.Fprintln(out, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
+	fmt.Fprintln(out, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
+	fmt.Fprintln(out, "\nOptions (<args>):")
+	fmt.Fprintln(out, "  --help, -h")
+	fmt.Fprintln(out, "    Print this help message and exit.")
+	fmt.Fprintln(out, "  --version, -v")
+	fmt.Fprintln(out, "    Print version number and exit.")
+	fmt.Fprintln(out, "  --read")
+	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(out, "  --parse")
+	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
+	fmt.Fprintln(out, "  --evaluate")
+	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(out, "  --working-dir <directory>")
+	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
+	fmt.Fprintln(out, "  --dialect <dialect>")
+	fmt.Fprintln(out, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
+	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
+	fmt.Fprintln(out, "  --hashmap-threshold <n>")
+	fmt.Fprintln(out, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
 }
 
 var (
-	debug bool  // Hidden option
-	helpFlag bool
-	versionFlag bool
-	phase Phase = EVAL  // --read, --parse, --evaluate
-	workingDir string
-	lintFlag bool
-	dialect Dialect
-	expr string
-	replFlag bool
-	filename string
+	debug         bool // Hidden option
+	helpFlag      bool
+	versionFlag   bool
+	phase         Phase = EVAL // --read, --parse, --evaluate
+	workingDir    string
+	lintFlag      bool
+	dialect       Dialect
+	expr          string
+	replFlag      bool
+	filename      string
 	remainingArgs []string
 )
 
 func notOption(arg string) bool {
-	return arg == "-" || !strings.HasPrefix(arg, "-") 
+	return arg == "-" || !strings.HasPrefix(arg, "-")
 }
 
 func parseArgs(args []string) {
@@ -274,16 +274,18 @@ func parseArgs(args []string) {
 	missing := false
 	noFileFlag := false
 	var i int
-	for i = 1; i < length; i++ {  // shift
-		if (debug) { fmt.Fprintf(os.Stderr, "arg[%d]=%s\n", i, args[i]) }
+	for i = 1; i < length; i++ { // shift
+		if debug {
+			fmt.Fprintf(os.Stderr, "arg[%d]=%s\n", i, args[i])
+		}
 		switch args[i] {
 		case "--", "-":
-			stop = true  // "-" is stdin. "--" is stdin for now; later will formally end options processing
+			stop = true // "-" is stdin. "--" is stdin for now; later will formally end options processing
 		case "--debug":
 			debug = true
 		case "--help", "-h":
 			helpFlag = true
-			return  // don't bother parsing anything else
+			return // don't bother parsing anything else
 		case "--version", "-v":
 			versionFlag = true
 		case "--read":
@@ -294,7 +296,7 @@ func parseArgs(args []string) {
 			phase = EVAL
 		case "--working-dir":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				workingDir = args[i]
 			} else {
 				missing = true
@@ -315,14 +317,14 @@ func parseArgs(args []string) {
 			dialect = EDN
 		case "--dialect":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				dialect = dialectFromArg(args[i])
 			} else {
 				missing = true
 			}
 		case "--hashmap-threshold":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				thresh, err := strconv.Atoi(args[i])
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error: ", err)
@@ -338,10 +340,10 @@ func parseArgs(args []string) {
 			}
 		case "-e", "--expr":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				expr = args[i]
 				if i < length-1 && args[i+1] == "--" {
-					i += 2  // shift 2
+					i += 2 // shift 2
 					noFileFlag = true
 					stop = true
 				}
@@ -351,7 +353,7 @@ func parseArgs(args []string) {
 		case "--repl":
 			replFlag = true
 			if i < length-1 && args[i+1] == "--" {
-				i += 2  // shift 2
+				i += 2 // shift 2
 				noFileFlag = true
 				stop = true
 			}
@@ -371,12 +373,16 @@ func parseArgs(args []string) {
 		os.Exit(3)
 	}
 	if i < length && !noFileFlag {
-		if (debug) { fmt.Fprintf(os.Stderr, "filename=%s\n", args[i]) }
+		if debug {
+			fmt.Fprintf(os.Stderr, "filename=%s\n", args[i])
+		}
 		filename = args[i]
-		i += 1  // shift
+		i += 1 // shift
 	}
-	if (i < length) {
-		if (debug) { fmt.Fprintf(os.Stderr, "remaining=%v\n", args[i:]) }
+	if i < length {
+		if debug {
+			fmt.Fprintf(os.Stderr, "remaining=%v\n", args[i:])
+		}
 		remainingArgs = args[i:]
 	}
 }
@@ -384,7 +390,9 @@ func parseArgs(args []string) {
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
-	if len(os.Args) > 1 && os.Args[1] == "--debug" { debug = true }  // peek to see if it's the first arg
+	if len(os.Args) > 1 && os.Args[1] == "--debug" {
+		debug = true
+	} // peek to see if it's the first arg
 
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
@@ -404,8 +412,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "remainingArgs=%v\n", remainingArgs)
 	}
 
-	if (helpFlag) {
-		usage()
+	if helpFlag {
+		usage(os.Stdout)
 		return
 	}
 
@@ -416,30 +424,30 @@ func main() {
 
 	if len(remainingArgs) > 0 {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
 			os.Exit(4)
 		}
 		if phase != EVAL {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
 			os.Exit(5)
 		}
 	}
 
 	if expr != "" {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n")
 			os.Exit(6)
 		}
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n")
 			os.Exit(7)
 		}
 		if workingDir != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n")
 			os.Exit(8)
 		}
 		if filename != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n")
 			os.Exit(9)
 		}
 		reader := NewReader(strings.NewReader(expr), "<expr>")
@@ -449,7 +457,7 @@ func main() {
 
 	if lintFlag {
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n");
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n")
 			os.Exit(10)
 		}
 		if dialect == UNKNOWN {
@@ -463,7 +471,7 @@ func main() {
 	}
 
 	if workingDir != "" {
-		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n");
+		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n")
 		os.Exit(11)
 	}
 
