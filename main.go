@@ -272,7 +272,7 @@ var (
 	phase         Phase = EVAL // --read, --parse, --evaluate
 	workingDir    string
 	lintFlag      bool
-	dialect       Dialect
+	dialect       Dialect = UNKNOWN
 	expr          string
 	replFlag      bool
 	filename      string
