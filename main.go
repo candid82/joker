@@ -218,36 +218,36 @@ func dialectFromArg(arg string) Dialect {
 	return UNKNOWN
 }
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "Joker - %s\n\n", VERSION)
-	fmt.Fprintln(os.Stderr, "Usage: joker [args]                                 starts a repl")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] <filename> [<script-args>]      input from file")
-	fmt.Fprintln(os.Stderr, "   or: joker [args] --lint <filename>               lint the code in file")
-	fmt.Fprintln(os.Stderr, "\nNotes:")
-	fmt.Fprintln(os.Stderr, "  -e is a synonym for --expr.")
-	fmt.Fprintln(os.Stderr, "  '-' for <filename> means read from standard input (stdin).")
-	fmt.Fprintln(os.Stderr, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
-	fmt.Fprintln(os.Stderr, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
-	fmt.Fprintln(os.Stderr, "\nOptions (<args>):")
-	fmt.Fprintln(os.Stderr, "  --help, -h")
-	fmt.Fprintln(os.Stderr, "    Print this help message and exit.")
-	fmt.Fprintln(os.Stderr, "  --version, -v")
-	fmt.Fprintln(os.Stderr, "    Print version number and exit.")
-	fmt.Fprintln(os.Stderr, "  --read")
-	fmt.Fprintln(os.Stderr, "    Read, but do not parse nor evaluate, the input.")
-	fmt.Fprintln(os.Stderr, "  --parse")
-	fmt.Fprintln(os.Stderr, "    Read and parse, but do not evaluate, the input.")
-	fmt.Fprintln(os.Stderr, "  --evaluate")
-	fmt.Fprintln(os.Stderr, "    Read, parse, and evaluate the input (default unless --lint in effect).")
-	fmt.Fprintln(os.Stderr, "  --working-dir <directory>")
-	fmt.Fprintln(os.Stderr, "    Specify working directory for lint configuration (requires --lint).")
-	fmt.Fprintln(os.Stderr, "  --dialect <dialect>")
-	fmt.Fprintln(os.Stderr, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
-	fmt.Fprintln(os.Stderr, "    default is inferred from <filename> suffix, if any.")
-	fmt.Fprintln(os.Stderr, "  --hashmap-threshold <n>")
-	fmt.Fprintln(os.Stderr, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
+func usage(out *os.File) {
+	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
+	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
+	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
+	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
+	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
+	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
+	fmt.Fprintln(out, "\nNotes:")
+	fmt.Fprintln(out, "  -e is a synonym for --expr.")
+	fmt.Fprintln(out, "  '-' for <filename> means read from standard input (stdin).")
+	fmt.Fprintln(out, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
+	fmt.Fprintln(out, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
+	fmt.Fprintln(out, "\nOptions (<args>):")
+	fmt.Fprintln(out, "  --help, -h")
+	fmt.Fprintln(out, "    Print this help message and exit.")
+	fmt.Fprintln(out, "  --version, -v")
+	fmt.Fprintln(out, "    Print version number and exit.")
+	fmt.Fprintln(out, "  --read")
+	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(out, "  --parse")
+	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
+	fmt.Fprintln(out, "  --evaluate")
+	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(out, "  --working-dir <directory>")
+	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
+	fmt.Fprintln(out, "  --dialect <dialect>")
+	fmt.Fprintln(out, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
+	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
+	fmt.Fprintln(out, "  --hashmap-threshold <n>")
+	fmt.Fprintln(out, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
 }
 
 var (
@@ -404,7 +404,7 @@ func main() {
 	}
 
 	if (helpFlag) {
-		usage()
+		usage(os.Stdout)
 		return
 	}
 
