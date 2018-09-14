@@ -35,6 +35,18 @@ func versionMap() Map {
 	return res
 }
 
+func (env *Env) SetEnvArgs(newArgs []string) {
+	args := EmptyVector
+	for _, arg := range newArgs {
+		args = args.Conjoin(String{S: arg})
+	}
+	if args.Count() > 0 {
+		env.args.Value = args
+	} else {
+		env.args.Value = NIL
+	}
+}
+
 func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -59,15 +71,7 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 			:incremental and :qualifier keys. Feature releases may increment
 			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
-	args := EmptyVector
-	for _, arg := range os.Args[1:] {
-		args = args.Conjoin(String{S: arg})
-	}
-	if args.Count() > 0 {
-		res.args.Value = args
-	} else {
-		res.args.Value = NIL
-	}
+	res.SetEnvArgs(os.Args[1:])
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}
