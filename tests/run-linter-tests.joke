@@ -11,20 +11,24 @@
 (let [test-dirs (->> (joker.os/ls "tests/linter")
                      (filter :dir?)
                      (map :name))
-      pwd (get (joker.os/env) "PWD")]
+      pwd (get (joker.os/env) "PWD")
+      exe (get (joker.os/env) "JOKER_EXE" (str pwd "/joker"))]
   (doseq [test-dir test-dirs]
     (let [dir (str "tests/linter/" test-dir "/")
           filename (if (file-exists? (str dir "input.clj"))
                      (str dir "input.clj")
                      (str dir "input.cljs"))
-          res (joker.os/sh (str pwd "/joker") "--lint" filename)
+          res (joker.os/sh exe "--lint" filename)
           output (:err res)
           expected (slurp (str dir "output.txt"))]
       (when (or (and (not= "" output)
                      (:success res))
                 (and (= "" output)
                      (not (:success res))))
-        (println "FAILED:" test-dir "(wrong exit code)"))
+        (println "FAILED:" test-dir "(wrong exit code)")
+        (println "RESULT:")
+        (println res)
+        (var-set #'exit-code 1))
       (when-not (= expected output)
         (println "FAILED:" test-dir)
         (println "EXPECTED:")
