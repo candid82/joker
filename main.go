@@ -6,6 +6,8 @@ import (
 	"io"
 	"math"
 	"os"
+	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 
@@ -21,6 +23,7 @@ import (
 	_ "github.com/candid82/joker/std/url"
 	_ "github.com/candid82/joker/std/yaml"
 	"github.com/chzyer/readline"
+	"github.com/pkg/profile"
 )
 
 type (
@@ -248,20 +251,37 @@ func usage(out *os.File) {
 	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
 	fmt.Fprintln(out, "  --hashmap-threshold <n>")
 	fmt.Fprintln(out, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
+	fmt.Fprintln(out, "  --profiler <type>")
+	fmt.Fprintln(out, "    Specify type of profiler to use (default 'runtime/pprof' or 'pkg/profile').")
+	fmt.Fprintln(out, "  --cpuprofile <name>")
+	fmt.Fprintln(out, "    Write CPU profile to specified file or directory (depending on")
+	fmt.Fprintln(out, "    profiler chosen).")
+	fmt.Fprintln(out, "  --cpuprofile-rate <rate>")
+	fmt.Fprintln(out, "    Specify rate (hz, aka samples per second) for the 'runtime/pprof' CPU")
+	fmt.Fprintln(out, "    profiler to use.")
+	fmt.Fprintln(out, "  --memprofile <name>")
+	fmt.Fprintln(out, "    Write memory profile to specified file.")
+	fmt.Fprintln(out, "  --memprofile-rate <rate>")
+	fmt.Fprintln(out, "    Specify rate (one sample per <rate>) for the memory profiler to use.")
 }
 
 var (
-	debug         bool // Hidden option
-	helpFlag      bool
-	versionFlag   bool
-	phase         Phase = EVAL // --read, --parse, --evaluate
-	workingDir    string
-	lintFlag      bool
-	dialect       Dialect = UNKNOWN
-	expr          string
-	replFlag      bool
-	filename      string
-	remainingArgs []string
+	debug              bool // Hidden option
+	helpFlag           bool
+	versionFlag        bool
+	phase              Phase = EVAL // --read, --parse, --evaluate
+	workingDir         string
+	lintFlag           bool
+	dialect            Dialect = UNKNOWN
+	expr               string
+	replFlag           bool
+	filename           string
+	remainingArgs      []string
+	profilerType       string = "runtime/pprof"
+	cpuProfileName     string
+	cpuProfileRate     int
+	cpuProfileRateFlag bool
+	memProfileName     string
 )
 
 func notOption(arg string) bool {
@@ -357,10 +377,60 @@ func parseArgs(args []string) {
 				noFileFlag = true
 				stop = true
 			}
+		case "--profiler":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				profilerType = args[i]
+			} else {
+				missing = true
+			}
+		case "--cpuprofile":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				cpuProfileName = args[i]
+			} else {
+				missing = true
+			}
+		case "--cpuprofile-rate":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				rate, err := strconv.Atoi(args[i])
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error: ", err)
+					return
+				}
+				if rate > 0 {
+					cpuProfileRate = rate
+					cpuProfileRateFlag = true
+				}
+			} else {
+				missing = true
+			}
+		case "--memprofile":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				memProfileName = args[i]
+			} else {
+				missing = true
+			}
+		case "--memprofile-rate":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				rate, err := strconv.Atoi(args[i])
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error: ", err)
+					return
+				}
+				if rate > 0 {
+					runtime.MemProfileRate = rate
+				}
+			} else {
+				missing = true
+			}
 		default:
 			if strings.HasPrefix(args[i], "-") {
 				fmt.Fprintf(os.Stderr, "Error: Unrecognized option '%s'\n", args[i])
-				os.Exit(2)
+				ExitJoker(2)
 			}
 			stop = true
 		}
@@ -370,7 +440,7 @@ func parseArgs(args []string) {
 	}
 	if missing {
 		fmt.Fprintf(os.Stderr, "Error: Missing argument for '%s' option\n", args[i])
-		os.Exit(3)
+		ExitJoker(3)
 	}
 	if i < length && !noFileFlag {
 		if debug {
@@ -387,7 +457,11 @@ func parseArgs(args []string) {
 	}
 }
 
+var runningProfile interface{ Stop() }
+
 func main() {
+	SetExitJoker(my_exit)
+
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	if len(os.Args) > 1 && os.Args[1] == "--debug" {
@@ -425,30 +499,62 @@ func main() {
 	if len(remainingArgs) > 0 {
 		if lintFlag {
 			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
-			os.Exit(4)
+			ExitJoker(4)
 		}
 		if phase != EVAL {
 			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
-			os.Exit(5)
+			ExitJoker(5)
 		}
+	}
+
+	/* Set up profiling. */
+
+	if cpuProfileName != "" {
+		switch profilerType {
+		case "pkg/profile":
+			runningProfile = profile.Start(profile.ProfilePath(cpuProfileName))
+			defer finish()
+		case "runtime/pprof":
+			f, err := os.Create(cpuProfileName)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: Could not create CPU profile `%s': %v\n",
+					cpuProfileName, err)
+				cpuProfileName = ""
+				ExitJoker(96)
+			}
+			if cpuProfileRateFlag {
+				runtime.SetCPUProfileRate(cpuProfileRate)
+			}
+			pprof.StartCPUProfile(f)
+			fmt.Fprintf(os.Stderr, "Profiling started at rate=%d. See file `%s'.\n",
+				cpuProfileRate, cpuProfileName)
+			defer finish()
+		default:
+			fmt.Fprintf(os.Stderr,
+				"Unrecognized profiler: %s\n  Use 'pkg/profile' or 'runtime/pprof'.\n",
+				profilerType)
+			ExitJoker(96)
+		}
+	} else if memProfileName != "" {
+		defer finish()
 	}
 
 	if expr != "" {
 		if lintFlag {
 			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n")
-			os.Exit(6)
+			ExitJoker(6)
 		}
 		if replFlag {
 			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n")
-			os.Exit(7)
+			ExitJoker(7)
 		}
 		if workingDir != "" {
 			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n")
-			os.Exit(8)
+			ExitJoker(8)
 		}
 		if filename != "" {
 			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n")
-			os.Exit(9)
+			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(expr), "<expr>")
 		ProcessReader(reader, "", phase)
@@ -458,21 +564,21 @@ func main() {
 	if lintFlag {
 		if replFlag {
 			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n")
-			os.Exit(10)
+			ExitJoker(10)
 		}
 		if dialect == UNKNOWN {
 			dialect = detectDialect(filename)
 		}
 		lintFile(filename, dialect, workingDir)
 		if PROBLEM_COUNT > 0 {
-			os.Exit(1)
+			ExitJoker(1)
 		}
 		return
 	}
 
 	if workingDir != "" {
 		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n")
-		os.Exit(11)
+		ExitJoker(11)
 	}
 
 	if filename != "" {
@@ -482,4 +588,37 @@ func main() {
 
 	repl(phase)
 	return
+}
+
+func finish() {
+	if runningProfile != nil {
+		runningProfile.Stop()
+		runningProfile = nil
+	} else if cpuProfileName != "" {
+		pprof.StopCPUProfile()
+		fmt.Fprintf(os.Stderr, "Profiling stopped. See file `%s'.\n", cpuProfileName)
+		cpuProfileName = ""
+	}
+
+	if memProfileName != "" {
+		f, err := os.Create(memProfileName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Could not create memory profile `%s': %v\n",
+				memProfileName, err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Could not write memory profile `%s': %v\n",
+				memProfileName, err)
+		}
+		f.Close()
+		fmt.Fprintf(os.Stderr, "Memory profile rate=%d written to `%s'.\n",
+			runtime.MemProfileRate, memProfileName)
+		memProfileName = ""
+	}
+}
+
+func my_exit(rc int) {
+	finish()
+	os.Exit(rc)
 }
