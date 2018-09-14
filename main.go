@@ -266,22 +266,22 @@ func usage(out *os.File) {
 }
 
 var (
-	debug         bool // Hidden option
-	helpFlag      bool
-	versionFlag   bool
-	phase         Phase = EVAL // --read, --parse, --evaluate
-	workingDir    string
-	lintFlag      bool
-	dialect       Dialect = UNKNOWN
-	expr          string
-	replFlag      bool
-	filename      string
-	remainingArgs []string
-	profilerType string = "runtime/pprof"
-	cpuProfileName string
-	cpuProfileRate int
+	debug              bool // Hidden option
+	helpFlag           bool
+	versionFlag        bool
+	phase              Phase = EVAL // --read, --parse, --evaluate
+	workingDir         string
+	lintFlag           bool
+	dialect            Dialect = UNKNOWN
+	expr               string
+	replFlag           bool
+	filename           string
+	remainingArgs      []string
+	profilerType       string = "runtime/pprof"
+	cpuProfileName     string
+	cpuProfileRate     int
 	cpuProfileRateFlag bool
-	memProfileName string
+	memProfileName     string
 )
 
 func notOption(arg string) bool {
@@ -379,21 +379,21 @@ func parseArgs(args []string) {
 			}
 		case "--profiler":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				profilerType = args[i]
 			} else {
 				missing = true
 			}
 		case "--cpuprofile":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				cpuProfileName = args[i]
 			} else {
 				missing = true
 			}
 		case "--cpuprofile-rate":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				rate, err := strconv.Atoi(args[i])
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error: ", err)
@@ -408,14 +408,14 @@ func parseArgs(args []string) {
 			}
 		case "--memprofile":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				memProfileName = args[i]
 			} else {
 				missing = true
 			}
 		case "--memprofile-rate":
 			if i < length-1 && notOption(args[i+1]) {
-				i += 1  // shift
+				i += 1 // shift
 				rate, err := strconv.Atoi(args[i])
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error: ", err)
@@ -457,7 +457,7 @@ func parseArgs(args []string) {
 	}
 }
 
-var runningProfile interface { Stop() }
+var runningProfile interface{ Stop() }
 
 func main() {
 	SetExitJoker(my_exit)
@@ -521,7 +521,7 @@ func main() {
 				cpuProfileName = ""
 				ExitJoker(96)
 			}
-			if (cpuProfileRateFlag) {
+			if cpuProfileRateFlag {
 				runtime.SetCPUProfileRate(cpuProfileRate)
 			}
 			pprof.StartCPUProfile(f)
@@ -605,7 +605,7 @@ func finish() {
 			fmt.Fprintf(os.Stderr, "Error: Could not create memory profile `%s': %v\n",
 				memProfileName, err)
 		}
-		runtime.GC()  // get up-to-date statistics
+		runtime.GC() // get up-to-date statistics
 		if err := pprof.WriteHeapProfile(f); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Could not write memory profile `%s': %v\n",
 				memProfileName, err)
