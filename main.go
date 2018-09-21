@@ -457,11 +457,15 @@ func parseArgs(args []string) {
 	}
 }
 
-var runningProfile interface{ Stop() }
+var runningProfile interface {
+	Stop()
+}
 
 func main() {
-	SetExitJoker(my_exit)
-
+	SetExitJoker(func(code int) {
+		finish()
+		os.Exit(code)
+	})
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	if len(os.Args) > 1 && os.Args[1] == "--debug" {
@@ -616,9 +620,4 @@ func finish() {
 			runtime.MemProfileRate, memProfileName)
 		memProfileName = ""
 	}
-}
-
-func my_exit(rc int) {
-	finish()
-	os.Exit(rc)
 }
