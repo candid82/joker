@@ -97,8 +97,10 @@ func UnpackHeader(p []byte, env *Env) (*PackHeader, []byte) {
 	stringCount, p := extractInt(p)
 	strs := make([]*string, stringCount)
 	for i := 0; i < stringCount; i++ {
-		index, p := extractUInt16(p)
-		length, p := extractInt(p)
+		var index uint16
+		var length int
+		index, p = extractUInt16(p)
+		length, p = extractInt(p)
 		if length == -1 {
 			strs[index] = nil
 		} else {
@@ -111,11 +113,12 @@ func UnpackHeader(p []byte, env *Env) (*PackHeader, []byte) {
 		Strings:   strs,
 	}
 	bindingCount, p := extractInt(p)
-	println(bindingCount)
 	bindings := make([]Binding, bindingCount)
 	for i := 0; i < bindingCount; i++ {
-		index, p := extractInt(p)
-		b, p := unpackBinding(p, header)
+		var index int
+		var b Binding
+		index, p = extractInt(p)
+		b, p = unpackBinding(p, header)
 		bindings[index] = b
 	}
 	header.Bindings = bindings
