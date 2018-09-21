@@ -1591,8 +1591,8 @@ func ReadConfig(filename string, workingDir string) {
 	}
 	ok, ignoredUnusedNamespaces := configMap.Get(MakeKeyword("ignored-unused-namespaces"))
 	if ok {
-		seq, ok := ignoredUnusedNamespaces.(Seqable)
-		if ok {
+		seq, ok1 := ignoredUnusedNamespaces.(Seqable)
+		if ok1 {
 			WARNINGS.ignoredUnusedNamespaces = NewSetFromSeq(seq.Seq())
 		} else {
 			printConfigError(configFileName, ":ignored-unused-namespaces value must be a vector, got "+ignoredUnusedNamespaces.GetType().ToString(false))
@@ -1601,22 +1601,22 @@ func ReadConfig(filename string, workingDir string) {
 	}
 	ok, knownNamespaces := configMap.Get(MakeKeyword("known-namespaces"))
 	if ok {
-		if _, ok := knownNamespaces.(Seqable); !ok {
+		if _, ok1 := knownNamespaces.(Seqable); !ok1 {
 			printConfigError(configFileName, ":known-namespaces value must be a vector, got "+knownNamespaces.GetType().ToString(false))
 			return
 		}
 	}
 	ok, knownTags := configMap.Get(MakeKeyword("known-tags"))
 	if ok {
-		if _, ok := knownTags.(Seqable); !ok {
+		if _, ok1 := knownTags.(Seqable); !ok1 {
 			printConfigError(configFileName, ":known-tags value must be a vector, got "+knownTags.GetType().ToString(false))
 			return
 		}
 	}
 	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
-		_, ok := knownMacros.(Seqable)
-		if !ok {
+		_, ok1 := knownMacros.(Seqable)
+		if !ok1 {
 			printConfigError(configFileName, ":known-macros value must be a vector, got "+knownMacros.GetType().ToString(false))
 			return
 		}

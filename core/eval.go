@@ -72,8 +72,8 @@ func (rt *Runtime) stacktrace() string {
 	}
 	name := "global"
 	for _, f := range rt.callstack.frames {
-		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, pos.Filename(), pos.startLine, pos.startColumn))
+		framePos := f.traceable.Pos()
+		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, framePos.Filename(), framePos.startLine, framePos.startColumn))
 		name = f.traceable.Name()
 		if strings.HasPrefix(name, "#'") {
 			name = name[2:]

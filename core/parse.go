@@ -1069,8 +1069,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			s = s.Rest()
 		}
 		res := NewListFrom(objs...)
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case *Vector:
@@ -1080,8 +1080,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res = res.Conj(t)
 		}
 		res.(*Vector).meta = s.meta
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case Map:
@@ -1094,8 +1094,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res.Add(key, value)
 		}
 		res.meta = s.(Meta).GetMeta()
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	default:
