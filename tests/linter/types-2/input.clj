@@ -12,3 +12,5 @@
 (seq v)
 (def ^Int v1 (if 1 2 3))
 (seq v1)
+(def ^:dynamic dv 1)
+(seq dv)

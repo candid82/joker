@@ -180,6 +180,7 @@ type (
 		value         Keyword
 		vector        Keyword
 		name          Keyword
+		dynamic       Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -270,6 +271,7 @@ var (
 		value:         MakeKeyword("value"),
 		vector:        MakeKeyword("vector"),
 		name:          MakeKeyword("name"),
+		dynamic:       MakeKeyword("dynamic"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
@@ -666,7 +668,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		if count == 3 {
 			res.value = Parse(Third(seq), ctx)
 		} else if count == 4 {
-			res.value = Parse(Forth(seq), ctx)
+			res.value = Parse(Fourth(seq), ctx)
 			docstring := Third(seq)
 			switch docstring.(type) {
 			case String:
@@ -684,6 +686,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
 			if ok, p := meta.Get(KEYWORDS.private); ok {
 				vr.isPrivate = toBool(p)
+			}
+			if ok, p := meta.Get(KEYWORDS.dynamic); ok {
+				vr.isDynamic = toBool(p)
 			}
 			vr.taggedType = getTaggedType(sym)
 		}
@@ -1337,7 +1342,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return &IfExpr{
 				cond:     Parse(Second(seq), ctx),
 				positive: Parse(Third(seq), ctx),
-				negative: Parse(Forth(seq), ctx),
+				negative: Parse(Fourth(seq), ctx),
 				Position: pos,
 			}
 		case STR.fn_:

@@ -17,6 +17,9 @@ jobs:
           name: go get readline
           command: go get -d -v github.com/chzyer/readline
       - run:
+          name: go get profile
+          command: go get -d -v github.com/pkg/profile
+      - run:
           name: go get yaml
           command: go get -d -v gopkg.in/yaml.v2
       - run:

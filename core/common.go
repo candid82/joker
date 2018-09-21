@@ -5,6 +5,12 @@ import (
 	"io"
 )
 
+var ExitJoker func(rc int)
+
+func SetExitJoker(fn func(rc int)) {
+	ExitJoker = fn
+}
+
 func writeIndent(w io.Writer, n int) {
 	space := []byte(" ")
 	for i := 0; i < n; i++ {

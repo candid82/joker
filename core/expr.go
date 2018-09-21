@@ -141,10 +141,13 @@ func (expr *VarRefExpr) InferType() *Type {
 	// if expr.vr.taggedType != nil {
 	// 	return expr.vr.taggedType
 	// }
-	if expr.vr.expr != nil {
-		return expr.vr.expr.InferType()
+	if expr.vr.expr == nil {
+		return nil
 	}
-	return nil
+	if expr.vr.isDynamic {
+		return nil
+	}
+	return expr.vr.expr.InferType()
 }
 
 func (expr *VarRefExpr) Dump(pos bool) Map {

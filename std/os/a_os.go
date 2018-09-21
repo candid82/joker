@@ -3,7 +3,7 @@
 package os
 
 import (
-  "os"
+  
   . "github.com/candid82/joker/core"
 )
 
@@ -60,7 +60,7 @@ var exit_ Proc = func(args []Object) Object {
   case c == 1:
     
     code := ExtractInt(args, 0)
-    res := NIL; os.Exit(code)
+    res := NIL; ExitJoker(code)
     return res
 
   default:
