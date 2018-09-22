@@ -30,6 +30,7 @@ const (
 	NOT_NULL      = 101
 	SYMBOL_OBJ    = 102
 	VAR_OBJ       = 103
+	TYPE_OBJ      = 104
 )
 
 type (
@@ -255,6 +256,16 @@ func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 	return res, p
 }
 
+func (t *Type) Pack(p []byte, env *PackEnv) []byte {
+	s := MakeSymbol(t.name)
+	return s.Pack(p, env)
+}
+
+func unpackType(p []byte, header *PackHeader) (*Type, []byte) {
+	s, p := unpackSymbol(p, header)
+	return TYPES[s.name], p
+}
+
 func packObject(obj Object, p []byte, env *PackEnv) []byte {
 	switch obj := obj.(type) {
 	case Symbol:
@@ -262,6 +273,10 @@ func packObject(obj Object, p []byte, env *PackEnv) []byte {
 		return obj.Pack(p, env)
 	case *Var:
 		p = append(p, VAR_OBJ)
+		p = obj.Pack(p, env)
+		return p
+	case *Type:
+		p = append(p, TYPE_OBJ)
 		p = obj.Pack(p, env)
 		return p
 	default:
@@ -281,6 +296,8 @@ func unpackObject(p []byte, header *PackHeader) (Object, []byte) {
 		return unpackSymbol(p[1:], header)
 	case VAR_OBJ:
 		return unpackVar(p[1:], header)
+	case TYPE_OBJ:
+		return unpackType(p[1:], header)
 	case NULL:
 		var size int
 		size, p = extractInt(p[1:])

@@ -528,12 +528,8 @@ var procSeq Proc = func(args []Object) Object {
 
 var procIsInstance Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
-	switch t := args[0].(type) {
-	case *Type:
-		return Bool{B: IsInstance(t, args[1])}
-	default:
-		panic(RT.NewError("First argument to instance? must be a type"))
-	}
+	t := EnsureType(args, 0)
+	return Bool{B: IsInstance(t, args[1])}
 }
 
 var procAssoc Proc = func(args []Object) Object {
