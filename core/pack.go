@@ -29,6 +29,7 @@ const (
 	NULL          = 100
 	NOT_NULL      = 101
 	SYMBOL_OBJ    = 102
+	VAR_OBJ       = 103
 )
 
 type (
@@ -255,10 +256,14 @@ func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 }
 
 func packObject(obj Object, p []byte, env *PackEnv) []byte {
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case Symbol:
 		p = append(p, SYMBOL_OBJ)
-		return obj.(Symbol).Pack(p, env)
+		return obj.Pack(p, env)
+	case *Var:
+		p = append(p, VAR_OBJ)
+		p = obj.Pack(p, env)
+		return p
 	default:
 		p = append(p, NULL)
 		var buf bytes.Buffer
@@ -274,6 +279,8 @@ func unpackObject(p []byte, header *PackHeader) (Object, []byte) {
 	switch p[0] {
 	case SYMBOL_OBJ:
 		return unpackSymbol(p[1:], header)
+	case VAR_OBJ:
+		return unpackVar(p[1:], header)
 	case NULL:
 		var size int
 		size, p = extractInt(p[1:])
@@ -524,22 +531,33 @@ func unpackRecurExpr(p []byte, header *PackHeader) (*RecurExpr, []byte) {
 	return res, p
 }
 
+func (vr *Var) Pack(p []byte, env *PackEnv) []byte {
+	p = vr.ns.Name.Pack(p, env)
+	p = vr.name.Pack(p, env)
+	return p
+}
+
+func unpackVar(p []byte, header *PackHeader) (*Var, []byte) {
+	nsName, p := unpackSymbol(p, header)
+	name, p := unpackSymbol(p, header)
+	vr := GLOBAL_ENV.FindNamespace(nsName).mappings[name.name]
+	return vr, p
+}
+
 func (expr *VarRefExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, VARREF_EXPR)
 	p = expr.Pos().Pack(p, env)
-	p = expr.vr.ns.Name.Pack(p, env)
-	p = expr.vr.name.Pack(p, env)
+	p = expr.vr.Pack(p, env)
 	return p
 }
 
 func unpackVarRefExpr(p []byte, header *PackHeader) (*VarRefExpr, []byte) {
 	p = p[1:]
 	pos, p := unpackPosition(p, header)
-	nsName, p := unpackSymbol(p, header)
-	name, p := unpackSymbol(p, header)
+	vr, p := unpackVar(p, header)
 	res := &VarRefExpr{
 		Position: pos,
-		vr:       GLOBAL_ENV.FindNamespace(nsName).mappings[name.name],
+		vr:       vr,
 	}
 	return res, p
 }
