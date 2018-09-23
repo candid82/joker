@@ -492,12 +492,12 @@ func unpackDefExpr(p []byte, header *PackHeader) (*DefExpr, []byte) {
 	p = p[1:]
 	pos, p := unpackPosition(p, header)
 	name, p := unpackSymbol(p, header)
-	value, p := UnpackExprOrNull(p, header)
-	meta, p := UnpackExprOrNull(p, header)
-	varInfo, p := unpackObjectInfo(p, header)
 	varName := name
 	varName.ns = nil
 	vr := header.GlobalEnv.CurrentNamespace().Intern(varName)
+	value, p := UnpackExprOrNull(p, header)
+	meta, p := UnpackExprOrNull(p, header)
+	varInfo, p := unpackObjectInfo(p, header)
 	vr.WithInfo(varInfo)
 	res := &DefExpr{
 		Position: pos,
@@ -558,6 +558,9 @@ func unpackVar(p []byte, header *PackHeader) (*Var, []byte) {
 	nsName, p := unpackSymbol(p, header)
 	name, p := unpackSymbol(p, header)
 	vr := GLOBAL_ENV.FindNamespace(nsName).mappings[name.name]
+	if vr == nil {
+		panic(RT.NewError("Error unpacking var: cannot find var " + *nsName.name + "/" + *name.name))
+	}
 	return vr, p
 }
 

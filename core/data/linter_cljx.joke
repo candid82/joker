@@ -1,5 +1,3 @@
-(joker.core/in-ns 'joker.core)
-
 (defn ^:private conj-import*
   [v sym]
   (let [parts (joker.string/split (name sym) #"\.")]
@@ -364,8 +362,6 @@
    (__sequence__ coll))
   ([xform coll])
   ([xform coll & colls]))
-
-(joker.core/in-ns 'user)
 
 (remove-ns 'joker.yaml)
 (remove-ns 'joker.json)

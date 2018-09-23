@@ -1,7 +1,5 @@
 ;; Additional restriction on arities where it makes sense
 
-(joker.core/in-ns 'joker.core)
-
 (def __=__ =)
 (defn =
   [x y & more]
@@ -36,5 +34,3 @@
 (defn ==
   [^Number x ^Number y & more]
   (apply __==__ x y more))
-
-(joker.core/in-ns 'user)

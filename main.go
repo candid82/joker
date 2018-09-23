@@ -462,6 +462,8 @@ var runningProfile interface {
 }
 
 func main() {
+	ProcessCoreData()
+
 	SetExitJoker(func(code int) {
 		finish()
 		os.Exit(code)

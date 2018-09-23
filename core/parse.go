@@ -1181,6 +1181,14 @@ func checkArglist(arglist Seq, passedArgsCount int) bool {
 	return false
 }
 
+func setMacroMeta(vr *Var) {
+	if vr.meta == nil {
+		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	} else {
+		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	}
+}
+
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	expr := Parse(Second(obj.(Seq)), ctx)
 	switch expr := expr.(type) {
@@ -1189,11 +1197,7 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 		case *Var:
 			vr.isMacro = true
 			vr.isUsed = false
-			if vr.meta == nil {
-				vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
-			} else {
-				vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
-			}
+			setMacroMeta(vr)
 			return expr
 		}
 	}
@@ -1357,7 +1361,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		// Vars' isMacro has to be properly set during parse stage
 		// for linter mode to correctly handle arguments count.
 		case STR.setMacro_:
-			return parseSetMacro(obj, ctx)
+			parseSetMacro(obj, ctx)
 
 		case STR.def:
 			return parseDef(obj, ctx)

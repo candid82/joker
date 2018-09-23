@@ -394,6 +394,13 @@ var procAtom = func(args []Object) Object {
 	return res
 }
 
+var procSetMacro Proc = func(args []Object) Object {
+	vr := args[0].(*Var)
+	vr.isMacro = true
+	setMacroMeta(vr)
+	return vr
+}
+
 var procDeref = func(args []Object) Object {
 	return EnsureDeref(args, 0).Deref()
 }
@@ -1418,6 +1425,11 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 			return nil, err
 		}
 		p = expr.Pack(p, packEnv)
+		_, err = TryEval(expr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, err
+		}
 	}
 }
 
@@ -1474,20 +1486,22 @@ func intern(name string, proc Proc) {
 }
 
 func processData(data []byte) {
-	currentNamespace := GLOBAL_ENV.ns.Value
-	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
-	reader := bytes.NewReader(data)
-	ProcessReader(NewReader(reader, "<joker.core>"), "", EVAL)
-
-	p, err := PackReader(NewReader(bytes.NewReader(data), "<joker.core>"), "")
-	PanicOnErr(err)
-
-	header, p := UnpackHeader(p, GLOBAL_ENV)
+	ns := GLOBAL_ENV.CurrentNamespace()
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
+	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	header, p := UnpackHeader(data, GLOBAL_ENV)
 	for len(p) > 0 {
-		_, p = UnpackExpr(p, header)
+		var expr Expr
+		expr, p = UnpackExpr(p, header)
+		_, err := TryEval(expr)
+		PanicOnErr(err)
 	}
+}
 
-	GLOBAL_ENV.ns.Value = currentNamespace
+func ProcessCoreData() {
+	processData(coreData)
+	processData(timeData)
+	processData(mathData)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -1642,21 +1656,18 @@ func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return
 	}
-	reader := bytes.NewReader(linter_allData)
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		return
 	}
-	reader = bytes.NewReader(linter_cljxData)
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	processData(linter_cljxData)
 	switch dialect {
 	case CLJ:
-		reader = bytes.NewReader(linter_cljData)
+		processData(linter_cljData)
 	case CLJS:
-		reader = bytes.NewReader(linter_cljsData)
+		processData(linter_cljsData)
 	}
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
 }
 
 func NewReaderFromFile(filename string) (*Reader, error) {
@@ -1847,14 +1858,11 @@ func init() {
 	intern("joker-version__", procJokerVersion)
 
 	intern("hash__", procHash)
+	intern("set-macro*", procSetMacro)
 
 	intern("index-of__", procIndexOf)
 	intern("lib-path__", procLibPath)
 	intern("intern-fake-var__", procInternFakeVar)
 	intern("parse__", procParse)
 	intern("inc-problem-count__", procIncProblemCount)
-
-	processData(coreData)
-	processData(timeData)
-	processData(mathData)
 }
