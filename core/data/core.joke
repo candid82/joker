@@ -29,13 +29,13 @@
   ^{:added "1.0"}
   let (fn* let [&form &env & decl] (cons 'let* decl)))
 
-(set-macro* #'let)
+(set-macro__ #'let)
 
 (def
   ^{:added "1.0"}
   loop (fn* loop [&form &env & decl] (cons 'loop* decl)))
 
-(set-macro* #'loop)
+(set-macro__ #'loop)
 
 (def
   ^{:added "1.0"}
@@ -44,7 +44,7 @@
             (cons 'fn* decl)
             (meta__ &form))))
 
-(set-macro* #'fn)
+(set-macro__ #'fn)
 
 (def
   ^{:arglists '([coll])
@@ -279,7 +279,7 @@
            (list 'def (with-meta name m)
                  (cons `fn fdecl)))))
 
-(set-macro* #'defn)
+(set-macro__ #'defn)
 
 (defn cast
   "Throws an error if x is not of a type t, else returns x."
@@ -363,9 +363,9 @@
                             d))]
                (list 'do
                      (cons `defn decl)
-                     (list 'set-macro* (list 'var name))))))
+                     (list 'set-macro__ (list 'var name))))))
 
-(set-macro* #'defmacro)
+(set-macro__ #'defmacro)
 
 (defmacro when
   "Evaluates test. If logical true, evaluates body in an implicit do."

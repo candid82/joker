@@ -1858,7 +1858,7 @@ func init() {
 	intern("joker-version__", procJokerVersion)
 
 	intern("hash__", procHash)
-	intern("set-macro*", procSetMacro)
+	intern("set-macro__", procSetMacro)
 
 	intern("index-of__", procIndexOf)
 	intern("lib-path__", procLibPath)

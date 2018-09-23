@@ -238,7 +238,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	if expr.meta != nil {
 		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
 	}
-	// isMacro can be set by set-macro* during parse stage
+	// isMacro can be set by set-macro__ during parse stage
 	if expr.vr.isMacro {
 		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 	}

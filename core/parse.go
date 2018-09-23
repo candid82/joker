@@ -286,7 +286,7 @@ var (
 		let_:               MakeSymbol("let*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
-		setMacro_:          MakeSymbol("set-macro*"),
+		setMacro_:          MakeSymbol("set-macro__"),
 		def:                MakeSymbol("def"),
 		_var:               MakeSymbol("var"),
 		do:                 MakeSymbol("do"),
@@ -313,7 +313,7 @@ var (
 		let_:      STRINGS.Intern("let*"),
 		loop_:     STRINGS.Intern("loop*"),
 		recur:     STRINGS.Intern("recur"),
-		setMacro_: STRINGS.Intern("set-macro*"),
+		setMacro_: STRINGS.Intern("set-macro__"),
 		def:       STRINGS.Intern("def"),
 		_var:      STRINGS.Intern("var"),
 		do:        STRINGS.Intern("do"),
@@ -1201,7 +1201,7 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 			return expr
 		}
 	}
-	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
+	panic(&ParseError{obj: obj, msg: "set-macro__ argument must be a var"})
 }
 
 func isKnownMacros(sym Symbol) (bool, Seq) {
