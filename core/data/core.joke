@@ -363,7 +363,7 @@
                             d))]
                (list 'do
                      (cons `defn decl)
-                     (list 'set-macro__ (list 'var name))))))
+                     (list 'joker.core/set-macro__ (list 'var name))))))
 
 (set-macro__ #'defmacro)
 
