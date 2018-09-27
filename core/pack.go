@@ -234,8 +234,24 @@ func unpackObjectInfo(p []byte, header *PackHeader) (*ObjectInfo, []byte) {
 	return &ObjectInfo{Position: pos}, p
 }
 
+func PackObjectOrNull(obj Object, p []byte, env *PackEnv) []byte {
+	if obj == nil {
+		return append(p, NULL)
+	}
+	p = append(p, NOT_NULL)
+	return packObject(obj, p, env)
+}
+
+func UnpackObjectOrNull(p []byte, header *PackHeader) (Object, []byte) {
+	if p[0] == NULL {
+		return nil, p[1:]
+	}
+	return unpackObject(p[1:], header)
+}
+
 func (s Symbol) Pack(p []byte, env *PackEnv) []byte {
 	p = s.info.Pack(p, env)
+	p = PackObjectOrNull(s.meta, p, env)
 	p = appendUint16(p, env.stringIndex(s.name))
 	p = appendUint16(p, env.stringIndex(s.ns))
 	p = appendUint32(p, s.hash)
@@ -244,6 +260,7 @@ func (s Symbol) Pack(p []byte, env *PackEnv) []byte {
 
 func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 	info, p := unpackObjectInfo(p, header)
+	meta, p := UnpackObjectOrNull(p, header)
 	iname, p := extractUInt16(p)
 	ins, p := extractUInt16(p)
 	hash, p := extractUInt32(p)
@@ -252,6 +269,9 @@ func unpackSymbol(p []byte, header *PackHeader) (Symbol, []byte) {
 		name:       header.Strings[iname],
 		ns:         header.Strings[ins],
 		hash:       hash,
+	}
+	if meta != nil {
+		res.meta = meta.(Map)
 	}
 	return res, p
 }
