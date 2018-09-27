@@ -518,7 +518,7 @@ func unpackDefExpr(p []byte, header *PackHeader) (*DefExpr, []byte) {
 	value, p := UnpackExprOrNull(p, header)
 	meta, p := UnpackExprOrNull(p, header)
 	varInfo, p := unpackObjectInfo(p, header)
-	vr.WithInfo(varInfo)
+	updateVar(vr, varInfo, value, name)
 	res := &DefExpr{
 		Position: pos,
 		vr:       vr,

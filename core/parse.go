@@ -640,6 +640,21 @@ func GetPosition(obj Object) Position {
 	return Position{}
 }
 
+func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
+	vr.WithInfo(info)
+	vr.expr = valueExpr
+	meta := sym.GetMeta()
+	if meta != nil {
+		if ok, p := meta.Get(KEYWORDS.private); ok {
+			vr.isPrivate = toBool(p)
+		}
+		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
+			vr.isDynamic = toBool(p)
+		}
+		vr.taggedType = getTaggedType(sym)
+	}
+}
+
 func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
@@ -656,8 +671,6 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
-		vr.WithInfo(obj.GetInfo())
-
 		res := &DefExpr{
 			vr:       vr,
 			name:     sym,
@@ -681,16 +694,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
 		}
-		vr.expr = res.value
+		updateVar(vr, obj.GetInfo(), res.value, sym)
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
-			if ok, p := meta.Get(KEYWORDS.private); ok {
-				vr.isPrivate = toBool(p)
-			}
-			if ok, p := meta.Get(KEYWORDS.dynamic); ok {
-				vr.isDynamic = toBool(p)
-			}
-			vr.taggedType = getTaggedType(sym)
 		}
 		return res
 	default:
