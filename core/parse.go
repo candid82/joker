@@ -113,6 +113,10 @@ type (
 		catches     []*CatchExpr
 		finallyExpr []Expr
 	}
+	SetMacroExpr struct {
+		Position
+		vr *Var
+	}
 	ParseError struct {
 		obj Object
 		msg string
@@ -1201,10 +1205,11 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	case *LiteralExpr:
 		switch vr := expr.obj.(type) {
 		case *Var:
-			vr.isMacro = true
-			vr.isUsed = false
-			setMacroMeta(vr)
-			return expr
+			res := &SetMacroExpr{
+				vr: vr,
+			}
+			res.Eval(nil)
+			return res
 		}
 	}
 	panic(&ParseError{obj: obj, msg: "set-macro__ argument must be a var"})
@@ -1367,7 +1372,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		// Vars' isMacro has to be properly set during parse stage
 		// for linter mode to correctly handle arguments count.
 		case STR.setMacro_:
-			parseSetMacro(obj, ctx)
+			return parseSetMacro(obj, ctx)
 
 		case STR.def:
 			return parseDef(obj, ctx)

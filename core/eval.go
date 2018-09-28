@@ -174,6 +174,13 @@ func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	return expr.vr.Resolve()
 }
 
+func (expr *SetMacroExpr) Eval(env *LocalEnv) Object {
+	expr.vr.isMacro = true
+	expr.vr.isUsed = false
+	setMacroMeta(expr.vr)
+	return NIL
+}
+
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
 	for i := env.frame; i > expr.binding.frame; i-- {
 		env = env.parent

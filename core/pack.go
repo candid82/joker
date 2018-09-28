@@ -7,30 +7,31 @@ import (
 )
 
 const (
-	LITERAL_EXPR  = 1
-	VECTOR_EXPR   = 2
-	MAP_EXPR      = 3
-	SET_EXPR      = 4
-	IF_EXPR       = 5
-	DEF_EXPR      = 6
-	CALL_EXPR     = 7
-	RECUR_EXPR    = 8
-	META_EXPR     = 9
-	DO_EXPR       = 10
-	FN_ARITY_EXPR = 11
-	FN_EXPR       = 12
-	LET_EXPR      = 13
-	THROW_EXPR    = 14
-	CATCH_EXPR    = 15
-	TRY_EXPR      = 16
-	VARREF_EXPR   = 17
-	BINDING_EXPR  = 18
-	LOOP_EXPR     = 19
-	NULL          = 100
-	NOT_NULL      = 101
-	SYMBOL_OBJ    = 102
-	VAR_OBJ       = 103
-	TYPE_OBJ      = 104
+	LITERAL_EXPR   = 1
+	VECTOR_EXPR    = 2
+	MAP_EXPR       = 3
+	SET_EXPR       = 4
+	IF_EXPR        = 5
+	DEF_EXPR       = 6
+	CALL_EXPR      = 7
+	RECUR_EXPR     = 8
+	META_EXPR      = 9
+	DO_EXPR        = 10
+	FN_ARITY_EXPR  = 11
+	FN_EXPR        = 12
+	LET_EXPR       = 13
+	THROW_EXPR     = 14
+	CATCH_EXPR     = 15
+	TRY_EXPR       = 16
+	VARREF_EXPR    = 17
+	BINDING_EXPR   = 18
+	LOOP_EXPR      = 19
+	SET_MACRO_EXPR = 20
+	NULL           = 100
+	NOT_NULL       = 101
+	SYMBOL_OBJ     = 102
+	VAR_OBJ        = 103
+	TYPE_OBJ       = 104
 )
 
 type (
@@ -602,6 +603,24 @@ func unpackVarRefExpr(p []byte, header *PackHeader) (*VarRefExpr, []byte) {
 	return res, p
 }
 
+func (expr *SetMacroExpr) Pack(p []byte, env *PackEnv) []byte {
+	p = append(p, SET_MACRO_EXPR)
+	p = expr.Pos().Pack(p, env)
+	p = expr.vr.Pack(p, env)
+	return p
+}
+
+func unpackSetMacroExpr(p []byte, header *PackHeader) (*SetMacroExpr, []byte) {
+	p = p[1:]
+	pos, p := unpackPosition(p, header)
+	vr, p := unpackVar(p, header)
+	res := &SetMacroExpr{
+		Position: pos,
+		vr:       vr,
+	}
+	return res, p
+}
+
 func (expr *BindingExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = append(p, BINDING_EXPR)
 	p = expr.Pos().Pack(p, env)
@@ -883,6 +902,8 @@ func UnpackExpr(p []byte, header *PackHeader) (Expr, []byte) {
 		return unpackTryExpr(p, header)
 	case VARREF_EXPR:
 		return unpackVarRefExpr(p, header)
+	case SET_MACRO_EXPR:
+		return unpackSetMacroExpr(p, header)
 	case BINDING_EXPR:
 		return unpackBindingExpr(p, header)
 	default:

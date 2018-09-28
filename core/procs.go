@@ -394,13 +394,6 @@ var procAtom = func(args []Object) Object {
 	return res
 }
 
-var procSetMacro Proc = func(args []Object) Object {
-	vr := args[0].(*Var)
-	vr.isMacro = true
-	setMacroMeta(vr)
-	return vr
-}
-
 var procDeref = func(args []Object) Object {
 	return EnsureDeref(args, 0).Deref()
 }
@@ -1858,7 +1851,6 @@ func init() {
 	intern("joker-version__", procJokerVersion)
 
 	intern("hash__", procHash)
-	intern("set-macro__", procSetMacro)
 
 	intern("index-of__", procIndexOf)
 	intern("lib-path__", procLibPath)
