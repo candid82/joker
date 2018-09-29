@@ -1645,6 +1645,14 @@ func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG.Value = configMap
 }
 
+func removeJokerNamespaces() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			delete(GLOBAL_ENV.Namespaces, k)
+		}
+	}
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return
@@ -1661,6 +1669,7 @@ func ProcessLinterData(dialect Dialect) {
 	case CLJS:
 		processData(linter_cljsData)
 	}
+	removeJokerNamespaces()
 }
 
 func NewReaderFromFile(filename string) (*Reader, error) {

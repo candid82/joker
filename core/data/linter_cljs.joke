@@ -378,8 +378,6 @@
   []
   #{:as :reload :reload-all :require :use :verbose :refer :default :refer-macros :exclude :only :rename :include-macros})
 
-; (remove-ns 'joker.string)
-
 (in-ns 'user)
 (joker.core/refer 'joker.core)
 

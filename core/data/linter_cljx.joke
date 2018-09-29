@@ -363,12 +363,6 @@
   ([xform coll])
   ([xform coll & colls]))
 
-(remove-ns 'joker.yaml)
-(remove-ns 'joker.json)
-(remove-ns 'joker.os)
-(remove-ns 'joker.base64)
-(remove-ns 'joker.time)
-(remove-ns 'joker.math)
 (ns-unmap 'joker.core 'pprint)
 (ns-unmap 'user 'pprint)
 (ns-unmap 'joker.core 'pr-err)

@@ -329,8 +329,6 @@
 (def *agent*)
 (def *read-eval*)
 
-; (remove-ns 'joker.string)
-
 (in-ns 'user)
 (joker.core/refer 'joker.core)
 
