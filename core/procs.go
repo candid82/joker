@@ -19,6 +19,16 @@ import (
 	"unicode/utf8"
 )
 
+var (
+	coreData        []byte
+	timeData        []byte
+	mathData        []byte
+	linter_allData  []byte
+	linter_cljxData []byte
+	linter_cljData  []byte
+	linter_cljsData []byte
+)
+
 type (
 	Phase   int
 	Dialect int
