@@ -83,6 +83,10 @@ func (env *Env) CurrentNamespace() *Namespace {
 	return AssertNamespace(env.ns.Value, "")
 }
 
+func (env *Env) SetCurrentNamespace(ns *Namespace) {
+	env.ns.Value = ns
+}
+
 func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 	if sym.ns != nil {
 		panic(RT.NewError("Namespace's name cannot be qualified: " + sym.ToString(false)))

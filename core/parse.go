@@ -14,6 +14,7 @@ type (
 		InferType() *Type
 		Pos() Position
 		Dump(includePosition bool) Map
+		Pack(p []byte, env *PackEnv) []byte
 	}
 	LiteralExpr struct {
 		Position
@@ -111,6 +112,10 @@ type (
 		body        []Expr
 		catches     []*CatchExpr
 		finallyExpr []Expr
+	}
+	SetMacroExpr struct {
+		Position
+		vr *Var
 	}
 	ParseError struct {
 		obj Object
@@ -285,7 +290,7 @@ var (
 		let_:               MakeSymbol("let*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
-		setMacro_:          MakeSymbol("set-macro*"),
+		setMacro_:          MakeSymbol("set-macro__"),
 		def:                MakeSymbol("def"),
 		_var:               MakeSymbol("var"),
 		do:                 MakeSymbol("do"),
@@ -312,7 +317,7 @@ var (
 		let_:      STRINGS.Intern("let*"),
 		loop_:     STRINGS.Intern("loop*"),
 		recur:     STRINGS.Intern("recur"),
-		setMacro_: STRINGS.Intern("set-macro*"),
+		setMacro_: STRINGS.Intern("set-macro__"),
 		def:       STRINGS.Intern("def"),
 		_var:      STRINGS.Intern("var"),
 		do:        STRINGS.Intern("do"),
@@ -639,6 +644,21 @@ func GetPosition(obj Object) Position {
 	return Position{}
 }
 
+func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
+	vr.WithInfo(info)
+	vr.expr = valueExpr
+	meta := sym.GetMeta()
+	if meta != nil {
+		if ok, p := meta.Get(KEYWORDS.private); ok {
+			vr.isPrivate = toBool(p)
+		}
+		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
+			vr.isDynamic = toBool(p)
+		}
+		vr.taggedType = getTaggedType(sym)
+	}
+}
+
 func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
@@ -655,8 +675,6 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
-		vr.WithInfo(obj.GetInfo())
-
 		res := &DefExpr{
 			vr:       vr,
 			name:     sym,
@@ -680,16 +698,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
 		}
-		vr.expr = res.value
+		updateVar(vr, obj.GetInfo(), res.value, sym)
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
-			if ok, p := meta.Get(KEYWORDS.private); ok {
-				vr.isPrivate = toBool(p)
-			}
-			if ok, p := meta.Get(KEYWORDS.dynamic); ok {
-				vr.isDynamic = toBool(p)
-			}
-			vr.taggedType = getTaggedType(sym)
 		}
 		return res
 	default:
@@ -1068,8 +1079,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			s = s.Rest()
 		}
 		res := NewListFrom(objs...)
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case *Vector:
@@ -1079,8 +1090,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res = res.Conj(t)
 		}
 		res.(*Vector).meta = s.meta
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case Map:
@@ -1093,8 +1104,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res.Add(key, value)
 		}
 		res.meta = s.(Meta).GetMeta()
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	default:
@@ -1180,23 +1191,28 @@ func checkArglist(arglist Seq, passedArgsCount int) bool {
 	return false
 }
 
+func setMacroMeta(vr *Var) {
+	if vr.meta == nil {
+		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	} else {
+		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	}
+}
+
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	expr := Parse(Second(obj.(Seq)), ctx)
 	switch expr := expr.(type) {
 	case *LiteralExpr:
 		switch vr := expr.obj.(type) {
 		case *Var:
-			vr.isMacro = true
-			vr.isUsed = false
-			if vr.meta == nil {
-				vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
-			} else {
-				vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+			res := &SetMacroExpr{
+				vr: vr,
 			}
-			return expr
+			res.Eval(nil)
+			return res
 		}
 	}
-	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
+	panic(&ParseError{obj: obj, msg: "set-macro__ argument must be a var"})
 }
 
 func isKnownMacros(sym Symbol) (bool, Seq) {

@@ -1,7 +1,5 @@
 ;; This vars are declared for the linter mode to work properly
 
-(joker.core/in-ns 'user)
-
 (def defproject)
 
 (doseq
@@ -54,8 +52,6 @@
 
 (doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
   (inject-ns__ sym))
-
-(joker.core/in-ns 'joker.core)
 
 ;; Unsupported arities
 
@@ -333,9 +329,6 @@
 (def *agent*)
 (def *read-eval*)
 
-(joker.core/in-ns 'user)
-
-(remove-ns 'joker.string)
-
+(in-ns 'user)
 (joker.core/refer 'joker.core)
 

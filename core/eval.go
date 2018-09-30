@@ -72,8 +72,8 @@ func (rt *Runtime) stacktrace() string {
 	}
 	name := "global"
 	for _, f := range rt.callstack.frames {
-		pos := f.traceable.Pos()
-		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, pos.Filename(), pos.startLine, pos.startColumn))
+		framePos := f.traceable.Pos()
+		b.WriteString(fmt.Sprintf("  %s %s:%d:%d\n", name, framePos.Filename(), framePos.startLine, framePos.startColumn))
 		name = f.traceable.Name()
 		if strings.HasPrefix(name, "#'") {
 			name = name[2:]
@@ -174,6 +174,13 @@ func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 	return expr.vr.Resolve()
 }
 
+func (expr *SetMacroExpr) Eval(env *LocalEnv) Object {
+	expr.vr.isMacro = true
+	expr.vr.isUsed = false
+	setMacroMeta(expr.vr)
+	return NIL
+}
+
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
 	for i := env.frame; i > expr.binding.frame; i-- {
 		env = env.parent
@@ -238,7 +245,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	if expr.meta != nil {
 		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
 	}
-	// isMacro can be set by set-macro* during parse stage
+	// isMacro can be set by set-macro__ during parse stage
 	if expr.vr.isMacro {
 		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
 	}

@@ -156,6 +156,16 @@ func (expr *VarRefExpr) Dump(pos bool) Map {
 	return res
 }
 
+func (expr *SetMacroExpr) InferType() *Type {
+	return nil
+}
+
+func (expr *SetMacroExpr) Dump(pos bool) Map {
+	res := exprArrayMap(expr, "set-macro", pos)
+	res.Add(KEYWORDS.var_, expr.vr)
+	return res
+}
+
 func (expr *BindingExpr) InferType() *Type {
 	return nil
 }

@@ -1,8 +1,6 @@
 (doseq [sym '(js Math)]
   (inject-ns__ sym))
 
-(joker.core/in-ns 'joker.core)
-
 (def require-macros require)
 
 (def ^:private require-opt-keys
@@ -380,9 +378,6 @@
   []
   #{:as :reload :reload-all :require :use :verbose :refer :default :refer-macros :exclude :only :rename :include-macros})
 
-(joker.core/in-ns 'user)
-
-(remove-ns 'joker.string)
-
+(in-ns 'user)
 (joker.core/refer 'joker.core)
 
