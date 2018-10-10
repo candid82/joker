@@ -2,3 +2,4 @@ joker
 .vscode
 .idea
 core/a_*.go
+*.prof
