@@ -3406,7 +3406,7 @@
   [& args] (apply load-libs :require :use args))
 
 (defn loaded-libs
-  "Returns a UNSORTED set of symbols naming the currently loaded libs"
+  "Returns an UNSORTED set of symbols naming the currently loaded libs"
   {:added "1.0"}
   []
   *loaded-libs*)
