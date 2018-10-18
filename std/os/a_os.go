@@ -189,6 +189,8 @@ osNamespace.InternVar("sh", sh_,
     NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
     `Executes the named program with the given arguments. Returns a map with the following keys:
       :success - whether or not the execution was successful,
+      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
 
@@ -198,6 +200,8 @@ osNamespace.InternVar("sh-from", sh_from_,
     `Executes the named program with the given arguments and working directory set to dir.
   Returns a map with the following keys:
       :success - whether or not the execution was successful,
+      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
 
