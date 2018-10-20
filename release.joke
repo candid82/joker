@@ -16,6 +16,13 @@
       (exit-err (str "'" (s/join " " args) "'") "failed:" (:out res) (:err res)))
     (:out res)))
 
+(defn- exec-from
+  [dir & args]
+  (let [res (apply os/sh-from dir args)]
+    (when-not (:success res)
+      (exit-err (str "'[" dir "] " (s/join " " args) "'") "failed:" (:out res) (:err res)))
+    (:out res)))
+
 (defn- shasum
   [filename]
   (let [res (exec "shasum" "-a" "256" filename)]
@@ -63,6 +70,10 @@
   (exec "rm" "-f" "joker.exe")
   (exec "rm" "-f" "joker"))
 
+(defn- generate-docs
+  []
+  (exec-from "docs" "../joker" "generate-docs.joke"))
+
 (defn- main
   [args]
   (let [[_ _ version] args]
@@ -70,6 +81,7 @@
       (exit-err "No version provided"))
     (when-not (re-matches #"v\d\.\d{1,2}\.\d{1,2}" version)
       (exit-err "Invalid version provided:" version))
+    (generate-docs)
     (update-version version)
     (build-binaries version)
     (update-brew-formula version)))
