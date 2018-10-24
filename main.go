@@ -17,6 +17,7 @@ import (
 	_ "github.com/candid82/joker/std/http"
 	_ "github.com/candid82/joker/std/json"
 	_ "github.com/candid82/joker/std/math"
+	_ "github.com/candid82/joker/std/net"
 	_ "github.com/candid82/joker/std/os"
 	_ "github.com/candid82/joker/std/string"
 	_ "github.com/candid82/joker/std/time"
