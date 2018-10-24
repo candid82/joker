@@ -143,16 +143,29 @@ func repl(phase Phase) {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
-	rl, err := readline.New("")
-	if err != nil {
-		fmt.Println("Error: " + err.Error())
+	var runeReader io.RuneReader
+	var rl *readline.Instance
+	var err error
+	if noReadline {
+		runeReader = bufio.NewReader(os.Stdin)
+	} else {
+		rl, err = readline.New("")
+		if err != nil {
+			fmt.Println("Error: " + err.Error())
+			return
+		}
+		defer rl.Close()
+		runeReader = NewLineRuneReader(rl)
 	}
-	defer rl.Close()
 
-	reader := NewReader(NewLineRuneReader(rl), "<repl>")
+	reader := NewReader(runeReader, "<repl>")
 
 	for {
-		rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		if noReadline {
+			print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		} else {
+			rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}
@@ -244,6 +257,8 @@ func usage(out *os.File) {
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(out, "  --no-readline")
+	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful if joker is called with rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
 	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
 	fmt.Fprintln(out, "  --dialect <dialect>")
@@ -282,6 +297,7 @@ var (
 	cpuProfileRate     int
 	cpuProfileRateFlag bool
 	memProfileName     string
+	noReadline         bool
 )
 
 func notOption(arg string) bool {
@@ -377,6 +393,8 @@ func parseArgs(args []string) {
 				noFileFlag = true
 				stop = true
 			}
+		case "--no-readline":
+			noReadline = true
 		case "--profiler":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
@@ -488,6 +506,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
 		fmt.Fprintf(os.Stderr, "expr=%v\n", expr)
 		fmt.Fprintf(os.Stderr, "replFlag=%v\n", replFlag)
+		fmt.Fprintf(os.Stderr, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(os.Stderr, "filename=%v\n", filename)
 		fmt.Fprintf(os.Stderr, "remainingArgs=%v\n", remainingArgs)
 	}
