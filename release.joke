@@ -70,6 +70,10 @@
   (exec "rm" "-f" "joker.exe")
   (exec "rm" "-f" "joker"))
 
+(defn- generate-std
+  []
+  (exec-from "std" "../joker" "generate-std.joke"))
+
 (defn- generate-docs
   []
   (exec-from "docs" "../joker" "generate-docs.joke"))
@@ -81,6 +85,7 @@
       (exit-err "No version provided"))
     (when-not (re-matches #"v\d\.\d{1,2}\.\d{1,2}" version)
       (exit-err "Invalid version provided:" version))
+    (generate-std)
     (generate-docs)
     (update-version version)
     (build-binaries version)

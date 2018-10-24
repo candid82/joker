@@ -1,0 +1,2 @@
+
+Run `./release.joke`.
