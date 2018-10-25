@@ -309,6 +309,11 @@ var procExCause Proc = func(args []Object) Object {
 	return res
 }
 
+var procExMessage Proc = func(args []Object) Object {
+	_, res := args[0].(*ExInfo).Get(KEYWORDS.message)
+	return res
+}
+
 var procRegex Proc = func(args []Object) Object {
 	r, err := regexp.Compile(EnsureString(args, 0).S)
 	if err != nil {
@@ -1847,6 +1852,7 @@ func init() {
 	intern("ex-info__", procExInfo)
 	intern("ex-data__", procExData)
 	intern("ex-cause__", procExCause)
+	intern("ex-message__", procExMessage)
 	intern("regex__", procRegex)
 	intern("re-seq__", procReSeq)
 	intern("re-find__", procReFind)
