@@ -288,6 +288,9 @@
 (defn bytes? [x])
 (defn uri? [x])
 (defn print-method [x writer])
+(defn add-tap [f])
+(defn remove-tap [f])
+(defn tap> [x])
 
 ;; Clojure core macros not supported by Joker
 
