@@ -9,7 +9,7 @@ import (
 
 var netNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.net"))
 
-var lookup_MX_ Proc = func(args []Object) Object {
+var LookupMX_ Proc = func(args []Object) Object {
   c := len(args)
   switch  {
   case c == 1:
@@ -27,9 +27,9 @@ var lookup_MX_ Proc = func(args []Object) Object {
 
 func init() {
 
-netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements net.LookupMX(string).", "1.0"))
+netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just net.LookupMX() so far.", "1.0"))
 
-netNamespace.InternVar("lookup-MX", lookup_MX_,
+netNamespace.InternVar("LookupMX", LookupMX_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("s"))),
     `DRAFT: Returns error object from net.LookupMX(s)`, "1.0"))

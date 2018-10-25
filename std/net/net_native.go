@@ -6,6 +6,7 @@ import "net"
 func lookupMX(s string) string {
 	_, e := net.LookupMX(s)
 	if e == nil {
-		return "" }
+		return ""
+	}
 	return fmt.Sprintf("%s", e)
 }

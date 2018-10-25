@@ -1,9 +1,9 @@
 (ns
   ^{:go-imports []
-    :doc "DRAFT: Implements net.LookupMX(string)."}
+    :doc "DRAFT: Implements just net.LookupMX() so far."}
   net)
 
-(defn ^String lookup-MX
+(defn ^String LookupMX
   "DRAFT: Returns error object from net.LookupMX(s)"
   {:added "1.0"
   :go "lookupMX(s)"}
