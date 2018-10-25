@@ -13,7 +13,16 @@
 #   -  Add it to list of imports near to of `main.go`.
 #
 #   -  Add it to `*loaded-libs*` in `data/core.joke`.
+#
+#   -  Run this script.
+#
+#   -  `git add` newly generated files.
 
 (cd std; ../joker generate-std.joke)
 
 (cd docs; ../joker generate-docs.joke)
+
+echo ""
+echo "Remember to 'git add' newly generated files:"
+echo ""
+git status
