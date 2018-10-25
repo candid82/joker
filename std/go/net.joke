@@ -1,6 +1,6 @@
 (ns
   ^{:go-imports []
-    :doc "DRAFT: Implements just joker.go.net.LookupMX() so far."}
+    :doc "DRAFT: Implements just joker.go.net/LookupMX() so far."}
   go.net)
 
 (defn ^String LookupMX

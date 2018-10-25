@@ -27,7 +27,7 @@ var LookupMX_ Proc = func(args []Object) Object {
 
 func init() {
 
-netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just joker.go.net.LookupMX() so far.", "1.0"))
+netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just joker.go.net/LookupMX() so far.", "1.0"))
 
 netNamespace.InternVar("LookupMX", LookupMX_,
   MakeMeta(
