@@ -7,7 +7,7 @@ import (
   . "github.com/candid82/joker/core"
 )
 
-var netNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.net"))
+var netNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.go.net"))
 
 var LookupMX_ Proc = func(args []Object) Object {
   c := len(args)
@@ -27,7 +27,7 @@ var LookupMX_ Proc = func(args []Object) Object {
 
 func init() {
 
-netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just joker.net.LookupMX() so far.", "1.0"))
+netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just joker.go.net.LookupMX() so far.", "1.0"))
 
 netNamespace.InternVar("LookupMX", LookupMX_,
   MakeMeta(

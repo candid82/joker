@@ -3181,7 +3181,7 @@
 (defonce ^:dynamic
   ^{:private true
     :doc "A set of symbols representing loaded libs"}
-  *loaded-libs* #{'joker.core 'joker.os 'joker.base64 'joker.json 'joker.string 'joker.yaml 'joker.net})
+  *loaded-libs* #{'joker.core 'joker.os 'joker.base64 'joker.json 'joker.string 'joker.yaml 'joker.net 'joker.go.net})
 
 (defonce ^:dynamic
   ^{:private true
