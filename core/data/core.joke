@@ -2865,7 +2865,23 @@
   {:added "1.0"}
   [ex]
   (when (instance? ExInfo ex)
-    (ex-data__ ^ExInfo ex)))
+    (ex-data__ ex)))
+
+(defn ex-cause
+  "Returns the cause of ex if ex is an ExInfo.
+  Otherwise returns nil."
+  {:added "1.0"}
+  [ex]
+  (when (instance? ExInfo ex)
+    (ex-cause__ ex)))
+
+(defn ex-message
+  "Returns the message attached to ex if ex is an ExInfo.
+  Otherwise returns nil."
+  {:added "1.0"}
+  [ex]
+  (when (instance? ExInfo ex)
+    (ex-message__ ex)))
 
 (defn hash
   "Returns the hash code of its argument."

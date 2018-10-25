@@ -288,6 +288,16 @@
 (defn bytes? [x])
 (defn uri? [x])
 (defn print-method [x writer])
+(defn add-tap [f])
+(defn remove-tap [f])
+(defn tap> [x])
+(defn read+string
+  ([])
+  ([stream])
+  ([stream eof-error? eof-value])
+  ([stream eof-error? eof-value recursive?])
+  ([opts stream]))
+(defn PrintWriter-on [flush-fn close-fn])
 
 ;; Clojure core macros not supported by Joker
 

@@ -164,6 +164,7 @@ type (
 		message       Keyword
 		form          Keyword
 		data          Keyword
+		cause         Keyword
 		arglist       Keyword
 		doc           Keyword
 		added         Keyword
@@ -255,6 +256,7 @@ var (
 		message:       MakeKeyword("message"),
 		form:          MakeKeyword("form"),
 		data:          MakeKeyword("data"),
+		cause:         MakeKeyword("cause"),
 		arglist:       MakeKeyword("arglists"),
 		doc:           MakeKeyword("doc"),
 		added:         MakeKeyword("added"),
