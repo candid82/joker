@@ -38,6 +38,7 @@ const (
 	READ Phase = iota
 	PARSE
 	EVAL
+	PRINT_IF_NOT_NIL
 )
 
 const VERSION = "v0.10.0"
@@ -1482,10 +1483,16 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
-		_, err = TryEval(expr)
+		obj, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return err
+		}
+		if phase == EVAL {
+			continue
+		}
+		if _, ok := obj.(Nil); !ok {
+			fmt.Println(obj.ToString(true))
 		}
 	}
 }
