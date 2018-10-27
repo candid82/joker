@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"unsafe"
 )
@@ -17,7 +18,11 @@ type (
 )
 
 func (ns *Namespace) ToString(escape bool) string {
-	return "#object[Namespace \"" + ns.Name.ToString(escape) + "\"]"
+	return ns.Name.ToString(escape)
+}
+
+func (ns *Namespace) Print(w io.Writer, printReadably bool) {
+	fmt.Fprint(w, "#object[Namespace \""+ns.Name.ToString(true)+"\"]")
 }
 
 func (ns *Namespace) Equals(other interface{}) bool {
