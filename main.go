@@ -238,11 +238,11 @@ func usage(out *os.File) {
 	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
 	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
 	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
-	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  evalute <expr>, print if non-nil")
+	fmt.Fprintln(out, "   or: joker [args] --eval <expr> [-- <expr-args>]  evaluate <expr>, print if non-nil")
 	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
 	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
 	fmt.Fprintln(out, "\nNotes:")
-	fmt.Fprintln(out, "  -e is a synonym for --expr.")
+	fmt.Fprintln(out, "  -e is a synonym for --eval.")
 	fmt.Fprintln(out, "  '-' for <filename> means read from standard input (stdin).")
 	fmt.Fprintln(out, "  Evaluating '(println (str *command-line-args*))' prints the arguments")
 	fmt.Fprintln(out, "    in <repl-args>, <expr-args>, or <script-args> (TBD).")
@@ -288,7 +288,7 @@ var (
 	workingDir         string
 	lintFlag           bool
 	dialect            Dialect = UNKNOWN
-	expr               string
+	eval               string
 	replFlag           bool
 	filename           string
 	remainingArgs      []string
@@ -374,10 +374,10 @@ func parseArgs(args []string) {
 			} else {
 				missing = true
 			}
-		case "-e", "--expr":
+		case "-e", "--eval":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
-				expr = args[i]
+				eval = args[i]
 				phase = PRINT_IF_NOT_NIL
 				if i < length-1 && args[i+1] == "--" {
 					i += 2 // shift 2
@@ -505,7 +505,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "dialect=%v\n", dialect)
 		fmt.Fprintf(os.Stderr, "workingDir=%v\n", workingDir)
 		fmt.Fprintf(os.Stderr, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
-		fmt.Fprintf(os.Stderr, "expr=%v\n", expr)
+		fmt.Fprintf(os.Stderr, "eval=%v\n", eval)
 		fmt.Fprintf(os.Stderr, "replFlag=%v\n", replFlag)
 		fmt.Fprintf(os.Stderr, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(os.Stderr, "filename=%v\n", filename)
@@ -565,24 +565,24 @@ func main() {
 		defer finish()
 	}
 
-	if expr != "" {
+	if eval != "" {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --lint.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --lint.\n")
 			ExitJoker(6)
 		}
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --repl.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --repl.\n")
 			ExitJoker(7)
 		}
 		if workingDir != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and --working-dir.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --working-dir.\n")
 			ExitJoker(8)
 		}
 		if filename != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --expr/-e and a <filename> argument.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and a <filename> argument.\n")
 			ExitJoker(9)
 		}
-		reader := NewReader(strings.NewReader(expr), "<expr>")
+		reader := NewReader(strings.NewReader(eval), "<expr>")
 		ProcessReader(reader, "", phase)
 		return
 	}
