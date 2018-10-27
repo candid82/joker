@@ -238,7 +238,7 @@ func usage(out *os.File) {
 	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
 	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
 	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
-	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  input is <expr>")
+	fmt.Fprintln(out, "   or: joker [args] --expr <expr> [-- <expr-args>]  evalute <expr>, print if non-nil")
 	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
 	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
 	fmt.Fprintln(out, "\nNotes:")
@@ -378,6 +378,7 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				expr = args[i]
+				phase = PRINT_IF_NOT_NIL
 				if i < length-1 && args[i+1] == "--" {
 					i += 2 // shift 2
 					noFileFlag = true
@@ -526,7 +527,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
 			ExitJoker(4)
 		}
-		if phase != EVAL {
+		if phase != EVAL && phase != PRINT_IF_NOT_NIL {
 			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
 			ExitJoker(5)
 		}
