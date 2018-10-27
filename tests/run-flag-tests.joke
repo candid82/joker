@@ -130,4 +130,28 @@
   "tests/flags/script-flags.joke -- something that is not a flag"
   "[-- something that is not a flag]")
 
+;; (testing :out "--eval option not printing nil result (FAKE)"
+;;          "--debug=stdout --eval '(println (+ 3 4))'"
+;;          "7")
+
+(testing :out "--eval option not printing nil result"
+         "--eval nil"
+         "")
+
+(testing :out "--eval option printing non-nil result (a string)"
+         "--eval '\"foo\"'"
+         "\"foo\"")
+
+(testing :out "--eval option printing non-nil result (a keyword)"
+         "--eval :bar"
+         ":bar")
+
+(testing :out "--eval option printing non-nil result (a number)"
+         "--eval 96"
+         "96")
+
+(testing :out "--eval option printing non-nil result (a symbol)"
+         "--eval 'xyzzy"
+         "xyzzy")
+
 (joker.os/exit exit-code)
