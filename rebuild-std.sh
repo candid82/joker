@@ -20,6 +20,8 @@
 
 (cd std; ../joker generate-std.joke)
 
+# Note that I haven't worked out the right order to do things, but I'm pretty sure that doc generation must come _after_ building Joker, while library-code generation must come _before_. So maybe re-build joker at this point?
+
 (cd docs; ../joker generate-docs.joke)
 
 echo ""
