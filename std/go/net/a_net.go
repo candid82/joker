@@ -16,7 +16,7 @@ var LookupMX_ Proc = func(args []Object) Object {
     
     s := ExtractString(args, 0)
     res := lookupMX(s)
-    return MakeString(res)
+    return res
 
   default:
     PanicArity(c)
@@ -32,6 +32,6 @@ netNamespace.ResetMeta(MakeMeta(nil, "DRAFT: Implements just joker.go.net/Lookup
 netNamespace.InternVar("LookupMX", LookupMX_,
   MakeMeta(
     NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `DRAFT: Returns error object from net.LookupMX(s)`, "1.0"))
+    `DRAFT: Returns vector of MX ({ :Host <hostname>, :Pref <preference>}) and error object (or nil) from net.LookupMX(s) as { :res <mx> :err <err> }`, "1.0"))
 
 }
