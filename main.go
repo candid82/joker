@@ -281,7 +281,7 @@ func usage(out *os.File) {
 }
 
 var (
-	debug              bool // Hidden option
+	debugOut           *os.File
 	helpFlag           bool
 	versionFlag        bool
 	phase              Phase = EVAL // --read, --parse, --evaluate
@@ -311,14 +311,18 @@ func parseArgs(args []string) {
 	noFileFlag := false
 	var i int
 	for i = 1; i < length; i++ { // shift
-		if debug {
-			fmt.Fprintf(os.Stderr, "arg[%d]=%s\n", i, args[i])
+		if debugOut != nil {
+			fmt.Fprintf(debugOut, "arg[%d]=%s\n", i, args[i])
 		}
 		switch args[i] {
 		case "--", "-":
 			stop = true // "-" is stdin. "--" is stdin for now; later will formally end options processing
 		case "--debug":
-			debug = true
+			debugOut = os.Stderr
+		case "--debug=stderr":
+			debugOut = os.Stderr
+		case "--debug=stdout":
+			debugOut = os.Stdout
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else
@@ -462,15 +466,15 @@ func parseArgs(args []string) {
 		ExitJoker(3)
 	}
 	if i < length && !noFileFlag {
-		if debug {
-			fmt.Fprintf(os.Stderr, "filename=%s\n", args[i])
+		if debugOut != nil {
+			fmt.Fprintf(debugOut, "filename=%s\n", args[i])
 		}
 		filename = args[i]
 		i += 1 // shift
 	}
 	if i < length {
-		if debug {
-			fmt.Fprintf(os.Stderr, "remaining=%v\n", args[i:])
+		if debugOut != nil {
+			fmt.Fprintf(debugOut, "remaining=%v\n", args[i:])
 		}
 		remainingArgs = args[i:]
 	}
@@ -489,27 +493,33 @@ func main() {
 	})
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
-	if len(os.Args) > 1 && os.Args[1] == "--debug" {
-		debug = true
-	} // peek to see if it's the first arg
+	if len(os.Args) > 1 {
+		// peek to see if the first arg is "--debug*"
+		switch os.Args[1] {
+		case "--debug", "--debug=stderr":
+			debugOut = os.Stderr
+		case "--debug=stdout":
+			debugOut = os.Stdout
+		}
+	}
 
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "debug=%v\n", debug)
-		fmt.Fprintf(os.Stderr, "helpFlag=%v\n", helpFlag)
-		fmt.Fprintf(os.Stderr, "versionFlag=%v\n", versionFlag)
-		fmt.Fprintf(os.Stderr, "phase=%v\n", phase)
-		fmt.Fprintf(os.Stderr, "lintFlag=%v\n", lintFlag)
-		fmt.Fprintf(os.Stderr, "dialect=%v\n", dialect)
-		fmt.Fprintf(os.Stderr, "workingDir=%v\n", workingDir)
-		fmt.Fprintf(os.Stderr, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
-		fmt.Fprintf(os.Stderr, "eval=%v\n", eval)
-		fmt.Fprintf(os.Stderr, "replFlag=%v\n", replFlag)
-		fmt.Fprintf(os.Stderr, "noReadline=%v\n", noReadline)
-		fmt.Fprintf(os.Stderr, "filename=%v\n", filename)
-		fmt.Fprintf(os.Stderr, "remainingArgs=%v\n", remainingArgs)
+	if debugOut != nil {
+		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
+		fmt.Fprintf(debugOut, "helpFlag=%v\n", helpFlag)
+		fmt.Fprintf(debugOut, "versionFlag=%v\n", versionFlag)
+		fmt.Fprintf(debugOut, "phase=%v\n", phase)
+		fmt.Fprintf(debugOut, "lintFlag=%v\n", lintFlag)
+		fmt.Fprintf(debugOut, "dialect=%v\n", dialect)
+		fmt.Fprintf(debugOut, "workingDir=%v\n", workingDir)
+		fmt.Fprintf(debugOut, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
+		fmt.Fprintf(debugOut, "eval=%v\n", eval)
+		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
+		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
+		fmt.Fprintf(debugOut, "filename=%v\n", filename)
+		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
 	}
 
 	if helpFlag {
