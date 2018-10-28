@@ -7,7 +7,7 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-func lookupMX(s string) Map {
+func lookupMX(s string) Object {
 	mxen, e := net.LookupMX(s)
 	mxinfo := EmptyVector
 	for _, mx := range mxen {
@@ -16,12 +16,14 @@ func lookupMX(s string) Map {
 		mxmap.Add(MakeKeyword("Pref"), Int{I: int(mx.Pref)})
 		mxinfo = mxinfo.Conjoin(mxmap)
 	}
-	ret := EmptyArrayMap()
-	ret.Add(MakeKeyword("res"), mxinfo)
+	res := EmptyVector
+	res = res.Conjoin(mxinfo)
+	var err Object
 	if e == nil {
-		ret.Add(MakeKeyword("err"), NIL)
+		err = NIL
 	} else {
-		ret.Add(MakeKeyword("err"), String{S: fmt.Sprintf("%s", e)})
+		err = String{S: fmt.Sprintf("%s", e)}
 	}
-	return ret // { :res mxinfo, :err err }
+	res = res.Conjoin(err)
+	return res // [ mxinfo err ]
 }
