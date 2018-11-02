@@ -399,7 +399,7 @@ func pprintSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
 	for iter := iter(seq); iter.HasNext(); {
-		i = pprintObject(iter.Next(), indent, w)
+		i = pprintObject(iter.Next(), indent+1, w)
 		if iter.HasNext() {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+1)
