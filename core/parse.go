@@ -406,7 +406,13 @@ func (b *Bindings) PopFrame() *Bindings {
 	return b.parent
 }
 
-func (b *Bindings) AddBinding(sym Symbol, index int) {
+func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) {
+	if LINTER_MODE && !skipUnused {
+		old := b.bindings[sym.name]
+		if old != nil && !old.isUsed && old.name.name != SYMBOLS.underscore.name && !isSkipUnused(old.name) {
+			printParseWarning(GetPosition(old.name), "Unused binding: "+old.name.ToString(false))
+		}
+	}
 	b.bindings[sym.name] = &Binding{
 		name:  sym,
 		frame: b.frame,
@@ -421,7 +427,7 @@ func (ctx *ParseContext) PushEmptyLocalFrame() {
 func (ctx *ParseContext) PushLocalFrame(names []Symbol) {
 	ctx.PushEmptyLocalFrame()
 	for i, sym := range names {
-		ctx.localBindings.AddBinding(sym, i)
+		ctx.localBindings.AddBinding(sym, i, true)
 	}
 }
 
@@ -971,6 +977,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			pos := GetPosition(obj)
 			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
+		skipUnused := isSkipUnused(b)
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
 		ctx.PushEmptyLocalFrame()
@@ -996,7 +1003,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 				}
 			}
 			res.values[i] = Parse(b.at(i*2+1), ctx)
-			ctx.localBindings.AddBinding(res.names[i], i)
+			ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 		}
 
 		if isLoop {
@@ -1016,7 +1023,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 				printParseWarning(pos, formName+" form with empty body")
 			}
 
-			if !isSkipUnused(b) {
+			if !skipUnused {
 				for _, b := range ctx.localBindings.bindings {
 					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) && !isSkipUnused(b.name) {
 						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
@@ -1431,7 +1438,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}()
 			for !syms.IsEmpty() {
 				if sym, ok := syms.First().(Symbol); ok {
-					ctx.linterBindings.AddBinding(sym, 0)
+					ctx.linterBindings.AddBinding(sym, 0, true)
 				}
 				syms = syms.Rest()
 			}
