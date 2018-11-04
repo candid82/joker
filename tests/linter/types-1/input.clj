@@ -1,4 +1,4 @@
-(map (fn []) 2)
+(map (fn [] nil) 2)
 (cons 1 2)
 (first 2)
 (next 1)

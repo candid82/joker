@@ -1,4 +1,4 @@
-tests/linter/types-1/input.clj:1:14: Parse warning: arg[1] of core/map must have type Seqable, got Int
+tests/linter/types-1/input.clj:1:18: Parse warning: arg[1] of core/map must have type Seqable, got Int
 tests/linter/types-1/input.clj:2:9: Parse warning: arg[1] of core/cons must have type Seqable, got Int
 tests/linter/types-1/input.clj:3:8: Parse warning: arg[0] of core/first must have type Seqable, got Int
 tests/linter/types-1/input.clj:4:7: Parse warning: arg[0] of core/next must have type Seqable, got Int

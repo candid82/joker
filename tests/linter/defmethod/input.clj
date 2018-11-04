@@ -5,6 +5,6 @@
   [a]
   b)
 
-(defmethod m2 :v [])
+(defmethod m2 :v [] nil)
 
 (defmethod m3)

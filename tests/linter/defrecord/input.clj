@@ -4,7 +4,7 @@
 (defprotocol TestProtocol)
 
 (defn test-method
-  [])
+  [] nil)
 
 (defrecord TestRecord [a b]
   TestProtocol

@@ -771,7 +771,9 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 	return res, false
 }
 
-func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
+func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
+	params := sig.First()
+	body := sig.Rest()
 	args, isVariadic := parseParams(params)
 	ctx.PushLocalFrame(args)
 	defer ctx.PopLocalFrame()
@@ -782,7 +784,11 @@ func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 	ctx.noRecurAllowed = false
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
-	arity := FnArityExpr{args: args, body: parseBody(body, ctx)}
+	arity := FnArityExpr{
+		Position: GetPosition(sig),
+		args:     args,
+		body:     parseBody(body, ctx),
+	}
 	if isVariadic {
 		if fn.variadic != nil {
 			panic(&ParseError{obj: params, msg: "Can't have more than 1 variadic overload"})
@@ -803,6 +809,12 @@ func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 			panic(&ParseError{obj: params, msg: "Can't have fixed arity function with more params than variadic function"})
 		}
 		fn.arities = append(fn.arities, arity)
+	}
+
+	if LINTER_MODE {
+		if len(arity.body) == 0 {
+			printParseWarning(arity.Position, "fn form with empty body")
+		}
 	}
 }
 
@@ -835,7 +847,7 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 		defer ctx.PopLocalFrame()
 	}
 	if IsVector(p) { // single arity
-		addArity(res, p, bodies.Rest(), ctx)
+		addArity(res, bodies, ctx)
 		return wrapWithMeta(res, obj, ctx)
 	}
 	// multiple arities
@@ -850,7 +862,7 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 			if !IsVector(params) {
 				panic(&ParseError{obj: params, msg: "Parameter declaration must be a vector. Got: " + params.ToString(false)})
 			}
-			addArity(res, params, s.Rest(), ctx)
+			addArity(res, s, ctx)
 		default:
 			panic(&ParseError{obj: body, msg: "Function body must be a list. Got: " + s.ToString(false)})
 		}
