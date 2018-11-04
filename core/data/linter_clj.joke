@@ -338,6 +338,7 @@
 (def *compiler-options*)
 (def *agent*)
 (def *read-eval*)
+(def *data-readers*)
 
 (in-ns 'user)
 (joker.core/refer 'joker.core)
