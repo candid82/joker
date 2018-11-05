@@ -99,7 +99,7 @@
     `(defn ~(symbol (str  "->" name))
        ~fields
        (def ~(symbol (str name)))
-       (defn ~(symbol (str  "map->" name)) [m] nil)
+       (defn ~(symbol (str  "map->" name)) [~(symbol "_")] nil)
        ~@(defimpls__ impls))))
 
 (defmacro deftype

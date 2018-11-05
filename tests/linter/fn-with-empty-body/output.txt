@@ -1,0 +1,1 @@
+tests/linter/fn-with-empty-body/input.clj:1:1: Parse warning: fn form with empty body

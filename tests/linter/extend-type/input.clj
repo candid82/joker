@@ -1,8 +1,8 @@
 (defprotocol P
-  (m [this a]))
+  (m [_this _a]))
 
 (extend-type Object
   P
-  (m [this a]
+  (m [_this a]
     (pr-str a))
   (m1 ))

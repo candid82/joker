@@ -1,5 +1,5 @@
 (defn f1 [] nil)
-(defn f2 [x] nil)
+(defn f2 [_x] nil)
 (def v1 1)
 (def k :t)
 (def m {})

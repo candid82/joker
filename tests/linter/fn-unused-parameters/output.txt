@@ -1,0 +1,1 @@
+tests/linter/fn-unused-parameters/input.clj:1:15: Parse warning: unused parameter: b

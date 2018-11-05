@@ -1664,9 +1664,14 @@ func ReadConfig(filename string, workingDir string) {
 			printConfigError(configFileName, ":rules value must be a map, got "+rules.GetType().ToString(false))
 			return
 		}
-		ok, v := m.Get(KEYWORDS.ifWithoutElse)
-		if ok {
+		if ok, v := m.Get(KEYWORDS.ifWithoutElse); ok {
 			WARNINGS.ifWithoutElse = toBool(v)
+		}
+		if ok, v := m.Get(KEYWORDS.unusedFnParameters); ok {
+			WARNINGS.unusedFnParameters = toBool(v)
+		}
+		if ok, v := m.Get(KEYWORDS.fnWithEmptyBody); ok {
+			WARNINGS.fnWithEmptyBody = toBool(v)
 		}
 	}
 	LINTER_CONFIG.Value = configMap

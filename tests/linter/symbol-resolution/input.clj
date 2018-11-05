@@ -8,7 +8,7 @@
 
 ;; Should PASS
 
-(defmacro test-macro [x] nil)
+(defmacro test-macro [_x] nil)
 
 (def f [])
 

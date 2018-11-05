@@ -20,7 +20,7 @@
     (println a b))
 
   TestProtocol2
-  (test-method2 [x y]
+  (test-method2 [x _y]
     (println x)))
 
 (instance? TestRecord 1)

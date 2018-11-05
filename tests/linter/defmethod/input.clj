@@ -2,7 +2,7 @@
 
 ;; Should FAIL
 (defmethod m1 :v
-  [a]
+  [_a]
   b)
 
 (defmethod m2 :v [] nil)

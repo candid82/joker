@@ -151,41 +151,45 @@ type (
 	}
 	Warnings struct {
 		ifWithoutElse           bool
+		unusedFnParameters      bool
+		fnWithEmptyBody         bool
 		ignoredUnusedNamespaces Set
 	}
 	Keywords struct {
-		tag           Keyword
-		skipUnused    Keyword
-		private       Keyword
-		line          Keyword
-		column        Keyword
-		file          Keyword
-		macro         Keyword
-		message       Keyword
-		form          Keyword
-		data          Keyword
-		cause         Keyword
-		arglist       Keyword
-		doc           Keyword
-		added         Keyword
-		meta          Keyword
-		knownMacros   Keyword
-		rules         Keyword
-		ifWithoutElse Keyword
-		_prefix       Keyword
-		pos           Keyword
-		startLine     Keyword
-		endLine       Keyword
-		startColumn   Keyword
-		endColumn     Keyword
-		filename      Keyword
-		object        Keyword
-		type_         Keyword
-		var_          Keyword
-		value         Keyword
-		vector        Keyword
-		name          Keyword
-		dynamic       Keyword
+		tag                Keyword
+		skipUnused         Keyword
+		private            Keyword
+		line               Keyword
+		column             Keyword
+		file               Keyword
+		macro              Keyword
+		message            Keyword
+		form               Keyword
+		data               Keyword
+		cause              Keyword
+		arglist            Keyword
+		doc                Keyword
+		added              Keyword
+		meta               Keyword
+		knownMacros        Keyword
+		rules              Keyword
+		ifWithoutElse      Keyword
+		unusedFnParameters Keyword
+		fnWithEmptyBody    Keyword
+		_prefix            Keyword
+		pos                Keyword
+		startLine          Keyword
+		endLine            Keyword
+		startColumn        Keyword
+		endColumn          Keyword
+		filename           Keyword
+		object             Keyword
+		type_              Keyword
+		var_               Keyword
+		value              Keyword
+		vector             Keyword
+		name               Keyword
+		dynamic            Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -244,40 +248,44 @@ var (
 	REQUIRE_VAR     *Var
 	ALIAS_VAR       *Var
 	CREATE_NS_VAR   *Var
-	WARNINGS        = Warnings{}
-	KEYWORDS        = Keywords{
-		tag:           MakeKeyword("tag"),
-		skipUnused:    MakeKeyword("skip-unused"),
-		private:       MakeKeyword("private"),
-		line:          MakeKeyword("line"),
-		column:        MakeKeyword("column"),
-		file:          MakeKeyword("file"),
-		macro:         MakeKeyword("macro"),
-		message:       MakeKeyword("message"),
-		form:          MakeKeyword("form"),
-		data:          MakeKeyword("data"),
-		cause:         MakeKeyword("cause"),
-		arglist:       MakeKeyword("arglists"),
-		doc:           MakeKeyword("doc"),
-		added:         MakeKeyword("added"),
-		meta:          MakeKeyword("meta"),
-		knownMacros:   MakeKeyword("known-macros"),
-		rules:         MakeKeyword("rules"),
-		ifWithoutElse: MakeKeyword("if-without-else"),
-		_prefix:       MakeKeyword("_prefix"),
-		pos:           MakeKeyword("pos"),
-		startLine:     MakeKeyword("start-line"),
-		endLine:       MakeKeyword("end-line"),
-		startColumn:   MakeKeyword("start-column"),
-		endColumn:     MakeKeyword("end-column"),
-		filename:      MakeKeyword("filename"),
-		object:        MakeKeyword("object"),
-		type_:         MakeKeyword("type"),
-		var_:          MakeKeyword("var"),
-		value:         MakeKeyword("value"),
-		vector:        MakeKeyword("vector"),
-		name:          MakeKeyword("name"),
-		dynamic:       MakeKeyword("dynamic"),
+	WARNINGS        = Warnings{
+		fnWithEmptyBody: true,
+	}
+	KEYWORDS = Keywords{
+		tag:                MakeKeyword("tag"),
+		skipUnused:         MakeKeyword("skip-unused"),
+		private:            MakeKeyword("private"),
+		line:               MakeKeyword("line"),
+		column:             MakeKeyword("column"),
+		file:               MakeKeyword("file"),
+		macro:              MakeKeyword("macro"),
+		message:            MakeKeyword("message"),
+		form:               MakeKeyword("form"),
+		data:               MakeKeyword("data"),
+		cause:              MakeKeyword("cause"),
+		arglist:            MakeKeyword("arglists"),
+		doc:                MakeKeyword("doc"),
+		added:              MakeKeyword("added"),
+		meta:               MakeKeyword("meta"),
+		knownMacros:        MakeKeyword("known-macros"),
+		rules:              MakeKeyword("rules"),
+		ifWithoutElse:      MakeKeyword("if-without-else"),
+		unusedFnParameters: MakeKeyword("unused-fn-parameters"),
+		fnWithEmptyBody:    MakeKeyword("fn-with-empty-body"),
+		_prefix:            MakeKeyword("_prefix"),
+		pos:                MakeKeyword("pos"),
+		startLine:          MakeKeyword("start-line"),
+		endLine:            MakeKeyword("end-line"),
+		startColumn:        MakeKeyword("start-column"),
+		endColumn:          MakeKeyword("end-column"),
+		filename:           MakeKeyword("filename"),
+		object:             MakeKeyword("object"),
+		type_:              MakeKeyword("type"),
+		var_:               MakeKeyword("var"),
+		value:              MakeKeyword("value"),
+		vector:             MakeKeyword("vector"),
+		name:               MakeKeyword("name"),
+		dynamic:            MakeKeyword("dynamic"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
@@ -409,7 +417,7 @@ func (b *Bindings) PopFrame() *Bindings {
 func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) {
 	if LINTER_MODE && !skipUnused {
 		old := b.bindings[sym.name]
-		if old != nil && !old.isUsed && old.name.name != SYMBOLS.underscore.name && !isSkipUnused(old.name) {
+		if old != nil && needsUnusedWarning(old) {
 			printParseWarning(GetPosition(old.name), "Unused binding: "+old.name.ToString(false))
 		}
 	}
@@ -771,6 +779,14 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 	return res, false
 }
 
+func needsUnusedWarning(b *Binding) bool {
+	return !b.isUsed &&
+		!strings.HasPrefix(*b.name.name, "_") &&
+		!strings.HasPrefix(*b.name.name, "&form") &&
+		!strings.HasPrefix(*b.name.name, "&env") &&
+		!isSkipUnused(b.name)
+}
+
 func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	params := sig.First()
 	body := sig.Rest()
@@ -812,8 +828,18 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	}
 
 	if LINTER_MODE {
-		if len(arity.body) == 0 {
-			printParseWarning(arity.Position, "fn form with empty body")
+		if WARNINGS.fnWithEmptyBody {
+			if len(arity.body) == 0 {
+				printParseWarning(arity.Position, "fn form with empty body")
+			}
+		}
+
+		if WARNINGS.unusedFnParameters {
+			for _, b := range ctx.localBindings.bindings {
+				if needsUnusedWarning(b) {
+					printParseWarning(GetPosition(b.name), "unused parameter: "+b.name.ToString(false))
+				}
+			}
 		}
 	}
 }
@@ -1037,7 +1063,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 
 			if !skipUnused {
 				for _, b := range ctx.localBindings.bindings {
-					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) && !isSkipUnused(b.name) {
+					if needsUnusedWarning(b) {
 						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
 					}
 				}
