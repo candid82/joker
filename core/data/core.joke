@@ -2663,7 +2663,7 @@
                                (concat (map (fn* [c] `(assert ~c)) pre)
                                        body)
                                body)]
-                    (maybe-destructured params body)))
+                    (derive-info__ (maybe-destructured params body) sig)))
         new-sigs (map psig sigs)]
     (with-meta
       (if name

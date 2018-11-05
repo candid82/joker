@@ -199,11 +199,15 @@ Joker supports a few configurable linting rules. To turn them on or off set thei
 
 Below is the list of all configurable rules.
 
-|         Rule         |                      Description                      | Default value |
-|----------------------|-------------------------------------------------------|---------------|
-| `if-without-else`    | warn on `if` without the `else` branch                | false         |
-| `no-forms-threading` | warn on threading macros with no forms, i.e. `(-> a)` | true          |
-| `unused-as`          | warn on unused `:as` binding                          | true          |
+|          Rule          |                      Description                      | Default value |
+|------------------------|-------------------------------------------------------|---------------|
+| `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
+| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
+| `unused-as`            | warn on unused `:as` binding                          | `true`        |
+| `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
+| `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
+
+Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
 
 ## Building
 

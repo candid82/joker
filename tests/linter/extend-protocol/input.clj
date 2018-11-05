@@ -2,5 +2,5 @@
 
 (extend-protocol P
   Integer
-  (m1 [a])
+  (m1 [_a] nil)
   (m2))

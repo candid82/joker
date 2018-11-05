@@ -3,9 +3,9 @@
 
 (reify
   P1
-  (m1 [a])
-  (m2 [b])
+  (m1 [_a] nil)
+  (m2 [_b] nil)
 
   P2
-  (m3 [c])
+  (m3 [_c] nil)
   (m4))

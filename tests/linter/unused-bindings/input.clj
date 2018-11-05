@@ -19,3 +19,5 @@
     1))
 
 (let [{:keys [a b]} {}] (println a))
+
+(let [_ 1 _ 2 a 1 a 2] a)

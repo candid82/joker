@@ -89,7 +89,7 @@
   (for [sig (vals sigs)]
     (derive-info__
      `(defn ~(:name sig) ~(or (:doc sig) "")
-        ~@(map list (:arglists sig)))
+        ~@(map #(cons % '(nil)) (:arglists sig)))
      (:name sig))))
 
 (defmacro defrecord
@@ -99,7 +99,7 @@
     `(defn ~(symbol (str  "->" name))
        ~fields
        (def ~(symbol (str name)))
-       (defn ~(symbol (str  "map->" name)) [m])
+       (defn ~(symbol (str  "map->" name)) [~(symbol "_")] nil)
        ~@(defimpls__ impls))))
 
 (defmacro deftype

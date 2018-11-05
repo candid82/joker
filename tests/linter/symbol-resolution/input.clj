@@ -8,7 +8,7 @@
 
 ;; Should PASS
 
-(defmacro test-macro [x])
+(defmacro test-macro [_x] nil)
 
 (def f [])
 
@@ -43,7 +43,7 @@ uuu
 (test-macro (load u3))
 (test-macro (ext2/f u4))
 (testing u9)
-(defmethod u6 1 [])
+(defmethod u6 1 [] nil)
 #'g
 #'ns/gg
 (joker.string/split "1" #"2")
