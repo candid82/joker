@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/882970/48046961-30a95280-e14b-11e8-80e8-1d277281dc15.png" width="113px"/>
+<img src="https://user-images.githubusercontent.com/882970/48048842-a0224080-e151-11e8-8855-642cf5ef3fdd.png" width="117px"/>
 
 [![CircleCI](https://circleci.com/gh/candid82/joker.svg?style=svg)](https://circleci.com/gh/candid82/joker)
 
