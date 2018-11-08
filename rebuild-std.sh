@@ -8,11 +8,13 @@
 #
 #   -  Add Go implementation to `std/X/Y/Y_native.go`.
 #
-#   -  Edit `std/generate-std.joke` to add it to `namespaces`.
-#
 #   -  Add it to list of imports near to of `main.go`.
 #
-#   -  Add it to `*loaded-libs*` in `data/core.joke`.
+#   -  Add it to `*loaded-libs*` in `core/data/core.joke`.
+#
+#   -  Build Joker (./run.sh -e '*loaded-libs*')
+#
+#   -  Edit `std/generate-std.joke` to add .X.Y to `namespaces`.
 #
 #   -  Run this script.
 #
