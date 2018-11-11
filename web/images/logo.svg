@@ -2,15 +2,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="500" height="200">
 	<defs>
 	  <style type="text/css">
-	    @font-face {
-	        font-family: "Open Sans";
-	        src: url('https://fonts.gstatic.com/s/opensans/v14/cJZKeOuBrn4kERxqtaUH3ZBw1xU1rKptJj_0jans920.woff2');
-	    }
-	 </style>
+	  	@font-face {
+	  	  font-family: 'Chancery';
+	  	  src: url('../fonts/chancery/apple-chancery-webfont.eot');
+	  	  src: local('Apple Chancery'), url('../fonts/chancery/apple-chancery-webfont.eot?#iefix') format('embedded-opentype'),
+	  	  url('../fonts/chancery/apple-chancery-webfont.woff2') format('woff2'),
+	  	  url('../fonts/chancery/apple-chancery-webfont.woff') format('woff'),
+	  	  url('../fonts/chancery/apple-chancery-webfont.ttf') format('truetype'),
+	  	  url('../fonts/chancery/apple-chancery-webfont.svg#apple-chancery') format('svg');
+	  	  font-weight: lighter;
+	  	  font-style: normal;
+	  	}
+	  </style>
 	</defs>
-    <path d="M10 160 Q120 60 30 20" stroke="#FD6835" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <path d="M135 160 Q135 60 30 20" stroke="#FD6835" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <path d="M10 160 Q100 100 135 160" stroke="#FD6835" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <circle cx="20" cy="20" r="10" stroke="#FD6835" stroke-width="1" fill="#FD6835"/>
-    <text x="170" y="130" fill="#FD6835" font-family="Open Sans" font-size="120" font-weight="100">Joker</text>
+    <path d="M30 160 Q120 60 50 40" stroke="#34485e" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M135 160 Q135 60 50 40" stroke="#34485e" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M30 160 Q100 100 135 160" stroke="#34485e" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle cx="40" cy="40" r="10" stroke="#34485e" stroke-width="1" fill="#34485e"/>
+    <text x="155" y="130" fill="#34485e" font-family="Chancery" font-size="120" font-weight="100">Joker</text>
 </svg>

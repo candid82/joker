@@ -1,4 +1,25 @@
+body {
+	display: flex;
+	flex-direction: column;
+}
+header {
+	display: flex;
+}
+.menu {
+	display: flex;
+	list-style: none;
+}
+.showcases{
+	display: flex;
+}
+
 #logo img {
 	max-width: 200px;
 	max-height: 200px;
+}
+
+.showcase {
+	max-width: 440px;
+	max-height: 260px;
+	background-color: #ffffff;
 }

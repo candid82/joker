@@ -13,10 +13,9 @@
 			<img src="/images/logo.svg" alt="joker">
 		</a>
 		<nav>
-			<ul>
-				<li><a href="/">Home</a></li>
-				<li><a href="/about/">About</a></li>
-				<li><a href="/docs/">Docs</a></li>
+			<ul class="menu">
+				<li><a href="https://github.com/candid82/joker">GITHUB</a></li>
+				<li><a href="https://clojurians.slack.com/messages/C9VURUUNL/">SLACK</a></li>
 			</ul>
 		</nav>
 	</header>
@@ -24,22 +23,27 @@
 		<p>
 			Joker is a small interpreted dialect of Clojure written in Go. It is also a Clojure(Script) linter.
 		</p>
-		<div class="left">
-			<p>Write scripts in Clojure</p>
-			<img src="/images/script-showcase.png">
-			<ul>
-				<li>Fast startup time.</li>
-				<li>Sane error messages and stacktraces.</li>
-				<li>Common scripting functions are included in standard library: send HTTP requests, read and parse JSON, YAML, work with file system, start external processes etc.</li>
-			</ul>
-		</div>
-		<div class="right">
-			<p>Check your Clojure(Script) code on the fly</p>
-			<img src="/images/linter-showcase.png">
-			<ul>
-				<li>Works with all major editors</li>
-				<li>Checks for syntax errors, function arity mismatches, unresolvable symbols, unused namespaces, vars, bindings and much more</li>
-			</ul>
+		<div class="showcases">
+			<div class="script-showcase">
+				<p>Write scripts in Clojure</p>
+				<img class="showcase" src="/images/script-showcase-ia.png">
+				<ul>
+					<li>Fast startup time.</li>
+					<li>Sane error messages and stacktraces.</li>
+					<li>Common scripting functions are included in standard library: send HTTP requests, read and parse JSON, YAML, work with file system, start external processes etc.</li>
+				</ul>
+			</div>
+			<div class="linter-showcase">
+				<p>Check your Clojure(Script) code on the fly</p>
+				<img class="showcase" src="/images/linter-showcase-ia.png">
+				<ul>
+					<li>Works with all major editors</li>
+					<li>Checks for syntax errors, function arity mismatches, unresolvable symbols, unused namespaces, vars, bindings and much more</li>
+				</ul>
+			</div>
 		</div>
 	</div>
+	<footer>
+		Copyright © 2018 Roman Bataev
+	</footer>
 </body>
