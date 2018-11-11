@@ -19,5 +19,5 @@
     <path d="M135 160 Q135 60 50 40" stroke="#34485e" stroke-width="8" fill="none" stroke-linecap="round"/>
     <path d="M30 160 Q100 100 135 160" stroke="#34485e" stroke-width="8" fill="none" stroke-linecap="round"/>
     <circle cx="40" cy="40" r="10" stroke="#34485e" stroke-width="1" fill="#34485e"/>
-    <text x="155" y="130" fill="#34485e" font-family="Chancery" font-size="120" font-weight="100">Joker</text>
+    <text x="160" y="130" fill="#34485e" font-family="Chancery" font-size="120" font-weight="100">Joker</text>
 </svg>
