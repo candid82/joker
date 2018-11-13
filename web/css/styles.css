@@ -23,6 +23,7 @@ a {
 header {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	border-bottom: 1px solid #deb4b4;
 	padding: 10px 0 5px 0;
 	font-size: 18px;
@@ -32,8 +33,9 @@ ul {
 	padding: 0;
 }
 .menu {
+	margin: 0;
 	display: flex;
-	padding-right: 25px;
+	padding-right: 10px;
 }
 .menu > li {
 	margin: 4px;
@@ -62,11 +64,23 @@ ul {
 	}
 }
 
+@media only screen and (max-width: 600px) {
+	.container {
+		width: 90%;
+	}
+	.menu {
+		font-size: 14px;
+	}
+}
+
 #logo {
 	display: block;
+	width: 25%;
+	max-width: 150px;
 }
 #logo > img {
-	width: 150px;
+	max-width: 100%;
+	height: auto;
 }
 
 .showcase {
