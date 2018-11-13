@@ -1,7 +1,6 @@
-/** {
-	font-family: Athelas,STHeiti,Microsoft Yahei,serif;
+* {
+	box-sizing: border-box;
 }
-*/
 body {
 	padding: 0;
 	margin: 0;
@@ -16,7 +15,7 @@ a {
 	text-decoration: none;
 }
 .container {
-	width: 1000px;
+	width: 80%;
 	margin: 0 auto;
 	display: flex;
 	flex-direction: column;
@@ -48,10 +47,19 @@ ul {
 .showcases{
 	display: flex;
 	justify-content: space-between;
+	flex-direction: column;
+}
+.callout {
+	color: #cc4a4a;
 }
 
-.showcases > div {
-	max-width: 450px;
+@media only screen and (min-width: 992px) {
+	.showcases {
+		flex-direction: row;
+	}
+	.showcases > div {
+		max-width: 48%;
+	}
 }
 
 #logo {
@@ -62,8 +70,8 @@ ul {
 }
 
 .showcase {
-	max-width: 440px;
-	max-height: 260px;
+	width: 100%;
+	height: auto;
 	background-color: #ffffff;
 }
 
