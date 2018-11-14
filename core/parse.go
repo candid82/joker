@@ -1430,7 +1430,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				vr, ok := ctx.GlobalEnv.Resolve(sym)
 				if !ok {
 					if !LINTER_MODE {
-						panic(&ParseError{obj: obj, msg: "Enable to resolve var " + sym.ToString(false) + " in this context"})
+						panic(&ParseError{obj: obj, msg: "Unable to resolve var " + sym.ToString(false) + " in this context"})
 					}
 					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 					if !ctx.isUnknownCallableScope {
