@@ -1,3 +1,4 @@
 tests/linter/let/input.clj:12:1: Parse warning: let form with empty body
 tests/linter/let/input.clj:13:1: Parse warning: let form with empty bindings vector
-tests/linter/let/input.clj:14:6: Exception: Unsupported binding form, only :as can follow & parameter
+tests/linter/let/input.clj:14:7: Parse error: Can't let qualified name: foo/bar
+tests/linter/let/input.clj:15:6: Exception: Unsupported binding form, only :as can follow & parameter

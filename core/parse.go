@@ -14,6 +14,7 @@ type (
 		InferType() *Type
 		Pos() Position
 		Dump(includePosition bool) Map
+		Pack(p []byte, env *PackEnv) []byte
 	}
 	LiteralExpr struct {
 		Position
@@ -50,7 +51,6 @@ type (
 		Position
 		callable Expr
 		args     []Expr
-		name     string
 	}
 	MacroCallExpr struct {
 		Position
@@ -113,6 +113,10 @@ type (
 		catches     []*CatchExpr
 		finallyExpr []Expr
 	}
+	SetMacroExpr struct {
+		Position
+		vr *Var
+	}
 	ParseError struct {
 		obj Object
 		msg string
@@ -147,39 +151,45 @@ type (
 	}
 	Warnings struct {
 		ifWithoutElse           bool
+		unusedFnParameters      bool
+		fnWithEmptyBody         bool
 		ignoredUnusedNamespaces Set
 	}
 	Keywords struct {
-		tag           Keyword
-		skipUnused    Keyword
-		private       Keyword
-		line          Keyword
-		column        Keyword
-		file          Keyword
-		macro         Keyword
-		message       Keyword
-		form          Keyword
-		data          Keyword
-		arglist       Keyword
-		doc           Keyword
-		added         Keyword
-		meta          Keyword
-		knownMacros   Keyword
-		rules         Keyword
-		ifWithoutElse Keyword
-		_prefix       Keyword
-		pos           Keyword
-		startLine     Keyword
-		endLine       Keyword
-		startColumn   Keyword
-		endColumn     Keyword
-		filename      Keyword
-		object        Keyword
-		type_         Keyword
-		var_          Keyword
-		value         Keyword
-		vector        Keyword
-		name          Keyword
+		tag                Keyword
+		skipUnused         Keyword
+		private            Keyword
+		line               Keyword
+		column             Keyword
+		file               Keyword
+		macro              Keyword
+		message            Keyword
+		form               Keyword
+		data               Keyword
+		cause              Keyword
+		arglist            Keyword
+		doc                Keyword
+		added              Keyword
+		meta               Keyword
+		knownMacros        Keyword
+		rules              Keyword
+		ifWithoutElse      Keyword
+		unusedFnParameters Keyword
+		fnWithEmptyBody    Keyword
+		_prefix            Keyword
+		pos                Keyword
+		startLine          Keyword
+		endLine            Keyword
+		startColumn        Keyword
+		endColumn          Keyword
+		filename           Keyword
+		object             Keyword
+		type_              Keyword
+		var_               Keyword
+		value              Keyword
+		vector             Keyword
+		name               Keyword
+		dynamic            Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -238,38 +248,44 @@ var (
 	REQUIRE_VAR     *Var
 	ALIAS_VAR       *Var
 	CREATE_NS_VAR   *Var
-	WARNINGS        = Warnings{}
-	KEYWORDS        = Keywords{
-		tag:           MakeKeyword("tag"),
-		skipUnused:    MakeKeyword("skip-unused"),
-		private:       MakeKeyword("private"),
-		line:          MakeKeyword("line"),
-		column:        MakeKeyword("column"),
-		file:          MakeKeyword("file"),
-		macro:         MakeKeyword("macro"),
-		message:       MakeKeyword("message"),
-		form:          MakeKeyword("form"),
-		data:          MakeKeyword("data"),
-		arglist:       MakeKeyword("arglists"),
-		doc:           MakeKeyword("doc"),
-		added:         MakeKeyword("added"),
-		meta:          MakeKeyword("meta"),
-		knownMacros:   MakeKeyword("known-macros"),
-		rules:         MakeKeyword("rules"),
-		ifWithoutElse: MakeKeyword("if-without-else"),
-		_prefix:       MakeKeyword("_prefix"),
-		pos:           MakeKeyword("pos"),
-		startLine:     MakeKeyword("start-line"),
-		endLine:       MakeKeyword("end-line"),
-		startColumn:   MakeKeyword("start-column"),
-		endColumn:     MakeKeyword("end-column"),
-		filename:      MakeKeyword("filename"),
-		object:        MakeKeyword("object"),
-		type_:         MakeKeyword("type"),
-		var_:          MakeKeyword("var"),
-		value:         MakeKeyword("value"),
-		vector:        MakeKeyword("vector"),
-		name:          MakeKeyword("name"),
+	WARNINGS        = Warnings{
+		fnWithEmptyBody: true,
+	}
+	KEYWORDS = Keywords{
+		tag:                MakeKeyword("tag"),
+		skipUnused:         MakeKeyword("skip-unused"),
+		private:            MakeKeyword("private"),
+		line:               MakeKeyword("line"),
+		column:             MakeKeyword("column"),
+		file:               MakeKeyword("file"),
+		macro:              MakeKeyword("macro"),
+		message:            MakeKeyword("message"),
+		form:               MakeKeyword("form"),
+		data:               MakeKeyword("data"),
+		cause:              MakeKeyword("cause"),
+		arglist:            MakeKeyword("arglists"),
+		doc:                MakeKeyword("doc"),
+		added:              MakeKeyword("added"),
+		meta:               MakeKeyword("meta"),
+		knownMacros:        MakeKeyword("known-macros"),
+		rules:              MakeKeyword("rules"),
+		ifWithoutElse:      MakeKeyword("if-without-else"),
+		unusedFnParameters: MakeKeyword("unused-fn-parameters"),
+		fnWithEmptyBody:    MakeKeyword("fn-with-empty-body"),
+		_prefix:            MakeKeyword("_prefix"),
+		pos:                MakeKeyword("pos"),
+		startLine:          MakeKeyword("start-line"),
+		endLine:            MakeKeyword("end-line"),
+		startColumn:        MakeKeyword("start-column"),
+		endColumn:          MakeKeyword("end-column"),
+		filename:           MakeKeyword("filename"),
+		object:             MakeKeyword("object"),
+		type_:              MakeKeyword("type"),
+		var_:               MakeKeyword("var"),
+		value:              MakeKeyword("value"),
+		vector:             MakeKeyword("vector"),
+		name:               MakeKeyword("name"),
+		dynamic:            MakeKeyword("dynamic"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
@@ -284,7 +300,7 @@ var (
 		let_:               MakeSymbol("let*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
-		setMacro_:          MakeSymbol("set-macro*"),
+		setMacro_:          MakeSymbol("set-macro__"),
 		def:                MakeSymbol("def"),
 		_var:               MakeSymbol("var"),
 		do:                 MakeSymbol("do"),
@@ -311,7 +327,7 @@ var (
 		let_:      STRINGS.Intern("let*"),
 		loop_:     STRINGS.Intern("loop*"),
 		recur:     STRINGS.Intern("recur"),
-		setMacro_: STRINGS.Intern("set-macro*"),
+		setMacro_: STRINGS.Intern("set-macro__"),
 		def:       STRINGS.Intern("def"),
 		_var:      STRINGS.Intern("var"),
 		do:        STRINGS.Intern("do"),
@@ -398,7 +414,13 @@ func (b *Bindings) PopFrame() *Bindings {
 	return b.parent
 }
 
-func (b *Bindings) AddBinding(sym Symbol, index int) {
+func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) {
+	if LINTER_MODE && !skipUnused {
+		old := b.bindings[sym.name]
+		if old != nil && needsUnusedWarning(old) {
+			printParseWarning(GetPosition(old.name), "Unused binding: "+old.name.ToString(false))
+		}
+	}
 	b.bindings[sym.name] = &Binding{
 		name:  sym,
 		frame: b.frame,
@@ -413,7 +435,7 @@ func (ctx *ParseContext) PushEmptyLocalFrame() {
 func (ctx *ParseContext) PushLocalFrame(names []Symbol) {
 	ctx.PushEmptyLocalFrame()
 	for i, sym := range names {
-		ctx.localBindings.AddBinding(sym, i)
+		ctx.localBindings.AddBinding(sym, i, true)
 	}
 }
 
@@ -444,6 +466,7 @@ func (pos Position) Pos() Position {
 }
 
 func printError(pos Position, msg string) {
+	PROBLEM_COUNT++
 	fmt.Fprintf(os.Stderr, "%s:%d:%d: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
 }
 
@@ -488,7 +511,7 @@ func WarnOnUnusedNamespaces() {
 	for _, ns := range GLOBAL_ENV.Namespaces {
 		if !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
-			if pos != nil && pos.Filename() != "<joker.core>" {
+			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
 				name := ns.Name.ToString(false)
 				names = append(names, name)
 				positions[name] = pos.Position
@@ -637,6 +660,21 @@ func GetPosition(obj Object) Position {
 	return Position{}
 }
 
+func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
+	vr.WithInfo(info)
+	vr.expr = valueExpr
+	meta := sym.GetMeta()
+	if meta != nil {
+		if ok, p := meta.Get(KEYWORDS.private); ok {
+			vr.isPrivate = toBool(p)
+		}
+		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
+			vr.isDynamic = toBool(p)
+		}
+		vr.taggedType = getTaggedType(sym)
+	}
+}
+
 func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
@@ -653,8 +691,6 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
-		vr.WithInfo(obj.GetInfo())
-
 		res := &DefExpr{
 			vr:       vr,
 			name:     sym,
@@ -665,7 +701,7 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		if count == 3 {
 			res.value = Parse(Third(seq), ctx)
 		} else if count == 4 {
-			res.value = Parse(Forth(seq), ctx)
+			res.value = Parse(Fourth(seq), ctx)
 			docstring := Third(seq)
 			switch docstring.(type) {
 			case String:
@@ -678,13 +714,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
 		}
-		vr.expr = res.value
+		updateVar(vr, obj.GetInfo(), res.value, sym)
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
-			if ok, p := meta.Get(KEYWORDS.private); ok {
-				vr.isPrivate = toBool(p)
-			}
-			vr.taggedType = getTaggedType(sym)
 		}
 		return res
 	default:
@@ -747,7 +779,17 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 	return res, false
 }
 
-func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
+func needsUnusedWarning(b *Binding) bool {
+	return !b.isUsed &&
+		!strings.HasPrefix(*b.name.name, "_") &&
+		!strings.HasPrefix(*b.name.name, "&form") &&
+		!strings.HasPrefix(*b.name.name, "&env") &&
+		!isSkipUnused(b.name)
+}
+
+func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
+	params := sig.First()
+	body := sig.Rest()
 	args, isVariadic := parseParams(params)
 	ctx.PushLocalFrame(args)
 	defer ctx.PopLocalFrame()
@@ -758,7 +800,11 @@ func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 	ctx.noRecurAllowed = false
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
-	arity := FnArityExpr{args: args, body: parseBody(body, ctx)}
+	arity := FnArityExpr{
+		Position: GetPosition(sig),
+		args:     args,
+		body:     parseBody(body, ctx),
+	}
 	if isVariadic {
 		if fn.variadic != nil {
 			panic(&ParseError{obj: params, msg: "Can't have more than 1 variadic overload"})
@@ -779,6 +825,22 @@ func addArity(fn *FnExpr, params Object, body Seq, ctx *ParseContext) {
 			panic(&ParseError{obj: params, msg: "Can't have fixed arity function with more params than variadic function"})
 		}
 		fn.arities = append(fn.arities, arity)
+	}
+
+	if LINTER_MODE {
+		if WARNINGS.fnWithEmptyBody {
+			if len(arity.body) == 0 {
+				printParseWarning(arity.Position, "fn form with empty body")
+			}
+		}
+
+		if WARNINGS.unusedFnParameters {
+			for _, b := range ctx.localBindings.bindings {
+				if needsUnusedWarning(b) {
+					printParseWarning(GetPosition(b.name), "unused parameter: "+b.name.ToString(false))
+				}
+			}
+		}
 	}
 }
 
@@ -811,7 +873,7 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 		defer ctx.PopLocalFrame()
 	}
 	if IsVector(p) { // single arity
-		addArity(res, p, bodies.Rest(), ctx)
+		addArity(res, bodies, ctx)
 		return wrapWithMeta(res, obj, ctx)
 	}
 	// multiple arities
@@ -826,7 +888,7 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 			if !IsVector(params) {
 				panic(&ParseError{obj: params, msg: "Parameter declaration must be a vector. Got: " + params.ToString(false)})
 			}
-			addArity(res, params, s.Rest(), ctx)
+			addArity(res, s, ctx)
 		default:
 			panic(&ParseError{obj: body, msg: "Function body must be a list. Got: " + s.ToString(false)})
 		}
@@ -953,6 +1015,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			pos := GetPosition(obj)
 			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
+		skipUnused := isSkipUnused(b)
 		res.names = make([]Symbol, b.count/2)
 		res.values = make([]Expr, b.count/2)
 		ctx.PushEmptyLocalFrame()
@@ -961,6 +1024,14 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			s := b.at(i * 2)
 			switch sym := s.(type) {
 			case Symbol:
+				if sym.ns != nil {
+					msg := "Can't let qualified name: " + sym.ToString(false)
+					if LINTER_MODE {
+						printParseError(GetPosition(s), msg)
+					} else {
+						panic(&ParseError{obj: s, msg: msg})
+					}
+				}
 				res.names[i] = sym
 			default:
 				if LINTER_MODE {
@@ -970,7 +1041,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 				}
 			}
 			res.values[i] = Parse(b.at(i*2+1), ctx)
-			ctx.localBindings.AddBinding(res.names[i], i)
+			ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 		}
 
 		if isLoop {
@@ -990,9 +1061,9 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 				printParseWarning(pos, formName+" form with empty body")
 			}
 
-			if !isSkipUnused(b) {
+			if !skipUnused {
 				for _, b := range ctx.localBindings.bindings {
-					if !b.isUsed && !b.name.Equals(SYMBOLS.underscore) {
+					if needsUnusedWarning(b) {
 						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
 					}
 				}
@@ -1035,6 +1106,8 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 		if !ok || !vr.isMacro || vr.Value == nil {
 			return nil
 		}
+		vr.isUsed = true
+		vr.ns.isUsed = true
 		return vr.Value.(Callable)
 	default:
 		return nil
@@ -1053,8 +1126,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			s = s.Rest()
 		}
 		res := NewListFrom(objs...)
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case *Vector:
@@ -1064,8 +1137,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res = res.Conj(t)
 		}
 		res.(*Vector).meta = s.meta
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	case Map:
@@ -1078,8 +1151,8 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			res.Add(key, value)
 		}
 		res.meta = s.(Meta).GetMeta()
-		if info := obj.GetInfo(); info != nil {
-			return res.WithInfo(info)
+		if objInfo := obj.GetInfo(); objInfo != nil {
+			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
 	default:
@@ -1126,7 +1199,7 @@ func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 		if declaredType := getTaggedType(da); declaredType != nil {
 			passedType := call.args[i].InferType()
 			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
-				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.name, declaredType.ToString(false), passedType.ToString(false)))
+				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), declaredType.ToString(false), passedType.ToString(false)))
 				res = true
 			}
 		}
@@ -1148,7 +1221,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v != nil && passedArgsCount >= len(v.args)-1 {
 		return checkTypes(v.args, call)
 	}
-	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.name))
+	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
 	return true
 }
 
@@ -1165,23 +1238,28 @@ func checkArglist(arglist Seq, passedArgsCount int) bool {
 	return false
 }
 
+func setMacroMeta(vr *Var) {
+	if vr.meta == nil {
+		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	} else {
+		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+	}
+}
+
 func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 	expr := Parse(Second(obj.(Seq)), ctx)
 	switch expr := expr.(type) {
 	case *LiteralExpr:
 		switch vr := expr.obj.(type) {
 		case *Var:
-			vr.isMacro = true
-			vr.isUsed = false
-			if vr.meta == nil {
-				vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
-			} else {
-				vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+			res := &SetMacroExpr{
+				vr: vr,
 			}
-			return expr
+			res.Eval(nil)
+			return res
 		}
 	}
-	panic(&ParseError{obj: obj, msg: "set-macro* argument must be a var"})
+	panic(&ParseError{obj: obj, msg: "set-macro__ argument must be a var"})
 }
 
 func isKnownMacros(sym Symbol) (bool, Seq) {
@@ -1279,19 +1357,19 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 		}
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
-			reportNotAFunction(pos, call.name)
+			reportNotAFunction(pos, call.Name())
 			return
 		}
 		switch expr.obj.(type) {
 		case Keyword:
 			if argsCount == 0 || argsCount > 2 {
-				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.name))
+				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.Name()))
 			}
 		}
 	case *RecurExpr:
-		reportNotAFunction(pos, call.name)
+		reportNotAFunction(pos, call.Name())
 	case *ThrowExpr:
-		reportNotAFunction(pos, call.name)
+		reportNotAFunction(pos, call.Name())
 	}
 }
 
@@ -1326,7 +1404,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return &IfExpr{
 				cond:     Parse(Second(seq), ctx),
 				positive: Parse(Third(seq), ctx),
-				negative: Parse(Forth(seq), ctx),
+				negative: Parse(Fourth(seq), ctx),
 				Position: pos,
 			}
 		case STR.fn_:
@@ -1357,7 +1435,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 					if !ctx.isUnknownCallableScope {
 						if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-							fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+							printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
 						}
 					}
 					vr = InternFakeSymbol(symNs, sym)
@@ -1398,7 +1476,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}()
 			for !syms.IsEmpty() {
 				if sym, ok := syms.First().(Symbol); ok {
-					ctx.linterBindings.AddBinding(sym, 0)
+					ctx.linterBindings.AddBinding(sym, 0, true)
 				}
 				syms = syms.Rest()
 			}
@@ -1410,15 +1488,6 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		callable: callable,
 		args:     parseSeq(seq.Rest(), ctx),
 		Position: pos,
-		name:     "fn",
-	}
-	switch c := res.callable.(type) {
-	case *VarRefExpr:
-		res.name = c.vr.ToString(false)
-	case *BindingExpr:
-		res.name = c.binding.name.ToString(false)
-	case *LiteralExpr:
-		res.name = c.obj.ToString(false)
 	}
 	if LINTER_MODE {
 		switch c := res.callable.(type) {
@@ -1442,14 +1511,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 						if ok, arglist := m.Get(KEYWORDS.arglist); ok {
 							if arglist, ok := arglist.(Seq); ok {
 								if !checkArglist(arglist, len(res.args)) {
-									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.name))
+									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.Name()))
 								}
 							}
 						}
 					}
 					return res
 				default:
-					reportNotAFunction(pos, res.name)
+					reportNotAFunction(pos, res.Name())
 				}
 			} else {
 				checkCall(c.vr.expr, c.vr.isMacro, res, pos)
@@ -1516,6 +1585,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
 		}
 		if DIALECT == CLJS && sym.ns == nil {
+			// Check if this is a "callable namespace"
 			ns := ctx.GlobalEnv.FindNamespace(sym)
 			if ns == nil {
 				ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
@@ -1523,6 +1593,11 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			if ns != nil {
 				ns.isUsed = true
 				return NewSurrogateExpr(obj)
+			}
+			// See if this is a JS interop (i.e. Math.PI)
+			parts := strings.Split(sym.Name(), ".")
+			if len(parts) > 1 && parts[0] != "" && parts[len(parts)-1] != "" {
+				return parseSymbol(DeriveReadObject(obj, MakeSymbol(strings.Join(parts[:len(parts)-1], "."))), ctx)
 			}
 		}
 		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
@@ -1532,7 +1607,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			}
 			if !ctx.isUnknownCallableScope {
 				if ctx.linterBindings.GetBinding(sym) == nil {
-					fmt.Fprintln(os.Stderr, &ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+					printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
 				}
 			}
 		}
@@ -1585,6 +1660,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+			PROBLEM_COUNT++
 			switch r.(type) {
 			case *ParseError:
 				err = r.(error)

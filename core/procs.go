@@ -19,6 +19,16 @@ import (
 	"unicode/utf8"
 )
 
+var (
+	coreData        []byte
+	timeData        []byte
+	mathData        []byte
+	linter_allData  []byte
+	linter_cljxData []byte
+	linter_cljData  []byte
+	linter_cljsData []byte
+)
+
 type (
 	Phase   int
 	Dialect int
@@ -28,9 +38,10 @@ const (
 	READ Phase = iota
 	PARSE
 	EVAL
+	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.9.0"
+const VERSION = "v0.10.1"
 
 const (
 	CLJ Dialect = iota
@@ -294,6 +305,16 @@ var procExData Proc = func(args []Object) Object {
 	return res
 }
 
+var procExCause Proc = func(args []Object) Object {
+	_, res := args[0].(*ExInfo).Get(KEYWORDS.cause)
+	return res
+}
+
+var procExMessage Proc = func(args []Object) Object {
+	_, res := args[0].(*ExInfo).Get(KEYWORDS.message)
+	return res
+}
+
 var procRegex Proc = func(args []Object) Object {
 	r, err := regexp.Compile(EnsureString(args, 0).S)
 	if err != nil {
@@ -528,12 +549,8 @@ var procSeq Proc = func(args []Object) Object {
 
 var procIsInstance Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
-	switch t := args[0].(type) {
-	case *Type:
-		return Bool{B: IsInstance(t, args[1])}
-	default:
-		panic(RT.NewError("First argument to instance? must be a type"))
-	}
+	t := EnsureType(args, 0)
+	return Bool{B: IsInstance(t, args[1])}
 }
 
 var procAssoc Proc = func(args []Object) Object {
@@ -1149,7 +1166,15 @@ var procFindNamespace Proc = func(args []Object) Object {
 
 var procCreateNamespace Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
-	return GLOBAL_ENV.EnsureNamespace(sym)
+	res := GLOBAL_ENV.EnsureNamespace(sym)
+	// In linter mode the latest create-ns call overrides position info.
+	// This is for the cases when (ns ...) is called in .jokerd/linter.clj file and alike.
+	// Also, isUsed needs to be reset in this case.
+	if LINTER_MODE {
+		res.Name = res.Name.WithInfo(sym.GetInfo()).(Symbol)
+		res.isUsed = false
+	}
+	return res
 }
 
 var procInjectNamespace Proc = func(args []Object) Object {
@@ -1384,6 +1409,49 @@ var procParse Proc = func(args []Object) Object {
 	return res.Dump(false)
 }
 
+func PackReader(reader *Reader, filename string) ([]byte, error) {
+	var p []byte
+	packEnv := NewPackEnv()
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			var hp []byte
+			hp = packEnv.Pack(hp)
+			return append(hp, p...), nil
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, err
+		}
+		expr, err := TryParse(obj, parseContext)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, err
+		}
+		p = expr.Pack(p, packEnv)
+		_, err = TryEval(expr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return nil, err
+		}
+	}
+}
+
+var procIncProblemCount Proc = func(args []Object) Object {
+	PROBLEM_COUNT++
+	return NIL
+}
+
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1415,10 +1483,16 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
-		_, err = TryEval(expr)
+		obj, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return err
+		}
+		if phase == EVAL {
+			continue
+		}
+		if _, ok := obj.(Nil); !ok {
+			fmt.Println(obj.ToString(true))
 		}
 	}
 }
@@ -1432,11 +1506,22 @@ func intern(name string, proc Proc) {
 }
 
 func processData(data []byte) {
-	currentNamespace := GLOBAL_ENV.ns.Value
-	GLOBAL_ENV.ns.Value = GLOBAL_ENV.CoreNamespace
-	reader := bytes.NewReader(data)
-	ProcessReader(NewReader(reader, "<joker.core>"), "", EVAL)
-	GLOBAL_ENV.ns.Value = currentNamespace
+	ns := GLOBAL_ENV.CurrentNamespace()
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
+	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	header, p := UnpackHeader(data, GLOBAL_ENV)
+	for len(p) > 0 {
+		var expr Expr
+		expr, p = UnpackExpr(p, header)
+		_, err := TryEval(expr)
+		PanicOnErr(err)
+	}
+}
+
+func ProcessCoreData() {
+	processData(coreData)
+	processData(timeData)
+	processData(mathData)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -1536,8 +1621,8 @@ func ReadConfig(filename string, workingDir string) {
 	}
 	ok, ignoredUnusedNamespaces := configMap.Get(MakeKeyword("ignored-unused-namespaces"))
 	if ok {
-		seq, ok := ignoredUnusedNamespaces.(Seqable)
-		if ok {
+		seq, ok1 := ignoredUnusedNamespaces.(Seqable)
+		if ok1 {
 			WARNINGS.ignoredUnusedNamespaces = NewSetFromSeq(seq.Seq())
 		} else {
 			printConfigError(configFileName, ":ignored-unused-namespaces value must be a vector, got "+ignoredUnusedNamespaces.GetType().ToString(false))
@@ -1546,22 +1631,22 @@ func ReadConfig(filename string, workingDir string) {
 	}
 	ok, knownNamespaces := configMap.Get(MakeKeyword("known-namespaces"))
 	if ok {
-		if _, ok := knownNamespaces.(Seqable); !ok {
+		if _, ok1 := knownNamespaces.(Seqable); !ok1 {
 			printConfigError(configFileName, ":known-namespaces value must be a vector, got "+knownNamespaces.GetType().ToString(false))
 			return
 		}
 	}
 	ok, knownTags := configMap.Get(MakeKeyword("known-tags"))
 	if ok {
-		if _, ok := knownTags.(Seqable); !ok {
+		if _, ok1 := knownTags.(Seqable); !ok1 {
 			printConfigError(configFileName, ":known-tags value must be a vector, got "+knownTags.GetType().ToString(false))
 			return
 		}
 	}
 	ok, knownMacros := configMap.Get(KEYWORDS.knownMacros)
 	if ok {
-		_, ok := knownMacros.(Seqable)
-		if !ok {
+		_, ok1 := knownMacros.(Seqable)
+		if !ok1 {
 			printConfigError(configFileName, ":known-macros value must be a vector, got "+knownMacros.GetType().ToString(false))
 			return
 		}
@@ -1579,33 +1664,44 @@ func ReadConfig(filename string, workingDir string) {
 			printConfigError(configFileName, ":rules value must be a map, got "+rules.GetType().ToString(false))
 			return
 		}
-		ok, v := m.Get(KEYWORDS.ifWithoutElse)
-		if ok {
+		if ok, v := m.Get(KEYWORDS.ifWithoutElse); ok {
 			WARNINGS.ifWithoutElse = toBool(v)
+		}
+		if ok, v := m.Get(KEYWORDS.unusedFnParameters); ok {
+			WARNINGS.unusedFnParameters = toBool(v)
+		}
+		if ok, v := m.Get(KEYWORDS.fnWithEmptyBody); ok {
+			WARNINGS.fnWithEmptyBody = toBool(v)
 		}
 	}
 	LINTER_CONFIG.Value = configMap
+}
+
+func removeJokerNamespaces() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			delete(GLOBAL_ENV.Namespaces, k)
+		}
+	}
 }
 
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return
 	}
-	reader := bytes.NewReader(linter_allData)
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		return
 	}
-	reader = bytes.NewReader(linter_cljxData)
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	processData(linter_cljxData)
 	switch dialect {
 	case CLJ:
-		reader = bytes.NewReader(linter_cljData)
+		processData(linter_cljData)
 	case CLJS:
-		reader = bytes.NewReader(linter_cljsData)
+		processData(linter_cljsData)
 	}
-	ProcessReader(NewReader(reader, "<user>"), "", EVAL)
+	removeJokerNamespaces()
 }
 
 func NewReaderFromFile(filename string) (*Reader, error) {
@@ -1767,6 +1863,8 @@ func init() {
 	intern("buffer__", procBuffer)
 	intern("ex-info__", procExInfo)
 	intern("ex-data__", procExData)
+	intern("ex-cause__", procExCause)
+	intern("ex-message__", procExMessage)
 	intern("regex__", procRegex)
 	intern("re-seq__", procReSeq)
 	intern("re-find__", procReFind)
@@ -1801,8 +1899,5 @@ func init() {
 	intern("lib-path__", procLibPath)
 	intern("intern-fake-var__", procInternFakeVar)
 	intern("parse__", procParse)
-
-	processData(coreData)
-	processData(timeData)
-	processData(mathData)
+	intern("inc-problem-count__", procIncProblemCount)
 }

@@ -1,7 +1,5 @@
-(doseq [sym '(js)]
+(doseq [sym '(js Math)]
   (inject-ns__ sym))
-
-(joker.core/in-ns 'joker.core)
 
 (def require-macros require)
 
@@ -357,7 +355,6 @@
 (defn js-str [s])
 (defn es6-iterable [ty])
 (defn use-macros [& args])
-(defn import [& import-symbols-or-lists])
 (defn copy-arguments [dest])
 (defn divide [x & more])
 (defn unsafe-bit-and [x y & more])
@@ -367,7 +364,8 @@
    *known-macros*
    {'cljs.core.async.macros/go-loop nil 'cljs.core.async.macros/alt! nil 'cljs.core.async.macros/alt!! nil
     'cljs.core.async.macros/alts! nil 'cljs.core.async.macros/alts!! nil 'this-as nil 'import-macros nil
-    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil 'import nil}
+    'goog-define nil 'specify! nil 'specify nil 'simple-benchmark nil 'use-macros nil
+    'cljs.test/deftest nil 'cljs.test/is nil 'cljs.test/are nil}
    (:known-macros joker.core/*linter-config*)))
 
 (defn- lib-name__
@@ -376,9 +374,10 @@
     (derive-info__ (symbol (joker.string/replace lib "/" "_")) lib)
     lib))
 
-(joker.core/in-ns 'user)
+(defn- load-libs-options__
+  []
+  #{:as :reload :reload-all :require :use :verbose :refer :default :refer-macros :exclude :only :rename :include-macros})
 
-(remove-ns 'joker.string)
-
+(in-ns 'user)
 (joker.core/refer 'joker.core)
 

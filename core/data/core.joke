@@ -29,13 +29,13 @@
   ^{:added "1.0"}
   let (fn* let [&form &env & decl] (cons 'let* decl)))
 
-(set-macro* #'let)
+(set-macro__ #'let)
 
 (def
   ^{:added "1.0"}
   loop (fn* loop [&form &env & decl] (cons 'loop* decl)))
 
-(set-macro* #'loop)
+(set-macro__ #'loop)
 
 (def
   ^{:added "1.0"}
@@ -44,7 +44,7 @@
             (cons 'fn* decl)
             (meta__ &form))))
 
-(set-macro* #'fn)
+(set-macro__ #'fn)
 
 (def
   ^{:arglists '([coll])
@@ -279,7 +279,7 @@
            (list 'def (with-meta name m)
                  (cons `fn fdecl)))))
 
-(set-macro* #'defn)
+(set-macro__ #'defn)
 
 (defn cast
   "Throws an error if x is not of a type t, else returns x."
@@ -363,9 +363,9 @@
                             d))]
                (list 'do
                      (cons `defn decl)
-                     (list 'set-macro* (list 'var name))))))
+                     (list 'set-macro__ (list 'var name))))))
 
-(set-macro* #'defmacro)
+(set-macro__ #'defmacro)
 
 (defmacro when
   "Evaluates test. If logical true, evaluates body in an implicit do."
@@ -451,6 +451,7 @@
   ([prefix-string] (gensym__ prefix-string)))
 
 (def println-err)
+(def println-linter__)
 
 (defmacro cond
   "Takes a set of test/expr pairs. It evaluates each test one at a
@@ -467,7 +468,7 @@
           (when (next (next clauses))
             (cons 'joker.core/cond (next (next clauses)))))
     (when *linter-mode*
-      (println-err (ex-info "Empty cond" {:form &form :_prefix "Parse warning"})))))
+      (println-linter__ (ex-info "Empty cond" {:form &form :_prefix "Parse warning"})))))
 
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
@@ -1215,7 +1216,7 @@
   {:added "1.0"}
   [x & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in ->" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
       (let [form (first forms)
@@ -1233,7 +1234,7 @@
   {:added "1.0"}
   [x & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in ->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in ->>" {:form &form :_prefix "Parse warning"})))
   (loop [x x forms forms]
     (if forms
       (let [form (first forms)
@@ -1260,7 +1261,14 @@
   test, if not, yields else"
   {:added "1.0"}
   ([bindings then]
-   `(if-let ~bindings ~then nil))
+   (assert-args
+    (vector? bindings) "a vector for its binding"
+    (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (let [form (bindings 0) tst (bindings 1)]
+     `(let [temp# ~tst]
+        (if temp#
+          (let [~form temp#]
+            ~then)))))
   ([bindings then else & oldform]
    (assert-args
     (vector? bindings) "a vector for its binding"
@@ -2268,7 +2276,7 @@
     (or (find-ns x)
         (if *linter-mode*
           (do
-            (println-err (ex-info (str "No namespace: " x " found")
+            (println-linter__ (ex-info (str "No namespace: " x " found")
                                   {:form x :_prefix "Parse warning"}))
             (create-ns__ x))
           (throw (ex-info (str "No namespace: " x " found") {:form x}))))))
@@ -2469,7 +2477,11 @@
 
 ;redefine let and loop  with destructuring
 (defn ^:private destructure [bindings]
-  (let [bents (partition 2 bindings)
+  (let [mark-as (fn [s]
+                  (if (and *linter-mode* (false? (:unused-as (:rules *linter-config*))))
+                    (vary-meta s assoc :skip-unused true)
+                    s))
+        bents (partition 2 bindings)
         pb (fn pb [bvec b v]
              (let [pvec
                    (fn [bvec b val]
@@ -2491,7 +2503,7 @@
                                                     n
                                                     (nnext bs)
                                                     true)
-                               (= firstb :as) (pb ret (second bs) gvec)
+                               (= firstb :as) (pb ret (mark-as (second bs)) gvec)
                                :else (if seen-rest?
                                        (throw (ex-info "Unsupported binding form, only :as can follow & parameter" {:form bindings}))
                                        (recur (pb (if has-rest
@@ -2516,7 +2528,7 @@
                                       (conj gmap) (conj `(if (seq? ~gmap) (apply array-map__ (seq ~gmapseq)) ~gmap))
                                       ((fn [ret]
                                          (if (:as b)
-                                           (conj ret (:as b) gmap)
+                                           (conj ret (mark-as (:as b)) gmap)
                                            ret))))
                               bes (let [transforms
                                         (reduce
@@ -2651,7 +2663,7 @@
                                (concat (map (fn* [c] `(assert ~c)) pre)
                                        body)
                                body)]
-                    (maybe-destructured params body)))
+                    (derive-info__ (maybe-destructured params body) sig)))
         new-sigs (map psig sigs)]
     (with-meta
       (if name
@@ -2842,13 +2854,34 @@
   (binding [*out* *err*]
     (apply println xs)))
 
+(defn ^:private println-linter__
+  [& xs]
+  (inc-problem-count__)
+  (apply println-err xs))
+
 (defn ex-data
   "Returns exception data (a map) if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
   [ex]
   (when (instance? ExInfo ex)
-    (ex-data__ ^ExInfo ex)))
+    (ex-data__ ex)))
+
+(defn ex-cause
+  "Returns the cause of ex if ex is an ExInfo.
+  Otherwise returns nil."
+  {:added "1.0"}
+  [ex]
+  (when (instance? ExInfo ex)
+    (ex-cause__ ex)))
+
+(defn ex-message
+  "Returns the message attached to ex if ex is an ExInfo.
+  Otherwise returns nil."
+  {:added "1.0"}
+  [ex]
+  (when (instance? ExInfo ex)
+    (ex-message__ ex)))
 
 (defn hash
   "Returns the hash code of its argument."
@@ -3162,10 +3195,10 @@
 
 (defn- throw-if
   "Throws an exception with a message if pred is true"
-  [pred fmt & args]
+  [pred form fmt & args]
   (when pred
     (let [^String message (apply format fmt args)
-          exception (ex-info message {})]
+          exception (ex-info message {:form form})]
       (throw exception))))
 
 (defn- libspec?
@@ -3193,6 +3226,7 @@
   [lib need-ns require]
   (load lib)
   (throw-if (and need-ns (not (find-ns lib)))
+            lib
             "namespace '%s' not found after loading '%s'"
             lib (lib-path__ lib))
   (when require
@@ -3216,26 +3250,36 @@
   [lib]
   lib)
 
+(defn- load-libs-options__
+  []
+  #{:as :reload :reload-all :require :use :verbose :exclude :only :rename :refer})
+
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
   (throw-if (and prefix (pos? (index-of__ (name lib) \.)))
+            lib
             "Found lib name '%s' containing period with prefix '%s'.  lib names inside prefix lists must not contain periods"
             (name lib) prefix)
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         lib (lib-name__ lib)
         opts (apply hash-map options)
-        {:keys [as reload reload-all require use verbose]} opts
+        unsupported (seq (remove (load-libs-options__) (keys opts)))
+        _ (throw-if unsupported
+                    (first unsupported)
+                    (apply str "Unsupported option(s) supplied: "
+                           (interpose \, unsupported)))
+        {:keys [as reload reload-all require use verbose default]} opts
         loaded (contains? *loaded-libs* lib)
         load (cond reload-all
                load-all
                (or reload (not require) (not loaded))
                load-one)
-        need-ns (or as use)
+        need-ns (or as use default)
         filter-opts (select-keys opts require-opt-keys)
         undefined-on-entry (not (find-ns lib))]
     (when (and *linter-mode* loaded)
-      (println-err (ex-info (str "duplicate require for " lib)
+      (println-linter__ (ex-info (str "duplicate require for " lib)
                             {:form lib :_prefix "Parse warning"})))
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
@@ -3246,6 +3290,7 @@
               (remove-ns lib))
             (throw e)))
         (throw-if (and need-ns (not (find-ns lib)))
+                  lib
                   "namespace '%s' not found" lib))
       (when (and need-ns *loading-verbosely*)
         (printf "(joker.core/in-ns '%s)\n" (ns-name *ns*)))
@@ -3253,6 +3298,10 @@
         (when *loading-verbosely*
           (printf "(joker.core/alias '%s '%s)\n" as lib))
         (alias as lib))
+      (when default
+        (when *loading-verbosely*
+          (printf "(joker.core/alias '%s '%s)\n" default lib))
+        (alias default lib))
       (when (or use (get-refer-opt filter-opts))
         (when *loading-verbosely*
           (printf "(joker.core/refer '%s" lib)
@@ -3269,18 +3318,19 @@
         opts (interleave flags (repeat true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
-    (let [supported #{:as :reload :reload-all :require :use :verbose :refer}
+    (let [supported (load-libs-options__)
           unsupported (seq (remove supported flags))]
       (throw-if unsupported
+                (first unsupported)
                 (apply str "Unsupported option(s) supplied: "
                      (interpose \, unsupported))))
     ; check a load target was specified
-    (throw-if (not (seq args)) "Nothing specified to load")
+    (throw-if (not (seq args)) args "Nothing specified to load")
     (doseq [arg args]
       (if (libspec? arg)
         (apply load-lib nil (prependss arg opts))
         (let [[prefix & args] arg]
-          (throw-if (nil? prefix) "prefix cannot be nil")
+          (throw-if (nil? prefix) arg "prefix cannot be nil")
           (doseq [arg args]
             (apply load-lib prefix (prependss arg opts))))))))
 
@@ -3289,12 +3339,12 @@
   exception message shows the dependency chain with the cycle
   highlighted. Ignores the trivial case of a file attempting to load
   itself because."
-  [path]
+  [path lib]
   (when (some #{path} (rest *pending-paths*))
     (let [pending (map #(if (= % path) (str "[ " % " ]") %)
                        (cons path *pending-paths*))
           chain (apply str (interpose "->" pending))]
-      (throw-if true "Cyclic load dependency: %s" chain))))
+      (throw-if true  lib "Cyclic load dependency: %s" chain))))
 
 (defn require
   "Loads libs, skipping any that are already loaded. Each argument is
@@ -3372,7 +3422,7 @@
   [& args] (apply load-libs :require :use args))
 
 (defn loaded-libs
-  "Returns a sorted set of symbols naming the currently loaded libs"
+  "Returns an UNSORTED set of symbols naming the currently loaded libs"
   {:added "1.0"}
   []
   *loaded-libs*)
@@ -3391,7 +3441,7 @@
     (let [^String path (lib-path__ lib)]
       (when *loading-verbosely*
         (printf "(joker.core/load \"%s\")\n" path))
-      (check-cyclic-dependency path)
+      (check-cyclic-dependency path lib)
       (when-not (= path (first *pending-paths*))
         (binding [*pending-paths* (conj *pending-paths* path)
                   *ns* *ns*]
@@ -4011,7 +4061,7 @@
   [expr & clauses]
   (assert (even? (count clauses)))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (-> ~g ~step) ~g))
                    (partition 2 clauses))]
@@ -4030,7 +4080,7 @@
   [expr & clauses]
   (assert (even? (count clauses)))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [[test step]] `(if ~test (->> ~g ~step) ~g))
                    (partition 2 clauses))]
@@ -4047,7 +4097,7 @@
   {:added "1.0"}
   [expr name & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in as->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in as->" {:form &form :_prefix "Parse warning"})))
   `(let [~name ~expr
          ~@(interleave (repeat name) (butlast forms))]
      ~(if (empty? forms)
@@ -4060,7 +4110,7 @@
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in some->" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in some->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))
                    forms)]
@@ -4076,7 +4126,7 @@
   {:added "1.0"}
   [expr & forms]
   (when (and *linter-mode* (not (seq forms)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
-    (println-err (ex-info "No forms in some->>" {:form &form :_prefix "Parse warning"})))
+    (println-linter__ (ex-info "No forms in some->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
         steps (map (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))
                    forms)]

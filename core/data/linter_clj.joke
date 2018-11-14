@@ -1,7 +1,5 @@
 ;; This vars are declared for the linter mode to work properly
 
-(joker.core/in-ns 'user)
-
 (def defproject)
 
 (doseq
@@ -55,8 +53,6 @@
 (doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
   (inject-ns__ sym))
 
-(joker.core/in-ns 'joker.core)
-
 ;; Unsupported arities
 
 (def __deref__ deref)
@@ -64,6 +60,9 @@
   ([^Deref ref]
    (__deref__ ref))
   ([^Deref ref ^Int timeout-ms timeout-val]))
+
+(defn spit [f content & options])
+(defn slurp [f & options])
 
 
 ;; Clojure core functions not supported by Joker
@@ -289,6 +288,17 @@
 (defn bytes? [x])
 (defn uri? [x])
 (defn print-method [x writer])
+(defn print-dup [x writer])
+(defn add-tap [f])
+(defn remove-tap [f])
+(defn tap> [x])
+(defn read+string
+  ([])
+  ([stream])
+  ([stream eof-error? eof-value])
+  ([stream eof-error? eof-value recursive?])
+  ([opts stream]))
+(defn PrintWriter-on [flush-fn close-fn])
 
 ;; Clojure core macros not supported by Joker
 
@@ -329,10 +339,19 @@
 (def *compiler-options*)
 (def *agent*)
 (def *read-eval*)
+(def *data-readers*)
+(def *verbose-defrecords*)
+(def *math-context*)
+(def EMPTY-NODE)
+(def char-escape-string)
+(def *suppress-read*)
+(def *fn-loader*)
+(def *use-context-classloader*)
+(def primitives-classnames)
+(def *allow-unresolved-vars*)
+(def *source-path*)
+(def char-name-string)
 
-(joker.core/in-ns 'user)
-
-(remove-ns 'joker.string)
-
+(in-ns 'user)
 (joker.core/refer 'joker.core)
 

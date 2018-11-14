@@ -1,4 +1,4 @@
-(ns joker.time)
+(in-ns 'joker.time)
 
 (def
   ^{:doc "Number of nanoseconds in 1 nanosecond"
@@ -8,24 +8,24 @@
 (def
   ^{:doc "Number of nanoseconds in 1 microsecond"
     :added "1.0"}
-  microsecond (* 1000 nanosecond))
+  microsecond (joker.core/* 1000 nanosecond))
 
 (def
   ^{:doc "Number of nanoseconds in 1 millisecond"
     :added "1.0"}
-  millisecond (* 1000 microsecond))
+  millisecond (joker.core/* 1000 microsecond))
 
 (def
   ^{:doc "Number of nanoseconds in 1 second"
     :added "1.0"}
-  second (* 1000 millisecond))
+  second (joker.core/* 1000 millisecond))
 
 (def
   ^{:doc "Number of nanoseconds in 1 minute"
     :added "1.0"}
-  minute (* 60 second))
+  minute (joker.core/* 60 second))
 
 (def
   ^{:doc "Number of nanoseconds in 1 hour"
     :added "1.0"}
-  hour (* 60 minute))
+  hour (joker.core/* 60 minute))

@@ -320,7 +320,7 @@ func Third(seq Seq) Object {
 	return seq.Rest().Rest().First()
 }
 
-func Forth(seq Seq) Object {
+func Fourth(seq Seq) Object {
 	return seq.Rest().Rest().Rest().First()
 }
 
@@ -399,7 +399,7 @@ func pprintSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
 	for iter := iter(seq); iter.HasNext(); {
-		i = pprintObject(iter.Next(), indent, w)
+		i = pprintObject(iter.Next(), indent+1, w)
 		if iter.HasNext() {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+1)

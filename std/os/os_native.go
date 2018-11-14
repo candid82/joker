@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	. "github.com/candid82/joker/core"
 )
@@ -27,8 +28,11 @@ func commandArgs() Object {
 	return res
 }
 
-func sh(name string, args []string) Object {
+const defaultFailedCode = 127  // seen from 'sh no-such-file' on OS X and Ubuntu
+
+func sh(dir string, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
 	stdoutReader, err := cmd.StdoutPipe()
 	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
@@ -45,9 +49,24 @@ func sh(name string, args []string) Object {
 	err = cmd.Wait()
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Bool{B: err == nil})
+
+	var exitCode int
 	if err != nil {
 		res.Add(MakeKeyword("err-msg"), String{S: err.Error()})
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			ws := exiterr.Sys().(syscall.WaitStatus)
+			exitCode = ws.ExitStatus()
+		} else {
+			exitCode = defaultFailedCode
+			if stderrString == "" {
+				stderrString = err.Error()
+			}
+		}
+	} else {
+		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
+		exitCode = ws.ExitStatus()
 	}
+	res.Add(MakeKeyword("exit"), Int{I: exitCode})
 	res.Add(MakeKeyword("out"), String{S: stdoutString})
 	res.Add(MakeKeyword("err"), String{S: stderrString})
 	return res

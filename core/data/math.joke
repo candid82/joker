@@ -1,4 +1,4 @@
-(ns joker.math)
+(in-ns 'joker.math)
 
 (def
   ^{:doc "Mathematical constant Pi."

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	. "github.com/candid82/joker/core"
 )
@@ -105,9 +106,9 @@ func mapToResp(response Map, w http.ResponseWriter) {
 	if ok, b := response.Get(MakeKeyword("body")); ok {
 		body = AssertString(b, "HTTP response body must be a string").S
 	}
-	if ok, h := response.Get(MakeKeyword("headers")); ok {
+	if ok, headers := response.Get(MakeKeyword("headers")); ok {
 		header := w.Header()
-		h := AssertMap(h, "HTTP response headers must be a map")
+		h := AssertMap(headers, "HTTP response headers must be a map")
 		for iter := h.Iter(); iter.HasNext(); {
 			p := iter.Next()
 			hname := AssertString(p.Key, "HTTP response header name must be a string").S
@@ -144,8 +145,11 @@ func startServer(addr string, handler Callable) Object {
 		host = MakeString(addr[:i])
 		port = MakeString(addr[i+1:])
 	}
+	var mutex sync.Mutex
 	err := http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		mutex.Lock()
 		defer func() {
+			mutex.Unlock()
 			if r := recover(); r != nil {
 				w.WriteHeader(500)
 				io.WriteString(w, "Internal server error")

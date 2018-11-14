@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/882970/31309929-6bced720-ab43-11e7-960c-74861aeec64c.png" width="200px"/>
+<img src="https://user-images.githubusercontent.com/882970/48048842-a0224080-e151-11e8-8855-642cf5ef3fdd.png" width="117px"/>
 
 [![CircleCI](https://circleci.com/gh/candid82/joker.svg?style=svg)](https://circleci.com/gh/candid82/joker)
 
@@ -35,6 +35,8 @@ You can also [build](#building) Joker from the source code.
 `joker -e <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
+
+`joker -` - execute a script on standard input (os.Stdin). (Supersedes `--`, which will be changed to mean "end of Joker options" in the future.)
 
 ## Documentation
 
@@ -108,7 +110,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 
 ## Linter mode
 
-To run Joker in linter mode pass `--lint --dialect <dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `--dialect <dialect>` is omitted, it will be set based on file extension. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lint --dialect cljs --` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
+To run Joker in linter mode pass `--lint --dialect <dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `--dialect <dialect>` is omitted, it will be set based on file extension. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lint --dialect cljs -` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
 ```clojure
 (let [a 1])
 ```
@@ -138,7 +140,7 @@ Joker lints the code in one file at a time and doesn't try to resolve symbols fr
 (def-something baz ...)
 ```
 
-Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The configuration file is called `.joker` and should be in the same directory as the target file, or in its parent directory, or in its parent's parent directory etc up to the root directory. When the reading from stdin Joker will look for a `.joker` file in the current working directory. The `--working-dir <path/to/file>` flag can be used to override the working directory that Joker starts looking in. Joker will also look for a `.joker` file in your home directory if it cannot find it in the above directories. The file should contain a single map with `:known-macros` key:
+Symbol `baz` is introduced inside `def-something` macro. The code it totally valid. However, the linter will output the following error: `Parse error: Unable to resolve symbol: baz`. This is because by default the linter assumes external vars (`bar/def-something` in this case) to hold functions, not macros. The good news is that you can tell Joker that `bar/def-something` is a macro and thus suppress the error message. To do that you need to add `bar/def-something` to the list of known macros in Joker configuration file. The configuration file is called `.joker` and should be in the same directory as the target file, or in its parent directory, or in its parent's parent directory etc up to the root directory. When reading from stdin Joker will look for a `.joker` file in the current working directory. The `--working-dir <path/to/file>` flag can be used to override the working directory that Joker starts looking in. Joker will also look for a `.joker` file in your home directory if it cannot find it in the above directories. The file should contain a single map with `:known-macros` key:
 
 ```clojure
 {:known-macros [bar/def-something foo/another-macro ...]}
@@ -172,6 +174,20 @@ If your code uses tagged literals that Joker doesn't know about, add them to `:k
 {:known-tags [db/fn]}
 ```
 
+If you use `:refer :all` Joker won't be able to properly resolve symbols because it doesn't know what vars are declared in the required namespace (i.e. `clojure.test`). There are generally three options here:
+
+1. Refer specific symbols. For example: `[clojure.test :refer [deftest testing is are]]`. This is usually not too tedious, and you only need to do it once per file.
+2. Use alias and qualified symbols:
+
+```clojure
+(:require [clojure.test :as t])
+(t/deftest ...)
+```
+
+3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file. So Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. Note that such declarations become valid even if you don't require the namespace they come from, so this feature should be used sparingly (see [this discussion](https://github.com/candid82/joker/issues/52) for more details).
+
+I generally prefer first option for `clojure.test` namespace.
+
 ### Optional rules
 
 Joker supports a few configurable linting rules. To turn them on or off set their values to `true` or `false` in `:rules` map in `.joker` file. For example:
@@ -183,23 +199,32 @@ Joker supports a few configurable linting rules. To turn them on or off set thei
 
 Below is the list of all configurable rules.
 
-|         Rule         |                      Description                      | Default value |
-|----------------------|-------------------------------------------------------|---------------|
-| `if-without-else`    | warn on `if` without the `else` branch                | false         |
-| `no-forms-threading` | warn on threading macros with no forms, i.e. `(-> a)` | true          |
+|          Rule          |                      Description                      | Default value |
+|------------------------|-------------------------------------------------------|---------------|
+| `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
+| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
+| `unused-as`            | warn on unused `:as` binding                          | `true`        |
+| `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
+| `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
+
+Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
 
 ## Building
 
-Joker's only dependency is [readline](https://github.com/chzyer/readline).
-Below commands should get you up and running. Ignore the error message about undefined `coreData` after you run `go get`: `coreData` will be generated by `go generate`.
+Joker requires Go v1.9 or later.
+Below commands should get you up and running.
 
 ```
-go get github.com/candid82/joker
+go get -d github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
-go generate ./...
-go build
-./joker
+./run.sh --version && go install
 ```
+
+## Contributors
+
+(Generated by [Hall-Of-Fame](https://github.com/sourcerer-io/hall-of-fame))
+
+[![](https://sourcerer.io/fame/candid82/candid82/joker/images/0)](https://sourcerer.io/fame/candid82/candid82/joker/links/0)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/1)](https://sourcerer.io/fame/candid82/candid82/joker/links/1)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/2)](https://sourcerer.io/fame/candid82/candid82/joker/links/2)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/3)](https://sourcerer.io/fame/candid82/candid82/joker/links/3)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/4)](https://sourcerer.io/fame/candid82/candid82/joker/links/4)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/5)](https://sourcerer.io/fame/candid82/candid82/joker/links/5)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/6)](https://sourcerer.io/fame/candid82/candid82/joker/links/6)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/7)](https://sourcerer.io/fame/candid82/candid82/joker/links/7)
 
 ## License
 

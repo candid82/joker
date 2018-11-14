@@ -106,7 +106,7 @@ func (expr *CallExpr) InferType() *Type {
 
 func (expr *CallExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "call", pos)
-	res.Add(MakeKeyword("name"), String{S: expr.name})
+	res.Add(MakeKeyword("name"), String{S: expr.Name()})
 	res.Add(MakeKeyword("callable"), expr.callable.Dump(pos))
 	addVector(res, expr.args, "args", pos)
 	return res
@@ -141,14 +141,27 @@ func (expr *VarRefExpr) InferType() *Type {
 	// if expr.vr.taggedType != nil {
 	// 	return expr.vr.taggedType
 	// }
-	if expr.vr.expr != nil {
-		return expr.vr.expr.InferType()
+	if expr.vr.expr == nil {
+		return nil
 	}
-	return nil
+	if expr.vr.isDynamic {
+		return nil
+	}
+	return expr.vr.expr.InferType()
 }
 
 func (expr *VarRefExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "var-ref", pos)
+	res.Add(KEYWORDS.var_, expr.vr)
+	return res
+}
+
+func (expr *SetMacroExpr) InferType() *Type {
+	return nil
+}
+
+func (expr *SetMacroExpr) Dump(pos bool) Map {
+	res := exprArrayMap(expr, "set-macro", pos)
 	res.Add(KEYWORDS.var_, expr.vr)
 	return res
 }
