@@ -50,7 +50,7 @@
   ([^String separator ^Seqable coll]))
 
 (defn ^String replace
-  "Replaces all instances of match (String of Regex) with string repl in string s.
+  "Replaces all instances of match (String or Regex) with string repl in string s.
 
   If match is Regex, $1, $2, etc. in the replacement string repl are
   substituted with the string that matched the corresponding
@@ -61,7 +61,7 @@
   [^String s ^Object match ^String repl])
 
 (defn ^String replace-first
-  "Replaces the first instance of match (String of Regex) with string repl in string s.
+  "Replaces the first instance of match (String or Regex) with string repl in string s.
 
   If match is Regex, $1, $2, etc. in the replacement string repl are
   substituted with the string that matched the corresponding
