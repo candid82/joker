@@ -178,6 +178,8 @@ func nrepl(port string, phase Phase) {
 
 	reader := NewReader(runeReader, "<nrepl>")
 
+	fmt.Fprintf(JokerOut, "Welcome to joker %s. Use '(joker.os/exit 0)', or close the connection, to exit.\n", VERSION)
+
 	for {
 		fmt.Fprint(JokerOut, GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {
