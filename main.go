@@ -12,7 +12,6 @@ import (
 	"runtime/pprof"
 	"strconv"
 	"strings"
-	"time"
 
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/std/base64"
@@ -69,7 +68,7 @@ func processFile(filename string, phase Phase) error {
 	var reader *Reader
 	if filename == "-" || filename == "--" {
 		if filename == "--" {
-			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead")
+			fmt.Fprintln(JokerErr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead")
 		}
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
@@ -99,15 +98,15 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 			switch r := r.(type) {
 			case *ParseError:
 				replContext.PushException(r)
-				fmt.Fprintln(os.Stderr, r)
+				fmt.Fprintln(JokerErr, r)
 			case *EvalError:
 				replContext.PushException(r)
-				fmt.Fprintln(os.Stderr, r)
+				fmt.Fprintln(JokerErr, r)
 			case Error:
 				replContext.PushException(r)
-				fmt.Fprintln(os.Stderr, r)
+				fmt.Fprintln(JokerErr, r)
 			// case *runtime.TypeAssertionError:
-			// 	fmt.Fprintln(os.Stderr, r)
+			// 	fmt.Fprintln(JokerErr, r)
 			default:
 				panic(r)
 			}
@@ -119,7 +118,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 		return true
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(JokerErr, err)
 		skipRestOfLine(reader)
 		return
 	}
@@ -137,162 +136,14 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 
 	res := Eval(expr, nil)
 	replContext.PushValue(res)
-	fmt.Println(res.ToString(true))
+	fmt.Fprintln(JokerOut, res.ToString(true))
 	return false
-}
-
-type networkOutput struct { }
-
-func (n *networkOutput) Read(buf []byte) (bytes int, err error) {
-	return 0, nil
-}
-
-func (n *networkOutput) Write(buf []byte) (bytes int, err error) {
-	return 0, nil
-}
-
-func (n *networkOutput) Flush() error {
-	return nil
-}
-
-func (n *networkOutput) Chdir() error {
-	panic("hi there")
-}
-
-func (n *networkOutput) Chmod(mode os.FileMode) error {
-	panic("so cute")
-}
-
-func (n *networkOutput) Chown(uid, gid int)  error {
-	panic("no way")
-}
-
-func (n *networkOutput) Close() error {
-	return nil
-}
-
-func (n *networkOutput) Fd() int {
-	panic("want fd")
-}
-
-func (n *networkOutput) Name() string {
-	panic("not me")
-}
-
-func (n *networkOutput) Readdir(nent int) ([]os.FileInfo, error) {
-	panic("nor me")
-}
-
-func (n *networkOutput) Readdirnames(nent int) ([]string, error) {
-	panic("me either")
-}
-
-func (n *networkOutput) Seek(offset int64, whence int) (ret int64, err error) {
-	panic("and ye shall not find")
-}
-
-func (n *networkOutput) SetDeadline(t time.Time) error {
-	panic("manana")
-}
-
-func (n *networkOutput) SetReadDeadline(t time.Time) error {
-	panic("manana")
-}
-
-func (n *networkOutput) SetWriteDeadline(t time.Time) error {
-	panic("manana")
-}
-
-func (n *networkOutput) Stat() (os.FileInfo, error) {
-	panic("right away, doctor!")
-}
-
-func (n *networkOutput) Sync() error {
-	panic("faucet")
-}
-
-func (n *networkOutput) Truncate(size int64) error {
-	panic("ouch!")
-}
-
-func (n *networkOutput) WriteAt(buf []byte, off int64) (int, error) {
-	panic("who you talking at?")
-}
-
-func (n *networkOutput) WriteString(s string) (int, error) {
-	panic("interesting theory!")
-}
-
-func newNetworkOutput(conn net.Conn) *networkOutput {
-	return &networkOutput{}
-}
-
-type discardWriter struct {}
-func (w discardWriter) Write(p []byte) (n int, err error) {
-	return
-}
-
-// A redirectedWriter is the write half of a pipe.
-type redirector struct {
-}
-
-func (p *redirector) Read(b []byte) (n int, err error) {
-	return 0, nil
-}
-
-func (p *redirector) readCloseError() error {
-	return nil
-}
-
-func (p *redirector) CloseRead(err error) error {
-	return nil
-}
-
-func (p *redirector) Write(b []byte) (n int, err error) {
-	return 0, nil
-}
-
-func (p *redirector) writeCloseError() error {
-	return nil
-}
-
-func (p *redirector) CloseWrite(err error) error {
-	return nil
-}
-
-// A RedirectedWriter is the write half of a pipe.
-type RedirectedWriter struct {
-	p *redirector
-}
-
-// Write implements the standard Write interface:
-// it writes data to the pipe, blocking until one or more readers
-// have consumed all the data or the read end is closed.
-// If the read end is closed with an error, that err is
-// returned as err; otherwise err is ErrClosedPipe.
-func (w *RedirectedWriter) Write(data []byte) (n int, err error) {
-	return w.p.Write(data)
-}
-
-// Close closes the writer; subsequent reads from the
-// read half of the pipe will return no bytes and EOF.
-func (w *RedirectedWriter) Close() error {
-	return w.CloseWithError(nil)
-}
-
-// CloseWithError closes the writer; subsequent reads from the
-// read half of the pipe will return no bytes and the error err,
-// or EOF if err is nil.
-//
-// CloseWithError always returns nil.
-func (w *RedirectedWriter) CloseWithError(err error) error {
-	return w.p.CloseWrite(err)
 }
 
 func nrepl(port string, phase Phase) {
 	l, err := net.Listen("tcp", nRepl)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot start nrepl listening on %s: %s\n",
+		fmt.Fprintf(JokerErr, "Cannot start nrepl listening on %s: %s\n",
 			nRepl, err.Error())
 		ExitJoker(12)
 	}
@@ -301,55 +152,24 @@ func nrepl(port string, phase Phase) {
 	fmt.Printf("Joker nrepl listening at %s...\n", l.Addr())
 	conn, err := l.Accept() // Wait for a single connection
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot start nrepl accepting on %s: %s\n",
+		fmt.Fprintf(JokerErr, "Cannot start nrepl accepting on %s: %s\n",
 			l.Addr(), err.Error())
 		ExitJoker(13)
 	}
-	defer conn.Close()
+
+	oldOut := *JokerOut
+	oldErr := *JokerErr
+	*JokerOut = JokerWriter{N: conn}
+	*JokerErr = *JokerOut
+	defer func() {
+		conn.Close()
+		*JokerOut = oldOut
+		*JokerErr = oldErr
+	}()
 
 	fmt.Printf("Joker nrepl accepting client at %s...\n", conn.RemoteAddr())
 
 	runeReader := bufio.NewReader(conn)
-
-	oldOut := os.Stdout
-	oldErr := os.Stderr
-	r, w, err := os.Pipe()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot start nrepl pipe: %s\n", err.Error())
-		ExitJoker(14)
-	}
-	p := &redirector{}
-	rw := &RedirectedWriter{p}
-	os.Stdout = rw
-	os.Stderr = rw
-
-	go func() {
-		defer func() {
-			defer w.Close()
-			r.Close()
-			os.Stdout = oldOut
-			os.Stderr = oldErr
-		}()
-		var buf []byte
-		println("go func()")
-		for {
-			n, err := r.Read(buf)
-			if n == 0 && err == nil {
-				println("Looping...")
-				time.Sleep(1 * time.Second)
-				continue
-			}
-			if err == io.EOF || err == io.ErrClosedPipe {
-				return
-			}
-			println(fmt.Sprintf("r.Read => %d %v\n", n, err))
-			if err != nil {
-				return
-			}
-			written, err := w.Write(buf[0:n])
-			println(fmt.Sprintf("r.Write => %d %v\n", written, err))
-		}
-	}()
 
 	/* The rest of this code comes from repl(), below: */
 
@@ -359,7 +179,7 @@ func nrepl(port string, phase Phase) {
 	reader := NewReader(runeReader, "<nrepl>")
 
 	for {
-		fmt.Print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		fmt.Fprint(JokerOut, GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}
@@ -462,7 +282,7 @@ func dialectFromArg(arg string) Dialect {
 	return UNKNOWN
 }
 
-func usage(out *os.File) {
+func usage(out *JokerWriter) {
 	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
 	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
 	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
@@ -509,7 +329,7 @@ func usage(out *os.File) {
 }
 
 var (
-	debugOut           *os.File
+	debugOut           *JokerWriter
 	helpFlag           bool
 	versionFlag        bool
 	phase              Phase = EVAL // --read, --parse, --evaluate
@@ -547,11 +367,11 @@ func parseArgs(args []string) {
 		case "--", "-":
 			stop = true // "-" is stdin. "--" is stdin for now; later will formally end options processing
 		case "--debug":
-			debugOut = os.Stderr
+			debugOut = JokerErr
 		case "--debug=stderr":
-			debugOut = os.Stderr
+			debugOut = JokerErr
 		case "--debug=stdout":
-			debugOut = os.Stdout
+			debugOut = JokerOut
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else
@@ -596,7 +416,7 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				thresh, err := strconv.Atoi(args[i])
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error: ", err)
+					fmt.Fprintln(JokerErr, "Error: ", err)
 					return
 				}
 				if thresh < 0 {
@@ -656,7 +476,7 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				rate, err := strconv.Atoi(args[i])
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error: ", err)
+					fmt.Fprintln(JokerErr, "Error: ", err)
 					return
 				}
 				if rate > 0 {
@@ -678,7 +498,7 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				rate, err := strconv.Atoi(args[i])
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error: ", err)
+					fmt.Fprintln(JokerErr, "Error: ", err)
 					return
 				}
 				if rate > 0 {
@@ -689,7 +509,7 @@ func parseArgs(args []string) {
 			}
 		default:
 			if strings.HasPrefix(args[i], "-") {
-				fmt.Fprintf(os.Stderr, "Error: Unrecognized option '%s'\n", args[i])
+				fmt.Fprintf(JokerErr, "Error: Unrecognized option '%s'\n", args[i])
 				ExitJoker(2)
 			}
 			stop = true
@@ -699,7 +519,7 @@ func parseArgs(args []string) {
 		}
 	}
 	if missing {
-		fmt.Fprintf(os.Stderr, "Error: Missing argument for '%s' option\n", args[i])
+		fmt.Fprintf(JokerErr, "Error: Missing argument for '%s' option\n", args[i])
 		ExitJoker(3)
 	}
 	if i < length && !noFileFlag {
@@ -734,9 +554,9 @@ func main() {
 		// peek to see if the first arg is "--debug*"
 		switch os.Args[1] {
 		case "--debug", "--debug=stderr":
-			debugOut = os.Stderr
+			debugOut = JokerErr
 		case "--debug=stdout":
-			debugOut = os.Stdout
+			debugOut = JokerOut
 		}
 	}
 
@@ -761,7 +581,7 @@ func main() {
 	}
 
 	if helpFlag {
-		usage(os.Stdout)
+		usage(JokerOut)
 		return
 	}
 
@@ -772,11 +592,11 @@ func main() {
 
 	if len(remainingArgs) > 0 {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code while linting it.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot provide arguments to code while linting it.\n")
 			ExitJoker(4)
 		}
 		if phase != EVAL && phase != PRINT_IF_NOT_NIL {
-			fmt.Fprintf(os.Stderr, "Error: Cannot provide arguments to code without evaluating it.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot provide arguments to code without evaluating it.\n")
 			ExitJoker(5)
 		}
 	}
@@ -791,7 +611,7 @@ func main() {
 		case "runtime/pprof":
 			f, err := os.Create(cpuProfileName)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: Could not create CPU profile `%s': %v\n",
+				fmt.Fprintf(JokerErr, "Error: Could not create CPU profile `%s': %v\n",
 					cpuProfileName, err)
 				cpuProfileName = ""
 				ExitJoker(96)
@@ -800,11 +620,11 @@ func main() {
 				runtime.SetCPUProfileRate(cpuProfileRate)
 			}
 			pprof.StartCPUProfile(f)
-			fmt.Fprintf(os.Stderr, "Profiling started at rate=%d. See file `%s'.\n",
+			fmt.Fprintf(JokerErr, "Profiling started at rate=%d. See file `%s'.\n",
 				cpuProfileRate, cpuProfileName)
 			defer finish()
 		default:
-			fmt.Fprintf(os.Stderr,
+			fmt.Fprintf(JokerErr,
 				"Unrecognized profiler: %s\n  Use 'pkg/profile' or 'runtime/pprof'.\n",
 				profilerType)
 			ExitJoker(96)
@@ -815,19 +635,19 @@ func main() {
 
 	if eval != "" {
 		if lintFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --lint.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot combine --eval/-e and --lint.\n")
 			ExitJoker(6)
 		}
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --[n]repl.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot combine --eval/-e and --[n]repl.\n")
 			ExitJoker(7)
 		}
 		if workingDir != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --working-dir.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot combine --eval/-e and --working-dir.\n")
 			ExitJoker(8)
 		}
 		if filename != "" {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and a <filename> argument.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot combine --eval/-e and a <filename> argument.\n")
 			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(eval), "<expr>")
@@ -837,7 +657,7 @@ func main() {
 
 	if lintFlag {
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --[n]repl.\n")
+			fmt.Fprintf(JokerErr, "Error: Cannot combine --lint and --[n]repl.\n")
 			ExitJoker(10)
 		}
 		if dialect == UNKNOWN {
@@ -851,7 +671,7 @@ func main() {
 	}
 
 	if workingDir != "" {
-		fmt.Fprintf(os.Stderr, "Error: Cannot specify --working-dir option when not linting.\n")
+		fmt.Fprintf(JokerErr, "Error: Cannot specify --working-dir option when not linting.\n")
 		ExitJoker(11)
 	}
 
@@ -870,28 +690,31 @@ func main() {
 }
 
 func finish() {
+	JokerOut.Sync()
+	JokerErr.Sync()
+
 	if runningProfile != nil {
 		runningProfile.Stop()
 		runningProfile = nil
 	} else if cpuProfileName != "" {
 		pprof.StopCPUProfile()
-		fmt.Fprintf(os.Stderr, "Profiling stopped. See file `%s'.\n", cpuProfileName)
+		fmt.Fprintf(JokerErr, "Profiling stopped. See file `%s'.\n", cpuProfileName)
 		cpuProfileName = ""
 	}
 
 	if memProfileName != "" {
 		f, err := os.Create(memProfileName)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Could not create memory profile `%s': %v\n",
+			fmt.Fprintf(JokerErr, "Error: Could not create memory profile `%s': %v\n",
 				memProfileName, err)
 		}
 		runtime.GC() // get up-to-date statistics
 		if err := pprof.WriteHeapProfile(f); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Could not write memory profile `%s': %v\n",
+			fmt.Fprintf(JokerErr, "Error: Could not write memory profile `%s': %v\n",
 				memProfileName, err)
 		}
 		f.Close()
-		fmt.Fprintf(os.Stderr, "Memory profile rate=%d written to `%s'.\n",
+		fmt.Fprintf(JokerErr, "Memory profile rate=%d written to `%s'.\n",
 			runtime.MemProfileRate, memProfileName)
 		memProfileName = ""
 	}

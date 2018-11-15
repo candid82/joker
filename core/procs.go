@@ -1430,18 +1430,18 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 			return append(hp, p...), nil
 		}
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return nil, err
 		}
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return nil, err
 		}
 		p = expr.Pack(p, packEnv)
 		_, err = TryEval(expr)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return nil, err
 		}
 	}
@@ -1469,7 +1469,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			return nil
 		}
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return err
 		}
 		if phase == READ {
@@ -1477,7 +1477,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		}
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return err
 		}
 		if phase == PARSE {
@@ -1485,14 +1485,14 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		}
 		obj, err = TryEval(expr)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(JokerErr, err)
 			return err
 		}
 		if phase == EVAL {
 			continue
 		}
 		if _, ok := obj.(Nil); !ok {
-			fmt.Println(obj.ToString(true))
+			fmt.Fprintln(JokerOut, obj.ToString(true))
 		}
 	}
 }
@@ -1531,14 +1531,14 @@ func findConfigFile(filename string, workingDir string, findDir bool) string {
 	}
 	filename, err := filepath.Abs(filename)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", err)
+		fmt.Fprintln(JokerErr, "Error reading config file "+filename+": ", err)
 		return ""
 	}
 
 	if workingDir != "" {
 		workingDir, err = filepath.Abs(workingDir)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error resolving working directory"+workingDir+": ", err)
+			fmt.Fprintln(JokerErr, "Error resolving working directory"+workingDir+": ", err)
 			return ""
 		}
 		filename = filepath.Join(workingDir, configName)
@@ -1572,7 +1572,7 @@ func findConfigFile(filename string, workingDir string, findDir bool) string {
 }
 
 func printConfigError(filename, msg string) {
-	fmt.Fprintln(os.Stderr, "Error reading config file "+filename+": ", msg)
+	fmt.Fprintln(JokerErr, "Error reading config file "+filename+": ", msg)
 }
 
 func knownMacrosToMap(km Object) (Map, error) {
@@ -1707,7 +1707,7 @@ func ProcessLinterData(dialect Dialect) {
 func NewReaderFromFile(filename string) (*Reader, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error: ", err)
+		fmt.Fprintln(JokerErr, "Error: ", err)
 		return nil, err
 	}
 	return NewReader(bufio.NewReader(f), filename), nil

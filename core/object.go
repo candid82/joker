@@ -268,6 +268,7 @@ type (
 		Fn             *Type
 		File           *Type
 		BufferedReader *Type
+		JokerWriter    *Type
 		HashMap        *Type
 		Int            *Type
 		Keyword        *Type
@@ -359,6 +360,7 @@ func init() {
 		Fn:             regRefType("Fn", (*Fn)(nil)),
 		File:           regRefType("File", (*File)(nil)),
 		BufferedReader: regRefType("BufferedReader", (*BufferedReader)(nil)),
+		JokerWriter:    regRefType("JokerWriter", (*JokerWriter)(nil)),
 		HashMap:        regRefType("HashMap", (*HashMap)(nil)),
 		Int:            regType("Int", (*Int)(nil)),
 		Keyword:        regType("Keyword", (*Keyword)(nil)),

@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+var (
+	JokerOut = &JokerWriter{O: os.Stdout}
+	JokerErr = &JokerWriter{O: os.Stderr}
+)
+
 type (
 	Env struct {
 		Namespaces    map[*string]*Namespace
@@ -47,7 +52,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
-func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) *Env {
+func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *os.File, stderr *JokerWriter) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
 	features.Add(MakeKeyword("joker"))
@@ -60,11 +65,11 @@ func NewEnv(currentNs Symbol, stdout *os.File, stdin *os.File, stderr *os.File) 
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &File{stdout}
+	res.stdout.Value = stdout
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
 	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = &File{stderr}
+	res.stderr.Value = stderr
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
 		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
