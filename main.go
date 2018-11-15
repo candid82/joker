@@ -2,14 +2,17 @@ package main
 
 import (
 	"bufio"
+//	"bytes"
 	"fmt"
 	"io"
 	"math"
+	"net"
 	"os"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
+	"time"
 
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/std/base64"
@@ -136,6 +139,231 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 	replContext.PushValue(res)
 	fmt.Println(res.ToString(true))
 	return false
+}
+
+type networkOutput struct { }
+
+func (n *networkOutput) Read(buf []byte) (bytes int, err error) {
+	return 0, nil
+}
+
+func (n *networkOutput) Write(buf []byte) (bytes int, err error) {
+	return 0, nil
+}
+
+func (n *networkOutput) Flush() error {
+	return nil
+}
+
+func (n *networkOutput) Chdir() error {
+	panic("hi there")
+}
+
+func (n *networkOutput) Chmod(mode os.FileMode) error {
+	panic("so cute")
+}
+
+func (n *networkOutput) Chown(uid, gid int)  error {
+	panic("no way")
+}
+
+func (n *networkOutput) Close() error {
+	return nil
+}
+
+func (n *networkOutput) Fd() int {
+	panic("want fd")
+}
+
+func (n *networkOutput) Name() string {
+	panic("not me")
+}
+
+func (n *networkOutput) Readdir(nent int) ([]os.FileInfo, error) {
+	panic("nor me")
+}
+
+func (n *networkOutput) Readdirnames(nent int) ([]string, error) {
+	panic("me either")
+}
+
+func (n *networkOutput) Seek(offset int64, whence int) (ret int64, err error) {
+	panic("and ye shall not find")
+}
+
+func (n *networkOutput) SetDeadline(t time.Time) error {
+	panic("manana")
+}
+
+func (n *networkOutput) SetReadDeadline(t time.Time) error {
+	panic("manana")
+}
+
+func (n *networkOutput) SetWriteDeadline(t time.Time) error {
+	panic("manana")
+}
+
+func (n *networkOutput) Stat() (os.FileInfo, error) {
+	panic("right away, doctor!")
+}
+
+func (n *networkOutput) Sync() error {
+	panic("faucet")
+}
+
+func (n *networkOutput) Truncate(size int64) error {
+	panic("ouch!")
+}
+
+func (n *networkOutput) WriteAt(buf []byte, off int64) (int, error) {
+	panic("who you talking at?")
+}
+
+func (n *networkOutput) WriteString(s string) (int, error) {
+	panic("interesting theory!")
+}
+
+func newNetworkOutput(conn net.Conn) *networkOutput {
+	return &networkOutput{}
+}
+
+type discardWriter struct {}
+func (w discardWriter) Write(p []byte) (n int, err error) {
+	return
+}
+
+// A redirectedWriter is the write half of a pipe.
+type redirector struct {
+}
+
+func (p *redirector) Read(b []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (p *redirector) readCloseError() error {
+	return nil
+}
+
+func (p *redirector) CloseRead(err error) error {
+	return nil
+}
+
+func (p *redirector) Write(b []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (p *redirector) writeCloseError() error {
+	return nil
+}
+
+func (p *redirector) CloseWrite(err error) error {
+	return nil
+}
+
+// A RedirectedWriter is the write half of a pipe.
+type RedirectedWriter struct {
+	p *redirector
+}
+
+// Write implements the standard Write interface:
+// it writes data to the pipe, blocking until one or more readers
+// have consumed all the data or the read end is closed.
+// If the read end is closed with an error, that err is
+// returned as err; otherwise err is ErrClosedPipe.
+func (w *RedirectedWriter) Write(data []byte) (n int, err error) {
+	return w.p.Write(data)
+}
+
+// Close closes the writer; subsequent reads from the
+// read half of the pipe will return no bytes and EOF.
+func (w *RedirectedWriter) Close() error {
+	return w.CloseWithError(nil)
+}
+
+// CloseWithError closes the writer; subsequent reads from the
+// read half of the pipe will return no bytes and the error err,
+// or EOF if err is nil.
+//
+// CloseWithError always returns nil.
+func (w *RedirectedWriter) CloseWithError(err error) error {
+	return w.p.CloseWrite(err)
+}
+
+func nrepl(port string, phase Phase) {
+	l, err := net.Listen("tcp", nRepl)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot start nrepl listening on %s: %s\n",
+			nRepl, err.Error())
+		ExitJoker(12)
+	}
+	defer l.Close()
+
+	fmt.Printf("Joker nrepl listening at %s...\n", l.Addr())
+	conn, err := l.Accept() // Wait for a single connection
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot start nrepl accepting on %s: %s\n",
+			l.Addr(), err.Error())
+		ExitJoker(13)
+	}
+	defer conn.Close()
+
+	fmt.Printf("Joker nrepl accepting client at %s...\n", conn.RemoteAddr())
+
+	runeReader := bufio.NewReader(conn)
+
+	oldOut := os.Stdout
+	oldErr := os.Stderr
+	r, w, err := os.Pipe()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Cannot start nrepl pipe: %s\n", err.Error())
+		ExitJoker(14)
+	}
+	p := &redirector{}
+	rw := &RedirectedWriter{p}
+	os.Stdout = rw
+	os.Stderr = rw
+
+	go func() {
+		defer func() {
+			defer w.Close()
+			r.Close()
+			os.Stdout = oldOut
+			os.Stderr = oldErr
+		}()
+		var buf []byte
+		println("go func()")
+		for {
+			n, err := r.Read(buf)
+			if n == 0 && err == nil {
+				println("Looping...")
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			if err == io.EOF || err == io.ErrClosedPipe {
+				return
+			}
+			println(fmt.Sprintf("r.Read => %d %v\n", n, err))
+			if err != nil {
+				return
+			}
+			written, err := w.Write(buf[0:n])
+			println(fmt.Sprintf("r.Write => %d %v\n", written, err))
+		}
+	}()
+
+	/* The rest of this code comes from repl(), below: */
+
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	replContext := NewReplContext(parseContext.GlobalEnv)
+
+	reader := NewReader(runeReader, "<nrepl>")
+
+	for {
+		fmt.Print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		if processReplCommand(reader, phase, parseContext, replContext) {
+			return
+		}
+	}
 }
 
 func repl(phase Phase) {
@@ -290,6 +518,7 @@ var (
 	dialect            Dialect = UNKNOWN
 	eval               string
 	replFlag           bool
+	nRepl              string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -397,6 +626,14 @@ func parseArgs(args []string) {
 				i += 2 // shift 2
 				noFileFlag = true
 				stop = true
+			}
+		case "--nrepl":
+			replFlag = true
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				nRepl = args[i]
+			} else {
+				missing = true
 			}
 		case "--no-readline":
 			noReadline = true
@@ -517,6 +754,7 @@ func main() {
 		fmt.Fprintf(debugOut, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
 		fmt.Fprintf(debugOut, "eval=%v\n", eval)
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
+		fmt.Fprintf(debugOut, "nRepl=%v\n", nRepl)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
@@ -581,7 +819,7 @@ func main() {
 			ExitJoker(6)
 		}
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --repl.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --eval/-e and --[n]repl.\n")
 			ExitJoker(7)
 		}
 		if workingDir != "" {
@@ -599,7 +837,7 @@ func main() {
 
 	if lintFlag {
 		if replFlag {
-			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --repl.\n")
+			fmt.Fprintf(os.Stderr, "Error: Cannot combine --lint and --[n]repl.\n")
 			ExitJoker(10)
 		}
 		if dialect == UNKNOWN {
@@ -619,6 +857,11 @@ func main() {
 
 	if filename != "" {
 		processFile(filename, phase)
+		return
+	}
+
+	if nRepl != "" {
+		nrepl(nRepl, phase)
 		return
 	}
 
