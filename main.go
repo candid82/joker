@@ -384,21 +384,11 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				eval = args[i]
 				phase = PRINT_IF_NOT_NIL
-				if i < length-1 && args[i+1] == "--" {
-					i += 2 // shift 2
-					noFileFlag = true
-					stop = true
-				}
 			} else {
 				missing = true
 			}
 		case "--repl":
 			replFlag = true
-			if i < length-1 && args[i+1] == "--" {
-				i += 2 // shift 2
-				noFileFlag = true
-				stop = true
-			}
 		case "--no-readline":
 			noReadline = true
 		case "--profiler":
