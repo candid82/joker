@@ -140,19 +140,19 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 	return false
 }
 
-func nrepl(port string, phase Phase) {
-	l, err := net.Listen("tcp", nRepl)
+func srepl(port string, phase Phase) {
+	l, err := net.Listen("tcp", replSocket)
 	if err != nil {
-		fmt.Fprintf(JokerErr, "Cannot start nrepl listening on %s: %s\n",
-			nRepl, err.Error())
+		fmt.Fprintf(JokerErr, "Cannot start srepl listening on %s: %s\n",
+			replSocket, err.Error())
 		ExitJoker(12)
 	}
 	defer l.Close()
 
-	fmt.Printf("Joker nrepl listening at %s...\n", l.Addr())
+	fmt.Printf("Joker repl listening at %s...\n", l.Addr())
 	conn, err := l.Accept() // Wait for a single connection
 	if err != nil {
-		fmt.Fprintf(JokerErr, "Cannot start nrepl accepting on %s: %s\n",
+		fmt.Fprintf(JokerErr, "Cannot start repl accepting on %s: %s\n",
 			l.Addr(), err.Error())
 		ExitJoker(13)
 	}
@@ -167,7 +167,7 @@ func nrepl(port string, phase Phase) {
 		*JokerErr = oldErr
 	}()
 
-	fmt.Printf("Joker nrepl accepting client at %s...\n", conn.RemoteAddr())
+	fmt.Printf("Joker repl accepting client at %s...\n", conn.RemoteAddr())
 
 	runeReader := bufio.NewReader(conn)
 
@@ -176,9 +176,10 @@ func nrepl(port string, phase Phase) {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
-	reader := NewReader(runeReader, "<nrepl>")
+	reader := NewReader(runeReader, "<srepl>")
 
-	fmt.Fprintf(JokerOut, "Welcome to joker %s. Use '(joker.os/exit 0)', or close the connection, to exit.\n", VERSION)
+	fmt.Fprintf(JokerOut, "Welcome to joker %s, client at %s. Use '(joker.os/exit 0)', or close the connection, to exit.\n",
+		VERSION, conn.RemoteAddr())
 
 	for {
 		fmt.Fprint(JokerOut, GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
@@ -286,8 +287,9 @@ func dialectFromArg(arg string) Dialect {
 
 func usage(out *JokerWriter) {
 	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
-	fmt.Fprintln(out, "Usage: joker [args]                                 starts a repl")
-	fmt.Fprintln(out, "   or: joker [args] --repl [-- <repl-args>]         starts a repl with args")
+	fmt.Fprintln(out, "Usage: joker [args] [-- <repl-args>]                starts a repl")
+	fmt.Fprintln(out, "   or: joker [args] --repl [<socket>] [-- <repl-args>]")
+	fmt.Fprintln(out, "                                                    starts a repl (on optional network socket)")
 	fmt.Fprintln(out, "   or: joker [args] --eval <expr> [-- <expr-args>]  evaluate <expr>, print if non-nil")
 	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
 	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
@@ -340,7 +342,7 @@ var (
 	dialect            Dialect = UNKNOWN
 	eval               string
 	replFlag           bool
-	nRepl              string
+	replSocket              string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -444,18 +446,14 @@ func parseArgs(args []string) {
 			}
 		case "--repl":
 			replFlag = true
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				replSocket = args[i]
+			}
 			if i < length-1 && args[i+1] == "--" {
 				i += 2 // shift 2
 				noFileFlag = true
 				stop = true
-			}
-		case "--nrepl":
-			replFlag = true
-			if i < length-1 && notOption(args[i+1]) {
-				i += 1 // shift
-				nRepl = args[i]
-			} else {
-				missing = true
 			}
 		case "--no-readline":
 			noReadline = true
@@ -576,7 +574,7 @@ func main() {
 		fmt.Fprintf(debugOut, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
 		fmt.Fprintf(debugOut, "eval=%v\n", eval)
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
-		fmt.Fprintf(debugOut, "nRepl=%v\n", nRepl)
+		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
@@ -682,8 +680,8 @@ func main() {
 		return
 	}
 
-	if nRepl != "" {
-		nrepl(nRepl, phase)
+	if replSocket != "" {
+		srepl(replSocket, phase)
 		return
 	}
 
