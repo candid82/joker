@@ -64,10 +64,7 @@ func (ctx *ReplContext) PushException(exc Object) {
 
 func processFile(filename string, phase Phase) error {
 	var reader *Reader
-	if filename == "-" || filename == "--" {
-		if filename == "--" {
-			fmt.Fprintln(os.Stderr, "Warning: '--' indicating standard input (stdin) to Joker is deprecated; please use '-' instead")
-		}
+	if filename == "-" {
 		reader = NewReader(bufio.NewReader(os.Stdin), "<stdin>")
 		filename = ""
 	} else {
@@ -315,8 +312,12 @@ func parseArgs(args []string) {
 			fmt.Fprintf(debugOut, "arg[%d]=%s\n", i, args[i])
 		}
 		switch args[i] {
-		case "--", "-":
-			stop = true // "-" is stdin. "--" is stdin for now; later will formally end options processing
+		case "-": // denotes stdin
+			stop = true
+		case "--": // formally ends options processing
+			stop = true
+			noFileFlag = true
+			i += 1 // do not include "--" in *command-line-args*
 		case "--debug":
 			debugOut = os.Stderr
 		case "--debug=stderr":
@@ -383,21 +384,11 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				eval = args[i]
 				phase = PRINT_IF_NOT_NIL
-				if i < length-1 && args[i+1] == "--" {
-					i += 2 // shift 2
-					noFileFlag = true
-					stop = true
-				}
 			} else {
 				missing = true
 			}
 		case "--repl":
 			replFlag = true
-			if i < length-1 && args[i+1] == "--" {
-				i += 2 // shift 2
-				noFileFlag = true
-				stop = true
-			}
 		case "--no-readline":
 			noReadline = true
 		case "--profiler":
