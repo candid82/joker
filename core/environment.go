@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	JokerIn = &BufferedReader{bufio.NewReader(os.Stdin)}
 	JokerOut = &JokerWriter{O: os.Stdout}
 	JokerErr = &JokerWriter{O: os.Stderr}
 )
@@ -52,7 +53,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
-func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *os.File, stderr *JokerWriter) *Env {
+func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *BufferedReader, stderr *JokerWriter) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
 	features.Add(MakeKeyword("joker"))
@@ -67,7 +68,7 @@ func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *os.File, stderr *Joker
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
 	res.stdout.Value = stdout
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
+	res.stdin.Value = stdin
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
 	res.stderr.Value = stderr
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))

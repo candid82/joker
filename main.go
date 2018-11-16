@@ -154,12 +154,15 @@ func srepl(port string, phase Phase) {
 		ExitJoker(13)
 	}
 
+	oldIn := *JokerIn
 	oldOut := *JokerOut
 	oldErr := *JokerErr
+	*JokerIn = BufferedReader{bufio.NewReader(conn)}
 	*JokerOut = JokerWriter{N: conn}
 	*JokerErr = *JokerOut
 	defer func() {
 		conn.Close()
+		*JokerIn = oldIn
 		*JokerOut = oldOut
 		*JokerErr = oldErr
 	}()

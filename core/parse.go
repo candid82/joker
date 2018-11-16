@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"unsafe"
@@ -241,7 +240,7 @@ type (
 )
 
 var (
-	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), JokerOut, os.Stdin, JokerErr)
+	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), JokerOut, JokerIn, JokerErr)
 	LOCAL_BINDINGS  *Bindings = nil
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
