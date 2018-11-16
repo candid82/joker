@@ -36,7 +36,7 @@ You can also [build](#building) Joker from the source code.
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
-`joker -` - execute a script on standard input (os.Stdin). (Supersedes `--`, which will be changed to mean "end of Joker options" in the future.)
+`joker -` - execute a script on standard input (os.Stdin).
 
 ## Documentation
 
