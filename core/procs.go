@@ -1103,11 +1103,24 @@ var procReadString Proc = func(args []Object) Object {
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
+func readLine(r *BufferedReader) (s string, err error) {
+	for {
+		line, isPrefix, err := r.ReadLine();
+		if err != nil {
+			return "", err
+		}
+		s += string(line)
+		if !isPrefix {
+			break
+		}
+	}
+	return
+}
+
 var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
-	var line string
-	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
-	fmt.Fscanln(f, &line)
+	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "").(*BufferedReader)
+	line, _ := readLine(f)
 	return String{S: line}
 }
 
