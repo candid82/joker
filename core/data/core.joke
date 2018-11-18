@@ -4059,7 +4059,10 @@
   not short circuit after the first true test expression."
   {:added "1.0"}
   [expr & clauses]
-  (assert (even? (count clauses)))
+  (if *linter-mode*
+    (when-not (even? (count clauses))
+      (println-linter__ (ex-info "Odd number of clauses in cond->" {:form &form :_prefix "Parse warning"})))
+    (assert (even? (count clauses))))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-linter__ (ex-info "No forms in cond->" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)
@@ -4078,7 +4081,10 @@
   after the first true test expression."
   {:added "1.0"}
   [expr & clauses]
-  (assert (even? (count clauses)))
+  (if *linter-mode*
+    (when-not (even? (count clauses))
+      (println-linter__ (ex-info "Odd number of clauses in cond->>" {:form &form :_prefix "Parse warning"})))
+    (assert (even? (count clauses))))
   (when (and *linter-mode* (not (seq clauses)) (not (false? (:no-forms-threading (:rules *linter-config*)))))
     (println-linter__ (ex-info "No forms in cond->>" {:form &form :_prefix "Parse warning"})))
   (let [g (gensym)

@@ -5,3 +5,5 @@
 (as-> 0 n)
 (some-> 1)
 (some->> 1)
+(cond->> [1 2 3] true (filter odd?) false)
+(cond-> odd? true (filter [1 2 3]) false)

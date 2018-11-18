@@ -5,3 +5,5 @@ tests/linter/threading-macros/input.clj:4:1: Parse warning: No forms in cond->>
 tests/linter/threading-macros/input.clj:5:1: Parse warning: No forms in as->
 tests/linter/threading-macros/input.clj:6:1: Parse warning: No forms in some->
 tests/linter/threading-macros/input.clj:7:1: Parse warning: No forms in some->>
+tests/linter/threading-macros/input.clj:8:1: Parse warning: Odd number of clauses in cond->>
+tests/linter/threading-macros/input.clj:9:1: Parse warning: Odd number of clauses in cond->
