@@ -1120,7 +1120,10 @@ func readLine(r *BufferedReader) (s string, err error) {
 var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
 	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "").(*BufferedReader)
-	line, _ := readLine(f)
+	line, err := readLine(f)
+	if err != nil {
+		return NIL
+	}
 	return String{S: line}
 }
 
