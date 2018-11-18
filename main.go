@@ -166,7 +166,7 @@ func srepl(port string, phase Phase) {
 		Stdin = oldStdIn
 		Stdout = oldStdOut
 		Stderr = oldStdErr
-	GLOBAL_ENV.SetStdIO(Stdin, Stdout, Stderr)
+		GLOBAL_ENV.SetStdIO(Stdin, Stdout, Stderr)
 	}()
 
 	fmt.Printf("Joker repl accepting client at %s...\n", conn.RemoteAddr())
