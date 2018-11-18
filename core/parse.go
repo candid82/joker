@@ -240,7 +240,7 @@ type (
 )
 
 var (
-	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), JokerOut, JokerIn, JokerErr)
+	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
 	LOCAL_BINDINGS  *Bindings = nil
 	SPECIAL_SYMBOLS           = make(map[*string]bool)
 	KNOWN_MACROS    *Var
@@ -466,7 +466,7 @@ func (pos Position) Pos() Position {
 
 func printError(pos Position, msg string) {
 	PROBLEM_COUNT++
-	fmt.Fprintf(JokerErr, "%s:%d:%d: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
+	fmt.Fprintf(Stderr, "%s:%d:%d: %s\n", pos.Filename(), pos.startLine, pos.startColumn, msg)
 }
 
 func printParseWarning(pos Position, msg string) {

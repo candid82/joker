@@ -1,12 +1,13 @@
 package core
 
 import (
+	"os"
 	"unsafe"
 )
 
 type (
 	File struct {
-		*JokerWriter
+		*os.File
 	}
 )
 

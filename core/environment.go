@@ -2,15 +2,17 @@ package core
 
 import (
 	"bufio"
+	"io"
 	"os"
 	"strconv"
 	"strings"
 )
 
+
 var (
-	JokerIn = &BufferedReader{bufio.NewReader(os.Stdin)}
-	JokerOut = &JokerWriter{O: os.Stdout}
-	JokerErr = &JokerWriter{O: os.Stderr}
+	Stdin io.Reader = os.Stdin
+	Stdout io.Writer = os.Stdout
+	Stderr io.Writer = os.Stderr
 )
 
 type (
@@ -53,7 +55,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
-func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *BufferedReader, stderr *JokerWriter) *Env {
+func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
 	features.Add(MakeKeyword("joker"))
@@ -65,12 +67,12 @@ func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *BufferedReader, stderr
 	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
-	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = stdout
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = stdin
+	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
+	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
+	res.stdout.Value = &IOWriter{io.Writer(stdout)}
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = stderr
+	res.stderr.Value = &IOWriter{io.Writer(stderr)}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
 		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
@@ -83,6 +85,12 @@ func NewEnv(currentNs Symbol, stdout *JokerWriter, stdin *BufferedReader, stderr
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-config*")).Value = EmptyArrayMap()
 	return res
+}
+
+func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
+	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
+	env.stdout.Value = &IOWriter{io.Writer(stdout)}
+	env.stderr.Value = &IOWriter{io.Writer(stderr)}
 }
 
 func (env *Env) CurrentNamespace() *Namespace {

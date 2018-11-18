@@ -235,6 +235,7 @@ type (
 		Gettable       *Type
 		Indexed        *Type
 		IOReader       *Type
+		IOWriter       *Type
 		KVReduce       *Type
 		Map            *Type
 		Meta           *Type
@@ -268,7 +269,6 @@ type (
 		Fn             *Type
 		File           *Type
 		BufferedReader *Type
-		JokerWriter    *Type
 		HashMap        *Type
 		Int            *Type
 		Keyword        *Type
@@ -327,6 +327,7 @@ func init() {
 		Gettable:       regInterface("Gettable", (*Gettable)(nil)),
 		Indexed:        regInterface("Indexed", (*Indexed)(nil)),
 		IOReader:       regInterface("IOReader", (*io.Reader)(nil)),
+		IOWriter:       regInterface("IOWriter", (*io.Writer)(nil)),
 		KVReduce:       regInterface("KVReduce", (*KVReduce)(nil)),
 		Map:            regInterface("Map", (*Map)(nil)),
 		Meta:           regInterface("Meta", (*Meta)(nil)),
@@ -360,7 +361,6 @@ func init() {
 		Fn:             regRefType("Fn", (*Fn)(nil)),
 		File:           regRefType("File", (*File)(nil)),
 		BufferedReader: regRefType("BufferedReader", (*BufferedReader)(nil)),
-		JokerWriter:    regRefType("JokerWriter", (*JokerWriter)(nil)),
 		HashMap:        regRefType("HashMap", (*HashMap)(nil)),
 		Int:            regType("Int", (*Int)(nil)),
 		Keyword:        regType("Keyword", (*Keyword)(nil)),
