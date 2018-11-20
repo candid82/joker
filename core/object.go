@@ -235,6 +235,7 @@ type (
 		Gettable       *Type
 		Indexed        *Type
 		IOReader       *Type
+		IOWriter       *Type
 		KVReduce       *Type
 		Map            *Type
 		Meta           *Type
@@ -326,6 +327,7 @@ func init() {
 		Gettable:       regInterface("Gettable", (*Gettable)(nil)),
 		Indexed:        regInterface("Indexed", (*Indexed)(nil)),
 		IOReader:       regInterface("IOReader", (*io.Reader)(nil)),
+		IOWriter:       regInterface("IOWriter", (*io.Writer)(nil)),
 		KVReduce:       regInterface("KVReduce", (*KVReduce)(nil)),
 		Map:            regInterface("Map", (*Map)(nil)),
 		Meta:           regInterface("Meta", (*Meta)(nil)),
