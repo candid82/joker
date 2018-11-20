@@ -70,9 +70,9 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
 	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &IOWriter{io.Writer(stdout)}
+	res.stdout.Value = &IOWriter{stdout}
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = &IOWriter{io.Writer(stderr)}
+	res.stderr.Value = &IOWriter{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
 		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
@@ -89,8 +89,8 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 
 func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
 	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
-	env.stdout.Value = &IOWriter{io.Writer(stdout)}
-	env.stderr.Value = &IOWriter{io.Writer(stderr)}
+	env.stdout.Value = &IOWriter{stdout}
+	env.stderr.Value = &IOWriter{stderr}
 }
 
 func (env *Env) CurrentNamespace() *Namespace {
