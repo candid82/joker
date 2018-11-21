@@ -2149,7 +2149,7 @@
 
 (def
   ^{:arglists '([])
-    :doc "Reads the next line from *in*."
+    :doc "Reads the next line from *in*. Returns nil if an error (such as EOF) is detected."
     :added "1.0"}
   read-line read-line__)
 
