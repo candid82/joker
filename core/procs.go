@@ -1122,7 +1122,7 @@ func readLine(inp io.Reader) (s string, e error) {
 			l := len(s)
 			if s[l-1] == '\n' {
 				l -= 1
-				if s[l-1] == '\r' {
+				if l > 0 && s[l-1] == '\r' {
 					l -= 1
 				}
 			}
