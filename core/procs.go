@@ -1103,23 +1103,41 @@ var procReadString Proc = func(args []Object) Object {
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
-func readLine(r *BufferedReader) (s string, err error) {
-	for {
-		line, isPrefix, err := r.ReadLine();
-		if err != nil {
-			return "", err
+func readLine(inp io.Reader) (s string, e error) {
+	switch r := inp.(type) {
+	case *BufferedReader: // Underlying type is *bufio.Reader
+		for {
+			line, isPrefix, err := r.ReadLine();
+			if err != nil {
+				return "", err
+			}
+			s += string(line)
+			if !isPrefix {
+				break
+			}
 		}
-		s += string(line)
-		if !isPrefix {
-			break
+	case *Buffer: // Underlying type is *bytes.Buffer
+		s, e = r.ReadString('\n')
+		if e == nil {
+			l := len(s)
+			if s[l-1] == '\n' {
+				l -= 1
+				if s[l-1] == '\r' {
+					l -= 1
+				}
+			}
+			s = s[0:l]
 		}
+	default:
+		msg := fmt.Sprintf("Expected %s, got %T", "*core.BufferedReader or *core.Buffer", inp)
+		panic(RT.NewError(msg))
 	}
 	return
 }
 
 var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
-	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "").(*BufferedReader)
+	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
 	line, err := readLine(f)
 	if err != nil {
 		return NIL
