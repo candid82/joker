@@ -1127,6 +1127,8 @@ func readLine(inp io.Reader) (s string, e error) {
 				}
 			}
 			s = s[0:l]
+		} else if s != "" && e == io.EOF {
+			e = nil
 		}
 	default:
 		msg := fmt.Sprintf("Expected %s, got %T", "*core.BufferedReader or *core.Buffer", inp)
