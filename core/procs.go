@@ -1103,7 +1103,7 @@ var procReadString Proc = func(args []Object) Object {
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
-type stringReader interface{ ReadString(delim byte) (s string, e error)}
+type stringReader interface{ ReadString(delim byte) (s string, e error) }
 func readLine(r stringReader) (s string, e error) {
 	s, e = r.ReadString('\n')
 	if e == nil {
