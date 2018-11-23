@@ -1103,43 +1103,27 @@ var procReadString Proc = func(args []Object) Object {
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
-func readLine(inp io.Reader) (s string, e error) {
-	switch r := inp.(type) {
-	case *BufferedReader: // Underlying type is *bufio.Reader
-		for {
-			line, isPrefix, err := r.ReadLine();
-			if err != nil {
-				return "", err
-			}
-			s += string(line)
-			if !isPrefix {
-				break
-			}
-		}
-	case *Buffer: // Underlying type is *bytes.Buffer
-		s, e = r.ReadString('\n')
-		if e == nil {
-			l := len(s)
-			if s[l-1] == '\n' {
+type stringReader interface{ ReadString(delim byte) (s string, e error)}
+func readLine(r stringReader) (s string, e error) {
+	s, e = r.ReadString('\n')
+	if e == nil {
+		l := len(s)
+		if s[l-1] == '\n' {
+			l -= 1
+			if l > 0 && s[l-1] == '\r' {
 				l -= 1
-				if l > 0 && s[l-1] == '\r' {
-					l -= 1
-				}
 			}
-			s = s[0:l]
-		} else if s != "" && e == io.EOF {
-			e = nil
 		}
-	default:
-		msg := fmt.Sprintf("Expected %s, got %T", "*core.BufferedReader or *core.Buffer", inp)
-		panic(RT.NewError(msg))
+		s = s[0:l]
+	} else if s != "" && e == io.EOF {
+		e = nil
 	}
 	return
 }
 
 var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
-	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "")
+	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "").(stringReader)
 	line, err := readLine(f)
 	if err != nil {
 		return NIL
