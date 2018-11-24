@@ -30,8 +30,11 @@ var (
 )
 
 type (
-	Phase   int
-	Dialect int
+	Phase        int
+	Dialect      int
+	StringReader interface {
+		ReadString(delim byte) (s string, e error)
+	}
 )
 
 const (
@@ -1060,13 +1063,13 @@ func EnsureRuneReader(args []Object, index int) io.RuneReader {
 	}
 }
 
-func AssertIOReader(obj Object, msg string) io.Reader {
+func AssertStringReader(obj Object, msg string) StringReader {
 	switch c := obj.(type) {
-	case io.Reader:
+	case StringReader:
 		return c
 	default:
 		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "IOReader", obj.GetType().ToString(false))
+			msg = fmt.Sprintf("Expected %s, got %s", "StringReader", obj.GetType().ToString(false))
 		}
 		panic(RT.NewError(msg))
 	}
@@ -1103,8 +1106,7 @@ var procReadString Proc = func(args []Object) Object {
 	return readFromReader(strings.NewReader(EnsureString(args, 0).S))
 }
 
-type stringReader interface{ ReadString(delim byte) (s string, e error) }
-func readLine(r stringReader) (s string, e error) {
+func readLine(r StringReader) (s string, e error) {
 	s, e = r.ReadString('\n')
 	if e == nil {
 		l := len(s)
@@ -1123,7 +1125,7 @@ func readLine(r stringReader) (s string, e error) {
 
 var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
-	f := AssertIOReader(GLOBAL_ENV.stdin.Value, "").(stringReader)
+	f := AssertStringReader(GLOBAL_ENV.stdin.Value, "")
 	line, err := readLine(f)
 	if err != nil {
 		return NIL
