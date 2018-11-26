@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-//	"bytes"
 	"fmt"
 	"io"
 	"math"
