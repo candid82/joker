@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-//	"bytes"
 	"fmt"
 	"io"
 	"math"
@@ -184,7 +183,7 @@ func srepl(port string, phase Phase) {
 		VERSION, conn.RemoteAddr())
 
 	for {
-		fmt.Fprint(Stdout, GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		fmt.Fprint(Stdout, GLOBAL_ENV.CurrentNamespace().Name.ToString(false)+"=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}
@@ -307,6 +306,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Print version number and exit.")
 	fmt.Fprintln(out, "  --read")
 	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(out, "  --format")
+	fmt.Fprintln(out, "    Format the source code and print it to standard output.")
 	fmt.Fprintln(out, "  --parse")
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
@@ -344,7 +345,7 @@ var (
 	dialect            Dialect = UNKNOWN
 	eval               string
 	replFlag           bool
-	replSocket              string
+	replSocket         string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -387,6 +388,8 @@ func parseArgs(args []string) {
 			return // don't bother parsing anything else
 		case "--version", "-v":
 			versionFlag = true
+		case "--format":
+			phase = FORMAT
 		case "--read":
 			phase = READ
 		case "--parse":

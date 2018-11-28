@@ -160,6 +160,10 @@ func (seq *VectorSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *VectorSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (vseq *VectorSeq) WithMeta(meta Map) Object {
 	res := *vseq
 	res.meta = SafeMerge(res.meta, meta)
@@ -212,6 +216,10 @@ func (vseq *VectorRSeq) ToString(escape bool) string {
 
 func (seq *VectorRSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
+}
+
+func (seq *VectorRSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
 }
 
 func (vseq *VectorRSeq) WithMeta(meta Map) Object {

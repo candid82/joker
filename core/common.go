@@ -28,3 +28,14 @@ func pprintObject(obj Object, indent int, w io.Writer) int {
 		return indent + len(s)
 	}
 }
+
+func formatObject(obj Object, indent int, w io.Writer) int {
+	switch obj := obj.(type) {
+	case Formatter:
+		return obj.Format(w, indent)
+	default:
+		s := obj.ToString(true)
+		fmt.Fprint(w, s)
+		return indent + len(s)
+	}
+}

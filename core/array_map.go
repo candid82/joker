@@ -56,6 +56,10 @@ func (seq *ArrayMapSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *ArrayMapSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (seq *ArrayMapSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)

@@ -8,19 +8,21 @@
 
 (def exit-code 0)
 
-(let [test-dirs (->> (joker.os/ls "tests/linter")
+(let [[cmd root-dir output-k output-file-name] *command-line-args*
+      output-k (keyword output-k)
+      test-dirs (->> (joker.os/ls root-dir)
                      (filter :dir?)
                      (map :name))
       pwd (get (joker.os/env) "PWD")
       exe (str pwd "/joker")]
   (doseq [test-dir test-dirs]
-    (let [dir (str "tests/linter/" test-dir "/")
+    (let [dir (str root-dir "/" test-dir "/")
           filename (if (file-exists? (str dir "input.clj"))
                      (str dir "input.clj")
                      (str dir "input.cljs"))
-          res (joker.os/sh exe "--lint" filename)
-          output (:err res)
-          expected (slurp (str dir "output.txt"))]
+          res (joker.os/sh exe cmd filename)
+          output (output-k res)
+          expected (slurp (str dir output-file-name))]
       (when (and (not= "" output)
                  (:success res))
         (println "FAILED:" test-dir "(zero exit code, yet stderr written to)")

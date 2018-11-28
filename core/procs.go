@@ -39,6 +39,7 @@ type (
 
 const (
 	READ Phase = iota
+	FORMAT
 	PARSE
 	EVAL
 	PRINT_IF_NOT_NIL
@@ -1495,6 +1496,10 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			return err
 		}
 		if phase == READ {
+			continue
+		}
+		if phase == FORMAT {
+			formatObject(obj, 0, Stdout)
 			continue
 		}
 		expr, err := TryParse(obj, parseContext)

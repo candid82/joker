@@ -180,6 +180,10 @@ func (seq *ArrayNodeSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *ArrayNodeSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (s *ArrayNodeSeq) GetType() *Type {
 	return TYPE.ArrayNodeSeq
 }
@@ -267,6 +271,10 @@ func (s *NodeSeq) ToString(escape bool) string {
 
 func (seq *NodeSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
+}
+
+func (seq *NodeSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
 }
 
 func (s *NodeSeq) GetType() *Type {
