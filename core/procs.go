@@ -1500,6 +1500,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		}
 		if phase == FORMAT {
 			formatObject(obj, 0, Stdout)
+			fmt.Fprint(Stdout, "\n\n")
 			continue
 		}
 		expr, err := TryParse(obj, parseContext)
