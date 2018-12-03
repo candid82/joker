@@ -321,30 +321,6 @@ func EnsureInt(args []Object, index int) Int {
 	}
 }
 
-<<<<<<< HEAD
-=======
-func AssertByte(obj Object, msg string) Byte {
-	switch c := obj.(type) {
-	case Byte:
-		return c
-	default:
-		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "Byte", obj.GetType().ToString(false))
-		}
-		panic(RT.NewError(msg))
-	}
-}
-
-func EnsureByte(args []Object, index int) Byte {
-	switch c := args[index].(type) {
-	case Byte:
-		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Byte"))
-	}
-}
-
->>>>>>> 050fb75... Run 'go fmt' on source tree
 func AssertDouble(obj Object, msg string) Double {
 	switch c := obj.(type) {
 	case Double:

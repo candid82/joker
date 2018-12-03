@@ -72,14 +72,6 @@ func (x Int) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
-<<<<<<< HEAD
-=======
-func (x Byte) WithInfo(info *ObjectInfo) Object {
-	x.info = info
-	return x
-}
-
->>>>>>> 050fb75... Run 'go fmt' on source tree
 func (x Bool) WithInfo(info *ObjectInfo) Object {
 	x.info = info
 	return x
