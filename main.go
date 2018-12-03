@@ -183,7 +183,7 @@ func srepl(port string, phase Phase) {
 		VERSION, conn.RemoteAddr())
 
 	for {
-		fmt.Fprint(Stdout, GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+		fmt.Fprint(Stdout, GLOBAL_ENV.CurrentNamespace().Name.ToString(false)+"=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			return
 		}
@@ -343,7 +343,7 @@ var (
 	dialect            Dialect = UNKNOWN
 	eval               string
 	replFlag           bool
-	replSocket              string
+	replSocket         string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"

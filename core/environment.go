@@ -8,9 +8,8 @@ import (
 	"strings"
 )
 
-
 var (
-	Stdin io.Reader = os.Stdin
+	Stdin  io.Reader = os.Stdin
 	Stdout io.Writer = os.Stdout
 	Stderr io.Writer = os.Stderr
 )

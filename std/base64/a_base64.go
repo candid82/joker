@@ -3,55 +3,53 @@
 package base64
 
 import (
-  
-  . "github.com/candid82/joker/core"
+	. "github.com/candid82/joker/core"
 )
 
 var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
 var decode_string_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    s := ExtractString(args, 0)
-    res := decodeString(s)
-    return MakeString(res)
+	c := len(args)
+	switch {
+	case c == 1:
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+		s := ExtractString(args, 0)
+		res := decodeString(s)
+		return MakeString(res)
+
+	default:
+		PanicArity(c)
+	}
+	return NIL
 }
 
 var encode_string_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    s := ExtractString(args, 0)
-    res := encodeString(s)
-    return MakeString(res)
+	c := len(args)
+	switch {
+	case c == 1:
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+		s := ExtractString(args, 0)
+		res := encodeString(s)
+		return MakeString(res)
+
+	default:
+		PanicArity(c)
+	}
+	return NIL
 }
-
 
 func init() {
 
-base64Namespace.ResetMeta(MakeMeta(nil, "Implements base64 encoding as specified by RFC 4648.", "1.0"))
+	base64Namespace.ResetMeta(MakeMeta(nil, "Implements base64 encoding as specified by RFC 4648.", "1.0"))
 
-base64Namespace.InternVar("decode-string", decode_string_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `Returns the bytes represented by the base64 string s.`, "1.0"))
+	base64Namespace.InternVar("decode-string", decode_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Returns the bytes represented by the base64 string s.`, "1.0"))
 
-base64Namespace.InternVar("encode-string", encode_string_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `Returns the base64 encoding of s.`, "1.0"))
+	base64Namespace.InternVar("encode-string", encode_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Returns the base64 encoding of s.`, "1.0"))
 
 }
