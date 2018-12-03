@@ -3,197 +3,201 @@
 package os
 
 import (
+	
 	. "github.com/candid82/joker/core"
 )
 
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
-var args_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 0:
-
-		res := commandArgs()
-		return res
+var args_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 0:
+		
+		
+		_res := commandArgs()
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var cwd_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 0:
-
-		res := getwd()
-		return MakeString(res)
+var cwd_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 0:
+		
+		
+		_res := getwd()
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var env_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 0:
-
-		res := env()
-		return res
+var env_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 0:
+		
+		
+		_res := env()
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var exit_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 1:
-
-		code := ExtractInt(args, 0)
-		res := NIL
-		ExitJoker(code)
-		return res
+var exit_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		code := ExtractInt(_args, 0)
+		_res := NIL; ExitJoker(code)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var ls_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 1:
-
-		dirname := ExtractString(args, 0)
-		res := readDir(dirname)
-		return res
+var ls_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		dirname := ExtractString(_args, 0)
+		_res := readDir(dirname)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var mkdir_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 2:
-
-		name := ExtractString(args, 0)
-		perm := ExtractInt(args, 1)
-		res := mkdir(name, perm)
-		return res
+var mkdir_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 2:
+		
+		name := ExtractString(_args, 0)
+    perm := ExtractInt(_args, 1)
+		_res := mkdir(name, perm)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var sh_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
+var sh_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
 	case true:
-		CheckArity(args, 1, 999)
-		name := ExtractString(args, 0)
-		arguments := ExtractStrings(args, 1)
-		res := sh("", name, arguments)
-		return res
+		CheckArity(_args, 1,999)
+		name := ExtractString(_args, 0)
+    arguments := ExtractStrings(_args, 1)
+		_res := sh("", name, arguments)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var sh_from_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
+var sh_from_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
 	case true:
-		CheckArity(args, 2, 999)
-		dir := ExtractString(args, 0)
-		name := ExtractString(args, 1)
-		arguments := ExtractStrings(args, 2)
-		res := sh(dir, name, arguments)
-		return res
+		CheckArity(_args, 2,999)
+		dir := ExtractString(_args, 0)
+    name := ExtractString(_args, 1)
+    arguments := ExtractStrings(_args, 2)
+		_res := sh(dir, name, arguments)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var stat_ Proc = func(args []Object) Object {
-	c := len(args)
-	switch {
-	case c == 1:
-
-		filename := ExtractString(args, 0)
-		res := stat(filename)
-		return res
+var stat_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		filename := ExtractString(_args, 0)
+		_res := stat(filename)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
+
 
 func init() {
 
-	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
+osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
 
-	osNamespace.InternVar("args", args_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+osNamespace.InternVar("args", args_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom()),
+		`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
 
-	osNamespace.InternVar("cwd", cwd_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a rooted path name corresponding to the current directory. If the current directory can
+osNamespace.InternVar("cwd", cwd_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom()),
+		`Returns a rooted path name corresponding to the current directory. If the current directory can
   be reached via multiple paths (due to symbolic links), cwd may return any one of them.`, "1.0"))
 
-	osNamespace.InternVar("env", env_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a map representing the environment.`, "1.0"))
+osNamespace.InternVar("env", env_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom()),
+		`Returns a map representing the environment.`, "1.0"))
 
-	osNamespace.InternVar("exit", exit_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
-			`Causes the current program to exit with the given status code.`, "1.0"))
+osNamespace.InternVar("exit", exit_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("code"))),
+		`Causes the current program to exit with the given status code.`, "1.0"))
 
-	osNamespace.InternVar("ls", ls_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Reads the directory named by dirname and returns a list of directory entries sorted by filename.`, "1.0"))
+osNamespace.InternVar("ls", ls_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
+		`Reads the directory named by dirname and returns a list of directory entries sorted by filename.`, "1.0"))
 
-	osNamespace.InternVar("mkdir", mkdir_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
-			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+osNamespace.InternVar("mkdir", mkdir_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
+		`Creates a new directory with the specified name and permission bits.`, "1.0"))
 
-	osNamespace.InternVar("sh", sh_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments. Returns a map with the following keys:
+osNamespace.InternVar("sh", sh_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
+		`Executes the named program with the given arguments. Returns a map with the following keys:
       :success - whether or not the execution was successful,
       :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
 
-	osNamespace.InternVar("sh-from", sh_from_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments and working directory set to dir.
+osNamespace.InternVar("sh-from", sh_from_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
+		`Executes the named program with the given arguments and working directory set to dir.
   Returns a map with the following keys:
       :success - whether or not the execution was successful,
       :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
@@ -201,10 +205,10 @@ func init() {
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
 
-	osNamespace.InternVar("stat", stat_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
-			`Returns a map describing the named file. The info map has the following attributes:
+osNamespace.InternVar("stat", stat_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
+		`Returns a map describing the named file. The info map has the following attributes:
   :name - base name of the file
   :size - length in bytes for regular files; system-dependent for others
   :mode - file mode bits
