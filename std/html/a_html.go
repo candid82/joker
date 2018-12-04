@@ -3,40 +3,40 @@
 package html
 
 import (
-  "html"
-  . "github.com/candid82/joker/core"
+	"html"
+	. "github.com/candid82/joker/core"
 )
 
 var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
-var escape_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    s := ExtractString(args, 0)
-    res := html.EscapeString(s)
-    return MakeString(res)
+var escape_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		s := ExtractString(_args, 0)
+		_res := html.EscapeString(s)
+		return MakeString(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var unescape_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    s := ExtractString(args, 0)
-    res := html.UnescapeString(s)
-    return MakeString(res)
+var unescape_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		s := ExtractString(_args, 0)
+		_res := html.UnescapeString(s)
+		return MakeString(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
 
@@ -45,13 +45,13 @@ func init() {
 htmlNamespace.ResetMeta(MakeMeta(nil, "Provides functions for escaping and unescaping HTML text.", "1.0"))
 
 htmlNamespace.InternVar("escape", escape_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and ".`, "1.0"))
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+		`Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and ".`, "1.0"))
 
 htmlNamespace.InternVar("unescape", unescape_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `Unescapes entities like &lt; to become <.`, "1.0"))
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+		`Unescapes entities like &lt; to become <.`, "1.0"))
 
 }

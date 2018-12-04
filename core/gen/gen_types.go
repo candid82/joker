@@ -20,39 +20,39 @@ package core
 
 var importFmt string = `
 import (
-  "fmt"
+	"fmt"
 )
 `
 
 var assertTemplate string = `
 func Assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
-  switch c := obj.(type) {
-  case {{.TypeName}}:
-    return c
-  default:
-    if msg == "" {
-      msg = fmt.Sprintf("Expected %s, got %s", "{{.Name}}", obj.GetType().ToString(false))
-    }
-    panic(RT.NewError(msg))
-  }
+	switch c := obj.(type) {
+	case {{.TypeName}}:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "{{.Name}}", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
 }
 `
 
 var ensureTemplate string = `
 func Ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
-  switch c := args[index].(type) {
-  case {{.TypeName}}:
-    return c
-  default:
-    panic(RT.NewArgTypeError(index, c, "{{.Name}}"))
-  }
+	switch c := args[index].(type) {
+	case {{.TypeName}}:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "{{.Name}}"))
+	}
 }
 `
 
 var infoTemplate string = `
 func (x {{.TypeName}}) WithInfo(info *ObjectInfo) Object {
-  x.info = info
-  return x
+	x.info = info
+	return x
 }
 `
 

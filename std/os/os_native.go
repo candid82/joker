@@ -28,7 +28,7 @@ func commandArgs() Object {
 	return res
 }
 
-const defaultFailedCode = 127  // seen from 'sh no-such-file' on OS X and Ubuntu
+const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
 func sh(dir string, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
