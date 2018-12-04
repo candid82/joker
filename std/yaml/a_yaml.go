@@ -9,32 +9,32 @@ import (
 
 var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
-var read_string_ Proc = func(args []Object) Object {
-	c := len(args)
+var read_string_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := readString(s)
-		return res
+		s := ExtractString(_args, 0)
+		_res := readString(s)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var write_string_ Proc = func(args []Object) Object {
-	c := len(args)
+var write_string_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		v := ExtractObject(args, 0)
-		res := writeString(v)
-		return res
+		v := ExtractObject(_args, 0)
+		_res := writeString(v)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }

@@ -9,32 +9,32 @@ import (
 
 var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
-var escape_ Proc = func(args []Object) Object {
-	c := len(args)
+var escape_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := html.EscapeString(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := html.EscapeString(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var unescape_ Proc = func(args []Object) Object {
-	c := len(args)
+var unescape_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := html.UnescapeString(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := html.UnescapeString(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
