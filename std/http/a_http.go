@@ -9,49 +9,49 @@ import (
 
 var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
-var send_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var send_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		request := ExtractMap(_args, 0)
-		_res := sendRequest(request)
-		return _res
+		request := ExtractMap(args, 0)
+		res := sendRequest(request)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var start_file_server_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var start_file_server_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		addr := ExtractString(_args, 0)
-    root := ExtractString(_args, 1)
-		_res := startFileServer(addr, root)
-		return _res
+		addr := ExtractString(args, 0)
+    root := ExtractString(args, 1)
+		res := startFileServer(addr, root)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var start_server_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var start_server_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		addr := ExtractString(_args, 0)
-    handler := ExtractCallable(_args, 1)
-		_res := startServer(addr, handler)
-		return _res
+		addr := ExtractString(args, 0)
+    handler := ExtractCallable(args, 1)
+		res := startServer(addr, handler)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

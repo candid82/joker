@@ -9,48 +9,48 @@ import (
 
 var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
 
-var cos_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var cos_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		x := ExtractNumber(_args, 0)
-		_res := cos(x)
-		return MakeDouble(_res)
+		x := ExtractNumber(args, 0)
+		res := cos(x)
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var hypot_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var hypot_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		p := ExtractNumber(_args, 0)
-    q := ExtractNumber(_args, 1)
-		_res := hypot(p, q)
-		return MakeDouble(_res)
+		p := ExtractNumber(args, 0)
+    q := ExtractNumber(args, 1)
+		res := hypot(p, q)
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var sin_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var sin_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		x := ExtractNumber(_args, 0)
-		_res := sin(x)
-		return MakeDouble(_res)
+		x := ExtractNumber(args, 0)
+		res := sin(x)
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

@@ -9,32 +9,32 @@ import (
 
 var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
-var read_string_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var read_string_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := readString(s)
-		return _res
+		s := ExtractString(args, 0)
+		res := readString(s)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var write_string_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var write_string_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		v := ExtractObject(_args, 0)
-		_res := writeString(v)
-		return _res
+		v := ExtractObject(args, 0)
+		res := writeString(v)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

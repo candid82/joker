@@ -9,141 +9,141 @@ import (
 
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
-var args_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var args_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 0:
+	case c == 0:
 		
 		
-		_res := commandArgs()
-		return _res
+		res := commandArgs()
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var cwd_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var cwd_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 0:
+	case c == 0:
 		
 		
-		_res := getwd()
-		return MakeString(_res)
+		res := getwd()
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var env_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var env_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 0:
+	case c == 0:
 		
 		
-		_res := env()
-		return _res
+		res := env()
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var exit_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var exit_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		code := ExtractInt(_args, 0)
-		_res := NIL; ExitJoker(code)
-		return _res
+		code := ExtractInt(args, 0)
+		res := NIL; ExitJoker(code)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var ls_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var ls_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		dirname := ExtractString(_args, 0)
-		_res := readDir(dirname)
-		return _res
+		dirname := ExtractString(args, 0)
+		res := readDir(dirname)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var mkdir_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var mkdir_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		name := ExtractString(_args, 0)
-    perm := ExtractInt(_args, 1)
-		_res := mkdir(name, perm)
-		return _res
+		name := ExtractString(args, 0)
+    perm := ExtractInt(args, 1)
+		res := mkdir(name, perm)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var sh_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var sh_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
 	case true:
-		CheckArity(_args, 1,999)
-		name := ExtractString(_args, 0)
-    arguments := ExtractStrings(_args, 1)
-		_res := sh("", name, arguments)
-		return _res
+		CheckArity(args, 1,999)
+		name := ExtractString(args, 0)
+    arguments := ExtractStrings(args, 1)
+		res := sh("", name, arguments)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var sh_from_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var sh_from_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
 	case true:
-		CheckArity(_args, 2,999)
-		dir := ExtractString(_args, 0)
-    name := ExtractString(_args, 1)
-    arguments := ExtractStrings(_args, 2)
-		_res := sh(dir, name, arguments)
-		return _res
+		CheckArity(args, 2,999)
+		dir := ExtractString(args, 0)
+    name := ExtractString(args, 1)
+    arguments := ExtractStrings(args, 2)
+		res := sh(dir, name, arguments)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var stat_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var stat_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		filename := ExtractString(_args, 0)
-		_res := stat(filename)
-		return _res
+		filename := ExtractString(args, 0)
+		res := stat(filename)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

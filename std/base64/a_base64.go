@@ -9,32 +9,32 @@ import (
 
 var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
-var decode_string_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var decode_string_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := decodeString(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := decodeString(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var encode_string_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var encode_string_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := encodeString(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := encodeString(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

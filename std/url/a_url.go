@@ -9,62 +9,62 @@ import (
 
 var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
 
-var path_escape_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var path_escape_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := url.PathEscape(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := url.PathEscape(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var path_unescape_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var path_unescape_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := pathUnescape(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := pathUnescape(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var query_escape_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var query_escape_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := url.QueryEscape(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := url.QueryEscape(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var query_unescape_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var query_unescape_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		_res := queryUnescape(s)
-		return MakeString(_res)
+		s := ExtractString(args, 0)
+		res := queryUnescape(s)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }

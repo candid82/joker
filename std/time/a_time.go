@@ -9,248 +9,248 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
-var add_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var add_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		t := ExtractTime(_args, 0)
-    d := ExtractInt(_args, 1)
-		_res := t.Add(time.Duration(d))
-		return MakeTime(_res)
+		t := ExtractTime(args, 0)
+    d := ExtractInt(args, 1)
+		res := t.Add(time.Duration(d))
+		return MakeTime(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var format_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var format_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		t := ExtractTime(_args, 0)
-    layout := ExtractString(_args, 1)
-		_res := t.Format(layout)
-		return MakeString(_res)
+		t := ExtractTime(args, 0)
+    layout := ExtractString(args, 1)
+		res := t.Format(layout)
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var from_unix_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var from_unix_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		sec := ExtractInt(_args, 0)
-    nsec := ExtractInt(_args, 1)
-		_res := time.Unix(int64(sec), int64(nsec))
-		return MakeTime(_res)
+		sec := ExtractInt(args, 0)
+    nsec := ExtractInt(args, 1)
+		res := time.Unix(int64(sec), int64(nsec))
+		return MakeTime(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var hours_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var hours_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		d := ExtractInt(_args, 0)
-		_res := time.Duration(d).Hours()
-		return MakeDouble(_res)
+		d := ExtractInt(args, 0)
+		res := time.Duration(d).Hours()
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var minutes_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var minutes_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		d := ExtractInt(_args, 0)
-		_res := time.Duration(d).Minutes()
-		return MakeDouble(_res)
+		d := ExtractInt(args, 0)
+		res := time.Duration(d).Minutes()
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var now_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var now_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 0:
+	case c == 0:
 		
 		
-		_res := time.Now()
-		return MakeTime(_res)
+		res := time.Now()
+		return MakeTime(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var parse_duration_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var parse_duration_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		s := ExtractString(_args, 0)
-		t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)
-		return MakeInt(_res)
+		s := ExtractString(args, 0)
+		t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var round_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var round_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		d := ExtractInt(_args, 0)
-    m := ExtractInt(_args, 1)
-		_res := int(time.Duration(d).Round(time.Duration(m)))
-		return MakeInt(_res)
+		d := ExtractInt(args, 0)
+    m := ExtractInt(args, 1)
+		res := int(time.Duration(d).Round(time.Duration(m)))
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var seconds_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var seconds_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		d := ExtractInt(_args, 0)
-		_res := time.Duration(d).Seconds()
-		return MakeDouble(_res)
+		d := ExtractInt(args, 0)
+		res := time.Duration(d).Seconds()
+		return MakeDouble(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var since_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var since_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		t := ExtractTime(_args, 0)
-		_res := int(time.Since(t))
-		return MakeInt(_res)
+		t := ExtractTime(args, 0)
+		res := int(time.Since(t))
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var sleep_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var sleep_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		d := ExtractInt(_args, 0)
-		_res := sleep(d)
-		return _res
+		d := ExtractInt(args, 0)
+		res := sleep(d)
+		return res
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var string_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var string_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		d := ExtractInt(_args, 0)
-		_res := time.Duration(d).String()
-		return MakeString(_res)
+		d := ExtractInt(args, 0)
+		res := time.Duration(d).String()
+		return MakeString(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var sub_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var sub_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		t := ExtractTime(_args, 0)
-    u := ExtractTime(_args, 1)
-		_res := int(t.Sub(u))
-		return MakeInt(_res)
+		t := ExtractTime(args, 0)
+    u := ExtractTime(args, 1)
+		res := int(t.Sub(u))
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var truncate_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var truncate_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 2:
+	case c == 2:
 		
-		d := ExtractInt(_args, 0)
-    m := ExtractInt(_args, 1)
-		_res := int(time.Duration(d).Truncate(time.Duration(m)))
-		return MakeInt(_res)
+		d := ExtractInt(args, 0)
+    m := ExtractInt(args, 1)
+		res := int(time.Duration(d).Truncate(time.Duration(m)))
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var unix_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var unix_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		t := ExtractTime(_args, 0)
-		_res := int(t.Unix())
-		return MakeInt(_res)
+		t := ExtractTime(args, 0)
+		res := int(t.Unix())
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
 
-var until_ Proc = func(_args []Object) Object {
-	_c := len(_args)
+var until_ Proc = func(args []Object) Object {
+	c := len(args)
 	switch  {
-	case _c == 1:
+	case c == 1:
 		
-		t := ExtractTime(_args, 0)
-		_res := int(time.Until(t))
-		return MakeInt(_res)
+		t := ExtractTime(args, 0)
+		res := int(time.Until(t))
+		return MakeInt(res)
 
 	default:
-		PanicArity(_c)
+		PanicArity(c)
 	}
 	return NIL
 }
