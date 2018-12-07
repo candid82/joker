@@ -1,0 +1,53 @@
+(defn slurp-or
+  [path alt]
+  (try
+    (slurp path)
+    (catch Error e
+      alt)))
+
+(def exit-code 0)
+
+(defn have-option
+  "Quick and dirty options parser."
+  [opt]
+  (some #(= opt %) *command-line-args*))
+
+(def verbose (or (have-option "--verbose") (have-option "-v")))
+
+(let [test-dirs (->> (joker.os/ls "tests/eval")
+                     (filter :dir?)
+                     (map :name))
+      pwd (get (joker.os/env) "PWD")
+      exe (str pwd "/joker")]
+  (doseq [test-dir test-dirs]
+    (when verbose
+      (println (str "Running test " test-dir)))
+    (let [dir (str "tests/eval/" test-dir "/")
+          filename "input.joke"
+          res (joker.os/sh-from dir exe filename) ; Someday add: :in "input.txt" (no :in support yet)
+          out (:out res)
+          err (:err res)
+          rc (:exit res)
+          expected-out (slurp-or (str dir "stdout.txt") "")
+          expected-err (slurp-or (str dir "stderr.txt") "")
+          expected-rc (if-let [rc (slurp-or (str dir "rc.txt") false)]
+                        (int (bigint (with-in-str rc (read-line))))
+                        0)]
+      (when-not (and (= expected-out out) (= expected-err err) (= expected-rc rc))
+        (println "FAILED:" test-dir)
+        (when-not (= expected-out out)
+          (println "EXPECTED STDOUT:")
+          (println expected-out)
+          (println "ACTUAL STDOUT:")
+          (println out))
+        (when-not (= expected-err err)
+          (println "EXPECTED STDERR:")
+          (println expected-err)
+          (println "ACTUAL STDERR:")
+          (println err))
+        (when-not (= expected-rc rc)
+          (println "EXPECTED RC:" expected-rc)
+          (println "ACTUAL RC:" rc))
+        (var-set #'exit-code 1)))))
+
+(joker.os/exit exit-code)

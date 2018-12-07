@@ -34,3 +34,6 @@ jobs:
       - run:
           name: flag tests
           command: ./flag-tests.sh
+      - run:
+          name: eval tests
+          command: ./eval-tests.sh
