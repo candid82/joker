@@ -10,378 +10,378 @@ import (
 
 var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
-var isblank_ Proc = func(args []Object) Object {
-	c := len(args)
+var isblank_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractObject(args, 0)
-		res := isBlank(s)
-		return MakeBool(res)
+		s := ExtractObject(_args, 0)
+		_res := isBlank(s)
+		return MakeBool(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var capitalize_ Proc = func(args []Object) Object {
-	c := len(args)
+var capitalize_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := capitalize(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := capitalize(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var isends_with_ Proc = func(args []Object) Object {
-	c := len(args)
+var isends_with_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    substr := ExtractString(args, 1)
-		res := strings.HasSuffix(s, substr)
-		return MakeBool(res)
+		s := ExtractString(_args, 0)
+    substr := ExtractString(_args, 1)
+		_res := strings.HasSuffix(s, substr)
+		return MakeBool(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var escape_ Proc = func(args []Object) Object {
-	c := len(args)
+var escape_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    cmap := ExtractCallable(args, 1)
-		res := escape(s, cmap)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+    cmap := ExtractCallable(_args, 1)
+		_res := escape(s, cmap)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var isincludes_ Proc = func(args []Object) Object {
-	c := len(args)
+var isincludes_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    substr := ExtractString(args, 1)
-		res := strings.Contains(s, substr)
-		return MakeBool(res)
+		s := ExtractString(_args, 0)
+    substr := ExtractString(_args, 1)
+		_res := strings.Contains(s, substr)
+		return MakeBool(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var index_of_ Proc = func(args []Object) Object {
-	c := len(args)
+var index_of_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    value := ExtractObject(args, 1)
-		res := indexOf(s, value, 0)
-		return res
+		s := ExtractString(_args, 0)
+    value := ExtractObject(_args, 1)
+		_res := indexOf(s, value, 0)
+		return _res
 
-  case c == 3:
+  case _c == 3:
 		
-		s := ExtractString(args, 0)
-    value := ExtractObject(args, 1)
-    from := ExtractInt(args, 2)
-		res := indexOf(s, value, from)
-		return res
+		s := ExtractString(_args, 0)
+    value := ExtractObject(_args, 1)
+    from := ExtractInt(_args, 2)
+		_res := indexOf(s, value, from)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var join_ Proc = func(args []Object) Object {
-	c := len(args)
+var join_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		coll := ExtractSeqable(args, 0)
-		res := join("", coll)
-		return MakeString(res)
+		coll := ExtractSeqable(_args, 0)
+		_res := join("", coll)
+		return MakeString(_res)
 
-  case c == 2:
+  case _c == 2:
 		
-		separator := ExtractString(args, 0)
-    coll := ExtractSeqable(args, 1)
-		res := join(separator, coll)
-		return MakeString(res)
+		separator := ExtractString(_args, 0)
+    coll := ExtractSeqable(_args, 1)
+		_res := join(separator, coll)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var last_index_of_ Proc = func(args []Object) Object {
-	c := len(args)
+var last_index_of_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    value := ExtractObject(args, 1)
-		res := lastIndexOf(s, value, 0)
-		return res
+		s := ExtractString(_args, 0)
+    value := ExtractObject(_args, 1)
+		_res := lastIndexOf(s, value, 0)
+		return _res
 
-  case c == 3:
+  case _c == 3:
 		
-		s := ExtractString(args, 0)
-    value := ExtractObject(args, 1)
-    from := ExtractInt(args, 2)
-		res := lastIndexOf(s, value, from)
-		return res
+		s := ExtractString(_args, 0)
+    value := ExtractObject(_args, 1)
+    from := ExtractInt(_args, 2)
+		_res := lastIndexOf(s, value, from)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var lower_case_ Proc = func(args []Object) Object {
-	c := len(args)
+var lower_case_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.ToLower(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.ToLower(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var pad_left_ Proc = func(args []Object) Object {
-	c := len(args)
+var pad_left_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 3:
+	case _c == 3:
 		
-		s := ExtractString(args, 0)
-    pad := ExtractString(args, 1)
-    n := ExtractInt(args, 2)
-		res := padLeft(s, pad, n)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+    pad := ExtractString(_args, 1)
+    n := ExtractInt(_args, 2)
+		_res := padLeft(s, pad, n)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var pad_right_ Proc = func(args []Object) Object {
-	c := len(args)
+var pad_right_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 3:
+	case _c == 3:
 		
-		s := ExtractString(args, 0)
-    pad := ExtractString(args, 1)
-    n := ExtractInt(args, 2)
-		res := padRight(s, pad, n)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+    pad := ExtractString(_args, 1)
+    n := ExtractInt(_args, 2)
+		_res := padRight(s, pad, n)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var replace_ Proc = func(args []Object) Object {
-	c := len(args)
+var replace_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 3:
+	case _c == 3:
 		
-		s := ExtractString(args, 0)
-    match := ExtractObject(args, 1)
-    repl := ExtractString(args, 2)
-		res := replace(s, match, repl)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+    match := ExtractObject(_args, 1)
+    repl := ExtractString(_args, 2)
+		_res := replace(s, match, repl)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var replace_first_ Proc = func(args []Object) Object {
-	c := len(args)
+var replace_first_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 3:
+	case _c == 3:
 		
-		s := ExtractString(args, 0)
-    match := ExtractObject(args, 1)
-    repl := ExtractString(args, 2)
-		res := replaceFirst(s, match, repl)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+    match := ExtractObject(_args, 1)
+    repl := ExtractString(_args, 2)
+		_res := replaceFirst(s, match, repl)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var reverse_ Proc = func(args []Object) Object {
-	c := len(args)
+var reverse_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := reverse(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := reverse(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var split_ Proc = func(args []Object) Object {
-	c := len(args)
+var split_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    re := ExtractRegex(args, 1)
-		res := split(s, re, 0)
-		return res
+		s := ExtractString(_args, 0)
+    re := ExtractRegex(_args, 1)
+		_res := split(s, re, 0)
+		return _res
 
-  case c == 3:
+  case _c == 3:
 		
-		s := ExtractString(args, 0)
-    re := ExtractRegex(args, 1)
-    n := ExtractInt(args, 2)
-		res := split(s, re, n)
-		return res
+		s := ExtractString(_args, 0)
+    re := ExtractRegex(_args, 1)
+    n := ExtractInt(_args, 2)
+		_res := split(s, re, n)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var split_lines_ Proc = func(args []Object) Object {
-	c := len(args)
+var split_lines_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := split(s, newLine, 0)
-		return res
+		s := ExtractString(_args, 0)
+		_res := split(s, newLine, 0)
+		return _res
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var isstarts_with_ Proc = func(args []Object) Object {
-	c := len(args)
+var isstarts_with_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 2:
+	case _c == 2:
 		
-		s := ExtractString(args, 0)
-    substr := ExtractString(args, 1)
-		res := strings.HasPrefix(s, substr)
-		return MakeBool(res)
+		s := ExtractString(_args, 0)
+    substr := ExtractString(_args, 1)
+		_res := strings.HasPrefix(s, substr)
+		return MakeBool(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var trim_ Proc = func(args []Object) Object {
-	c := len(args)
+var trim_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.TrimSpace(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.TrimSpace(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var trim_left_ Proc = func(args []Object) Object {
-	c := len(args)
+var trim_left_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.TrimLeftFunc(s, unicode.IsSpace)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.TrimLeftFunc(s, unicode.IsSpace)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var trim_newline_ Proc = func(args []Object) Object {
-	c := len(args)
+var trim_newline_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.TrimRight(s, "\n\r")
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.TrimRight(s, "\n\r")
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var trim_right_ Proc = func(args []Object) Object {
-	c := len(args)
+var trim_right_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.TrimRightFunc(s, unicode.IsSpace)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.TrimRightFunc(s, unicode.IsSpace)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
 
-var upper_case_ Proc = func(args []Object) Object {
-	c := len(args)
+var upper_case_ Proc = func(_args []Object) Object {
+	_c := len(_args)
 	switch  {
-	case c == 1:
+	case _c == 1:
 		
-		s := ExtractString(args, 0)
-		res := strings.ToUpper(s)
-		return MakeString(res)
+		s := ExtractString(_args, 0)
+		_res := strings.ToUpper(s)
+		return MakeString(_res)
 
 	default:
-		PanicArity(c)
+		PanicArity(_c)
 	}
 	return NIL
 }
