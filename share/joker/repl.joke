@@ -1,7 +1,6 @@
 (ns
-  ^{:go-imports []
-    :doc "Utilities meant to be used interactively at the REPL."}
-  repl)
+  ^{:doc "Utilities meant to be used interactively at the REPL."}
+  joker.repl)
 
 (def ^:private special-doc-map
   '{def {:forms [(def symbol doc-string? init?)]
