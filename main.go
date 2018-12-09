@@ -331,8 +331,7 @@ func usage(out io.Writer) {
     Sets the value of the dynamic variable *classdir*, used when a search of
     *classpath* for a library encounters an "-" component. Defaults (at startup
     time) to the JOKER_CLASSDIR environment variable or, if that is undefined
-    (not just empty), $0/share, where $0 is the absolute path of the Joker
-    executable with any single trailing "bin" component removed.
+    (not just empty), as described by (joker.repl/doc *classdir*).
 `)
 	fmt.Fprintln(out, "  --no-readline")
 	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")

@@ -3711,10 +3711,12 @@
   {:added "1.0"})
 
 (add-doc-and-meta *classdir*
-  "A string identifying the directory, relative to the Joker executable itself,
-  in which to find a library when a search of *classpath* encounters a \"-\"
-  component. Configured by --classdir or the JOKER_CLASSDIR environment
-  variable."
+  "A string identifying the directory in which to find a library when a search
+  of *classpath* encounters a \"-\" component. Configured by --classdir or the
+  JOKER_CLASSDIR environment variable. Defaults to \"$(dirname $(dirname
+  $0))/share/joker\" if \"$(dirname $0)\" ends with a single \"bin\" component,
+  where \"$0\" is the absolute pathname of the Joker executable being run;
+  otherwise defaults to \"$(dirname $0)/share\"."
   {:added "1.0"})
 
 (add-doc-and-meta *ns*
