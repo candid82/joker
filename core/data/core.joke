@@ -3454,8 +3454,16 @@
   [^String f]
   (load-file__ f))
 
+(defn load-lib-from-path
+  "Loads library, potentially from path, depending on *classpath* and
+  *classdir*. Does not protect against recursion."
+  {:added "1.0"}
+  [^Symbol lib, ^String path]
+  (load-lib-from-path__ lib path))
+
 (defn load
-  "Loads code from libs, skipping libs already being loaded."
+  "Loads code from libs, throwing error if cyclic dependency detected,
+  and ignoring libs already being loaded."
   {:added "1.0"}
   [& libs]
   (doseq [^Symbol lib libs]
@@ -3468,7 +3476,7 @@
                   *ns* *ns*]
           (if *linter-mode*
             (in-ns lib)
-            (load-file path)))))))
+            (load-lib-from-path lib path)))))))
 
 (defn get-in
   "Returns the value in a nested associative structure,

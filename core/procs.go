@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -1371,6 +1372,50 @@ var procLoadFile Proc = func(args []Object) Object {
 	return NIL
 }
 
+var procLoadLibFromPath Proc = func(args []Object) Object {
+	libname := EnsureSymbol(args, 0).Name()
+	pathname := EnsureString(args, 1).S
+	cp := GLOBAL_ENV.classPath.Value
+	cpvec := AssertVector(cp, "*classpath* must be a Vector, not a "+cp.GetType().ToString(false))
+	count := cpvec.Count()
+	var f *os.File
+	var err error
+	var canonicalErr error
+	var filename string
+	for i := 0; i < count; i++ {
+		elem := cpvec.at(i)
+		cpelem := AssertString(elem, "*classpath* must contain only Strings, not a "+elem.GetType().ToString(false)+" (at element "+strconv.Itoa(i)+")")
+		s := cpelem.S
+		if s == "" {
+			filename = pathname
+		} else {
+			var dirname string
+			if s == "-" {
+				d := GLOBAL_ENV.classDir.Value
+				dirname = AssertString(d, "*classdir* must be a String, not a "+d.GetType().ToString(false)).S
+			} else {
+				dirname = s
+			}
+			filename = filepath.Join(dirname, filepath.Join(strings.Split(libname, ".")...))+".joke" // could cache inner join....
+		}
+		f, err = os.Open(filename)
+		if err == nil {
+			break
+		}
+		if s == "" {
+			canonicalErr = err
+		}
+	}
+	if canonicalErr == nil {
+		PanicOnErr(err)
+	} else if err != nil {
+		PanicOnErr(canonicalErr)
+	}
+	reader := NewReader(bufio.NewReader(f), filename)
+	ProcessReader(reader, filename, EVAL)
+	return NIL
+}
+
 var procReduceKv Proc = func(args []Object) Object {
 	f := EnsureCallable(args, 0)
 	init := args[1]
@@ -1907,6 +1952,7 @@ func init() {
 	intern("bound?__", procIsBound)
 	intern("format__", procFormat)
 	intern("load-file__", procLoadFile)
+	intern("load-lib-from-path__", procLoadLibFromPath)
 	intern("reduce-kv__", procReduceKv)
 	intern("slurp__", procSlurp)
 	intern("spit__", procSpit)
