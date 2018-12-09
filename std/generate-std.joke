@@ -117,7 +117,7 @@
       (rpl "\n// package" "\npackage")))
 
 (defn- ns-public-fns
-  "Return public functions only, not macros."
+  "Return public non-macros only."
   [ns]
   (remove #(:macro (meta (val %))) (ns-publics ns)))
 
