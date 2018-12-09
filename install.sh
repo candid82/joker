@@ -6,4 +6,9 @@ LIBS="$GOPATH/share/joker"
 
 mkdir -p "$LIBS"
 
-cp -a share/joker "$GOPATH/share/joker"
+cd share
+
+for f in *; do
+    rm -fr "$LIBS/$f"
+    cp -a "$f" "$LIBS/$f"
+done
