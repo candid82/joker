@@ -2,9 +2,9 @@ package core
 
 import (
 	"bufio"
-	"path/filepath"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )

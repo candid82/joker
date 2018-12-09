@@ -312,7 +312,7 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
-	fmt.Fprint(out,   "  --classpath, -c <cp>")
+	fmt.Fprint(out, "  --classpath, -c <cp>")
 	fmt.Fprint(out, `
     Use colon-delimited <cp> (semicolon-delimited on Windows) for source
     directories when loading libraries via :require and the like (but not

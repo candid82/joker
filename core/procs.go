@@ -1396,7 +1396,7 @@ var procLoadLibFromPath Proc = func(args []Object) Object {
 			} else {
 				dirname = s
 			}
-			filename = filepath.Join(dirname, filepath.Join(strings.Split(libname, ".")...))+".joke" // could cache inner join....
+			filename = filepath.Join(dirname, filepath.Join(strings.Split(libname, ".")...)) + ".joke" // could cache inner join....
 		}
 		f, err = os.Open(filename)
 		if err == nil {
