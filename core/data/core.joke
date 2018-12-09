@@ -3446,13 +3446,13 @@
   *loaded-libs*)
 
 (defn load-file
-  "Loads code from file f"
+  "Loads code from file f. Does not protect against recursion."
   {:added "1.0"}
   [^String f]
   (load-file__ f))
 
 (defn load
-  "Loads code from libs."
+  "Loads code from libs, skipping libs already being loaded."
   {:added "1.0"}
   [& libs]
   (doseq [^Symbol lib libs]
@@ -3700,6 +3700,11 @@
 (add-doc-and-meta *command-line-args*
   "A sequence of the supplied command line arguments, or nil if
   none were supplied"
+  {:added "1.0"})
+
+(add-doc-and-meta *classpath*
+  "A vector of the classpath elements as configured by --classpath or
+  the JOKER_CLASSPATH environment variable."
   {:added "1.0"})
 
 (add-doc-and-meta *ns*

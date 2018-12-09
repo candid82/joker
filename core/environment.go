@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"path/filepath"
 	"io"
 	"os"
 	"strconv"
@@ -24,6 +25,7 @@ type (
 		printReadably *Var
 		file          *Var
 		args          *Var
+		classPath     *Var
 		ns            *Var
 		version       *Var
 		Features      Set
@@ -54,6 +56,18 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
+func (env *Env) SetClassPath(cp string) {
+	cparray := filepath.SplitList(cp)
+	cpvec := EmptyVector
+	for _, cpelem := range cparray {
+		cpvec = cpvec.Conjoin(String{S: cpelem})
+	}
+	if cpvec.Count() == 0 {
+		cpvec = cpvec.Conjoin(String{S: ""})
+	}
+	env.classPath.Value = cpvec
+}
+
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -79,6 +93,8 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	res.SetEnvArgs(os.Args[1:])
+	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
+	res.classPath.Value = NIL
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}

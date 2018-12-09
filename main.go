@@ -310,8 +310,20 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprint(out,   "  --classpath, -c <cp>")
+	fmt.Fprint(out, `
+    Use colon-delimited <cp> (semicolon-delimited on Windows) for source
+    directories when loading libraries via :require and the like (but not
+    load-file). An empty field denotes the directory containing the current
+    load-file or, if none, the current directory (this is original Joker
+    behavior); a '.' (period) by itself denotes solely the current directory;
+    and a "-" denotes $0/share, where $0 is the absolute path of the Joker
+    executable with a single trailing "bin" component, if any, removed. Defaults
+    to the value of the JOKER_CLASSPATH environment variable or, if that is
+    undefined (not just empty), ":-".
+`)
 	fmt.Fprintln(out, "  --no-readline")
-	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful if joker is called with rlwrap.")
+	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
 	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
 	fmt.Fprintln(out, "  --dialect <dialect>")
@@ -344,6 +356,7 @@ var (
 	eval               string
 	replFlag           bool
 	replSocket         string
+	classPath          string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -363,6 +376,11 @@ func parseArgs(args []string) {
 	stop := false
 	missing := false
 	noFileFlag := false
+	if v, ok := os.LookupEnv("JOKER_CLASSPATH"); ok {
+		classPath = v
+	} else {
+		classPath = ":-"
+	}
 	var i int
 	for i = 1; i < length; i++ { // shift
 		if debugOut != nil {
@@ -449,6 +467,13 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				replSocket = args[i]
+			}
+		case "-c", "--classpath":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				classPath = args[i]
+			} else {
+				missing = true
 			}
 		case "--no-readline":
 			noReadline = true
@@ -557,6 +582,7 @@ func main() {
 
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
+	GLOBAL_ENV.SetClassPath(classPath)
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
@@ -570,6 +596,7 @@ func main() {
 		fmt.Fprintf(debugOut, "eval=%v\n", eval)
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
 		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
+		fmt.Fprintf(debugOut, "classPath=%v\n", classPath)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
