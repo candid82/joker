@@ -7,6 +7,8 @@ import (
 	"math"
 	"net"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
@@ -315,12 +317,22 @@ func usage(out io.Writer) {
     Use colon-delimited <cp> (semicolon-delimited on Windows) for source
     directories when loading libraries via :require and the like (but not
     load-file). An empty field denotes the directory containing the current
-    load-file or, if none, the current directory (this is original Joker
-    behavior); a '.' (period) by itself denotes solely the current directory;
-    and a "-" denotes $0/share, where $0 is the absolute path of the Joker
-    executable with a single trailing "bin" component, if any, removed. Defaults
-    to the value of the JOKER_CLASSPATH environment variable or, if that is
-    undefined (not just empty), ":-".
+    load-file, with zero or more trailing components removed as determined by
+    the number of "." separators in the current namespace, or, if no load-file
+    is in progress, the current directory (this is original Joker behavior); a
+    '.' (period) by itself denotes solely the current directory; and a "-"
+    denotes the current value of *classdir* (see the --classdir
+    option). Defaults to the value of the JOKER_CLASSPATH environment variable
+    or, if that is undefined (not just empty), ":-". The resulting classpath is
+    stored in the dynamic variable *classpath*, which is used (in lieu of
+    command-line arguments or environment variables) for all pertinent
+    subsequent operations.
+  --classdir <cd>
+    Sets the value of the dynamic variable *classdir*, used when a search of
+    *classpath* for a library encounters an "-" component. Defaults (at startup
+    time) to the JOKER_CLASSDIR environment variable or, if that is undefined
+    (not just empty), $0/share, where $0 is the absolute path of the Joker
+    executable with any single trailing "bin" component removed.
 `)
 	fmt.Fprintln(out, "  --no-readline")
 	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
@@ -357,6 +369,7 @@ var (
 	replFlag           bool
 	replSocket         string
 	classPath          string
+	classDir           string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -380,6 +393,28 @@ func parseArgs(args []string) {
 		classPath = v
 	} else {
 		classPath = ":-"
+	}
+	if v, ok := os.LookupEnv("JOKER_CLASSDIR"); ok {
+		classDir = v
+	} else {
+		path, err := exec.LookPath(os.Args[0])
+		if err != nil {
+			path = os.Args[0]
+		}
+		if abs, err := filepath.Abs(path); err == nil {
+			path = abs
+		}
+		path = filepath.Dir(path)
+		if filepath.Base(path) == "bin" {
+			// Assume it's formally installed somewhere, like $GOBIN
+			// or /usr/bin, and use the sibling share/ directory's
+			// joker/ subdirectory.
+			path = filepath.Dir(path)
+			classDir = filepath.Join(path, "share/joker")
+		} else {
+			// Assume it's locally built, and use share/ from here.
+			classDir = filepath.Join(path, "share")
+		}
 	}
 	var i int
 	for i = 1; i < length; i++ { // shift
@@ -472,6 +507,13 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				classPath = args[i]
+			} else {
+				missing = true
+			}
+		case "--classdir":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				classDir = args[i]
 			} else {
 				missing = true
 			}
@@ -583,6 +625,7 @@ func main() {
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
+	GLOBAL_ENV.SetClassDir(classDir)
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
@@ -597,6 +640,7 @@ func main() {
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
 		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
 		fmt.Fprintf(debugOut, "classPath=%v\n", classPath)
+		fmt.Fprintf(debugOut, "classDir=%v\n", classDir)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)

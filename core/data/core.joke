@@ -3254,7 +3254,7 @@
 
 (defn lib-path
   "Returns whatever procLibPath returns."
-  [lib]
+  [^Symbol lib]
   (lib-path__ lib))
 
 (defn- load-libs-options__
@@ -3355,32 +3355,35 @@
 
 (defn require
   "Loads libs, skipping any that are already loaded. Each argument is
-  either a libspec that identifies a lib, a prefix list that identifies
-  multiple libs whose names share a common prefix, or a flag that modifies
-  how all the identified libs are loaded. Use :require in the ns macro
-  in preference to calling this directly.
+  either a libspec that identifies a lib, a prefix list that
+  identifies multiple libs whose names share a common prefix, or a
+  flag that modifies how all the identified libs are
+  loaded. Use :require in the ns macro in preference to calling this
+  directly.
 
   Libs
 
-  A 'lib' is a named set of resources in classpath whose contents define a
-  library of Clojure code. Lib names are symbols and each lib is associated
-  with a Clojure namespace and a Java package that share its name. A lib's
-  name also locates its root directory within classpath using Java's
-  package name to classpath-relative path mapping. All resources in a lib
-  should be contained in the directory structure under its root directory.
-  All definitions a lib makes should be in its associated namespace.
+  A 'lib' is a named set of resources in *classpath* whose contents
+  define a library of Clojure code. Lib names are symbols and each lib
+  is associated with a Clojure namespace and a Joker package that
+  share its name. A lib's name also locates its root directory within
+  *classpath* using its package name to classpath-relative path
+  mapping. All resources in a lib should be contained in the directory
+  structure under its root directory.  All definitions a lib makes
+  should be in its associated namespace.
 
-  'require loads a lib by loading its root resource. The root resource path
-  is derived from the lib name in the following manner:
-  Consider a lib named by the symbol 'x.y.z; it has the root directory
-  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root
-  resource should contain code to create the lib's namespace (usually by using
-  the ns macro) and load any additional lib resources.
+  'require loads a lib by loading its root resource. The root resource
+  path is derived from the lib name in the following manner: Consider
+  a lib named by the symbol 'x.y.z; it has the root directory
+  <*classpath*>/x/y/, and its root resource is
+  <*classpath*>/x/y/z.clj. The root resource should contain code to
+  create the lib's namespace (usually by using the ns macro) and load
+  any additional lib resources.
 
   Libspecs
 
-  A libspec is a lib name or a vector containing a lib name followed by
-  options expressed as sequential keywords and arguments.
+  A libspec is a lib name or a vector containing a lib name followed
+  by options expressed as sequential keywords and arguments.
 
   Recognized options:
   :as takes a symbol as its argument and makes that symbol an alias to the
@@ -3705,6 +3708,13 @@
 (add-doc-and-meta *classpath*
   "A vector of the classpath elements as configured by --classpath or
   the JOKER_CLASSPATH environment variable."
+  {:added "1.0"})
+
+(add-doc-and-meta *classdir*
+  "A string identifying the directory, relative to the Joker executable itself,
+  in which to find a library when a search of *classpath* encounters a \"-\"
+  component. Configured by --classdir or the JOKER_CLASSDIR environment
+  variable."
   {:added "1.0"})
 
 (add-doc-and-meta *ns*
