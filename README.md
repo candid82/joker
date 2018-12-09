@@ -217,8 +217,10 @@ Below commands should get you up and running.
 ```
 go get -d github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
-./run.sh --version && go install
+./run.sh --version && ./install.sh
 ```
+
+Note that pure-Joker run-time libraries (such as `joker.repl`) are installed via the `install.sh` script; by itself, `go install` won't install them.
 
 ## Contributors
 
