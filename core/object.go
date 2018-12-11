@@ -1419,6 +1419,13 @@ func (s String) Compare(other Object) int {
 	return strings.Compare(s.S, s2.S)
 }
 
+func MakeError(e error) String {
+	if e == nil {
+		return MakeString("")
+	}
+	return MakeString(e.Error())
+}
+
 func IsSymbol(obj Object) bool {
 	switch obj.(type) {
 	case Symbol:
