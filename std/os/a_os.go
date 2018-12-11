@@ -3,7 +3,7 @@
 package os
 
 import (
-	
+	"os"
 	. "github.com/candid82/joker/core"
 )
 
@@ -17,6 +17,21 @@ var args_ Proc = func(_args []Object) Object {
 		
 		_res := commandArgs()
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var chdir_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		dirname := ExtractString(_args, 0)
+		_res := os.Chdir(dirname)
+		return MakeError(_res)
 
 	default:
 		PanicArity(_c)
@@ -157,6 +172,11 @@ osNamespace.InternVar("args", args_,
 	MakeMeta(
 		NewListFrom(NewVectorFrom()),
 		`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+
+osNamespace.InternVar("chdir", chdir_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
+		`Chdir changes the current working directory to the named directory. If there is an error, it will be of type string (this might change to a stringizable error type); else nil will be returned.`, "1.0"))
 
 osNamespace.InternVar("cwd", cwd_,
 	MakeMeta(
