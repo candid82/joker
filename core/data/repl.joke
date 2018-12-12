@@ -1,0 +1,80 @@
+(ns
+  ^{:doc "Utilities meant to be used interactively at the REPL."}
+  joker.repl)
+
+(def ^:private special-doc-map
+  '{def {:forms [(def symbol doc-string? init?)]
+         :doc "Creates and interns a global var with the name
+  of symbol in the current namespace (*ns*) or locates such a var if
+  it already exists.  If init is supplied, it is evaluated, and the
+  root binding of the var is set to the resulting value.  If init is
+  not supplied, the root binding of the var is unaffected."}
+    do {:forms [(do exprs*)]
+        :doc "Evaluates the expressions in order and returns the value of
+  the last. If no expressions are supplied, returns nil."}
+    if {:forms [(if test then else?)]
+        :doc "Evaluates test. If not the singular values nil or false,
+  evaluates and yields then, otherwise, evaluates and yields else. If
+  else is not supplied it defaults to nil."}
+    quote {:forms [(quote form)]
+           :doc "Yields the unevaluated form."}
+    recur {:forms [(recur exprs*)]
+           :doc "Evaluates the exprs in order, then, in parallel, rebinds
+  the bindings of the recursion point to the values of the exprs.
+  Execution then jumps back to the recursion point, a loop or fn method."}
+    throw {:forms [(throw expr)]
+           :doc "The expr is evaluated and thrown, therefore it should
+  yield an instance of some derivee of Throwable."}
+    try {:forms [(try expr* catch-clause* finally-clause?)]
+         :doc "catch-clause => (catch classname name expr*)
+  finally-clause => (finally expr*)
+
+  Catches and handles exceptions and Go panics."}
+    var {:forms [(var symbol)]
+         :doc "The symbol must resolve to a var, and the Var object
+  itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
+
+(defn- special-doc [name-symbol]
+  (assoc (or (special-doc-map name-symbol) (meta (resolve name-symbol)))
+         :name name-symbol
+         :special-form true))
+
+(defn- print-doc [{n :ns
+                   nm :name
+                   :keys [forms arglists special-form doc url macro spec]
+                   :as m}]
+  (println "-------------------------")
+  (println (or spec (str (when n (str (ns-name n) "/")) nm)))
+  (when forms
+    (doseq [f forms]
+      (print "  ")
+      (prn f)))
+  (when arglists
+    (prn arglists))
+  (cond
+    special-form
+    (do
+      (println "Special Form")
+      (println " " doc)
+      (if (contains? m :url)
+        (when url
+          (println (str "\n  Please see http://clojure.org/" url)))
+        (println (str "\n  Please see http://clojure.org/special_forms#" nm))))
+    macro
+    (println "Macro")
+    spec
+    (println "Spec"))
+  (when doc (println " " doc)))
+
+(defmacro doc
+  "Prints documentation for a var or special form given its name,
+  or for a spec if given a keyword"
+  {:added "1.0"}
+  [name]
+  (if-let [special-name ('{& fn catch try finally try} name)]
+    `(#'print-doc (#'special-doc '~special-name))
+    (cond
+      (special-doc-map name) `(#'print-doc (#'special-doc '~name))
+      ;      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
+      ;      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
+      (resolve name) `(#'print-doc (meta (var ~name))))))

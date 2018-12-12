@@ -61,6 +61,11 @@
    (__deref__ ref))
   ([^Deref ref ^Int timeout-ms timeout-val]))
 
+(def __re-find__ re-find)
+(defn re-find
+  ([m])
+  ([^Regex re ^String s] (__re-find__ re s)))
+
 (defn spit [f content & options])
 (defn slurp [f & options])
 
