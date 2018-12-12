@@ -24,6 +24,7 @@ var (
 	coreData        []byte
 	timeData        []byte
 	mathData        []byte
+	replData        []byte
 	linter_allData  []byte
 	linter_cljxData []byte
 	linter_cljData  []byte
@@ -1589,6 +1590,10 @@ func ProcessCoreData() {
 	processData(coreData)
 	processData(timeData)
 	processData(mathData)
+}
+
+func ProcessReplData() {
+	processData(replData)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
