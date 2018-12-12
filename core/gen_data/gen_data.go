@@ -37,6 +37,10 @@ var files []FileInfo = []FileInfo{
 		filename: "math.joke",
 	},
 	{
+		name:     "<joker.repl>",
+		filename: "repl.joke",
+	},
+	{
 		name:     "<joker.core>",
 		filename: "linter_all.joke",
 	},
