@@ -3,7 +3,7 @@
 package os
 
 import (
-	"os"
+	
 	. "github.com/candid82/joker/core"
 )
 
@@ -30,8 +30,8 @@ var chdir_ Proc = func(_args []Object) Object {
 	case _c == 1:
 		
 		dirname := ExtractString(_args, 0)
-		_res := os.Chdir(dirname)
-		return MakeError(_res)
+		_res := chdir(dirname)
+		return _res
 
 	default:
 		PanicArity(_c)
@@ -176,7 +176,7 @@ osNamespace.InternVar("args", args_,
 osNamespace.InternVar("chdir", chdir_,
 	MakeMeta(
 		NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-		`Chdir changes the current working directory to the named directory. If there is an error, it will be of type string (this might change to a stringizable error type); else nil will be returned.`, "1.0"))
+		`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
 
 osNamespace.InternVar("cwd", cwd_,
 	MakeMeta(

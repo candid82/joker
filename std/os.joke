@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["os"]
+  ^{:go-imports []
     :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
@@ -63,10 +63,10 @@
   :go "getwd()"}
   [])
 
-(defn ^Error chdir
-  "Chdir changes the current working directory to the named directory. If there is an error, it will be of type string (this might change to a stringizable error type); else nil will be returned."
+(defn chdir
+  "Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil."
   {:added "1.0"
-  :go "os.Chdir(dirname)"}
+  :go "chdir(dirname)"}
   [^String dirname])
 
 (defn stat
