@@ -161,6 +161,7 @@ type (
 		line               Keyword
 		column             Keyword
 		file               Keyword
+		ns                 Keyword
 		macro              Keyword
 		message            Keyword
 		form               Keyword
@@ -257,6 +258,7 @@ var (
 		line:               MakeKeyword("line"),
 		column:             MakeKeyword("column"),
 		file:               MakeKeyword("file"),
+		ns:                 MakeKeyword("ns"),
 		macro:              MakeKeyword("macro"),
 		message:            MakeKeyword("message"),
 		form:               MakeKeyword("form"),

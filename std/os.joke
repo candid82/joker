@@ -63,6 +63,12 @@
   :go "getwd()"}
   [])
 
+(defn chdir
+  "Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil."
+  {:added "1.0"
+  :go "chdir(dirname)"}
+  [^String dirname])
+
 (defn stat
   "Returns a map describing the named file. The info map has the following attributes:
   :name - base name of the file
