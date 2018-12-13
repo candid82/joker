@@ -1011,7 +1011,7 @@ var procPprint Proc = func(args []Object) Object {
 	return NIL
 }
 
-func printObject(obj Object, w io.Writer) {
+func PrintObject(obj Object, w io.Writer) {
 	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
 	switch obj := obj.(type) {
 	case Printer:
@@ -1026,10 +1026,10 @@ var procPr Proc = func(args []Object) Object {
 	if n > 0 {
 		f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 		for _, arg := range args[:n-1] {
-			printObject(arg, f)
+			PrintObject(arg, f)
 			fmt.Fprint(f, " ")
 		}
-		printObject(args[n-1], f)
+		PrintObject(args[n-1], f)
 	}
 	return NIL
 }

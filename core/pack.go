@@ -303,7 +303,7 @@ func packObject(obj Object, p []byte, env *PackEnv) []byte {
 	default:
 		p = append(p, NULL)
 		var buf bytes.Buffer
-		printObject(obj, &buf)
+		PrintObject(obj, &buf)
 		bb := buf.Bytes()
 		p = appendInt(p, len(bb))
 		p = append(p, bb...)
