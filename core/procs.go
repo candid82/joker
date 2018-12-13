@@ -24,6 +24,8 @@ var (
 	timeData        []byte
 	mathData        []byte
 	replData        []byte
+	walkData        []byte
+	templateData    []byte
 	linter_allData  []byte
 	linter_cljxData []byte
 	linter_cljData  []byte
@@ -1543,8 +1545,11 @@ func processData(data []byte) {
 
 func ProcessCoreData() {
 	processData(coreData)
+	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
 	processData(timeData)
 	processData(mathData)
+	processData(walkData)
+	processData(templateData)
 }
 
 func ProcessReplData() {
