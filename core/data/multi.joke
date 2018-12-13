@@ -12,12 +12,13 @@
 ;;multimethods
 (defn- new-multifn
   [name dispatch-fn default hierarchy]
-  (println "new-multifn: " name dispatch-fn default hierarchy)
   (when hierarchy
     (throw (ex-info ":hierarchy not yet supported by joker.core/defmulti" {})))
-  (with-meta
-    (fn [& args])
-    {:name name :dispatch-fn dispatch-fn :default default :method-table {}}))
+  (let [gs (gensym (str name "-method-table-"))]
+    (intern *ns* gs {})
+    (with-meta
+      (fn [& args])
+      {:name name :dispatch-fn dispatch-fn :default default :method-table gs})))
 
 (defn- multifn-reset
   [multifn]
