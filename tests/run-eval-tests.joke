@@ -52,182 +52,7 @@
         (var-set #'exit-code 1)))))
 
 
-;;; walk.clj - generic tree walker with replacement
-
-;; by Stuart Sierra
-;; December 15, 2008
-
-;; CHANGE LOG:
-;;
-;; * December 15, 2008: replaced 'walk' with 'prewalk' & 'postwalk'
-;;
-;; * December 9, 2008: first version
-
-
-;; (ns
-;;   ^{:author "Stuart Sierra",
-;;      :doc "This file defines a generic tree walker for Clojure data
-;; structures.  It takes any data structure (list, vector, map, set,
-;; seq), calls a function on every element, and uses the return value
-;; of the function in place of the original.  This makes it fairly
-;; easy to write recursive search-and-replace functions, as shown in
-;; the examples.
-
-;; Note: \"walk\" supports all Clojure data structures EXCEPT maps
-;; created with sorted-map-by.  There is no (obvious) way to retrieve
-;; the sorting function."}
-;;   clojure.walk)
-
-(defn walk
-  "Traverses form, an arbitrary data structure.  inner and outer are
-  functions.  Applies inner to each element of form, building up a
-  data structure of the same type, then applies outer to the result.
-  Recognizes all Clojure data structures. Consumes seqs as with doall."
-
-  {:added "1.1"}
-  [inner outer form]
-  (cond
-   (list? form) (outer (apply list (map inner form)))
-;;   (instance? clojure.lang.IMapEntry form)
-;;   (outer (clojure.lang.MapEntry/create (inner (key form)) (inner (val form))))
-   (seq? form) (outer (doall (map inner form)))
-;;   (instance? clojure.lang.IRecord form)
-;;     (outer (reduce (fn [r x] (conj r (inner x))) form form))
-   (coll? form) (outer (into (empty form) (map inner form)))
-   :else (outer form)))
-
-(defn postwalk
-  "Performs a depth-first, post-order traversal of form.  Calls f on
-  each sub-form, uses f's return value in place of the original.
-  Recognizes all Clojure data structures. Consumes seqs as with doall."
-  {:added "1.1"}
-  [f form]
-  (walk (partial postwalk f) f form))
-
-(defn prewalk
-  "Like postwalk, but does pre-order traversal."
-  {:added "1.1"}
-  [f form]
-  (walk (partial prewalk f) identity (f form)))
-
-
-;; Note: I wanted to write:
-;;
-;; (defn walk
-;;   [f form]
-;;   (let [pf (partial walk f)]
-;;     (if (coll? form)
-;;       (f (into (empty form) (map pf form)))
-;;       (f form))))
-;;
-;; but this throws a ClassCastException when applied to a map.
-
-
-(defn postwalk-demo
-  "Demonstrates the behavior of postwalk by printing each form as it is
-  walked.  Returns form."
-  {:added "1.1"}
-  [form]
-  (postwalk (fn [x] (print "Walked: ") (prn x) x) form))
-
-(defn prewalk-demo
-  "Demonstrates the behavior of prewalk by printing each form as it is
-  walked.  Returns form."
-  {:added "1.1"}
-  [form]
-  (prewalk (fn [x] (print "Walked: ") (prn x) x) form))
-
-(defn keywordize-keys
-  "Recursively transforms all map keys from strings to keywords."
-  {:added "1.1"}
-  [m]
-  (let [f (fn [[k v]] (if (string? k) [(keyword k) v] [k v]))]
-    ;; only apply to maps
-    (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
-
-(defn stringify-keys
-  "Recursively transforms all map keys from keywords to strings."
-  {:added "1.1"}
-  [m]
-  (let [f (fn [[k v]] (if (keyword? k) [(name k) v] [k v]))]
-    ;; only apply to maps
-    (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
-
-(defn prewalk-replace
-  "Recursively transforms form by replacing keys in smap with their
-  values.  Like clojure/replace but works on any data structure.  Does
-  replacement at the root of the tree first."
-  {:added "1.1"}
-  [smap form]
-  (prewalk (fn [x] (if (contains? smap x) (smap x) x)) form))
-
-(defn postwalk-replace
-  "Recursively transforms form by replacing keys in smap with their
-  values.  Like clojure/replace but works on any data structure.  Does
-  replacement at the leaves of the tree first."
-  {:added "1.1"}
-  [smap form]
-  (postwalk (fn [x] (if (contains? smap x) (smap x) x)) form))
-
-(defn macroexpand-all
-  "Recursively performs all possible macroexpansions in form."
-  {:added "1.1"}
-  [form]
-  (prewalk (fn [x] (if (seq? x) (macroexpand x) x)) form))
-
-;;; End code from clojure/src/clj/clojure/walk.clj
-
-
-;;; template.clj - anonymous functions that pre-evaluate sub-expressions
-
-;; By Stuart Sierra
-;; June 23, 2009
-
-;; CHANGE LOG
-;;
-;; June 23, 2009: complete rewrite, eliminated _1,_2,... argument
-;; syntax
-;;
-;; January 20, 2009: added "template?" and checks for valid template
-;; expressions.
-;;
-;; December 15, 2008: first version
-
-
-;; (ns ^{:doc "Macros that expand to repeated copies of a template expression."
-;;        :author "Stuart Sierra"}
-;;   joker.template
-;;   (:require [joker.walk :as walk]))
-
-(defn apply-template
-  "For use in macros.  argv is an argument list, as in defn.  expr is
-  a quoted expression using the symbols in argv.  values is a sequence
-  of values to be used for the arguments.
-
-  apply-template will recursively replace argument symbols in expr
-  with their corresponding values, returning a modified expr.
-
-  Example: (apply-template '[x] '(+ x x) '[2])
-           ;=> (+ 2 2)"
-  [argv expr values]
-  (assert (vector? argv))
-  (assert (every? symbol? argv))
-  (postwalk-replace (zipmap argv values) expr))
-
-(defmacro do-template
-  "Repeatedly copies expr (in a do block) for each group of arguments
-  in values.  values are automatically partitioned by the number of
-  arguments in argv, an argument vector as in defn.
-
-  Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
-           ;=> (do (+ 4 2) (+ 5 3))"
-  [argv expr & values]
-  (let [c (count argv)]
-    `(do ~@(map (fn [a] (apply-template argv expr a)) 
-                (partition c values)))))
-
-;;; End code from clojure/src/clj/clojure/template.clj
-
+(use '[joker.template])
 
 (defn dosync
   "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything."
@@ -235,10 +60,9 @@
   exprs)
 
 (defn commute
-  "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything."
+  "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything. vars are thus used instead of ref, as Joker doesn't (yet) support (ref ...)."
   [ref fun & args]
-  (apply fun ref args)
-  ref)
+  (var-set ref (apply fun (var-get ref) args)))
 
 ;;; From clojure/src/clj/clojure/test.clj:
 
@@ -262,7 +86,7 @@
 (def ^:dynamic *report-counters* nil)	  ; bound to a ref of a map in test-ns
 
 (def ^:dynamic *initial-report-counters*  ; used to initialize *report-counters*
-     {:test 0, :pass 0, :fail 0, :error 0})
+     {:test 0, :pass 0, :fail 0, :error 0})  ; (why ":dynamic" though; it's used as a constant here and in test.clj!)
 
 (def ^:dynamic *testing-vars* (list))  ; bound to hierarchy of vars being tested
 
@@ -761,16 +585,17 @@
   *report-counters*."
   {:added "1.1"}
   [ns]
-  (binding [*report-counters* (identity *initial-report-counters*)] ; TODO: was: ref *initial-report-counters*
+  (def irc *initial-report-counters*) ; TODO: Make a copy, which is what (ref ...) does.
+  (binding [*report-counters* (var irc)] ; TODO: was: ref *initial-report-counters*
     (let [ns-obj (the-ns ns)]
       (do-report {:type :begin-test-ns, :ns ns-obj})
       ;; If the namespace has a test-ns-hook function, call that:
       (if-let [v (find-var (symbol (str (ns-name ns-obj)) "test-ns-hook"))]
-	((var-get v))
+        ((var-get v))
         ;; Otherwise, just test every var in the namespace.
         (test-all-vars ns-obj))
       (do-report {:type :end-test-ns, :ns ns-obj}))
-    *report-counters*)) ; TODO: was @*report-counters*
+    (var-get *report-counters*))) ; TODO: was @*report-counters*
 
 
 
@@ -825,13 +650,13 @@
     (odd? -3)
     (not (odd? 0))
     (odd? 5)
-    (odd? 6) ; TODO: Remove after getting this test fixture to work as expected
     (not (odd? 8)))
   (is (thrown? Error (odd? 1/2))) ; was: thrown? IllegalArgumentException
   (is (thrown? Error (odd? (double 10))))) ; was: thrown? IllegalArgumentException
 
-(run-all-tests)
-
-(println *report-counters*)  ; TODO: Remove after fixing this.
+(let [res (run-all-tests)]
+  (when (< 0 (+ (:fail res) (:error res)))
+    (println "there were failures and/or errors; returning exit code 1")
+    (var-set #'exit-code 1)))
 
 (joker.os/exit exit-code)
