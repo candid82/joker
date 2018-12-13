@@ -241,6 +241,8 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	meta.Add(KEYWORDS.line, Int{I: expr.startLine})
 	meta.Add(KEYWORDS.column, Int{I: expr.startColumn})
 	meta.Add(KEYWORDS.file, String{S: *expr.filename})
+	meta.Add(KEYWORDS.ns, expr.vr.ns)
+	meta.Add(KEYWORDS.name, expr.vr.name)
 	expr.vr.meta = meta
 	if expr.meta != nil {
 		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
