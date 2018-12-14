@@ -1742,6 +1742,7 @@ func markJokerNamespacesAsUsed() {
 
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_allData)
