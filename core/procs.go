@@ -1364,30 +1364,13 @@ var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
 
-func loadFile(filename string) Object {
-	var reader *Reader
-	f, err := os.Open(filename)
-	PanicOnErr(err)
-	reader = NewReader(bufio.NewReader(f), filename)
-	ProcessReader(reader, filename, EVAL)
-	return NIL
-}
-
 var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
-	return loadFile(filename.S)
-}
-
-var procLoadLibFromFile Proc = func(args []Object) Object {
-	libname := EnsureSymbol(args, 0)
-	filename := EnsureString(args, 1)
-	if libname.Name() == "joker.walk" {
-		processData(walkData)
-	} else if libname.Name() == "joker.template" {
-		processData(templateData)
-	} else {
-		loadFile(filename.S)
-	}
+	var reader *Reader
+	f, err := os.Open(filename.S)
+	PanicOnErr(err)
+	reader = NewReader(bufio.NewReader(f), filename.S)
+	ProcessReader(reader, filename.S, EVAL)
 	return NIL
 }
 
@@ -1565,6 +1548,8 @@ func ProcessCoreData() {
 	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
 	processData(timeData)
 	processData(mathData)
+	processData(walkData)
+	processData(templateData)
 }
 
 func ProcessReplData() {
@@ -1732,13 +1717,23 @@ func removeJokerNamespaces() {
 	}
 }
 
+func markJokerNamespacesAsUsed() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			ns.isUsed = true
+		}
+	}
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_cljxData)
@@ -1932,7 +1927,6 @@ func init() {
 	intern("bound?__", procIsBound)
 	intern("format__", procFormat)
 	intern("load-file__", procLoadFile)
-	intern("load-lib-from-file__", procLoadLibFromFile)
 	intern("reduce-kv__", procReduceKv)
 	intern("slurp__", procSlurp)
 	intern("spit__", procSpit)
