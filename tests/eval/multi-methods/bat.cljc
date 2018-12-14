@@ -14,8 +14,8 @@
   (str "str: " x ", " y ", " (first xs) " and " (second xs)))
 (defmethod-joke bat [N N] [x y & xs]
   (str "numbers: " x " and " y))
-(defmethod-joke bat :default [x y & xs]
-  (str "default:" x " then " y " and finally " xs))
+;; (defmethod-joke bat :default [x y & xs]
+;;   (str "default: " x " then " y " and finally " xs))
 
 ;; you call it like this...
 

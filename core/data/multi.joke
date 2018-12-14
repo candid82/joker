@@ -10,6 +10,10 @@
           (map #(str ", " %) (rest valid-keys))) {}))))
 
 ;;multimethods
+(defn- multifn-nomatch
+  [& args]
+  (throw (ex-info (str "No method in multimethod for dispatch value: " args) {})))
+
 (defn- new-multifn
   [name dispatch-fn default hierarchy]
 ;  (prn "after: name=" name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
@@ -19,7 +23,7 @@
   (with-meta
     (fn [& args]
 ;      (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default)
-      (let [method (get @mfatom (apply dispatch-fn args) default)]
+      (let [method (get @mfatom (apply dispatch-fn args) (get @mfatom default multifn-nomatch))]
 ;        (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default " method=" method)
         (apply method args)))
     {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom}))
