@@ -1732,6 +1732,14 @@ func removeJokerNamespaces() {
 	}
 }
 
+func markJokerNamespacesAsUsed() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			ns.isUsed = true
+		}
+	}
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		return
@@ -1739,6 +1747,7 @@ func ProcessLinterData(dialect Dialect) {
 	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_cljxData)
