@@ -1,6 +1,6 @@
 (ns-unmap *ns* 'bat)
 
-(def N #?(:clj Number
+(def N #?(:clj Long
           :joker Int))
 
 (defmulti-joke bat
