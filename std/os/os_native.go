@@ -105,6 +105,12 @@ func getwd() string {
 	return res
 }
 
+func chdir(dirname string) Object {
+	err := os.Chdir(dirname)
+	PanicOnErr(err)
+	return NIL
+}
+
 func stat(filename string) Object {
 	info, err := os.Stat(filename)
 	PanicOnErr(err)

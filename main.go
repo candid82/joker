@@ -132,11 +132,14 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 
 	res := Eval(expr, nil)
 	replContext.PushValue(res)
-	fmt.Fprintln(Stdout, res.ToString(true))
+	PrintObject(res, Stdout)
+	fmt.Fprintln(Stdout, "")
 	return false
 }
 
 func srepl(port string, phase Phase) {
+	ProcessReplData()
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	l, err := net.Listen("tcp", replSocket)
 	if err != nil {
 		fmt.Fprintf(Stderr, "Cannot start srepl listening on %s: %s\n",
@@ -191,6 +194,8 @@ func srepl(port string, phase Phase) {
 }
 
 func repl(phase Phase) {
+	ProcessReplData()
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)

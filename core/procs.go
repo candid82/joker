@@ -23,6 +23,9 @@ var (
 	coreData        []byte
 	timeData        []byte
 	mathData        []byte
+	replData        []byte
+	walkData        []byte
+	templateData    []byte
 	linter_allData  []byte
 	linter_cljxData []byte
 	linter_cljData  []byte
@@ -1010,7 +1013,7 @@ var procPprint Proc = func(args []Object) Object {
 	return NIL
 }
 
-func printObject(obj Object, w io.Writer) {
+func PrintObject(obj Object, w io.Writer) {
 	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
 	switch obj := obj.(type) {
 	case Printer:
@@ -1025,10 +1028,10 @@ var procPr Proc = func(args []Object) Object {
 	if n > 0 {
 		f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 		for _, arg := range args[:n-1] {
-			printObject(arg, f)
+			PrintObject(arg, f)
 			fmt.Fprint(f, " ")
 		}
-		printObject(args[n-1], f)
+		PrintObject(args[n-1], f)
 	}
 	return NIL
 }
@@ -1542,8 +1545,15 @@ func processData(data []byte) {
 
 func ProcessCoreData() {
 	processData(coreData)
+	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
 	processData(timeData)
 	processData(mathData)
+	processData(walkData)
+	processData(templateData)
+}
+
+func ProcessReplData() {
+	processData(replData)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -1707,13 +1717,23 @@ func removeJokerNamespaces() {
 	}
 }
 
+func markJokerNamespacesAsUsed() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			ns.isUsed = true
+		}
+	}
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_cljxData)
