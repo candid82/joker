@@ -131,7 +131,9 @@
 ;      (prn "before: mm-name=" mm-name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
       (check-valid-options-joke options :default :hierarchy)
       `(let [v# (def ~mm-name)]
-         (when-not (and (bound? v#) (map? (deref v#))) ; was: (and (.hasRoot v#) (instance? clojure.lang.MultiFn ...))
+         (when-not (and (bound? v#) ; was: (and (.hasRoot v#) (instance? clojure.lang.MultiFn (deref v#)))
+                        (fn? (deref v#))
+                        (:method-table (meta (deref v#))))
            (let [fndef# (apply new-multifn (list (var ~mm-name) ~dispatch-fn ~default ~hierarchy))]
 ;             (prn "during: mm-name=" ~(name mm-name) " dispatch-fn=" ~dispatch-fn " default=" ~default " hierarchy=" ~hierarchy " fndef=" fndef#)
                  (def ~mm-name fndef#)))))))

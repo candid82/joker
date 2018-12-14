@@ -51,10 +51,10 @@
 
 ;; defmulti/defmethods support variadic arguments and dispatch functions.
 
-(ns-unmap *ns* 'bat)
-
 (def N #?(:clj Long
           :joker Int))
+
+(ns-unmap *ns* 'bat)
 
 (defmulti-joke bat
   (fn ([x y & xs]
@@ -99,17 +99,14 @@
 ;; If you're REPLing you might want to re-define the defmulti dispatch function
 ;; (which defmulti won't allow you to do). For this you can use `ns-unmap`:
 
+(ns-unmap *ns* 'x)
+
 (defmulti-joke x (fn[_] :inc))
 (defmethod-joke x :inc [y] (inc y))
 (defmethod-joke x :dec [y] (dec y))
 (println (x 0)) ;; => 1
 (defmulti-joke x (fn[_] :dec)) ;; Can't redefine :(
-(println (try (x 0)
-              (catch #?(:clj Exception
-                        :joker Error)
-                  e
-                (str "Caught this expected exception: " e))))
-;; DIFFERENT behavior than Clojure, which would be: (println (x 0)) ;; => 1 ;; STILL :(
+(println (x 0)) ;; => 1 ;; STILL :(
 (ns-unmap *ns* 'x) ;; unmap the var from the namespace
 (defmulti-joke x (fn[_] :dec))
 (defmethod-joke x :inc [y] (inc y))
@@ -124,6 +121,8 @@
 (use #?(:clj '[clojure.repl]
         :joker '[joker.repl]))
 
+(ns-unmap *ns* 'f)
+
 (defmulti-joke f "Great function" (fn [x] :blah))
 (doc f)
 ;; => -------------------------
@@ -132,6 +131,8 @@
 
 ;; However, we can add `:arglists` metadata via a third (optional) argument to `defmulti` (`attr-map?` in the docstring for `defmulti`):
 
+(ns-unmap *ns* 'g)
+
 (defmulti-joke g "Better function" {:arglists '([x])} (fn [x] :blah))
 (doc g)
 ;; => -------------------------
@@ -139,6 +140,8 @@
 ;; => ([x])
 ;; =>   Better function
 
+
+(ns-unmap *ns* 'compact)
 
 (defmulti-joke compact map?)
 
@@ -189,6 +192,8 @@
 ;;  {:name/type :split :name/first "Bob" :name/last "Dobbs"}
 ;;  {:name/type :full :name/full "Bob Dobbs"}
 
+(ns-unmap *ns* 'full-name)
+
 (defmulti-joke full-name :name/type)
 
 (defmethod-joke full-name :full [name-data]
@@ -212,6 +217,8 @@
 ;;polymorphism classic example
 
 ;;defmulti
+(ns-unmap *ns* 'draw)
+
 (defmulti-joke draw :shape)
 
 ;;defmethod
@@ -226,6 +233,8 @@
 
 
 ;;defmulti with dispatch function
+(ns-unmap *ns* 'salary)
+
 (defmulti-joke salary (fn[amount] (amount :t)))
 
 ;;defmethod provides a function implementation for a particular value
