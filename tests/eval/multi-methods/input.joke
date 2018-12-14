@@ -53,12 +53,12 @@
        (mapv class (into [x y] xs)))))
 (defmethod bat [String String] [x y & xs] 
   (str "str: " x " and " y))
-(defmethod bat [String String String] [x y & xs] 
+(defmethod bat [String String String] [x y & xs]
   (str "str: " x ", " y " and " (first xs)))
-(defmethod bat [String String String String] [x y & xs] 
+(defmethod bat [String String String String] [x y & xs]
   (str "str: " x ", " y ", " (first xs) " and " (second xs)))
 (defmethod bat [Number Number] [x y & xs] 
-  (str "number: " x " and " y))
+  (str "numbers: " x " and " y))
 
 ;; you call it like this...
 
@@ -72,7 +72,20 @@
 ;; => "str: dog, cat, cow and horse"
 
 (bat 1 2)
-;; => "number: 1 and 2"
+;; => "numbers: 1 and 2"
+
+(println (try (bat :hey :there)
+              (catch #?(:clj Exception
+                        :joker Error)
+                  e
+                (str "Caught this expected exception: " e))))
+;; => IllegalArgumentException No method in multimethod 'bat' for dispatch value: [clojure.lang.Keyword clojure.lang.Keyword]  clojure.lang.MultiFn.getFn (MultiFn.java:156)
+
+(defmethod-joke bat :default [x y & xs]
+  (str "default: " x " then " y " and finally " xs))
+
+(bat :hey :there :you)
+;; => "default: :hey then :there and finally :you"
 
 
 ;; If you're REPLing you might want to re-define the defmulti dispatch function 
