@@ -31,7 +31,11 @@
 (println (bat 1 2))
 ;; => "numbers: 1 and 2"
 
-(println (bat :hey :there))
+(println (try (bat :hey :there)
+              (catch #?(:clj Exception
+                        :joker Error)
+                  e
+                (str "Caught this expected exception: " e))))
 ;; => IllegalArgumentException No method in multimethod 'bat' for dispatch value: [clojure.lang.Keyword clojure.lang.Keyword]  clojure.lang.MultiFn.getFn (MultiFn.java:156)
 
 
