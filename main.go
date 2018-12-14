@@ -134,7 +134,8 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 
 	res := Eval(expr, nil)
 	replContext.PushValue(res)
-	fmt.Fprintln(Stdout, res.ToString(true))
+	PrintObject(res, Stdout)
+	fmt.Fprintln(Stdout, "")
 	return false
 }
 

@@ -24,6 +24,21 @@ var args_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var chdir_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch  {
+	case _c == 1:
+		
+		dirname := ExtractString(_args, 0)
+		_res := chdir(dirname)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var cwd_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch  {
@@ -157,6 +172,11 @@ osNamespace.InternVar("args", args_,
 	MakeMeta(
 		NewListFrom(NewVectorFrom()),
 		`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+
+osNamespace.InternVar("chdir", chdir_,
+	MakeMeta(
+		NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
+		`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
 
 osNamespace.InternVar("cwd", cwd_,
 	MakeMeta(
