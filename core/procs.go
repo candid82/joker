@@ -24,6 +24,8 @@ var (
 	timeData        []byte
 	mathData        []byte
 	replData        []byte
+	walkData        []byte
+	templateData    []byte
 	linter_allData  []byte
 	linter_cljxData []byte
 	linter_cljData  []byte
@@ -1362,13 +1364,30 @@ var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
 
+func loadFile(filename string) Object {
+	var reader *Reader
+	f, err := os.Open(filename)
+	PanicOnErr(err)
+	reader = NewReader(bufio.NewReader(f), filename)
+	ProcessReader(reader, filename, EVAL)
+	return NIL
+}
+
 var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
-	var reader *Reader
-	f, err := os.Open(filename.S)
-	PanicOnErr(err)
-	reader = NewReader(bufio.NewReader(f), filename.S)
-	ProcessReader(reader, filename.S, EVAL)
+	return loadFile(filename.S)
+}
+
+var procLoadLibFromFile Proc = func(args []Object) Object {
+	libname := EnsureSymbol(args, 0)
+	filename := EnsureString(args, 1)
+	if libname.Name() == "joker.walk" {
+		processData(walkData)
+	} else if libname.Name() == "joker.template" {
+		processData(templateData)
+	} else {
+		loadFile(filename.S)
+	}
 	return NIL
 }
 
@@ -1543,6 +1562,7 @@ func processData(data []byte) {
 
 func ProcessCoreData() {
 	processData(coreData)
+	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
 	processData(timeData)
 	processData(mathData)
 }
@@ -1912,6 +1932,7 @@ func init() {
 	intern("bound?__", procIsBound)
 	intern("format__", procFormat)
 	intern("load-file__", procLoadFile)
+	intern("load-lib-from-file__", procLoadLibFromFile)
 	intern("reduce-kv__", procReduceKv)
 	intern("slurp__", procSlurp)
 	intern("spit__", procSpit)

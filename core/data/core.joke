@@ -3446,6 +3446,12 @@
   [^String f]
   (load-file__ f))
 
+(defn load-lib-from-file
+  "Loads library from file f (or from internal copy, if available)"
+  {:added "1.0"}
+  [^String lib ^String f]
+  (load-lib-from-file__ lib f))
+
 (defn load
   "Loads code from libs."
   {:added "1.0"}
@@ -3460,7 +3466,7 @@
                   *ns* *ns*]
           (if *linter-mode*
             (in-ns lib)
-            (load-file path)))))))
+            (load-lib-from-file lib path)))))))
 
 (defn get-in
   "Returns the value in a nested associative structure,
