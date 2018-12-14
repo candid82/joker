@@ -1,4 +1,4 @@
-(defn ^:private check-valid-options
+(defn ^:private check-valid-options-joke
   "Throws an exception if the given option map contains keys not listed
   as valid, else returns nil."
   [options & valid-keys]
@@ -12,24 +12,29 @@
 ;;multimethods
 (defn- new-multifn
   [name dispatch-fn default hierarchy]
+;  (prn "after: name=" name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
   (when hierarchy
     (throw (ex-info ":hierarchy not yet supported by joker.core/defmulti" {})))
-  (let [gs (gensym (str name "-method-table-"))]
-    (intern *ns* gs {})
-    (with-meta
-      (fn [& args])
-      {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table gs})))
+  (def mfatom (atom {}))
+  (with-meta
+    (fn [& args]
+;      (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default)
+      (let [method (get @mfatom (apply dispatch-fn args) default)]
+;        (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default " method=" method)
+        (apply method args)))
+    {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom}))
 
-(defn- multifn-set-method-table
-  [multifn mt]
-  (let [mm (meta multifn)
-        gs (:method-table mm)
-        ns (:ns mm)]
-    (intern ns gs mt)))
+(defn- multifn-swap-method-table-vals!
+  [multifn ^Callable f & args]
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    (apply swap-vals! mfatom f args)))
 
 (defn- multifn-reset
   [multifn]
-  nil)
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    (reset! mfatom {})))
 
 (defn- multifn-remove-method
   [multifn dispatch-val]
@@ -41,17 +46,23 @@
 
 (defn- multifn-get-method-table
   [multifn]
-  (find-var (:method-table (meta multifn))))
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    @mfatom))
 
 (defn- multifn-get-method
   [multifn dispatch-val]
-  nil)
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)
+        default (:default mfm)]
+;    (prn "multifn-get-method multifn=" multifn " mfm=" mfm " mfatom=" mfatom " default=" default)
+    (get @mfatom dispatch-val default)))
 
 (defn- multifn-get-prefer-table
   [multifn]
   nil)
 
-(defmacro defmulti
+(defmacro defmulti-joke
   "Creates a new multimethod with the associated dispatch function.
   The docstring and attr-map are optional.
 
@@ -103,48 +114,51 @@
     (let [options   (apply hash-map options)
           default   (get options :default :default)
           hierarchy (get options :hierarchy nil)]
-      (check-valid-options options :default :hierarchy)
+;      (prn "before: mm-name=" mm-name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
+      (check-valid-options-joke options :default :hierarchy)
       `(let [v# (def ~mm-name)]
          (when-not (and (bound? v#) (map? (deref v#))) ; was: (and (.hasRoot v#) (instance? clojure.lang.MultiFn ...))
-           (def ~mm-name
-                (new-multifn ~(name mm-name) ~dispatch-fn ~default ~hierarchy)))))))
+           (let [fndef# (apply new-multifn (list (var ~mm-name) ~dispatch-fn ~default ~hierarchy))]
+;             (prn "during: mm-name=" ~(name mm-name) " dispatch-fn=" ~dispatch-fn " default=" ~default " hierarchy=" ~hierarchy " fndef=" fndef#)
+                 (def ~mm-name fndef#)))))))
 
-(defmacro defmethod
+(defmacro defmethod-joke
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   {:added "1.0"}
   [multifn dispatch-val & fn-tail]
-  `(. ~(with-meta multifn {:tag 'clojure.lang.MultiFn}) addMethod ~dispatch-val (fn ~@fn-tail)))
+  `(multifn-swap-method-table-vals! ~multifn assoc ~dispatch-val (fn ~@fn-tail)))
 
-(defn remove-all-methods
+(defn remove-all-methods-joke
   "Removes all of the methods of multimethod."
   {:added "1.2"
-   :static true} 
- [^clojure.lang.MultiFn multifn]
- (multifn-reset multifn))
+   :static true}
+  [^clojure.lang.MultiFn multifn]
+  (multifn-reset multifn)
+  multifn)
 
-(defn remove-method
+(defn remove-method-joke
   "Removes the method of multimethod associated with dispatch-value."
   {:added "1.0"
    :static true}
  [^clojure.lang.MultiFn multifn dispatch-val]
  (multifn-remove-method multifn dispatch-val))
 
-(defn prefer-method
-  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y 
+(defn prefer-method-joke
+  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y
    when there is a conflict"
   {:added "1.0"
    :static true}
   [^clojure.lang.MultiFn multifn dispatch-val-x dispatch-val-y]
   (multifn-prefer-method multifn dispatch-val-x dispatch-val-y))
 
-(defn methods
+(defn methods-joke
   "Given a multimethod, returns a map of dispatch values -> dispatch fns"
   {:added "1.0"
    :static true}
   [multifn] ; was: [^clojure.lang.MultiFn multifn]
   (multifn-get-method-table multifn))
 
-(defn get-method
+(defn get-method-joke
   "Given a multimethod and a dispatch value, returns the dispatch fn
   that would apply to that value, or nil if none apply and no default"
   {:added "1.0"
@@ -152,7 +166,7 @@
   [multifn dispatch-val] ; was: [^clojure.lang.MultiFn multifn...]
   (multifn-get-method multifn dispatch-val))
 
-(defn prefers
+(defn prefers-joke
   "Given a multimethod, returns a map of preferred value -> set of other values"
   {:added "1.0"
    :static true}

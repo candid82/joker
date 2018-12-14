@@ -1333,6 +1333,13 @@
          (let [~form temp#]
            ~@body)))))
 
+(defn class
+  "Returns the Class of x; currently this is the underlying type, as Go classes are not yet supported."
+  {:added "1.0"
+   :static true}
+  [x]
+  (type__ x))
+
 (defn type
   "Returns the :type metadata of x, or its Type if none"
   {:added "1.0"}
