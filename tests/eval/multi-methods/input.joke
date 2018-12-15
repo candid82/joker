@@ -43,7 +43,7 @@
 (println (factorial 1)) ; => 1
 (println (factorial 3)) ; => 6
 (println (factorial 7)) ; => 5040
-
+(println (map factorial [5 4 3 2 1])) ; => (120 24 6 2 1)
 
 ;; defmulti/defmethods support variadic arguments and dispatch functions.
 
@@ -233,3 +233,8 @@
 ;;do these again, to catch errors relating to reuse of a shared resource across multimethods
 (println (draw (square "red"))) ; => "Drawing a red square"
 (println (draw (triangle "green"))) ; => "Drawing a green triangle"
+
+;; test getmethod
+(println (get-method factorial 0)) ; => #object[Fn]
+(defn circle [color] {:shape :circle :clr color})
+(println (get-method draw (circle "black")))        ; => nil

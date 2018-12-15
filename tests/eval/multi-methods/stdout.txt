@@ -5,6 +5,7 @@ I don't know the Spanish language
 1
 6
 5040
+(120 24 6 2 1)
 str: mink and stoat
 str: bear, skunk and sloth
 str: dog, cat, cow and horse
@@ -27,3 +28,5 @@ Drawing a green triangle
 1099
 Drawing a red square
 Drawing a green triangle
+#object[Fn]
+nil
