@@ -25,3 +25,5 @@ Drawing a red square
 Drawing a green triangle
 1500
 1099
+Drawing a red square
+Drawing a green triangle

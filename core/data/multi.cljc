@@ -22,21 +22,21 @@
 
 (defn- new-multifn
   [name dispatch-fn default hierarchy]
-;  (prn "after: name=" name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
+  ;;  (prn "after: name=" name " dispatch-fn=" dispatch-fn " default=" default " hierarchy=" hierarchy)
   (when hierarchy
     (throw (ex-info ":hierarchy not yet supported by joker.core/defmulti" {})))
-  (def mfatom (atom {}))
-  (with-meta
-    (fn [& args]
-;      (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default)
-      (let [method (get @mfatom
-                        (apply dispatch-fn args)
-                        (get @mfatom
-                             default
-                             (fn [& args] (multifn-nomatch name args))))]
-;        (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default " method=" method)
-        (apply method args)))
-    {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom}))
+  (let [mfatom (atom {})]
+    (with-meta
+      (fn [& args]
+        ;;      (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default)
+        (let [method (get @mfatom
+                          (apply dispatch-fn args)
+                          (get @mfatom
+                               default
+                               (fn [& args] (multifn-nomatch name args))))]
+          ;;        (prn "mfatom=" @mfatom " dispatch-fn=" dispatch-fn " args=" args " default=" default " method=" method)
+          (apply method args)))
+      {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom})))
 
 (defn- multifn-swap-method-table-vals!
   [multifn ^Callable f & args]

@@ -243,3 +243,7 @@
 
 (println (salary {:t "com" :b 1000})) ; => 1500
 (println (salary {:t "bon" :b 1000})) ; => 1099
+
+;;do these again, to catch errors relating to reuse of a shared resource across multimethods
+(println (draw (square "red"))) ; => "Drawing a red square"
+(println (draw (triangle "green"))) ; => "Drawing a green triangle"
