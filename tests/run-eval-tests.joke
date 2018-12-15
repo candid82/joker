@@ -12,7 +12,9 @@
   [opt]
   (some #(= opt %) *command-line-args*))
 
-(def verbose (or (have-option "--verbose") (have-option "-v")))
+(def verbose (or (have-option "--verbose")
+                 (have-option "-v")
+                 (not (have-option "--no-verbose"))))
 
 (let [test-dirs (->> (joker.os/ls "tests/eval")
                      (filter :dir?)
@@ -22,7 +24,7 @@
       exe (str pwd "/joker")]
   (doseq [test-dir test-dirs]
     (when verbose
-      (println (str "Running test " test-dir)))
+      (println (str "Running subtest " test-dir)))
     (let [dir (str "tests/eval/" test-dir "/")
           filename "input.joke"
           res (joker.os/sh-from dir exe filename) ; Someday add: :in "input.txt" (no :in support yet)
@@ -65,6 +67,22 @@
   (var-set ref (apply fun (var-get ref) args)))
 
 ;;; From clojure/src/clj/clojure/test.clj:
+
+;   Copyright (c) Rich Hickey. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+;;; test.clj: test framework for Clojure
+
+;; by Stuart Sierra
+;; March 28, 2009
+
+;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
+;; contributions and suggestions.
 
 (defonce ^:dynamic
   ^{:doc "True by default.  If set to false, no test functions will
@@ -133,17 +151,7 @@
 
 ;;; TEST RESULT REPORTING
 
-(declare report-default)
-(declare report-pass)
-(declare report-fail)
-(declare report-error)
-(declare report-summary)
-(declare report-begin-test-ns)
-(declare report-end-test-ns)
-(declare report-begin-test-var)
-(declare report-end-test-var)
-
-(defn report
+(defmulti
   ^{:doc "Generic reporting function, may be overridden to plug in
    different report formats (e.g., TAP, JUnit).  Assertions such as
    'is' call 'report' to indicate results.  The argument given to
@@ -151,18 +159,8 @@
    the top of test_is.clj for more information on the types of
    arguments for 'report'."
      :dynamic true
-    :added "1.1"}
-  [type arg]
-  (case type
-    :default (report-default arg)
-    :pass (report-pass arg)
-    :fail (report-fail arg)
-    :error (report-error arg)
-    :summary (report-summary arg)
-    :begin-test-ns (report-begin-test-ns arg)
-    :end-test-ns (report-end-test-ns arg)
-    :begin-test-var (report-begin-test-var arg)
-    :end-test-var (report-end-test-var arg)))
+     :added "1.1"}
+  report :type)
 
 (defn- stacktrace-file-and-line
   [stacktrace]
@@ -187,15 +185,15 @@
    ;;                                                  (str/starts-with? cl-name "clojure.core$ex_info")))
    ;;                                           (.getStackTrace (Thread/currentThread)))) m)
    ;;  :error (merge (stacktrace-file-and-line (.getStackTrace ^Throwable (:actual m))) m)
-    (:type m) m))
+    m))
 
-(defn- report-default [m]
+(defmethod report :default [m]
   (with-test-out (prn m)))
 
-(defn- report-pass [m]
+(defmethod report :pass [m]
   (with-test-out (inc-report-counter :pass)))
 
-(defn- report-fail [m]
+(defmethod report :fail [m]
   (with-test-out
     (inc-report-counter :fail)
     (println "\nFAIL in" (testing-vars-str m))
@@ -204,7 +202,7 @@
     (println "expected:" (pr-str (:expected m)))
     (println "  actual:" (pr-str (:actual m)))))
 
-(defn- report-error [m]
+(defmethod report :error [m]
   (with-test-out
    (inc-report-counter :error)
    (println "\nERROR in" (testing-vars-str m))
@@ -215,22 +213,22 @@
    (let [actual (:actual m)]
      ;; (if (instance? Throwable actual)
      ;;   (stack/print-cause-trace actual *stack-trace-depth*)
-       (prn actual))))
+     (prn actual))))
 
-(defn- report-summary [m]
+(defmethod report :summary [m]
   (with-test-out
    (println "\nRan" (:test m) "tests containing"
             (+ (:pass m) (:fail m) (:error m)) "assertions.")
    (println (:fail m) "failures," (:error m) "errors.")))
 
-(defn- report-begin-test-ns [m]
+(defmethod report :begin-test-ns [m]
   (with-test-out
    (println "\nTesting" (ns-name (:ns m)))))
 
 ;; Ignore these message types:
-(defn- report-end-test-ns [m])
-(defn- report-begin-test-var [m])
-(defn- report-end-test-var [m])
+(defmethod report :end-test-ns [m])
+(defmethod report :begin-test-var [m])
+(defmethod report :end-test-var [m])
 
 
 
@@ -296,35 +294,23 @@
 ;; macro.  These define different kinds of tests, based on the first
 ;; symbol in the test expression.
 
-(declare assert-expr-always-fail)
-(declare assert-expr-default)
-(declare assert-expr-'instance?)
-(declare assert-expr-'thrown?)
-(declare assert-expr-'thrown-with-msg?)
+(defmulti assert-expr
+  (fn [msg form]
+    (cond
+      (nil? form) :always-fail
+      (seq? form) (first form)
+      :else :default)))
 
-(defn assert-expr
-  [msg form]
-  (let [key (cond
-              (nil? form) :always-fail
-              (seq? form) (first form)
-              :else :default)]
-    (case key
-      :always-fail (assert-expr-always-fail msg form)
-      'instance? (assert-expr-'instance? msg form)
-      'thrown? (assert-expr-'thrown? msg form)
-      'thrown-with-msg? (assert-expr-'thrown-with-msg? msg form)
-      (assert-expr-default msg form))))
-
-(defn- assert-expr-always-fail [msg form]
+(defmethod assert-expr :always-fail [msg form]
   ;; nil test: always fail
   `(do-report {:type :fail, :message ~msg}))
 
-(defn- assert-expr-default [msg form]
+(defmethod assert-expr :default [msg form]
   (if (and (sequential? form) (function? (first form)))
     (assert-predicate msg form)
     (assert-any msg form)))
 
-(defn- assert-expr-'instance? [msg form]
+(defmethod assert-expr 'instance? [msg form]
   ;; Test if x is an instance of y.
   `(let [klass# ~(nth form 1)
          object# ~(nth form 2)]
@@ -336,7 +322,7 @@
                   :expected '~form, :actual (class object#)}))
        result#)))
 
-(defn- assert-expr-'thrown? [msg form]
+(defmethod assert-expr 'thrown? [msg form]
   ;; (is (thrown? c expr))
   ;; Asserts that evaluating expr throws an exception of class c.
   ;; Returns the exception thrown.
@@ -350,7 +336,7 @@
                      :expected '~form, :actual e#})
             e#))))
 
-(defn- assert-expr-'thrown-with-msg? [msg form]
+(defmethod assert-expr 'thrown-with-msg? [msg form]
   ;; (is (thrown-with-msg? c re expr))
   ;; Asserts that evaluating expr throws an exception of class c.
   ;; Also asserts that the message string of the exception matches
@@ -404,6 +390,8 @@
   ([form] `(is ~form nil))
   ([form msg] `(try-expr ~msg ~form)))
 
+(require '[joker.template :as temp])
+
 (defmacro are
   "Checks multiple assertions with a template expression.
   See clojure.template/do-template for an explanation of
@@ -426,8 +414,8 @@
        (and (pos? (count argv))
             (pos? (count args))
             (zero? (mod (count args) (count argv)))))
-    `(do-template ~argv (is ~expr) ~@args)
-    (throw (str "IllegalArgumentException: " "The number of args doesn't match are's argv."))))
+    `(temp/do-template ~argv (is ~expr) ~@args)
+    (throw (ex-info (str "IllegalArgumentException: " "The number of args doesn't match are's argv.") {}))))
 
 (defmacro testing
   "Adds a new string to the list of testing contexts.  May be nested,
@@ -502,18 +490,18 @@
   [key coll]
   (alter-meta! *ns* assoc key coll))
 
-;; (defmulti use-fixtures
-;;   "Wrap test runs in a fixture function to perform setup and
-;;   teardown. Using a fixture-type of :each wraps every test
-;;   individually, while :once wraps the whole run in a single function."
-;;   {:added "1.1"}
-;;   (fn [fixture-type & args] fixture-type))
+(defmulti use-fixtures
+  "Wrap test runs in a fixture function to perform setup and
+  teardown. Using a fixture-type of :each wraps every test
+  individually, while :once wraps the whole run in a single function."
+  {:added "1.1"}
+  (fn [fixture-type & args] fixture-type))
 
-;; (defmethod use-fixtures :each [fixture-type & args]
-;;   (add-ns-meta ::each-fixtures args))
+(defmethod use-fixtures :each [fixture-type & args]
+  (add-ns-meta ::each-fixtures args))
 
-;; (defmethod use-fixtures :once [fixture-type & args]
-;;   (add-ns-meta ::once-fixtures args))
+(defmethod use-fixtures :once [fixture-type & args]
+  (add-ns-meta ::once-fixtures args))
 
 (defn- default-fixture
   "The default, empty, fixture function.  Just calls its argument."
@@ -635,6 +623,7 @@
 ;; even? odd?
 
 (deftest test-even?
+  (is (even? 2))
   (are [x] (true? x)
     (even? -4)
     (not (even? -3))
@@ -650,13 +639,14 @@
     (odd? -3)
     (not (odd? 0))
     (odd? 5)
+    (odd? 6) ; TODO: Remove after confirming failures caught
     (not (odd? 8)))
   (is (thrown? Error (odd? 1/2))) ; was: thrown? IllegalArgumentException
   (is (thrown? Error (odd? (double 10))))) ; was: thrown? IllegalArgumentException
 
 (let [res (run-all-tests)]
   (when (< 0 (+ (:fail res) (:error res)))
-    (println "there were failures and/or errors; returning exit code 1")
+    (println "There were failures and/or errors; returning exit code 1")
     (var-set #'exit-code 1)))
 
 (joker.os/exit exit-code)
