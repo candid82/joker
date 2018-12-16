@@ -49,6 +49,8 @@ const (
 
 const VERSION = "v0.10.2"
 
+var internalLibs map[string][]byte
+
 const (
 	CLJ Dialect = iota
 	CLJS
@@ -56,6 +58,14 @@ const (
 	EDN
 	UNKNOWN
 )
+
+func InitInternalLibs() {
+	internalLibs = map[string][]byte{
+		"joker.walk":     walkData,
+		"joker.template": templateData,
+		"joker.repl":     replData,
+	}
+}
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
@@ -1381,10 +1391,8 @@ var procLoadFile Proc = func(args []Object) Object {
 var procLoadLibFromFile Proc = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0)
 	filename := EnsureString(args, 1)
-	if libname.Name() == "joker.walk" {
-		processData(walkData)
-	} else if libname.Name() == "joker.template" {
-		processData(templateData)
+	if d := internalLibs[libname.Name()]; d != nil {
+		processData(d)
 	} else {
 		loadFile(filename.S)
 	}
