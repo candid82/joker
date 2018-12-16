@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -453,13 +454,25 @@ func MakeKeyword(nsname string) Keyword {
 
 func PanicArity(n int) {
 	name := RT.currentExpr.(Traceable).Name()
-	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to `%s'", n, name)))
+}
+
+func rangeString(min, max int) string {
+	if min == max {
+		return strconv.Itoa(min)
+	}
+	return strconv.Itoa(min) + ":" + strconv.Itoa(max)
+}
+
+func PanicArityMinMax(n, min, max int) {
+	name := RT.currentExpr.(Traceable).Name()
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to `%s'; expects %s", n, name, rangeString(min, max))))
 }
 
 func CheckArity(args []Object, min int, max int) {
 	n := len(args)
 	if n < min || n > max {
-		PanicArity(n)
+		PanicArityMinMax(n, min, max)
 	}
 }
 
