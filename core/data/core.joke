@@ -3467,7 +3467,7 @@
                   *ns* *ns*]
           (if *linter-mode*
             (in-ns lib)
-            (load-file path)))))))
+            (load-lib-from-file__ lib path)))))))
 
 (defn get-in
   "Returns the value in a nested associative structure,
