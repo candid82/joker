@@ -21,17 +21,16 @@ func processFile(file string) (err error) {
 
 func processEntry(path string, info os.FileInfo, err error) error {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(5)
+		return err
 	}
 	name := info.Name()
 	if name == ".git" {
 		return filepath.SkipDir
 	}
 	if !info.IsDir() {
-		processFile(path)
+		err = processFile(path)
 	}
-	return nil
+	return err
 }
 
 func main() {
