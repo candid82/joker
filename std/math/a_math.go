@@ -11,7 +11,7 @@ var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
 
 var cos_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		x := ExtractNumber(_args, 0)
@@ -26,7 +26,7 @@ var cos_ Proc = func(_args []Object) Object {
 
 var hypot_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		p := ExtractNumber(_args, 0)
@@ -42,7 +42,7 @@ var hypot_ Proc = func(_args []Object) Object {
 
 var sin_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		x := ExtractNumber(_args, 0)

@@ -11,7 +11,7 @@ var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
 
 var path_escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -26,7 +26,7 @@ var path_escape_ Proc = func(_args []Object) Object {
 
 var path_unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -41,7 +41,7 @@ var path_unescape_ Proc = func(_args []Object) Object {
 
 var query_escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -56,7 +56,7 @@ var query_escape_ Proc = func(_args []Object) Object {
 
 var query_unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)

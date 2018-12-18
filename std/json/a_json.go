@@ -11,7 +11,7 @@ var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
 var read_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -26,7 +26,7 @@ var read_string_ Proc = func(_args []Object) Object {
 
 var write_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		v := ExtractObject(_args, 0)

@@ -11,7 +11,7 @@ var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
 var send_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		request := ExtractMap(_args, 0)
@@ -26,7 +26,7 @@ var send_ Proc = func(_args []Object) Object {
 
 var start_file_server_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		addr := ExtractString(_args, 0)
@@ -42,7 +42,7 @@ var start_file_server_ Proc = func(_args []Object) Object {
 
 var start_server_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		addr := ExtractString(_args, 0)

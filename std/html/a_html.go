@@ -11,7 +11,7 @@ var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
 var escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -26,7 +26,7 @@ var escape_ Proc = func(_args []Object) Object {
 
 var unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)

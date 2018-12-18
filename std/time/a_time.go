@@ -11,7 +11,7 @@ var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
 var add_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		t := ExtractTime(_args, 0)
@@ -27,7 +27,7 @@ var add_ Proc = func(_args []Object) Object {
 
 var format_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		t := ExtractTime(_args, 0)
@@ -43,7 +43,7 @@ var format_ Proc = func(_args []Object) Object {
 
 var from_unix_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		sec := ExtractInt(_args, 0)
@@ -59,7 +59,7 @@ var from_unix_ Proc = func(_args []Object) Object {
 
 var hours_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		d := ExtractInt(_args, 0)
@@ -74,7 +74,7 @@ var hours_ Proc = func(_args []Object) Object {
 
 var minutes_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		d := ExtractInt(_args, 0)
@@ -89,7 +89,7 @@ var minutes_ Proc = func(_args []Object) Object {
 
 var now_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 0:
 		
 		
@@ -104,7 +104,7 @@ var now_ Proc = func(_args []Object) Object {
 
 var parse_duration_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -119,7 +119,7 @@ var parse_duration_ Proc = func(_args []Object) Object {
 
 var round_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		d := ExtractInt(_args, 0)
@@ -135,7 +135,7 @@ var round_ Proc = func(_args []Object) Object {
 
 var seconds_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		d := ExtractInt(_args, 0)
@@ -150,7 +150,7 @@ var seconds_ Proc = func(_args []Object) Object {
 
 var since_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		t := ExtractTime(_args, 0)
@@ -165,7 +165,7 @@ var since_ Proc = func(_args []Object) Object {
 
 var sleep_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		d := ExtractInt(_args, 0)
@@ -180,7 +180,7 @@ var sleep_ Proc = func(_args []Object) Object {
 
 var string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		d := ExtractInt(_args, 0)
@@ -195,7 +195,7 @@ var string_ Proc = func(_args []Object) Object {
 
 var sub_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		t := ExtractTime(_args, 0)
@@ -211,7 +211,7 @@ var sub_ Proc = func(_args []Object) Object {
 
 var truncate_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		d := ExtractInt(_args, 0)
@@ -227,7 +227,7 @@ var truncate_ Proc = func(_args []Object) Object {
 
 var unix_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		t := ExtractTime(_args, 0)
@@ -242,7 +242,7 @@ var unix_ Proc = func(_args []Object) Object {
 
 var until_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		t := ExtractTime(_args, 0)

@@ -11,7 +11,7 @@ var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
 var args_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 0:
 		
 		
@@ -26,7 +26,7 @@ var args_ Proc = func(_args []Object) Object {
 
 var chdir_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		dirname := ExtractString(_args, 0)
@@ -41,7 +41,7 @@ var chdir_ Proc = func(_args []Object) Object {
 
 var cwd_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 0:
 		
 		
@@ -56,7 +56,7 @@ var cwd_ Proc = func(_args []Object) Object {
 
 var env_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 0:
 		
 		
@@ -71,7 +71,7 @@ var env_ Proc = func(_args []Object) Object {
 
 var exit_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		code := ExtractInt(_args, 0)
@@ -86,7 +86,7 @@ var exit_ Proc = func(_args []Object) Object {
 
 var ls_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		dirname := ExtractString(_args, 0)
@@ -101,7 +101,7 @@ var ls_ Proc = func(_args []Object) Object {
 
 var mkdir_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		name := ExtractString(_args, 0)
@@ -117,7 +117,7 @@ var mkdir_ Proc = func(_args []Object) Object {
 
 var sh_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case true:
 		CheckArity(_args, 1,999)
 		name := ExtractString(_args, 0)
@@ -133,7 +133,7 @@ var sh_ Proc = func(_args []Object) Object {
 
 var sh_from_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case true:
 		CheckArity(_args, 2,999)
 		dir := ExtractString(_args, 0)
@@ -150,7 +150,7 @@ var sh_from_ Proc = func(_args []Object) Object {
 
 var stat_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		filename := ExtractString(_args, 0)

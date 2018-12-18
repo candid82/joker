@@ -11,7 +11,7 @@ var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
 var decode_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -26,7 +26,7 @@ var decode_string_ Proc = func(_args []Object) Object {
 
 var encode_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)

@@ -12,7 +12,7 @@ var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
 var isblank_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractObject(_args, 0)
@@ -27,7 +27,7 @@ var isblank_ Proc = func(_args []Object) Object {
 
 var capitalize_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -42,7 +42,7 @@ var capitalize_ Proc = func(_args []Object) Object {
 
 var isends_with_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -58,7 +58,7 @@ var isends_with_ Proc = func(_args []Object) Object {
 
 var escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -74,7 +74,7 @@ var escape_ Proc = func(_args []Object) Object {
 
 var isincludes_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -90,7 +90,7 @@ var isincludes_ Proc = func(_args []Object) Object {
 
 var index_of_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -114,7 +114,7 @@ var index_of_ Proc = func(_args []Object) Object {
 
 var join_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		coll := ExtractSeqable(_args, 0)
@@ -136,7 +136,7 @@ var join_ Proc = func(_args []Object) Object {
 
 var last_index_of_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -160,7 +160,7 @@ var last_index_of_ Proc = func(_args []Object) Object {
 
 var lower_case_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -175,7 +175,7 @@ var lower_case_ Proc = func(_args []Object) Object {
 
 var pad_left_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 3:
 		
 		s := ExtractString(_args, 0)
@@ -192,7 +192,7 @@ var pad_left_ Proc = func(_args []Object) Object {
 
 var pad_right_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 3:
 		
 		s := ExtractString(_args, 0)
@@ -209,7 +209,7 @@ var pad_right_ Proc = func(_args []Object) Object {
 
 var replace_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 3:
 		
 		s := ExtractString(_args, 0)
@@ -226,7 +226,7 @@ var replace_ Proc = func(_args []Object) Object {
 
 var replace_first_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 3:
 		
 		s := ExtractString(_args, 0)
@@ -243,7 +243,7 @@ var replace_first_ Proc = func(_args []Object) Object {
 
 var reverse_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -258,7 +258,7 @@ var reverse_ Proc = func(_args []Object) Object {
 
 var split_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -282,7 +282,7 @@ var split_ Proc = func(_args []Object) Object {
 
 var split_lines_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -297,7 +297,7 @@ var split_lines_ Proc = func(_args []Object) Object {
 
 var isstarts_with_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
 		
 		s := ExtractString(_args, 0)
@@ -313,7 +313,7 @@ var isstarts_with_ Proc = func(_args []Object) Object {
 
 var trim_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -328,7 +328,7 @@ var trim_ Proc = func(_args []Object) Object {
 
 var trim_left_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -343,7 +343,7 @@ var trim_left_ Proc = func(_args []Object) Object {
 
 var trim_newline_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -358,7 +358,7 @@ var trim_newline_ Proc = func(_args []Object) Object {
 
 var trim_right_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
@@ -373,7 +373,7 @@ var trim_right_ Proc = func(_args []Object) Object {
 
 var upper_case_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
 		
 		s := ExtractString(_args, 0)
