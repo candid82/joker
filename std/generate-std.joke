@@ -1,8 +1,10 @@
 (def namespaces ['base64 'html 'http 'json 'math 'os 'string 'time 'url 'yaml])
 
+(require '[joker.string :as s])
+
 (apply require namespaces)
 
-(def rpl joker.string/replace)
+(def rpl s/replace)
 
 (def fn-template
   (slurp "fn.tmpl"))
@@ -66,7 +68,7 @@
                   (string? go) go
                   varargs? (:varargs go)
                   :else (get go cnt))
-        go-res (if (joker.string/starts-with? go-expr "!")
+        go-res (if (s/starts-with? go-expr "!")
                  (subs go-expr 1)
                  (str "_res := " go-expr))]
     (-> arity-template
@@ -118,6 +120,15 @@
       (rpl "\n" "\n//")
       (rpl "\n// package" "\npackage")))
 
+(defn compare-imports
+  [^String l ^String r]
+  (cond
+    (s/starts-with? l ". ") (if (s/starts-with? r ". ")
+                            (compare l r)
+                            -1)
+    (s/starts-with? r ". ") 1
+    :else (compare l r)))
+
 (defn generate-ns
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
@@ -128,9 +139,9 @@
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}"
-                     (if (empty? (:go-imports m))
-                       "{blank}"
-                       (joker.string/join "\n\t" (map q (:go-imports m)))))
+                     (joker.string/join "\n\t" (sort compare-imports (conj
+                                                                      (vec (map q (:go-imports m)))
+                                                                      ". \"github.com/candid82/joker/core\""))))
                 (rpl "{fns}" (joker.string/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
                 (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
