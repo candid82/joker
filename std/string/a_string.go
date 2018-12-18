@@ -3,6 +3,8 @@
 package string
 
 import (
+	"strings"
+  "unicode"
 	. "github.com/candid82/joker/core"
 )
 

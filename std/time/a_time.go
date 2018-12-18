@@ -3,6 +3,7 @@
 package time
 
 import (
+	"time"
 	. "github.com/candid82/joker/core"
 )
 
@@ -85,7 +86,6 @@ var now_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
-		
 		_res := time.Now()
 		return MakeTime(_res)
 

@@ -3,6 +3,7 @@
 package html
 
 import (
+	"html"
 	. "github.com/candid82/joker/core"
 )
 

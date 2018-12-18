@@ -12,7 +12,6 @@ var args_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
-		
 		_res := commandArgs()
 		return _res
 
@@ -40,7 +39,6 @@ var cwd_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
-		
 		_res := getwd()
 		return MakeString(_res)
 
@@ -54,7 +52,6 @@ var env_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
-		
 		_res := env()
 		return _res
 
