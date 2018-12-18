@@ -27,7 +27,7 @@ var hypot_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		p := ExtractNumber(_args, 0)
-	q := ExtractNumber(_args, 1)
+		q := ExtractNumber(_args, 1)
 		_res := hypot(p, q)
 		return MakeDouble(_res)
 

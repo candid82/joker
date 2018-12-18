@@ -41,7 +41,7 @@ var isends_with_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	substr := ExtractString(_args, 1)
+		substr := ExtractString(_args, 1)
 		_res := strings.HasSuffix(s, substr)
 		return MakeBool(_res)
 
@@ -56,7 +56,7 @@ var escape_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	cmap := ExtractCallable(_args, 1)
+		cmap := ExtractCallable(_args, 1)
 		_res := escape(s, cmap)
 		return MakeString(_res)
 
@@ -71,7 +71,7 @@ var isincludes_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	substr := ExtractString(_args, 1)
+		substr := ExtractString(_args, 1)
 		_res := strings.Contains(s, substr)
 		return MakeBool(_res)
 
@@ -86,14 +86,14 @@ var index_of_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	value := ExtractObject(_args, 1)
+		value := ExtractObject(_args, 1)
 		_res := indexOf(s, value, 0)
 		return _res
 
   case _c == 3:
 		s := ExtractString(_args, 0)
-	value := ExtractObject(_args, 1)
-	from := ExtractInt(_args, 2)
+		value := ExtractObject(_args, 1)
+		from := ExtractInt(_args, 2)
 		_res := indexOf(s, value, from)
 		return _res
 
@@ -113,7 +113,7 @@ var join_ Proc = func(_args []Object) Object {
 
   case _c == 2:
 		separator := ExtractString(_args, 0)
-	coll := ExtractSeqable(_args, 1)
+		coll := ExtractSeqable(_args, 1)
 		_res := join(separator, coll)
 		return MakeString(_res)
 
@@ -128,14 +128,14 @@ var last_index_of_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	value := ExtractObject(_args, 1)
+		value := ExtractObject(_args, 1)
 		_res := lastIndexOf(s, value, 0)
 		return _res
 
   case _c == 3:
 		s := ExtractString(_args, 0)
-	value := ExtractObject(_args, 1)
-	from := ExtractInt(_args, 2)
+		value := ExtractObject(_args, 1)
+		from := ExtractInt(_args, 2)
 		_res := lastIndexOf(s, value, from)
 		return _res
 
@@ -164,8 +164,8 @@ var pad_left_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 3:
 		s := ExtractString(_args, 0)
-	pad := ExtractString(_args, 1)
-	n := ExtractInt(_args, 2)
+		pad := ExtractString(_args, 1)
+		n := ExtractInt(_args, 2)
 		_res := padLeft(s, pad, n)
 		return MakeString(_res)
 
@@ -180,8 +180,8 @@ var pad_right_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 3:
 		s := ExtractString(_args, 0)
-	pad := ExtractString(_args, 1)
-	n := ExtractInt(_args, 2)
+		pad := ExtractString(_args, 1)
+		n := ExtractInt(_args, 2)
 		_res := padRight(s, pad, n)
 		return MakeString(_res)
 
@@ -196,8 +196,8 @@ var replace_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 3:
 		s := ExtractString(_args, 0)
-	match := ExtractObject(_args, 1)
-	repl := ExtractString(_args, 2)
+		match := ExtractObject(_args, 1)
+		repl := ExtractString(_args, 2)
 		_res := replace(s, match, repl)
 		return MakeString(_res)
 
@@ -212,8 +212,8 @@ var replace_first_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 3:
 		s := ExtractString(_args, 0)
-	match := ExtractObject(_args, 1)
-	repl := ExtractString(_args, 2)
+		match := ExtractObject(_args, 1)
+		repl := ExtractString(_args, 2)
 		_res := replaceFirst(s, match, repl)
 		return MakeString(_res)
 
@@ -242,14 +242,14 @@ var split_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	re := ExtractRegex(_args, 1)
+		re := ExtractRegex(_args, 1)
 		_res := split(s, re, 0)
 		return _res
 
   case _c == 3:
 		s := ExtractString(_args, 0)
-	re := ExtractRegex(_args, 1)
-	n := ExtractInt(_args, 2)
+		re := ExtractRegex(_args, 1)
+		n := ExtractInt(_args, 2)
 		_res := split(s, re, n)
 		return _res
 
@@ -278,7 +278,7 @@ var isstarts_with_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-	substr := ExtractString(_args, 1)
+		substr := ExtractString(_args, 1)
 		_res := strings.HasPrefix(s, substr)
 		return MakeBool(_res)
 

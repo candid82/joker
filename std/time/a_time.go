@@ -13,7 +13,7 @@ var add_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		t := ExtractTime(_args, 0)
-	d := ExtractInt(_args, 1)
+		d := ExtractInt(_args, 1)
 		_res := t.Add(time.Duration(d))
 		return MakeTime(_res)
 
@@ -28,7 +28,7 @@ var format_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		t := ExtractTime(_args, 0)
-	layout := ExtractString(_args, 1)
+		layout := ExtractString(_args, 1)
 		_res := t.Format(layout)
 		return MakeString(_res)
 
@@ -43,7 +43,7 @@ var from_unix_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		sec := ExtractInt(_args, 0)
-	nsec := ExtractInt(_args, 1)
+		nsec := ExtractInt(_args, 1)
 		_res := time.Unix(int64(sec), int64(nsec))
 		return MakeTime(_res)
 
@@ -114,7 +114,7 @@ var round_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		d := ExtractInt(_args, 0)
-	m := ExtractInt(_args, 1)
+		m := ExtractInt(_args, 1)
 		_res := int(time.Duration(d).Round(time.Duration(m)))
 		return MakeInt(_res)
 
@@ -185,7 +185,7 @@ var sub_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		t := ExtractTime(_args, 0)
-	u := ExtractTime(_args, 1)
+		u := ExtractTime(_args, 1)
 		_res := int(t.Sub(u))
 		return MakeInt(_res)
 
@@ -200,7 +200,7 @@ var truncate_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		d := ExtractInt(_args, 0)
-	m := ExtractInt(_args, 1)
+		m := ExtractInt(_args, 1)
 		_res := int(time.Duration(d).Truncate(time.Duration(m)))
 		return MakeInt(_res)
 

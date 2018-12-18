@@ -27,7 +27,7 @@ var start_file_server_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		addr := ExtractString(_args, 0)
-	root := ExtractString(_args, 1)
+		root := ExtractString(_args, 1)
 		_res := startFileServer(addr, root)
 		return _res
 
@@ -42,7 +42,7 @@ var start_server_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 2:
 		addr := ExtractString(_args, 0)
-	handler := ExtractCallable(_args, 1)
+		handler := ExtractCallable(_args, 1)
 		_res := startServer(addr, handler)
 		return _res
 
