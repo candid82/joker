@@ -461,7 +461,16 @@ func rangeString(min, max int) string {
 	if min == max {
 		return strconv.Itoa(min)
 	}
-	return strconv.Itoa(min) + ":" + strconv.Itoa(max)
+	if min + 1 == max {
+		return strconv.Itoa(min) + " or " + strconv.Itoa(max)
+	}
+	if min + 2 == max {
+		return strconv.Itoa(min) + ", " + strconv.Itoa(min + 1) + ", or " + strconv.Itoa(max)
+	}
+	if max >= 999 {
+		return "at least " + strconv.Itoa(min)
+	}
+	return "between " + strconv.Itoa(min) + " and " + strconv.Itoa(max) + ", inclusive"
 }
 
 func PanicArityMinMax(n, min, max int) {
