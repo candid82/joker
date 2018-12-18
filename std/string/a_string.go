@@ -3,9 +3,9 @@
 package string
 
 import (
+	. "github.com/candid82/joker/core"
 	"strings"
 	"unicode"
-	. "github.com/candid82/joker/core"
 )
 
 var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))

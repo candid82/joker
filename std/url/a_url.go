@@ -3,8 +3,8 @@
 package url
 
 import (
-	"net/url"
 	. "github.com/candid82/joker/core"
+	"net/url"
 )
 
 var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))

@@ -3,8 +3,8 @@
 package html
 
 import (
-	"html"
 	. "github.com/candid82/joker/core"
+	"html"
 )
 
 var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))

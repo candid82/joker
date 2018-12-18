@@ -3,8 +3,8 @@
 package time
 
 import (
-	"time"
 	. "github.com/candid82/joker/core"
+	"time"
 )
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
