@@ -3,7 +3,6 @@
 package yaml
 
 import (
-	
 	. "github.com/candid82/joker/core"
 )
 

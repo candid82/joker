@@ -3,7 +3,6 @@
 package base64
 
 import (
-	
 	. "github.com/candid82/joker/core"
 )
 

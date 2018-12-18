@@ -3,7 +3,6 @@
 package url
 
 import (
-	"net/url"
 	. "github.com/candid82/joker/core"
 )
 

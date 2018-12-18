@@ -3,7 +3,6 @@
 package json
 
 import (
-	
 	. "github.com/candid82/joker/core"
 )
 
