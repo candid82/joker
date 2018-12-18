@@ -1,8 +1,10 @@
 (def namespaces ['base64 'html 'http 'json 'math 'os 'string 'time 'url 'yaml])
 
+(require '[joker.string :as s])
+
 (apply require namespaces)
 
-(def rpl joker.string/replace)
+(def rpl s/replace)
 
 (def fn-template
   (slurp "fn.tmpl"))
@@ -39,7 +41,7 @@
 (defn extract-args
   [args]
   (joker.string/join
-   "\n    "
+   "\n\t\t"
    (map-indexed
     (fn [i arg]
       (let [m (meta arg)
@@ -66,16 +68,18 @@
                   (string? go) go
                   varargs? (:varargs go)
                   :else (get go cnt))
-        go-res (if (joker.string/starts-with? go-expr "!")
+        go-res (if (s/starts-with? go-expr "!")
                  (subs go-expr 1)
                  (str "_res := " go-expr))]
     (-> arity-template
         (rpl "{arity}" (if varargs? "true" (str "_c == " (count args))))
         (rpl "{arityCheck}" (if varargs?
-                              (str "CheckArity(_args, " (dec cnt) "," 999 ")")
-                              ""))
-        (rpl "{args}" (extract-args handle-args))
-        (rpl "{goExpr}" go-res)
+                              (str "CheckArity(_args, " (dec cnt) ", " 999 ")")
+                              "{blank}"))
+        (rpl "{args}" (if (empty? args)
+                        "{blank}"
+                        (extract-args handle-args)))
+        (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
         (rpl "{return}"
              (if tag
                (str "return Make" tag "(_res)")
@@ -93,7 +97,7 @@
   (let [m (meta v)
         arglists (:arglists m)
         go-fn-name (go-name (str k))
-        arities (joker.string/join "\n  " (map #(generate-arity % (:go m) (:tag m)) arglists))
+        arities (joker.string/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
                    (rpl "{fnName}" go-fn-name)
                    (rpl "{arities}" arities))
@@ -116,6 +120,15 @@
       (rpl "\n" "\n//")
       (rpl "\n// package" "\npackage")))
 
+(defn compare-imports
+  [^String l ^String r]
+  (cond
+    (s/starts-with? l ". ") (if (s/starts-with? r ". ")
+                            (compare l r)
+                            -1)
+    (s/starts-with? r ". ") 1
+    :else (compare l r)))
+
 (defn generate-ns
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
@@ -125,10 +138,13 @@
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
-                (rpl "{imports}" (joker.string/join "\n  " (map q (:go-imports m))))
+                (rpl "{imports}"
+                     (joker.string/join "\n\t" (sort compare-imports (conj
+                                                                      (vec (map q (:go-imports m)))
+                                                                      ". \"github.com/candid82/joker/core\""))))
                 (rpl "{fns}" (joker.string/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
-                (rpl "{interns}" (joker.string/join "\n" (map second fns))))
+                (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
         res (if (:empty m)
               (comment-out res)
               res)]
@@ -138,9 +154,14 @@
   [dir ns-name-final]
   (str dir "/a_" ns-name-final ".go"))
 
+(defn remove-blanky-lines
+  [s]
+  (-> s
+       (rpl #"[[:space:]]*{blank}" "")))
+
 (doseq [ns-sym namespaces]
   (let [ns-name (str ns-sym)
         dir (rpl ns-name "." "/")
         ns-name-final (rpl ns-name #".*[.]" "")]
     (spit (ns-file-name dir ns-name-final)
-          (generate-ns ns-sym ns-name ns-name-final))))
+          (remove-blanky-lines (generate-ns ns-sym ns-name ns-name-final)))))

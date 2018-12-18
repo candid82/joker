@@ -542,6 +542,7 @@ var runningProfile interface {
 }
 
 func main() {
+	InitInternalLibs()
 	ProcessCoreData()
 
 	SetExitJoker(func(code int) {
