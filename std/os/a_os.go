@@ -14,7 +14,6 @@ var args_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 0:
 		
-		
 		_res := commandArgs()
 		return _res
 
@@ -28,7 +27,6 @@ var chdir_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		dirname := ExtractString(_args, 0)
 		_res := chdir(dirname)
 		return _res
@@ -44,7 +42,6 @@ var cwd_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 0:
 		
-		
 		_res := getwd()
 		return MakeString(_res)
 
@@ -59,7 +56,6 @@ var env_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 0:
 		
-		
 		_res := env()
 		return _res
 
@@ -73,7 +69,6 @@ var exit_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		code := ExtractInt(_args, 0)
 		_res := NIL; ExitJoker(code)
 		return _res
@@ -88,7 +83,6 @@ var ls_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		dirname := ExtractString(_args, 0)
 		_res := readDir(dirname)
 		return _res
@@ -103,7 +97,6 @@ var mkdir_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		name := ExtractString(_args, 0)
 	perm := ExtractInt(_args, 1)
 		_res := mkdir(name, perm)
@@ -152,7 +145,6 @@ var stat_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		filename := ExtractString(_args, 0)
 		_res := stat(filename)
 		return _res

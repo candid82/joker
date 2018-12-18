@@ -13,7 +13,6 @@ var escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := html.EscapeString(s)
 		return MakeString(_res)
@@ -28,7 +27,6 @@ var unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := html.UnescapeString(s)
 		return MakeString(_res)

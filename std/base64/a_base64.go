@@ -13,7 +13,6 @@ var decode_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := decodeString(s)
 		return MakeString(_res)
@@ -28,7 +27,6 @@ var encode_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := encodeString(s)
 		return MakeString(_res)

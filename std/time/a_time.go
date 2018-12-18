@@ -13,7 +13,6 @@ var add_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		t := ExtractTime(_args, 0)
 	d := ExtractInt(_args, 1)
 		_res := t.Add(time.Duration(d))
@@ -29,7 +28,6 @@ var format_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		t := ExtractTime(_args, 0)
 	layout := ExtractString(_args, 1)
 		_res := t.Format(layout)
@@ -45,7 +43,6 @@ var from_unix_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		sec := ExtractInt(_args, 0)
 	nsec := ExtractInt(_args, 1)
 		_res := time.Unix(int64(sec), int64(nsec))
@@ -61,7 +58,6 @@ var hours_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		d := ExtractInt(_args, 0)
 		_res := time.Duration(d).Hours()
 		return MakeDouble(_res)
@@ -76,7 +72,6 @@ var minutes_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		d := ExtractInt(_args, 0)
 		_res := time.Duration(d).Minutes()
 		return MakeDouble(_res)
@@ -92,7 +87,6 @@ var now_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 0:
 		
-		
 		_res := time.Now()
 		return MakeTime(_res)
 
@@ -106,7 +100,6 @@ var parse_duration_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)
 		return MakeInt(_res)
@@ -121,7 +114,6 @@ var round_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		d := ExtractInt(_args, 0)
 	m := ExtractInt(_args, 1)
 		_res := int(time.Duration(d).Round(time.Duration(m)))
@@ -137,7 +129,6 @@ var seconds_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		d := ExtractInt(_args, 0)
 		_res := time.Duration(d).Seconds()
 		return MakeDouble(_res)
@@ -152,7 +143,6 @@ var since_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		t := ExtractTime(_args, 0)
 		_res := int(time.Since(t))
 		return MakeInt(_res)
@@ -167,7 +157,6 @@ var sleep_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		d := ExtractInt(_args, 0)
 		_res := sleep(d)
 		return _res
@@ -182,7 +171,6 @@ var string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		d := ExtractInt(_args, 0)
 		_res := time.Duration(d).String()
 		return MakeString(_res)
@@ -197,7 +185,6 @@ var sub_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		t := ExtractTime(_args, 0)
 	u := ExtractTime(_args, 1)
 		_res := int(t.Sub(u))
@@ -213,7 +200,6 @@ var truncate_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		d := ExtractInt(_args, 0)
 	m := ExtractInt(_args, 1)
 		_res := int(time.Duration(d).Truncate(time.Duration(m)))
@@ -229,7 +215,6 @@ var unix_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		t := ExtractTime(_args, 0)
 		_res := int(t.Unix())
 		return MakeInt(_res)
@@ -244,7 +229,6 @@ var until_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		t := ExtractTime(_args, 0)
 		_res := int(time.Until(t))
 		return MakeInt(_res)

@@ -14,7 +14,6 @@ var isblank_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractObject(_args, 0)
 		_res := isBlank(s)
 		return MakeBool(_res)
@@ -29,7 +28,6 @@ var capitalize_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := capitalize(s)
 		return MakeString(_res)
@@ -44,7 +42,6 @@ var isends_with_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	substr := ExtractString(_args, 1)
 		_res := strings.HasSuffix(s, substr)
@@ -60,7 +57,6 @@ var escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	cmap := ExtractCallable(_args, 1)
 		_res := escape(s, cmap)
@@ -76,7 +72,6 @@ var isincludes_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	substr := ExtractString(_args, 1)
 		_res := strings.Contains(s, substr)
@@ -92,14 +87,12 @@ var index_of_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	value := ExtractObject(_args, 1)
 		_res := indexOf(s, value, 0)
 		return _res
 
   case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	value := ExtractObject(_args, 1)
 	from := ExtractInt(_args, 2)
@@ -116,13 +109,11 @@ var join_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		coll := ExtractSeqable(_args, 0)
 		_res := join("", coll)
 		return MakeString(_res)
 
   case _c == 2:
-		
 		separator := ExtractString(_args, 0)
 	coll := ExtractSeqable(_args, 1)
 		_res := join(separator, coll)
@@ -138,14 +129,12 @@ var last_index_of_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	value := ExtractObject(_args, 1)
 		_res := lastIndexOf(s, value, 0)
 		return _res
 
   case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	value := ExtractObject(_args, 1)
 	from := ExtractInt(_args, 2)
@@ -162,7 +151,6 @@ var lower_case_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.ToLower(s)
 		return MakeString(_res)
@@ -177,7 +165,6 @@ var pad_left_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	pad := ExtractString(_args, 1)
 	n := ExtractInt(_args, 2)
@@ -194,7 +181,6 @@ var pad_right_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	pad := ExtractString(_args, 1)
 	n := ExtractInt(_args, 2)
@@ -211,7 +197,6 @@ var replace_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	match := ExtractObject(_args, 1)
 	repl := ExtractString(_args, 2)
@@ -228,7 +213,6 @@ var replace_first_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	match := ExtractObject(_args, 1)
 	repl := ExtractString(_args, 2)
@@ -245,7 +229,6 @@ var reverse_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := reverse(s)
 		return MakeString(_res)
@@ -260,14 +243,12 @@ var split_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	re := ExtractRegex(_args, 1)
 		_res := split(s, re, 0)
 		return _res
 
   case _c == 3:
-		
 		s := ExtractString(_args, 0)
 	re := ExtractRegex(_args, 1)
 	n := ExtractInt(_args, 2)
@@ -284,7 +265,6 @@ var split_lines_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := split(s, newLine, 0)
 		return _res
@@ -299,7 +279,6 @@ var isstarts_with_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		s := ExtractString(_args, 0)
 	substr := ExtractString(_args, 1)
 		_res := strings.HasPrefix(s, substr)
@@ -315,7 +294,6 @@ var trim_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.TrimSpace(s)
 		return MakeString(_res)
@@ -330,7 +308,6 @@ var trim_left_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.TrimLeftFunc(s, unicode.IsSpace)
 		return MakeString(_res)
@@ -345,7 +322,6 @@ var trim_newline_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.TrimRight(s, "\n\r")
 		return MakeString(_res)
@@ -360,7 +336,6 @@ var trim_right_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.TrimRightFunc(s, unicode.IsSpace)
 		return MakeString(_res)
@@ -375,7 +350,6 @@ var upper_case_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := strings.ToUpper(s)
 		return MakeString(_res)

@@ -13,7 +13,6 @@ var read_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := readString(s)
 		return _res
@@ -28,7 +27,6 @@ var write_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		v := ExtractObject(_args, 0)
 		_res := writeString(v)
 		return _res

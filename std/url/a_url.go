@@ -13,7 +13,6 @@ var path_escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := url.PathEscape(s)
 		return MakeString(_res)
@@ -28,7 +27,6 @@ var path_unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := pathUnescape(s)
 		return MakeString(_res)
@@ -43,7 +41,6 @@ var query_escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := url.QueryEscape(s)
 		return MakeString(_res)
@@ -58,7 +55,6 @@ var query_unescape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := queryUnescape(s)
 		return MakeString(_res)

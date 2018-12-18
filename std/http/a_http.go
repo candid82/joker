@@ -13,7 +13,6 @@ var send_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		request := ExtractMap(_args, 0)
 		_res := sendRequest(request)
 		return _res
@@ -28,7 +27,6 @@ var start_file_server_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		addr := ExtractString(_args, 0)
 	root := ExtractString(_args, 1)
 		_res := startFileServer(addr, root)
@@ -44,7 +42,6 @@ var start_server_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		addr := ExtractString(_args, 0)
 	handler := ExtractCallable(_args, 1)
 		_res := startServer(addr, handler)

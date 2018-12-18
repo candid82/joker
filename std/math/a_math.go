@@ -13,7 +13,6 @@ var cos_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		x := ExtractNumber(_args, 0)
 		_res := cos(x)
 		return MakeDouble(_res)
@@ -28,7 +27,6 @@ var hypot_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		
 		p := ExtractNumber(_args, 0)
 	q := ExtractNumber(_args, 1)
 		_res := hypot(p, q)
@@ -44,7 +42,6 @@ var sin_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		
 		x := ExtractNumber(_args, 0)
 		_res := sin(x)
 		return MakeDouble(_res)
