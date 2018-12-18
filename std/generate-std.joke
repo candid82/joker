@@ -72,7 +72,7 @@
     (-> arity-template
         (rpl "{arity}" (if varargs? "true" (str "_c == " (count args))))
         (rpl "{arityCheck}" (if varargs?
-                              (str "CheckArity(_args, " (dec cnt) "," 999 ")")
+                              (str "CheckArity(_args, " (dec cnt) ", " 999 ")")
                               "{blank}"))
         (rpl "{args}" (if (empty? args)
                         "{blank}"
@@ -95,7 +95,7 @@
   (let [m (meta v)
         arglists (:arglists m)
         go-fn-name (go-name (str k))
-        arities (joker.string/join "\n  " (map #(generate-arity % (:go m) (:tag m)) arglists))
+        arities (joker.string/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
                    (rpl "{fnName}" go-fn-name)
                    (rpl "{arities}" arities))
@@ -130,7 +130,7 @@
                 (rpl "{imports}"
                      (if (empty? (:go-imports m))
                        "{blank}"
-                       (joker.string/join "\n  " (map q (:go-imports m)))))
+                       (joker.string/join "\n\t" (map q (:go-imports m)))))
                 (rpl "{fns}" (joker.string/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
                 (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
