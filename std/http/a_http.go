@@ -52,7 +52,6 @@ var start_server_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
 	httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implementations", "1.0"))

@@ -238,7 +238,6 @@ var until_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))

@@ -358,7 +358,6 @@ var upper_case_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
 	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))

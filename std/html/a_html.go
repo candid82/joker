@@ -36,7 +36,6 @@ var unescape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
 	htmlNamespace.ResetMeta(MakeMeta(nil, "Provides functions for escaping and unescaping HTML text.", "1.0"))
