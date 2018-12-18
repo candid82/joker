@@ -4343,7 +4343,7 @@
   "Removes all of the methods of multimethod."
   {:added "1.2"
    :static true}
-  [^clojure.lang.MultiFn multifn]
+  [multifn] ; was: ^clojure.lang.MultiFn multifn
   (multifn-reset multifn)
   multifn)
 
@@ -4351,15 +4351,15 @@
   "Removes the method of multimethod associated with dispatch-value."
   {:added "1.0"
    :static true}
- [^clojure.lang.MultiFn multifn dispatch-val]
- (multifn-remove-method multifn dispatch-val))
+  [multifn dispatch-val] ; was: ^clojure.lang.MultiFn multifn dispatch-val
+  (multifn-remove-method multifn dispatch-val))
 
 (defn prefer-method
   "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y
    when there is a conflict"
   {:added "1.0"
    :static true}
-  [^clojure.lang.MultiFn multifn dispatch-val-x dispatch-val-y]
+  [multifn dispatch-val-x dispatch-val-y] ; was: ^clojure.lang.MultiFn multifn ...
   (multifn-prefer-method multifn dispatch-val-x dispatch-val-y))
 
 (defn methods
