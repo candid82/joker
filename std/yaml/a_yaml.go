@@ -3,7 +3,6 @@
 package yaml
 
 import (
-	
 	. "github.com/candid82/joker/core"
 )
 
@@ -11,9 +10,8 @@ var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
 var read_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
-		
 		s := ExtractString(_args, 0)
 		_res := readString(s)
 		return _res
@@ -26,9 +24,8 @@ var read_string_ Proc = func(_args []Object) Object {
 
 var write_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
-		
 		v := ExtractObject(_args, 0)
 		_res := writeString(v)
 		return _res
@@ -39,19 +36,18 @@ var write_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
-yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
+	yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
 
-yamlNamespace.InternVar("read-string", read_string_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-		`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
+	yamlNamespace.InternVar("read-string", read_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
 
-yamlNamespace.InternVar("write-string", write_string_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-		`Returns the YAML encoding of v.`, "1.0"))
+	yamlNamespace.InternVar("write-string", write_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
+			`Returns the YAML encoding of v.`, "1.0"))
 
 }
