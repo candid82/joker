@@ -40,16 +40,16 @@ var write_string_ Proc = func(_args []Object) Object {
 
 func init() {
 
-yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
+	yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
 
-yamlNamespace.InternVar("read-string", read_string_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-		`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
+	yamlNamespace.InternVar("read-string", read_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
 
-yamlNamespace.InternVar("write-string", write_string_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-		`Returns the YAML encoding of v.`, "1.0"))
+	yamlNamespace.InternVar("write-string", write_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
+			`Returns the YAML encoding of v.`, "1.0"))
 
 }

@@ -55,21 +55,21 @@ var sin_ Proc = func(_args []Object) Object {
 
 func init() {
 
-mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
+	mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
 
-mathNamespace.InternVar("cos", cos_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-		`Returns the cosine of the radian argument x.`, "1.0"))
+	mathNamespace.InternVar("cos", cos_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the cosine of the radian argument x.`, "1.0"))
 
-mathNamespace.InternVar("hypot", hypot_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
-		`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
+	mathNamespace.InternVar("hypot", hypot_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
+			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
 
-mathNamespace.InternVar("sin", sin_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-		`Returns the sine of the radian argument x.`, "1.0"))
+	mathNamespace.InternVar("sin", sin_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the sine of the radian argument x.`, "1.0"))
 
 }
