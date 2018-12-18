@@ -66,7 +66,8 @@ var exit_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 1:
 		code := ExtractInt(_args, 0)
-		_res := NIL; ExitJoker(code)
+		_res := NIL
+		ExitJoker(code)
 		return _res
 
 	default:

@@ -100,7 +100,9 @@ var parse_duration_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 1:
 		s := ExtractString(_args, 0)
-		t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)
+		t, err := time.ParseDuration(s)
+		PanicOnErr(err)
+		_res := int(t)
 		return MakeInt(_res)
 
 	default:
