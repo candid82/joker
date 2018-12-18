@@ -105,7 +105,7 @@ var mkdir_ Proc = func(_args []Object) Object {
 	case _c == 2:
 		
 		name := ExtractString(_args, 0)
-    perm := ExtractInt(_args, 1)
+	perm := ExtractInt(_args, 1)
 		_res := mkdir(name, perm)
 		return _res
 
@@ -121,7 +121,7 @@ var sh_ Proc = func(_args []Object) Object {
 	case true:
 		CheckArity(_args, 1,999)
 		name := ExtractString(_args, 0)
-    arguments := ExtractStrings(_args, 1)
+	arguments := ExtractStrings(_args, 1)
 		_res := sh("", name, arguments)
 		return _res
 
@@ -137,8 +137,8 @@ var sh_from_ Proc = func(_args []Object) Object {
 	case true:
 		CheckArity(_args, 2,999)
 		dir := ExtractString(_args, 0)
-    name := ExtractString(_args, 1)
-    arguments := ExtractStrings(_args, 2)
+	name := ExtractString(_args, 1)
+	arguments := ExtractStrings(_args, 2)
 		_res := sh(dir, name, arguments)
 		return _res
 
