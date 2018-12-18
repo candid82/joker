@@ -128,7 +128,7 @@
                 (rpl "{imports}" (joker.string/join "\n  " (map q (:go-imports m))))
                 (rpl "{fns}" (joker.string/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
-                (rpl "{interns}" (joker.string/join "\n" (map second fns))))
+                (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
         res (if (:empty m)
               (comment-out res)
               res)]
