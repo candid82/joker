@@ -79,7 +79,7 @@
         (rpl "{args}" (if (empty? args)
                         "{blank}"
                         (extract-args handle-args)))
-        (rpl "{goExpr}" go-res)
+        (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
         (rpl "{return}"
              (if tag
                (str "return Make" tag "(_res)")
