@@ -125,7 +125,10 @@
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
-                (rpl "{imports}" (joker.string/join "\n  " (map q (:go-imports m))))
+                (rpl "{imports}"
+                     (if (empty (:go-imports m))
+                       "{blank}"
+                       (joker.string/join "\n  " (map q (:go-imports m)))))
                 (rpl "{fns}" (joker.string/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
                 (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
