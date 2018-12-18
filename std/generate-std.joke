@@ -39,7 +39,7 @@
 (defn extract-args
   [args]
   (joker.string/join
-   "\n    "
+   "\n\t"
    (map-indexed
     (fn [i arg]
       (let [m (meta arg)
