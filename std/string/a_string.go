@@ -4,7 +4,7 @@ package string
 
 import (
 	"strings"
-  "unicode"
+	"unicode"
 	. "github.com/candid82/joker/core"
 )
 
@@ -92,7 +92,7 @@ var index_of_ Proc = func(_args []Object) Object {
 		_res := indexOf(s, value, 0)
 		return _res
 
-  case _c == 3:
+	case _c == 3:
 		s := ExtractString(_args, 0)
 		value := ExtractObject(_args, 1)
 		from := ExtractInt(_args, 2)
@@ -113,7 +113,7 @@ var join_ Proc = func(_args []Object) Object {
 		_res := join("", coll)
 		return MakeString(_res)
 
-  case _c == 2:
+	case _c == 2:
 		separator := ExtractString(_args, 0)
 		coll := ExtractSeqable(_args, 1)
 		_res := join(separator, coll)
@@ -134,7 +134,7 @@ var last_index_of_ Proc = func(_args []Object) Object {
 		_res := lastIndexOf(s, value, 0)
 		return _res
 
-  case _c == 3:
+	case _c == 3:
 		s := ExtractString(_args, 0)
 		value := ExtractObject(_args, 1)
 		from := ExtractInt(_args, 2)
@@ -248,7 +248,7 @@ var split_ Proc = func(_args []Object) Object {
 		_res := split(s, re, 0)
 		return _res
 
-  case _c == 3:
+	case _c == 3:
 		s := ExtractString(_args, 0)
 		re := ExtractRegex(_args, 1)
 		n := ExtractInt(_args, 2)

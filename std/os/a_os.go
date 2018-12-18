@@ -108,7 +108,7 @@ var sh_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
-		CheckArity(_args, 1,999)
+		CheckArity(_args, 1, 999)
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
 		_res := sh("", name, arguments)
@@ -124,7 +124,7 @@ var sh_from_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
-		CheckArity(_args, 2,999)
+		CheckArity(_args, 2, 999)
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)
