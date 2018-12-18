@@ -73,7 +73,7 @@
         (rpl "{arity}" (if varargs? "true" (str "_c == " (count args))))
         (rpl "{arityCheck}" (if varargs?
                               (str "CheckArity(_args, " (dec cnt) "," 999 ")")
-                              ""))
+                              "{blank}"))
         (rpl "{args}" (extract-args handle-args))
         (rpl "{goExpr}" go-res)
         (rpl "{return}"
@@ -138,9 +138,14 @@
   [dir ns-name-final]
   (str dir "/a_" ns-name-final ".go"))
 
+(defn remove-blanky-lines
+  [s]
+  (-> s
+       (rpl #"[[:space:]]*{blank}" "")))
+
 (doseq [ns-sym namespaces]
   (let [ns-name (str ns-sym)
         dir (rpl ns-name "." "/")
         ns-name-final (rpl ns-name #".*[.]" "")]
     (spit (ns-file-name dir ns-name-final)
-          (generate-ns ns-sym ns-name ns-name-final))))
+          (remove-blanky-lines (generate-ns ns-sym ns-name ns-name-final)))))
