@@ -3,16 +3,9 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.9.4
+    working_directory: /go/src/github.com/candid82/joker
     steps:
       - checkout
-      - run:
-          command: pwd
-      - run:
-          name: mkdir
-          command: mkdir -p /go/src/github.com/${CIRCLE_PROJECT_USERNAME}
-      - run:
-          name: ln
-          command: ln -s /home/circleci/project /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
       - run:
           name: go get readline
           command: go get -d -v github.com/chzyer/readline
