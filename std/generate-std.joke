@@ -34,13 +34,13 @@
               (rpl "-" "_")
               (rpl "?" "")
               (str "_"))]
-    (if (joker.string/ends-with? fn-name "?")
+    (if (s/ends-with? fn-name "?")
       (str "is" n)
       n)))
 
 (defn extract-args
   [args]
-  (joker.string/join
+  (s/join
    "\n\t\t"
    (map-indexed
     (fn [i arg]
@@ -88,7 +88,7 @@
 (defn generate-arglist
   [args]
   (str "NewVectorFrom("
-       (joker.string/join ", " (for [arg args]
+       (s/join ", " (for [arg args]
                                  (str "MakeSymbol(" (q (str arg)) ")")))
        ")"))
 
@@ -97,7 +97,7 @@
   (let [m (meta v)
         arglists (:arglists m)
         go-fn-name (go-name (str k))
-        arities (joker.string/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
+        arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
                    (rpl "{fnName}" go-fn-name)
                    (rpl "{arities}" arities))
@@ -109,7 +109,7 @@
                        (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
                        (rpl "{added}" (:added m))
                        (rpl "{args}"
-                            (joker.string/join ", " (for [args arglists]
+                            (s/join ", " (for [args arglists]
                                                       (generate-arglist args)))))]
     [fn-str intern-str]))
 
@@ -139,12 +139,12 @@
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}"
-                     (joker.string/join "\n\t" (sort compare-imports (conj
+                     (s/join "\n\t" (sort compare-imports (conj
                                                                       (vec (map q (:go-imports m)))
                                                                       ". \"github.com/candid82/joker/core\""))))
-                (rpl "{fns}" (joker.string/join "\n" (map first fns)))
+                (rpl "{fns}" (s/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
-                (rpl "{interns}" (joker.string/join "\n\t" (map second fns))))
+                (rpl "{interns}" (s/join "\n\t" (map second fns))))
         res (if (:empty m)
               (comment-out res)
               res)]
