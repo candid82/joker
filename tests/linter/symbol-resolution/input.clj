@@ -31,6 +31,9 @@
 (case 1 r 2 1 3)
 uuu
 (is (thrown? c body))
+(proxy [String] []
+  (toString []
+    (println this)))
 
 ;; Should FAIL
 
