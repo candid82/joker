@@ -89,7 +89,7 @@
   [args]
   (str "NewVectorFrom("
        (s/join ", " (for [arg args]
-                                 (str "MakeSymbol(" (q (str arg)) ")")))
+                      (str "MakeSymbol(" (q (str arg)) ")")))
        ")"))
 
 (defn generate-fn
@@ -110,7 +110,7 @@
                        (rpl "{added}" (:added m))
                        (rpl "{args}"
                             (s/join ", " (for [args arglists]
-                                                      (generate-arglist args)))))]
+                                           (generate-arglist args)))))]
     [fn-str intern-str]))
 
 (defn comment-out
@@ -124,8 +124,8 @@
   [^String l ^String r]
   (cond
     (s/starts-with? l ". ") (if (s/starts-with? r ". ")
-                            (compare l r)
-                            -1)
+                              (compare l r)
+                              -1)
     (s/starts-with? r ". ") 1
     :else (compare l r)))
 
