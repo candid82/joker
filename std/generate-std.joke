@@ -140,8 +140,8 @@
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}"
                      (s/join "\n\t" (sort compare-imports (conj
-                                                                      (vec (map q (:go-imports m)))
-                                                                      ". \"github.com/candid82/joker/core\""))))
+                                                           (vec (map q (:go-imports m)))
+                                                           ". \"github.com/candid82/joker/core\""))))
                 (rpl "{fns}" (s/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
                 (rpl "{interns}" (s/join "\n\t" (map second fns))))
