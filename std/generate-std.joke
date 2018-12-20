@@ -157,7 +157,7 @@
 (defn remove-blanky-lines
   [s]
   (-> s
-       (rpl #"[[:space:]]*{blank}" "")))
+      (rpl #"[[:space:]]*{blank}" "")))
 
 (doseq [ns-sym namespaces]
   (let [ns-name (str ns-sym)
