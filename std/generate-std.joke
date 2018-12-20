@@ -129,11 +129,28 @@
     (s/starts-with? r ". ") 1
     :else (compare l r)))
 
+(defn- ns-public-fns
+  "Return only publics that are functions."
+  [ns]
+  (remove #(:macro (meta (val %)))
+          (filter #(:arglists (meta (val %))) (ns-publics ns))))
+
+(defn- ns-public-go-fns
+  "Return only publics that are functions and have additional Go-specific metadata."
+  [ns]
+  (filter #(:go (meta (val %))) (ns-public-fns ns)))
+
+(defn- warn-about-skipped-publics
+  [skipped]
+  (when (> (count skipped) 0)
+    (println-err "WARNING: skipping publics that are not Go-calling functions:" skipped)))
+
 (defn generate-ns
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        fns (for [[k v] (sort-by first (ns-publics ns))]
+        go-fns (sort-by first (ns-public-go-fns ns))
+        fns (for [[k v] go-fns]
               (generate-fn ns-name ns-name-final k v))
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
@@ -148,6 +165,8 @@
         res (if (:empty m)
               (comment-out res)
               res)]
+    (warn-about-skipped-publics (remove (set (map #(key %) go-fns))
+                                        (map #(key %) (ns-publics ns))))
     res))
 
 (defn ns-file-name
