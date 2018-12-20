@@ -89,7 +89,7 @@
   [args]
   (str "NewVectorFrom("
        (s/join ", " (for [arg args]
-                                 (str "MakeSymbol(" (q (str arg)) ")")))
+                      (str "MakeSymbol(" (q (str arg)) ")")))
        ")"))
 
 (defn generate-fn
@@ -110,7 +110,7 @@
                        (rpl "{added}" (:added m))
                        (rpl "{args}"
                             (s/join ", " (for [args arglists]
-                                                      (generate-arglist args)))))]
+                                           (generate-arglist args)))))]
     [fn-str intern-str]))
 
 (defn comment-out
@@ -124,8 +124,8 @@
   [^String l ^String r]
   (cond
     (s/starts-with? l ". ") (if (s/starts-with? r ". ")
-                            (compare l r)
-                            -1)
+                              (compare l r)
+                              -1)
     (s/starts-with? r ". ") 1
     :else (compare l r)))
 
@@ -157,8 +157,8 @@
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}"
                      (s/join "\n\t" (sort compare-imports (conj
-                                                                      (vec (map q (:go-imports m)))
-                                                                      ". \"github.com/candid82/joker/core\""))))
+                                                           (mapv q (:go-imports m))
+                                                           ". \"github.com/candid82/joker/core\""))))
                 (rpl "{fns}" (s/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
                 (rpl "{interns}" (s/join "\n\t" (map second fns))))
@@ -176,7 +176,7 @@
 (defn remove-blanky-lines
   [s]
   (-> s
-       (rpl #"[[:space:]]*{blank}" "")))
+      (rpl #"[[:space:]]*{blank}" "")))
 
 (doseq [ns-sym namespaces]
   (let [ns-name (str ns-sym)
