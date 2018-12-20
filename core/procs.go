@@ -1389,20 +1389,13 @@ var procLoadFile Proc = func(args []Object) Object {
 	return loadFile(filename.S)
 }
 
-var procLoadLibFromFile Proc = func(args []Object) Object {
-	libname := EnsureSymbol(args, 0)
-	filename := EnsureString(args, 1)
-	if d := internalLibs[libname.Name()]; d != nil {
-		processData(d)
-	} else {
-		loadFile(filename.S)
-	}
-	return NIL
-}
-
 var procLoadLibFromPath Proc = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
+	if d := internalLibs[libname]; d != nil {
+		processData(d)
+		return NIL
+	}
 	cp := GLOBAL_ENV.classPath.Value
 	cpvec := AssertVector(cp, "*classpath* must be a Vector, not a "+cp.GetType().ToString(false))
 	count := cpvec.Count()
