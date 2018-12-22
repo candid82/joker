@@ -2,10 +2,10 @@ package main
 
 import (
 	"crypto/sha256"
-	"path/filepath"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 var h = sha256.New()
