@@ -4233,39 +4233,6 @@
         mfatom (:method-table mfm)]
     (apply swap-vals! mfatom f args)))
 
-(defn- multifn-reset
-  [multifn]
-  (let [mfm (meta multifn)
-        mfatom (:method-table mfm)]
-    (reset! mfatom {})))
-
-(defn- multifn-remove-method
-  [multifn dispatch-val]
-  (throw (ex-info "method removal not yet supported by joker.core" {})))
-
-(defn- multifn-prefer-method
-  [multifn dispatch-val-x dispatch-val-y]
-  (throw (ex-info "method preference not yet supported by joker.core" {})))
-
-(defn- multifn-get-method-table
-  [multifn]
-  (let [mfm (meta multifn)
-        mfatom (:method-table mfm)]
-    @mfatom))
-
-(defn- multifn-get-method
-  [multifn dispatch-val]
-  (let [mfm (meta multifn)
-        mfatom (:method-table mfm)
-        default (:default mfm)]
-    (get @mfatom
-         dispatch-val
-         (get @mfatom default))))
-
-(defn- multifn-get-prefer-table
-  [multifn]
-  (throw (ex-info "method preference not yet supported by joker.core" {})))
-
 (defmacro defmulti
   "Creates a new multimethod with the associated dispatch function.
   The docstring and attr-map are optional.
@@ -4336,37 +4303,47 @@
   "Removes all of the methods of multimethod."
   {:added "1.0"}
   [multifn]
-  (multifn-reset multifn)
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    (reset! mfatom {}))
   multifn)
 
 (defn remove-method
   "Removes the method of multimethod associated with dispatch-value."
   {:added "1.0"}
   [multifn dispatch-val]
-  (multifn-remove-method multifn dispatch-val))
+  (throw (ex-info "method removal not yet supported by joker.core" {})))
 
 (defn prefer-method
   "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y
    when there is a conflict"
   {:added "1.0"}
   [multifn dispatch-val-x dispatch-val-y]
-  (multifn-prefer-method multifn dispatch-val-x dispatch-val-y))
+  (throw (ex-info "method preference not yet supported by joker.core" {})))
 
 (defn methods
   "Given a multimethod, returns a map of dispatch values -> dispatch fns"
   {:added "1.0"}
   [multifn]
-  (multifn-get-method-table multifn))
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    @mfatom))
 
 (defn get-method
   "Given a multimethod and a dispatch value, returns the dispatch fn
   that would apply to that value, or nil if none apply and no default"
   {:added "1.0"}
   [multifn dispatch-val]
-  (multifn-get-method multifn dispatch-val))
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)
+        default (:default mfm)]
+    (get @mfatom
+         dispatch-val
+         (get @mfatom default))))
 
 (defn prefers
   "Given a multimethod, returns a map of preferred value -> set of other values"
   {:added "1.0"}
   [multifn]
-  (multifn-get-prefer-table multifn))
+  (throw (ex-info "method preference not yet supported by joker.core" {})))
+
