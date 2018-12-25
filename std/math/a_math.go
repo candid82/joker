@@ -3,7 +3,6 @@
 package math
 
 import (
-	
 	. "github.com/candid82/joker/core"
 )
 
@@ -11,9 +10,8 @@ var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
 
 var cos_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
-		
 		x := ExtractNumber(_args, 0)
 		_res := cos(x)
 		return MakeDouble(_res)
@@ -26,11 +24,10 @@ var cos_ Proc = func(_args []Object) Object {
 
 var hypot_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 2:
-		
 		p := ExtractNumber(_args, 0)
-    q := ExtractNumber(_args, 1)
+		q := ExtractNumber(_args, 1)
 		_res := hypot(p, q)
 		return MakeDouble(_res)
 
@@ -42,9 +39,8 @@ var hypot_ Proc = func(_args []Object) Object {
 
 var sin_ Proc = func(_args []Object) Object {
 	_c := len(_args)
-	switch  {
+	switch {
 	case _c == 1:
-		
 		x := ExtractNumber(_args, 0)
 		_res := sin(x)
 		return MakeDouble(_res)
@@ -55,24 +51,23 @@ var sin_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-
 func init() {
 
-mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
+	mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
 
-mathNamespace.InternVar("cos", cos_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-		`Returns the cosine of the radian argument x.`, "1.0"))
+	mathNamespace.InternVar("cos", cos_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the cosine of the radian argument x.`, "1.0"))
 
-mathNamespace.InternVar("hypot", hypot_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
-		`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
+	mathNamespace.InternVar("hypot", hypot_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
+			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
 
-mathNamespace.InternVar("sin", sin_,
-	MakeMeta(
-		NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-		`Returns the sine of the radian argument x.`, "1.0"))
+	mathNamespace.InternVar("sin", sin_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the sine of the radian argument x.`, "1.0"))
 
 }
