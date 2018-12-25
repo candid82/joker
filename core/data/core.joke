@@ -4227,7 +4227,7 @@
           (apply method args)))
       {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom})))
 
-(defn- multifn-swap-method-table-vals!
+(defn- multifn-swap-method-table-vals!__
   [multifn ^Callable f & args]
   (let [mfm (meta multifn)
         mfatom (:method-table mfm)]
@@ -4330,7 +4330,7 @@
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   {:added "1.0"}
   [multifn dispatch-val & fn-tail]
-  `(multifn-swap-method-table-vals! ~multifn assoc ~dispatch-val (fn ~@fn-tail)))
+  `(multifn-swap-method-table-vals!__ ~multifn assoc ~dispatch-val (fn ~@fn-tail)))
 
 (defn remove-all-methods
   "Removes all of the methods of multimethod."
