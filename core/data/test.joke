@@ -325,7 +325,7 @@
      :added "1.0"}
   report :type)
 
-;; 2018-12-25 jcburley: Haven't investigate what Joker might already
+;; 2018-12-25 jcburley: Haven't investigated what Joker might already
 ;; have to offer for stacktrace outputs. For now, provide no info.
 (defn- stacktrace-file-and-line
   [stacktrace]
