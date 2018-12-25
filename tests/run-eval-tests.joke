@@ -1,3 +1,6 @@
+(ns joker.test.run-eval-tests
+  (:use joker.test))
+
 (defn slurp-or
   [path alt]
   (try
@@ -16,6 +19,12 @@
                  (have-option "-v")
                  (not (have-option "--no-verbose"))))
 
+;; Directories have input.joke files that are passed as input to a
+;; fork'ed instance of Joker.  Ths test harness is rudimentary but
+;; handles more complicated cases than joker.test and can also catch
+;; test failures in that and its dependencies (such as defmulti,
+;; joker.template, and joker.walk) before a huge deluge of failures is
+;; reported by the per-file tests that are performed after these.
 (let [test-dirs (->> (joker.os/ls "tests/eval")
                      (filter :dir?)
                      (map :name)
@@ -53,34 +62,17 @@
           (println "ACTUAL RC:" rc))
         (var-set #'exit-code 1)))))
 
+;; Load all the tests/eval/*.joke files:
+(let [test-files (->> (joker.os/ls "tests/eval")
+                      (remove :dir?)
+                      (map :name)
+                      (filter #(joker.string/ends-with? % ".joke"))
+                      (remove #(joker.string/starts-with? % ".")))]
+  (doseq [test-file test-files]
+    (binding [*ns* *ns*]
+      (load-file (str "tests/eval/" test-file)))))
 
-(use '[joker.template])
-(use '[joker.test])
-
-;; even? odd?
-
-(deftest test-even?
-  (is (even? 2))
-  (are [x] (true? x)
-    (even? -4)
-    (not (even? -3))
-    (even? 0)
-    (not (even? 5))
-    (even? 8))
-  (is (thrown? Error (even? 1/2))) ; was: thrown? IllegalArgumentException
-  (is (thrown? Error (even? (double 10))))) ; was: thrown? IllegalArgumentException
-
-(deftest test-odd?
-  (are [x] (true? x)
-    (not (odd? -4))
-    (odd? -3)
-    (not (odd? 0))
-    (odd? 5)
-    (odd? 6) ; TODO: Remove after confirming failures caught
-    (not (odd? 8)))
-  (is (thrown? Error (odd? 1/2))) ; was: thrown? IllegalArgumentException
-  (is (thrown? Error (odd? (double 10))))) ; was: thrown? IllegalArgumentException
-
+;; Run the loaded tests.
 (let [res (run-all-tests)]
   (when (< 0 (+ (:fail res) (:error res)))
     (println "There were failures and/or errors; returning exit code 1")

@@ -1,0 +1,27 @@
+(ns joker.test-joker.numbers
+  (:use joker.test
+        joker.template))
+
+;; even? odd?
+
+(deftest test-even?
+  (is (even? 2))
+  (are [x] (true? x)
+    (even? -4)
+    (not (even? -3))
+    (even? 0)
+    (not (even? 5))
+    (even? 8))
+  (is (thrown? Error (even? 1/2)))
+  (is (thrown? Error (even? (double 10)))))
+
+(deftest test-odd?
+  (are [x] (true? x)
+    (not (odd? -4))
+    (odd? -3)
+    (not (odd? 0))
+    (odd? 5)
+    (odd? 6) ; TODO: Remove after confirming failures caught
+    (not (odd? 8)))
+  (is (thrown? Error (odd? 1/2)))
+  (is (thrown? Error (odd? (double 10)))))
