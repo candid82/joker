@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -456,10 +457,31 @@ func PanicArity(n int) {
 	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
 
+func rangeString(min, max int) string {
+	if min == max {
+		return strconv.Itoa(min)
+	}
+	if min + 1 == max {
+		return strconv.Itoa(min) + " or " + strconv.Itoa(max)
+	}
+	if min + 2 == max {
+		return strconv.Itoa(min) + ", " + strconv.Itoa(min + 1) + ", or " + strconv.Itoa(max)
+	}
+	if max >= 999 {
+		return "at least " + strconv.Itoa(min)
+	}
+	return "between " + strconv.Itoa(min) + " and " + strconv.Itoa(max) + ", inclusive"
+}
+
+func PanicArityMinMax(n, min, max int) {
+	name := RT.currentExpr.(Traceable).Name()
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s; expects %s", n, name, rangeString(min, max))))
+}
+
 func CheckArity(args []Object, min int, max int) {
 	n := len(args)
 	if n < min || n > max {
-		PanicArity(n)
+		PanicArityMinMax(n, min, max)
 	}
 }
 

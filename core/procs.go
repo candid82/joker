@@ -49,6 +49,8 @@ const (
 
 const VERSION = "v0.10.2"
 
+var internalLibs map[string][]byte
+
 const (
 	CLJ Dialect = iota
 	CLJS
@@ -56,6 +58,14 @@ const (
 	EDN
 	UNKNOWN
 )
+
+func InitInternalLibs() {
+	internalLibs = map[string][]byte{
+		"joker.walk":     walkData,
+		"joker.template": templateData,
+		"joker.repl":     replData,
+	}
+}
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
@@ -1364,13 +1374,28 @@ var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
 
+func loadFile(filename string) Object {
+	var reader *Reader
+	f, err := os.Open(filename)
+	PanicOnErr(err)
+	reader = NewReader(bufio.NewReader(f), filename)
+	ProcessReader(reader, filename, EVAL)
+	return NIL
+}
+
 var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
-	var reader *Reader
-	f, err := os.Open(filename.S)
-	PanicOnErr(err)
-	reader = NewReader(bufio.NewReader(f), filename.S)
-	ProcessReader(reader, filename.S, EVAL)
+	return loadFile(filename.S)
+}
+
+var procLoadLibFromFile Proc = func(args []Object) Object {
+	libname := EnsureSymbol(args, 0)
+	filename := EnsureString(args, 1)
+	if d := internalLibs[libname.Name()]; d != nil {
+		processData(d)
+	} else {
+		loadFile(filename.S)
+	}
 	return NIL
 }
 
@@ -1548,8 +1573,6 @@ func ProcessCoreData() {
 	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
 	processData(timeData)
 	processData(mathData)
-	processData(walkData)
-	processData(templateData)
 }
 
 func ProcessReplData() {
@@ -1927,6 +1950,7 @@ func init() {
 	intern("bound?__", procIsBound)
 	intern("format__", procFormat)
 	intern("load-file__", procLoadFile)
+	intern("load-lib-from-file__", procLoadLibFromFile)
 	intern("reduce-kv__", procReduceKv)
 	intern("slurp__", procSlurp)
 	intern("spit__", procSpit)

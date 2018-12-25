@@ -18,7 +18,7 @@
        ~@(map #(list 'def %) (remove resolve syms)))))
 
 (def *known-macros*
-  {'memfn nil 'defmulti nil
+  {'memfn nil
    'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
@@ -148,10 +148,6 @@
        (def ~name)
        ~@(defmethods__ sigs))))
 
-(defmacro defmethod
-  [multifn dispatch-val & fn-tail]
-  `(do ~multifn (fn ~@fn-tail)))
-
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
                (let [specs (if (vector? (first specs))
@@ -211,7 +207,6 @@
 (defn locking [x & body])
 (defn amap [a idx ret expr])
 (defn memfn [name & args])
-(defn defmulti [mm-name & options])
 (defn letfn [fnspecs & body])
 (defn .. [x form & more])
 (defn . [x m & args])

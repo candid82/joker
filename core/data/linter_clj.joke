@@ -328,9 +328,20 @@
 (def *known-macros*
   (merge
    *known-macros*
-   {'proxy nil 'defstruct nil 'with-local-vars nil 'definline nil 'gen-interface nil 'definterface nil
-    'proxy-super nil 'with-open nil 'defproject nil 'clojure.core.async/go-loop nil 'clojure.core.async/alt! nil
-    'clojure.core.async/alt!! nil 'clojure.core.async/alts! nil 'clojure.core.async/alts!! nil}
+   {'definline nil
+    'definterface nil
+    'defstruct nil
+    'gen-interface nil
+    'proxy ['this]
+    'proxy-super nil
+    'with-local-vars nil
+    'with-open nil
+    'defproject nil
+    'clojure.core.async/go-loop nil
+    'clojure.core.async/alt! nil
+    'clojure.core.async/alt!! nil
+    'clojure.core.async/alts! nil
+    'clojure.core.async/alts!! nil}
    (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
