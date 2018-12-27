@@ -4208,9 +4208,6 @@
           (map #(str ", " %) (rest valid-keys))) {}))))
 
 ;;multimethods
-(defn- multifn-nomatch
-  [name args]
-  (throw (ex-info (str "No method in multimethod for dispatch value: (" name (apply str (interleave (repeat " ") args)) ")") {})))
 
 (defn- multimethod__
   [name dispatch-fn default hierarchy]
@@ -4219,19 +4216,17 @@
   (let [mfatom (atom {})]
     (with-meta
       (fn [& args]
-        (let [method (get @mfatom
-                          (apply dispatch-fn args)
-                          (get @mfatom
-                               default
-                               (fn [& args] (multifn-nomatch name args))))]
+        (let [dispatch-value (apply dispatch-fn args)
+              method
+              (get @mfatom
+                   dispatch-value
+                   (get @mfatom
+                        default
+                        (fn [& args]
+                          (throw (ex-info (format "No method in multimethod '%s' for dispatch value: %s"
+                                                  name (pr-str dispatch-value)) {})))))]
           (apply method args)))
-      {:name name :dispatch-fn dispatch-fn :default default :ns *ns* :method-table mfatom})))
-
-(defn- multifn-swap-method-table-vals!__
-  [multifn ^Callable f & args]
-  (let [mfm (meta multifn)
-        mfatom (:method-table mfm)]
-    (apply swap-vals! mfatom f args)))
+      {:dispatch-fn dispatch-fn :default default :method-table mfatom})))
 
 (defmacro defmulti
   "Creates a new multimethod with the associated dispatch function.
@@ -4290,14 +4285,16 @@
          (when-not (and (bound? v#)
                         (fn? (deref v#))
                         (:method-table (meta (deref v#))))
-           (let [fndef# (apply multimethod__ (list (var ~mm-name) ~dispatch-fn ~default ~hierarchy))]
+           (let [fndef# (multimethod__ ~(name mm-name) ~dispatch-fn ~default ~hierarchy)]
                  (def ~mm-name fndef#)))))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
   {:added "1.0"}
   [multifn dispatch-val & fn-tail]
-  `(multifn-swap-method-table-vals!__ ~multifn assoc ~dispatch-val (fn ~@fn-tail)))
+  `(do
+     (swap-vals! (:method-table (meta ~multifn)) assoc ~dispatch-val (fn ~@fn-tail))
+     ~multifn))
 
 (defn remove-all-methods
   "Removes all of the methods of multimethod."
