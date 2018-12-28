@@ -1097,7 +1097,7 @@ func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 	}
 }
 
-func resolveMacro(obj Object, ctx *ParseContext) Callable {
+func resolveMacro(obj Object, ctx *ParseContext) *Var {
 	switch sym := obj.(type) {
 	case Symbol:
 		if ctx.GetLocalBinding(sym) != nil {
@@ -1109,7 +1109,7 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 		}
 		vr.isUsed = true
 		vr.ns.isUsed = true
-		return vr.Value.(Callable)
+		return vr
 	default:
 		return nil
 	}
@@ -1163,13 +1163,13 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 
 func macroexpand1(seq Seq, ctx *ParseContext) Object {
 	op := seq.First()
-	macro := resolveMacro(op, ctx)
-	if macro != nil {
+	vr := resolveMacro(op, ctx)
+	if vr != nil {
 		expr := &MacroCallExpr{
 			Position: GetPosition(seq),
-			macro:    macro,
+			macro:    vr.Value.(Callable),
 			args:     ToSlice(seq.Rest().Cons(ctx.localBindings.ToMap()).Cons(seq)),
-			name:     *op.(Symbol).name,
+			name:     varCallableString(vr),
 		}
 		return fixInfo(Eval(expr, nil), seq.GetInfo())
 	} else {
