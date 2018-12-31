@@ -147,8 +147,9 @@ type (
 	Fn   struct {
 		InfoHolder
 		MetaHolder
-		fnExpr *FnExpr
-		env    *LocalEnv
+		isMacro bool
+		fnExpr  *FnExpr
+		env     *LocalEnv
 	}
 	ExInfo struct {
 		ArrayMap
@@ -718,7 +719,11 @@ func (fn *Fn) Call(args []Object) Object {
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
-		PanicArity(len(args))
+		c := len(args)
+		if fn.isMacro {
+			c -= 2
+		}
+		PanicArity(c)
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {
