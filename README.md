@@ -103,7 +103,6 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other built-in namespaces include `joker.string`, `joker.json`, `joker.os`, `joker.base64` etc. See [standard library reference](https://candid82.github.io/joker/) for details.
 1. Miscellaneous:
   - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
-  - `refer-clojure` is not a thing. Use `(joker.core/refer 'joker.core)` instead if you really need to.
   - `slurp` only takes one argument - a filename (string). No options are supported.
   - `ifn?` is called `callable?`
   - Map entry is represented as a two-element vector.

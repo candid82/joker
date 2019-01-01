@@ -1,1 +1,1 @@
-tests/linter/macro-call-1/input.clj:1:1: Eval error: Wrong number of args (2) passed to deftype
+tests/linter/macro-call-1/input.clj:1:1: Eval error: Wrong number of args (0) passed to core/deftype

@@ -177,8 +177,11 @@ func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 func (expr *SetMacroExpr) Eval(env *LocalEnv) Object {
 	expr.vr.isMacro = true
 	expr.vr.isUsed = false
+	if fn, ok := expr.vr.Value.(*Fn); ok {
+		fn.isMacro = true
+	}
 	setMacroMeta(expr.vr)
-	return NIL
+	return expr.vr
 }
 
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
