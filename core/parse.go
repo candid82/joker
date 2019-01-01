@@ -247,7 +247,9 @@ var (
 	KNOWN_MACROS    *Var
 	REQUIRE_VAR     *Var
 	ALIAS_VAR       *Var
+	REFER_VAR       *Var
 	CREATE_NS_VAR   *Var
+	IN_NS_VAR       *Var
 	WARNINGS        = Warnings{
 		fnWithEmptyBody: true,
 	}
@@ -510,7 +512,7 @@ func WarnOnUnusedNamespaces() {
 	positions := make(map[string]Position)
 
 	for _, ns := range GLOBAL_ENV.Namespaces {
-		if !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
+		if ns != GLOBAL_ENV.CurrentNamespace() && !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
 			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
 				name := ns.Name.ToString(false)
@@ -1329,6 +1331,13 @@ func getRequireVar(ctx *ParseContext) *Var {
 	return REQUIRE_VAR
 }
 
+func getReferVar(ctx *ParseContext) *Var {
+	if REFER_VAR == nil {
+		REFER_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("refer")
+	}
+	return REFER_VAR
+}
+
 func getAliasVar(ctx *ParseContext) *Var {
 	if ALIAS_VAR == nil {
 		ALIAS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("alias")
@@ -1341,6 +1350,13 @@ func getCreateNsVar(ctx *ParseContext) *Var {
 		CREATE_NS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("create-ns")
 	}
 	return CREATE_NS_VAR
+}
+
+func getInNsVar(ctx *ParseContext) *Var {
+	if IN_NS_VAR == nil {
+		IN_NS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("in-ns")
+	}
+	return IN_NS_VAR
 }
 
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
@@ -1498,10 +1514,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				case *Fn:
 					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
 						require := getRequireVar(ctx)
+						refer := getReferVar(ctx)
 						alias := getAliasVar(ctx)
 						createNs := getCreateNsVar(ctx)
+						inNs := getInNsVar(ctx)
 						if (c.vr.Value.Equals(require.Value) ||
 							c.vr.Value.Equals(alias.Value) ||
+							c.vr.Value.Equals(refer.Value) ||
+							c.vr.Value.Equals(inNs.Value) ||
 							c.vr.Value.Equals(createNs.Value)) &&
 							areAllLiteralExprs(res.args) {
 							Eval(res, nil)
