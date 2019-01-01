@@ -1552,6 +1552,7 @@ var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Bool{B: true}).(Ma
 func intern(name string, proc Proc) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
 	vr.Value = proc
+	vr.isPrivate = true
 	vr.meta = privateMeta
 }
 

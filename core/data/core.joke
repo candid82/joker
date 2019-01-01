@@ -528,7 +528,7 @@
   seq calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'lazy-seq__ (list* 'fn [] body)))
+  (list 'joker.core/lazy-seq__ (list* 'fn [] body)))
 
 (defn chunked-seq?
   "Always returns false because chunked sequences are not supported"
@@ -565,7 +565,7 @@
   calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'delay__ (list* 'fn [] body)))
+  (list 'joker.core/delay__ (list* 'fn [] body)))
 
 (defn delay?
   "returns true if x is a Delay created with delay"
