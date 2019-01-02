@@ -241,7 +241,7 @@
   [& exprs]
   exprs)
 
-;; 2018-12-25 jcburley: Should this go into joker.core?
+;; 2018-12-25 jcburley: Should this go into joker.core? Ensure it's passed an @atom, and/or support other types?
 (defn- commute
   "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything. atoms are used anyway instead of ref, as Joker doesn't (yet) support (ref ...)."
   [ref fun & args]
@@ -325,6 +325,8 @@
      :added "1.0"}
   report :type)
 
+;; 2018-12-25 jcburley: Haven't investigated what Joker might already
+;; have to offer for stacktrace outputs. For now, provide no info.
 (defn- stacktrace-file-and-line
   [stacktrace]
   ;; (if (seq stacktrace)
