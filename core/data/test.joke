@@ -15,7 +15,7 @@
 ;; contributions and suggestions.
 
 (ns
-  ^{:author "Stuart Sierra, with contributions and suggestions by 
+  ^{:author "Stuart Sierra, with contributions and suggestions by
   Chas Emerick, Allen Rohner, and Stuart Halloway",
      :doc "A unit testing framework.
 
@@ -49,7 +49,7 @@
    \"(is (thrown? c ...))\" form tests if an exception of class c is
    thrown:
 
-   (is (thrown? ArithmeticException (/ 1 0))) 
+   (is (thrown? ArithmeticException (/ 1 0)))
 
    \"(is (thrown-with-msg? c re ...))\" does the same thing and also
    tests that the message on the exception matches the regular
