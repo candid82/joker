@@ -528,7 +528,7 @@
   seq calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'lazy-seq__ (list* 'fn [] body)))
+  (list 'joker.core/lazy-seq__ (list* 'fn [] body)))
 
 (defn chunked-seq?
   "Always returns false because chunked sequences are not supported"
@@ -565,7 +565,7 @@
   calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'delay__ (list* 'fn [] body)))
+  (list 'joker.core/delay__ (list* 'fn [] body)))
 
 (defn delay?
   "returns true if x is a Delay created with delay"
@@ -3160,7 +3160,7 @@
        (joker.core/in-ns '~name)
        ~@(when name-metadata
            `((reset-meta! (joker.core/find-ns '~name) ~name-metadata)))
-       ~@(when (not= name 'joker.core)
+       ~@(when (and (not= name 'joker.core) (not-any? #(= :refer-clojure (first %)) references))
            `((joker.core/refer '~'joker.core)))
        ~@(map process-reference references)
        (if (= '~name 'joker.core)
@@ -3168,6 +3168,12 @@
          (do
            (var-set #'*loaded-libs* (conj *loaded-libs* '~name))
            nil)))))
+
+(defmacro refer-clojure
+  "Same as (refer 'joker.core <filters>)"
+  {:added "1.0"}
+  [& filters]
+  `(joker.core/refer '~'joker.core ~@filters))
 
 (defmacro defonce
   "defs name to have the value of the expr if the named var is not bound,

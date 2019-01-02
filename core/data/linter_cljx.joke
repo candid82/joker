@@ -210,7 +210,6 @@
 (defn letfn [fnspecs & body])
 (defn .. [x form & more])
 (defn . [x m & args])
-(defn refer-clojure [& filters])
 
 ;; Clojure core functions not supported by Joker
 

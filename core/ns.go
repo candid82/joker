@@ -78,7 +78,9 @@ func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
 
 func (ns *Namespace) ReferAll(other *Namespace) {
 	for name, vr := range other.mappings {
-		ns.mappings[name] = vr
+		if !vr.isPrivate {
+			ns.mappings[name] = vr
+		}
 	}
 }
 
