@@ -1,3 +1,3 @@
-tests/linter/ns-cljs-3/input.cljs:3:34: Parse error: Alias async already exists in namespace user, aliasing cljs.core.async.macros
+tests/linter/ns-cljs-3/input.cljs:3:34: Parse error: Alias async already exists in namespace example.macros, aliasing cljs.core.async.macros
 tests/linter/ns-cljs-3/input.cljs:11:2: Parse error: Unable to resolve symbol: t
 tests/linter/ns-cljs-3/input.cljs:3:14: Parse warning: unused namespace cljs.core.async

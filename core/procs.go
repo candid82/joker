@@ -48,7 +48,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.10.2"
+const VERSION = "v0.11.0"
 
 var internalLibs map[string][]byte
 
@@ -1590,6 +1590,7 @@ var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Bool{B: true}).(Ma
 func intern(name string, proc Proc) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
 	vr.Value = proc
+	vr.isPrivate = true
 	vr.meta = privateMeta
 }
 

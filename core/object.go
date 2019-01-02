@@ -147,8 +147,9 @@ type (
 	Fn   struct {
 		InfoHolder
 		MetaHolder
-		fnExpr *FnExpr
-		env    *LocalEnv
+		isMacro bool
+		fnExpr  *FnExpr
+		env     *LocalEnv
 	}
 	ExInfo struct {
 		ArrayMap
@@ -461,11 +462,11 @@ func rangeString(min, max int) string {
 	if min == max {
 		return strconv.Itoa(min)
 	}
-	if min + 1 == max {
+	if min+1 == max {
 		return strconv.Itoa(min) + " or " + strconv.Itoa(max)
 	}
-	if min + 2 == max {
-		return strconv.Itoa(min) + ", " + strconv.Itoa(min + 1) + ", or " + strconv.Itoa(max)
+	if min+2 == max {
+		return strconv.Itoa(min) + ", " + strconv.Itoa(min+1) + ", or " + strconv.Itoa(max)
 	}
 	if max >= 999 {
 		return "at least " + strconv.Itoa(min)
@@ -718,7 +719,11 @@ func (fn *Fn) Call(args []Object) Object {
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
-		PanicArity(len(args))
+		c := len(args)
+		if fn.isMacro {
+			c -= 2
+		}
+		PanicArity(c)
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {

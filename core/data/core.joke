@@ -528,7 +528,7 @@
   seq calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'lazy-seq__ (list* 'fn [] body)))
+  (list 'joker.core/lazy-seq__ (list* 'fn [] body)))
 
 (defn chunked-seq?
   "Always returns false because chunked sequences are not supported"
@@ -565,7 +565,7 @@
   calls. See also - realized?"
   {:added "1.0"}
   [& body]
-  (list 'delay__ (list* 'fn [] body)))
+  (list 'joker.core/delay__ (list* 'fn [] body)))
 
 (defn delay?
   "returns true if x is a Delay created with delay"
@@ -1332,6 +1332,12 @@
          nil
          (let [~form temp#]
            ~@body)))))
+
+(defn class
+  "Returns the Type of x."
+  {:added "1.0"}
+  [x]
+  (type__ x))
 
 (defn type
   "Returns the :type metadata of x, or its Type if none"
@@ -3154,7 +3160,7 @@
        (joker.core/in-ns '~name)
        ~@(when name-metadata
            `((reset-meta! (joker.core/find-ns '~name) ~name-metadata)))
-       ~@(when (not= name 'joker.core)
+       ~@(when (and (not= name 'joker.core) (not-any? #(= :refer-clojure (first %)) references))
            `((joker.core/refer '~'joker.core)))
        ~@(map process-reference references)
        (if (= '~name 'joker.core)
@@ -3162,6 +3168,12 @@
          (do
            (var-set #'*loaded-libs* (conj *loaded-libs* '~name))
            nil)))))
+
+(defmacro refer-clojure
+  "Same as (refer 'joker.core <filters>)"
+  {:added "1.0"}
+  [& filters]
+  `(joker.core/refer '~'joker.core ~@filters))
 
 (defmacro defonce
   "defs name to have the value of the expr if the named var is not bound,
@@ -4219,3 +4231,152 @@
   {:added "1.0"}
   []
   (joker-version__))
+
+(defn- check-valid-options
+  "Throws an exception if the given option map contains keys not listed
+  as valid, else returns nil."
+  [options & valid-keys]
+  (when (seq (apply disj (apply hash-set (keys options)) valid-keys))
+    (throw
+      (ex-info
+        (apply str "Only these options are valid: "
+          (first valid-keys)
+          (map #(str ", " %) (rest valid-keys))) {}))))
+
+;;multimethods
+
+(defn- multimethod__
+  [name dispatch-fn default hierarchy]
+  (when hierarchy
+    (throw (ex-info ":hierarchy not yet supported by joker.core/defmulti" {})))
+  (let [mfatom (atom {})]
+    (with-meta
+      (fn [& args]
+        (let [dispatch-value (apply dispatch-fn args)
+              method
+              (get @mfatom
+                   dispatch-value
+                   (get @mfatom
+                        default
+                        (fn [& args]
+                          (throw (ex-info (format "No method in multimethod '%s' for dispatch value: %s"
+                                                  name (pr-str dispatch-value)) {})))))]
+          (apply method args)))
+      {:dispatch-fn dispatch-fn :default default :method-table mfatom})))
+
+(defmacro defmulti
+  "Creates a new multimethod with the associated dispatch function.
+  The docstring and attr-map are optional.
+
+  Options are key-value pairs and may be one of:
+
+  :default
+
+  The default dispatch value, defaults to :default
+
+  :hierarchy (UNSUPPORTED)
+
+  The value used for hierarchical dispatch (e.g. ::square is-a ::shape)
+
+  Hierarchies are type-like relationships that do not depend upon type
+  inheritance. By default Clojure's multimethods dispatch off of a
+  global hierarchy map.  However, a hierarchy relationship can be
+  created with the derive function used to augment the root ancestor
+  created with make-hierarchy.
+
+  Multimethods expect the value of the hierarchy option to be supplied as
+  a reference type e.g. a var (i.e. via the Var-quote dispatch macro #'
+  or the var special form)."
+  {:arglists '([name docstring? attr-map? dispatch-fn & options])
+   :added "1.0"}
+  [mm-name & options]
+  (let [docstring   (if (string? (first options))
+                      (first options)
+                      nil)
+        options     (if (string? (first options))
+                      (next options)
+                      options)
+        m           (if (map? (first options))
+                      (first options)
+                      {})
+        options     (if (map? (first options))
+                      (next options)
+                      options)
+        dispatch-fn (first options)
+        options     (next options)
+        m           (if docstring
+                      (assoc m :doc docstring)
+                      m)
+        m           (if (meta mm-name)
+                      (conj (meta mm-name) m)
+                      m)
+        mm-name (with-meta mm-name m)]
+    (when (= (count options) 1)
+      (throw (ex-info "The syntax for defmulti has changed. Example: (defmulti name dispatch-fn :default dispatch-value)" {})))
+    (let [options   (apply hash-map options)
+          default   (get options :default :default)
+          hierarchy (get options :hierarchy nil)]
+      (check-valid-options options :default :hierarchy)
+      `(let [v# (def ~mm-name)]
+         (when-not (and (bound? v#)
+                        (fn? (deref v#))
+                        (:method-table (meta (deref v#))))
+           (let [fndef# (multimethod__ ~(name mm-name) ~dispatch-fn ~default ~hierarchy)]
+                 (def ~mm-name fndef#)))))))
+
+(defmacro defmethod
+  "Creates and installs a new method of multimethod associated with dispatch-value. "
+  {:added "1.0"}
+  [multifn dispatch-val & fn-tail]
+  `(do
+     (swap-vals! (:method-table (meta ~multifn)) assoc ~dispatch-val (fn ~@fn-tail))
+     ~multifn))
+
+(defn remove-all-methods
+  "Removes all of the methods of multimethod."
+  {:added "1.0"}
+  [multifn]
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    (reset! mfatom {}))
+  multifn)
+
+(defn remove-method
+  "Removes the method of multimethod associated with dispatch-value."
+  {:added "1.0"}
+  [multifn dispatch-val]
+  (throw (ex-info "method removal not yet supported by joker.core" {})))
+
+(defn prefer-method
+  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y
+   when there is a conflict"
+  {:added "1.0"}
+  [multifn dispatch-val-x dispatch-val-y]
+  (throw (ex-info "method preference not yet supported by joker.core" {})))
+
+(defn methods
+  "Given a multimethod, returns a map of dispatch values -> dispatch fns"
+  {:added "1.0"}
+  [multifn]
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)]
+    @mfatom))
+
+(defn get-method
+  "Given a multimethod and a dispatch value, returns the dispatch fn
+  that would apply to that value, or nil if none apply and no default"
+  {:added "1.0"}
+  [multifn dispatch-val]
+  (let [mfm (meta multifn)
+        mfatom (:method-table mfm)
+        default (:default mfm)]
+    (get @mfatom
+         dispatch-val
+         (get @mfatom default))))
+
+(defn prefers
+  "Given a multimethod, returns a map of preferred value -> set of other values"
+  {:added "1.0"}
+  [multifn]
+  (throw (ex-info "method preference not yet supported by joker.core" {})))
+
