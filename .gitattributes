@@ -12,3 +12,6 @@
 
 # Unix line endings on .joke files.
 *.joke text eol=lf
+
+# Unix line endings on .tmpl files.
+*.tmpl text eol=lf
