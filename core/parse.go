@@ -499,7 +499,7 @@ func printReadError(reader *Reader, msg string) {
 	printError(pos, "Read error: "+msg)
 }
 
-func isIgnoredUnsusedNamespace(ns *Namespace) bool {
+func isIgnoredUnusedNamespace(ns *Namespace) bool {
 	if WARNINGS.ignoredUnusedNamespaces == nil {
 		return false
 	}
@@ -512,7 +512,7 @@ func WarnOnUnusedNamespaces() {
 	positions := make(map[string]Position)
 
 	for _, ns := range GLOBAL_ENV.Namespaces {
-		if ns != GLOBAL_ENV.CurrentNamespace() && !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
+		if ns != GLOBAL_ENV.CurrentNamespace() && !ns.isUsed && !isIgnoredUnusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
 			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
 				name := ns.Name.ToString(false)
