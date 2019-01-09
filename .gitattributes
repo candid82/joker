@@ -15,3 +15,9 @@
 
 # Unix line endings on .tmpl files.
 *.tmpl text eol=lf
+
+# Unix line endings on .cljs files.
+*.cljs text eol=lf
+
+# Unix line endings on .clj files.
+*.clj text eol=lf
