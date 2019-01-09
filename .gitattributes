@@ -3,3 +3,6 @@
 
 # Unix line endings on .txt files.
 *.txt text eol=lf
+
+# Unix line endings on .go files.
+*.go text eol=lf
