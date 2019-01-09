@@ -6,3 +6,6 @@
 
 # Unix line endings on .go files.
 *.go text eol=lf
+
+# Unix line endings on .html files.
+*.html text eol=lf
