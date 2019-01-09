@@ -9,3 +9,6 @@
 
 # Unix line endings on .html files.
 *.html text eol=lf
+
+# Unix line endings on .joke files.
+*.joke text eol=lf
