@@ -1,0 +1,5 @@
+# Set the default behavior.
+* text=auto
+
+# Unix line endings on .txt files.
+*.txt text eol=lf
