@@ -3264,7 +3264,7 @@
   [lib]
   lib)
 
-(defn lib-path
+(defn- lib-path
   "Returns whatever procLibPath returns."
   [^Symbol lib]
   (lib-path__ lib))
@@ -3466,7 +3466,7 @@
   [^String f]
   (load-file__ f))
 
-(defn load-lib-from-path
+(defn- load-lib-from-path
   "Loads library, potentially from path, depending on *classpath*. Does
   not protect against recursion."
   {:added "1.0"}
