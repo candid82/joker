@@ -1,0 +1,7 @@
+(require 'a.b.c)
+
+(binding [joker.core/*classpath* ["."]]
+  (require 'd.e.f))
+
+(binding [joker.core/*classpath* ["." "a"]]
+  (require 'b.c))
