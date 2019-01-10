@@ -5,3 +5,6 @@
 
 (binding [joker.core/*classpath* ["." "a"]]
   (require 'b.c))
+
+(binding [joker.core/*classpath* ["x/y"]]
+  (require 'z))
