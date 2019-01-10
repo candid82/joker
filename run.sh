@@ -14,7 +14,7 @@ set -e  # Exit on error.
 
 build
 
-./joker -e '(print "\nLibraries available in this build:\n  ") joker.core/*loaded-libs* (println)'
+./joker -e '(print "\nLibraries available in this build:\n  ") (loaded-libs) (println)'
 
 SUM256="$(go run tools/sum256dir/main.go std)"
 
