@@ -26,7 +26,6 @@ type (
 		file          *Var
 		args          *Var
 		classPath     *Var
-		classDir      *Var
 		ns            *Var
 		version       *Var
 		Features      Set
@@ -69,10 +68,6 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpvec
 }
 
-func (env *Env) SetClassDir(cd string) {
-	env.classDir.Value = String{S: cd}
-}
-
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -100,8 +95,7 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.SetEnvArgs(os.Args[1:])
 	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
 	res.classPath.Value = NIL
-	res.classDir = res.CoreNamespace.Intern(MakeSymbol("*classdir*"))
-	res.classDir.Value = NIL
+	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}
