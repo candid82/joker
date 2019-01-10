@@ -1410,14 +1410,7 @@ var procLoadLibFromPath Proc = func(args []Object) Object {
 		if s == "" {
 			filename = pathname
 		} else {
-			var dirname string
-			if s == "-" {
-				d := GLOBAL_ENV.classDir.Value
-				dirname = AssertString(d, "*classdir* must be a String, not a "+d.GetType().ToString(false)).S
-			} else {
-				dirname = s
-			}
-			filename = filepath.Join(dirname, filepath.Join(strings.Split(libname, ".")...)) + ".joke" // could cache inner join....
+			filename = filepath.Join(s, filepath.Join(strings.Split(libname, ".")...)) + ".joke" // could cache inner join....
 		}
 		f, err = os.Open(filename)
 		if err == nil {

@@ -26,7 +26,6 @@ type (
 		file          *Var
 		args          *Var
 		classPath     *Var
-		classDir      *Var
 		ns            *Var
 		version       *Var
 		Features      Set
@@ -48,7 +47,7 @@ func versionMap() Map {
 func (env *Env) SetEnvArgs(newArgs []string) {
 	args := EmptyVector
 	for _, arg := range newArgs {
-		args = args.Conjoin(String{S: arg})
+		args = args.Conjoin(MakeString(arg))
 	}
 	if args.Count() > 0 {
 		env.args.Value = args.Seq()
@@ -58,19 +57,15 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 }
 
 func (env *Env) SetClassPath(cp string) {
-	cparray := filepath.SplitList(cp)
-	cpvec := EmptyVector
-	for _, cpelem := range cparray {
-		cpvec = cpvec.Conjoin(String{S: cpelem})
+	cpArray := filepath.SplitList(cp)
+	cpVec := EmptyVector
+	for _, cpelem := range cpArray {
+		cpVec = cpVec.Conjoin(MakeString(cpelem))
 	}
-	if cpvec.Count() == 0 {
-		cpvec = cpvec.Conjoin(String{S: ""})
+	if cpVec.Count() == 0 {
+		cpVec = cpVec.Conjoin(MakeString(""))
 	}
-	env.classPath.Value = cpvec
-}
-
-func (env *Env) SetClassDir(cd string) {
-	env.classDir.Value = String{S: cd}
+	env.classPath.Value = cpVec
 }
 
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
@@ -100,8 +95,7 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.SetEnvArgs(os.Args[1:])
 	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
 	res.classPath.Value = NIL
-	res.classDir = res.CoreNamespace.Intern(MakeSymbol("*classdir*"))
-	res.classDir.Value = NIL
+	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}

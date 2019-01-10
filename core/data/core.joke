@@ -3264,7 +3264,7 @@
   [lib]
   lib)
 
-(defn lib-path
+(defn- lib-path
   "Returns whatever procLibPath returns."
   [^Symbol lib]
   (lib-path__ lib))
@@ -3466,9 +3466,9 @@
   [^String f]
   (load-file__ f))
 
-(defn load-lib-from-path
-  "Loads library, potentially from path, depending on *classpath* and
-  *classdir*. Does not protect against recursion."
+(defn- load-lib-from-path
+  "Loads library, potentially from path, depending on *classpath*. Does
+  not protect against recursion."
   {:added "1.0"}
   [^Symbol lib, ^String path]
   (load-lib-from-path__ lib path))
@@ -3727,17 +3727,23 @@
 
 (add-doc-and-meta *classpath*
   "A vector of the classpath elements as configured by --classpath or
-  the JOKER_CLASSPATH environment variable."
-  {:added "1.0"})
+  the JOKER_CLASSPATH environment variable.
 
-(add-doc-and-meta *classdir*
-  "A string identifying the directory in which to find a library when a search
-  of *classpath* encounters a \"-\" component. Configured by --classdir or the
-  JOKER_CLASSDIR environment variable. Defaults to \"$(dirname $(dirname
-  $0))/share/joker\" if \"$(dirname $0)\" ends with a single \"bin\" component,
-  where \"$0\" is the absolute pathname of the Joker executable being run;
-  otherwise defaults to \"$(dirname $0)/share\"."
-  {:added "1.0"})
+  Use colon-delimited <cp> (semicolon-delimited on Windows) for source
+  directories when loading libraries via :require and the like (but
+  not load-file). An empty field denotes the directory containing the
+  current file being loaded, with zero or more trailing components
+  removed as determined by the number of \".\" separators in the current
+  namespace; or, if no file is being loaded, the current
+  directory (this is original Joker behavior); a '.' (period) by
+  itself denotes solely the current directory. Defaults to the value
+  of the JOKER_CLASSPATH environment variable or, if that is
+  undefined, the empty string (denoting a single empty field). The
+  resulting classpath is stored herein, and this variable is used (in
+  lieu of command-line arguments or environment variables) for all
+  pertinent subsequent operations."
+  {:added "1.0"
+   :private true})
 
 (add-doc-and-meta *ns*
   "A Namespace object representing the current namespace."
