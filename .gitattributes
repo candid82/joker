@@ -1,0 +1,5 @@
+# Set the default behavior.
+* text eol=lf
+
+# DOS line endings on .bat files.
+*.bat text=auto
