@@ -3264,11 +3264,6 @@
   [lib]
   lib)
 
-(defn- lib-path
-  "Returns whatever procLibPath returns."
-  [^Symbol lib]
-  (lib-path__ lib))
-
 (defn- load-libs-options__
   []
   #{:as :reload :reload-all :require :use :verbose :exclude :only :rename :refer})
@@ -3465,13 +3460,6 @@
   {:added "1.0"}
   [^String f]
   (load-file__ f))
-
-(defn- load-lib-from-path
-  "Loads library, potentially from path, depending on *classpath*. Does
-  not protect against recursion."
-  {:added "1.0"}
-  [^Symbol lib, ^String path]
-  (load-lib-from-path__ lib path))
 
 (defn load
   "Loads code from libs, throwing error if cyclic dependency detected,
