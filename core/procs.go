@@ -1414,17 +1414,15 @@ var procLoadLibFromPath Proc = func(args []Object) Object {
 		}
 		f, err = os.Open(filename)
 		if err == nil {
+			canonicalErr = nil
 			break
 		}
 		if s == "" {
 			canonicalErr = err
 		}
 	}
-	if canonicalErr == nil {
-		PanicOnErr(err)
-	} else if err != nil {
-		PanicOnErr(canonicalErr)
-	}
+	PanicOnErr(canonicalErr)
+	PanicOnErr(err)
 	reader := NewReader(bufio.NewReader(f), filename)
 	ProcessReader(reader, filename, EVAL)
 	return NIL
