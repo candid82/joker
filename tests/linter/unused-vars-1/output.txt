@@ -1,0 +1,4 @@
+tests/linter/unused-vars-1/input.clj:11:1: Parse warning: unused var f
+tests/linter/unused-vars-1/input.clj:10:1: Parse warning: unused var m
+tests/linter/unused-vars-1/input.clj:8:1: Parse warning: unused var v3
+tests/linter/unused-vars-1/input.clj:9:1: Parse warning: unused var v4

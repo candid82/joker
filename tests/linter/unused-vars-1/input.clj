@@ -1,4 +1,3 @@
-(ns my.test)
 ;; Should PASS
 
 (def v1)
@@ -10,5 +9,3 @@
 (def ^:private v4 1)
 (defmacro ^:private m [x] x)
 (defn ^:private f [] 1)
-
-
