@@ -3362,32 +3362,35 @@
 
 (defn require
   "Loads libs, skipping any that are already loaded. Each argument is
-  either a libspec that identifies a lib, a prefix list that identifies
-  multiple libs whose names share a common prefix, or a flag that modifies
-  how all the identified libs are loaded. Use :require in the ns macro
-  in preference to calling this directly.
+  either a libspec that identifies a lib, a prefix list that
+  identifies multiple libs whose names share a common prefix, or a
+  flag that modifies how all the identified libs are
+  loaded. Use :require in the ns macro in preference to calling this
+  directly.
 
   Libs
 
-  A 'lib' is a named set of resources in classpath whose contents define a
-  library of Clojure code. Lib names are symbols and each lib is associated
-  with a Clojure namespace and a Java package that share its name. A lib's
-  name also locates its root directory within classpath using Java's
-  package name to classpath-relative path mapping. All resources in a lib
-  should be contained in the directory structure under its root directory.
-  All definitions a lib makes should be in its associated namespace.
+  A 'lib' is a named set of resources in *classpath* whose contents
+  define a library of Clojure code. Lib names are symbols and each lib
+  is associated with a Clojure namespace and a Joker package that
+  share its name. A lib's name also locates its root directory within
+  *classpath* using its package name to classpath-relative path
+  mapping. All resources in a lib should be contained in the directory
+  structure under its root directory.  All definitions a lib makes
+  should be in its associated namespace.
 
-  'require loads a lib by loading its root resource. The root resource path
-  is derived from the lib name in the following manner:
-  Consider a lib named by the symbol 'x.y.z; it has the root directory
-  <classpath>/x/y/, and its root resource is <classpath>/x/y/z.clj. The root
-  resource should contain code to create the lib's namespace (usually by using
-  the ns macro) and load any additional lib resources.
+  'require loads a lib by loading its root resource. The root resource
+  path is derived from the lib name in the following manner: Consider
+  a lib named by the symbol 'x.y.z; it has the root directory
+  <*classpath*>/x/y/, and its root resource is
+  <*classpath*>/x/y/z.clj. The root resource should contain code to
+  create the lib's namespace (usually by using the ns macro) and load
+  any additional lib resources.
 
   Libspecs
 
-  A libspec is a lib name or a vector containing a lib name followed by
-  options expressed as sequential keywords and arguments.
+  A libspec is a lib name or a vector containing a lib name followed
+  by options expressed as sequential keywords and arguments.
 
   Recognized options:
   :as takes a symbol as its argument and makes that symbol an alias to the
@@ -3453,13 +3456,14 @@
   *loaded-libs*)
 
 (defn load-file
-  "Loads code from file f"
+  "Loads code from file f. Does not protect against recursion."
   {:added "1.0"}
   [^String f]
   (load-file__ f))
 
 (defn load
-  "Loads code from libs."
+  "Loads code from libs, throwing error if cyclic dependency detected,
+  and ignoring libs already being loaded."
   {:added "1.0"}
   [& libs]
   (doseq [^Symbol lib libs]
@@ -3472,7 +3476,7 @@
                   *ns* *ns*]
           (if *linter-mode*
             (in-ns lib)
-            (load-lib-from-file__ lib path)))))))
+            (load-lib-from-path__ lib path)))))))
 
 (defn get-in
   "Returns the value in a nested associative structure,
@@ -3708,6 +3712,24 @@
   "A sequence of the supplied command line arguments, or nil if
   none were supplied"
   {:added "1.0"})
+
+(add-doc-and-meta *classpath*
+  "A vector of the classpath elements as configured by --classpath.
+
+  Use colon-delimited <cp> (semicolon-delimited on Windows) for source
+  directories when loading libraries via :require and the like (but
+  not load-file). An empty field denotes the directory containing the
+  current file being loaded, with zero or more trailing components
+  removed as determined by the number of \".\" separators in the
+  current namespace; or, if no file is being loaded, the current
+  directory (this is original Joker behavior); a '.' (period) by
+  itself denotes solely the current directory. Defaults to the empty
+  string (denoting a single empty field). The resulting classpath is
+  stored herein, and this variable is used (in lieu of command-line
+  arguments or environment variables) for all pertinent subsequent
+  operations."
+  {:added "1.0"
+   :private true})
 
 (add-doc-and-meta *ns*
   "A Namespace object representing the current namespace."
