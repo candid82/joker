@@ -235,18 +235,6 @@
   (:require [joker.template :as temp]
             [joker.walk :as walk]))
 
-;; 2018-12-25 jcburley: Should this go into joker.core?
-(defn- dosync
-  "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything."
-  [& exprs]
-  exprs)
-
-;; 2018-12-25 jcburley: Should this go into joker.core? Ensure it's passed an @atom, and/or support other types?
-(defn- commute
-  "Joker is single-threaded with respect to Clojure code (the Go runtime spawns multiple threads, but that shouldn't matter). So there's no need to synchronize anything. atoms are used anyway instead of ref, as Joker doesn't (yet) support (ref ...)."
-  [ref fun & args]
-  (get (apply swap-vals! ref fun args) 1))
-
 (defonce ^:dynamic
   ^{:doc "True by default.  If set to false, no test functions will
    be created by deftest, set-test, or with-test.  Use this to omit
@@ -310,7 +298,7 @@
   {:added "1.0"}
   [name]
   (when *report-counters*
-    (dosync (commute *report-counters* update-in [name] (fnil inc 0)))))
+    (get (swap-vals! *report-counters* update-in [name] (fnil inc 0)) 1)))
 
 ;;; TEST RESULT REPORTING
 
