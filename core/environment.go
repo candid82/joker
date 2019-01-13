@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -24,6 +25,7 @@ type (
 		printReadably *Var
 		file          *Var
 		args          *Var
+		classPath     *Var
 		ns            *Var
 		version       *Var
 		Features      Set
@@ -45,13 +47,25 @@ func versionMap() Map {
 func (env *Env) SetEnvArgs(newArgs []string) {
 	args := EmptyVector
 	for _, arg := range newArgs {
-		args = args.Conjoin(String{S: arg})
+		args = args.Conjoin(MakeString(arg))
 	}
 	if args.Count() > 0 {
 		env.args.Value = args.Seq()
 	} else {
 		env.args.Value = NIL
 	}
+}
+
+func (env *Env) SetClassPath(cp string) {
+	cpArray := filepath.SplitList(cp)
+	cpVec := EmptyVector
+	for _, cpelem := range cpArray {
+		cpVec = cpVec.Conjoin(MakeString(cpelem))
+	}
+	if cpVec.Count() == 0 {
+		cpVec = cpVec.Conjoin(MakeString(""))
+	}
+	env.classPath.Value = cpVec
 }
 
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
@@ -79,6 +93,9 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
 	res.SetEnvArgs(os.Args[1:])
+	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
+	res.classPath.Value = NIL
+	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Bool{B: true}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}

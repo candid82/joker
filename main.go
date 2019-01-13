@@ -316,7 +316,7 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
 	fmt.Fprintln(out, "  --no-readline")
-	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful if joker is called with rlwrap.")
+	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
 	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
 	fmt.Fprintln(out, "  --dialect <dialect>")
@@ -349,6 +349,7 @@ var (
 	eval               string
 	replFlag           bool
 	replSocket         string
+	classPath          string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -454,6 +455,13 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				replSocket = args[i]
+			}
+		case "-c", "--classpath":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				classPath = args[i]
+			} else {
+				missing = true
 			}
 		case "--no-readline":
 			noReadline = true
@@ -563,6 +571,7 @@ func main() {
 
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
+	GLOBAL_ENV.SetClassPath(classPath)
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
@@ -576,6 +585,7 @@ func main() {
 		fmt.Fprintf(debugOut, "eval=%v\n", eval)
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
 		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
+		fmt.Fprintf(debugOut, "classPath=%v\n", classPath)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)

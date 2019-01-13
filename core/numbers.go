@@ -372,9 +372,9 @@ func (ops IntOps) Quotient(x, y Number) Number {
 func (ops DoubleOps) Quotient(x, y Number) Number {
 	z := x.Double().D / y.Double().D
 	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
-		return Int{I: int(z)}
+		return Double{D: float64(int(z))}
 	}
-	return &BigInt{b: *big.NewInt(int64(z))}
+	return Double{D: float64(int64(z))}
 }
 
 func (ops BigIntOps) Quotient(x, y Number) Number {
