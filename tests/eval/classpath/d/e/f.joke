@@ -1,0 +1,4 @@
+(ns d.e.f
+  (:require g.h.i))
+
+(println "this is d/e/f.joke")
