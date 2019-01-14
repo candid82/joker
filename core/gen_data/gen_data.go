@@ -53,6 +53,10 @@ var files []FileInfo = []FileInfo{
 		filename: "template.joke",
 	},
 	{
+		name:     "<joker.test>",
+		filename: "test.joke",
+	},
+	{
 		name:     "<joker.core>",
 		filename: "linter_all.joke",
 	},

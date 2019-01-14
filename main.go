@@ -101,8 +101,8 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 			case Error:
 				replContext.PushException(r)
 				fmt.Fprintln(Stderr, r)
-			// case *runtime.TypeAssertionError:
-			// 	fmt.Fprintln(Stderr, r)
+				// case *runtime.TypeAssertionError:
+				// 	fmt.Fprintln(Stderr, r)
 			default:
 				panic(r)
 			}
