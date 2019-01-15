@@ -7,7 +7,13 @@ build() {
 
     go vet -all ./...
 
-    [ -n "$SHADOW" ] && go vet -all "$SHADOW" ./... && echo "Shadowed-variables check complete."
+    if [ -n "$SHADOW" ]; then
+        go vet -all "$SHADOW" ./... && echo "Shadowed-variables check complete."
+    else
+        echo "Not performing shadowed-variables check; consider installing shadow tool via:"
+        echo "  go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow"
+        echo "and rebuilding."
+    fi
 
     go build
 }
@@ -15,6 +21,8 @@ build() {
 if which shadow >/dev/null 2>/dev/null; then
     # Install via: go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
     SHADOW="-vettool=$(which shadow)"
+elif $(go tool vet nonexistent.go 2>&1 | grep -q -v unsupported); then
+    SHADOW="-shadow=true"
 fi
 
 set -e  # Exit on error.
