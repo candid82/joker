@@ -5,9 +5,9 @@ build() {
 
     go generate ./...
 
-    go vet -all ./
+    go vet -all ./...
 
-    [ -n "$SHADOW" ] && go vet -all "$SHADOW" ./ && echo "Shadowed-variables check complete."
+    [ -n "$SHADOW" ] && go vet -all "$SHADOW" ./... && echo "Shadowed-variables check complete."
 
     go build
 }
