@@ -5,10 +5,17 @@ build() {
 
     go generate ./...
 
-    go tool vet -all -shadow=true ./
+    go vet -all ./
+
+    [ -n "$SHADOW" ] && go vet -all "$SHADOW" ./ && echo "Shadowed-variables check complete."
 
     go build
 }
+
+if which shadow >/dev/null 2>/dev/null; then
+    # Install via: go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
+    SHADOW="-vettool=$(which shadow)"
+fi
 
 set -e  # Exit on error.
 
