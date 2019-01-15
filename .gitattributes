@@ -1,17 +1,5 @@
 # Set the default behavior.
-* text=auto
+* text eol=lf
 
-# Unix line endings on .txt files.
-*.txt text eol=lf
-
-# Unix line endings on .go files.
-*.go text eol=lf
-
-# Unix line endings on .html files.
-*.html text eol=lf
-
-# Unix line endings on .joke files.
-*.joke text eol=lf
-
-# Unix line endings on .tmpl files.
-*.tmpl text eol=lf
+# DOS line endings on .bat files.
+*.bat text=auto

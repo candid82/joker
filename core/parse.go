@@ -532,14 +532,17 @@ func WarnOnUnusedVars() {
 	var names []string
 	positions := make(map[string]Position)
 
-	ns := GLOBAL_ENV.Namespaces[STRINGS.Intern("user")]
-
-	for _, vr := range ns.mappings {
-		if vr.ns == ns && !vr.isUsed && vr.isPrivate {
-			pos := vr.GetInfo()
-			if pos != nil {
-				names = append(names, *vr.name.name)
-				positions[*vr.name.name] = pos.Position
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		for _, vr := range ns.mappings {
+			if vr.ns == ns && !vr.isUsed && vr.isPrivate {
+				pos := vr.GetInfo()
+				if pos != nil {
+					names = append(names, *vr.name.name)
+					positions[*vr.name.name] = pos.Position
+				}
 			}
 		}
 	}

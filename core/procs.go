@@ -27,6 +27,7 @@ var (
 	replData        []byte
 	walkData        []byte
 	templateData    []byte
+	testData        []byte
 	linter_allData  []byte
 	linter_cljxData []byte
 	linter_cljData  []byte
@@ -48,7 +49,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.11.0"
+const VERSION = "v0.11.1"
 
 var internalLibs map[string][]byte
 
@@ -65,6 +66,7 @@ func InitInternalLibs() {
 		"joker.walk":     walkData,
 		"joker.template": templateData,
 		"joker.repl":     replData,
+		"joker.test":     testData,
 	}
 }
 
