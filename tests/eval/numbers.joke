@@ -131,13 +131,13 @@
 
 (deftest test-mod
   ; wrong number of args
-;  (is (thrown? IllegalArgumentException (mod)))
-;  (is (thrown? IllegalArgumentException (mod 1)))
-;  (is (thrown? IllegalArgumentException (mod 3 2 1)))
+  (is (thrown? Error (mod)))
+  (is (thrown? Error (mod 1)))
+  (is (thrown? Error (mod 3 2 1)))
 
   ; divide by zero
-;;  (is (thrown? Error (mod 9 0)))
-;;  (is (thrown? Error (mod 0 0)))
+  (is (thrown? Error (mod 9 0)))
+  (is (thrown? Error (mod 0 0)))
 
   (are [x y] (= x y)
     (mod 4 2) 0
@@ -184,13 +184,13 @@
 
 (deftest test-rem
   ; wrong number of args
-;  (is (thrown? IllegalArgumentException (rem)))
-;  (is (thrown? IllegalArgumentException (rem 1)))
-;  (is (thrown? IllegalArgumentException (rem 3 2 1)))
+  (is (thrown? Error (rem)))
+  (is (thrown? Error (rem 1)))
+  (is (thrown? Error (rem 3 2 1)))
 
   ; divide by zero
-;;  (is (thrown? Error (rem 9 0)))
-;;  (is (thrown? Error (rem 0 0)))
+  (is (thrown? Error (rem 9 0)))
+  (is (thrown? Error (rem 0 0)))
 
   (are [x y] (= x y)
     (rem 4 2) 0
@@ -231,13 +231,13 @@
 
 (deftest test-quot
   ; wrong number of args
-;  (is (thrown? IllegalArgumentException (quot)))
-;  (is (thrown? IllegalArgumentException (quot 1)))
-;  (is (thrown? IllegalArgumentException (quot 3 2 1)))
+  (is (thrown? Error (quot)))
+  (is (thrown? Error (quot 1)))
+  (is (thrown? Error (quot 3 2 1)))
 
   ; divide by zero
-;;  (is (thrown? Error (quot 9 0)))
-;;  (is (thrown? Error (quot 0 0)))
+  (is (thrown? Error (quot 9 0)))
+  (is (thrown? Error (quot 0 0)))
 
   (are [x y] (= x y)
     (quot 4 2) 2
