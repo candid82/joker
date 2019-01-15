@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 
+ex () {
+    exit $?
+}
+trap ex ERR
+
 build() {
+    trap ex ERR
+
     go clean -x
 
     go generate ./...
 
-    go vet -all ./...
+    $GOVET
 
     if [ -n "$SHADOW" ]; then
         go vet -all "$SHADOW" ./... && echo "Shadowed-variables check complete."
-    else
-        echo "Not performing shadowed-variables check; consider installing shadow tool via:"
-        echo "  go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow"
-        echo "and rebuilding."
     fi
 
     go build
@@ -21,11 +24,16 @@ build() {
 if which shadow >/dev/null 2>/dev/null; then
     # Install via: go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
     SHADOW="-vettool=$(which shadow)"
+    GOVET="go vet -all ./..."  # Must be done as a separate step
 elif $(go tool vet nonexistent.go 2>&1 | grep -q -v unsupported); then
-    SHADOW="-shadow=true"
+    SHADOW="-shadow=true"  # Older version of go that supports 'go tool vet' and thus '-shadow=true'
+    GOVET=""  # One-step vetting works with 'go tool vet -all -shadow=true'
+else
+    GOVET="go vet -all ./..."
+    echo "Not performing shadowed-variables check; consider installing shadow tool via:"
+    echo "  go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow"
+    echo "and rebuilding."
 fi
-
-set -e  # Exit on error.
 
 build
 
