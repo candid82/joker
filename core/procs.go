@@ -21,17 +21,18 @@ import (
 )
 
 var (
-	coreData        []byte
-	timeData        []byte
-	mathData        []byte
-	replData        []byte
-	walkData        []byte
-	templateData    []byte
-	testData        []byte
-	linter_allData  []byte
-	linter_cljxData []byte
-	linter_cljData  []byte
-	linter_cljsData []byte
+	coreData         []byte
+	timeData         []byte
+	mathData         []byte
+	replData         []byte
+	walkData         []byte
+	templateData     []byte
+	testData         []byte
+	linter_allData   []byte
+	linter_jokerData []byte
+	linter_cljxData  []byte
+	linter_cljData   []byte
+	linter_cljsData  []byte
 )
 
 type (
@@ -1789,6 +1790,7 @@ func ProcessLinterData(dialect Dialect) {
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		markJokerNamespacesAsUsed()
+		processData(linter_jokerData)
 		return
 	}
 	processData(linter_cljxData)

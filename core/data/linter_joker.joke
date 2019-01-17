@@ -1,0 +1,2 @@
+(def *known-macros*
+  {'joker.test/deftest nil 'joker.test/is nil 'joker.test/are nil})

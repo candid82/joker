@@ -12,8 +12,7 @@
 ;;
 
 (ns joker.test-joker.numbers
-  (:require [joker.test :refer [deftest is are]]
-            [joker.template]))
+  (:require [joker.test :refer [deftest is are]]))
 
 ;; *** Functions ***
 
