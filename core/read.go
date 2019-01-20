@@ -333,7 +333,7 @@ func readNumber(reader *Reader) Object {
 	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if isRatio {
-		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' {
+		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' && str[0] != '+' {
 			panic(invalidNumberError)
 		}
 		return scanRatio(str, invalidNumberError, reader)
@@ -1041,12 +1041,12 @@ func Read(reader *Reader) (Object, bool) {
 	case unicode.IsDigit(r):
 		reader.Unget()
 		return readNumber(reader), false
-	case r == '-':
+	case r == '-' || r == '+':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readSymbol(reader, '-'), false
+		return readSymbol(reader, r), false
 	case r == '%' && ARGS != nil:
 		return readArgSymbol(reader), false
 	case isSymbolInitial(r):

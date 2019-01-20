@@ -12,8 +12,7 @@
 ;;
 
 (ns joker.test-joker.numbers
-  (:use joker.test
-        joker.template))
+  (:require [joker.test :refer [deftest is are]]))
 
 ;; *** Functions ***
 
@@ -28,7 +27,7 @@
 
       (+ -1) -1
       (+ -1 -2) -3
-;;      (+ -1 +2 -3) -2  ; TODO: allow "+2" in Joker.
+      (+ -1 +2 -3) -2
 
       (+ 1 -1) 0
       (+ -1 1) 0
