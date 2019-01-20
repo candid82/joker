@@ -62,6 +62,10 @@ var files []FileInfo = []FileInfo{
 	},
 	{
 		name:     "<joker.core>",
+		filename: "linter_joker.joke",
+	},
+	{
+		name:     "<joker.core>",
 		filename: "linter_cljx.joke",
 	},
 	{

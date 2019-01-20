@@ -238,7 +238,7 @@ func makeDialectKeyword(dialect Dialect) Keyword {
 	case CLJS:
 		return MakeKeyword("cljs")
 	default:
-		return MakeKeyword("joker ")
+		return MakeKeyword("joker")
 	}
 }
 

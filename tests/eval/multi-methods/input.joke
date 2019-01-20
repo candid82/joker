@@ -36,7 +36,7 @@
 (defmulti factorial identity)
 
 (defmethod factorial 0 [_]  1)
-(defmethod factorial :default [num] 
+(defmethod factorial :default [num]
     (* num (factorial (dec num))))
 
 (println (factorial 0)) ; => 1
@@ -50,10 +50,10 @@
 (def N #?(:clj Long
           :joker Int))
 
-(defmulti bat 
-  (fn ([x y & xs] 
+(defmulti bat
+  (fn ([x y & xs]
        (mapv class (into [x y] xs)))))
-(defmethod bat [String String] [x y & xs] 
+(defmethod bat [String String] [x y & xs]
   (str "str: " x " and " y))
 (defmethod bat [String String String] [x y & xs]
   (str "str: " x ", " y " and " (first xs)))
@@ -95,7 +95,7 @@
 ;; => "default: :hey then :there and finally :you"
 
 
-;; If you're REPLing you might want to re-define the defmulti dispatch function 
+;; If you're REPLing you might want to re-define the defmulti dispatch function
 ;; (which defmulti won't allow you to do). For this you can use `ns-unmap`:
 
 (defmulti x (fn[_] :inc))
@@ -186,10 +186,10 @@
 
 (defmulti full-name :name/type)
 
-(defmethod full-name :full [name-data] 
+(defmethod full-name :full [name-data]
   (:name/full name-data))
 
-(defmethod full-name :split [name-data] 
+(defmethod full-name :split [name-data]
   (str (:name/first name-data) " " (:name/last name-data)))
 
 (defmethod full-name :default [_] "???")
