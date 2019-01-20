@@ -9,7 +9,7 @@
 ; Author: Frantisek Sodomka, Robert Lachlan
 
 (ns joker.test-joker.multimethods
-  (:require [joker.test :refer [deftest is are]]))
+  (:require [joker.test :refer [deftest is are testing]]))
 
 ; http://clojure.org/multimethods
 

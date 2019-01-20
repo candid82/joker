@@ -1383,7 +1383,7 @@ func loadFile(filename string) Object {
 	f, err := os.Open(filename)
 	PanicOnErr(err)
 	reader = NewReader(bufio.NewReader(f), filename)
-	ProcessReader(reader, filename, EVAL)
+	ProcessReaderFromEval(reader, filename)
 	return NIL
 }
 
@@ -1427,7 +1427,7 @@ var procLoadLibFromPath Proc = func(args []Object) Object {
 	PanicOnErr(canonicalErr)
 	PanicOnErr(err)
 	reader := NewReader(bufio.NewReader(f), filename)
-	ProcessReader(reader, filename, EVAL)
+	ProcessReaderFromEval(reader, filename)
 	return NIL
 }
 
@@ -1576,6 +1576,30 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if _, ok := obj.(Nil); !ok {
 			fmt.Fprintln(Stdout, obj.ToString(true))
 		}
+	}
+}
+
+func ProcessReaderFromEval(reader *Reader, filename string) {
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			return
+		}
+		PanicOnErr(err)
+		expr, err := TryParse(obj, parseContext)
+		PanicOnErr(err)
+		obj, err = TryEval(expr)
+		PanicOnErr(err)
 	}
 }
 
