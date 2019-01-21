@@ -500,7 +500,7 @@
     `(try ~@body
           (do-report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
-            (let [m# (.getMessage e#)]
+            (let [m# (:message e#)]
               (if (re-find ~re m#)
                 (do-report {:type :pass, :message ~msg,
                          :expected '~form, :actual e#})
