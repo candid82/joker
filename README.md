@@ -44,6 +44,11 @@ You can also [build](#building) Joker from the source code.
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
+## Coding Guidelines
+
+* Dashes (`-`) in namespaces are not converted to underscores (`_`) by Joker, so (unlike with Clojure) there's no need to name `.joke` files accordingly.
+* Avoid `:refer :all` and the `use` function, as that reduces the effectiveness of linting.
+
 ## Project goals
 
 These are high level goals of the project that guide design and implementation decisions.
