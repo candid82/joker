@@ -872,7 +872,7 @@ var procGte Proc = func(args []Object) Object {
 var procEq Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Eq(a, b)}
+	return MakeBool(numbersEq(a, b))
 }
 
 var procMax Proc = func(args []Object) Object {
