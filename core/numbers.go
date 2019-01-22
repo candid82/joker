@@ -35,6 +35,12 @@ type (
 	RatioOps    struct{}
 )
 
+const (
+	INTEGER_CATEGORY  = iota
+	FLOATING_CATEGORY = iota
+	RATIO_CATEGORY    = iota
+)
+
 const MAX_INT = int(^uint(0) >> 1)
 const MIN_INT = -MAX_INT - 1
 const MAX_RUNE = int(^uint32(0) >> 1)
@@ -581,6 +587,10 @@ func (ops RatioOps) Eq(x Number, y Number) bool {
 	return x.Ratio().Cmp(y.Ratio()) == 0
 }
 
+func numbersEq(x Number, y Number) bool {
+	return GetOps(x).Combine(GetOps(y)).Eq(x, y)
+}
+
 func CompareNumbers(x Number, y Number) int {
 	ops := GetOps(x).Combine(GetOps(y))
 	if ops.Lt(x, y) {
@@ -606,4 +616,17 @@ func Min(x Number, y Number) Number {
 		return x
 	}
 	return y
+}
+
+func category(x Number) int {
+	switch x.(type) {
+	case *BigFloat:
+		return FLOATING_CATEGORY
+	case Double:
+		return FLOATING_CATEGORY
+	case *Ratio:
+		return RATIO_CATEGORY
+	default:
+		return INTEGER_CATEGORY
+	}
 }
