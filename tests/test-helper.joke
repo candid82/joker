@@ -15,7 +15,7 @@
 ;;  tomfaulhaber (gmail)
 ;;  Created 04 November 2010
 
-(ns tests.test_helper
+(ns tests.test-helper
   (:require [joker.string :as s]
             [joker.test :refer [is do-report]]))
 

@@ -14,7 +14,7 @@
 
 (ns joker.test-clojure.control
   (:require [joker.test :refer [deftest is are testing]]
-            [tests.test_helper :refer :all]))
+            [tests.test-helper :refer :all]))
 
 ;; *** Helper functions ***
 
