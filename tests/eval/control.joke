@@ -43,12 +43,12 @@
   (are [x y] (= x y)
       ; no params => nil
       (do) nil
-      
+
       ; return last
       (do 1) 1
       (do 1 2) 2
       (do 1 2 3 4 5) 5
-      
+
       ; evaluate and return last
       (let [a (atom 0)]
         (do (reset! a (+ @a 1))   ; 1
@@ -174,7 +174,7 @@
 
       (cond nil true) nil
       (cond false true) nil
-      
+
       (cond true 1 true (exception)) 1
       (cond nil 1 false 2 true 3 true 4) 3
       (cond nil 1 false 2 true 3 true (exception)) 3 )
@@ -283,7 +283,7 @@
 
 ; locking, monitor-enter, monitor-exit
 
-; case 
+; case
 (deftest test-case
   (testing "can match many kinds of things"
     (let [two 2
