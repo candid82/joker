@@ -262,8 +262,7 @@ func scanRatio(str string, err error, reader *Reader) Object {
 	if _, ok := rat.SetString(str); !ok {
 		panic(err)
 	}
-	res := Ratio{r: rat}
-	return MakeReadObject(reader, &res)
+	return MakeReadObject(reader, ratioOrInt(&rat))
 }
 
 func scanBigFloat(str string, err error, reader *Reader) Object {
