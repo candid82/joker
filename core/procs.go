@@ -28,6 +28,8 @@ var (
 	walkData         []byte
 	templateData     []byte
 	testData         []byte
+	setData          []byte
+	dataData         []byte
 	linter_allData   []byte
 	linter_jokerData []byte
 	linter_cljxData  []byte
@@ -68,6 +70,8 @@ func InitInternalLibs() {
 		"joker.template": templateData,
 		"joker.repl":     replData,
 		"joker.test":     testData,
+		"joker.set":      setData,
+		"joker.data":     dataData,
 	}
 }
 

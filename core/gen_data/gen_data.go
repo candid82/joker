@@ -57,6 +57,14 @@ var files []FileInfo = []FileInfo{
 		filename: "test.joke",
 	},
 	{
+		name:     "<joker.set>",
+		filename: "set.joke",
+	},
+	{
+		name:     "<joker.data>",
+		filename: "data.joke",
+	},
+	{
 		name:     "<joker.core>",
 		filename: "linter_all.joke",
 	},
