@@ -1,0 +1,11 @@
+(ns joker.tests.large-forked-stdout
+  (:require [joker.os :as os]
+            [joker.string :as s]))
+
+(let [exe (str (get (joker.os/env) "PWD") "/joker")
+      res (os/sh exe "lots-of-stderr.joke")]
+  (print (:out res))
+  (let [ev (s/split-lines (:err res))]
+    (println-err (ev 0))
+    (println-err (ev 1))
+    (println-err (ev (- (count ev) 2)))))
