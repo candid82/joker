@@ -3796,6 +3796,13 @@
       (let [seg (doall (take n s))]
         (cons seg (partition-all n step (nthrest s step))))))))
 
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  {:added "1.0"}
+  [to from]
+  (reduce conj to from))
+
 (defmacro case
   "Takes an expression, and a set of clauses.
 
@@ -3812,6 +3819,16 @@
   and no clause matches, an exception is thrown."
   {:added "1.0"}
   [expr & clauses]
+  (loop [all-cases #{}
+         [[test then] & more-clauses] (partition 2 clauses)]
+    (when test
+      (let [cases (if (list? test) (set test) (set [test]))]
+        (when (some cases all-cases)
+          (let [e (ex-info (str "Duplicate case constant: " test) {:form test :_prefix "Parse error"})]
+            (if *linter-mode*
+              (println-linter__ e)
+              (throw e))))
+        (recur (into all-cases cases) more-clauses))))
   (let [parts (partition-all 2 clauses)
         setized (for [p parts
                       :let [[test then] p]]
@@ -3821,13 +3838,6 @@
         transformed-clauses (apply concat setized)]
     `(condp contains? ~expr
        ~@transformed-clauses)))
-
-(defn into
-  "Returns a new coll consisting of to-coll with all of the items of
-  from-coll conjoined."
-  {:added "1.0"}
-  [to from]
-  (reduce conj to from))
 
 (defn mapv
   "Returns a vector consisting of the result of applying f to the
