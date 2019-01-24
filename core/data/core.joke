@@ -3824,7 +3824,7 @@
     (when test
       (let [cases (if (list? test) (set test) (set [test]))]
         (when (some cases all-cases)
-          (let [e (ex-info (str "Duplicate case constant: " test) {:form test :_prefix "Parse error"})]
+          (let [e (ex-info (str "Duplicate case test constant: " test) {:form test :_prefix "Parse error"})]
             (if *linter-mode*
               (println-linter__ e)
               (throw e))))
