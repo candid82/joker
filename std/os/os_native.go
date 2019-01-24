@@ -2,6 +2,7 @@ package os
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -40,13 +41,16 @@ func sh(dir string, name string, args []string) Object {
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
 	}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stdoutReader)
-	stdoutString := buf.String()
-	buf = new(bytes.Buffer)
-	buf.ReadFrom(stderrReader)
-	stderrString := buf.String()
+
+	bufOut := new(bytes.Buffer)
+	bufErr := new(bytes.Buffer)
+
+	go io.Copy(bufOut, stdoutReader)
+	go io.Copy(bufErr, stderrReader)
+
 	err = cmd.Wait()
+	stdoutString := bufOut.String()
+	stderrString := bufErr.String()
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Bool{B: err == nil})
 
