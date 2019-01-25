@@ -1,0 +1,3 @@
+A lazy dog knows 0 tricks.
+A lazy dog knows 1 tricks.
+A lazy dog knows 9999 tricks.
