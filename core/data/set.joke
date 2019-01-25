@@ -142,7 +142,7 @@
 (defn subset?
   "Is set1 a subset of set2?"
   {:added "1.2",
-   :tag Bool}
+   :tag Boolean}
   [set1 set2]
   (and (<= (count set1) (count set2))
        (every? #(contains? set2 %) set1)))
@@ -150,28 +150,29 @@
 (defn superset?
   "Is set1 a superset of set2?"
   {:added "1.2",
-   :tag Bool}
+   :tag Boolean}
   [set1 set2]
   (and (>= (count set1) (count set2))
        (every? #(contains? set1 %) set2)))
 
-;; (def xs #{{:a 11 :b 1 :c 1 :d 4}
-;;          {:a 2 :b 12 :c 2 :d 6}
-;;          {:a 3 :b 3 :c 3 :d 8 :f 42}})
+(comment
+  (def xs #{{:a 11 :b 1 :c 1 :d 4}
+            {:a 2 :b 12 :c 2 :d 6}
+            {:a 3 :b 3 :c 3 :d 8 :f 42}})
 
-;; (def ys #{{:a 11 :b 11 :c 11 :e 5}
-;;          {:a 12 :b 11 :c 12 :e 3}
-;;          {:a 3 :b 3 :c 3 :e 7 }})
+  (def ys #{{:a 11 :b 11 :c 11 :e 5}
+            {:a 12 :b 11 :c 12 :e 3}
+            {:a 3 :b 3 :c 3 :e 7 }})
 
-;; (println (join xs ys))
-;; (newline)
-;; (println (join xs (rename ys {:b :yb :c :yc}) {:a :a}))
-;; (newline)
-;; (println (union #{:a :b :c} #{:c :d :e }))
-;; (newline)
-;; (println (difference #{:a :b :c} #{:c :d :e}))
-;; (newline)
-;; (println (intersection #{:a :b :c} #{:c :d :e}))
-;; (newline)
-;; (println (index ys [:b]))
-;; (newline)
+  (println (join xs ys))
+  (newline)
+  (println (join xs (rename ys {:b :yb :c :yc}) {:a :a}))
+  (newline)
+  (println (union #{:a :b :c} #{:c :d :e }))
+  (newline)
+  (println (difference #{:a :b :c} #{:c :d :e}))
+  (newline)
+  (println (intersection #{:a :b :c} #{:c :d :e}))
+  (newline)
+  (println (index ys [:b]))
+  (newline))
