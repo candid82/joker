@@ -16,7 +16,7 @@ var isblank_ Proc = func(_args []Object) Object {
 	case _c == 1:
 		s := ExtractObject(_args, 0)
 		_res := isBlank(s)
-		return MakeBool(_res)
+		return MakeBoolean(_res)
 
 	default:
 		PanicArity(_c)
@@ -45,7 +45,7 @@ var isends_with_ Proc = func(_args []Object) Object {
 		s := ExtractString(_args, 0)
 		substr := ExtractString(_args, 1)
 		_res := strings.HasSuffix(s, substr)
-		return MakeBool(_res)
+		return MakeBoolean(_res)
 
 	default:
 		PanicArity(_c)
@@ -75,7 +75,7 @@ var isincludes_ Proc = func(_args []Object) Object {
 		s := ExtractString(_args, 0)
 		substr := ExtractString(_args, 1)
 		_res := strings.Contains(s, substr)
-		return MakeBool(_res)
+		return MakeBoolean(_res)
 
 	default:
 		PanicArity(_c)
@@ -282,7 +282,7 @@ var isstarts_with_ Proc = func(_args []Object) Object {
 		s := ExtractString(_args, 0)
 		substr := ExtractString(_args, 1)
 		_res := strings.HasPrefix(s, substr)
-		return MakeBool(_res)
+		return MakeBoolean(_res)
 
 	default:
 		PanicArity(_c)

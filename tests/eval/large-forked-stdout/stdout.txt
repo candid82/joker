@@ -1,0 +1,1 @@
+this is stdout; just one line.

@@ -1,0 +1,2 @@
+tests/linter/case/input.clj:5:21: Parse error: Duplicate case test constant: (2 4)
+tests/linter/case/input.clj:5:32: Parse error: Duplicate case test constant: 4

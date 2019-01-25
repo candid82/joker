@@ -153,24 +153,24 @@ func EnsureRegex(args []Object, index int) Regex {
 	}
 }
 
-func AssertBool(obj Object, msg string) Bool {
+func AssertBoolean(obj Object, msg string) Boolean {
 	switch c := obj.(type) {
-	case Bool:
+	case Boolean:
 		return c
 	default:
 		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "Bool", obj.GetType().ToString(false))
+			msg = fmt.Sprintf("Expected %s, got %s", "Boolean", obj.GetType().ToString(false))
 		}
 		panic(RT.NewError(msg))
 	}
 }
 
-func EnsureBool(args []Object, index int) Bool {
+func EnsureBoolean(args []Object, index int) Boolean {
 	switch c := args[index].(type) {
-	case Bool:
+	case Boolean:
 		return c
 	default:
-		panic(RT.NewArgTypeError(index, c, "Bool"))
+		panic(RT.NewArgTypeError(index, c, "Boolean"))
 	}
 }
 

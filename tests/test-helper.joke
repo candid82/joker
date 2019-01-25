@@ -19,7 +19,7 @@
   (:require [joker.string :as s]
             [joker.test :refer [is do-report]]))
 
-(let [nl (with-out-str (newline))] 
+(let [nl (with-out-str (newline))]
   (defn platform-newlines [s] (s/replace s "\n" nl)))
 
 (defn temp-ns

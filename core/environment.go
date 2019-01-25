@@ -97,8 +97,8 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.classPath.Value = NIL
 	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
-	res.printReadably.Value = Bool{B: true}
-	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Bool{B: LINTER_MODE}
+	res.printReadably.Value = Boolean{B: true}
+	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Boolean{B: LINTER_MODE}
 	res.CoreNamespace.Intern(MakeSymbol("*linter-config*")).Value = EmptyArrayMap()
 	return res
 }

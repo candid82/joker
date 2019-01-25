@@ -1,6 +1,6 @@
 //go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
 
@@ -97,7 +97,7 @@ type (
 		InfoHolder
 		r big.Rat
 	}
-	Bool struct {
+	Boolean struct {
 		InfoHolder
 		B bool
 	}
@@ -259,7 +259,7 @@ type (
 		Atom           *Type
 		BigFloat       *Type
 		BigInt         *Type
-		Bool           *Type
+		Boolean        *Type
 		Time           *Type
 		Buffer         *Type
 		Char           *Type
@@ -351,7 +351,7 @@ func init() {
 		Atom:           regRefType("Atom", (*Atom)(nil)),
 		BigFloat:       regRefType("BigFloat", (*BigFloat)(nil)),
 		BigInt:         regRefType("BigInt", (*BigInt)(nil)),
-		Bool:           regType("Bool", (*Bool)(nil)),
+		Boolean:        regType("Boolean", (*Boolean)(nil)),
 		Time:           regType("Time", (*Time)(nil)),
 		Buffer:         regRefType("Buffer", (*Buffer)(nil)),
 		Char:           regType("Char", (*Char)(nil)),
@@ -750,11 +750,11 @@ func (fn *Fn) Call(args []Object) Object {
 
 func compare(c Callable, a, b Object) int {
 	switch r := c.Call([]Object{a, b}).(type) {
-	case Bool:
+	case Boolean:
 		if r.B {
 			return -1
 		}
-		if AssertBool(c.Call([]Object{b, a}), "").B {
+		if AssertBoolean(c.Call([]Object{b, a}), "").B {
 			return 1
 		}
 		return 0
@@ -1059,8 +1059,8 @@ func (c Char) Compare(other Object) int {
 	return 0
 }
 
-func MakeBool(b bool) Bool {
-	return Bool{B: b}
+func MakeBoolean(b bool) Boolean {
+	return Boolean{B: b}
 }
 
 func MakeTime(t time.Time) Time {
@@ -1131,28 +1131,28 @@ func (i Int) Compare(other Object) int {
 	return CompareNumbers(i, AssertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
 }
 
-func (b Bool) ToString(escape bool) string {
+func (b Boolean) ToString(escape bool) string {
 	return fmt.Sprintf("%t", b.B)
 }
 
-func (b Bool) Equals(other interface{}) bool {
+func (b Boolean) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case Bool:
+	case Boolean:
 		return b.B == other.B
 	default:
 		return false
 	}
 }
 
-func (b Bool) GetType() *Type {
-	return TYPE.Bool
+func (b Boolean) GetType() *Type {
+	return TYPE.Boolean
 }
 
-func (b Bool) Native() interface{} {
+func (b Boolean) Native() interface{} {
 	return b.B
 }
 
-func (b Bool) Hash() uint32 {
+func (b Boolean) Hash() uint32 {
 	h := getHash()
 	var bs = make([]byte, 1)
 	if b.B {
@@ -1164,8 +1164,8 @@ func (b Bool) Hash() uint32 {
 	return h.Sum32()
 }
 
-func (b Bool) Compare(other Object) int {
-	b2 := AssertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
+func (b Boolean) Compare(other Object) int {
+	b2 := AssertBoolean(other, "Cannot compare Boolean and "+other.GetType().ToString(false))
 	if b.B == b2.B {
 		return 0
 	}

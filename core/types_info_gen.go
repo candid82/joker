@@ -72,7 +72,7 @@ func (x Int) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
-func (x Bool) WithInfo(info *ObjectInfo) Object {
+func (x Boolean) WithInfo(info *ObjectInfo) Object {
 	x.info = info
 	return x
 }

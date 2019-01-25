@@ -3,13 +3,13 @@
     :doc "Implements simple functions to manipulate strings."}
   string)
 
-(defn ^Bool ends-with?
+(defn ^Boolean ends-with?
   "True if s ends with substr."
   {:added "1.0"
   :go "strings.HasSuffix(s, substr)"}
   [^String s ^String substr])
 
-(defn ^Bool starts-with?
+(defn ^Boolean starts-with?
   "True if s starts with substr."
   {:added "1.0"
   :go "strings.HasPrefix(s, substr)"}
@@ -95,7 +95,7 @@
   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
   [^String s])
 
-(defn ^Bool blank?
+(defn ^Boolean blank?
   "True if s is nil, empty, or contains only whitespace."
   {:added "1.0"
   :go "isBlank(s)"}
@@ -118,7 +118,7 @@
   :go "escape(s, cmap)"}
   [^String s ^Callable cmap])
 
-(defn ^Bool includes?
+(defn ^Boolean includes?
   "True if s includes substr."
   {:added "1.0"
   :go "strings.Contains(s, substr)"}
