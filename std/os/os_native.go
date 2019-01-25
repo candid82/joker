@@ -52,7 +52,7 @@ func sh(dir string, name string, args []string) Object {
 	stdoutString := bufOut.String()
 	stderrString := bufErr.String()
 	res := EmptyArrayMap()
-	res.Add(MakeKeyword("success"), Bool{B: err == nil})
+	res.Add(MakeKeyword("success"), Boolean{B: err == nil})
 
 	var exitCode int
 	if err != nil {
@@ -96,7 +96,7 @@ func readDir(dirname string) Object {
 		m.Add(name, MakeString(f.Name()))
 		m.Add(size, MakeInt(int(f.Size())))
 		m.Add(mode, MakeInt(int(f.Mode())))
-		m.Add(isDir, MakeBool(f.IsDir()))
+		m.Add(isDir, MakeBoolean(f.IsDir()))
 		m.Add(modTime, MakeInt(int(f.ModTime().Unix())))
 		res = res.Conjoin(m)
 	}
@@ -123,6 +123,6 @@ func stat(filename string) Object {
 	m.Add(MakeKeyword("size"), MakeInt(int(info.Size())))
 	m.Add(MakeKeyword("mode"), MakeInt(int(info.Mode())))
 	m.Add(MakeKeyword("modtime"), MakeTime(info.ModTime()))
-	m.Add(MakeKeyword("dir?"), MakeBool(info.IsDir()))
+	m.Add(MakeKeyword("dir?"), MakeBoolean(info.IsDir()))
 	return m
 }

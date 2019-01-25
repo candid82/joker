@@ -414,9 +414,9 @@ func readSymbol(reader *Reader, first rune) Object {
 	case str == "nil":
 		return MakeReadObject(reader, NIL)
 	case str == "true":
-		return MakeReadObject(reader, Bool{B: true})
+		return MakeReadObject(reader, Boolean{B: true})
 	case str == "false":
-		return MakeReadObject(reader, Bool{B: false})
+		return MakeReadObject(reader, Boolean{B: false})
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}
@@ -663,7 +663,7 @@ func readMeta(reader *Reader) *ArrayMap {
 	case String, Symbol:
 		return &ArrayMap{arr: []Object{DeriveReadObject(obj, KEYWORDS.tag), obj}}
 	case Keyword:
-		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{B: true})}}
+		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Boolean{B: true})}}
 	default:
 		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
@@ -750,7 +750,7 @@ func isSelfEvaluating(obj Object) bool {
 		return true
 	}
 	switch obj.(type) {
-	case Bool, Double, Int, Char, Keyword, String:
+	case Boolean, Double, Int, Char, Keyword, String:
 		return true
 	default:
 		return false

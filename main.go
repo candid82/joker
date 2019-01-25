@@ -247,7 +247,7 @@ func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	LINTER_MODE = true
 	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
-	lm.Value = Bool{B: true}
+	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
 	ProcessLinterData(dialect)
 }

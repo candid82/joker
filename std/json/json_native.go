@@ -11,7 +11,7 @@ func fromObject(obj Object) interface{} {
 	switch obj := obj.(type) {
 	case Keyword:
 		return obj.ToString(false)[1:]
-	case Bool:
+	case Boolean:
 		return obj.B
 	case Number:
 		return obj.Double().D
@@ -50,7 +50,7 @@ func toObject(v interface{}) Object {
 	case float64:
 		return Double{D: v}
 	case bool:
-		return Bool{B: v}
+		return Boolean{B: v}
 	case nil:
 		return NIL
 	case []interface{}:

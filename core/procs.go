@@ -151,19 +151,19 @@ var procWithMeta Proc = func(args []Object) Object {
 var procIsZero Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.IsZero(n)}
+	return Boolean{B: ops.IsZero(n)}
 }
 
 var procIsPos Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Gt(n, Int{I: 0})}
+	return Boolean{B: ops.Gt(n, Int{I: 0})}
 }
 
 var procIsNeg Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Lt(n, Int{I: 0})}
+	return Boolean{B: ops.Lt(n, Int{I: 0})}
 }
 
 var procAdd Proc = func(args []Object) Object {
@@ -289,7 +289,7 @@ var procBitFlip Proc = func(args []Object) Object {
 
 var procBitTest Proc = func(args []Object) Object {
 	x, y := AssertInts(args)
-	return Bool{B: x.I&(1<<uint(y.I)) != 0}
+	return Boolean{B: x.I&(1<<uint(y.I)) != 0}
 }
 
 var procBitShiftLeft Proc = func(args []Object) Object {
@@ -385,7 +385,7 @@ var procRand Proc = func(args []Object) Object {
 }
 
 var procIsSpecialSymbol Proc = func(args []Object) Object {
-	return Bool{B: IsSpecialSymbol(args[0])}
+	return Boolean{B: IsSpecialSymbol(args[0])}
 }
 
 var procSubs Proc = func(args []Object) Object {
@@ -492,7 +492,7 @@ var procEmpty = func(args []Object) Object {
 
 var procIsBound = func(args []Object) Object {
 	vr := EnsureVar(args, 0)
-	return Bool{B: vr.Value != nil}
+	return Boolean{B: vr.Value != nil}
 }
 
 func toNative(obj Object) interface{} {
@@ -570,7 +570,7 @@ var procSeq Proc = func(args []Object) Object {
 var procIsInstance Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	t := EnsureType(args, 0)
-	return Bool{B: IsInstance(t, args[1])}
+	return Boolean{B: IsInstance(t, args[1])}
 }
 
 var procAssoc Proc = func(args []Object) Object {
@@ -578,7 +578,7 @@ var procAssoc Proc = func(args []Object) Object {
 }
 
 var procEquals Proc = func(args []Object) Object {
-	return Bool{B: args[0].Equals(args[1])}
+	return Boolean{B: args[0].Equals(args[1])}
 }
 
 var procCount Proc = func(args []Object) Object {
@@ -723,7 +723,7 @@ var procForce Proc = func(args []Object) Object {
 }
 
 var procIdentical Proc = func(args []Object) Object {
-	return Bool{B: args[0] == args[1]}
+	return Boolean{B: args[0] == args[1]}
 }
 
 var procCompare Proc = func(args []Object) Object {
@@ -780,7 +780,7 @@ var procChar Proc = func(args []Object) Object {
 }
 
 var procBoolean Proc = func(args []Object) Object {
-	return Bool{B: toBool(args[0])}
+	return Boolean{B: toBool(args[0])}
 }
 
 var procNumerator Proc = func(args []Object) Object {
@@ -848,31 +848,31 @@ var procNth Proc = func(args []Object) Object {
 var procLt Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
 }
 
 var procLte Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
 }
 
 var procGt Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
 }
 
 var procGte Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
 }
 
 var procEq Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return MakeBool(numbersEq(a, b))
+	return MakeBoolean(numbersEq(a, b))
 }
 
 var procMax Proc = func(args []Object) Object {
@@ -926,9 +926,9 @@ var procContains Proc = func(args []Object) Object {
 	case Gettable:
 		ok, _ := c.Get(args[1])
 		if ok {
-			return Bool{B: true}
+			return Boolean{B: true}
 		}
-		return Bool{B: false}
+		return Boolean{B: false}
 	}
 	panic(RT.NewError("contains? not supported on type " + args[0].GetType().ToString(false)))
 }
@@ -1361,7 +1361,7 @@ var procShuffle Proc = func(args []Object) Object {
 }
 
 var procIsRealized Proc = func(args []Object) Object {
-	return Bool{B: EnsurePending(args, 0).IsRealized()}
+	return Boolean{B: EnsurePending(args, 0).IsRealized()}
 }
 
 var procDeriveInfo Proc = func(args []Object) Object {
@@ -1480,11 +1480,11 @@ var procInternFakeVar Proc = func(args []Object) Object {
 
 var procParse Proc = func(args []Object) Object {
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
-	lm.Value = Bool{B: true}
+	lm.Value = Boolean{B: true}
 	LINTER_MODE = true
 	defer func() {
 		LINTER_MODE = false
-		lm.Value = Bool{B: false}
+		lm.Value = Boolean{B: false}
 	}()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	res := Parse(args[0], parseContext)
@@ -1603,7 +1603,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 	}
 }
 
-var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Bool{B: true}).(Map)
+var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Boolean{B: true}).(Map)
 
 func intern(name string, proc Proc) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
@@ -1864,7 +1864,7 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Bool{B: true},
+	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Boolean{B: true},
 		MakeMeta(nil, "When set to logical false, assert is a noop. Defaults to true.", "1.0"))
 
 	intern("list__", procList)

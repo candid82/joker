@@ -252,7 +252,7 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	}
 	// isMacro can be set by set-macro__ during parse stage
 	if expr.vr.isMacro {
-		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	}
 	return expr.vr
 }
@@ -372,7 +372,7 @@ func toBool(obj Object) bool {
 	switch obj := obj.(type) {
 	case Nil:
 		return false
-	case Bool:
+	case Boolean:
 		return obj.B
 	default:
 		return true

@@ -1246,9 +1246,9 @@ func checkArglist(arglist Seq, passedArgsCount int) bool {
 
 func setMacroMeta(vr *Var) {
 	if vr.meta == nil {
-		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	} else {
-		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	}
 }
 
@@ -1650,7 +1650,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	var res Expr
 	canHaveMeta := false
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex, *Type:
+	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, Regex, *Type:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true
