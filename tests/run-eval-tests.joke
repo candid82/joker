@@ -9,6 +9,7 @@
       alt)))
 
 (def exit-code 0)
+(def subdir-failures (atom 0))
 
 (defn have-option
   "Quick and dirty options parser."
@@ -33,7 +34,7 @@
       exe (str pwd "/joker")]
   (doseq [test-dir test-dirs]
     (when verbose
-      (println (str "Running subtest " test-dir)))
+      (println (str "Running test in subdirectory " test-dir)))
     (let [dir (str "tests/eval/" test-dir "/")
           filename "input.joke"
           res (joker.os/sh-from dir exe filename) ; Someday add: :in "input.txt" (no :in support yet)
@@ -70,7 +71,11 @@
         (when-not (= expected-rc rc)
           (println "EXPECTED RC:" expected-rc)
           (println "ACTUAL RC:" rc))
-        (var-set #'exit-code 1)))))
+        (var-set #'exit-code 1)
+        (swap! subdir-failures inc)))))
+
+(when (> @subdir-failures 0)
+  (println (str "There were " @subdir-failures " failures and/or errors in subdirectory tests; returning exit code 1")))
 
 ;; Load all the tests/eval/*.joke files:
 (let [test-files (->> (joker.os/ls "tests/eval")
@@ -85,7 +90,7 @@
 ;; Run the loaded tests.
 (let [res (run-all-tests)]
   (when (< 0 (+ (:fail res) (:error res)))
-    (println "There were failures and/or errors; returning exit code 1")
+    (println "There were failures and/or errors in namespace tests; returning exit code 1")
     (var-set #'exit-code 1)))
 
 (joker.os/exit exit-code)
