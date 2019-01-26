@@ -1644,7 +1644,8 @@
   of second items in each coll, until any one of the colls is
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
-  {:added "1.0"}
+  {:added "1.0"
+  :tag Seq}
   ([^Callable f ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]

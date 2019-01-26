@@ -101,7 +101,12 @@ func (expr *DefExpr) Dump(pos bool) Map {
 }
 
 func (expr *CallExpr) InferType() *Type {
-	return nil
+	switch expr := expr.callable.(type) {
+	case *VarRefExpr:
+		return expr.vr.taggedType
+	default:
+		return nil
+	}
 }
 
 func (expr *CallExpr) Dump(pos bool) Map {

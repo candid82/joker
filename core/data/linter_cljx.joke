@@ -231,6 +231,7 @@
 
 (def __map__ map)
 (defn map
+  {:tag Seq}
   ([^Callable x])
   ([^Callable x ^Seqable coll]
    (__map__ x coll))

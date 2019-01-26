@@ -1,0 +1,2 @@
+tests/linter/types-3/input.clj:1:6: Parse warning: arg[0] of core/inc must have type Number, got Boolean
+tests/linter/types-3/input.clj:2:6: Parse warning: arg[0] of core/inc must have type Number, got Seq
