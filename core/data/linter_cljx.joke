@@ -179,9 +179,9 @@
 
 ;; Redefine some core functions with type hints
 
-(defn cons [x ^Seqable seq] (cons__ x seq))
+(defn cons ^Seq [x ^Seqable seq] (cons__ x seq))
 (defn first [^Seqable coll] (first__ coll))
-(defn next [^Seqable coll] (next__ coll))
+(defn next ^Seq [^Seqable coll] (next__ coll))
 (defn rest [^Seqable coll] (rest__ coll))
 (defn seq [^Seqable coll] (seq__ coll))
 (defn instance? [^Type c x] (instance?__ c x))
@@ -231,9 +231,8 @@
 
 (def __map__ map)
 (defn map
-  {:tag Seq}
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__map__ x coll))
   ([^Callable x c & colls]
    (apply __map__ x c colls)))

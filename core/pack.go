@@ -683,6 +683,12 @@ func (expr *FnArityExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = expr.Pos().Pack(p, env)
 	p = packSymbolSeq(p, expr.args, env)
 	p = packSeq(p, expr.body, env)
+	if expr.taggedType != nil {
+		p = append(p, NOT_NULL)
+		p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.taggedType.name)))
+	} else {
+		p = append(p, NULL)
+	}
 	return p
 }
 
@@ -691,10 +697,20 @@ func unpackFnArityExpr(p []byte, header *PackHeader) (*FnArityExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	args, p := unpackSymbolSeq(p, header)
 	body, p := unpackSeq(p, header)
+	var taggedType *Type
+	if p[0] == NULL {
+		p = p[1:]
+	} else {
+		p = p[1:]
+		var i uint16
+		i, p = extractUInt16(p)
+		taggedType = TYPES[header.Strings[i]]
+	}
 	res := &FnArityExpr{
-		Position: pos,
-		body:     body,
-		args:     args,
+		Position:   pos,
+		body:       body,
+		args:       args,
+		taggedType: taggedType,
 	}
 	return res, p
 }

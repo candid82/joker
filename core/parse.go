@@ -80,8 +80,9 @@ type (
 	}
 	FnArityExpr struct {
 		Position
-		args []Symbol
-		body []Expr
+		args       []Symbol
+		body       []Expr
+		taggedType *Type
 	}
 	FnExpr struct {
 		Position
@@ -807,9 +808,10 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
 	arity := FnArityExpr{
-		Position: GetPosition(sig),
-		args:     args,
-		body:     parseBody(body, ctx),
+		Position:   GetPosition(sig),
+		args:       args,
+		body:       parseBody(body, ctx),
+		taggedType: getTaggedType(params.(Meta)),
 	}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -1213,18 +1215,24 @@ func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 	return res
 }
 
+func selectArity(expr *FnExpr, passedArgsCount int) *FnArityExpr {
+	for _, arity := range expr.arities {
+		if len(arity.args) == passedArgsCount {
+			return &arity
+		}
+	}
+	if expr.variadic != nil && passedArgsCount >= len(expr.variadic.args)-1 {
+		return expr.variadic
+	}
+	return nil
+}
+
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) bool {
 	passedArgsCount := len(call.args)
 	if isMacro {
 		passedArgsCount += 2
 	}
-	for _, arity := range expr.arities {
-		if len(arity.args) == passedArgsCount {
-			return checkTypes(arity.args, call)
-		}
-	}
-	v := expr.variadic
-	if v != nil && passedArgsCount >= len(v.args)-1 {
+	if v := selectArity(expr, passedArgsCount); v != nil {
 		return checkTypes(v.args, call)
 	}
 	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))

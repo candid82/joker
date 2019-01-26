@@ -14,14 +14,16 @@
 (def
   ^{:arglists '([& items])
     :doc "Creates a new list containing the items."
-    :added "1.0"}
+    :added "1.0"
+    :tag List}
   list list__)
 
 (def
   ^{:arglists '([x seq])
     :doc "Returns a new seq where x is the first element and seq is
          the rest."
-         :added "1.0"}
+         :added "1.0"
+         :tag Seq}
   cons cons__)
 
 ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
@@ -57,7 +59,8 @@
   ^{:arglists '([coll])
     :doc "Returns a seq of the items after the first. Calls seq on its
          argument.  If there are no more items, returns nil."
-         :added "1.0"}
+         :added "1.0"
+         :tag Seq}
   next next__)
 
 (def
@@ -407,7 +410,7 @@
   "Returns true if x is logical false, false otherwise."
   {:tag Boolean
   :added "1.0"}
-  [x] (if x false true))
+  ^Boolean [x] (if x false true))
 
 (defn some?
   "Returns true if x is not nil, false otherwise."
