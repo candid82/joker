@@ -108,7 +108,7 @@ func (expr *CallExpr) InferType() *Type {
 		}
 		switch f := callableExpr.vr.Value.(type) {
 		case *Fn:
-			if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil {
+			if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil && arity.taggedType != nil {
 				return arity.taggedType
 			}
 		}

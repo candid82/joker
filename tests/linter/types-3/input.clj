@@ -1,6 +1,18 @@
 (inc (list 1))
 (inc (cons 1 []))
 (inc (next []))
+(inc (rest []))
+(inc (conj [] 1))
+(inc (nfirst []))
+(inc (nnext []))
+(inc (seq []))
+(inc (instance? Seq []))
+(inc (seq? []))
+(inc (char? []))
+(inc (map? []))
+(inc (vector? []))
+(inc (ex-info "" {}))
+(inc (assoc [] 0 1))
 
 
 (inc (not 1))

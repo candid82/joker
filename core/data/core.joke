@@ -67,7 +67,8 @@
   ^{:arglists '([coll])
     :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
          argument."
-         :added "1.0"}
+         :added "1.0"
+         :tag Seq}
   rest rest__)
 
 (def
@@ -75,7 +76,8 @@
     :doc "conj[oin]. Returns a new collection with the xs
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
-         :added "1.0"}
+         :added "1.0"
+         :tag Collection}
   ; TODO: types
   conj (fn conj
          ([coll x] (conj__ coll x))
@@ -99,7 +101,8 @@
 (def
   ^{:doc "Same as (next (first x))"
     :arglists '([x])
-    :added "1.0"}
+    :added "1.0"
+    :tag Seq}
   nfirst (fn nfirst [^Seqable x] (next (first x))))
 
 (def
@@ -111,57 +114,61 @@
 (def
   ^{:doc "Same as (next (next x))"
     :arglists '([x])
-    :added "1.0"}
+    :added "1.0"
+    :tag Seq}
   nnext (fn nnext [^Seqable x] (next (next x))))
 
 (def
   ^{:arglists '([coll])
     :doc "Returns a seq on the collection. If the collection is
          empty, returns nil.  (seq nil) returns nil."
-         :added "1.0"}
+         :added "1.0"
+         :tag Seq}
   seq seq__)
 
 (def
   ^{:arglists '([c x])
     :doc "Evaluates x and tests if it is an instance of type
          c. Returns true or false"
-         :added "1.0"}
+         :added "1.0"
+         :tag Boolean}
   instance? instance?__)
 
 (def
   ^{:arglists '([x])
     :doc "Returns true if x is a sequence"
     :added "1.0"}
-  seq? (fn seq? [x] (instance? Seq x)))
+  seq? (fn seq? ^Boolean [x] (instance? Seq x)))
 
 (def
   ^{:arglists '([x])
     :doc "Returns true if x is a Char"
     :added "1.0"}
-  char? (fn char? [x] (instance? Char x)))
+  char? (fn char? ^Boolean [x] (instance? Char x)))
 
 (def
   ^{:arglists '([x])
     :doc "Returns true if x is a String"
     :added "1.0"}
-  string? (fn string? [x] (instance? String x)))
+  string? (fn string? ^Boolean [x] (instance? String x)))
 
 (def
   ^{:arglists '([x])
     :doc "Returns true if x is a map"
     :added "1.0"}
-  map? (fn map? [x] (instance? Map x)))
+  map? (fn map? ^Boolean [x] (instance? Map x)))
 
 (def
   ^{:arglists '([x])
     :doc "Returns true if x is a vector"
     :added "1.0"}
-  vector? (fn vector? [x] (instance? Vector x)))
+  vector? (fn vector? ^Boolean [x] (instance? Vector x)))
 
 (def
   ^{:arglists '([msg map] [msg map cause])
     :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
-    :added "1.0"}
+    :added "1.0"
+    :tag ExInfo}
   ex-info ex-info__)
 
 (def
@@ -173,8 +180,8 @@
          :added "1.0"}
   assoc
   (fn assoc
-    ([^Associative map key val] (assoc__ map key val))
-    ([^Associative map key val & kvs]
+    (^Associative [^Associative map key val] (assoc__ map key val))
+    (^Associative [^Associative map key val & kvs]
      (let [ret (assoc__ map key val)]
        (if kvs
          (if (next kvs)
