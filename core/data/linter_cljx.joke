@@ -189,7 +189,7 @@
   (^ExInfo [^String msg ^Map map] (ex-info__ msg map))
   (^ExInfo [^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
 (defn with-meta [^Meta obj ^Map m] (with-meta__ obj m))
-(defn vec [^Seqable coll] (vec__ coll))
+(defn vec ^Vector [^Seqable coll] (vec__ coll))
 (defn not-every? [^Callable pred ^Seqable coll] (not (every? pred coll)))
 (defn not-any? [^Callable pred ^Seqable coll] (not (some pred coll)))
 (defn read-string [^String s] (read-string__ s))

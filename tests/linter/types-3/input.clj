@@ -13,7 +13,22 @@
 (inc (vector? []))
 (inc (ex-info "" {}))
 (inc (assoc [] 0 1))
-
-
+(inc (meta []))
+(inc (butlast []))
+(inc (vec []))
+(inc (vector 1))
+(inc (hash-set 1))
+(inc (nil? 1))
+(inc (false? 1))
+(inc (true? 1))
+(inc (boolean? 1))
+(inc (any? 1))
 (inc (not 1))
+(inc (some? 1))
+(inc (str))
+(inc (symbol? 1))
+(inc (keyword? 1))
+(inc (symbol 1))
+
+
 (inc (map inc nil))

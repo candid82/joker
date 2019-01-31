@@ -192,7 +192,8 @@
 (def
   ^{:arglists '([obj])
     :doc "Returns the metadata of obj, returns nil if there is no metadata."
-    :added "1.0"}
+    :added "1.0"
+    :tag Map}
   meta meta__)
 
 (def
@@ -243,7 +244,7 @@
   ^{:arglists '([coll])
     :doc "Return a seq of all but the last item in coll, in linear time."
     :added "1.0"}
-  butlast (fn butlast [^Seqable s]
+  butlast (fn butlast ^Seq [^Seqable s]
             (loop [ret [] s s]
               (if (next s)
                 (recur (conj ret (first s)) (next s))
@@ -300,13 +301,14 @@
 (def
   ^{:arglists '([coll])
     :doc "Creates a new vector containing the contents of coll."
-    :added "1.0"}
+    :added "1.0"
+    :tag Vector}
   vec vec__)
 
 (defn vector
   "Creates a new vector containing the args."
   {:added "1.0"}
-  [& args]
+  ^Vector [& args]
   (vec args))
 
 (def
@@ -314,14 +316,16 @@
     :doc "keyval => key val
          Returns a new hash map with supplied mappings.  If any keys are
          equal, they are handled as if by repeated uses of assoc."
-         :added "1.0"}
+         :added "1.0"
+         :tag HashMap}
   hash-map hash-map__)
 
 (def
   ^{:arglists '([& keys])
     :doc "Returns a new hash set with supplied keys.  Any equal keys are
          handled as if by repeated uses of conj."
-         :added "1.0"}
+         :added "1.0"
+         :tag MapSet}
   hash-set hash-set__)
 
 (defn nil?
@@ -437,20 +441,19 @@
 (defn symbol?
   "Return true if x is a Symbol"
   {:added "1.0"}
-  [x] (instance? Symbol x))
+  ^Boolean [x] (instance? Symbol x))
 
 (defn keyword?
   "Return true if x is a Keyword"
   {:added "1.0"}
-  [x] (instance? Keyword x))
+  ^Boolean [x] (instance? Keyword x))
 
 (defn symbol
   "Returns a Symbol with the given namespace and name."
-  {:tag Symbol
-  :added "1.0"}
+  {:added "1.0"}
   ;; TODO: types
-  ([name] (if (symbol? name) name (symbol__ name)))
-  ([ns name] (symbol__ ns name)))
+  (^Symbol [name] (if (symbol? name) name (symbol__ name)))
+  (^Symbol [ns name] (symbol__ ns name)))
 
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
