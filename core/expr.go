@@ -103,9 +103,6 @@ func (expr *DefExpr) Dump(pos bool) Map {
 func (expr *CallExpr) InferType() *Type {
 	switch callableExpr := expr.callable.(type) {
 	case *VarRefExpr:
-		if callableExpr.vr.isMacro {
-			return nil
-		}
 		switch f := callableExpr.vr.Value.(type) {
 		case *Fn:
 			if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil && arity.taggedType != nil {

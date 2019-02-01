@@ -460,8 +460,8 @@
   supplied, the name is prefix# where # is some unique number. If
   prefix is not supplied, the prefix is 'G__'."
   {:added "1.0"}
-  ([] (gensym "G__"))
-  ([prefix-string] (gensym__ prefix-string)))
+  (^Symbol [] (gensym "G__"))
+  (^Symbol [^String prefix-string] (gensym__ prefix-string)))
 
 (def println-err)
 (def println-linter__)
@@ -489,10 +489,10 @@
   {:tag Keyword
   :added "1.0"}
   ;; TODO: types
-  ([name] (cond (keyword? name) name
-            (symbol? name) (keyword__ name)
-            (string? name) (keyword__ name)))
-  ([ns name] (keyword__ ns name)))
+  (^Keyword [name] (cond (keyword? name) name
+                     (symbol? name) (keyword__ name)
+                     (string? name) (keyword__ name)))
+  (^Keyword [ns name] (keyword__ ns name)))
 
 (defn spread
   {:private true}
@@ -506,11 +506,11 @@
   "Creates a new list containing the items prepended to the rest, the
   last of which will be treated as a sequence."
   {:added "1.0"}
-  ([^Seqable args] (seq args))
-  ([a ^Seqable args] (cons a args))
-  ([a b ^Seqable args] (cons a (cons b args)))
-  ([a b c ^Seqable args] (cons a (cons b (cons c args))))
-  ([a b c d & more]
+  (^Seq [^Seqable args] (seq args))
+  (^Seq [a ^Seqable args] (cons a args))
+  (^Seq [a b ^Seqable args] (cons a (cons b args)))
+  (^Seq [a b c ^Seqable args] (cons a (cons b (cons c args))))
+  (^Seq [a b c d & more]
    (cons a (cons b (cons c (cons d (spread more)))))))
 
 (defn apply
@@ -540,27 +540,27 @@
   is called, and will cache the result and return it on all subsequent
   seq calls. See also - realized?"
   {:added "1.0"}
-  [& body]
+  ^Seqable [& body]
   (list 'joker.core/lazy-seq__ (list* 'fn [] body)))
 
 (defn chunked-seq?
   "Always returns false because chunked sequences are not supported"
   {:added "1.0"}
-  [s]
+  ^Boolean [s]
   false)
 
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   {:added "1.0"}
-  ([] (lazy-seq nil))
-  ([^Seqable x] (lazy-seq x))
-  ([^Seqable x ^Seqable y]
+  (^Seq [] (lazy-seq nil))
+  (^Seq [^Seqable x] (lazy-seq x))
+  (^Seq [^Seqable x ^Seqable y]
    (lazy-seq
     (let [s (seq x)]
       (if s
         (cons (first s) (concat (rest s) y))
         y))))
-  ([^Seqable x ^Seqable y & zs]
+  (^Seq [^Seqable x ^Seqable y & zs]
    (let [cat (fn cat [xys zs]
                (lazy-seq
                 (let [xys (seq xys)]
@@ -577,13 +577,13 @@
   will cache the result and return it on all subsequent force
   calls. See also - realized?"
   {:added "1.0"}
-  [& body]
+  ^Delay [& body]
   (list 'joker.core/delay__ (list* 'fn [] body)))
 
 (defn delay?
   "returns true if x is a Delay created with delay"
   {:added "1.0"}
-  [x]
+  ^Boolean [x]
   (instance? Delay x))
 
 (defn force
@@ -603,7 +603,7 @@
 (defn identical?
   "Tests if 2 arguments are the same object"
   {:added "1.0"}
-  [x y]
+  ^Boolean [x y]
   (identical__ x y))
 
 (defn =
@@ -612,9 +612,9 @@
   structures define = as a value, not an identity,
   comparison."
   {:added "1.0"}
-  ([x] true)
-  ([x y] (=__ x y))
-  ([x y & more]
+  (^Boolean [x] true)
+  (^Boolean [x y] (=__ x y))
+  (^Boolean [x y & more]
    (if (=__ x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -623,11 +623,10 @@
 
 (defn not=
   "Same as (not (= obj1 obj2))"
-  {:tag Boolean
-  :added "1.0"}
-  ([x] false)
-  ([x y] (not (= x y)))
-  ([x y & more]
+  {:added "1.0"}
+  (^Boolean [x] false)
+  (^Boolean [x y] (not (= x y)))
+  (^Boolean [x y & more]
    (not (apply = x y more))))
 
 (defn compare
@@ -636,7 +635,7 @@
   y. Works for nil, and compares numbers and collections in a type-independent manner. x
   must implement Comparable"
   {:added "1.0"}
-  [x y] (compare__ x y))
+  ^Int [x y] (compare__ x y))
 
 (defmacro and
   "Evaluates exprs one at a time, from left to right. If a form
@@ -665,20 +664,20 @@
 (defn zero?
   "Returns true if x is zero, else false"
   {:added "1.0"}
-  [^Number x] (zero?__ x))
+  ^Boolean [^Number x] (zero?__ x))
 
 (defn count
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings"
   {:added "1.0"}
   ;; TODO: types
-  [coll] (count__ coll))
+  ^Int [coll] (count__ coll))
 
 (defn int
   "Coerce to int"
   {:added "1.0"}
   ;; TODO: types
-  [x] (int__ x))
+  ^Int [x] (int__ x))
 
 (defn nth
   "Returns the value at the index. get returns nil if index out of
@@ -693,9 +692,9 @@
   "Returns non-nil if nums are in monotonically increasing order,
   otherwise false."
   {:added "1.0"}
-  ([^Number x] true)
-  ([^Number x ^Number y] (<__ x y))
-  ([^Number x ^Number y & more]
+  (^Boolean [^Number x] true)
+  (^Boolean [^Number x ^Number y] (<__ x y))
+  (^Boolean [^Number x ^Number y & more]
    (if (< x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -706,13 +705,13 @@
   "Returns a number one greater than num. Supports arbitrary precision.
   See also: inc"
   {:added "1.0"}
-  [^Number x] (inc'__ x))
+  ^Number [^Number x] (inc'__ x))
 
 (defn inc
   "Returns a number one greater than num. Does not auto-promote
   ints, will overflow. See also: inc'"
   {:added "1.0"}
-  [^Number x] (inc__ x))
+  ^Number [^Number x] (inc__ x))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
@@ -2140,7 +2139,7 @@
 (defn prn
   "Same as pr followed by (newline). Observes *flush-on-newline*"
   {:added "1.0"}
-  [& more]
+  ^Nil [& more]
   (apply pr more)
   (newline)
   (when *flush-on-newline*
@@ -2150,14 +2149,14 @@
   "Prints the object(s) to the output stream that is the current value
   of *out*.  print and println produce output for human consumption."
   {:added "1.0"}
-  [& more]
+  ^Nil [& more]
   (binding [*print-readably* nil]
     (apply pr more)))
 
 (defn println
   "Same as print followed by (newline)"
   {:added "1.0"}
-  [& more]
+  ^Nil [& more]
   (binding [*print-readably* nil]
     (apply prn more)))
 
@@ -2863,7 +2862,7 @@
 (defn print-err
   "print to *err*"
   {:added "1.0"}
-  [& xs]
+  ^Nil [& xs]
   (binding [*out* *err*]
     (apply print xs)))
 

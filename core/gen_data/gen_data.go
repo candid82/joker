@@ -87,7 +87,6 @@ const hextable = "0123456789abcdef"
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	for _, f := range files {
-		println("Generating " + f.filename)
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 		content, err := ioutil.ReadFile("data/" + f.filename)
 		if err != nil {
