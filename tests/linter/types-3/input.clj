@@ -48,6 +48,14 @@
 (inc (< 1 2))
 (map (inc' 1))
 (map (inc 1))
+(inc (reverse []))
+(map (+' 1))
+(map (+ 1))
+(map (*' 1))
+(map (* 1))
+(map (/ 1))
+(map (-' 1))
+(map (- 1))
 
 
 (inc (map inc nil))

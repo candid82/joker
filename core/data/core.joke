@@ -76,12 +76,11 @@
     :doc "conj[oin]. Returns a new collection with the xs
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
-         :added "1.0"
-         :tag Collection}
+         :added "1.0"}
   ; TODO: types
   conj (fn conj
-         ([coll x] (conj__ coll x))
-         ([coll x & xs]
+         (^Collection [coll x] (conj__ coll x))
+         (^Collection [coll x & xs]
           (if xs
             (recur (conj__ coll x) (first xs) (next xs))
             (conj__ coll x)))))
@@ -738,56 +737,56 @@
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
   {:added "1.0"}
-  [^Seqable coll]
+  ^Collection [^Seqable coll]
   (reduce conj () coll))
 
 (defn +'
   "Returns the sum of nums. (+) returns 0. Supports arbitrary precision.
   See also: +"
   {:added "1.0"}
-  ([] 0)
-  ([^Number x] (cast Number x))
-  ([^Number x ^Number y] (add'__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [] 0)
+  (^Number [^Number x] (cast Number x))
+  (^Number [^Number x ^Number y] (add'__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce +' (+' x y) more)))
 
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
   ints, will overflow. See also: +'"
   {:added "1.0"}
-  ([] 0)
-  ([^Number x] (cast Number x))
-  ([^Number x ^Number y] (add__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [] 0)
+  (^Number [^Number x] (cast Number x))
+  (^Number [^Number x ^Number y] (add__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce + (+ x y) more)))
 
 (defn *'
   "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
   See also: *"
   {:added "1.0"}
-  ([] 1)
-  ([^Number x] (cast Number x))
-  ([^Number x ^Number y] (multiply'__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [] 1)
+  (^Number [^Number x] (cast Number x))
+  (^Number [^Number x ^Number y] (multiply'__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce *' (*' x y) more)))
 
 (defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
   ints, will overflow. See also: *'"
   {:added "1.0"}
-  ([] 1)
-  ([^Number x] (cast Number x))
-  ([^Number x ^Number y] (multiply__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [] 1)
+  (^Number [^Number x] (cast Number x))
+  (^Number [^Number x ^Number y] (multiply__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
   else returns numerator divided by all of the denominators."
   {:added "1.0"}
-  ([^Number x] (/ 1 x))
-  ([^Number x ^Number y] (divide__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [^Number x] (/ 1 x))
+  (^Number [^Number x ^Number y] (divide__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce / (/ x y) more)))
 
 (defn -'
@@ -795,9 +794,9 @@
   the ys from x and returns the result. Supports arbitrary precision.
   See also: -"
   {:added "1.0"}
-  ([^Number x] (subtract'__ x))
-  ([^Number x ^Number y] (subtract'__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [^Number x] (subtract'__ x))
+  (^Number [^Number x ^Number y] (subtract'__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce -' (-' x y) more)))
 
 (defn -
@@ -805,9 +804,9 @@
   the ys from x and returns the result. Does not auto-promote
   ints, will overflow. See also: -'"
   {:added "1.0"}
-  ([^Number x] (subtract__ x))
-  ([^Number x ^Number y] (subtract__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [^Number x] (subtract__ x))
+  (^Number [^Number x ^Number y] (subtract__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce - (- x y) more)))
 
 (defn <=
