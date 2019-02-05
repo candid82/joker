@@ -813,9 +813,9 @@
   "Returns non-nil if nums are in monotonically non-decreasing order,
   otherwise false."
   {:added "1.0"}
-  ([^Number x] true)
-  ([^Number x ^Number y] (<=__ x y))
-  ([^Number x ^Number y & more]
+  (^Boolean [^Number x] true)
+  (^Boolean [^Number x ^Number y] (<=__ x y))
+  (^Boolean [^Number x ^Number y & more]
    (if (<= x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -826,9 +826,9 @@
   "Returns non-nil if nums are in monotonically decreasing order,
   otherwise false."
   {:added "1.0"}
-  ([^Number x] true)
-  ([^Number x ^Number y] (>__ x y))
-  ([^Number x ^Number y & more]
+  (^Boolean [^Number x] true)
+  (^Boolean [^Number x ^Number y] (>__ x y))
+  (^Boolean [^Number x ^Number y & more]
    (if (> x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -839,9 +839,9 @@
   "Returns non-nil if nums are in monotonically non-increasing order,
   otherwise false."
   {:added "1.0"}
-  ([^Number x] true)
-  ([^Number x ^Number y] (>=__ x y))
-  ([^Number x ^Number y & more]
+  (^Boolean [^Number x] true)
+  (^Boolean [^Number x ^Number y] (>=__ x y))
+  (^Boolean [^Number x ^Number y & more]
    (if (>= x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -852,9 +852,9 @@
   "Returns non-nil if nums all have the equivalent
   value (type-independent), otherwise false"
   {:added "1.0"}
-  ([^Number x] true)
-  ([^Number x ^Number y] (==__ x y))
-  ([^Number x ^Number y & more]
+  (^Boolean [^Number x] true)
+  (^Boolean [^Number x ^Number y] (==__ x y))
+  (^Boolean [^Number x ^Number y & more]
    (if (== x y)
      (if (next more)
        (recur y (first more) (next more))
@@ -864,125 +864,125 @@
 (defn max
   "Returns the greatest of the nums."
   {:added "1.0"}
-  ([^Number x] x)
-  ([^Number x ^Number y] (max__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [^Number x] x)
+  (^Number [^Number x ^Number y] (max__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
   {:added "1.0"}
-  ([^Number x] x)
-  ([^Number x ^Number y] (min__ x y))
-  ([^Number x ^Number y & more]
+  (^Number [^Number x] x)
+  (^Number [^Number x ^Number y] (min__ x y))
+  (^Number [^Number x ^Number y & more]
    (reduce min (min x y) more)))
 
 (defn dec'
   "Returns a number one less than num. Supports arbitrary precision.
   See also: dec"
   {:added "1.0"}
-  [^Number x] (dec'__ x))
+  ^Number [^Number x] (dec'__ x))
 
 (defn dec
   "Returns a number one less than num. Does not auto-promote
   ints, will overflow. See also: dec'"
   {:added "1.0"}
-  [^Number x] (dec__ x))
+  ^Number [^Number x] (dec__ x))
 
 (defn pos?
   "Returns true if num is greater than zero, else false"
   {:added "1.0"}
-  [^Number x] (pos__ x))
+  ^Boolean [^Number x] (pos__ x))
 
 (defn neg?
   "Returns true if num is less than zero, else false"
   {:added "1.0"}
-  [^Number x] (neg__ x))
+  ^Boolean [^Number x] (neg__ x))
 
 (defn quot
   "quot[ient] of dividing numerator by denominator."
   {:added "1.0"}
-  [^Number num ^Number div]
+  ^Number [^Number num ^Number div]
   (quot__ num div))
 
 (defn rem
   "remainder of dividing numerator by denominator."
   {:added "1.0"}
-  [^Number num ^Number div]
+  ^Number [^Number num ^Number div]
   (rem__ num div))
 
 (defn bit-not
   "Bitwise complement"
   {:added "1.0"}
-  [^Int x] (bit-not__ x))
+  ^Int [^Int x] (bit-not__ x))
 
 (defn bit-and
   "Bitwise and"
   {:added "1.0"}
-  ([^Int x ^Int y] (bit-and__ x y))
-  ([^Int x ^Int y & more]
+  (^Int [^Int x ^Int y] (bit-and__ x y))
+  (^Int [^Int x ^Int y & more]
    (reduce bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
   {:added "1.0"}
-  ([^Int x ^Int y] (bit-or__ x y))
-  ([^Int x ^Int y & more]
+  (^Int [^Int x ^Int y] (bit-or__ x y))
+  (^Int [^Int x ^Int y & more]
    (reduce bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
   {:added "1.0"}
-  ([^Int x ^Int y] (bit-xor_ x y))
-  ([^Int x ^Int y & more]
+  (^Int [^Int x ^Int y] (bit-xor_ x y))
+  (^Int [^Int x ^Int y & more]
    (reduce bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
   {:added "1.0"}
-  ([^Int x ^Int y] (bit-and-not__ x y))
-  ([^Int x ^Int y & more]
+  (^Int [^Int x ^Int y] (bit-and-not__ x y))
+  (^Int [^Int x ^Int y & more]
    (reduce bit-and-not (bit-and-not x y) more)))
 
 (defn bit-clear
   "Clear bit at index n"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-clear__ x n))
+  ^Int [^Int x ^Int n] (bit-clear__ x n))
 
 (defn bit-set
   "Set bit at index n"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-set__ x n))
+  ^Int [^Int x ^Int n] (bit-set__ x n))
 
 (defn bit-flip
   "Flip bit at index n"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-flip__ x n))
+  ^Int [^Int x ^Int n] (bit-flip__ x n))
 
 (defn bit-test
   "Test bit at index n"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-test__ x n))
+  ^Boolean [^Int x ^Int n] (bit-test__ x n))
 
 (defn bit-shift-left
   "Bitwise shift left"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-shift-left__ x n))
+  ^Int [^Int x ^Int n] (bit-shift-left__ x n))
 
 (defn bit-shift-right
   "Bitwise shift right"
   {:added "1.0"}
-  [^Int x ^Int n] (bit-shift-right__ x n))
+  ^Int [^Int x ^Int n] (bit-shift-right__ x n))
 
 (defn unsigned-bit-shift-right
   "Bitwise shift right, without sign-extension."
   {:added "1.0"}
-  [^Int x ^Int n] (unsigned-bit-shift-right__ x n))
+  ^Int [^Int x ^Int n] (unsigned-bit-shift-right__ x n))
 
 (defn integer?
   "Returns true if n is an integer"
   {:added "1.0"}
-  [n]
+  ^Boolean [n]
   (or (instance? Int n)
       (instance? BigInt n)))
 
@@ -990,7 +990,7 @@
   "Returns true if n is even, throws an exception if n is not an integer"
   {:added "1.0"}
   ;; TODO: types (Int, BigInt)
-  [n]
+  ^Boolean [n]
   (if (integer? n)
     (zero? (bit-and (int__ n) 1))
     (throw (ex-info (str "Argument must be an integer: " n) {}))))
@@ -999,40 +999,40 @@
   "Returns true if n is odd, throws an exception if n is not an integer"
   {:added "1.0"}
   ;; TODO: types (Int, BigInt)
-  [n] (not (even? n)))
+  ^Boolean [n] (not (even? n)))
 
 (defn int?
   "Return true if x is a fixed precision integer"
   {:tag Boolean
   :added "1.0"}
-  [x] (instance? Int x))
+  ^Boolean [x] (instance? Int x))
 
 (defn pos-int?
   "Return true if x is a positive fixed precision integer"
   {:tag Boolean
   :added "1.0"}
-  [x] (and (int? x)
-           (pos? x)))
+  ^Boolean [x] (and (int? x)
+                    (pos? x)))
 
 (defn neg-int?
   "Return true if x is a negative fixed precision integer"
   {:tag Boolean
   :added "1.0"}
-  [x] (and (int? x)
-           (neg? x)))
+  ^Boolean [x] (and (int? x)
+                    (neg? x)))
 
 (defn nat-int?
   "Return true if x is a non-negative fixed precision integer"
   {:tag Boolean
   :added "1.0"}
-  [x] (and (int? x)
-           (not (neg? x))))
+  ^Boolean [x] (and (int? x)
+                    (not (neg? x))))
 
 (defn double?
   "Return true if x is a Double"
   {:tag Boolean
   :added "1.0"}
-  [x] (instance? Double x))
+  ^Boolean [x] (instance? Double x))
 
 (defn complement
   "Takes a fn f and returns a fn that takes the same arguments as f,
