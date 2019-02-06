@@ -34,3 +34,13 @@
 (defn ==
   ^Boolean [^Number x ^Number y & more]
   (apply __==__ x y more))
+
+(def __merge__ merge)
+(defn merge
+  ^Map [^Map m1 & more]
+  (apply __merge__ m1 more))
+
+(def __merge-with__ merge-with)
+(defn merge-with
+  ^Map [^Callable f ^Map m1 & more]
+  (apply __merge-with__ f m1 more))

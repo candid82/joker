@@ -1038,7 +1038,7 @@
   "Takes a fn f and returns a fn that takes the same arguments as f,
   has the same effects, if any, and returns the opposite truth value."
   {:added "1.0"}
-  [^Callable f]
+  ^Fn [^Callable f]
   (fn
     ([] (not (f)))
     ([x] (not (f x)))
@@ -1048,7 +1048,7 @@
 (defn constantly
   "Returns a function that takes any number of arguments and returns x."
   {:added "1.0"}
-  [x]
+  ^Fn [x]
   (fn [& args] x))
 
 (defn identity
@@ -1077,7 +1077,7 @@
   range of indexes. 'contains?' operates constant or logarithmic time;
   it will not perform a linear search for a value.  See also 'some'."
   {:added "1.0"}
-  [^Gettable coll key] (contains?__ coll key))
+  ^Boolean [^Gettable coll key] (contains?__ coll key))
 
 (defn get
   "Returns the value mapped to key, not-found or nil if key not present."
@@ -1091,10 +1091,10 @@
   "dissoc[iate]. Returns a new map of the same (hashed/sorted) type,
   that does not contain a mapping for key(s)."
   {:added "1.0"}
-  ([^Map map] map)
-  ([^Map map key]
+  (^Map [^Map map] map)
+  (^Map [^Map map key]
    (dissoc__ map key))
-  ([^Map map key & ks]
+  (^Map [^Map map key & ks]
    (let [ret (dissoc__ map key)]
      (if ks
        (recur ret (first ks) (next ks))
@@ -1104,10 +1104,10 @@
   "disj[oin]. Returns a new set of the same (hashed/sorted) type, that
   does not contain key(s)."
   {:added "1.0"}
-  ([^Set set] set)
-  ([^Set set key]
+  (^Set [^Set set] set)
+  (^Set [^Set set key]
    (disj__ set key))
-  ([^Set set key & ks]
+  (^Set [^Set set key & ks]
    (when set
      (let [ret (disj__ set key)]
        (if ks
@@ -1122,7 +1122,7 @@
 (defn select-keys
   "Returns a map containing only those entries in map whose key is in keys"
   {:added "1.0"}
-  [^Associative map ^Seqable keyseq]
+  ^Map [^Associative map ^Seqable keyseq]
   (loop [ret {} keys (seq keyseq)]
     (if keys
       (let [entry (find__ map (first keys))]
@@ -1136,12 +1136,12 @@
 (defn keys
   "Returns a sequence of the map's keys, in the same order as (seq map)."
   {:added "1.0"}
-  [^Map map] (keys__ map))
+  ^Seq [^Map map] (keys__ map))
 
 (defn vals
   "Returns a sequence of the map's values, in the same order as (seq map)."
   {:added "1.0"}
-  [^Map map] (vals__ map))
+  ^Seq [^Map map] (vals__ map))
 
 (defn key
   "Returns the key of the map entry."
@@ -1159,7 +1159,7 @@
   "Returns, in constant time, a seq of the items in rev (which
   can be a vector or sorted-map), in reverse order. If rev is empty returns nil."
   {:added "1.0"}
-  [^Reversible rev]
+  ^Seq [^Reversible rev]
   (rseq__ rev))
 
 (defn name
@@ -1167,57 +1167,51 @@
   {:tag String
   :added "1.0"}
   ;; TODO: types
-  [x]
+  ^String [x]
   (if (string? x) x (name__ x)))
 
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."
   {:tag String
   :added "1.0"}
-  [^Named x]
+  ^String [^Named x]
   (namespace__ x))
 
 (defn ident?
   "Return true if x is a symbol or keyword"
   {:added "1.0"}
-  [x]
+  ^Boolean [x]
   (or (keyword? x) (symbol? x)))
 
 (defn simple-ident?
   "Return true if x is a symbol or keyword without a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (ident? x) (nil? (namespace x))))
+  {:added "1.0"}
+  ^Boolean [x] (and (ident? x) (nil? (namespace x))))
 
 (defn qualified-ident?
   "Return true if x is a symbol or keyword with a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (ident? x) (namespace x) true))
+  {:added "1.0"}
+  ^Boolean [x] (and (ident? x) (namespace x) true))
 
 (defn simple-symbol?
   "Return true if x is a symbol without a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (symbol? x) (nil? (namespace x))))
+  {:added "1.0"}
+  ^Boolean [x] (and (symbol? x) (nil? (namespace x))))
 
 (defn qualified-symbol?
   "Return true if x is a symbol with a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (symbol? x) (namespace x) true))
+  {:added "1.0"}
+  ^Boolean [x] (and (symbol? x) (namespace x) true))
 
 (defn simple-keyword?
   "Return true if x is a keyword without a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (keyword? x) (nil? (namespace x))))
+  {:added "1.0"}
+  ^Boolean [x] (and (keyword? x) (nil? (namespace x))))
 
 (defn qualified-keyword?
   "Return true if x is a keyword with a namespace"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (and (keyword? x) (namespace x) true))
+  {:added "1.0"}
+  ^Boolean [x] (and (keyword? x) (namespace x) true))
 
 (defmacro ->
   "Threads the expr through the forms. Inserts x as the
@@ -1347,13 +1341,13 @@
 (defn class
   "Returns the Type of x."
   {:added "1.0"}
-  [x]
+  ^Type [x]
   (type__ x))
 
 (defn type
   "Returns the :type metadata of x, or its Type if none"
   {:added "1.0"}
-  [x]
+  ^Type [x]
   (or (get (meta x) :type) (type__ x)))
 
 (defn reduce-kv
@@ -1465,7 +1459,7 @@
   If metadata-map is supplied, it will become the metadata on the
   atom."
   {:added "1.0"}
-  [x & options]
+  ^Atom [x & options]
   (apply atom__ x options))
 
 (defn swap!
@@ -1482,7 +1476,7 @@
   multiple times, and thus should be free of side effects.
   Returns [old new], the value of the atom before and after the swap."
   {:added "1.0"}
-  [^Atom atom ^Callable f & args]
+  ^Vector [^Atom atom ^Callable f & args]
   (apply swap-vals__ atom f args))
 
 (defn reset!
@@ -1496,7 +1490,7 @@
   "Sets the value of atom to newval. Returns [old new], the value of the
   atom before and after the reset."
   {:added "1.0"}
-  [^Atom atom newval]
+  ^Vector [^Atom atom newval]
   (reset-vals__ atom newval))
 
 (defn alter-meta!
@@ -1518,7 +1512,7 @@
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
   {:added "1.0"}
-  [^Symbol sym] (find-var__ sym))
+  ^Var [^Symbol sym] (find-var__ sym))
 
 (defn comp
   "Takes a set of functions and returns a fn that is the composition
@@ -1526,23 +1520,23 @@
   applies the rightmost of fns to the args, the next
   fn (right-to-left) to the result, etc."
   {:added "1.0"}
-  ([] identity)
-  ([^Callable f] f)
-  ([^Callable f ^Callable g]
+  (^Fn [] identity)
+  (^Fn [^Callable f] f)
+  (^Fn [^Callable f ^Callable g]
    (fn
      ([] (f (g)))
      ([x] (f (g x)))
      ([x y] (f (g x y)))
      ([x y z] (f (g x y z)))
      ([x y z & args] (f (apply g x y z args)))))
-  ([^Callable f ^Callable g ^Callable h]
+  (^Fn [^Callable f ^Callable g ^Callable h]
    (fn
      ([] (f (g (h))))
      ([x] (f (g (h x))))
      ([x y] (f (g (h x y))))
      ([x y z] (f (g (h x y z))))
      ([x y z & args] (f (g (apply h x y z args))))))
-  ([^Callable f1 ^Callable f2 ^Callable f3 & fs]
+  (^Fn [^Callable f1 ^Callable f2 ^Callable f3 & fs]
    (let [fs (reverse (list* f1 f2 f3 fs))]
      (fn [& args]
        (loop [ret (apply (first fs) args) fs (next fs)]
@@ -1557,28 +1551,28 @@
   args (left-to-right).
   ((juxt a b c) x) => [(a x) (b x) (c x)]"
   {:added "1.0"}
-  ([^Callable f]
+  (^Fn [^Callable f]
    (fn
      ([] [(f)])
      ([x] [(f x)])
      ([x y] [(f x y)])
      ([x y z] [(f x y z)])
      ([x y z & args] [(apply f x y z args)])))
-  ([^Callable f ^Callable g]
+  (^Fn [^Callable f ^Callable g]
    (fn
      ([] [(f) (g)])
      ([x] [(f x) (g x)])
      ([x y] [(f x y) (g x y)])
      ([x y z] [(f x y z) (g x y z)])
      ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
-  ([^Callable f ^Callable g ^Callable h]
+  (^Fn [^Callable f ^Callable g ^Callable h]
    (fn
      ([] [(f) (g) (h)])
      ([x] [(f x) (g x) (h x)])
      ([x y] [(f x y) (g x y) (h x y)])
      ([x y z] [(f x y z) (g x y z) (h x y z)])
      ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
-  ([^Callable f ^Callable g ^Callable h & fs]
+  (^Fn [^Callable f ^Callable g ^Callable h & fs]
    (let [fs (list* f g h fs)]
      (fn
        ([] (reduce #(conj %1 (%2)) [] fs))
@@ -1592,14 +1586,14 @@
   returns a fn that takes a variable number of additional args. When
   called, the returned function calls f with args + additional args."
   {:added "1.0"}
-  ([^Callable f] f)
-  ([^Callable f arg1]
+  (^Fn [^Callable f] f)
+  (^Fn [^Callable f arg1]
    (fn [& args] (apply f arg1 args)))
-  ([^Callable f arg1 arg2]
+  (^Fn [^Callable f arg1 arg2]
    (fn [& args] (apply f arg1 arg2 args)))
-  ([^Callable f arg1 arg2 arg3]
+  (^Fn [^Callable f arg1 arg2 arg3]
    (fn [& args] (apply f arg1 arg2 arg3 args)))
-  ([^Callable f arg1 arg2 arg3 & more]
+  (^Fn [^Callable f arg1 arg2 arg3 & more]
    (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 (defn sequence
@@ -1607,7 +1601,7 @@
   one. Will not force a lazy seq. (sequence nil) yields ()"
   {:added "1.0"}
   ;; TODO: types (Seq or Seqable)
-  [coll]
+  ^Seq [coll]
   (if (seq? coll)
     coll
     (or (seq coll) ())))
@@ -1615,9 +1609,8 @@
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
   false."
-  {:tag Boolean
-  :added "1.0"}
-  [^Callable pred ^Seqable coll]
+  {:added "1.0"}
+  ^Boolean [^Callable pred ^Seqable coll]
   (cond
     (nil? (seq coll)) true
     (pred (first coll)) (recur pred (next coll))
@@ -1655,25 +1648,24 @@
   of second items in each coll, until any one of the colls is
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
-  {:added "1.0"
-  :tag Seq}
-  ([^Callable f ^Seqable coll]
+  {:added "1.0"}
+  (^Seq [^Callable f ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (cons (f (first s)) (map f (rest s))))))
-  ([^Callable f ^Seqable c1 ^Seqable c2]
+  (^Seq [^Callable f ^Seqable c1 ^Seqable c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
       (when (and s1 s2)
         (cons (f (first s1) (first s2))
               (map f (rest s1) (rest s2)))))))
-  ([^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3]
+  (^Seq [^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2) s3 (seq c3)]
       (when (and  s1 s2 s3)
         (cons (f (first s1) (first s2) (first s3))
               (map f (rest s1) (rest s2) (rest s3)))))))
-  ([^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3 & colls]
+  (^Seq [^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3 & colls]
    (let [step (fn step [cs]
                 (lazy-seq
                  (let [ss (map seq cs)]
@@ -1685,14 +1677,14 @@
   "Returns the result of applying concat to the result of applying map
   to f and colls.  Thus function f should return a collection."
   {:added "1.0"}
-  [^Callable f & colls]
+  ^Seq [^Callable f & colls]
   (apply concat (apply map f colls)))
 
 (defn filter
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  ([^Callable pred ^Seqable coll]
+  (^Seq [^Callable pred ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [f (first s) r (rest s)]
@@ -1704,14 +1696,14 @@
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns false. pred must be free of side-effects."
   {:added "1.0"}
-  [^Callable pred ^Seqable coll]
+  ^Seq [^Callable pred ^Seqable coll]
   (filter (complement pred) coll))
 
 (defn take
   "Returns a lazy sequence of the first n items in coll, or all items if
   there are fewer than n."
   {:added "1.0"}
-  [^Number n ^Seqable coll]
+  ^Seq [^Number n ^Seqable coll]
   (lazy-seq
    (when (pos? n)
      (when-let [s (seq coll)]
@@ -1721,7 +1713,7 @@
   "Returns a lazy sequence of successive items from coll while
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  [^Callable pred ^Seqable coll]
+  ^Seq [^Callable pred ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (when (pred (first s))
@@ -1730,7 +1722,7 @@
 (defn drop
   "Returns a lazy sequence of all but the first n items in coll."
   {:added "1.0"}
-  [^Number n ^Seqable coll]
+  ^Seq [^Number n ^Seqable coll]
   (let [step (fn [n coll]
                (let [s (seq coll)]
                  (if (and (pos? n) s)
@@ -1741,14 +1733,14 @@
 (defn drop-last
   "Return a lazy sequence of all but the last n (default 1) items in coll"
   {:added "1.0"}
-  ([^Seqable s] (drop-last 1 s))
-  ([^Number n ^Seqable s] (map (fn [x _] x) s (drop n s))))
+  (^Seq [^Seqable s] (drop-last 1 s))
+  (^Seq [^Number n ^Seqable s] (map (fn [x _] x) s (drop n s))))
 
 (defn take-last
   "Returns a seq of the last n items in coll.  Depending on the type
   of coll may be no better than linear time.  For vectors, see also subvec."
   {:added "1.0"}
-  [^Number n ^Seqable coll]
+  ^Seq [^Number n ^Seqable coll]
   (loop [s (seq coll) lead (seq (drop n coll))]
     (if lead
       (recur (next s) (next lead))
@@ -1758,7 +1750,7 @@
   "Returns a lazy sequence of the items in coll starting from the first
   item for which (pred item) returns logical false."
   {:added "1.0"}
-  [^Callable pred ^Seqable coll]
+  ^Seq [^Callable pred ^Seqable coll]
   (let [step (fn [pred coll]
                (let [s (seq coll)]
                  (if (and s (pred (first s)))
@@ -1769,7 +1761,7 @@
 (defn cycle
   "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
   {:added "1.0"}
-  [^Seqable coll]
+  ^Seq [^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (concat s (cycle s)))))
@@ -1777,25 +1769,25 @@
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   {:added "1.0"}
-  [^Number n ^Seqable coll]
+  ^Vector [^Number n ^Seqable coll]
   [(take n coll) (drop n coll)])
 
 (defn split-with
   "Returns a vector of [(take-while pred coll) (drop-while pred coll)]"
   {:added "1.0"}
-  [^Callable pred ^Seqable coll]
+  ^Vector [^Callable pred ^Seqable coll]
   [(take-while pred coll) (drop-while pred coll)])
 
 (defn repeat
   "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
   {:added "1.0"}
-  ([x] (lazy-seq (cons x (repeat x))))
-  ([^Number n x] (take n (repeat x))))
+  (^Seq [x] (lazy-seq (cons x (repeat x))))
+  (^Seq [^Number n x] (take n (repeat x))))
 
 (defn iterate
   "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
   {:added "1.0"}
-  [^Callable f x] (cons x (lazy-seq (iterate f (f x)))))
+  ^Seq [^Callable f x] (cons x (lazy-seq (iterate f (f x)))))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -1803,10 +1795,10 @@
   infinity. When step is equal to 0, returns an infinite sequence of
   start. When start is equal to end, returns empty list."
   {:added "1.0"}
-  ([] (iterate inc 0))
-  ([^Number end] (range 0 end 1))
-  ([^Number start ^Number end] (range start end 1))
-  ([^Number start ^Number end ^Number step]
+  (^Seq [] (iterate inc 0))
+  (^Seq [^Number end] (range 0 end 1))
+  (^Seq [^Number start ^Number end] (range start end 1))
+  (^Seq [^Number start ^Number end ^Number step]
    (lazy-seq
     (let [comp (cond
                  (or (zero? step) (= start end)) not=
@@ -1821,8 +1813,7 @@
   the first.  If a key occurs in more than one map, the mapping from
   the latter (left-to-right) will be the mapping in the result."
   {:added "1.0"}
-  ;; TODO: types (define first few arities explicitly?)
-  [& maps]
+  ^Map [& maps]
   (when (some identity maps)
     (reduce #(conj (or %1 {}) %2) maps)))
 
@@ -1832,7 +1823,7 @@
   from the latter (left-to-right) will be combined with the mapping in
   the result by calling (f val-in-result val-in-latter)."
   {:added "1.0"}
-  [^Callable f & maps]
+  ^Map [^Callable f & maps]
   (when (some identity maps)
     (let [merge-entry (fn [m e]
                         (let [k (key e) v (val e)]
@@ -1846,7 +1837,7 @@
 (defn zipmap
   "Returns a map with the keys mapped to the corresponding vals."
   {:added "1.0"}
-  [^Seqable keys ^Seqable vals]
+  ^Map [^Seqable keys ^Seqable vals]
   (loop [map {}
          ks (seq keys)
          vs (seq vals)]
@@ -1865,9 +1856,9 @@
   "Returns a sorted sequence of the items in coll. If no comparator is
   supplied, uses compare."
   {:added "1.0"}
-  ([^Seqable coll]
+  (^Seq [^Seqable coll]
    (sort compare coll))
-  ([^Comparator comp ^Seqable coll]
+  (^Seq [^Comparator comp ^Seqable coll]
    (sort__ comp coll)))
 
 (defn sort-by
@@ -1875,9 +1866,9 @@
   order is determined by comparing (keyfn item).  If no comparator is
   supplied, uses compare."
   {:added "1.0"}
-  ([^Callable keyfn ^Seqable coll]
+  (^Seq [^Callable keyfn ^Seqable coll]
    (sort-by keyfn compare coll))
-  ([^Callable keyfn ^Comparator comp ^Seqable coll]
+  (^Seq [^Callable keyfn ^Comparator comp ^Seqable coll]
    (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))
 
 (defn dorun
@@ -1887,10 +1878,10 @@
   be used to force any effects. Walks through the successive nexts of
   the seq, does not retain the head and returns nil."
   {:added "1.0"}
-  ([^Seqable coll]
+  (^Nil [^Seqable coll]
    (when (seq coll)
      (recur (next coll))))
-  ([^Number n ^Seqable coll]
+  (^Nil [^Number n ^Seqable coll]
    (when (and (seq coll) (pos? n))
      (recur (dec n) (next coll)))))
 
@@ -1902,17 +1893,17 @@
   the seq, retains the head and returns it, thus causing the entire
   seq to reside in memory at one time."
   {:added "1.0"}
-  ([^Seqable coll]
+  (^Seq [^Seqable coll]
    (dorun coll)
    coll)
-  ([^Number n ^Seqable coll]
+  (^Seq [^Number n ^Seqable coll]
    (dorun n coll)
    coll))
 
 (defn nthnext
   "Returns the nth next of coll, (seq coll) when n is 0."
   {:added "1.0"}
-  [^Seqable coll ^Number n]
+  ^Seq [^Seqable coll ^Number n]
   (loop [n n xs (seq coll)]
     (if (and xs (pos? n))
       (recur (dec n) (next xs))
@@ -1921,7 +1912,7 @@
 (defn nthrest
   "Returns the nth rest of coll, coll when n is 0."
   {:added "1.0"}
-  [^Seqable coll ^Number n]
+  ^Seq [^Seqable coll ^Number n]
   (loop [n n xs coll]
     (if (and (pos? n) (seq xs))
       (recur (dec n) (rest xs))
@@ -3030,8 +3021,8 @@
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
   {:added "1.0"}
-  (^String [^String s ^Int start] (subs__ s start))
-  (^String [^String s ^Int start ^Int end] (subs__ s start end)))
+  (^String [^String s ^Number start] (subs__ s start))
+  (^String [^String s ^Number start ^Number end] (subs__ s start end)))
 
 (defn max-key
   "Returns the x for which (k x), a number, is greatest."
