@@ -1925,15 +1925,15 @@
   necessary to complete last partition upto n items. In case there are
   not enough padding elements, return a partition with less than n items."
   {:added "1.0"}
-  ([^Number n ^Seqable coll]
+  (^Seq [^Number n ^Seqable coll]
    (partition n n coll))
-  ([^Number n ^Number step ^Seqable coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (doall (take n s))]
         (when (= n (count p))
           (cons p (partition n step (nthrest s step))))))))
-  ([^Number n ^Number step ^Seqable pad ^Seqable coll]
+  (^Seq [^Number n ^Number step ^Seqable pad ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (doall (take n s))]
@@ -1951,7 +1951,7 @@
   bindings and filtering as provided by \"for\".  Does not retain
   the head of the sequence. Returns nil."
   {:added "1.0"}
-  [seq-exprs & body]
+  ^Nil [seq-exprs & body]
   (assert-args
    (vector? seq-exprs) "a vector for its binding"
    (even? (count seq-exprs)) "an even number of forms in binding vector")
@@ -2002,36 +2002,35 @@
 
 (defn num
   "Coerce to Number"
-  {:tag Number
-  :added "1.0"}
-  [^Number x] (num__ x))
+  {:added "1.0"}
+  ^Number [^Number x] (num__ x))
 
 (defn double
   "Coerce to double"
   {:added "1.0"}
-  [^Number x] (double__ x))
+  ^Double [^Number x] (double__ x))
 
 (defn char
   "Coerce to char"
   {:added "1.0"}
   ;; TODO: types (Char or Number)
-  [x] (char__ x))
+  ^Char [x] (char__ x))
 
 (defn boolean
   "Coerce to boolean"
   {:added "1.0"}
-  [x] (boolean__ x))
+  ^Boolean [x] (boolean__ x))
 
 (defn number?
   "Returns true if x is a Number"
   {:added "1.0"}
-  [x]
+  ^Boolean [x]
   (instance? Number x))
 
 (defn mod
   "Modulus of num and div. Truncates toward negative infinity."
   {:added "1.0"}
-  [^Number num ^Number div]
+  ^Number [^Number num ^Number div]
   (let [m (rem num div)]
     (if (or (zero? m) (= (pos? num) (pos? div)))
       m
@@ -2040,57 +2039,54 @@
 (defn ratio?
   "Returns true if n is a Ratio"
   {:added "1.0"}
-  [n] (instance? Ratio n))
+  ^Boolean [n] (instance? Ratio n))
 
 (defn numerator
   "Returns the numerator part of a Ratio."
-  {:tag BigInt
-  :added "1.0"}
-  [^Ratio r]
+  {:added "1.0"}
+  ^Number [^Ratio r]
   (numerator__ r))
 
 (defn denominator
   "Returns the denominator part of a Ratio."
-  {:tag BigInt
-  :added "1.0"}
-  [^Ratio r]
+  {:added "1.0"}
+  ^Number [^Ratio r]
   (denominator__ r))
 
 (defn bigfloat?
   "Returns true if n is a BigFloat"
   {:added "1.0"}
-  [n] (instance? BigFloat n))
+  ^Boolean [n] (instance? BigFloat n))
 
 (defn float?
   "Returns true if n is a floating point number"
   {:added "1.0"}
-  [n]
+  ^Boolean [n]
   (instance? Double n))
 
 (defn rational?
   "Returns true if n is a rational number"
   {:added "1.0"}
-  [n]
+  ^Boolean [n]
   (or (integer? n) (ratio? n)))
 
 (defn bigint
   "Coerce to BigInt"
-  {:tag BigInt
-  :added "1.0"}
-  [x]
+  {:added "1.0"}
+  ^BigInt [x]
   ;; TODO: types (Number or String)
   (bigint__ x))
 
 (defn bigfloat
   "Coerce to BigFloat"
-  {:tag BigFloat
-  :added "1.0"}
-  [x]
+  {:added "1.0"}
+  ^BigFloat [x]
   ;; TODO: types (Number or String)
   (bigfloat__ x))
 
 (def
   ^{:arglists '([& args])
+    :tag Nil
     :doc "Prints the object(s) to the output stream that is the current value
          of *out*.  Prints the object(s), separated by spaces if there is
          more than one.  By default, pr and prn print in a way that objects
@@ -2101,20 +2097,20 @@
 (defn pprint
   "Pretty prints x to the output stream that is the current value of *out*."
   {:added "1.0"}
-  [x]
+  ^Nil [x]
   (pprint__ x))
 
 (defn newline
   "Writes a platform-specific newline to *out*"
   {:added "1.0"}
-  []
+  ^Nil []
   (newline__))
 
 (defn flush
   "Flushes the output stream that is the current value of
   *out*"
   {:added "1.0"}
-  []
+  ^Nil []
   (flush__ *out*)
   nil)
 
@@ -2159,7 +2155,8 @@
 (def
   ^{:arglists '([])
     :doc "Reads the next line from *in*. Returns nil if an error (such as EOF) is detected."
-    :added "1.0"}
+    :added "1.0"
+    :tag String}
   read-line read-line__)
 
 (def
@@ -2175,9 +2172,9 @@
   the resulting vector shares structure with the original and no
   trimming is done."
   {:added "1.0"}
-  ([^Vector v ^Int start]
+  (^Vector [^Vector v ^Int start]
    (subvec v start (count v)))
-  ([^Vector v ^Int start ^Int end]
+  (^Vector [^Vector v ^Int start ^Int end]
    (subvec__ v start end)))
 
 (defmacro doto
@@ -2231,12 +2228,12 @@
 (defn set?
   "Returns true if x implements Set"
   {:added "1.0"}
-  [x] (instance? Set x))
+  ^Boolean [x] (instance? Set x))
 
 (defn set
   "Returns a set of the distinct elements of coll."
   {:added "1.0"}
-  [^Seqable coll]
+  ^Set [^Seqable coll]
   (if (set? coll)
     (with-meta coll nil)
     (reduce conj #{} coll)))
@@ -2253,25 +2250,25 @@
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
   {:added "1.0"}
-  [^Symbol sym] (find-ns__ sym))
+  ^Namespace [^Symbol sym] (find-ns__ sym))
 
 (defn create-ns
   "Create a new namespace named by the symbol if one doesn't already
   exist, returns it or the already-existing namespace of the same
   name."
   {:added "1.0"}
-  [^Symbol sym] (create-ns__ sym))
+  ^Namespace [^Symbol sym] (create-ns__ sym))
 
 (defn remove-ns
   "Removes the namespace named by the symbol. Use with caution.
   Cannot be used to remove the clojure namespace."
   {:added "1.0"}
-  [^Symbol sym] (remove-ns__ sym))
+  ^Namespace [^Symbol sym] (remove-ns__ sym))
 
 (defn all-ns
   "Returns a sequence of all namespaces."
   {:added "1.0"}
-  [] (all-ns__))
+  ^Seq [] (all-ns__))
 
 (defn the-ns
   "If passed a namespace, returns it. Else, when passed a symbol,
@@ -2293,21 +2290,21 @@
 (defn ns-name
   "Returns the name of the namespace, a symbol."
   {:added "1.0"}
-  [ns]
+  ^Symbol [ns]
   ;; TODO: types (Namespace or Symbol)
   (ns-name__ (the-ns ns)))
 
 (defn ns-map
   "Returns a map of all the mappings for the namespace."
   {:added "1.0"}
-  [ns]
+  ^Map [ns]
   ;; TODO: types (Namespace or Symbol)
   (ns-map__ (the-ns ns)))
 
 (defn ns-unmap
   "Removes the mappings for the symbol from the namespace."
   {:added "1.0"}
-  [ns ^Symbol sym]
+  ^Nil [ns ^Symbol sym]
   ;; TODO: types (Namespace or Symbol)
   (ns-unmap__ (the-ns ns) sym))
 
@@ -2318,7 +2315,7 @@
 (defn ns-publics
   "Returns a map of the public intern mappings for the namespace."
   {:added "1.0"}
-  [ns]
+  ^Map [ns]
   ;; TODO: types (Namespace or Symbol)
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
@@ -2329,7 +2326,7 @@
 (defn ns-interns
   "Returns a map of the intern mappings for the namespace."
   {:added "1.0"}
-  [ns]
+  ^Map [ns]
   ;; TODO: types (Namespace or Symbol)
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
@@ -2346,12 +2343,12 @@
   to val if supplied. The namespace must exist. The var will adopt any
   metadata from the name symbol.  Returns the var."
   {:added "1.0"}
-  ([ns ^Symbol name]
+  (^Var [ns ^Symbol name]
    ;; TODO: types (Namespace or Symbol)
    (let [v (intern__ (the-ns ns) name)]
      (when (meta name) (set-meta__ v (meta name)))
      v))
-  ([ns ^Symbol name val]
+  (^Var [ns ^Symbol name val]
     ;; TODO: types (Namespace or Symbol)
    (let [v (intern__ (the-ns ns) name val)]
      (when (meta name) (set-meta__ v (meta name)))
@@ -2373,7 +2370,7 @@
   to a symbol different from the var's name, in order to prevent
   clashes. Use :use in the ns macro in preference to calling this directly."
   {:added "1.0"}
-  [^Symbol ns-sym & filters]
+  ^Nil [^Symbol ns-sym & filters]
   (let [ns (or (find-ns ns-sym) (throw (ex-info (str "No namespace: " ns-sym) {:form ns-sym})))
         fs (apply hash-map filters)
         nspublics (ns-publics ns)
@@ -2402,7 +2399,7 @@
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
   {:added "1.0"}
-  [ns]
+  ^Map [ns]
   ;; TODO: types (Namespace or Symbol)
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
@@ -2415,28 +2412,28 @@
   the symbolic name of the target namespace. Use :as in the ns macro in preference
   to calling this directly."
   {:added "1.0"}
-  [^Symbol alias namespace-sym]
+  ^Nil [^Symbol alias namespace-sym]
   ;; TODO: types (Namespace or Symbol)
   (alias__ *ns* alias (the-ns namespace-sym)))
 
 (defn ns-aliases
   "Returns a map of the aliases for the namespace."
   {:added "1.0"}
-  [ns]
+  ^Map [ns]
   ;; TODO: types (Namespace or Symbol)
   (ns-aliases__ (the-ns ns)))
 
 (defn ns-unalias
   "Removes the alias for the symbol from the namespace."
   {:added "1.0"}
-  [ns ^Symbol sym]
+  ^Nil [ns ^Symbol sym]
   ;; TODO: types (Namespace or Symbol)
   (ns-unalias__ (the-ns ns) sym))
 
 (defn take-nth
   "Returns a lazy seq of every nth item in coll."
   {:added "1.0"}
-  [^Number n ^Seqable coll]
+  ^Seq [^Number n ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (cons (first s) (take-nth n (drop n s))))))
@@ -2444,15 +2441,15 @@
 (defn interleave
   "Returns a lazy seq of the first item in each coll, then the second etc."
   {:added "1.0"}
-  ([] ())
-  ([^Seqable c1] (lazy-seq c1))
-  ([^Seqable c1 ^Seqable c2]
+  (^Seq [] ())
+  (^Seq [^Seqable c1] (lazy-seq c1))
+  (^Seq [^Seqable c1 ^Seqable c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
       (when (and s1 s2)
         (cons (first s1) (cons (first s2)
                                (interleave (rest s1) (rest s2))))))))
-  ([^Seqable c1 ^Seqable c2 & colls]
+  (^Seq [^Seqable c1 ^Seqable c2 & colls]
    (lazy-seq
     (let [ss (map seq (conj colls c2 c1))]
       (when (every? identity ss)
@@ -2465,23 +2462,24 @@
   need not be present in the namespace."
   {:added "1.0"}
   ;; TODO: ns is namespace or symbol
-  ([ns ^Symbol sym]
+  (^Var [ns ^Symbol sym]
     (ns-resolve ns nil sym))
-  ([ns ^Gettable env ^Symbol sym]
+  (^Var [ns ^Gettable env ^Symbol sym]
     (when-not (contains? env sym)
       (ns-resolve__ (the-ns ns) sym))))
 
 (defn resolve
   "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
   {:added "1.0"}
-  ([^Symbol sym] (ns-resolve *ns* sym))
-  ([^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
+  (^Var [^Symbol sym] (ns-resolve *ns* sym))
+  (^Var [^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
 
 (def
   ^{:arglists '([& keyvals])
     :doc "Constructs an array-map. If any keys are equal, they are handled as
          if by repeated uses of assoc."
-         :added "1.0"}
+         :added "1.0"
+         :tag ArrayMap}
   array-map array-map__)
 
 ;redefine let and loop  with destructuring

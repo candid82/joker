@@ -54,7 +54,7 @@ func toObject(v interface{}) Object {
 	case nil:
 		return NIL
 	case []interface{}:
-		res := EmptyVector
+		res := EmptyVector()
 		for _, v := range v {
 			res = res.Conjoin(toObject(v))
 		}

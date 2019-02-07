@@ -1139,7 +1139,7 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 		}
 		return res.WithInfo(info)
 	case *Vector:
-		var res Conjable = EmptyVector
+		var res Conjable = EmptyVector()
 		for i := 0; i < s.count; i++ {
 			t := fixInfo(s.at(i), info)
 			res = res.Conj(t)

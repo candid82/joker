@@ -536,7 +536,7 @@ func readList(reader *Reader) Object {
 }
 
 func readVector(reader *Reader) Object {
-	res := EmptyVector
+	res := EmptyVector()
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ']' {
@@ -695,7 +695,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 		a[len(args)-1] = SYMBOLS.amp
 		a = append(a, v)
 	}
-	argVector := EmptyVector
+	argVector := EmptyVector()
 	for _, v := range a {
 		argVector = argVector.Conjoin(v)
 	}
@@ -899,7 +899,7 @@ func readConditional(reader *Reader) (Object, bool) {
 					msg := "Spliced form in reader conditional must be Seqable, got " + v.GetType().ToString(false)
 					if LINTER_MODE {
 						printReadError(reader, msg)
-						return EmptyVector, true
+						return EmptyVector(), true
 					} else {
 						panic(MakeReadError(reader, msg))
 					}
@@ -910,7 +910,7 @@ func readConditional(reader *Reader) (Object, bool) {
 		}
 		cond = cond.rest.rest
 	}
-	return EmptyVector, true
+	return EmptyVector(), true
 }
 
 func readNamespacedMap(reader *Reader) Object {

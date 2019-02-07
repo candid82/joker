@@ -276,7 +276,7 @@
 (def __take-nth__ take-nth)
 (defn take-nth
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__take-nth__ x coll)))
 
 (def __distinct__ distinct)
@@ -352,11 +352,13 @@
 
 (def __sequence__ sequence)
 (defn sequence
-  ([coll]
+  (^Seq [coll]
    (__sequence__ coll))
-  ([xform coll])
-  ([xform coll & colls]))
+  (^Seq [xform coll])
+  (^Seq [xform coll & colls]))
 
+(ns-unmap 'joker.core 'bigfloat?)
+(ns-unmap 'joker.core 'bigfloat)
 (ns-unmap 'joker.core 'pprint)
 (ns-unmap 'user 'pprint)
 (ns-unmap 'joker.core 'pr-err)

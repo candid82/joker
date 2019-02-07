@@ -354,7 +354,7 @@ var procReSeq Proc = func(args []Object) Object {
 		if len(match) == 1 {
 			res[i] = String{S: match[0]}
 		} else {
-			v := EmptyVector
+			v := EmptyVector()
 			for _, str := range match {
 				v = v.Conjoin(String{S: str})
 			}
@@ -374,7 +374,7 @@ var procReFind Proc = func(args []Object) Object {
 	if len(match) == 1 {
 		return String{S: match[0]}
 	}
-	v := EmptyVector
+	v := EmptyVector()
 	for _, str := range match {
 		v = v.Conjoin(String{S: str})
 	}

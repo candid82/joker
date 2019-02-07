@@ -326,7 +326,7 @@ func (v *Vector) Pop() Stack {
 		panic(RT.NewError("Can't pop empty vector"))
 	}
 	if v.count == 1 {
-		return EmptyVector.WithMeta(v.meta).(Stack)
+		return EmptyVector().WithMeta(v.meta).(Stack)
 	}
 	if v.count-v.tailoff() > 1 {
 		newTail := clone(v.tail)[0 : len(v.tail)-1]
@@ -425,15 +425,17 @@ func (v *Vector) Call(args []Object) Object {
 	return v.at(i)
 }
 
-var EmptyVector = &Vector{
-	count: 0,
-	shift: 5,
-	root:  empty_node,
-	tail:  make([]interface{}, 0, 32),
+func EmptyVector() *Vector {
+	return &Vector{
+		count: 0,
+		shift: 5,
+		root:  empty_node,
+		tail:  make([]interface{}, 0, 32),
+	}
 }
 
 func NewVectorFrom(objs ...Object) *Vector {
-	res := EmptyVector
+	res := EmptyVector()
 	for i := 0; i < len(objs); i++ {
 		res = res.Conjoin(objs[i])
 	}
@@ -441,7 +443,7 @@ func NewVectorFrom(objs ...Object) *Vector {
 }
 
 func NewVectorFromSeq(seq Seq) *Vector {
-	res := EmptyVector
+	res := EmptyVector()
 	for !seq.IsEmpty() {
 		res = res.Conjoin(seq.First())
 		seq = seq.Rest()
@@ -450,7 +452,7 @@ func NewVectorFromSeq(seq Seq) *Vector {
 }
 
 func (v *Vector) Empty() Collection {
-	return EmptyVector
+	return EmptyVector()
 }
 
 func (v *Vector) kvreduce(c Callable, init Object) Object {

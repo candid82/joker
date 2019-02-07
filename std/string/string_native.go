@@ -49,7 +49,7 @@ func padLeft(s, pad string, n int) string {
 func split(s string, r *regexp.Regexp, n int) Object {
 	indexes := r.FindAllStringIndex(s, n-1)
 	lastStart := 0
-	result := EmptyVector
+	result := EmptyVector()
 	for _, el := range indexes {
 		result = result.Conjoin(String{S: s[lastStart:el[0]]})
 		lastStart = el[1]

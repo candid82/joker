@@ -45,7 +45,7 @@ func versionMap() Map {
 }
 
 func (env *Env) SetEnvArgs(newArgs []string) {
-	args := EmptyVector
+	args := EmptyVector()
 	for _, arg := range newArgs {
 		args = args.Conjoin(MakeString(arg))
 	}
@@ -58,7 +58,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 
 func (env *Env) SetClassPath(cp string) {
 	cpArray := filepath.SplitList(cp)
-	cpVec := EmptyVector
+	cpVec := EmptyVector()
 	for _, cpelem := range cpArray {
 		cpVec = cpVec.Conjoin(MakeString(cpelem))
 	}

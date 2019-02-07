@@ -22,7 +22,7 @@ func env() Object {
 }
 
 func commandArgs() Object {
-	res := EmptyVector
+	res := EmptyVector()
 	for _, arg := range os.Args {
 		res = res.Conjoin(String{S: arg})
 	}
@@ -85,7 +85,7 @@ func mkdir(name string, perm int) Object {
 func readDir(dirname string) Object {
 	files, err := ioutil.ReadDir(dirname)
 	PanicOnErr(err)
-	res := EmptyVector
+	res := EmptyVector()
 	name := MakeKeyword("name")
 	size := MakeKeyword("size")
 	mode := MakeKeyword("mode")
