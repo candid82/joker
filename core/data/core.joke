@@ -2803,47 +2803,43 @@
 
 (defn pr-str
   "pr to a string, returning it"
-  {:tag String
-  :added "1.0"}
-  [& xs]
+  {:added "1.0"}
+  ^String [& xs]
   (with-out-str
     (apply pr xs)))
 
 (defn prn-str
   "prn to a string, returning it"
-  {:tag String
-  :added "1.0"}
-  [& xs]
+  {:added "1.0"}
+  ^String [& xs]
   (with-out-str
     (apply prn xs)))
 
 (defn print-str
   "print to a string, returning it"
-  {:tag String
-  :added "1.0"}
-  [& xs]
+  {:added "1.0"}
+  ^String [& xs]
   (with-out-str
     (apply print xs)))
 
 (defn println-str
   "println to a string, returning it"
-  {:tag String
-  :added "1.0"}
-  [& xs]
+  {:added "1.0"}
+  ^String [& xs]
   (with-out-str
     (apply println xs)))
 
 (defn pr-err
   "pr to *err*"
   {:added "1.0"}
-  [& xs]
+  ^Nil [& xs]
   (binding [*out* *err*]
     (apply pr xs)))
 
 (defn prn-err
   "prn to *err*"
   {:added "1.0"}
-  [& xs]
+  ^Nil [& xs]
   (binding [*out* *err*]
     (apply prn xs)))
 
@@ -2857,7 +2853,7 @@
 (defn println-err
   "println to *err*"
   {:added "1.0"}
-  [& xs]
+  ^Nil [& xs]
   (binding [*out* *err*]
     (apply println xs)))
 
@@ -2870,7 +2866,7 @@
   "Returns exception data (a map) if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  [ex]
+  ^Map [ex]
   (when (instance? ExInfo ex)
     (ex-data__ ex)))
 
@@ -2878,7 +2874,7 @@
   "Returns the cause of ex if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  [ex]
+  ^Error [ex]
   (when (instance? ExInfo ex)
     (ex-cause__ ex)))
 
@@ -2886,14 +2882,14 @@
   "Returns the message attached to ex if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  [ex]
+  ^String [ex]
   (when (instance? ExInfo ex)
     (ex-message__ ex)))
 
 (defn hash
   "Returns the hash code of its argument."
   {:added "1.0"}
-  [x] (hash__ x))
+  ^Int [x] (hash__ x))
 
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
@@ -2912,7 +2908,7 @@
   "test [v] finds fn at key :test in var metadata and calls it,
   presuming failure will throw exception"
   {:added "1.0"}
-  [v]
+  ^Keyword [v]
   (let [f (:test (meta v))]
     (if f
       (do (f) :ok)
@@ -2920,10 +2916,9 @@
 
 (defn re-pattern
   "Returns an instance of Regex"
-  {:tag Regex
-  :added "1.0"}
+  {:added "1.0"}
   ;; TODO: Regex or String
-  [s]
+  ^Regex [s]
   (if (instance? Regex s)
     s
     (regex__ s)))
@@ -2931,7 +2926,7 @@
 (defn re-seq
   "Returns a sequence of successive matches of pattern in string"
   {:added "1.0"}
-  [^Regex re ^String s]
+  ^Seq [^Regex re ^String s]
   (re-seq__ re s))
 
 (defn re-find
@@ -2955,13 +2950,13 @@
   "Returns a random floating point number between 0 (inclusive) and
   n (default 1) (exclusive)."
   {:added "1.0"}
-  ([] (rand__))
-  ([^Number n] (* n (rand))))
+  (^Double [] (rand__))
+  (^Double [^Number n] (* n (rand))))
 
 (defn rand-int
   "Returns a random integer between 0 (inclusive) and n (exclusive)."
   {:added "1.0"}
-  [^Number n] (int (rand n)))
+  ^Int [^Number n] (int (rand n)))
 
 (defmacro defn-
   "same as defn, yielding non-public def"
@@ -2977,7 +2972,7 @@
   nodes for which branch? returns true. Root is the root node of the
   tree."
   {:added "1.0"}
-  [^Callable branch? ^Callable children root]
+  ^Seq [^Callable branch? ^Callable children root]
   (let [walk (fn walk [node]
                (lazy-seq
                 (cons node
@@ -2998,7 +2993,7 @@
 (defn xml-seq
   "A tree seq on the xml elements as per xml/parse"
   {:added "1.0"}
-  [root]
+  ^Seq [root]
   (tree-seq
    (complement string?)
    (comp seq :content)
@@ -3007,13 +3002,13 @@
 (defn special-symbol?
   "Returns true if s names a special form"
   {:added "1.0"}
-  [s]
+  ^Boolean [s]
   (special-symbol?__ s))
 
 (defn var?
   "Returns true if v is of type Var"
   {:added "1.0"}
-  [v] (instance? Var v))
+  ^Boolean [v] (instance? Var v))
 
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending

@@ -189,5 +189,22 @@ tests/linter/types-3/input.clj:184:6: Parse warning: arg[0] of core/inc must hav
 tests/linter/types-3/input.clj:185:6: Parse warning: arg[0] of core/inc must have type Number, got Var
 tests/linter/types-3/input.clj:186:6: Parse warning: arg[0] of core/inc must have type Number, got ArrayMap
 tests/linter/types-3/input.clj:187:6: Parse warning: arg[0] of core/inc must have type Number, got Seq
+tests/linter/types-3/input.clj:188:6: Parse warning: arg[0] of core/inc must have type Number, got String
+tests/linter/types-3/input.clj:189:6: Parse warning: arg[0] of core/inc must have type Number, got String
+tests/linter/types-3/input.clj:190:6: Parse warning: arg[0] of core/inc must have type Number, got String
+tests/linter/types-3/input.clj:191:6: Parse warning: arg[0] of core/inc must have type Number, got String
+tests/linter/types-3/input.clj:192:6: Parse warning: arg[0] of core/inc must have type Number, got Map
+tests/linter/types-3/input.clj:193:6: Parse warning: arg[0] of core/inc must have type Number, got Error
+tests/linter/types-3/input.clj:194:6: Parse warning: arg[0] of core/inc must have type Number, got String
+tests/linter/types-3/input.clj:195:6: Parse warning: arg[0] of core/map must have type Callable, got Int
+tests/linter/types-3/input.clj:196:6: Parse warning: arg[0] of core/inc must have type Number, got Keyword
+tests/linter/types-3/input.clj:197:6: Parse warning: arg[0] of core/inc must have type Number, got Regex
+tests/linter/types-3/input.clj:198:6: Parse warning: arg[0] of core/inc must have type Number, got Seq
+tests/linter/types-3/input.clj:199:6: Parse warning: arg[0] of core/map must have type Callable, got Double
+tests/linter/types-3/input.clj:200:6: Parse warning: arg[0] of core/map must have type Callable, got Int
+tests/linter/types-3/input.clj:201:6: Parse warning: arg[0] of core/inc must have type Number, got Seq
+tests/linter/types-3/input.clj:202:6: Parse warning: arg[0] of core/inc must have type Number, got Seq
+tests/linter/types-3/input.clj:203:6: Parse warning: arg[0] of core/inc must have type Number, got Boolean
+tests/linter/types-3/input.clj:204:6: Parse warning: arg[0] of core/inc must have type Number, got Boolean
 tests/linter/types-3/input.clj:167:18: Parse warning: unused namespace f
 tests/linter/types-3/input.clj:179:17: Parse warning: unused namespace g
