@@ -191,8 +191,8 @@ tests/linter/types-1/input.clj:122:12: Parse warning: arg[0] of core/numerator m
 tests/linter/types-1/input.clj:123:14: Parse warning: arg[0] of core/denominator must have type Ratio, got String
 tests/linter/types-1/input.clj:124:14: Parse warning: arg[0] of core/read-string must have type String, got Int
 tests/linter/types-1/input.clj:125:9: Parse warning: arg[0] of core/subvec must have type Vector, got Int
-tests/linter/types-1/input.clj:125:11: Parse warning: arg[1] of core/subvec must have type Int, got String
-tests/linter/types-1/input.clj:125:15: Parse warning: arg[2] of core/subvec must have type Int, got String
+tests/linter/types-1/input.clj:125:11: Parse warning: arg[1] of core/subvec must have type Number, got String
+tests/linter/types-1/input.clj:125:15: Parse warning: arg[2] of core/subvec must have type Number, got String
 tests/linter/types-1/input.clj:126:14: Parse warning: arg[0] of core/load-string must have type String, got Int
 tests/linter/types-1/input.clj:127:6: Parse warning: arg[0] of core/set must have type Seqable, got Int
 tests/linter/types-1/input.clj:128:10: Parse warning: arg[0] of core/find-ns must have type Symbol, got Int

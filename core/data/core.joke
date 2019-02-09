@@ -179,8 +179,8 @@
          :added "1.0"}
   assoc
   (fn assoc
-    (^Associative [^Associative map key val] (assoc__ map key val))
-    (^Associative [^Associative map key val & kvs]
+    (^Map [^Associative map key val] (assoc__ map key val))
+    (^Map [^Associative map key val & kvs]
      (let [ret (assoc__ map key val)]
        (if kvs
          (if (next kvs)
@@ -1104,10 +1104,10 @@
   "disj[oin]. Returns a new set of the same (hashed/sorted) type, that
   does not contain key(s)."
   {:added "1.0"}
-  (^Set [^Set set] set)
-  (^Set [^Set set key]
+  (^MapSet [^Set set] set)
+  (^MapSet [^Set set key]
    (disj__ set key))
-  (^Set [^Set set key & ks]
+  (^MapSet [^Set set key & ks]
    (when set
      (let [ret (disj__ set key)]
        (if ks
@@ -2172,9 +2172,9 @@
   the resulting vector shares structure with the original and no
   trimming is done."
   {:added "1.0"}
-  (^Vector [^Vector v ^Int start]
+  (^Vector [^Vector v ^Number start]
    (subvec v start (count v)))
-  (^Vector [^Vector v ^Int start ^Int end]
+  (^Vector [^Vector v ^Number start ^Number end]
    (subvec__ v start end)))
 
 (defmacro doto
@@ -2233,7 +2233,7 @@
 (defn set
   "Returns a set of the distinct elements of coll."
   {:added "1.0"}
-  ^Set [^Seqable coll]
+  ^MapSet [^Seqable coll]
   (if (set? coll)
     (with-meta coll nil)
     (reduce conj #{} coll)))
@@ -3442,25 +3442,25 @@
   The arguments and semantics for :exclude, :only, and :rename are the same
   as those documented for joker.core/refer."
   {:added "1.0"}
-  [& args] (apply load-libs :require :use args))
+  ^Nil [& args] (apply load-libs :require :use args))
 
 (defn loaded-libs
   "Returns an UNSORTED set of symbols naming the currently loaded libs"
   {:added "1.0"}
-  []
+  ^MapSet []
   *loaded-libs*)
 
 (defn load-file
   "Loads code from file f. Does not protect against recursion."
   {:added "1.0"}
-  [^String f]
+  ^Nil [^String f]
   (load-file__ f))
 
 (defn load
   "Loads code from libs, throwing error if cyclic dependency detected,
   and ignoring libs already being loaded."
   {:added "1.0"}
-  [& libs]
+  ^Nil [& libs]
   (doseq [^Symbol lib libs]
     (let [^String path (lib-path__ lib)]
       (when *loading-verbosely*
@@ -3496,7 +3496,7 @@
   sequence of keys and v is the new value and returns a new nested structure.
   If any levels do not exist, hash-maps will be created."
   {:added "1.0"}
-  [^Associative m ^Seqable ks v]
+  ^Map [^Associative m ^Seqable ks v]
   (let [[k & ks] ks]
     (if ks
       (assoc m k (assoc-in (get m k) ks v))
@@ -3509,7 +3509,7 @@
   nested structure.  If any levels do not exist, hash-maps will be
   created."
   {:added "1.0"}
-  ([^Associative m ^Seqable ks ^Callable f & args]
+  (^Map [^Associative m ^Seqable ks ^Callable f & args]
    (let [[k & ks] ks]
      (if ks
        (assoc m k (apply update-in (get m k) ks f args))
@@ -3521,69 +3521,69 @@
   and any supplied args and return the new value, and returns a new
   structure.  If the key does not exist, nil is passed as the old value."
   {:added "1.0"}
-  ([^Associative m k ^Callable f]
+  (^Map [^Associative m k ^Callable f]
    (assoc m k (f (get m k))))
-  ([^Associative m k ^Callable f x]
+  (^Map [^Associative m k ^Callable f x]
    (assoc m k (f (get m k) x)))
-  ([^Associative m k ^Callable f x y]
+  (^Map [^Associative m k ^Callable f x y]
    (assoc m k (f (get m k) x y)))
-  ([^Associative m k ^Callable f x y z]
+  (^Map [^Associative m k ^Callable f x y z]
    (assoc m k (f (get m k) x y z)))
-  ([^Associative m k ^Callable f x y z & more]
+  (^Map [^Associative m k ^Callable f x y z & more]
    (assoc m k (apply f (get m k) x y z more))))
 
 (defn coll?
   "Returns true if x implements Collection"
   {:added "1.0"}
-  [x] (instance? Collection x))
+  ^Boolean [x] (instance? Collection x))
 
 (defn list?
   "Returns true if x is a List"
   {:added "1.0"}
-  [x] (instance? List x))
+  ^Boolean [x] (instance? List x))
 
 (defn seqable?
   "Return true if the seq function is supported for x"
-  {:tag Boolean
-  :added "1.0"}
-  [x] (or (nil? x)
-          (instance? Seqable x)))
+  {:added "1.0"}
+  ^Boolean [x]
+  (or (nil? x)
+      (instance? Seqable x)))
 
 (defn callable?
   "Returns true if x implements Callable. Note that many data structures
   (e.g. sets and maps) implement Callable."
   {:added "1.0"}
-  [x] (instance? Callable x))
+  ^Boolean [x] (instance? Callable x))
 
 (defn fn?
   "Returns true if x is Fn, i.e. is an object created via fn."
   {:added "1.0"}
-  [x] (instance? Fn x))
+  ^Boolean [x] (instance? Fn x))
 
 (defn associative?
   "Returns true if coll implements Associative"
   {:added "1.0"}
-  [coll] (instance? Associative coll))
+  ^Boolean [coll] (instance? Associative coll))
 
 (defn sequential?
   "Returns true if coll implements Sequential"
   {:added "1.0"}
-  [coll] (instance? Sequential coll))
+  ^Boolean [coll] (instance? Sequential coll))
 
 (defn counted?
   "Returns true if coll implements count in constant time"
   {:added "1.0"}
-  [coll] (instance? Counted coll))
+  ^Boolean [coll] (instance? Counted coll))
 
 (defn reversible?
   "Returns true if coll implements Reversible"
   {:added "1.0"}
-  [coll] (instance? Reversible coll))
+  ^Boolean [coll] (instance? Reversible coll))
 
 (defn indexed?
   "Return true if coll implements Indexed, indicating efficient lookup by index"
   {:added "1.0"}
-  [coll] (instance? Indexed coll))
+  ^Boolean [coll] (instance? Indexed coll))
 
 (def
   ^{:doc "bound in a repl to the most recent value printed"
@@ -3638,7 +3638,7 @@
   to results and, when calls with the same arguments are repeated often, has
   higher performance at the expense of higher memory use."
   {:added "1.0"}
-  [^Callable f]
+  ^Fn [^Callable f]
   (let [mem (atom {})]
     (fn [& args]
       (if-let [e (find @mem args)]
@@ -3692,7 +3692,7 @@
   "Returns true if coll has no items - same as (not (seq coll)).
   Please use the idiom (seq x) rather than (not (empty? x))"
   {:added "1.0"}
-  [^Seqable coll] (not (seq coll)))
+  ^Boolean [^Seqable coll] (not (seq coll)))
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
   `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
@@ -3762,18 +3762,18 @@
   positions (y, z). Note that the function f can take any number of
   arguments, not just the one(s) being nil-patched."
   {:added "1.0"}
-  ([^Callable f x]
+  (^Fn [^Callable f x]
    (fn
      ([a] (f (if (nil? a) x a)))
      ([a b] (f (if (nil? a) x a) b))
      ([a b c] (f (if (nil? a) x a) b c))
      ([a b c & ds] (apply f (if (nil? a) x a) b c ds))))
-  ([^Callable f x y]
+  (^Fn [^Callable f x y]
    (fn
      ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) c))
      ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
-  ([^Callable f x y z]
+  (^Fn [^Callable f x y z]
    (fn
      ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
@@ -3783,9 +3783,9 @@
   "Returns a lazy sequence of lists like partition, but may include
   partitions with fewer than n items at the end."
   {:added "1.0"}
-  ([^Number n ^Seqable coll]
+  (^Seq [^Number n ^Seqable coll]
    (partition-all n n coll))
-  ([^Number n ^Number step ^Seqable coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [seg (doall (take n s))]
@@ -3841,20 +3841,20 @@
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
   {:added "1.0"}
-  ([^Callable f coll]
+  (^Vector [^Callable f coll]
    (reduce (fn [v o] (conj v (f o))) [] coll))
-  ([^Callable f c1 c2]
+  (^Vector [^Callable f c1 c2]
    (into [] (map f c1 c2)))
-  ([^Callable f c1 c2 c3]
+  (^Vector [^Callable f c1 c2 c3]
    (into [] (map f c1 c2 c3)))
-  ([^Callable f c1 c2 c3 & colls]
+  (^Vector [^Callable f c1 c2 c3 & colls]
    (into [] (apply map f c1 c2 c3 colls))))
 
 (defn filterv
   "Returns a vector of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  [^Callable pred coll]
+  ^Vector [^Callable pred coll]
   (reduce (fn [v o] (if (pred o) (conj v o) v))
           []
           coll))
@@ -3862,14 +3862,14 @@
 (defn slurp
   "Opens file f and reads all its contents, returning a string."
   {:added "1.0"}
-  [^String f]
+  ^String [^String f]
   (slurp__ f))
 
 (defn spit
   "Opposite of slurp.  Opens file f, writes content, then
   closes f."
   {:added "1.0"}
-  [^String f ^String content]
+  ^Nil [^String f ^String content]
   (spit__ f content))
 
 (defn flatten
@@ -3877,7 +3877,7 @@
   etc.) and returns their contents as a single, flat sequence.
   (flatten nil) returns an empty sequence."
   {:added "1.0"}
-  [x]
+  ^Seq [x]
   (filter (complement sequential?)
           (rest (tree-seq sequential? seq x))))
 
@@ -3886,7 +3886,7 @@
   f on each element. The value at each key will be a vector of the
   corresponding elements, in the order they appeared in coll."
   {:added "1.0"}
-  [^Callable f coll]
+  ^Map [^Callable f coll]
   (reduce
    (fn [ret x]
      (let [k (f x)]
@@ -3897,7 +3897,7 @@
   "Applies f to each value in coll, splitting it each time f returns a
   new value.  Returns a lazy seq of partitions."
   {:added "1.0"}
-  [^Callable f ^Seqable coll]
+  ^Seq [^Callable f ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (let [fst (first s)
@@ -3909,7 +3909,7 @@
   "Returns a map from distinct items in coll to the number of times
   they appear."
   {:added "1.0"}
-  [coll]
+  ^Map [coll]
   (reduce (fn [counts x]
             (assoc counts x (inc (get counts x 0))))
           {} coll))
@@ -3918,12 +3918,12 @@
   "Returns a lazy seq of the intermediate values of the reduction (as
   per reduce) of coll by f, starting with init."
   {:added "1.0"}
-  ([^Callable f ^Seqable coll]
+  (^Seq [^Callable f ^Seqable coll]
    (lazy-seq
     (if-let [s (seq coll)]
       (reductions f (first s) (rest s))
       (list (f)))))
-  ([^Callable f init ^Seqable coll]
+  (^Seq [^Callable f init ^Seqable coll]
    (cons init
          (lazy-seq
           (when-let [s (seq coll)]
@@ -3940,7 +3940,7 @@
 (defn shuffle
   "Return a random permutation of coll"
   {:added "1.0"}
-  [coll]
+  ^Vector [coll]
   (shuffle__ coll))
 
 (defn map-indexed
@@ -3949,7 +3949,7 @@
   item in coll, etc, until coll is exhausted. Thus function f should
   accept 2 arguments, index and item."
   {:added "1.0"}
-  [^Callable f ^Seqable coll]
+  ^Seq [^Callable f ^Seqable coll]
   (let [mapi (fn mapi [idx coll]
                (lazy-seq
                 (when-let [s (seq coll)]
@@ -3961,7 +3961,7 @@
   this means false return values will be included.  f must be free of
   side-effects."
   {:added "1.0"}
-  [^Callable f ^Seqable coll]
+  ^Seq [^Callable f ^Seqable coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (let [x (f (first s))]
@@ -3974,7 +3974,7 @@
   this means false return values will be included.  f must be free of
   side-effects."
   {:added "1.0"}
-  [^Callable f ^Seqable coll]
+  ^Seq [^Callable f ^Seqable coll]
   (let [keepi (fn keepi [idx coll]
                 (lazy-seq
                  (when-let [s (seq coll)]
@@ -3988,7 +3988,7 @@
   "If coll is counted? returns its count, else will count at most the first n
   elements of coll using its seq"
   {:added "1.0"}
-  [^Number n coll]
+  ^Int [^Number n coll]
   (if (counted? coll)
     (count coll)
     (loop [i 0 s (seq coll)]
@@ -4002,7 +4002,7 @@
   false. Note that f is short-circuiting in that it will stop execution on the first
   argument that triggers a logical false result against the original predicates."
   {:added "1.0"}
-  ([^Callable p]
+  (^Fn [^Callable p]
    (fn ep1
      ([] true)
      ([x] (boolean (p x)))
@@ -4010,7 +4010,7 @@
      ([x y z] (boolean (and (p x) (p y) (p z))))
      ([x y z & args] (boolean (and (ep1 x y z)
                                    (every? p args))))))
-  ([^Callable p1 ^Callable p2]
+  (^Fn [^Callable p1 ^Callable p2]
    (fn ep2
      ([] true)
      ([x] (boolean (and (p1 x) (p2 x))))
@@ -4018,7 +4018,7 @@
      ([x y z] (boolean (and (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z))))
      ([x y z & args] (boolean (and (ep2 x y z)
                                    (every? #(and (p1 %) (p2 %)) args))))))
-  ([^Callable p1 ^Callable p2 ^Callable p3]
+  (^Fn [^Callable p1 ^Callable p2 ^Callable p3]
    (fn ep3
      ([] true)
      ([x] (boolean (and (p1 x) (p2 x) (p3 x))))
@@ -4026,7 +4026,7 @@
      ([x y z] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z))))
      ([x y z & args] (boolean (and (ep3 x y z)
                                    (every? #(and (p1 %) (p2 %) (p3 %)) args))))))
-  ([^Callable p1 ^Callable p2 ^Callable p3 & ps]
+  (^Fn [^Callable p1 ^Callable p2 ^Callable p3 & ps]
    (let [ps (list* p1 p2 p3 ps)]
      (fn epn
        ([] true)
@@ -4042,7 +4042,7 @@
   logical false. Note that f is short-circuiting in that it will stop execution on the first
   argument that triggers a logical true result against the original predicates."
   {:added "1.0"}
-  ([^Callable p]
+  (^Fn [^Callable p]
    (fn sp1
      ([] nil)
      ([x] (p x))
@@ -4050,7 +4050,7 @@
      ([x y z] (or (p x) (p y) (p z)))
      ([x y z & args] (or (sp1 x y z)
                          (some p args)))))
-  ([^Callable p1 ^Callable p2]
+  (^Fn [^Callable p1 ^Callable p2]
    (fn sp2
      ([] nil)
      ([x] (or (p1 x) (p2 x)))
@@ -4058,7 +4058,7 @@
      ([x y z] (or (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z)))
      ([x y z & args] (or (sp2 x y z)
                          (some #(or (p1 %) (p2 %)) args)))))
-  ([^Callable p1 ^Callable p2 ^Callable p3]
+  (^Fn [^Callable p1 ^Callable p2 ^Callable p3]
    (fn sp3
      ([] nil)
      ([x] (or (p1 x) (p2 x) (p3 x)))
@@ -4066,7 +4066,7 @@
      ([x y z] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z)))
      ([x y z & args] (or (sp3 x y z)
                          (some #(or (p1 %) (p2 %) (p3 %)) args)))))
-  ([^Callable p1 ^Callable p2 ^Callable p3 & ps]
+  (^Fn [^Callable p1 ^Callable p2 ^Callable p3 & ps]
    (let [ps (list* p1 p2 p3 ps)]
      (fn spn
        ([] nil)
@@ -4102,7 +4102,7 @@
 (defn realized?
   "Returns true if a value has been produced for a delay or lazy sequence."
   {:added "1.0"}
-  [^Pending x] (realized?__ x))
+  ^Boolean [^Pending x] (realized?__ x))
 
 (defmacro cond->
   "Takes an expression and a set of test/form pairs. Threads expr (via ->)
@@ -4197,7 +4197,7 @@
 (defn dedupe
   "Returns a lazy sequence removing consecutive duplicates in coll."
   {:added "1.0"}
-  [^Seqable coll]
+  ^Seq [^Seqable coll]
   (lazy-seq
    (when (seq coll)
      (cons (first coll)
@@ -4207,14 +4207,14 @@
   "Returns items from coll with random probability of prob (0.0 -
   1.0)."
   {:added "1.0"}
-  [^Number prob ^Seqable coll]
+  ^Seq [^Number prob ^Seqable coll]
   (filter (fn [_] (< (rand) prob)) coll))
 
 (defn run!
   "Runs the supplied procedure (via reduce), for purposes of side
   effects, on successive items in the collection. Returns nil."
   {:added "1.0"}
-  [^Callable proc coll]
+  ^Nil [^Callable proc coll]
   (reduce #(proc %2) nil coll)
   nil)
 
@@ -4226,7 +4226,7 @@
 (defn joker-version
   "Returns joker version as a printable string."
   {:added "1.0"}
-  []
+  ^String []
   (joker-version__))
 
 (defn- check-valid-options
@@ -4354,7 +4354,7 @@
 (defn methods
   "Given a multimethod, returns a map of dispatch values -> dispatch fns"
   {:added "1.0"}
-  [multifn]
+  ^Map [multifn]
   (let [mfm (meta multifn)
         mfatom (:method-table mfm)]
     @mfatom))
@@ -4363,7 +4363,7 @@
   "Given a multimethod and a dispatch value, returns the dispatch fn
   that would apply to that value, or nil if none apply and no default"
   {:added "1.0"}
-  [multifn dispatch-val]
+  ^Fn [multifn dispatch-val]
   (let [mfm (meta multifn)
         mfatom (:method-table mfm)
         default (:default mfm)]
@@ -4374,6 +4374,6 @@
 (defn prefers
   "Given a multimethod, returns a map of preferred value -> set of other values"
   {:added "1.0"}
-  [multifn]
+  ^Map [multifn]
   (throw (ex-info "method preference not yet supported by joker.core" {})))
 

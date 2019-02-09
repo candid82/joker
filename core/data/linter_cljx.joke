@@ -237,6 +237,12 @@
   (^Seq [^Callable x c & colls]
    (apply __map__ x c colls)))
 
+(def __mapcat__ mapcat)
+(defn mapcat
+  ([^Callable x])
+  (^Seq [^Callable x & colls]
+   (apply __mapcat__ x colls)))
+
 (def __filter__ filter)
 (defn filter
   ([^Callable x])
@@ -306,33 +312,33 @@
 (def __partition-by__ partition-by)
 (defn partition-by
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__partition-by__ x coll)))
 
 (def __partition-all__ partition-all)
 (defn partition-all
   ([^Number n])
-  ([^Number n ^Seqable coll]
+  (^Seq [^Number n ^Seqable coll]
    (__partition-all__ n coll))
-  ([^Number n ^Number step ^Seqable coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (__partition-all__ n step coll)))
 
 (def __map-indexed__ map-indexed)
 (defn map-indexed
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__map-indexed__ x coll)))
 
 (def __keep__ keep)
 (defn keep
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__keep__ x coll)))
 
 (def __keep-indexed__ keep-indexed)
 (defn keep-indexed
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__keep-indexed__ x coll)))
 
 (defn cat
@@ -341,13 +347,13 @@
 (def __dedupe__ dedupe)
 (defn dedupe
   ([])
-  ([^Seqable coll]
+  (^Seq [^Seqable coll]
    (__dedupe__ coll)))
 
 (def __random-sample__ random-sample)
 (defn random-sample
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__random-sample__ x coll)))
 
 (def __sequence__ sequence)
@@ -358,7 +364,11 @@
   (^Seq [xform coll & colls]))
 
 (ns-unmap 'joker.core 'bigfloat?)
+(ns-unmap 'user 'bigfloat?)
 (ns-unmap 'joker.core 'bigfloat)
+(ns-unmap 'user 'bigfloat)
+(ns-unmap 'joker.core 'joker-version)
+(ns-unmap 'user 'joker-version)
 (ns-unmap 'joker.core 'pprint)
 (ns-unmap 'user 'pprint)
 (ns-unmap 'joker.core 'pr-err)

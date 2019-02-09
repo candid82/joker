@@ -66,8 +66,8 @@
   ([m])
   ([^Regex re ^String s] (__re-find__ re s)))
 
-(defn spit [f content & options])
-(defn slurp [f & options])
+(defn ^Nil spit [f content & options])
+(defn ^String slurp [f & options])
 
 
 ;; Clojure core functions not supported by Joker
@@ -119,7 +119,6 @@
 (defn aset-short ([array idx val]) ([array idx idx2 & idxv]))
 (defn float [x])
 (defn construct-proxy [c & ctor-args])
-(defn methods [multifn])
 (defn agent-error [a])
 (defn agent-errors [a])
 (defn ifn? [x])
