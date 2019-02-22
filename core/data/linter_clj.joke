@@ -9,7 +9,7 @@
      ApplicationShutdownHooks                      ArithmeticException                           ArrayIndexOutOfBoundsException
      ArrayStoreException                           AssertionError                                AssertionStatusDirectives
      AutoCloseable                                 Boolean                                       BootstrapMethodError
-     BigDecimal
+     BigDecimal                                    BigInteger
      Byte                                          CharSequence                                  Character
      CharacterData                                 CharacterData00                               CharacterData01
      CharacterData02                               CharacterData0E                               CharacterDataLatin1
@@ -41,6 +41,7 @@
      StringBuffer                                  StringBuilder                                 StringCoding
      StringIndexOutOfBoundsException               SuppressWarnings                              System
      SystemClassLoaderAction                       Terminator                                    Thread
+     Thread$State                                  Thread$UncaughtExceptionHandler
      ThreadDeath                                   ThreadGroup                                   ThreadLocal
      Throwable                                     TypeNotPresentException                       UNIXProcess
      UnknownError                                  UnsatisfiedLinkError                          UnsupportedClassVersionError
