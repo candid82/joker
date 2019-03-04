@@ -371,6 +371,9 @@ var procReSeq Proc = func(args []Object) Object {
 	re := EnsureRegex(args, 0)
 	s := EnsureString(args, 1)
 	matches := re.R.FindAllStringSubmatchIndex(s.S, -1)
+	if matches == nil {
+		return NIL
+	}
 	res := make([]Object, len(matches))
 	for i, match := range matches {
 		res[i] = reGroups(s.S, match)
