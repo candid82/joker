@@ -94,6 +94,10 @@ func ExtractString(args []Object, index int) string {
 	return EnsureString(args, index).S
 }
 
+func ExtractStringable(args []Object, index int) string {
+	return EnsureStringable(args, index).S
+}
+
 func ExtractStrings(args []Object, index int) []string {
 	strs := make([]string, 0)
 	for i := index; i < len(args); i++ {
