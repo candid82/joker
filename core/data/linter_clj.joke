@@ -69,6 +69,12 @@
 
 (defn ^Nil spit [f content & options])
 (defn ^String slurp [f & options])
+(defn read
+  ([])
+  ([stream])
+  ([stream eof-error? eof-value])
+  ([stream eof-error? eof-value recursive?])
+  ([opts stream]))
 
 
 ;; Clojure core functions not supported by Joker
