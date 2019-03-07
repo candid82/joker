@@ -29,6 +29,7 @@ var (
 	templateData     []byte
 	testData         []byte
 	setData          []byte
+	tools_cliData    []byte
 	linter_allData   []byte
 	linter_jokerData []byte
 	linter_cljxData  []byte
@@ -65,11 +66,12 @@ const (
 
 func InitInternalLibs() {
 	internalLibs = map[string][]byte{
-		"joker.walk":     walkData,
-		"joker.template": templateData,
-		"joker.repl":     replData,
-		"joker.test":     testData,
-		"joker.set":      setData,
+		"joker.walk":      walkData,
+		"joker.template":  templateData,
+		"joker.repl":      replData,
+		"joker.test":      testData,
+		"joker.set":       setData,
+		"joker.tools.cli": tools_cliData,
 	}
 }
 
