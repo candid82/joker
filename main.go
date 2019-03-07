@@ -662,7 +662,9 @@ func main() {
 			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(eval), "<expr>")
-		ProcessReader(reader, "", phase)
+		if err := ProcessReader(reader, "", phase); err != nil {
+			ExitJoker(1)
+		}
 		return
 	}
 
@@ -687,7 +689,9 @@ func main() {
 	}
 
 	if filename != "" {
-		processFile(filename, phase)
+		if err := processFile(filename, phase); err != nil {
+			ExitJoker(1)
+		}
 		return
 	}
 
