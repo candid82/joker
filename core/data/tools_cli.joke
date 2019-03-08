@@ -302,7 +302,7 @@
               [(select-keys m ids) errors]
               [m errors]))))))
 
-(defn ^{:added "0.3.0"} make-summary-part
+(defn ^{:added "1.0"} make-summary-part
   "Given a single compiled option spec, turn it into a formatted string,
   optionally with its default values if requested."
   [show-defaults? spec]
@@ -326,7 +326,7 @@
       [opt dd (or desc "")]
       [opt (or desc "")])))
 
-(defn ^{:added "0.3.0"} format-lines
+(defn ^{:added "1.0"} format-lines
   "Format a sequence of summary parts into columns. lens is a sequence of
   lengths to use for parts. There are two sequences of lengths if we are
   not displaying defaults. There are three sequences of lengths if we
@@ -343,7 +343,7 @@
         s))
     #{} specs))
 
-(defn ^{:added "0.3.0"} summarize
+(defn ^{:added "1.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal.
   Note that the specs argument should be the compiled version. That effectively
   means that you shouldn't call summarize directly. When you call parse-opts
@@ -360,7 +360,7 @@
       (s/join \newline lines))
     ""))
 
-(defn ^{:added "0.3.2"} get-default-options
+(defn ^{:added "1.0"} get-default-options
   "Extract the map of default options from a sequence of option vectors.
 
   As of 0.4.1, this also applies any :default-fn present."
@@ -375,7 +375,7 @@
             (default-option-map specs :default-fn))))
 
 
-(defn ^{:added "0.3.0"} parse-opts
+(defn ^{:added "1.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the
   GNU Program Argument Syntax Conventions:
 
