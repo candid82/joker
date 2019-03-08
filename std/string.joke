@@ -89,10 +89,22 @@
   :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
   [^String s])
 
+(defn ^String triml
+  "Removes whitespace from the left side of string."
+  {:added "1.0"
+   :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
+  [^String s])
+
 (defn ^String trim-right
   "Removes whitespace from the right side of string."
   {:added "1.0"
   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
+  [^String s])
+
+(defn ^String trimr
+  "Removes whitespace from the right side of string."
+  {:added "1.0"
+   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
   [^String s])
 
 (defn ^Boolean blank?

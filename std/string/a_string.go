@@ -346,6 +346,34 @@ var trim_right_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var triml_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := strings.TrimLeftFunc(s, unicode.IsSpace)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var trimr_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := strings.TrimRightFunc(s, unicode.IsSpace)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var upper_case_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -482,6 +510,16 @@ func init() {
 			`Removes all trailing newline \n or return \r characters from string.`, "1.0"))
 
 	stringNamespace.InternVar("trim-right", trim_right_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Removes whitespace from the right side of string.`, "1.0"))
+
+	stringNamespace.InternVar("triml", triml_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Removes whitespace from the left side of string.`, "1.0"))
+
+	stringNamespace.InternVar("trimr", trimr_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Removes whitespace from the right side of string.`, "1.0"))
