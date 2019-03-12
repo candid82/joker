@@ -60,7 +60,7 @@
 (defn deref
   ([^Deref ref]
    (__deref__ ref))
-  ([^Deref ref ^Int timeout-ms timeout-val]))
+  ([^Deref ref ^Number timeout-ms timeout-val]))
 
 (def __re-find__ re-find)
 (defn re-find
