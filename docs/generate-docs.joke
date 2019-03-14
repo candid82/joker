@@ -1,4 +1,10 @@
 (alias 'string 'joker.string)
+(require 'joker.walk)
+(require 'joker.tools.cli)
+(require 'joker.test)
+(require 'joker.template)
+(require 'joker.set)
+(require 'joker.repl)
 
 (def index-template
   (slurp "templates/index.html"))

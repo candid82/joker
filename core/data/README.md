@@ -7,3 +7,5 @@ Besides dropping new `joker.X` library source code here, modify these to pick it
 
 That will make it available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
 
+Also add the coresponding `(require 'joker.x)` line to `generate-docs.joke`.
+

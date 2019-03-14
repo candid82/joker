@@ -1,0 +1,171 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.set</h1>
+    <span class="var-added">v</span>
+    <p class="var-docstr">Set operations such as union/intersection.</p>
+    <h2>Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#difference">difference</a>
+</li>
+<li>
+  <a href="#index">index</a>
+</li>
+<li>
+  <a href="#intersection">intersection</a>
+</li>
+<li>
+  <a href="#join">join</a>
+</li>
+<li>
+  <a href="#map-invert">map-invert</a>
+</li>
+<li>
+  <a href="#project">project</a>
+</li>
+<li>
+  <a href="#rename">rename</a>
+</li>
+<li>
+  <a href="#rename-keys">rename-keys</a>
+</li>
+<li>
+  <a href="#select">select</a>
+</li>
+<li>
+  <a href="#subset?">subset?</a>
+</li>
+<li>
+  <a href="#superset?">superset?</a>
+</li>
+<li>
+  <a href="#union">union</a>
+</li>
+
+    </ul>
+    <ul>
+      <li>
+  <h3 id="difference">difference</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(difference s1)</code></div>
+<div><code>(difference s1 s2)</code></div>
+<div><code>(difference s1 s2 & sets)</code></div>
+</pre>
+  <p class="var-docstr">Return a set that is the first set without elements of the remaining sets</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L49">source</a>
+</li>
+<li>
+  <h3 id="index">index</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(index xrel ks)</code></div>
+</pre>
+  <p class="var-docstr">Returns a map of the distinct values of ks in the xrel mapped to a<br>  set of the maps in xrel with the corresponding values of ks.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L95">source</a>
+</li>
+<li>
+  <h3 id="intersection">intersection</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(intersection s1)</code></div>
+<div><code>(intersection s1 s2)</code></div>
+<div><code>(intersection s1 s2 & sets)</code></div>
+</pre>
+  <p class="var-docstr">Return a set that is the intersection of the input sets</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L33">source</a>
+</li>
+<li>
+  <h3 id="join">join</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(join xrel yrel)</code></div>
+<div><code>(join xrel yrel km)</code></div>
+</pre>
+  <p class="var-docstr">When passed 2 rels, returns the rel corresponding to the natural<br>  join. When passed an additional keymap, joins on the corresponding<br>  keys.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L111">source</a>
+</li>
+<li>
+  <h3 id="map-invert">map-invert</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(map-invert m)</code></div>
+</pre>
+  <p class="var-docstr">Returns the map with the vals mapped to the keys.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L106">source</a>
+</li>
+<li>
+  <h3 id="project">project</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(project xrel ks)</code></div>
+</pre>
+  <p class="var-docstr">Returns a rel of the elements of xrel with only the keys in ks</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L72">source</a>
+</li>
+<li>
+  <h3 id="rename">rename</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(rename xrel kmap)</code></div>
+</pre>
+  <p class="var-docstr">Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L89">source</a>
+</li>
+<li>
+  <h3 id="rename-keys">rename-keys</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(rename-keys map kmap)</code></div>
+</pre>
+  <p class="var-docstr">Returns the map with the keys in kmap renamed to the vals in kmap</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L78">source</a>
+</li>
+<li>
+  <h3 id="select">select</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(select pred xset)</code></div>
+</pre>
+  <p class="var-docstr">Returns a set of the elements for which pred is true</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L65">source</a>
+</li>
+<li>
+  <h3 id="subset?">subset?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.2</span>
+  <pre class="var-usage"><div><code>(subset? set1 set2)</code></div>
+</pre>
+  <p class="var-docstr">Is set1 a subset of set2?</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L142">source</a>
+</li>
+<li>
+  <h3 id="superset?">superset?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.2</span>
+  <pre class="var-usage"><div><code>(superset? set1 set2)</code></div>
+</pre>
+  <p class="var-docstr">Is set1 a superset of set2?</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L150">source</a>
+</li>
+<li>
+  <h3 id="union">union</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(union)</code></div>
+<div><code>(union s1)</code></div>
+<div><code>(union s1 s2)</code></div>
+<div><code>(union s1 s2 & sets)</code></div>
+</pre>
+  <p class="var-docstr">Return a set that is the union of the input sets</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L20">source</a>
+</li>
+
+    </ul>
+  </div>
+</body>
+</html>
