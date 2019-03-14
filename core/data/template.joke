@@ -23,7 +23,8 @@
 
 
 (ns ^{:doc "Macros that expand to repeated copies of a template expression."
-       :author "Stuart Sierra"}
+       :author "Stuart Sierra"
+       :added "1.0"}
   joker.template
   (:require [joker.walk :as walk]))
 
@@ -37,6 +38,7 @@
 
   Example: (apply-template '[x] '(+ x x) '[2])
            ;=> (+ 2 2)"
+  {:added "1.0"}
   [argv expr values]
   (assert (vector? argv))
   (assert (every? symbol? argv))
@@ -49,7 +51,8 @@
 
   Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))
            ;=> (do (+ 4 2) (+ 5 3))"
+  {:added "1.0"}
   [argv expr & values]
   (let [c (count argv)]
-    `(do ~@(map (fn [a] (apply-template argv expr a)) 
+    `(do ~@(map (fn [a] (apply-template argv expr a))
                 (partition c values)))))

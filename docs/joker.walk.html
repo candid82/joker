@@ -5,17 +5,17 @@
 <body>
   <div class="main">
     <h1>Namespace: joker.walk</h1>
-    <span class="var-added">v</span>
+    <span class="var-added">v1.0</span>
     <p class="var-docstr">This file defines a generic tree walker for Clojure data
-structures.  It takes any data structure (list, vector, map, set,
-seq), calls a function on every element, and uses the return value
-of the function in place of the original.  This makes it fairly
-easy to write recursive search-and-replace functions, as shown in
-the examples.
+         structures.  It takes any data structure (list, vector, map, set,
+         seq), calls a function on every element, and uses the return value
+         of the function in place of the original.  This makes it fairly
+         easy to write recursive search-and-replace functions, as shown in
+         the examples.
 
-Note: "walk" supports all Clojure data structures EXCEPT maps
-created with sorted-map-by.  There is no (obvious) way to retrieve
-the sorting function.</p>
+         Note: "walk" supports all Clojure data structures EXCEPT maps
+         created with sorted-map-by.  There is no (obvious) way to retrieve
+         the sorting function.</p>
     <h2>Index</h2>
     <ul class="index">
       <li>
@@ -54,92 +54,92 @@ the sorting function.</p>
       <li>
   <h3 id="keywordize-keys">keywordize-keys</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keywordize-keys m)</code></div>
 </pre>
   <p class="var-docstr">Recursively transforms all map keys from strings to keywords.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L96">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L97">source</a>
 </li>
 <li>
   <h3 id="macroexpand-all">macroexpand-all</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(macroexpand-all form)</code></div>
 </pre>
   <p class="var-docstr">Recursively performs all possible macroexpansions in form.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L128">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L129">source</a>
 </li>
 <li>
   <h3 id="postwalk">postwalk</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk f form)</code></div>
 </pre>
   <p class="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on<br>  each sub-form, uses f's return value in place of the original.<br>  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L55">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L56">source</a>
 </li>
 <li>
   <h3 id="postwalk-demo">postwalk-demo</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-demo form)</code></div>
 </pre>
   <p class="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is<br>  walked.  Returns form.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L82">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L83">source</a>
 </li>
 <li>
   <h3 id="postwalk-replace">postwalk-replace</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-replace smap form)</code></div>
 </pre>
   <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>  values.  Like clojure/replace but works on any data structure.  Does<br>  replacement at the leaves of the tree first.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L120">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L121">source</a>
 </li>
 <li>
   <h3 id="prewalk">prewalk</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk f form)</code></div>
 </pre>
   <p class="var-docstr">Like postwalk, but does pre-order traversal.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L63">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L64">source</a>
 </li>
 <li>
   <h3 id="prewalk-demo">prewalk-demo</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-demo form)</code></div>
 </pre>
   <p class="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is<br>  walked.  Returns form.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L89">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L90">source</a>
 </li>
 <li>
   <h3 id="prewalk-replace">prewalk-replace</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-replace smap form)</code></div>
 </pre>
   <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>  values.  Like clojure/replace but works on any data structure.  Does<br>  replacement at the root of the tree first.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L112">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L113">source</a>
 </li>
 <li>
   <h3 id="stringify-keys">stringify-keys</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(stringify-keys m)</code></div>
 </pre>
   <p class="var-docstr">Recursively transforms all map keys from keywords to strings.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L104">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L105">source</a>
 </li>
 <li>
   <h3 id="walk">walk</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.1</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(walk inner outer form)</code></div>
 </pre>
   <p class="var-docstr">Traverses form, an arbitrary data structure.  inner and outer are<br>  functions.  Applies inner to each element of form, building up a<br>  data structure of the same type, then applies outer to the result.<br>  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L35">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L36">source</a>
 </li>
 
     </ul>

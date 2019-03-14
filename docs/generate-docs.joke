@@ -48,6 +48,10 @@
                      (string/replace usage-template "{usage}" (str (apply list k arglist))))]
       (string/join "" examples))))
 
+(defn- source-file
+  [ns]
+  (string/join "_" (rest (string/split (str ns) #"\."))))
+
 (defn var-doc
   [k v]
   (let [m (meta v)]
@@ -65,7 +69,9 @@
         (string/replace
          "{source}"
          (if (:line m)
-           (str "<a href=\"https://github.com/candid82/joker/blob/master/core/data/core.joke#L" (:line m) "\">source</a>")
+           (format "<a href=\"https://github.com/candid82/joker/blob/master/core/data/%s.joke#L%s\">source</a>"
+                   (source-file (:ns m))
+                   (str (:line m)))
            "")))))
 
 (defn namespace-doc

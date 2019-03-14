@@ -5,7 +5,7 @@
 <body>
   <div class="main">
     <h1>Namespace: joker.set</h1>
-    <span class="var-added">v</span>
+    <span class="var-added">v1.0</span>
     <p class="var-docstr">Set operations such as union/intersection.</p>
     <h2>Index</h2>
     <ul class="index">
@@ -57,7 +57,7 @@
 <div><code>(difference s1 s2 & sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the first set without elements of the remaining sets</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L49">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L50">source</a>
 </li>
 <li>
   <h3 id="index">index</h3>
@@ -66,7 +66,7 @@
   <pre class="var-usage"><div><code>(index xrel ks)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of the distinct values of ks in the xrel mapped to a<br>  set of the maps in xrel with the corresponding values of ks.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L95">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L96">source</a>
 </li>
 <li>
   <h3 id="intersection">intersection</h3>
@@ -77,7 +77,7 @@
 <div><code>(intersection s1 s2 & sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the intersection of the input sets</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L33">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L34">source</a>
 </li>
 <li>
   <h3 id="join">join</h3>
@@ -87,7 +87,7 @@
 <div><code>(join xrel yrel km)</code></div>
 </pre>
   <p class="var-docstr">When passed 2 rels, returns the rel corresponding to the natural<br>  join. When passed an additional keymap, joins on the corresponding<br>  keys.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L111">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L112">source</a>
 </li>
 <li>
   <h3 id="map-invert">map-invert</h3>
@@ -96,7 +96,7 @@
   <pre class="var-usage"><div><code>(map-invert m)</code></div>
 </pre>
   <p class="var-docstr">Returns the map with the vals mapped to the keys.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L106">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L107">source</a>
 </li>
 <li>
   <h3 id="project">project</h3>
@@ -105,7 +105,7 @@
   <pre class="var-usage"><div><code>(project xrel ks)</code></div>
 </pre>
   <p class="var-docstr">Returns a rel of the elements of xrel with only the keys in ks</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L72">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L73">source</a>
 </li>
 <li>
   <h3 id="rename">rename</h3>
@@ -114,7 +114,7 @@
   <pre class="var-usage"><div><code>(rename xrel kmap)</code></div>
 </pre>
   <p class="var-docstr">Returns a rel of the maps in xrel with the keys in kmap renamed to the vals in kmap</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L89">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L90">source</a>
 </li>
 <li>
   <h3 id="rename-keys">rename-keys</h3>
@@ -123,7 +123,7 @@
   <pre class="var-usage"><div><code>(rename-keys map kmap)</code></div>
 </pre>
   <p class="var-docstr">Returns the map with the keys in kmap renamed to the vals in kmap</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L78">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L79">source</a>
 </li>
 <li>
   <h3 id="select">select</h3>
@@ -132,25 +132,25 @@
   <pre class="var-usage"><div><code>(select pred xset)</code></div>
 </pre>
   <p class="var-docstr">Returns a set of the elements for which pred is true</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L65">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L66">source</a>
 </li>
 <li>
   <h3 id="subset?">subset?</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.2</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(subset? set1 set2)</code></div>
 </pre>
   <p class="var-docstr">Is set1 a subset of set2?</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L142">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L143">source</a>
 </li>
 <li>
   <h3 id="superset?">superset?</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v1.2</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(superset? set1 set2)</code></div>
 </pre>
   <p class="var-docstr">Is set1 a superset of set2?</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L150">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L151">source</a>
 </li>
 <li>
   <h3 id="union">union</h3>
@@ -162,7 +162,7 @@
 <div><code>(union s1 s2 & sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the union of the input sets</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L20">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L21">source</a>
 </li>
 
     </ul>

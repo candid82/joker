@@ -1,5 +1,6 @@
 (ns
-  ^{:doc "Utilities meant to be used interactively at the REPL."}
+  ^{:doc "Utilities meant to be used interactively at the REPL."
+    :added "1.0"}
   joker.repl)
 
 (def ^:private special-doc-map

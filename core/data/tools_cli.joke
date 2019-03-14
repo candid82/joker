@@ -1,5 +1,6 @@
 (ns ^{:author "Gareth Jones, Sung Pae, Sean Corfield"
-      :doc "Tools for working with command line arguments."}
+      :doc "Tools for working with command line arguments."
+      :added "1.0"}
   joker.tools.cli
   (:require [joker.string :as s]))
 

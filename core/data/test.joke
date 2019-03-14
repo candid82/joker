@@ -230,7 +230,8 @@
    of *test-out*.
 
    For additional event types, see the examples in the code.
-"}
+"
+:added "1.0"}
   joker.test
   (:require [joker.template :as temp]
             [joker.walk :as walk]))

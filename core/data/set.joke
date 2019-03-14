@@ -7,7 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns ^{:doc "Set operations such as union/intersection."
-       :author "Rich Hickey"}
+       :author "Rich Hickey"
+       :added "1.0"}
        joker.set)
 
 (defn- bubble-max-key
@@ -141,7 +142,7 @@
 
 (defn subset?
   "Is set1 a subset of set2?"
-  {:added "1.2",
+  {:added "1.0",
    :tag Boolean}
   [set1 set2]
   (and (<= (count set1) (count set2))
@@ -149,7 +150,7 @@
 
 (defn superset?
   "Is set1 a superset of set2?"
-  {:added "1.2",
+  {:added "1.0",
    :tag Boolean}
   [set1 set2]
   (and (>= (count set1) (count set2))
