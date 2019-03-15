@@ -9,6 +9,12 @@
   :go "env()"}
   [])
 
+(defn set-env
+  "Sets the specified key to the specified value in the environment."
+  {:added "1.0"
+   :go "setEnv(key, value)"}
+  [^String key ^String value])
+
 (defn args
   "Returns a sequence of the command line arguments, starting with the program name (normally, joker)."
   {:added "1.0"
