@@ -21,6 +21,13 @@ func env() Object {
 	return res
 }
 
+
+func setEnv(key string, value string) Object {
+	err := os.Setenv(key, value)
+	PanicOnErr(err)
+	return NIL
+}
+
 func commandArgs() Object {
 	res := EmptyVector()
 	for _, arg := range os.Args {

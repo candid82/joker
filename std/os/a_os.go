@@ -105,6 +105,21 @@ var mkdir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var set_env_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		key := ExtractString(_args, 0)
+		value := ExtractString(_args, 1)
+		_res := setEnv(key, value)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var sh_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -191,6 +206,11 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
 			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+
+	osNamespace.InternVar("set-env", set_env_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("key"), MakeSymbol("value"))),
+			`Sets the specified key to the specified value in the environment.`, "1.0"))
 
 	osNamespace.InternVar("sh", sh_,
 		MakeMeta(
