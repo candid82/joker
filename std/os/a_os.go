@@ -61,6 +61,21 @@ var env_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var exec_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		name := ExtractString(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := execute(name, opts)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var exit_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -127,7 +142,7 @@ var sh_ Proc = func(_args []Object) Object {
 		CheckArity(_args, 1, 999)
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
-		_res := sh("", name, arguments)
+		_res := sh("", nil, name, arguments)
 		return _res
 
 	default:
@@ -144,7 +159,7 @@ var sh_from_ Proc = func(_args []Object) Object {
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)
-		_res := sh(dir, name, arguments)
+		_res := sh(dir, nil, name, arguments)
 		return _res
 
 	default:
@@ -191,6 +206,22 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
 			`Returns a map representing the environment.`, "1.0"))
+
+	osNamespace.InternVar("exec", exec_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
+			`Executes the named program with the given arguments. opts is a map with the following keys (all optional):
+  :args - vector of arguments (all arguments must be strings),
+  :dir - if specified, working directory will be set to this value before executing the program,
+  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
+  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
+  Joker's stdin will be redirected to the program's stdin.
+  Returns a map with the following keys:
+  :success - whether or not the execution was successful,
+  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+  :exit - exit code of program (or attempt to execute it),
+  :out - string capturing stdout of the program,
+  :err - string capturing stderr of the program.`, "1.0"))
 
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(

@@ -21,7 +21,6 @@ func env() Object {
 	return res
 }
 
-
 func setEnv(key string, value string) Object {
 	err := os.Setenv(key, value)
 	PanicOnErr(err)
@@ -38,12 +37,41 @@ func commandArgs() Object {
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
-func sh(dir string, name string, args []string) Object {
+func execute(name string, opts Map) Object {
+	var dir string
+	var args []string
+	var stdin io.Reader
+	ok, dirObj := opts.Get(MakeKeyword("dir"))
+	if ok {
+		dir = AssertString(dirObj, "dir must be a string").S
+	}
+	ok, argsObj := opts.Get(MakeKeyword("args"))
+	if ok {
+		s := AssertSeqable(argsObj, "args must be Seqable").Seq()
+		for !s.IsEmpty() {
+			args = append(args, AssertString(s.First(), "args must be strings").S)
+			s = s.Rest()
+		}
+	}
+	ok, stdinObj := opts.Get(MakeKeyword("stdin"))
+	if ok {
+		if stdinObj.Equals(MakeKeyword("pipe")) {
+			stdin = Stdin
+		} else {
+			stdin = strings.NewReader(AssertString(stdinObj, "stdin must be either :pipe keyword or a string").S)
+		}
+	}
+	return sh(dir, stdin, name, args)
+}
+
+func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	stdoutReader, err := cmd.StdoutPipe()
 	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
+	PanicOnErr(err)
+	stdinWriter, err := cmd.StdinPipe()
 	PanicOnErr(err)
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
@@ -54,6 +82,9 @@ func sh(dir string, name string, args []string) Object {
 
 	go io.Copy(bufOut, stdoutReader)
 	go io.Copy(bufErr, stderrReader)
+	if stdin != nil {
+		go io.Copy(stdinWriter, stdin)
+	}
 
 	err = cmd.Wait()
 	stdoutString := bufOut.String()

@@ -22,6 +22,9 @@
   <a href="#env">env</a>
 </li>
 <li>
+  <a href="#exec">exec</a>
+</li>
+<li>
   <a href="#exit">exit</a>
 </li>
 <li>
@@ -29,6 +32,9 @@
 </li>
 <li>
   <a href="#mkdir">mkdir</a>
+</li>
+<li>
+  <a href="#set-env">set-env</a>
 </li>
 <li>
   <a href="#sh">sh</a>
@@ -79,6 +85,15 @@
   
 </li>
 <li>
+  <h3 id="exec">exec</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exec name opts)</code></div>
+</pre>
+  <p class="var-docstr">Executes the named program with the given arguments. opts is a map with the following keys (all optional):<br>  :args - vector of arguments (all arguments must be strings),<br>  :dir - if specified, working directory will be set to this value before executing the program,<br>  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.<br>  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,<br>  Joker's stdin will be redirected to the program's stdin.<br>  Returns a map with the following keys:<br>  :success - whether or not the execution was successful,<br>  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>  :exit - exit code of program (or attempt to execute it),<br>  :out - string capturing stdout of the program,<br>  :err - string capturing stderr of the program.</p>
+  
+</li>
+<li>
   <h3 id="exit">exit</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -103,6 +118,15 @@
   <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
 </pre>
   <p class="var-docstr">Creates a new directory with the specified name and permission bits.</p>
+  
+</li>
+<li>
+  <h3 id="set-env">set-env</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(set-env key value)</code></div>
+</pre>
+  <p class="var-docstr">Sets the specified key to the specified value in the environment.</p>
   
 </li>
 <li>

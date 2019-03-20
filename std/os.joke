@@ -35,7 +35,7 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(\"\", name, arguments)"}
+  :go "sh(\"\", nil, name, arguments)"}
   [^String name & ^String arguments])
 
 (defn sh-from
@@ -47,8 +47,25 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(dir, name, arguments)"}
+  :go "sh(dir, nil, name, arguments)"}
   [^String dir ^String name & ^String arguments])
+
+(defn exec
+  "Executes the named program with the given arguments. opts is a map with the following keys (all optional):
+  :args - vector of arguments (all arguments must be strings),
+  :dir - if specified, working directory will be set to this value before executing the program,
+  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
+  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
+  Joker's stdin will be redirected to the program's stdin.
+  Returns a map with the following keys:
+  :success - whether or not the execution was successful,
+  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+  :exit - exit code of program (or attempt to execute it),
+  :out - string capturing stdout of the program,
+  :err - string capturing stderr of the program."
+  {:added "1.0"
+  :go "execute(name, opts)"}
+  [^String name ^Map opts])
 
 (defn mkdir
   "Creates a new directory with the specified name and permission bits."
