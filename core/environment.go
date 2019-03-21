@@ -49,11 +49,7 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	for _, arg := range newArgs {
 		args = args.Conjoin(MakeString(arg))
 	}
-	if args.Count() > 0 {
-		env.args.Value = args.Seq()
-	} else {
-		env.args.Value = NIL
-	}
+	env.args.Value = args.Seq()
 }
 
 func (env *Env) SetClassPath(cp string) {
