@@ -79,3 +79,33 @@
       ;      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
       ;      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
       (resolve name) `(#'print-doc (meta (var ~name))))))
+
+
+;; ----------------------------------------------------------------------
+;; Examine Clojure functions (Vars, really)
+
+(defn apropos
+  "Given a regular expression or stringable thing, return a seq of all
+public definitions in all currently-loaded namespaces that match the
+str-or-pattern."
+  [str-or-pattern]
+  (let [matches? (if (instance? Regex str-or-pattern)
+                   #(re-find str-or-pattern (str %))
+                   #(joker.string/includes? (str %) (str str-or-pattern)))]
+    (sort (mapcat (fn [ns]
+                    (let [ns-name (str ns)]
+                      (map #(symbol ns-name (str %))
+                           (filter matches? (keys (ns-publics ns))))))
+                  (all-ns)))))
+
+(defn dir-fn
+  "Returns a sorted seq of symbols naming public vars in
+  a namespace or namespace alias. Looks for aliases in *ns*"
+  [ns]
+  (sort (map first (ns-publics (the-ns (get (ns-aliases *ns*) ns ns))))))
+
+(defmacro dir
+  "Prints a sorted directory of public vars in a namespace"
+  [nsname]
+  `(doseq [v# (dir-fn '~nsname)]
+     (println v#)))
