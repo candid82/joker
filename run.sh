@@ -29,7 +29,7 @@ Rebuilding Joker, as the libraries have changed; then regenerating docs.
 EOF
     build
 
-    (cd docs; ../joker generate-docs.joke)
+    (cd docs; ../joker generate-docs.joke --dummy-arg-so-command-line-args-is-documented-as-type-VectorSeq)
 fi
 
 ./joker "$@"
