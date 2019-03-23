@@ -247,13 +247,14 @@
  ^{:doc "The maximum depth of stack traces to print when an Exception
   is thrown during a test.  Defaults to nil, which means print the
   complete stack trace."
-   :added "1.0"}
+   :added "1.0"
+   :tag Int}
  *stack-trace-depth* nil)
 
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
 
-(def ^:dynamic *report-counters* nil)	  ; bound to an atom of a map in test-ns
+(def ^:dynamic ^Atom *report-counters* nil)	  ; bound to an atom of a map in test-ns
 
 (def ^:const *initial-report-counters*  ; used to initialize *report-counters*
      {:test 0, :pass 0, :fail 0, :error 0})

@@ -3706,7 +3706,8 @@
 (add-doc-and-meta *command-line-args*
   "A sequence of the supplied command line arguments, or nil if
   none were supplied"
-  {:added "1.0"})
+  {:added "1.0"
+   :tag Seq})
 
 (add-doc-and-meta *classpath*
   "A vector of the classpath elements as configured by --classpath.
@@ -3731,19 +3732,19 @@
   {:added "1.0"})
 
 (add-doc-and-meta *in*
-  "A File object representing standard input for read operations.
+  "A BufferedReader object representing standard input for read operations.
 
   Defaults to stdin."
   {:added "1.0"})
 
 (add-doc-and-meta *out*
-  "A File object representing standard output for print operations.
+  "A IOWriter object representing standard output for print operations.
 
   Defaults to stdout."
   {:added "1.0"})
 
 (add-doc-and-meta *err*
-  "A File object representing standard error for print operations.
+  "A IOWriter object representing standard error for print operations.
 
   Defaults to stderr."
   {:added "1.0"})

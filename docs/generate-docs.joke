@@ -26,13 +26,15 @@
 
 (defn type-name
   [v]
-  (cond
-    (not (bound? v)) "Object"
-    (:special-form (meta v)) "Special form"
-    (:macro (meta v)) "Macro"
-    (= Fn (type @v)) "Function"
-    (= Proc (type @v)) "Function"
-    :else (str (type @v))))
+  (let [m (meta v)]
+    (cond
+      (not (bound? v)) "Object"
+      (:special-form m) "Special form"
+      (:macro m) "Macro"
+      (= Fn (type @v)) "Function"
+      (= Proc (type @v)) "Function"
+      (:tag m) (str (:tag m))
+      :else (str (type @v)))))
 
 (defn link-item-doc
   [k]
@@ -104,7 +106,7 @@
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
         (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (str (:doc m)))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
         (string/replace  "{vars}" vars-doc)
         (string/replace "{index}" var-links-doc))))
 
