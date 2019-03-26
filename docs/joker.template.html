@@ -24,7 +24,15 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(apply-template argv expr values)</code></div>
 </pre>
-  <p class="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is<br>  a quoted expression using the symbols in argv.  values is a sequence<br>  of values to be used for the arguments.<br><br>  apply-template will recursively replace argument symbols in expr<br>  with their corresponding values, returning a modified expr.<br><br>  Example: (apply-template '[x] '(+ x x) '[2])<br>           ;=> (+ 2 2)</p>
+  <p class="var-docstr">For use in macros.  argv is an argument list, as in defn.  expr is<br>
+  a quoted expression using the symbols in argv.  values is a sequence<br>
+  of values to be used for the arguments.<br>
+<br>
+  apply-template will recursively replace argument symbols in expr<br>
+  with their corresponding values, returning a modified expr.<br>
+<br>
+  Example: (apply-template '[x] '(+ x x) '[2])<br>
+           ;=> (+ 2 2)</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/template.joke#L31">source</a>
 </li>
 <li>
@@ -33,7 +41,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(do-template argv expr & values)</code></div>
 </pre>
-  <p class="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments<br>  in values.  values are automatically partitioned by the number of<br>  arguments in argv, an argument vector as in defn.<br><br>  Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))<br>           ;=> (do (+ 4 2) (+ 5 3))</p>
+  <p class="var-docstr">Repeatedly copies expr (in a do block) for each group of arguments<br>
+  in values.  values are automatically partitioned by the number of<br>
+  arguments in argv, an argument vector as in defn.<br>
+<br>
+  Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))<br>
+           ;=> (do (+ 4 2) (+ 5 3))</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/template.joke#L47">source</a>
 </li>
 

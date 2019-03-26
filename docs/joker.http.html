@@ -27,7 +27,19 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(send request)</code></div>
 </pre>
-  <p class="var-docstr">Sends an HTTP request and returns an HTTP response.<br>  request is a map with the following keys:<br>  - url (string)<br>  - method (string, keyword or symbol, defaults to :get)<br>  - body (string)<br>  - host (string, overrides Host header if provided)<br>  - headers (map).<br>  All keys except for url are optional.<br>  response is a map with the following keys:<br>  - status (int)<br>  - body (string)<br>  - headers (map)<br>  - content-length (int)</p>
+  <p class="var-docstr">Sends an HTTP request and returns an HTTP response.<br>
+  request is a map with the following keys:<br>
+  - url (string)<br>
+  - method (string, keyword or symbol, defaults to :get)<br>
+  - body (string)<br>
+  - host (string, overrides Host header if provided)<br>
+  - headers (map).<br>
+  All keys except for url are optional.<br>
+  response is a map with the following keys:<br>
+  - status (int)<br>
+  - body (string)<br>
+  - headers (map)<br>
+  - content-length (int)</p>
   
 </li>
 <li>
@@ -36,7 +48,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(start-file-server addr root)</code></div>
 </pre>
-  <p class="var-docstr">Starts HTTP server on the TCP network address addr that<br>  serves HTTP requests with the contents of the file system rooted at root.</p>
+  <p class="var-docstr">Starts HTTP server on the TCP network address addr that<br>
+  serves HTTP requests with the contents of the file system rooted at root.</p>
   
 </li>
 <li>

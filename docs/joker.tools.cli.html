@@ -33,7 +33,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format-lines lens parts)</code></div>
 </pre>
-  <p class="var-docstr">Format a sequence of summary parts into columns. lens is a sequence of<br>  lengths to use for parts. There are two sequences of lengths if we are<br>  not displaying defaults. There are three sequences of lengths if we<br>  are showing defaults.</p>
+  <p class="var-docstr">Format a sequence of summary parts into columns. lens is a sequence of<br>
+  lengths to use for parts. There are two sequences of lengths if we are<br>
+  not displaying defaults. There are three sequences of lengths if we<br>
+  are showing defaults.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L330">source</a>
 </li>
 <li>
@@ -42,7 +45,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-default-options option-specs)</code></div>
 </pre>
-  <p class="var-docstr">Extract the map of default options from a sequence of option vectors.<br><br>  As of 0.4.1, this also applies any :default-fn present.</p>
+  <p class="var-docstr">Extract the map of default options from a sequence of option vectors.<br>
+<br>
+  As of 0.4.1, this also applies any :default-fn present.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L364">source</a>
 </li>
 <li>
@@ -51,7 +56,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(make-summary-part show-defaults? spec)</code></div>
 </pre>
-  <p class="var-docstr">Given a single compiled option spec, turn it into a formatted string,<br>  optionally with its default values if requested.</p>
+  <p class="var-docstr">Given a single compiled option spec, turn it into a formatted string,<br>
+  optionally with its default values if requested.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L306">source</a>
 </li>
 <li>
@@ -60,7 +66,166 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-opts args option-specs & options)</code></div>
 </pre>
-  <p class="var-docstr">Parse arguments sequence according to given option specifications and the<br>  GNU Program Argument Syntax Conventions:<br><br>    https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html<br><br>  Option specifications are a sequence of vectors with the following format:<br><br>    [short-opt long-opt-with-required-description description<br>     :property value]<br><br>  The first three string parameters in an option spec are positional and<br>  optional, and may be nil in order to specify a later parameter.<br><br>  By default, options are toggles that default to nil, but the second string<br>  parameter may be used to specify that an option requires an argument.<br><br>    e.g. ["-p" "--port PORT"] specifies that --port requires an argument,<br>         of which PORT is a short description.<br><br>  The :property value pairs are optional and take precedence over the<br>  positional string arguments. The valid properties are:<br><br>    :id           The key for this option in the resulting option map. This<br>                  is normally set to the keywordized name of the long option<br>                  without the leading dashes.<br><br>                  Multiple option entries can share the same :id in order to<br>                  transform a value in different ways, but only one of these<br>                  option entries may contain a :default(-fn) entry.<br><br>                  This option is mandatory.<br><br>    :short-opt    The short format for this option, normally set by the first<br>                  positional string parameter: e.g. "-p". Must be unique.<br><br>    :long-opt     The long format for this option, normally set by the second<br>                  positional string parameter; e.g. "--port". Must be unique.<br><br>    :required     A description of the required argument for this option if<br>                  one is required; normally set in the second positional<br>                  string parameter after the long option: "--port PORT".<br><br>                  The absence of this entry indicates that the option is a<br>                  boolean toggle that is set to true when specified on the<br>                  command line.<br><br>    :desc         A optional short description of this option.<br><br>    :default      The default value of this option. If none is specified, the<br>                  resulting option map will not contain an entry for this<br>                  option unless set on the command line. Also see :default-fn<br>                  (below).<br><br>                  This default is applied before any arguments are parsed so<br>                  this is a good way to seed values for :assoc-fn or :update-fn<br>                  as well as the simplest way to provide defaults.<br><br>                  If you need to compute a default based on other command line<br>                  arguments, or you need to provide a default separate from the<br>                  seed for :assoc-fn or :update-fn, see :default-fn below.<br><br>    :default-desc An optional description of the default value. This should be<br>                  used when the string representation of the default value is<br>                  too ugly to be printed on the command line, or :default-fn<br>                  is used to compute the default.<br><br>    :default-fn   A function to compute the default value of this option, given<br>                  the whole, parsed option map as its one argument. If no<br>                  function is specified, the resulting option map will not<br>                  contain an entry for this option unless set on the command<br>                  line. Also see :default (above).<br><br>                  If both :default and :default-fn are provided, if the<br>                  argument is not provided on the command-line, :default-fn will<br>                  still be called (and can override :default).<br><br>    :parse-fn     A function that receives the required option argument and<br>                  returns the option value.<br><br>                  If this is a boolean option, parse-fn will receive the value<br>                  true. This may be used to invert the logic of this option:<br><br>                  ["-q" "--quiet"<br>                   :id :verbose<br>                   :default true<br>                   :parse-fn not]<br><br>    :assoc-fn     A function that receives the current option map, the current<br>                  option :id, and the current parsed option value, and returns<br>                  a new option map. The default is 'assoc'.<br><br>                  For non-idempotent options, where you need to compute a option<br>                  value based on the current value and a new value from the<br>                  command line. If you only need the the current value, consider<br>                  :update-fn (below).<br><br>                  You cannot specify both :assoc-fn and :update-fn for an<br>                  option.<br><br>    :update-fn    A function that receives the the current parsed option value,<br>                  and returns a new option value, for each option :id present.<br>                  The default is 'identity'.<br><br>                  This may be used to create non-idempotent options where you<br>                  only need the current value, like setting a verbosity level by<br>                  specifying an option multiple times. ("-vvv" -> 3)<br><br>                  ["-v" "--verbose"<br>                   :default 0<br>                   :update-fn inc]<br><br>                  :default is applied first. If you wish to omit the :default<br>                  option value, use fnil in your :update-fn as follows:<br><br>                  ["-v" "--verbose"<br>                   :update-fn (fnil inc 0)]<br><br>                  You cannot specify both :assoc-fn and :update-fn for an<br>                  option.<br><br>    :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs<br>                  of validation functions and error messages may be provided.<br><br>    :validate-fn  A vector of functions that receives the parsed option value<br>                  and returns a falsy value or throws an exception when the<br>                  value is invalid. The validations are tried in the given<br>                  order.<br><br>    :validate-msg A vector of error messages corresponding to :validate-fn<br>                  that will be added to the :errors vector on validation<br>                  failure.<br><br>  parse-opts returns a map with four entries:<br><br>    {:options     The options map, keyed by :id, mapped to the parsed value<br>     :arguments   A vector of unprocessed arguments<br>     :summary     A string containing a minimal options summary<br>     :errors      A possible vector of error message strings generated during<br>                  parsing; nil when no errors exist}<br><br>  A few function options may be specified to influence the behavior of<br>  parse-opts:<br><br>    :in-order     Stop option processing at the first unknown argument. Useful<br>                  for building programs with subcommands that have their own<br>                  option specs.<br><br>    :no-defaults  Only include option values specified in arguments and do not<br>                  include any default values in the resulting options map.<br>                  Useful for parsing options from multiple sources; i.e. from a<br>                  config file and from the command line.<br><br>    :strict       Parse required arguments strictly: if a required argument value<br>                  matches any other option, it is considered to be missing (and<br>                  you have a parse error).<br><br>    :summary-fn   A function that receives the sequence of compiled option specs<br>                  (documented at #'clojure.tools.cli/compile-option-specs), and<br>                  returns a custom option summary string.<br>  </p>
+  <p class="var-docstr">Parse arguments sequence according to given option specifications and the<br>
+  GNU Program Argument Syntax Conventions:<br>
+<br>
+    https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html<br>
+<br>
+  Option specifications are a sequence of vectors with the following format:<br>
+<br>
+    [short-opt long-opt-with-required-description description<br>
+     :property value]<br>
+<br>
+  The first three string parameters in an option spec are positional and<br>
+  optional, and may be nil in order to specify a later parameter.<br>
+<br>
+  By default, options are toggles that default to nil, but the second string<br>
+  parameter may be used to specify that an option requires an argument.<br>
+<br>
+    e.g. ["-p" "--port PORT"] specifies that --port requires an argument,<br>
+         of which PORT is a short description.<br>
+<br>
+  The :property value pairs are optional and take precedence over the<br>
+  positional string arguments. The valid properties are:<br>
+<br>
+    :id           The key for this option in the resulting option map. This<br>
+                  is normally set to the keywordized name of the long option<br>
+                  without the leading dashes.<br>
+<br>
+                  Multiple option entries can share the same :id in order to<br>
+                  transform a value in different ways, but only one of these<br>
+                  option entries may contain a :default(-fn) entry.<br>
+<br>
+                  This option is mandatory.<br>
+<br>
+    :short-opt    The short format for this option, normally set by the first<br>
+                  positional string parameter: e.g. "-p". Must be unique.<br>
+<br>
+    :long-opt     The long format for this option, normally set by the second<br>
+                  positional string parameter; e.g. "--port". Must be unique.<br>
+<br>
+    :required     A description of the required argument for this option if<br>
+                  one is required; normally set in the second positional<br>
+                  string parameter after the long option: "--port PORT".<br>
+<br>
+                  The absence of this entry indicates that the option is a<br>
+                  boolean toggle that is set to true when specified on the<br>
+                  command line.<br>
+<br>
+    :desc         A optional short description of this option.<br>
+<br>
+    :default      The default value of this option. If none is specified, the<br>
+                  resulting option map will not contain an entry for this<br>
+                  option unless set on the command line. Also see :default-fn<br>
+                  (below).<br>
+<br>
+                  This default is applied before any arguments are parsed so<br>
+                  this is a good way to seed values for :assoc-fn or :update-fn<br>
+                  as well as the simplest way to provide defaults.<br>
+<br>
+                  If you need to compute a default based on other command line<br>
+                  arguments, or you need to provide a default separate from the<br>
+                  seed for :assoc-fn or :update-fn, see :default-fn below.<br>
+<br>
+    :default-desc An optional description of the default value. This should be<br>
+                  used when the string representation of the default value is<br>
+                  too ugly to be printed on the command line, or :default-fn<br>
+                  is used to compute the default.<br>
+<br>
+    :default-fn   A function to compute the default value of this option, given<br>
+                  the whole, parsed option map as its one argument. If no<br>
+                  function is specified, the resulting option map will not<br>
+                  contain an entry for this option unless set on the command<br>
+                  line. Also see :default (above).<br>
+<br>
+                  If both :default and :default-fn are provided, if the<br>
+                  argument is not provided on the command-line, :default-fn will<br>
+                  still be called (and can override :default).<br>
+<br>
+    :parse-fn     A function that receives the required option argument and<br>
+                  returns the option value.<br>
+<br>
+                  If this is a boolean option, parse-fn will receive the value<br>
+                  true. This may be used to invert the logic of this option:<br>
+<br>
+                  ["-q" "--quiet"<br>
+                   :id :verbose<br>
+                   :default true<br>
+                   :parse-fn not]<br>
+<br>
+    :assoc-fn     A function that receives the current option map, the current<br>
+                  option :id, and the current parsed option value, and returns<br>
+                  a new option map. The default is 'assoc'.<br>
+<br>
+                  For non-idempotent options, where you need to compute a option<br>
+                  value based on the current value and a new value from the<br>
+                  command line. If you only need the the current value, consider<br>
+                  :update-fn (below).<br>
+<br>
+                  You cannot specify both :assoc-fn and :update-fn for an<br>
+                  option.<br>
+<br>
+    :update-fn    A function that receives the the current parsed option value,<br>
+                  and returns a new option value, for each option :id present.<br>
+                  The default is 'identity'.<br>
+<br>
+                  This may be used to create non-idempotent options where you<br>
+                  only need the current value, like setting a verbosity level by<br>
+                  specifying an option multiple times. ("-vvv" -> 3)<br>
+<br>
+                  ["-v" "--verbose"<br>
+                   :default 0<br>
+                   :update-fn inc]<br>
+<br>
+                  :default is applied first. If you wish to omit the :default<br>
+                  option value, use fnil in your :update-fn as follows:<br>
+<br>
+                  ["-v" "--verbose"<br>
+                   :update-fn (fnil inc 0)]<br>
+<br>
+                  You cannot specify both :assoc-fn and :update-fn for an<br>
+                  option.<br>
+<br>
+    :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs<br>
+                  of validation functions and error messages may be provided.<br>
+<br>
+    :validate-fn  A vector of functions that receives the parsed option value<br>
+                  and returns a falsy value or throws an exception when the<br>
+                  value is invalid. The validations are tried in the given<br>
+                  order.<br>
+<br>
+    :validate-msg A vector of error messages corresponding to :validate-fn<br>
+                  that will be added to the :errors vector on validation<br>
+                  failure.<br>
+<br>
+  parse-opts returns a map with four entries:<br>
+<br>
+    {:options     The options map, keyed by :id, mapped to the parsed value<br>
+     :arguments   A vector of unprocessed arguments<br>
+     :summary     A string containing a minimal options summary<br>
+     :errors      A possible vector of error message strings generated during<br>
+                  parsing; nil when no errors exist}<br>
+<br>
+  A few function options may be specified to influence the behavior of<br>
+  parse-opts:<br>
+<br>
+    :in-order     Stop option processing at the first unknown argument. Useful<br>
+                  for building programs with subcommands that have their own<br>
+                  option specs.<br>
+<br>
+    :no-defaults  Only include option values specified in arguments and do not<br>
+                  include any default values in the resulting options map.<br>
+                  Useful for parsing options from multiple sources; i.e. from a<br>
+                  config file and from the command line.<br>
+<br>
+    :strict       Parse required arguments strictly: if a required argument value<br>
+                  matches any other option, it is considered to be missing (and<br>
+                  you have a parse error).<br>
+<br>
+    :summary-fn   A function that receives the sequence of compiled option specs<br>
+                  (documented at #'clojure.tools.cli/compile-option-specs), and<br>
+                  returns a custom option summary string.<br>
+  </p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L379">source</a>
 </li>
 <li>
@@ -69,7 +234,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(summarize specs)</code></div>
 </pre>
-  <p class="var-docstr">Reduce options specs into a options summary for printing at a terminal.<br>  Note that the specs argument should be the compiled version. That effectively<br>  means that you shouldn't call summarize directly. When you call parse-opts<br>  you get back a :summary key which is the result of calling summarize (or<br>  your user-supplied :summary-fn option) on the compiled option specs.</p>
+  <p class="var-docstr">Reduce options specs into a options summary for printing at a terminal.<br>
+  Note that the specs argument should be the compiled version. That effectively<br>
+  means that you shouldn't call summarize directly. When you call parse-opts<br>
+  you get back a :summary key which is the result of calling summarize (or<br>
+  your user-supplied :summary-fn option) on the compiled option specs.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L347">source</a>
 </li>
 

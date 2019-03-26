@@ -6,7 +6,220 @@
   <div class="main">
     <h1>Namespace: joker.test</h1>
     <span class="var-added">v1.0</span>
-    <p class="var-docstr">A unit testing framework.<br><br>   ASSERTIONS<br><br>   The core of the library is the "is" macro, which lets you make<br>   assertions of any arbitrary expression:<br><br>   (is (= 4 (+ 2 2)))<br>   (is (instance? Integer 256))<br>   (is (.startsWith "abcde" "ab"))<br><br>   You can type an "is" expression directly at the REPL, which will<br>   print a message if it fails.<br><br>       user> (is (= 5 (+ 2 2)))<br><br>       FAIL in  (:1)<br>       expected: (= 5 (+ 2 2))<br>         actual: (not (= 5 4))<br>       false<br><br>   The "expected:" line shows you the original expression, and the<br>   "actual:" shows you what actually happened.  In this case, it<br>   shows that (+ 2 2) returned 4, which is not = to 5.  Finally, the<br>   "false" on the last line is the value returned from the<br>   expression.  The "is" macro always returns the result of the<br>   inner expression.<br><br>   There are two special assertions for testing exceptions.  The<br>   "(is (thrown? c ...))" form tests if an exception of class c is<br>   thrown:<br><br>   (is (thrown? ArithmeticException (/ 1 0)))<br><br>   "(is (thrown-with-msg? c re ...))" does the same thing and also<br>   tests that the message on the exception matches the regular<br>   expression re:<br><br>   (is (thrown-with-msg? ArithmeticException #"Divide by zero"<br>                         (/ 1 0)))<br><br>   DOCUMENTING TESTS<br><br>   "is" takes an optional second argument, a string describing the<br>   assertion.  This message will be included in the error report.<br><br>   (is (= 5 (+ 2 2)) "Crazy arithmetic")<br><br>   In addition, you can document groups of assertions with the<br>   "testing" macro, which takes a string followed by any number of<br>   assertions.  The string will be included in failure reports.<br>   Calls to "testing" may be nested, and all of the strings will be<br>   joined together with spaces in the final report, in a style<br>   similar to RSpec <http://rspec.info/><br><br>   (testing "Arithmetic"<br>     (testing "with positive integers"<br>       (is (= 4 (+ 2 2)))<br>       (is (= 7 (+ 3 4))))<br>     (testing "with negative integers"<br>       (is (= -4 (+ -2 -2)))<br>       (is (= -1 (+ 3 -4)))))<br><br>   Note that, unlike RSpec, the "testing" macro may only be used<br>   INSIDE a "deftest" or "with-test" form (see below).<br><br><br>   DEFINING TESTS<br><br>   There are two ways to define tests.  The "with-test" macro takes<br>   a defn or def form as its first argument, followed by any number<br>   of assertions.  The tests will be stored as metadata on the<br>   definition.<br><br>   (with-test<br>       (defn my-function [x y]<br>         (+ x y))<br>     (is (= 4 (my-function 2 2)))<br>     (is (= 7 (my-function 3 4))))<br><br>   As of Clojure SVN rev. 1221, this does not work with defmacro.<br>   See http://code.google.com/p/clojure/issues/detail?id=51<br><br>   The other way lets you define tests separately from the rest of<br>   your code, even in a different namespace:<br><br>   (deftest addition<br>     (is (= 4 (+ 2 2)))<br>     (is (= 7 (+ 3 4))))<br><br>   (deftest subtraction<br>     (is (= 1 (- 4 3)))<br>     (is (= 3 (- 7 4))))<br><br>   This creates functions named "addition" and "subtraction", which<br>   can be called like any other function.  Therefore, tests can be<br>   grouped and composed, in a style similar to the test framework in<br>   Peter Seibel's "Practical Common Lisp"<br>   <http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html><br><br>   (deftest arithmetic<br>     (addition)<br>     (subtraction))<br><br>   The names of the nested tests will be joined in a list, like<br>   "(arithmetic addition)", in failure reports.  You can use nested<br>   tests to set up a context shared by several tests.<br><br><br>   RUNNING TESTS<br><br>   Run tests with the function "(run-tests namespaces...)":<br><br>   (run-tests 'your.namespace 'some.other.namespace)<br><br>   If you don't specify any namespaces, the current namespace is<br>   used.  To run all tests in all namespaces, use "(run-all-tests)".<br><br>   By default, these functions will search for all tests defined in<br>   a namespace and run them in an undefined order.  However, if you<br>   are composing tests, as in the "arithmetic" example above, you<br>   probably do not want the "addition" and "subtraction" tests run<br>   separately.  In that case, you must define a special function<br>   named "test-ns-hook" that runs your tests in the correct order:<br><br>   (defn test-ns-hook []<br>     (arithmetic))<br><br>   Note: test-ns-hook prevents execution of fixtures (see below).<br><br><br>   OMITTING TESTS FROM PRODUCTION CODE<br><br>   You can bind the variable "*load-tests*" to false when loading or<br>   compiling code in production.  This will prevent any tests from<br>   being created by "with-test" or "deftest".<br><br><br>   FIXTURES<br><br>   Fixtures allow you to run code before and after tests, to set up<br>   the context in which tests should be run.<br><br>   A fixture is just a function that calls another function passed as<br>   an argument.  It looks like this:<br><br>   (defn my-fixture [f]<br>      Perform setup, establish bindings, whatever.<br>     (f)  Then call the function we were passed.<br>      Tear-down / clean-up code here.<br>    )<br><br>   Fixtures are attached to namespaces in one of two ways.  "each"<br>   fixtures are run repeatedly, once for each test function created<br>   with "deftest" or "with-test".  "each" fixtures are useful for<br>   establishing a consistent before/after state for each test, like<br>   clearing out database tables.<br><br>   "each" fixtures can be attached to the current namespace like this:<br>   (use-fixtures :each fixture1 fixture2 ...)<br>   The fixture1, fixture2 are just functions like the example above.<br>   They can also be anonymous functions, like this:<br>   (use-fixtures :each (fn [f] setup... (f) cleanup...))<br><br>   The other kind of fixture, a "once" fixture, is only run once,<br>   around ALL the tests in the namespace.  "once" fixtures are useful<br>   for tasks that only need to be performed once, like establishing<br>   database connections, or for time-consuming tasks.<br><br>   Attach "once" fixtures to the current namespace like this:<br>   (use-fixtures :once fixture1 fixture2 ...)<br><br>   Note: Fixtures and test-ns-hook are mutually incompatible.  If you<br>   are using test-ns-hook, fixture functions will *never* be run.<br><br><br>   SAVING TEST OUTPUT TO A FILE<br><br>   All the test reporting functions write to the var *test-out*.  By<br>   default, this is the same as *out*, but you can rebind it to any<br>   PrintWriter.  For example, it could be a file opened with<br>   clojure.java.io/writer.<br><br><br>   EXTENDING TEST-IS (ADVANCED)<br><br>   You can extend the behavior of the "is" macro by defining new<br>   methods for the "assert-expr" multimethod.  These methods are<br>   called during expansion of the "is" macro, so they should return<br>   quoted forms to be evaluated.<br><br>   You can plug in your own test-reporting framework by rebinding<br>   the "report" function: (report event)<br><br>   The 'event' argument is a map.  It will always have a :type key,<br>   whose value will be a keyword signaling the type of event being<br>   reported.  Standard events with :type value of :pass, :fail, and<br>   :error are called when an assertion passes, fails, and throws an<br>   exception, respectively.  In that case, the event will also have<br>   the following keys:<br><br>     :expected   The form that was expected to be true<br>     :actual     A form representing what actually occurred<br>     :message    The string message given as an argument to 'is'<br><br>   The "testing" strings will be a list in "*testing-contexts*", and<br>   the vars being tested will be a list in "*testing-vars*".<br><br>   Your "report" function should wrap any printing calls in the<br>   "with-test-out" macro, which rebinds *out* to the current value<br>   of *test-out*.<br><br>   For additional event types, see the examples in the code.<br></p>
+    <p class="var-docstr">A unit testing framework.<br>
+<br>
+   ASSERTIONS<br>
+<br>
+   The core of the library is the "is" macro, which lets you make<br>
+   assertions of any arbitrary expression:<br>
+<br>
+   (is (= 4 (+ 2 2)))<br>
+   (is (instance? Integer 256))<br>
+   (is (.startsWith "abcde" "ab"))<br>
+<br>
+   You can type an "is" expression directly at the REPL, which will<br>
+   print a message if it fails.<br>
+<br>
+       user> (is (= 5 (+ 2 2)))<br>
+<br>
+       FAIL in  (:1)<br>
+       expected: (= 5 (+ 2 2))<br>
+         actual: (not (= 5 4))<br>
+       false<br>
+<br>
+   The "expected:" line shows you the original expression, and the<br>
+   "actual:" shows you what actually happened.  In this case, it<br>
+   shows that (+ 2 2) returned 4, which is not = to 5.  Finally, the<br>
+   "false" on the last line is the value returned from the<br>
+   expression.  The "is" macro always returns the result of the<br>
+   inner expression.<br>
+<br>
+   There are two special assertions for testing exceptions.  The<br>
+   "(is (thrown? c ...))" form tests if an exception of class c is<br>
+   thrown:<br>
+<br>
+   (is (thrown? ArithmeticException (/ 1 0)))<br>
+<br>
+   "(is (thrown-with-msg? c re ...))" does the same thing and also<br>
+   tests that the message on the exception matches the regular<br>
+   expression re:<br>
+<br>
+   (is (thrown-with-msg? ArithmeticException #"Divide by zero"<br>
+                         (/ 1 0)))<br>
+<br>
+   DOCUMENTING TESTS<br>
+<br>
+   "is" takes an optional second argument, a string describing the<br>
+   assertion.  This message will be included in the error report.<br>
+<br>
+   (is (= 5 (+ 2 2)) "Crazy arithmetic")<br>
+<br>
+   In addition, you can document groups of assertions with the<br>
+   "testing" macro, which takes a string followed by any number of<br>
+   assertions.  The string will be included in failure reports.<br>
+   Calls to "testing" may be nested, and all of the strings will be<br>
+   joined together with spaces in the final report, in a style<br>
+   similar to RSpec <http://rspec.info/><br>
+<br>
+   (testing "Arithmetic"<br>
+     (testing "with positive integers"<br>
+       (is (= 4 (+ 2 2)))<br>
+       (is (= 7 (+ 3 4))))<br>
+     (testing "with negative integers"<br>
+       (is (= -4 (+ -2 -2)))<br>
+       (is (= -1 (+ 3 -4)))))<br>
+<br>
+   Note that, unlike RSpec, the "testing" macro may only be used<br>
+   INSIDE a "deftest" or "with-test" form (see below).<br>
+<br>
+<br>
+   DEFINING TESTS<br>
+<br>
+   There are two ways to define tests.  The "with-test" macro takes<br>
+   a defn or def form as its first argument, followed by any number<br>
+   of assertions.  The tests will be stored as metadata on the<br>
+   definition.<br>
+<br>
+   (with-test<br>
+       (defn my-function [x y]<br>
+         (+ x y))<br>
+     (is (= 4 (my-function 2 2)))<br>
+     (is (= 7 (my-function 3 4))))<br>
+<br>
+   As of Clojure SVN rev. 1221, this does not work with defmacro.<br>
+   See http://code.google.com/p/clojure/issues/detail?id=51<br>
+<br>
+   The other way lets you define tests separately from the rest of<br>
+   your code, even in a different namespace:<br>
+<br>
+   (deftest addition<br>
+     (is (= 4 (+ 2 2)))<br>
+     (is (= 7 (+ 3 4))))<br>
+<br>
+   (deftest subtraction<br>
+     (is (= 1 (- 4 3)))<br>
+     (is (= 3 (- 7 4))))<br>
+<br>
+   This creates functions named "addition" and "subtraction", which<br>
+   can be called like any other function.  Therefore, tests can be<br>
+   grouped and composed, in a style similar to the test framework in<br>
+   Peter Seibel's "Practical Common Lisp"<br>
+   <http://www.gigamonkeys.com/book/practical-building-a-unit-test-framework.html><br>
+<br>
+   (deftest arithmetic<br>
+     (addition)<br>
+     (subtraction))<br>
+<br>
+   The names of the nested tests will be joined in a list, like<br>
+   "(arithmetic addition)", in failure reports.  You can use nested<br>
+   tests to set up a context shared by several tests.<br>
+<br>
+<br>
+   RUNNING TESTS<br>
+<br>
+   Run tests with the function "(run-tests namespaces...)":<br>
+<br>
+   (run-tests 'your.namespace 'some.other.namespace)<br>
+<br>
+   If you don't specify any namespaces, the current namespace is<br>
+   used.  To run all tests in all namespaces, use "(run-all-tests)".<br>
+<br>
+   By default, these functions will search for all tests defined in<br>
+   a namespace and run them in an undefined order.  However, if you<br>
+   are composing tests, as in the "arithmetic" example above, you<br>
+   probably do not want the "addition" and "subtraction" tests run<br>
+   separately.  In that case, you must define a special function<br>
+   named "test-ns-hook" that runs your tests in the correct order:<br>
+<br>
+   (defn test-ns-hook []<br>
+     (arithmetic))<br>
+<br>
+   Note: test-ns-hook prevents execution of fixtures (see below).<br>
+<br>
+<br>
+   OMITTING TESTS FROM PRODUCTION CODE<br>
+<br>
+   You can bind the variable "*load-tests*" to false when loading or<br>
+   compiling code in production.  This will prevent any tests from<br>
+   being created by "with-test" or "deftest".<br>
+<br>
+<br>
+   FIXTURES<br>
+<br>
+   Fixtures allow you to run code before and after tests, to set up<br>
+   the context in which tests should be run.<br>
+<br>
+   A fixture is just a function that calls another function passed as<br>
+   an argument.  It looks like this:<br>
+<br>
+   (defn my-fixture [f]<br>
+      Perform setup, establish bindings, whatever.<br>
+     (f)  Then call the function we were passed.<br>
+      Tear-down / clean-up code here.<br>
+    )<br>
+<br>
+   Fixtures are attached to namespaces in one of two ways.  "each"<br>
+   fixtures are run repeatedly, once for each test function created<br>
+   with "deftest" or "with-test".  "each" fixtures are useful for<br>
+   establishing a consistent before/after state for each test, like<br>
+   clearing out database tables.<br>
+<br>
+   "each" fixtures can be attached to the current namespace like this:<br>
+   (use-fixtures :each fixture1 fixture2 ...)<br>
+   The fixture1, fixture2 are just functions like the example above.<br>
+   They can also be anonymous functions, like this:<br>
+   (use-fixtures :each (fn [f] setup... (f) cleanup...))<br>
+<br>
+   The other kind of fixture, a "once" fixture, is only run once,<br>
+   around ALL the tests in the namespace.  "once" fixtures are useful<br>
+   for tasks that only need to be performed once, like establishing<br>
+   database connections, or for time-consuming tasks.<br>
+<br>
+   Attach "once" fixtures to the current namespace like this:<br>
+   (use-fixtures :once fixture1 fixture2 ...)<br>
+<br>
+   Note: Fixtures and test-ns-hook are mutually incompatible.  If you<br>
+   are using test-ns-hook, fixture functions will *never* be run.<br>
+<br>
+<br>
+   SAVING TEST OUTPUT TO A FILE<br>
+<br>
+   All the test reporting functions write to the var *test-out*.  By<br>
+   default, this is the same as *out*, but you can rebind it to any<br>
+   PrintWriter.  For example, it could be a file opened with<br>
+   clojure.java.io/writer.<br>
+<br>
+<br>
+   EXTENDING TEST-IS (ADVANCED)<br>
+<br>
+   You can extend the behavior of the "is" macro by defining new<br>
+   methods for the "assert-expr" multimethod.  These methods are<br>
+   called during expansion of the "is" macro, so they should return<br>
+   quoted forms to be evaluated.<br>
+<br>
+   You can plug in your own test-reporting framework by rebinding<br>
+   the "report" function: (report event)<br>
+<br>
+   The 'event' argument is a map.  It will always have a :type key,<br>
+   whose value will be a keyword signaling the type of event being<br>
+   reported.  Standard events with :type value of :pass, :fail, and<br>
+   :error are called when an assertion passes, fails, and throws an<br>
+   exception, respectively.  In that case, the event will also have<br>
+   the following keys:<br>
+<br>
+     :expected   The form that was expected to be true<br>
+     :actual     A form representing what actually occurred<br>
+     :message    The string message given as an argument to 'is'<br>
+<br>
+   The "testing" strings will be a list in "*testing-contexts*", and<br>
+   the vars being tested will be a list in "*testing-vars*".<br>
+<br>
+   Your "report" function should wrap any printing calls in the<br>
+   "with-test-out" macro, which rebinds *out* to the current value<br>
+   of *test-out*.<br>
+<br>
+   For additional event types, see the examples in the code.<br>
+</p>
     <h2>Index</h2>
     <ul class="index">
       <li>
@@ -133,7 +346,9 @@
   <span class="var-type Boolean">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr">True by default.  If set to false, no test functions will<br>   be created by deftest, set-test, or with-test.  Use this to omit<br>   tests when compiling or loading production code.</p>
+  <p class="var-docstr">True by default.  If set to false, no test functions will<br>
+   be created by deftest, set-test, or with-test.  Use this to omit<br>
+   tests when compiling or loading production code.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L239">source</a>
 </li>
 <li>
@@ -149,7 +364,9 @@
   <span class="var-type Int">Int</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr">The maximum depth of stack traces to print when an Exception<br>  is thrown during a test.  Defaults to nil, which means print the<br>  complete stack trace.</p>
+  <p class="var-docstr">The maximum depth of stack traces to print when an Exception<br>
+  is thrown during a test.  Defaults to nil, which means print the<br>
+  complete stack trace.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L246">source</a>
 </li>
 <li>
@@ -182,7 +399,18 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(are argv expr & args)</code></div>
 </pre>
-  <p class="var-docstr">Checks multiple assertions with a template expression.<br>  See clojure.template/do-template for an explanation of<br>  templates.<br><br>  Example: (are [x y] (= x y)<br>                2 (+ 1 1)<br>                4 (* 2 2))<br>  Expands to:<br>           (do (is (= 2 (+ 1 1)))<br>               (is (= 4 (* 2 2))))<br><br>  Note: This breaks some reporting features, such as line numbers.</p>
+  <p class="var-docstr">Checks multiple assertions with a template expression.<br>
+  See clojure.template/do-template for an explanation of<br>
+  templates.<br>
+<br>
+  Example: (are [x y] (= x y)<br>
+                2 (+ 1 1)<br>
+                4 (* 2 2))<br>
+  Expands to:<br>
+           (do (is (= 2 (+ 1 1)))<br>
+               (is (= 4 (* 2 2))))<br>
+<br>
+  Note: This breaks some reporting features, such as line numbers.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L548">source</a>
 </li>
 <li>
@@ -191,7 +419,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assert-any msg form)</code></div>
 </pre>
-  <p class="var-docstr">Returns generic assertion code for any test, including macros, Java<br>  method calls, or isolated symbols.</p>
+  <p class="var-docstr">Returns generic assertion code for any test, including macros, Java<br>
+  method calls, or isolated symbols.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L431">source</a>
 </li>
 <li>
@@ -208,7 +437,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assert-predicate msg form)</code></div>
 </pre>
-  <p class="var-docstr">Returns generic assertion code for any functional predicate.  The<br>  'expected' argument to 'report' will contains the original form, the<br>  'actual' argument will contain the form with all its sub-forms<br>  evaluated.  If the predicate returns false, the 'actual' form will<br>  be wrapped in (not...).</p>
+  <p class="var-docstr">Returns generic assertion code for any functional predicate.  The<br>
+  'expected' argument to 'report' will contains the original form, the<br>
+  'actual' argument will contain the form with all its sub-forms<br>
+  evaluated.  If the predicate returns false, the 'actual' form will<br>
+  be wrapped in (not...).</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L412">source</a>
 </li>
 <li>
@@ -217,7 +450,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(compose-fixtures f1 f2)</code></div>
 </pre>
-  <p class="var-docstr">Composes two fixture functions, creating a new fixture function<br>  that combines their behavior.</p>
+  <p class="var-docstr">Composes two fixture functions, creating a new fixture function<br>
+  that combines their behavior.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L665">source</a>
 </li>
 <li>
@@ -226,7 +460,16 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(deftest name & body)</code></div>
 </pre>
-  <p class="var-docstr">Defines a test function with no arguments.  Test functions may call<br>  other tests, so tests may be composed.  If you compose tests, you<br>  should also define a function named test-ns-hook; run-tests will<br>  call test-ns-hook instead of testing all vars.<br><br>  Note: Actually, the test body goes in the :test metadata on the var,<br>  and the real function (the value of the var) calls test-var on<br>  itself.<br><br>  When *load-tests* is false, deftest is ignored.</p>
+  <p class="var-docstr">Defines a test function with no arguments.  Test functions may call<br>
+  other tests, so tests may be composed.  If you compose tests, you<br>
+  should also define a function named test-ns-hook; run-tests will<br>
+  call test-ns-hook instead of testing all vars.<br>
+<br>
+  Note: Actually, the test body goes in the :test metadata on the var,<br>
+  and the real function (the value of the var) calls test-var on<br>
+  itself.<br>
+<br>
+  When *load-tests* is false, deftest is ignored.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L598">source</a>
 </li>
 <li>
@@ -244,7 +487,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(do-report m)</code></div>
 </pre>
-  <p class="var-docstr">Add file and line information to a test result and call report.<br>   If you are writing a custom assert-expr method, call this function<br>   to pass test results to report.</p>
+  <p class="var-docstr">Add file and line information to a test result and call report.<br>
+   If you are writing a custom assert-expr method, call this function<br>
+   to pass test results to report.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L327">source</a>
 </li>
 <li>
@@ -253,7 +498,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(function? x)</code></div>
 </pre>
-  <p class="var-docstr">Returns true if argument is a function or a symbol that resolves to<br>  a function (not a macro).</p>
+  <p class="var-docstr">Returns true if argument is a function or a symbol that resolves to<br>
+  a function (not a macro).</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L400">source</a>
 </li>
 <li>
@@ -271,7 +517,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(inc-report-counter name)</code></div>
 </pre>
-  <p class="var-docstr">Increments the named counter in *report-counters*, a ref to a map.<br>  Does nothing if *report-counters* is nil.</p>
+  <p class="var-docstr">Increments the named counter in *report-counters*, a ref to a map.<br>
+  Does nothing if *report-counters* is nil.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L297">source</a>
 </li>
 <li>
@@ -281,7 +528,19 @@
   <pre class="var-usage"><div><code>(is form)</code></div>
 <div><code>(is form msg)</code></div>
 </pre>
-  <p class="var-docstr">Generic assertion macro.  'form' is any predicate test.<br>  'msg' is an optional message to attach to the assertion.<br><br>  Example: (is (= 4 (+ 2 2)) "Two plus two should be 4")<br><br>  Special forms:<br><br>  (is (thrown? c body)) checks that an instance of c is thrown from<br>  body, fails if not; then returns the thing thrown.<br><br>  (is (thrown-with-msg? c re body)) checks that an instance of c is<br>  thrown AND that the message on the exception matches (with<br>  re-find) the regular expression re.</p>
+  <p class="var-docstr">Generic assertion macro.  'form' is any predicate test.<br>
+  'msg' is an optional message to attach to the assertion.<br>
+<br>
+  Example: (is (= 4 (+ 2 2)) "Two plus two should be 4")<br>
+<br>
+  Special forms:<br>
+<br>
+  (is (thrown? c body)) checks that an instance of c is thrown from<br>
+  body, fails if not; then returns the thing thrown.<br>
+<br>
+  (is (thrown-with-msg? c re body)) checks that an instance of c is<br>
+  thrown AND that the message on the exception matches (with<br>
+  re-find) the regular expression re.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L530">source</a>
 </li>
 <li>
@@ -290,7 +549,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(join-fixtures fixtures)</code></div>
 </pre>
-  <p class="var-docstr">Composes a collection of fixtures, in order.  Always returns a valid<br>  fixture function, even if the collection is empty.</p>
+  <p class="var-docstr">Composes a collection of fixtures, in order.  Always returns a valid<br>
+  fixture function, even if the collection is empty.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L672">source</a>
 </li>
 <li>
@@ -298,7 +558,12 @@
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr">Generic reporting function, may be overridden to plug in<br>   different report formats (e.g., TAP, JUnit).  Assertions such as<br>   'is' call 'report' to indicate results.  The argument given to<br>   'report' will be a map with a :type key.  See the documentation at<br>   the top of test_is.clj for more information on the types of<br>   arguments for 'report'.</p>
+  <p class="var-docstr">Generic reporting function, may be overridden to plug in<br>
+   different report formats (e.g., TAP, JUnit).  Assertions such as<br>
+   'is' call 'report' to indicate results.  The argument given to<br>
+   'report' will be a map with a :type key.  See the documentation at<br>
+   the top of test_is.clj for more information on the types of<br>
+   arguments for 'report'.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L307">source</a>
 </li>
 <li>
@@ -308,7 +573,10 @@
   <pre class="var-usage"><div><code>(run-all-tests)</code></div>
 <div><code>(run-all-tests re)</code></div>
 </pre>
-  <p class="var-docstr">Runs all tests in all namespaces; prints results.<br>  Optional argument is a regular expression; only namespaces with<br>  names matching the regular expression (with re-matches) will be<br>  tested.</p>
+  <p class="var-docstr">Runs all tests in all namespaces; prints results.<br>
+  Optional argument is a regular expression; only namespaces with<br>
+  names matching the regular expression (with re-matches) will be<br>
+  tested.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L756">source</a>
 </li>
 <li>
@@ -318,7 +586,9 @@
   <pre class="var-usage"><div><code>(run-tests)</code></div>
 <div><code>(run-tests & namespaces)</code></div>
 </pre>
-  <p class="var-docstr">Runs all tests in the given namespaces; prints results.<br>  Defaults to current namespace if none given.  Returns a map<br>  summarizing test results.</p>
+  <p class="var-docstr">Runs all tests in the given namespaces; prints results.<br>
+  Defaults to current namespace if none given.  Returns a map<br>
+  summarizing test results.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L744">source</a>
 </li>
 <li>
@@ -327,7 +597,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set-test name & body)</code></div>
 </pre>
-  <p class="var-docstr">Experimental.<br>  Sets :test metadata of the named var to a fn with the given body.<br>  The var must already exist.  Does not modify the value of the var.<br><br>  When *load-tests* is false, set-test is ignored.</p>
+  <p class="var-docstr">Experimental.<br>
+  Sets :test metadata of the named var to a fn with the given body.<br>
+  The var must already exist.  Does not modify the value of the var.<br>
+<br>
+  When *load-tests* is false, set-test is ignored.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L624">source</a>
 </li>
 <li>
@@ -336,7 +610,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(successful? summary)</code></div>
 </pre>
-  <p class="var-docstr">Returns true if the given test summary indicates all tests<br>  were successful, false otherwise.</p>
+  <p class="var-docstr">Returns true if the given test summary indicates all tests<br>
+  were successful, false otherwise.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L765">source</a>
 </li>
 <li>
@@ -354,7 +629,13 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-ns ns)</code></div>
 </pre>
-  <p class="var-docstr">If the namespace defines a function named test-ns-hook, calls that.<br>  Otherwise, calls test-all-vars on the namespace.  'ns' is a<br>  namespace object or a symbol.<br><br>  Internally binds *report-counters* to a ref initialized to<br>  *initial-report-counters*.  Returns the final, dereferenced state of<br>  *report-counters*.</p>
+  <p class="var-docstr">If the namespace defines a function named test-ns-hook, calls that.<br>
+  Otherwise, calls test-all-vars on the namespace.  'ns' is a<br>
+  namespace object or a symbol.<br>
+<br>
+  Internally binds *report-counters* to a ref initialized to<br>
+  *initial-report-counters*.  Returns the final, dereferenced state of<br>
+  *report-counters*.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L719">source</a>
 </li>
 <li>
@@ -363,7 +644,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-var v)</code></div>
 </pre>
-  <p class="var-docstr">If v has a function in its :test metadata, calls that function,<br>  with *testing-vars* bound to (conj *testing-vars* v).</p>
+  <p class="var-docstr">If v has a function in its :test metadata, calls that function,<br>
+  with *testing-vars* bound to (conj *testing-vars* v).</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L684">source</a>
 </li>
 <li>
@@ -372,7 +654,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-vars vars)</code></div>
 </pre>
-  <p class="var-docstr">Groups vars by their namespace and runs test-vars on them with<br>   appropriate fixtures applied.</p>
+  <p class="var-docstr">Groups vars by their namespace and runs test-vars on them with<br>
+   appropriate fixtures applied.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L699">source</a>
 </li>
 <li>
@@ -381,7 +664,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing string & body)</code></div>
 </pre>
-  <p class="var-docstr">Adds a new string to the list of testing contexts.  May be nested,<br>  but must occur inside a test function (deftest).</p>
+  <p class="var-docstr">Adds a new string to the list of testing contexts.  May be nested,<br>
+  but must occur inside a test function (deftest).</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L573">source</a>
 </li>
 <li>
@@ -390,7 +674,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing-contexts-str)</code></div>
 </pre>
-  <p class="var-docstr">Returns a string representation of the current test context. Joins<br>  strings in *testing-contexts* with spaces.</p>
+  <p class="var-docstr">Returns a string representation of the current test context. Joins<br>
+  strings in *testing-contexts* with spaces.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L290">source</a>
 </li>
 <li>
@@ -399,7 +684,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing-vars-str m)</code></div>
 </pre>
-  <p class="var-docstr">Returns a string representation of the current test.  Renders names<br>  in *testing-vars* as a list, then the source file and line of<br>  current assertion.</p>
+  <p class="var-docstr">Returns a string representation of the current test.  Renders names<br>
+  in *testing-vars* as a list, then the source file and line of<br>
+  current assertion.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L277">source</a>
 </li>
 <li>
@@ -408,7 +695,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(try-expr msg form)</code></div>
 </pre>
-  <p class="var-docstr">Used by the 'is' macro to catch unexpected exceptions.<br>  You don't call this.</p>
+  <p class="var-docstr">Used by the 'is' macro to catch unexpected exceptions.<br>
+  You don't call this.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L514">source</a>
 </li>
 <li>
@@ -416,7 +704,9 @@
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr">Wrap test runs in a fixture function to perform setup and<br>  teardown. Using a fixture-type of :each wraps every test<br>  individually, while :once wraps the whole run in a single function.</p>
+  <p class="var-docstr">Wrap test runs in a fixture function to perform setup and<br>
+  teardown. Using a fixture-type of :each wraps every test<br>
+  individually, while :once wraps the whole run in a single function.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L646">source</a>
 </li>
 <li>
@@ -425,7 +715,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(with-test definition & body)</code></div>
 </pre>
-  <p class="var-docstr">Takes any definition form (that returns a Var) as the first argument.<br>  Remaining body goes in the :test metadata function for that Var.<br><br>  When *load-tests* is false, only evaluates the definition, ignoring<br>  the tests.</p>
+  <p class="var-docstr">Takes any definition form (that returns a Var) as the first argument.<br>
+  Remaining body goes in the :test metadata function for that Var.<br>
+<br>
+  When *load-tests* is false, only evaluates the definition, ignoring<br>
+  the tests.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L585">source</a>
 </li>
 <li>

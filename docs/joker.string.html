@@ -99,7 +99,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(capitalize s)</code></div>
 </pre>
-  <p class="var-docstr">Converts first character of the string to upper-case, all other<br>  characters to lower-case.</p>
+  <p class="var-docstr">Converts first character of the string to upper-case, all other<br>
+  characters to lower-case.</p>
   
 </li>
 <li>
@@ -117,7 +118,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(escape s cmap)</code></div>
 </pre>
-  <p class="var-docstr">Return a new string, using cmap to escape each character ch<br>  from s as follows:<br><br>  If (cmap ch) is nil, append ch to the new string.<br>  If (cmap ch) is non-nil, append (str (cmap ch)) instead.</p>
+  <p class="var-docstr">Return a new string, using cmap to escape each character ch<br>
+  from s as follows:<br>
+<br>
+  If (cmap ch) is nil, append ch to the new string.<br>
+  If (cmap ch) is non-nil, append (str (cmap ch)) instead.</p>
   
 </li>
 <li>
@@ -136,7 +141,8 @@
   <pre class="var-usage"><div><code>(index-of s value)</code></div>
 <div><code>(index-of s value from)</code></div>
 </pre>
-  <p class="var-docstr">Return index of value (string or char) in s, optionally searching<br>  forward from from or nil if not found.</p>
+  <p class="var-docstr">Return index of value (string or char) in s, optionally searching<br>
+  forward from from or nil if not found.</p>
   
 </li>
 <li>
@@ -156,7 +162,8 @@
   <pre class="var-usage"><div><code>(last-index-of s value)</code></div>
 <div><code>(last-index-of s value from)</code></div>
 </pre>
-  <p class="var-docstr">Return last index of value (string or char) in s, optionally<br>  searching backward from from or nil if not found.</p>
+  <p class="var-docstr">Return last index of value (string or char) in s, optionally<br>
+  searching backward from from or nil if not found.</p>
   
 </li>
 <li>
@@ -192,7 +199,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(replace s match repl)</code></div>
 </pre>
-  <p class="var-docstr">Replaces all instances of match (String or Regex) with string repl in string s.<br><br>  If match is Regex, $1, $2, etc. in the replacement string repl are<br>  substituted with the string that matched the corresponding<br>  parenthesized group in the pattern.<br>  </p>
+  <p class="var-docstr">Replaces all instances of match (String or Regex) with string repl in string s.<br>
+<br>
+  If match is Regex, $1, $2, etc. in the replacement string repl are<br>
+  substituted with the string that matched the corresponding<br>
+  parenthesized group in the pattern.<br>
+  </p>
   
 </li>
 <li>
@@ -201,7 +213,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(replace-first s match repl)</code></div>
 </pre>
-  <p class="var-docstr">Replaces the first instance of match (String or Regex) with string repl in string s.<br><br>  If match is Regex, $1, $2, etc. in the replacement string repl are<br>  substituted with the string that matched the corresponding<br>  parenthesized group in the pattern.<br>  </p>
+  <p class="var-docstr">Replaces the first instance of match (String or Regex) with string repl in string s.<br>
+<br>
+  If match is Regex, $1, $2, etc. in the replacement string repl are<br>
+  substituted with the string that matched the corresponding<br>
+  parenthesized group in the pattern.<br>
+  </p>
   
 </li>
 <li>

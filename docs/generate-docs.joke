@@ -66,7 +66,7 @@
         (string/replace "{name}" (str k))
         (string/replace "{type}" (type-name v))
         (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m)))
         (string/replace
          "{source}"
@@ -88,7 +88,7 @@
     (-> namespace-template
         (string/replace "{id}" k)
         (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
 (defn ns-doc
@@ -106,7 +106,7 @@
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
         (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace  "{vars}" vars-doc)
         (string/replace "{index}" var-links-doc))))
 

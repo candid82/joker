@@ -93,7 +93,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format t layout)</code></div>
 </pre>
-  <p class="var-docstr">Returns a textual representation of the time value formatted according to layout,<br>  which defines the format by showing how the reference time, defined to be<br>  Mon Jan 2 15:04:05 -0700 MST 2006<br>  would be displayed if it were the value; it serves as an example of the desired output.<br>  The same display rules will then be applied to the time value..</p>
+  <p class="var-docstr">Returns a textual representation of the time value formatted according to layout,<br>
+  which defines the format by showing how the reference time, defined to be<br>
+  Mon Jan 2 15:04:05 -0700 MST 2006<br>
+  would be displayed if it were the value; it serves as an example of the desired output.<br>
+  The same display rules will then be applied to the time value..</p>
   
 </li>
 <li>
@@ -102,7 +106,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(from-unix sec nsec)</code></div>
 </pre>
-  <p class="var-docstr">Returns the local Time corresponding to the given Unix time, sec seconds and<br>  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].</p>
+  <p class="var-docstr">Returns the local Time corresponding to the given Unix time, sec seconds and<br>
+  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].</p>
   
 </li>
 <li>
@@ -178,7 +183,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-duration s)</code></div>
 </pre>
-  <p class="var-docstr">Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,<br>  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are<br>  ns, us (or µs), ms, s, m, h.</p>
+  <p class="var-docstr">Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,<br>
+  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are<br>
+  ns, us (or µs), ms, s, m, h.</p>
   
 </li>
 <li>
@@ -187,7 +194,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(round d m)</code></div>
 </pre>
-  <p class="var-docstr">Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.<br>  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.</p>
+  <p class="var-docstr">Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.<br>
+  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.</p>
   
 </li>
 <li>
@@ -222,7 +230,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sleep d)</code></div>
 </pre>
-  <p class="var-docstr">Pauses the execution thread for at least the duration d (expressed in nanoseconds).<br>  A negative or zero duration causes sleep to return immediately.</p>
+  <p class="var-docstr">Pauses the execution thread for at least the duration d (expressed in nanoseconds).<br>
+  A negative or zero duration causes sleep to return immediately.</p>
   
 </li>
 <li>

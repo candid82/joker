@@ -39,7 +39,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(path-unescape s)</code></div>
 </pre>
-  <p class="var-docstr">Does the inverse transformation of path-escape, converting each 3-byte encoded<br>  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts<br>  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.<br><br>  PathUnescape is identical to QueryUnescape except that it does not unescape '+' to ' ' (space).</p>
+  <p class="var-docstr">Does the inverse transformation of path-escape, converting each 3-byte encoded<br>
+  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts<br>
+  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.<br>
+<br>
+  PathUnescape is identical to QueryUnescape except that it does not unescape '+' to ' ' (space).</p>
   
 </li>
 <li>
@@ -57,7 +61,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(query-unescape s)</code></div>
 </pre>
-  <p class="var-docstr">Does the inverse transformation of query-escape, converting each 3-byte encoded<br>  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts<br>  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.</p>
+  <p class="var-docstr">Does the inverse transformation of query-escape, converting each 3-byte encoded<br>
+  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts<br>
+  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.</p>
   
 </li>
 

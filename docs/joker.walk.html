@@ -6,7 +6,16 @@
   <div class="main">
     <h1>Namespace: joker.walk</h1>
     <span class="var-added">v1.0</span>
-    <p class="var-docstr">This file defines a generic tree walker for Clojure data<br>         structures.  It takes any data structure (list, vector, map, set,<br>         seq), calls a function on every element, and uses the return value<br>         of the function in place of the original.  This makes it fairly<br>         easy to write recursive search-and-replace functions, as shown in<br>         the examples.<br><br>         Note: "walk" supports all Clojure data structures EXCEPT maps<br>         created with sorted-map-by.  There is no (obvious) way to retrieve<br>         the sorting function.</p>
+    <p class="var-docstr">This file defines a generic tree walker for Clojure data<br>
+         structures.  It takes any data structure (list, vector, map, set,<br>
+         seq), calls a function on every element, and uses the return value<br>
+         of the function in place of the original.  This makes it fairly<br>
+         easy to write recursive search-and-replace functions, as shown in<br>
+         the examples.<br>
+<br>
+         Note: "walk" supports all Clojure data structures EXCEPT maps<br>
+         created with sorted-map-by.  There is no (obvious) way to retrieve<br>
+         the sorting function.</p>
     <h2>Index</h2>
     <ul class="index">
       <li>
@@ -66,7 +75,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk f form)</code></div>
 </pre>
-  <p class="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on<br>  each sub-form, uses f's return value in place of the original.<br>  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
+  <p class="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on<br>
+  each sub-form, uses f's return value in place of the original.<br>
+  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L56">source</a>
 </li>
 <li>
@@ -75,7 +86,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-demo form)</code></div>
 </pre>
-  <p class="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is<br>  walked.  Returns form.</p>
+  <p class="var-docstr">Demonstrates the behavior of postwalk by printing each form as it is<br>
+  walked.  Returns form.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L83">source</a>
 </li>
 <li>
@@ -84,7 +96,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-replace smap form)</code></div>
 </pre>
-  <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>  values.  Like clojure/replace but works on any data structure.  Does<br>  replacement at the leaves of the tree first.</p>
+  <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>
+  values.  Like clojure/replace but works on any data structure.  Does<br>
+  replacement at the leaves of the tree first.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L121">source</a>
 </li>
 <li>
@@ -102,7 +116,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-demo form)</code></div>
 </pre>
-  <p class="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is<br>  walked.  Returns form.</p>
+  <p class="var-docstr">Demonstrates the behavior of prewalk by printing each form as it is<br>
+  walked.  Returns form.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L90">source</a>
 </li>
 <li>
@@ -111,7 +126,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-replace smap form)</code></div>
 </pre>
-  <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>  values.  Like clojure/replace but works on any data structure.  Does<br>  replacement at the root of the tree first.</p>
+  <p class="var-docstr">Recursively transforms form by replacing keys in smap with their<br>
+  values.  Like clojure/replace but works on any data structure.  Does<br>
+  replacement at the root of the tree first.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L113">source</a>
 </li>
 <li>
@@ -129,7 +146,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(walk inner outer form)</code></div>
 </pre>
-  <p class="var-docstr">Traverses form, an arbitrary data structure.  inner and outer are<br>  functions.  Applies inner to each element of form, building up a<br>  data structure of the same type, then applies outer to the result.<br>  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
+  <p class="var-docstr">Traverses form, an arbitrary data structure.  inner and outer are<br>
+  functions.  Applies inner to each element of form, building up a<br>
+  data structure of the same type, then applies outer to the result.<br>
+  Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L36">source</a>
 </li>
 
