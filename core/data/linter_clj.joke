@@ -316,7 +316,6 @@
 (defn dosync [& exprs])
 (defn sync [flags-ignored-for-now & body])
 (defn io! [& body])
-(defn proxy [class-and-interfaces args & fs])
 (defn defstruct [name & keys])
 (defn with-local-vars [name-vals-vec & body])
 (defn definline [name & decl])
@@ -325,6 +324,17 @@
 (defn proxy-super [meth & args])
 (defn with-open [bindings & body])
 
+(defmacro proxy
+  [class-and-interfaces args & fs]
+  (when-not (vector? class-and-interfaces)
+    (throw (ex-info "Expected a vector of class and intefaces." {:form class-and-interfaces})))
+  (let [impls (fn [fs] (for [f fs]
+                         (derive-info__ (cons 'fn f) f)))]
+    `(fn [this]
+       ~class-and-interfaces
+       ~args
+       ~@(impls fs))))
+
 (def *known-macros*
   (merge
    *known-macros*
@@ -332,7 +342,6 @@
     'definterface nil
     'defstruct nil
     'gen-interface nil
-    'proxy ['this]
     'proxy-super nil
     'with-local-vars nil
     'with-open nil

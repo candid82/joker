@@ -2,7 +2,6 @@
 ;; blank line where (defmulti) used to be (it's now supported in eval mode)
 (letfn)
 (..)
-(proxy)
 (defstruct)
 (with-local-vars)
 (definline)
