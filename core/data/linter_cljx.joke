@@ -141,7 +141,8 @@
                            (assoc m (keyword mname)
                                   (merge name-meta
                                          {:name (vary-meta mname assoc :doc doc :arglists arglists)
-                                          :arglists arglists
+                                          :arglists (map (fn [args] (mapv #(symbol (str "_" %)) args))
+                                                         arglists)
                                           :doc doc}))))
                        {} sigs))]
     `(do
