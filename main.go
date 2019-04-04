@@ -360,8 +360,13 @@ var (
 	noReadline         bool
 )
 
+func isNumber(s string) bool {
+	_, err := strconv.ParseInt(s, 10, 64)
+	return err == nil
+}
+
 func notOption(arg string) bool {
-	return arg == "-" || !strings.HasPrefix(arg, "-")
+	return arg == "-" || !strings.HasPrefix(arg, "-") || isNumber(arg[1:])
 }
 
 func parseArgs(args []string) {
