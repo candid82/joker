@@ -112,6 +112,14 @@ func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
 }
 
+func ExtractBoolean(args []Object, index int) bool {
+	return EnsureBoolean(args, index).B
+}
+
+func ExtractChar(args []Object, index int) rune {
+	return EnsureChar(args, index).Ch
+}
+
 func ExtractTime(args []Object, index int) time.Time {
 	return EnsureTime(args, index).T
 }

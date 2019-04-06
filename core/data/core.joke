@@ -3190,7 +3190,7 @@
     :doc "A set of symbols representing loaded libs"}
   *loaded-libs* #{'joker.base64 'joker.core 'joker.html 'joker.http 'joker.json
                   'joker.math 'joker.os 'joker.string 'joker.time 'joker.url
-                  'joker.yaml})
+                  'joker.yaml 'joker.strconv})
 
 (defonce ^:dynamic
   ^{:private true

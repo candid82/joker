@@ -19,6 +19,7 @@ import (
 	_ "github.com/candid82/joker/std/json"
 	_ "github.com/candid82/joker/std/math"
 	_ "github.com/candid82/joker/std/os"
+	_ "github.com/candid82/joker/std/strconv"
 	_ "github.com/candid82/joker/std/string"
 	_ "github.com/candid82/joker/std/time"
 	_ "github.com/candid82/joker/std/url"
