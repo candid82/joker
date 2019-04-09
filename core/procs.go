@@ -96,6 +96,10 @@ func ExtractString(args []Object, index int) string {
 	return EnsureString(args, index).S
 }
 
+func ExtractKeyword(args []Object, index int) string {
+	return EnsureKeyword(args, index).ToString(false)
+}
+
 func ExtractStringable(args []Object, index int) string {
 	return EnsureStringable(args, index).S
 }
