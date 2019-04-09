@@ -1,0 +1,16 @@
+(ns
+  ^{:go-imports ["encoding/hex"]
+    :doc "Implements hexadecimal encoding and decoding."}
+  hex)
+
+(defn ^String decode-string
+  "Returns the bytes represented by the hexadecimal string s."
+  {:added "1.0"
+  :go "! t, err := hex.DecodeString(s); PanicOnErr(err); _res := string(t)"}
+  [^String s])
+
+(defn ^String encode-string
+  "Returns the hexadecimal encoding of s."
+  {:added "1.0"
+  :go "hex.EncodeToString([]byte(s))"}
+  [^String s])

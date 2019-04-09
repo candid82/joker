@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports []
+  ^{:go-imports ["crypto/sha256"]
     :doc "Implements common cryptographic and hash functions."}
   crypto)
 
@@ -9,3 +9,9 @@
   {:added "1.0"
   :go "hmacSum(algorithm, message, key)"}
   [^Keyword algorithm ^String message ^String key])
+
+(defn ^String sha256
+  "Returns the SHA256 checksum of the data."
+  {:added "1.0"
+  :go "! t := sha256.Sum256([]byte(data)); _res := string(t[:])"}
+  [^String data])

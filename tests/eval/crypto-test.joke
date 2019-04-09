@@ -57,3 +57,7 @@
                                       :sha512
                                       "asdflkjhsdfiu239471204hsdkjhbf9128734yhfay49812734y1ihsfdkjhf2913874y"
                                       "sdfaskdjhfk1289374yrfh981273y4rihf18274yrfuh9r8hoojffh13iur0")))))
+
+(deftest sha256
+  (is (= "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+         (joker.hex/encode-string (joker.crypto/sha256 "1234")))))
