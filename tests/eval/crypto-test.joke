@@ -61,3 +61,31 @@
 (deftest sha256
   (is (= "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
          (joker.hex/encode-string (joker.crypto/sha256 "1234")))))
+
+(deftest sha224
+  (is (= "99fb2f48c6af4761f904fc85f95eb56190e5d40b1f44ec3a9c1fa319"
+         (joker.hex/encode-string (joker.crypto/sha224 "1234")))))
+
+(deftest sha384
+  (is (= "504f008c8fcf8b2ed5dfcde752fc5464ab8ba064215d9c5b5fc486af3d9ab8c81b14785180d2ad7cee1ab792ad44798c"
+         (joker.hex/encode-string (joker.crypto/sha384 "1234")))))
+
+(deftest sha512
+  (is (= "d404559f602eab6fd602ac7680dacbfaadd13630335e951f097af3900e9de176b6db28512f2e000b9d04fba5133e8b1c6e8df59db3a8ab9d60be4b97cc9e81db"
+         (joker.hex/encode-string (joker.crypto/sha512 "1234")))))
+
+(deftest sha512-224
+  (is (= "90ce2868ea834f4a9e0008d504bfdcd144cf7de5913b97ecbae7c58c"
+         (joker.hex/encode-string (joker.crypto/sha512-224 "1234")))))
+
+(deftest sha512-256
+  (is (= "3bb20e367b1a988158e3dbbed06bf6415beea23f56bbb15dbf346505edc7e7df"
+         (joker.hex/encode-string (joker.crypto/sha512-256 "1234")))))
+
+(deftest md5
+  (is (= "81dc9bdb52d04dc20036dbd8313ed055"
+         (joker.hex/encode-string (joker.crypto/md5 "1234")))))
+
+(deftest sha1
+  (is (= "7110eda4d09e062aa5e4a390b0a572ac0d2c0220"
+         (joker.hex/encode-string (joker.crypto/sha1 "1234")))))
