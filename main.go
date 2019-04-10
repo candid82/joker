@@ -557,6 +557,16 @@ var runningProfile interface {
 	Stop()
 }
 
+func getEnv(key string) string {
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		if pair[0] == key {
+			return pair[1]
+		}
+	}
+	return ""
+}
+
 func main() {
 	InitInternalLibs()
 	ProcessCoreData()
@@ -578,6 +588,9 @@ func main() {
 	}
 
 	parseArgs(os.Args)
+	if classPath == "" {
+		classPath = getEnv("JOKER_CLASSPATH")
+	}
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
 
