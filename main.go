@@ -377,6 +377,11 @@ func parseArgs(args []string) {
 	stop := false
 	missing := false
 	noFileFlag := false
+	if v, ok := os.LookupEnv("JOKER_CLASSPATH"); ok {
+		classPath = v
+	} else {
+		classPath = ""
+	}
 	var i int
 	for i = 1; i < length; i++ { // shift
 		if debugOut != nil {
