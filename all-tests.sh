@@ -17,3 +17,5 @@ done
 if [[ $fail == 0 ]]; then
     echo >&2 "All tests passed."
 fi
+
+exit $fail
