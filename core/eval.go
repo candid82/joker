@@ -204,7 +204,7 @@ func (expr *VectorExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *MapExpr) Eval(env *LocalEnv) Object {
-	if len(expr.keys) > HASHMAP_THRESHOLD/2 {
+	if int64(len(expr.keys)) > HASHMAP_THRESHOLD/2 {
 		res := EmptyHashMap
 		for i := range expr.keys {
 			key := Eval(expr.keys[i], env)
