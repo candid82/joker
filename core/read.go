@@ -604,7 +604,7 @@ func readMapWithNamespace(reader *Reader, nsname string) Object {
 	if len(objs)%2 != 0 {
 		panic(MakeReadError(reader, "Map literal must contain an even number of forms"))
 	}
-	if len(objs) > HASHMAP_THRESHOLD {
+	if int64(len(objs)) >= HASHMAP_THRESHOLD {
 		hashMap := NewHashMap()
 		for i := 0; i < len(objs); i += 2 {
 			key := resolveKey(objs[i], nsname)

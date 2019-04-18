@@ -21,7 +21,7 @@ type (
 )
 
 var (
-	HASHMAP_THRESHOLD int = 16
+	HASHMAP_THRESHOLD int64 = 16
 )
 
 func EmptyArrayMap() *ArrayMap {
@@ -169,7 +169,7 @@ func (m *ArrayMap) Assoc(key Object, value Object) Associative {
 		res.arr[i+1] = value
 		return res
 	}
-	if len(m.arr) >= HASHMAP_THRESHOLD {
+	if int64(len(m.arr)) >= HASHMAP_THRESHOLD {
 		return NewHashMap(m.arr...).Assoc(key, value)
 	}
 	res := m.Clone()

@@ -377,6 +377,11 @@ func parseArgs(args []string) {
 	stop := false
 	missing := false
 	noFileFlag := false
+	if v, ok := os.LookupEnv("JOKER_CLASSPATH"); ok {
+		classPath = v
+	} else {
+		classPath = ""
+	}
 	var i int
 	for i = 1; i < length; i++ { // shift
 		if debugOut != nil {
@@ -437,7 +442,7 @@ func parseArgs(args []string) {
 		case "--hashmap-threshold":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
-				thresh, err := strconv.Atoi(args[i])
+				thresh, err := strconv.ParseInt(args[i], 10, 64)
 				if err != nil {
 					fmt.Fprintln(Stderr, "Error: ", err)
 					return

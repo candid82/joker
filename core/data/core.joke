@@ -3710,20 +3710,22 @@
    :tag Seq})
 
 (add-doc-and-meta *classpath*
-  "A vector of the classpath elements as configured by --classpath.
+  "A vector of the classpath elements as configured by --classpath or
+  the JOKER_CLASSPATH environment variable.
 
   Use colon-delimited <cp> (semicolon-delimited on Windows) for source
   directories when loading libraries via :require and the like (but
   not load-file). An empty field denotes the directory containing the
   current file being loaded, with zero or more trailing components
-  removed as determined by the number of \".\" separators in the
-  current namespace; or, if no file is being loaded, the current
+  removed as determined by the number of \".\" separators in the current
+  namespace; or, if no file is being loaded, the current
   directory (this is original Joker behavior); a '.' (period) by
-  itself denotes solely the current directory. Defaults to the empty
-  string (denoting a single empty field). The resulting classpath is
-  stored herein, and this variable is used (in lieu of command-line
-  arguments or environment variables) for all pertinent subsequent
-  operations."
+  itself denotes solely the current directory. Defaults to the value
+  of the JOKER_CLASSPATH environment variable or, if that is
+  undefined, the empty string (denoting a single empty field). The
+  resulting classpath is stored herein, and this variable is used (in
+  lieu of command-line arguments or environment variables) for all
+  pertinent subsequent operations."
   {:added "1.0"
    :private true})
 
