@@ -1,0 +1,8 @@
+
+(let [output (with-out-str
+               (binding [*ns* *ns*]
+                 (load-file (str "tests/deps/test.joke"))))]
+  (when (or (re-matches #"(.|\n)*FAIL(.|\n)*" output))
+    (println output)
+    (joker.os/exit 1))
+  (joker.os/exit 0))
