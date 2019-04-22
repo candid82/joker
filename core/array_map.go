@@ -214,6 +214,9 @@ func (m *ArrayMap) Merge(other Map) Map {
 	for iter := other.Iter(); iter.HasNext(); {
 		p := iter.Next()
 		res.Set(p.Key, p.Value)
+		if len(res.arr) > HASHMAP_THRESHOLD {
+			return NewHashMap(m.arr...).Merge(other)
+		}
 	}
 	return res
 }
