@@ -1476,24 +1476,56 @@ var procIndexOf Proc = func(args []Object) Object {
 	return Int{I: -1}
 }
 
+func libExternalPath(sym Symbol) (path string, ok bool) {
+	nsSourcesVar, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*ns-sources*"))
+	nsSources := ToSlice(nsSourcesVar.Value.(*Vector).Seq())
+
+	var sourceKey string
+	var sourceMap Map
+	for _, source := range nsSources {
+		sourceKey := source.(*Vector).Nth(0).ToString(false)
+		match, _ := regexp.MatchString(sourceKey, sym.Name())
+		if match {
+			sourceMap = source.(*Vector).Nth(1).(Map)
+			break
+		}
+	}
+	if sourceMap != nil {
+		ok, url := sourceMap.Get(MakeKeyword("url"))
+		if !ok {
+			panic(RT.NewError("Key :url not found in ns-sources for: " + sourceKey))
+		} else {
+			return externalSourceToPath(sym.Name(), url.ToString(false)), true
+		}
+	}
+	return
+}
+
 var procLibPath Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
-	var file string
-	if GLOBAL_ENV.file.Value == nil {
-		var err error
-		file, err = filepath.Abs("user")
-		PanicOnErr(err)
-	} else {
-		file = AssertString(GLOBAL_ENV.file.Value, "").S
+	var path string
+
+	path, ok := libExternalPath(sym)
+
+	if !ok {
+		var file string
+		if GLOBAL_ENV.file.Value == nil {
+			var err error
+			file, err = filepath.Abs("user")
+			PanicOnErr(err)
+		} else {
+			file = AssertString(GLOBAL_ENV.file.Value, "").S
+		}
+		ns := GLOBAL_ENV.CurrentNamespace().Name
+
+		parts := strings.Split(ns.Name(), ".")
+		for _ = range parts {
+			file, _ = filepath.Split(file)
+			file = file[:len(file)-1]
+		}
+		path = filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...) + ".joke"
 	}
-	ns := GLOBAL_ENV.CurrentNamespace().Name
-	parts := strings.Split(ns.Name(), ".")
-	for _ = range parts {
-		file, _ = filepath.Split(file)
-		file = file[:len(file)-1]
-	}
-	path := filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...)
-	return String{S: path + ".joke"}
+	return String{S: path}
 }
 
 var procInternFakeVar Proc = func(args []Object) Object {

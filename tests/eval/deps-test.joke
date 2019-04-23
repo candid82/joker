@@ -1,0 +1,9 @@
+(ns deps-test
+  (:require
+    [joker.test :refer [deftest is are testing]]
+    [deps]
+    [test-local.lib :as lib-local]))
+
+(deftest local-lib-test
+  (testing "require from an local source"
+    (is (= lib-local/b :b))))
