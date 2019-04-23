@@ -7,9 +7,8 @@
        (second)
        (str/split #"/")
        (butlast)
-       (concat ["deps" "lib"])
+       (concat ["lib"])
        ((fn [x] (apply str (interpose "/" x))))))
 
 (ns-sources
-  {"test-local.*" {:url lib-dir}
-   "test-http.*" {:url "https://s3.us-east-2.amazonaws.com/tech.public.data/"}})
+  {"test-local.*" {:url lib-dir}})
