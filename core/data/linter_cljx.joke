@@ -381,4 +381,4 @@
 (ns-unmap 'joker.core 'println-err)
 (ns-unmap 'user 'println-err)
 (ns-unmap 'joker.core 'ns-sources)
-(ns-unmap 'joker.core '*ns-sources*)
+(ns-unmap 'user 'ns-sources)
