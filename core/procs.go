@@ -1478,23 +1478,22 @@ var procIndexOf Proc = func(args []Object) Object {
 
 func libExternalPath(sym Symbol) (path string, ok bool) {
 	nsSourcesVar, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*ns-sources*"))
-	nsSources := nsSourcesVar.Value.(Map)
+	nsSources := ToSlice(nsSourcesVar.Value.(*Vector).Seq())
 
-	nsSourceMatches := ToSlice(nsSources.Keys())
+	var sourceKey string
 	var sourceMap Map
-	var sourceKey Object
-	for _, sourceKey = range nsSourceMatches {
-		match, _ := regexp.MatchString(sourceKey.ToString(false), sym.Name())
+	for _, source := range nsSources {
+		sourceKey := source.(*Vector).Nth(0).ToString(false)
+		match, _ := regexp.MatchString(sourceKey, sym.Name())
 		if match {
-			_, source := nsSources.Get(sourceKey)
-			sourceMap = source.(Map)
+			sourceMap = source.(*Vector).Nth(1).(Map)
 			break
 		}
 	}
 	if sourceMap != nil {
 		ok, url := sourceMap.Get(MakeKeyword("url"))
 		if !ok {
-			panic(RT.NewError("Key :url not found in ns-sources for: " + sourceKey.ToString(false)))
+			panic(RT.NewError("Key :url not found in ns-sources for: " + sourceKey))
 		} else {
 			return externalSourceToPath(sym.Name(), url.ToString(false)), true
 		}

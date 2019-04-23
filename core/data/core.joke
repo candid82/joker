@@ -3205,7 +3205,7 @@
 (defonce ^:dynamic
   ^{:private true
     :doc "A map from namespace reg-exps to the source to load the external dependency from"}
-  *ns-sources* {})
+  *ns-sources* [])
 
 (defn- throw-if
   "Throws an exception with a message if pred is true"
@@ -3238,7 +3238,13 @@
   external depenndencies."
   {:added "1.0"}
   ^Nil [^Map sources]
-  (var-set #'*ns-sources* (merge *ns-sources* sources)))
+  (let [existing-source-keys (set (map first *ns-sources*))
+        merge-fn (fn [existing-sources [k v]]
+                   (concat existing-sources
+                           (if-not (existing-source-keys k) [[k v]])))]
+    (->> (reduce merge-fn *ns-sources* sources)
+         (vec)
+         (var-set #'*ns-sources*))))
 
 (defn- load-one
   "Loads a lib given its name. If need-ns, ensures that the associated
