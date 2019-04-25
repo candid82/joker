@@ -41,7 +41,7 @@ func externalHttpSourceToPath(lib string, url string) (path string) {
 }
 
 func externalSourceToPath(lib string, url string) (path string) {
-	httpPath, _ := regexp.MatchString("http://*|https://", url)
+	httpPath, _ := regexp.MatchString("http://|https://", url)
 	if httpPath {
 		return externalHttpSourceToPath(lib, url)
 	} else {

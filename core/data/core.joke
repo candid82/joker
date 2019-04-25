@@ -3235,7 +3235,7 @@
 
 (defn ns-sources
   "Adds to the built-in variable *ns-sources* which defines how to resolve
-  external depenndencies."
+  external dependencies."
   {:added "1.0"}
   ^Nil [^Map sources]
   (let [existing-source-keys (set (map first *ns-sources*))

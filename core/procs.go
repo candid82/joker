@@ -1483,7 +1483,7 @@ func libExternalPath(sym Symbol) (path string, ok bool) {
 	var sourceKey string
 	var sourceMap Map
 	for _, source := range nsSources {
-		sourceKey := source.(*Vector).Nth(0).ToString(false)
+		sourceKey = source.(*Vector).Nth(0).ToString(false)
 		match, _ := regexp.MatchString(sourceKey, sym.Name())
 		if match {
 			sourceMap = source.(*Vector).Nth(1).(Map)
