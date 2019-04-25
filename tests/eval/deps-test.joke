@@ -5,5 +5,5 @@
     [test-local.lib :as lib-local]))
 
 (deftest local-lib-test
-  (testing "require from an local source"
+  (testing "require from a local source"
     (is (= lib-local/b :b))))
