@@ -699,7 +699,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 	for _, v := range a {
 		argVector = argVector.Conjoin(v)
 	}
-	return DeriveReadObject(body, NewListFrom(SYMBOLS.fn, argVector, body))
+	return DeriveReadObject(body, NewListFrom(MakeSymbol("joker.core/fn"), argVector, body))
 }
 
 func isTerminatingMacro(r rune) bool {
