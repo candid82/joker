@@ -189,7 +189,7 @@
 (defn ex-info
   (^ExInfo [^String msg ^Map map] (ex-info__ msg map))
   (^ExInfo [^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
-(defn with-meta [^Meta obj ^Map m] (with-meta__ obj m))
+(defn with-meta [obj ^Map m] (with-meta__ obj m))
 (defn vec ^Vector [^Seqable coll] (vec__ coll))
 (defn not-every? ^Boolean [^Callable pred ^Seqable coll] (not (every? pred coll)))
 (defn not-any? ^Boolean [^Callable pred ^Seqable coll] (not (some pred coll)))

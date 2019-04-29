@@ -13,7 +13,7 @@
 (ex-info {} "")
 (first 1)
 (assoc 1 2 3)
-(with-meta "sd" nil)
+; (with-meta "sd" nil)
 (with-meta {} 1)
 (last 1)
 (butlast 1)

@@ -14,7 +14,6 @@ tests/linter/types-1/input.clj:13:10: Parse warning: arg[0] of core/ex-info must
 tests/linter/types-1/input.clj:13:13: Parse warning: arg[1] of core/ex-info must have type Map, got String
 tests/linter/types-1/input.clj:14:8: Parse warning: arg[0] of core/first must have type Seqable, got Int
 tests/linter/types-1/input.clj:15:8: Parse warning: arg[0] of core/assoc must have type Associative, got Int
-tests/linter/types-1/input.clj:16:12: Parse warning: arg[0] of core/with-meta must have type Meta, got String
 tests/linter/types-1/input.clj:17:15: Parse warning: arg[1] of core/with-meta must have type Map, got Int
 tests/linter/types-1/input.clj:18:7: Parse warning: arg[0] of core/last must have type Seqable, got Int
 tests/linter/types-1/input.clj:19:10: Parse warning: arg[0] of core/butlast must have type Seqable, got Int
