@@ -1099,11 +1099,11 @@ func TryRead(reader *Reader) (obj Object, err error) {
 			err = r.(error)
 		}
 	}()
-	eatWhitespace(reader)
-	if reader.Peek() == EOF {
-		return NIL, io.EOF
-	}
 	for {
+		eatWhitespace(reader)
+		if reader.Peek() == EOF {
+			return NIL, io.EOF
+		}
 		obj, multi := Read(reader)
 		if !multi {
 			return obj, nil
