@@ -1,0 +1,5 @@
+tests/linter/condp/input.clj:1:1: Parse error: condp with no clauses
+<file>:0:0: Parse warning: unused binding: pred__1
+tests/linter/condp/input.clj:2:1: Parse warning: condp with default expression only
+<file>:0:0: Parse warning: unused binding: pred__3
+<file>:0:0: Parse warning: unused binding: expr__4

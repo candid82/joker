@@ -3665,6 +3665,12 @@
           (swap! mem assoc args ret)
           ret)))))
 
+(defn empty?
+  "Returns true if coll has no items - same as (not (seq coll)).
+  Please use the idiom (seq x) rather than (not (empty? x))"
+  {:added "1.0"}
+  ^Boolean [^Seqable coll] (not (seq coll)))
+
 (defmacro condp
   "Takes a binary predicate, an expression, and a set of clauses.
   Each clause can take the form of either:
@@ -3687,6 +3693,11 @@
   {:added "1.0"}
 
   [pred expr & clauses]
+  (when *linter-mode*
+    (when (empty? clauses)
+      (println-linter__ (ex-info "condp with no clauses" {:form &form :_prefix "Parse error"})))
+    (when (= 1 (count clauses))
+      (println-linter__ (ex-info "condp with default expression only" {:form &form :_prefix "Parse warning"}))))
   (let [gpred (gensym "pred__")
         gexpr (gensym "expr__")
         emit (fn emit [pred expr args]
@@ -3705,12 +3716,6 @@
     `(let [~gpred ~pred
            ~gexpr ~expr]
        ~(emit gpred gexpr clauses))))
-
-(defn empty?
-  "Returns true if coll has no items - same as (not (seq coll)).
-  Please use the idiom (seq x) rather than (not (empty? x))"
-  {:added "1.0"}
-  ^Boolean [^Seqable coll] (not (seq coll)))
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
   `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
