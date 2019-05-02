@@ -843,11 +843,16 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 		}
 
 		if WARNINGS.unusedFnParameters {
+			var unused []Symbol
 			for _, b := range ctx.localBindings.bindings {
 				if needsUnusedWarning(b) {
-					printParseWarning(GetPosition(b.name), "unused parameter: "+b.name.ToString(false))
+					unused = append(unused, b.name)
 				}
 			}
+			SortedSymbols(unused,
+				func(u Symbol) {
+					printParseWarning(GetPosition(u), "unused parameter: "+u.ToString(false))
+				})
 		}
 	}
 }
@@ -1070,11 +1075,16 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			}
 
 			if !skipUnused {
+				var unused []Symbol
 				for _, b := range ctx.localBindings.bindings {
 					if needsUnusedWarning(b) {
-						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
+						unused = append(unused, b.name)
 					}
 				}
+				SortedSymbols(unused,
+					func(u Symbol) {
+						printParseWarning(GetPosition(u), "unused binding: "+u.ToString(false))
+					})
 			}
 		}
 
