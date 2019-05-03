@@ -849,10 +849,10 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 					unused = append(unused, b.name)
 				}
 			}
-			SortedSymbols(unused,
-				func(u Symbol) {
-					printParseWarning(GetPosition(u), "unused parameter: "+u.ToString(false))
-				})
+			sort.Sort(BySymbolName(unused))
+			for _, u := range unused {
+				printParseWarning(GetPosition(u), "unused parameter: "+u.ToString(false))
+			}
 		}
 	}
 }
@@ -1081,10 +1081,10 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 						unused = append(unused, b.name)
 					}
 				}
-				SortedSymbols(unused,
-					func(u Symbol) {
-						printParseWarning(GetPosition(u), "unused binding: "+u.ToString(false))
-					})
+				sort.Sort(BySymbolName(unused))
+				for _, u := range unused {
+					printParseWarning(GetPosition(u), "unused binding: "+u.ToString(false))
+				}
 			}
 		}
 

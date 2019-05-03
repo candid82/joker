@@ -16,7 +16,6 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -435,22 +434,16 @@ func MakeSymbol(nsname string) Symbol {
 	}
 }
 
-type bySymbolName []Symbol
+type BySymbolName []Symbol
 
-func (s bySymbolName) Len() int {
+func (s BySymbolName) Len() int {
 	return len(s)
 }
-func (s bySymbolName) Swap(i, j int) {
+func (s BySymbolName) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-func (s bySymbolName) Less(i, j int) bool {
+func (s BySymbolName) Less(i, j int) bool {
 	return s[i].ToString(false) < s[j].ToString(false)
-}
-func SortedSymbols(in []Symbol, f func(s Symbol)) {
-	sort.Sort(bySymbolName(in))
-	for _, s := range in {
-		f(s)
-	}
 }
 
 func MakeKeyword(nsname string) Keyword {
