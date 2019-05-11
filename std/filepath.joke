@@ -1,0 +1,10 @@
+(ns
+  ^{:go-imports []
+    :doc "Implements utility routines for manipulating filename paths."}
+  filepath)
+
+(defn file-seq
+  "Returns a seq of maps with info about files or directories under root."
+  {:added "1.0"
+  :go "fileSeq(root)"}
+  [^String root])

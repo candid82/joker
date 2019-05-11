@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
+	"os"
 )
 
 var ExitJoker func(rc int)
@@ -27,4 +28,14 @@ func pprintObject(obj Object, indent int, w io.Writer) int {
 		fmt.Fprint(w, s)
 		return indent + len(s)
 	}
+}
+
+func FileInfoMap(name string, info os.FileInfo) Map {
+	m := EmptyArrayMap()
+	m.Add(MakeKeyword("name"), MakeString(name))
+	m.Add(MakeKeyword("size"), MakeInt(int(info.Size())))
+	m.Add(MakeKeyword("mode"), MakeInt(int(info.Mode())))
+	m.Add(MakeKeyword("modtime"), MakeTime(info.ModTime()))
+	m.Add(MakeKeyword("dir?"), MakeBoolean(info.IsDir()))
+	return m
 }
