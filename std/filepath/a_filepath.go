@@ -4,9 +4,96 @@ package filepath
 
 import (
 	. "github.com/candid82/joker/core"
+	"path/filepath"
 )
 
 var filepathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.filepath"))
+
+var abs_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		 _res, err := filepath.Abs(path)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var base_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.Base(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var clean_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.Clean(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var dir_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.Dir(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var eval_symlinks_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		 _res, err := filepath.EvalSymlinks(path)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var ext_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.Ext(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
 
 var file_seq_ Proc = func(_args []Object) Object {
 	_c := len(_args)
@@ -22,13 +109,112 @@ var file_seq_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var from_slash_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.FromSlash(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var glob_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		pattern := ExtractString(_args, 0)
+		_res := glob(pattern)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func init() {
 
 	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
+
+	filepathNamespace.InternVar("abs", abs_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns an absolute representation of path. If the path is not absolute it will be
+  joined with the current working directory to turn it into an absolute path.
+  The absolute path name for a given file is not guaranteed to be unique.
+  Calls clean on the result.`, "1.0"))
+
+	filepathNamespace.InternVar("base", base_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the last element of path. Trailing path separators are removed before
+  extracting the last element. If the path is empty, returns ".". If the path consists
+  entirely of separators, returns a single separator.`, "1.0"))
+
+	filepathNamespace.InternVar("clean", clean_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the shortest path name equivalent to path by purely lexical processing.
+  Applies the following rules iteratively until no further processing can be done:
+
+1. Replace multiple Separator elements with a single one.
+2. Eliminate each . path name element (the current directory).
+3. Eliminate each inner .. path name element (the parent directory)
+   along with the non-.. element that precedes it.
+4. Eliminate .. elements that begin a rooted path:
+   that is, replace "/.." by "/" at the beginning of a path,
+   assuming Separator is '/'.
+The returned path ends in a slash only if it represents a root directory, such as "/" on Unix or ` + "`" + `C:\` + "`" + ` on Windows.
+
+Finally, any occurrences of slash are replaced by Separator.
+
+If the result of this process is an empty string, returns the string ".".`, "1.0"))
+
+	filepathNamespace.InternVar("dir", dir_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns all but the last element of path, typically the path's directory.
+  After dropping the final element, calls clean on the path and trailing slashes are removed.
+  If the path is empty, returns ".". If the path consists entirely of separators,
+  returns a single separator. The returned path does not end in a separator unless it is the root directory.`, "1.0"))
+
+	filepathNamespace.InternVar("eval-symlinks", eval_symlinks_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the path name after the evaluation of any symbolic links. If path is relative the result will be
+  relative to the current directory, unless one of the components is an absolute symbolic link.
+  Calls clean on the result.`, "1.0"))
+
+	filepathNamespace.InternVar("ext", ext_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the file name extension used by path. The extension is the suffix beginning at the final dot
+  in the final element of path; it is empty if there is no dot.`, "1.0"))
 
 	filepathNamespace.InternVar("file-seq", file_seq_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("root"))),
 			`Returns a seq of maps with info about files or directories under root.`, "1.0"))
+
+	filepathNamespace.InternVar("from-slash", from_slash_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the result of replacing each slash ('/') character in path with a separator character.
+  Multiple slashes are replaced by multiple separators.`, "1.0"))
+
+	filepathNamespace.InternVar("glob", glob_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("pattern"))),
+			`Returns the names of all files matching pattern or nil if there is no matching file.
+  The syntax of patterns is the same as in Match. The pattern may describe hierarchical
+  names such as /usr/*/bin/ed (assuming the Separator is '/').
+
+  Ignores file system errors such as I/O errors reading directories.
+  Throws exception when pattern is malformed.`, "1.0"))
 
 }
