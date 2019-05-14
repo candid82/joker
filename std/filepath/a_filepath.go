@@ -24,6 +24,20 @@ var abs_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var isabs_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.IsAbs(path)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var base_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -137,6 +151,21 @@ var glob_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var join_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case true:
+		CheckArity(_args, 0, 999)
+		elems := ExtractStrings(_args, 0)
+		_res := filepath.Join(elems...)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func init() {
 
 	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
@@ -148,6 +177,11 @@ func init() {
   joined with the current working directory to turn it into an absolute path.
   The absolute path name for a given file is not guaranteed to be unique.
   Calls clean on the result.`, "1.0"))
+
+	filepathNamespace.InternVar("abs?", isabs_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Reports whether the path is absolute.`, "1.0"))
 
 	filepathNamespace.InternVar("base", base_,
 		MakeMeta(
@@ -216,5 +250,12 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 
   Ignores file system errors such as I/O errors reading directories.
   Throws exception when pattern is malformed.`, "1.0"))
+
+	filepathNamespace.InternVar("join", join_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("&"), MakeSymbol("elems"))),
+			`Joins any number of path elements into a single path, adding a Separator if necessary.
+  Calls clean on the result; in particular, all empty strings are ignored. On Windows,
+  the result is a UNC path if and only if the first path element is a UNC path.`, "1.0"))
 
 }
