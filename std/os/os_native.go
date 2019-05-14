@@ -83,7 +83,10 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	go io.Copy(bufOut, stdoutReader)
 	go io.Copy(bufErr, stderrReader)
 	if stdin != nil {
-		go io.Copy(stdinWriter, stdin)
+		go func() {
+			io.Copy(stdinWriter, stdin)
+			stdinWriter.Close()
+		}()
 	}
 
 	err = cmd.Wait()
