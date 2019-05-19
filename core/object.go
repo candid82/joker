@@ -1357,6 +1357,14 @@ func MakeString(s string) String {
 	return String{S: s}
 }
 
+func MakeStringVector(ss []string) *Vector {
+	res := EmptyVector()
+	for _, s := range ss {
+		res = res.Conjoin(MakeString(s))
+	}
+	return res
+}
+
 func (s String) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case String:

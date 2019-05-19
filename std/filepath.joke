@@ -77,7 +77,7 @@ If the result of this process is an empty string, returns the string \".\"."
   :go "filepath.FromSlash(path)"}
   [^String path])
 
-(defn glob
+(defn ^{:tag [String]} glob
   "Returns the names of all files matching pattern or nil if there is no matching file.
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical
   names such as /usr/*/bin/ed (assuming the Separator is '/').
@@ -85,7 +85,7 @@ If the result of this process is an empty string, returns the string \".\"."
   Ignores file system errors such as I/O errors reading directories.
   Throws exception when pattern is malformed."
   {:added "1.0"
-  :go "glob(pattern)"}
+  :go "! _res, err := filepath.Glob(pattern); PanicOnErr(err)"}
   [^String pattern])
 
 (defn ^Boolean abs?
@@ -101,3 +101,51 @@ If the result of this process is an empty string, returns the string \".\"."
   {:added "1.0"
   :go "filepath.Join(elems...)"}
   [& ^String elems])
+
+(defn ^Boolean matches?
+  "Reports whether name matches the shell file name pattern.
+  Requires pattern to match all of name, not just a substring.
+  Throws exception if pattern is malformed.
+  On Windows, escaping is disabled. Instead, '\\' is treated as path separator."
+  {:added "1.0"
+  :go "! _res, err := filepath.Match(pattern, name); PanicOnErr(err)"}
+  [^String pattern ^String name])
+
+(defn ^String rel
+  "Returns a relative path that is lexically equivalent to targpath when joined to basepath
+  with an intervening separator. On success, the returned path will always be relative to basepath,
+  even if basepath and targpath share no elements. An exception is thrown if targpath can't be made
+  relative to basepath or if knowing the current working directory would be necessary to compute it.
+  Calls clean on the result."
+  {:added "1.0"
+  :go "! _res, err := filepath.Rel(basepath, targpath); PanicOnErr(err)"}
+  [^String basepath ^String targpath])
+
+(defn split
+  "Splits path immediately following the final Separator, separating it into a directory and file name component.
+  If there is no Separator in path, returns an empty dir and file set to path. The returned values have
+  the property that path = dir+file."
+  {:added "1.0"
+  :go "! _dir, _file := filepath.Split(path); _res := NewVectorFrom(MakeString(_dir), MakeString(_file))"}
+  [^String path])
+
+(defn ^{:tag [String]} split-list
+  "Splits a list of paths joined by the OS-specific ListSeparator, usually found in PATH or GOPATH environment variables.
+  Returns an empty slice when passed an empty string."
+  {:added "1.0"
+  :go "filepath.SplitList(path)"}
+  [^String path])
+
+(defn ^String to-slash
+  "Returns the result of replacing each separator character in path with a slash ('/') character.
+  Multiple separators are replaced by multiple slashes."
+  {:added "1.0"
+  :go "filepath.ToSlash(path)"}
+  [^String path])
+
+(defn ^String volume-name
+  "Returns leading volume name. Given \"C:\\foo\\bar\" it returns \"C:\" on Windows. Given \"\\\\host\\share\\foo\"
+  returns \"\\\\host\\share\". On other platforms it returns \"\"."
+  {:added "1.0"
+  :go "filepath.VolumeName(path)"}
+  [^String path])

@@ -59,6 +59,12 @@
         (conj (subvec args 0 (- c 2)) vargs))
       args)))
 
+(defn ^:private type-name
+  [tag]
+  (if (vector? tag)
+    (str (first tag) "Vector")
+    (str tag)))
+
 (defn generate-arity
   [args go tag]
   (let [handle-args (handle-varargs args)
@@ -82,7 +88,7 @@
         (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
         (rpl "{return}"
              (if tag
-               (str "return Make" tag "(_res)")
+               (str "return Make" (type-name tag) "(_res)")
                "return _res")))))
 
 (defn generate-arglist

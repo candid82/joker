@@ -142,8 +142,9 @@ var glob_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 1:
 		pattern := ExtractString(_args, 0)
-		_res := glob(pattern)
-		return _res
+		 _res, err := filepath.Glob(pattern)
+		PanicOnErr(err)
+		return MakeStringVector(_res)
 
 	default:
 		PanicArity(_c)
@@ -158,6 +159,95 @@ var join_ Proc = func(_args []Object) Object {
 		CheckArity(_args, 0, 999)
 		elems := ExtractStrings(_args, 0)
 		_res := filepath.Join(elems...)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var ismatches_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		pattern := ExtractString(_args, 0)
+		name := ExtractString(_args, 1)
+		 _res, err := filepath.Match(pattern, name)
+		PanicOnErr(err)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var rel_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		basepath := ExtractString(_args, 0)
+		targpath := ExtractString(_args, 1)
+		 _res, err := filepath.Rel(basepath, targpath)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var split_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		 _dir, _file := filepath.Split(path)
+		_res := NewVectorFrom(MakeString(_dir), MakeString(_file))
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var split_list_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.SplitList(path)
+		return MakeStringVector(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var to_slash_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.ToSlash(path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var volume_name_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := filepath.VolumeName(path)
 		return MakeString(_res)
 
 	default:
@@ -257,5 +347,47 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			`Joins any number of path elements into a single path, adding a Separator if necessary.
   Calls clean on the result; in particular, all empty strings are ignored. On Windows,
   the result is a UNC path if and only if the first path element is a UNC path.`, "1.0"))
+
+	filepathNamespace.InternVar("matches?", ismatches_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("pattern"), MakeSymbol("name"))),
+			`Reports whether name matches the shell file name pattern.
+  Requires pattern to match all of name, not just a substring.
+  Throws exception if pattern is malformed.
+  On Windows, escaping is disabled. Instead, '\' is treated as path separator.`, "1.0"))
+
+	filepathNamespace.InternVar("rel", rel_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("basepath"), MakeSymbol("targpath"))),
+			`Returns a relative path that is lexically equivalent to targpath when joined to basepath
+  with an intervening separator. On success, the returned path will always be relative to basepath,
+  even if basepath and targpath share no elements. An exception is thrown if targpath can't be made
+  relative to basepath or if knowing the current working directory would be necessary to compute it.
+  Calls clean on the result.`, "1.0"))
+
+	filepathNamespace.InternVar("split", split_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Splits path immediately following the final Separator, separating it into a directory and file name component.
+  If there is no Separator in path, returns an empty dir and file set to path. The returned values have
+  the property that path = dir+file.`, "1.0"))
+
+	filepathNamespace.InternVar("split-list", split_list_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Splits a list of paths joined by the OS-specific ListSeparator, usually found in PATH or GOPATH environment variables.
+  Returns an empty slice when passed an empty string.`, "1.0"))
+
+	filepathNamespace.InternVar("to-slash", to_slash_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns the result of replacing each separator character in path with a slash ('/') character.
+  Multiple separators are replaced by multiple slashes.`, "1.0"))
+
+	filepathNamespace.InternVar("volume-name", volume_name_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns leading volume name. Given "C:\foo\bar" it returns "C:" on Windows. Given "\\host\share\foo"
+  returns "\\host\share". On other platforms it returns "".`, "1.0"))
 
 }

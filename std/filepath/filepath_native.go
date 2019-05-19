@@ -17,13 +17,3 @@ func fileSeq(root string) *Vector {
 	})
 	return res
 }
-
-func glob(pattern string) *Vector {
-	res := EmptyVector()
-	matches, err := filepath.Glob(pattern)
-	PanicOnErr(err)
-	for _, match := range matches {
-		res = res.Conjoin(MakeString(match))
-	}
-	return res
-}
