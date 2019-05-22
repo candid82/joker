@@ -9,6 +9,9 @@ import (
 
 var filepathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.filepath"))
 
+var list_separator_ = MakeString(string(filepath.ListSeparator))
+var separator_ = MakeString(string(filepath.Separator))
+
 var abs_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -260,6 +263,16 @@ func init() {
 
 	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
 
+	filepathNamespace.InternVar("list-separator", list_separator_,
+		MakeMeta(
+			nil,
+			`OS-specific path list separator.`, "1.0"))
+
+	filepathNamespace.InternVar("separator", separator_,
+		MakeMeta(
+			nil,
+			`OS-specific path separator.`, "1.0"))
+
 	filepathNamespace.InternVar("abs", abs_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
@@ -286,16 +299,16 @@ func init() {
 			`Returns the shortest path name equivalent to path by purely lexical processing.
   Applies the following rules iteratively until no further processing can be done:
 
-1. Replace multiple Separator elements with a single one.
+1. Replace multiple separator elements with a single one.
 2. Eliminate each . path name element (the current directory).
 3. Eliminate each inner .. path name element (the parent directory)
    along with the non-.. element that precedes it.
 4. Eliminate .. elements that begin a rooted path:
    that is, replace "/.." by "/" at the beginning of a path,
-   assuming Separator is '/'.
+   assuming separator is '/'.
 The returned path ends in a slash only if it represents a root directory, such as "/" on Unix or ` + "`" + `C:\` + "`" + ` on Windows.
 
-Finally, any occurrences of slash are replaced by Separator.
+Finally, any occurrences of slash are replaced by separator.
 
 If the result of this process is an empty string, returns the string ".".`, "1.0"))
 
@@ -336,7 +349,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			NewListFrom(NewVectorFrom(MakeSymbol("pattern"))),
 			`Returns the names of all files matching pattern or nil if there is no matching file.
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical
-  names such as /usr/*/bin/ed (assuming the Separator is '/').
+  names such as /usr/*/bin/ed (assuming the separator is '/').
 
   Ignores file system errors such as I/O errors reading directories.
   Throws exception when pattern is malformed.`, "1.0"))
@@ -344,7 +357,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 	filepathNamespace.InternVar("join", join_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("&"), MakeSymbol("elems"))),
-			`Joins any number of path elements into a single path, adding a Separator if necessary.
+			`Joins any number of path elements into a single path, adding a separator if necessary.
   Calls clean on the result; in particular, all empty strings are ignored. On Windows,
   the result is a UNC path if and only if the first path element is a UNC path.`, "1.0"))
 
@@ -368,14 +381,14 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 	filepathNamespace.InternVar("split", split_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
-			`Splits path immediately following the final Separator, separating it into a directory and file name component.
-  If there is no Separator in path, returns an empty dir and file set to path. The returned values have
+			`Splits path immediately following the final separator, separating it into a directory and file name component.
+  If there is no separator in path, returns an empty dir and file set to path. The returned values have
   the property that path = dir+file.`, "1.0"))
 
 	filepathNamespace.InternVar("split-list", split_list_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
-			`Splits a list of paths joined by the OS-specific ListSeparator, usually found in PATH or GOPATH environment variables.
+			`Splits a list of paths joined by the OS-specific list-separator, usually found in PATH or GOPATH environment variables.
   Returns an empty slice when passed an empty string.`, "1.0"))
 
 	filepathNamespace.InternVar("to-slash", to_slash_,

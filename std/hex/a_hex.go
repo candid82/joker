@@ -9,6 +9,8 @@ import (
 
 var hexNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.hex"))
 
+
+
 var decode_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -43,6 +45,7 @@ func init() {
 
 	hexNamespace.ResetMeta(MakeMeta(nil, "Implements hexadecimal encoding and decoding.", "1.0"))
 
+	
 	hexNamespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

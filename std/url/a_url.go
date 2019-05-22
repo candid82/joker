@@ -9,6 +9,8 @@ import (
 
 var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
 
+
+
 var path_escape_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -69,6 +71,7 @@ func init() {
 
 	urlNamespace.ResetMeta(MakeMeta(nil, "Parses URLs and implements query escaping.", "1.0"))
 
+	
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

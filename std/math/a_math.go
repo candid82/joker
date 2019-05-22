@@ -8,6 +8,8 @@ import (
 
 var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
 
+
+
 var cos_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -55,6 +57,7 @@ func init() {
 
 	mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
 
+	
 	mathNamespace.InternVar("cos", cos_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),

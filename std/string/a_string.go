@@ -10,6 +10,8 @@ import (
 
 var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
+
+
 var isblank_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -392,6 +394,7 @@ func init() {
 
 	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
 
+	
 	stringNamespace.InternVar("blank?", isblank_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

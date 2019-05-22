@@ -8,6 +8,8 @@ import (
 
 var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
+
+
 var read_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -40,6 +42,7 @@ func init() {
 
 	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
 
+	
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

@@ -12,6 +12,8 @@ import (
 
 var cryptoNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.crypto"))
 
+
+
 var hmac_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -152,6 +154,7 @@ func init() {
 
 	cryptoNamespace.ResetMeta(MakeMeta(nil, "Implements common cryptographic and hash functions.", "1.0"))
 
+	
 	cryptoNamespace.InternVar("hmac", hmac_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("algorithm"), MakeSymbol("message"), MakeSymbol("key"))),

@@ -8,10 +8,13 @@ import (
 
 var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.{nsFullName}"))
 
+{non-fns}
+
 {fns}
 func init() {
 
 	{nsName}Namespace.ResetMeta(MakeMeta(nil, "{nsDocstring}", "1.0"))
 
-	{interns}
+	{non-fns-interns}
+	{fns-interns}
 }

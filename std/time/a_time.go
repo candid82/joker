@@ -9,6 +9,8 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
+
+
 var add_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -244,6 +246,7 @@ func init() {
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
+	
 	timeNamespace.InternVar("add", add_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),

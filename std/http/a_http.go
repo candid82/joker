@@ -8,6 +8,8 @@ import (
 
 var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
+
+
 var send_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -56,6 +58,7 @@ func init() {
 
 	httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implementations", "1.0"))
 
+	
 	httpNamespace.InternVar("send", send_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("request"))),

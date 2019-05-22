@@ -115,9 +115,29 @@
                        (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
                        (rpl "{added}" (:added m))
                        (rpl "{args}"
-                            (s/join ", " (for [args arglists]
-                                           (generate-arglist args)))))]
+                            (str "NewListFrom("
+                                 (s/join ", " (for [args arglists]
+                                                (generate-arglist args)))
+                                 ")")))]
     [fn-str intern-str]))
+
+(defn generate-non-fn
+  [ns-name ns-name-final k v]
+  (let [m (meta v)
+        go-non-fn-name (go-name (str k))
+        non-fn-str (format "var %s = Make%s(%s)"
+                           go-non-fn-name
+                           (type-name (:tag m))
+                           (:go m))
+        intern-str (-> intern-template
+                       (rpl "{nsFullName}" ns-name)
+                       (rpl "{nsName}" ns-name-final)
+                       (rpl "{fnName}" (str k))
+                       (rpl "{goName}" go-non-fn-name)
+                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
+                       (rpl "{added}" (:added m))
+                       (rpl "{args}" "nil"))]
+    [non-fn-str intern-str]))
 
 (defn comment-out
   [s]
@@ -141,23 +161,37 @@
   (remove #(:macro (meta (val %)))
           (filter #(:arglists (meta (val %))) (ns-publics ns))))
 
+(defn- ns-public-non-fns
+  "Return only publics that are not functions."
+  [ns]
+  (remove #(:macro (meta (val %)))
+          (remove #(:arglists (meta (val %))) (ns-publics ns))))
+
 (defn- ns-public-go-fns
   "Return only publics that are functions and have additional Go-specific metadata."
   [ns]
   (filter #(:go (meta (val %))) (ns-public-fns ns)))
 
+(defn- ns-public-go-non-fns
+  "Return only publics that are not functions and have additional Go-specific metadata."
+  [ns]
+  (filter #(:go (meta (val %))) (ns-public-non-fns ns)))
+
 (defn- warn-about-skipped-publics
   [skipped]
   (when (> (count skipped) 0)
-    (println-err "WARNING: skipping publics that are not Go-calling functions:" skipped)))
+    (println-err "WARNING: skipping publics that are not Go-calling functions or vars:" skipped)))
 
 (defn generate-ns
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
         m (meta ns)
+        go-non-fns (sort-by first (ns-public-go-non-fns ns))
         go-fns (sort-by first (ns-public-go-fns ns))
         fns (for [[k v] go-fns]
               (generate-fn ns-name ns-name-final k v))
+        non-fns (for [[k v] go-non-fns]
+                  (generate-non-fn ns-name ns-name-final k v))
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
@@ -165,13 +199,16 @@
                      (s/join "\n\t" (sort compare-imports (conj
                                                            (mapv q (:go-imports m))
                                                            ". \"github.com/candid82/joker/core\""))))
+                (rpl "{non-fns}" (s/join "\n" (map first non-fns)))
                 (rpl "{fns}" (s/join "\n" (map first fns)))
                 (rpl "{nsDocstring}" (:doc m))
-                (rpl "{interns}" (s/join "\n\t" (map second fns))))
+                (rpl "{non-fns-interns}" (s/join "\n\t" (map second non-fns)))
+                (rpl "{fns-interns}" (s/join "\n\t" (map second fns))))
         res (if (:empty m)
               (comment-out res)
               res)]
-    (warn-about-skipped-publics (remove (set (map #(key %) go-fns))
+    (warn-about-skipped-publics (remove (set (concat (map key go-fns)
+                                                     (map key go-non-fns)))
                                         (map #(key %) (ns-publics ns))))
     res))
 

@@ -9,6 +9,8 @@ import (
 
 var strconvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.strconv"))
 
+
+
 var atoi_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -277,6 +279,7 @@ func init() {
 
 	strconvNamespace.ResetMeta(MakeMeta(nil, "Implements conversions to and from string representations of basic data types.", "1.0"))
 
+	
 	strconvNamespace.InternVar("atoi", atoi_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
