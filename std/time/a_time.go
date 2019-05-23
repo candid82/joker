@@ -9,7 +9,12 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
-
+var hour_ = MakeInt(int(time.Hour))
+var microsecond_ = MakeInt(int(time.Microsecond))
+var millisecond_ = MakeInt(int(time.Millisecond))
+var minute_ = MakeInt(int(time.Minute))
+var nanosecond_ = MakeInt(int(time.Nanosecond))
+var second_ = MakeInt(int(time.Second))
 
 var add_ Proc = func(_args []Object) Object {
 	_c := len(_args)
@@ -161,7 +166,8 @@ var sleep_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 1:
 		d := ExtractInt(_args, 0)
-		_res := sleep(d)
+		 time.Sleep(time.Duration(d))
+		_res := NIL
 		return _res
 
 	default:
@@ -246,7 +252,36 @@ func init() {
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
-	
+	timeNamespace.InternVar("hour", hour_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 hour`, "1.0"))
+
+	timeNamespace.InternVar("microsecond", microsecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 microsecond`, "1.0"))
+
+	timeNamespace.InternVar("millisecond", millisecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 millisecond`, "1.0"))
+
+	timeNamespace.InternVar("minute", minute_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 minute`, "1.0"))
+
+	timeNamespace.InternVar("nanosecond", nanosecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 nanosecond`, "1.0"))
+
+	timeNamespace.InternVar("second", second_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 second`, "1.0"))
+
 	timeNamespace.InternVar("add", add_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
