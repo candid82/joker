@@ -9,12 +9,27 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
+var ansi_c_ = MakeString(time.ANSIC)
 var hour_ = MakeInt(int(time.Hour))
+var kitchen_ = MakeString(time.Kitchen)
 var microsecond_ = MakeInt(int(time.Microsecond))
 var millisecond_ = MakeInt(int(time.Millisecond))
 var minute_ = MakeInt(int(time.Minute))
 var nanosecond_ = MakeInt(int(time.Nanosecond))
+var rfc1123_ = MakeString(time.RFC1123)
+var rfc1123_z_ = MakeString(time.RFC1123Z)
+var rfc3339_ = MakeString(time.RFC3339)
+var rfc3339_nano_ = MakeString(time.RFC3339Nano)
+var rfc822_ = MakeString(time.RFC822)
+var rfc822_z_ = MakeString(time.RFC822Z)
+var rfc850_ = MakeString(time.RFC850)
+var ruby_date_ = MakeString(time.RubyDate)
 var second_ = MakeInt(int(time.Second))
+var stamp_ = MakeString(time.Stamp)
+var stamp_micro_ = MakeString(time.StampMicro)
+var stamp_milli_ = MakeString(time.StampMilli)
+var stamp_nano_ = MakeString(time.StampNano)
+var unix_date_ = MakeString(time.UnixDate)
 
 var add_ Proc = func(_args []Object) Object {
 	_c := len(_args)
@@ -252,10 +267,20 @@ func init() {
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
+	timeNamespace.InternVar("ansi-c", ansi_c_,
+		MakeMeta(
+			nil,
+			`Mon Jan _2 15:04:05 2006`, "1.0"))
+
 	timeNamespace.InternVar("hour", hour_,
 		MakeMeta(
 			nil,
 			`Number of nanoseconds in 1 hour`, "1.0"))
+
+	timeNamespace.InternVar("kitchen", kitchen_,
+		MakeMeta(
+			nil,
+			`3:04PM`, "1.0"))
 
 	timeNamespace.InternVar("microsecond", microsecond_,
 		MakeMeta(
@@ -277,10 +302,75 @@ func init() {
 			nil,
 			`Number of nanoseconds in 1 nanosecond`, "1.0"))
 
+	timeNamespace.InternVar("rfc1123", rfc1123_,
+		MakeMeta(
+			nil,
+			`Mon, 02 Jan 2006 15:04:05 MST`, "1.0"))
+
+	timeNamespace.InternVar("rfc1123-z", rfc1123_z_,
+		MakeMeta(
+			nil,
+			`Mon, 02 Jan 2006 15:04:05 -0700`, "1.0"))
+
+	timeNamespace.InternVar("rfc3339", rfc3339_,
+		MakeMeta(
+			nil,
+			`2006-01-02T15:04:05Z07:00`, "1.0"))
+
+	timeNamespace.InternVar("rfc3339-nano", rfc3339_nano_,
+		MakeMeta(
+			nil,
+			`2006-01-02T15:04:05.999999999Z07:00`, "1.0"))
+
+	timeNamespace.InternVar("rfc822", rfc822_,
+		MakeMeta(
+			nil,
+			`02 Jan 06 15:04 MST`, "1.0"))
+
+	timeNamespace.InternVar("rfc822-z", rfc822_z_,
+		MakeMeta(
+			nil,
+			`02 Jan 06 15:04 -0700`, "1.0"))
+
+	timeNamespace.InternVar("rfc850", rfc850_,
+		MakeMeta(
+			nil,
+			`Monday, 02-Jan-06 15:04:05 MST`, "1.0"))
+
+	timeNamespace.InternVar("ruby-date", ruby_date_,
+		MakeMeta(
+			nil,
+			`Mon Jan 02 15:04:05 -0700 2006`, "1.0"))
+
 	timeNamespace.InternVar("second", second_,
 		MakeMeta(
 			nil,
 			`Number of nanoseconds in 1 second`, "1.0"))
+
+	timeNamespace.InternVar("stamp", stamp_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05`, "1.0"))
+
+	timeNamespace.InternVar("stamp-micro", stamp_micro_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000000`, "1.0"))
+
+	timeNamespace.InternVar("stamp-milli", stamp_milli_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000`, "1.0"))
+
+	timeNamespace.InternVar("stamp-nano", stamp_nano_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000000000`, "1.0"))
+
+	timeNamespace.InternVar("unix-date", unix_date_,
+		MakeMeta(
+			nil,
+			`Mon Jan _2 15:04:05 MST 2006`, "1.0"))
 
 	timeNamespace.InternVar("add", add_,
 		MakeMeta(

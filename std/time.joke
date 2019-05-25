@@ -149,3 +149,108 @@
     :tag Int
     :go "int(time.Hour)"}
   hour)
+
+(def
+  ^{:doc "Mon Jan _2 15:04:05 2006"
+    :added "1.0"
+    :tag String
+    :go "time.ANSIC"}
+  ansi-c)
+
+(def
+  ^{:doc "Mon Jan _2 15:04:05 MST 2006"
+    :added "1.0"
+    :tag String
+    :go "time.UnixDate"}
+  unix-date)
+
+(def
+  ^{:doc "Mon Jan 02 15:04:05 -0700 2006"
+    :added "1.0"
+    :tag String
+    :go "time.RubyDate"}
+  ruby-date)
+
+(def
+  ^{:doc "02 Jan 06 15:04 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC822"}
+  rfc822)
+
+(def
+  ^{:doc "02 Jan 06 15:04 -0700"
+    :added "1.0"
+    :tag String
+    :go "time.RFC822Z"}
+  rfc822-z)
+
+(def
+  ^{:doc "Monday, 02-Jan-06 15:04:05 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC850"}
+  rfc850)
+
+(def
+  ^{:doc "Mon, 02 Jan 2006 15:04:05 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC1123"}
+  rfc1123)
+
+(def
+  ^{:doc "Mon, 02 Jan 2006 15:04:05 -0700"
+    :added "1.0"
+    :tag String
+    :go "time.RFC1123Z"}
+  rfc1123-z)
+
+(def
+  ^{:doc "2006-01-02T15:04:05Z07:00"
+    :added "1.0"
+    :tag String
+    :go "time.RFC3339"}
+  rfc3339)
+
+(def
+  ^{:doc "2006-01-02T15:04:05.999999999Z07:00"
+    :added "1.0"
+    :tag String
+    :go "time.RFC3339Nano"}
+  rfc3339-nano)
+
+(def
+  ^{:doc "3:04PM"
+    :added "1.0"
+    :tag String
+    :go "time.Kitchen"}
+  kitchen)
+
+(def
+  ^{:doc "Jan _2 15:04:05"
+    :added "1.0"
+    :tag String
+    :go "time.Stamp"}
+  stamp)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000"
+    :added "1.0"
+    :tag String
+    :go "time.StampMilli"}
+  stamp-milli)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000000"
+    :added "1.0"
+    :tag String
+    :go "time.StampMicro"}
+  stamp-micro)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000000000"
+    :added "1.0"
+    :tag String
+    :go "time.StampNano"}
+  stamp-nano)
