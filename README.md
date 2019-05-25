@@ -126,6 +126,7 @@ The output format is as follows: `<filename>:<line>:<column>: <issue type>: <mes
 - Atom: [linter-joker](https://atom.io/packages/linter-joker)
 - Vim: [syntastic-joker](https://github.com/aclaimant/syntastic-joker), [ale](https://github.com/w0rp/ale)
 - VSCode: [VSCode Linter Plugin (alpha)](https://github.com/martinklepsch/vscode-joker-clojure-linter)
+- Kakoune: [clj-kakoune-joker](https://github.com/w33tmaricich/clj-kakoune-joker)
 
 [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
 
