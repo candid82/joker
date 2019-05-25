@@ -1,6 +1,0 @@
-(in-ns 'joker.math)
-
-(def
-  ^{:doc "Mathematical constant Pi."
-    :added "1.0"}
-  pi 3.14159265358979323846264338327950288419716939937510582097494459)

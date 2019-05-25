@@ -1,22 +1,29 @@
 (ns
-  ^{:go-imports []
+  ^{:go-imports ["math"]
     :doc "Provides basic constants and mathematical functions."}
   math)
 
 (defn ^Double sin
   "Returns the sine of the radian argument x."
   {:added "1.0"
-  :go "sin(x)"}
+  :go "math.Sin(x.Double().D)"}
   [^Number x])
 
 (defn ^Double cos
   "Returns the cosine of the radian argument x."
   {:added "1.0"
-  :go "cos(x)"}
+  :go "math.Cos(x.Double().D)"}
   [^Number x])
 
 (defn ^Double hypot
   "Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow."
   {:added "1.0"
-  :go "hypot(p, q)"}
+  :go "math.Hypot(p.Double().D, q.Double().D)"}
   [^Number p, ^Number q])
+
+(def
+  ^{:doc "Pi"
+    :added "1.0"
+    :tag Double
+    :go "math.Pi"}
+  pi)

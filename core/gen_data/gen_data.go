@@ -33,10 +33,6 @@ var files []FileInfo = []FileInfo{
 		filename: "core.joke",
 	},
 	{
-		name:     "<joker.math>",
-		filename: "math.joke",
-	},
-	{
 		name:     "<joker.repl>",
 		filename: "repl.joke",
 	},

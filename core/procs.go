@@ -22,7 +22,6 @@ import (
 
 var (
 	coreData         []byte
-	mathData         []byte
 	replData         []byte
 	walkData         []byte
 	templateData     []byte
@@ -1685,8 +1684,6 @@ func processData(data []byte) {
 
 func ProcessCoreData() {
 	processData(coreData)
-	/* Might be faster startup if the rest of these were deferred until actually :require'd? */
-	processData(mathData)
 }
 
 func ProcessReplData() {
