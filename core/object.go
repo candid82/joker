@@ -498,6 +498,21 @@ func CheckArity(args []Object, min int, max int) {
 	}
 }
 
+func getMap(k Object, args []Object) Object {
+	CheckArity(args, 1, 2)
+	switch m := args[0].(type) {
+	case Map:
+		ok, v := m.Get(k)
+		if ok {
+			return v
+		}
+	}
+	if len(args) == 2 {
+		return args[1]
+	}
+	return NIL
+}
+
 func (s SortableSlice) Len() int {
 	return len(s.s)
 }
@@ -1264,18 +1279,7 @@ func (k Keyword) Compare(other Object) int {
 }
 
 func (k Keyword) Call(args []Object) Object {
-	CheckArity(args, 1, 2)
-	switch m := args[0].(type) {
-	case Map:
-		ok, v := m.Get(k)
-		if ok {
-			return v
-		}
-	}
-	if len(args) == 2 {
-		return args[1]
-	}
-	return NIL
+	return getMap(k, args)
 }
 
 func (rx Regex) ToString(escape bool) string {
@@ -1344,6 +1348,10 @@ func (s Symbol) Hash() uint32 {
 func (s Symbol) Compare(other Object) int {
 	s2 := AssertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
 	return strings.Compare(s.ToString(false), s2.ToString(false))
+}
+
+func (s Symbol) Call(args []Object) Object {
+	return getMap(s, args)
 }
 
 func (s String) ToString(escape bool) string {
