@@ -203,6 +203,7 @@ type (
 		fn_                Symbol
 		fn                 Symbol
 		let_               Symbol
+		letfn_             Symbol
 		loop_              Symbol
 		recur              Symbol
 		setMacro_          Symbol
@@ -230,6 +231,7 @@ type (
 		quote     *string
 		fn_       *string
 		let_      *string
+		letfn_    *string
 		loop_     *string
 		recur     *string
 		setMacro_ *string
@@ -302,6 +304,7 @@ var (
 		fn_:                MakeSymbol("fn*"),
 		fn:                 MakeSymbol("fn"),
 		let_:               MakeSymbol("let*"),
+		letfn_:             MakeSymbol("letfn*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
 		setMacro_:          MakeSymbol("set-macro__"),
@@ -329,6 +332,7 @@ var (
 		quote:     STRINGS.Intern("quote"),
 		fn_:       STRINGS.Intern("fn*"),
 		let_:      STRINGS.Intern("let*"),
+		letfn_:    STRINGS.Intern("letfn*"),
 		loop_:     STRINGS.Intern("loop*"),
 		recur:     STRINGS.Intern("recur"),
 		setMacro_: STRINGS.Intern("set-macro__"),
@@ -994,11 +998,15 @@ func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 }
 
 func parseLet(obj Object, ctx *ParseContext) *LetExpr {
-	return parseLetLoop(obj, false, ctx)
+	return parseLetLoop(obj, "let", ctx)
 }
 
 func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
-	return (*LoopExpr)(parseLetLoop(obj, true, ctx))
+	return (*LoopExpr)(parseLetLoop(obj, "loop", ctx))
+}
+
+func parseLetfn(obj Object, ctx *ParseContext) *LoopExpr {
+	return (*LoopExpr)(parseLetLoop(obj, "letfn", ctx))
 }
 
 func isSkipUnused(obj Meta) bool {
@@ -1010,11 +1018,7 @@ func isSkipUnused(obj Meta) bool {
 	return false
 }
 
-func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
-	formName := "let"
-	if isLoop {
-		formName = "loop"
-	}
+func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 	res := &LetExpr{
 		Position: GetPosition(obj),
 	}
@@ -1024,7 +1028,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		if b.count%2 != 0 {
 			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
 		}
-		if LINTER_MODE && !isLoop && b.count == 0 {
+		if LINTER_MODE && formName != "loop" && b.count == 0 {
 			pos := GetPosition(obj)
 			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
@@ -1033,6 +1037,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.values = make([]Expr, b.count/2)
 		ctx.PushEmptyLocalFrame()
 		defer ctx.PopLocalFrame()
+
 		for i := 0; i < b.count/2; i++ {
 			s := b.at(i * 2)
 			switch sym := s.(type) {
@@ -1053,11 +1058,19 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
 				}
 			}
-			res.values[i] = Parse(b.at(i*2+1), ctx)
+			if formName != "letfn" {
+				res.values[i] = Parse(b.at(i*2+1), ctx)
+			}
 			ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 		}
 
-		if isLoop {
+		if formName == "letfn" {
+			for i := 0; i < b.count/2; i++ {
+				res.values[i] = Parse(b.at(i*2+1), ctx)
+			}
+		}
+
+		if formName == "loop" {
 			ctx.PushLoopBindings(res.names)
 			defer ctx.PopLoopBindings()
 
@@ -1449,6 +1462,8 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseFn(obj, ctx)
 		case STR.let_:
 			return parseLet(obj, ctx)
+		case STR.letfn_:
+			return parseLetfn(obj, ctx)
 		case STR.loop_:
 			return parseLoop(obj, ctx)
 		case STR.recur:
@@ -1723,6 +1738,7 @@ func init() {
 	SPECIAL_SYMBOLS[SYMBOLS.quote.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.fn_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.let_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.letfn_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.loop_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.recur.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.setMacro_.name] = true

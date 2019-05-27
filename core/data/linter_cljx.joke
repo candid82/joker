@@ -19,7 +19,7 @@
 
 (def *known-macros*
   {'memfn nil
-   'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
+   '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
   [x]
@@ -208,7 +208,6 @@
 (defn locking [x & body])
 (defn amap [a idx ret expr])
 (defn memfn [name & args])
-(defn letfn [fnspecs & body])
 (defn .. [x form & more])
 (defn . [x m & args])
 
