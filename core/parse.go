@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 	"unsafe"
@@ -1610,14 +1611,14 @@ func isRecordConstructor(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
 }
 
+var fullClassNameRe = regexp.MustCompile(`.+\..+\..+`)
+
 func isJavaSymbol(sym Symbol) bool {
 	s := *sym.name
 	if sym.ns != nil {
 		s = *sym.ns
 	}
-	return strings.HasPrefix(s, "java.") ||
-		strings.HasPrefix(s, "javax.") ||
-		strings.HasPrefix(s, "clojure.lang.")
+	return fullClassNameRe.MatchString(s)
 }
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
