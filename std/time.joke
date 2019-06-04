@@ -41,6 +41,18 @@
   :go "t.Add(time.Duration(d))"}
   [^Time t ^Int d])
 
+(defn ^Time add-date
+  "Returns the time t + (years, months, days)."
+  {:added "1.0"
+   :go "t.AddDate(years, months, days)"}
+  [^Time t ^Int years ^Int months ^Int days])
+
+(defn ^Time parse
+  "Parses a time string."
+  {:added "1.0"
+   :go "!_res, err := time.Parse(layout, value); PanicOnErr(err)"}
+  [^String layout ^String value])
+
 (defn ^Int parse-duration
   "Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are

@@ -46,6 +46,23 @@ var add_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var add_date_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 4:
+		t := ExtractTime(_args, 0)
+		years := ExtractInt(_args, 1)
+		months := ExtractInt(_args, 2)
+		days := ExtractInt(_args, 3)
+		_res := t.AddDate(years, months, days)
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var format_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -109,6 +126,22 @@ var now_ Proc = func(_args []Object) Object {
 	switch {
 	case _c == 0:
 		_res := time.Now()
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var parse_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		layout := ExtractString(_args, 0)
+		value := ExtractString(_args, 1)
+		_res, err := time.Parse(layout, value)
+		PanicOnErr(err)
 		return MakeTime(_res)
 
 	default:
@@ -377,6 +410,11 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
 			`Returns the time t+d.`, "1.0"))
 
+	timeNamespace.InternVar("add-date", add_date_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("years"), MakeSymbol("months"), MakeSymbol("days"))),
+			`Returns the time t + (years, months, days).`, "1.0"))
+
 	timeNamespace.InternVar("format", format_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("layout"))),
@@ -406,6 +444,11 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
 			`Returns the current local time.`, "1.0"))
+
+	timeNamespace.InternVar("parse", parse_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"))),
+			`Parses a time string.`, "1.0"))
 
 	timeNamespace.InternVar("parse-duration", parse_duration_,
 		MakeMeta(
