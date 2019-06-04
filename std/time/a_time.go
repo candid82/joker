@@ -46,6 +46,23 @@ var add_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var add_date_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 4:
+		t := ExtractTime(_args, 0)
+		years := ExtractInt(_args, 1)
+		months := ExtractInt(_args, 2)
+		days := ExtractInt(_args, 3)
+		_res := t.AddDate(years, months, days)
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var format_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -392,6 +409,11 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
 			`Returns the time t+d.`, "1.0"))
+
+	timeNamespace.InternVar("add-date", add_date_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("years"), MakeSymbol("months"), MakeSymbol("days"))),
+			`Returns the time t + (years, months, days).`, "1.0"))
 
 	timeNamespace.InternVar("format", format_,
 		MakeMeta(

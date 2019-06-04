@@ -41,6 +41,12 @@
   :go "t.Add(time.Duration(d))"}
   [^Time t ^Int d])
 
+(defn ^Time add-date
+  "Returns the time t + (years, months, days)."
+  {:added "1.0"
+   :go "t.AddDate(years, months, days)"}
+  [^Time t ^Int years ^Int months ^Int days])
+
 (defn ^Time parse
   "Parses a time string."
   {:added "1.0"
