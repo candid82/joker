@@ -117,6 +117,22 @@ var now_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var parse_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		layout := ExtractString(_args, 0)
+		value := ExtractString(_args, 1)
+		_res, err := time.Parse(layout, value)
+		PanicOnErr(err)
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var parse_duration_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -406,6 +422,11 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
 			`Returns the current local time.`, "1.0"))
+
+	timeNamespace.InternVar("parse", parse_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"))),
+			`Parses a time string.`, "1.0"))
 
 	timeNamespace.InternVar("parse-duration", parse_duration_,
 		MakeMeta(
