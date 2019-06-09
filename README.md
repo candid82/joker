@@ -188,9 +188,9 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
 
    *  :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
    * If you really want some symbols to be considered declared *in any namespace no matter what*, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
-    (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion). 
+    (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
 
-Igenerally prefer first option for `clojure.test` namespace.
+I generally prefer first option for `clojure.test` namespace.
 
 ### Optional rules
 
