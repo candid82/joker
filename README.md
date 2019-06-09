@@ -179,14 +179,18 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
 1. Refer specific symbols. For example: `[clojure.test :refer [deftest testing is are]]`. This is usually not too tedious, and you only need to do it once per file.
 2. Use alias and qualified symbols:
 
-```clojure
-(:require [clojure.test :as t])
-(t/deftest ...)
-```
+ ```clojure
+ (:require [clojure.test :as t])
+ (t/deftest ...)
+ ```
 
-3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file. So Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. Note that such declarations become valid even if you don't require the namespace they come from, so this feature should be used sparingly (see [this discussion](https://github.com/candid82/joker/issues/52) for more details).
+3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
 
-I generally prefer first option for `clojure.test` namespace.
+   *  :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
+   * If you really want some symbols to be considered declared *in any namespace no matter what*, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
+    (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion). 
+
+Igenerally prefer first option for `clojure.test` namespace.
 
 ### Optional rules
 
