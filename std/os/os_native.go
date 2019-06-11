@@ -71,8 +71,14 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
 	PanicOnErr(err)
-	stdinWriter, err := cmd.StdinPipe()
-	PanicOnErr(err)
+	var stdinWriter io.WriteCloser
+	if stdin == Stdin {
+		cmd.Stdin = Stdin
+	} else {
+		writer, err := cmd.StdinPipe()
+		PanicOnErr(err)
+		stdinWriter = writer
+	}
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
 	}
@@ -82,7 +88,7 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 
 	go io.Copy(bufOut, stdoutReader)
 	go io.Copy(bufErr, stderrReader)
-	if stdin != nil {
+	if stdin != nil && stdinWriter != nil {
 		go func() {
 			io.Copy(stdinWriter, stdin)
 			stdinWriter.Close()
