@@ -37,7 +37,8 @@
       (println (str "Running test in subdirectory " test-dir)))
     (let [dir (str "tests/eval/" test-dir "/")
           filename "input.joke"
-          res (joker.os/sh-from dir exe filename) ; Someday add: :in "input.txt" (no :in support yet)
+          stdin (slurp-or (str dir "stdin.txt") :pipe)
+          res (joker.os/exec exe {:dir dir :args [filename] :stdin stdin})
           out (:out res)
           err (:err res)
           rc (:exit res)

@@ -1,0 +1,5 @@
+(ns stdin-pipe-test
+  (:require [joker.os :as os]))
+
+(let [result (os/exec "cat" {:stdin :pipe})]
+  (print "|" (:out result)))
