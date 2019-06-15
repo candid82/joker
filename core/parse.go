@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 	"unsafe"
@@ -80,8 +81,9 @@ type (
 	}
 	FnArityExpr struct {
 		Position
-		args []Symbol
-		body []Expr
+		args       []Symbol
+		body       []Expr
+		taggedType *Type
 	}
 	FnExpr struct {
 		Position
@@ -161,6 +163,7 @@ type (
 		line               Keyword
 		column             Keyword
 		file               Keyword
+		ns                 Keyword
 		macro              Keyword
 		message            Keyword
 		form               Keyword
@@ -201,6 +204,7 @@ type (
 		fn_                Symbol
 		fn                 Symbol
 		let_               Symbol
+		letfn_             Symbol
 		loop_              Symbol
 		recur              Symbol
 		setMacro_          Symbol
@@ -228,6 +232,7 @@ type (
 		quote     *string
 		fn_       *string
 		let_      *string
+		letfn_    *string
 		loop_     *string
 		recur     *string
 		setMacro_ *string
@@ -246,7 +251,9 @@ var (
 	KNOWN_MACROS    *Var
 	REQUIRE_VAR     *Var
 	ALIAS_VAR       *Var
+	REFER_VAR       *Var
 	CREATE_NS_VAR   *Var
+	IN_NS_VAR       *Var
 	WARNINGS        = Warnings{
 		fnWithEmptyBody: true,
 	}
@@ -257,6 +264,7 @@ var (
 		line:               MakeKeyword("line"),
 		column:             MakeKeyword("column"),
 		file:               MakeKeyword("file"),
+		ns:                 MakeKeyword("ns"),
 		macro:              MakeKeyword("macro"),
 		message:            MakeKeyword("message"),
 		form:               MakeKeyword("form"),
@@ -297,6 +305,7 @@ var (
 		fn_:                MakeSymbol("fn*"),
 		fn:                 MakeSymbol("fn"),
 		let_:               MakeSymbol("let*"),
+		letfn_:             MakeSymbol("letfn*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
 		setMacro_:          MakeSymbol("set-macro__"),
@@ -324,6 +333,7 @@ var (
 		quote:     STRINGS.Intern("quote"),
 		fn_:       STRINGS.Intern("fn*"),
 		let_:      STRINGS.Intern("let*"),
+		letfn_:    STRINGS.Intern("letfn*"),
 		loop_:     STRINGS.Intern("loop*"),
 		recur:     STRINGS.Intern("recur"),
 		setMacro_: STRINGS.Intern("set-macro__"),
@@ -495,7 +505,7 @@ func printReadError(reader *Reader, msg string) {
 	printError(pos, "Read error: "+msg)
 }
 
-func isIgnoredUnsusedNamespace(ns *Namespace) bool {
+func isIgnoredUnusedNamespace(ns *Namespace) bool {
 	if WARNINGS.ignoredUnusedNamespaces == nil {
 		return false
 	}
@@ -508,7 +518,7 @@ func WarnOnUnusedNamespaces() {
 	positions := make(map[string]Position)
 
 	for _, ns := range GLOBAL_ENV.Namespaces {
-		if !ns.isUsed && !isIgnoredUnsusedNamespace(ns) {
+		if ns != GLOBAL_ENV.CurrentNamespace() && !ns.isUsed && !isIgnoredUnusedNamespace(ns) {
 			pos := ns.Name.GetInfo()
 			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
 				name := ns.Name.ToString(false)
@@ -528,14 +538,17 @@ func WarnOnUnusedVars() {
 	var names []string
 	positions := make(map[string]Position)
 
-	ns := GLOBAL_ENV.Namespaces[STRINGS.Intern("user")]
-
-	for _, vr := range ns.mappings {
-		if vr.ns == ns && !vr.isUsed && vr.isPrivate {
-			pos := vr.GetInfo()
-			if pos != nil {
-				names = append(names, *vr.name.name)
-				positions[*vr.name.name] = pos.Position
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		for _, vr := range ns.mappings {
+			if vr.ns == ns && !vr.isUsed && vr.isPrivate {
+				pos := vr.GetInfo()
+				if pos != nil {
+					names = append(names, *vr.name.name)
+					positions[*vr.name.name] = pos.Position
+				}
 			}
 		}
 	}
@@ -800,9 +813,10 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
 	arity := FnArityExpr{
-		Position: GetPosition(sig),
-		args:     args,
-		body:     parseBody(body, ctx),
+		Position:   GetPosition(sig),
+		args:       args,
+		body:       parseBody(body, ctx),
+		taggedType: getTaggedType(params.(Meta)),
 	}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -834,10 +848,15 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 		}
 
 		if WARNINGS.unusedFnParameters {
+			var unused []Symbol
 			for _, b := range ctx.localBindings.bindings {
 				if needsUnusedWarning(b) {
-					printParseWarning(GetPosition(b.name), "unused parameter: "+b.name.ToString(false))
+					unused = append(unused, b.name)
 				}
+			}
+			sort.Sort(BySymbolName(unused))
+			for _, u := range unused {
+				printParseWarning(GetPosition(u), "unused parameter: "+u.ToString(false))
 			}
 		}
 	}
@@ -980,11 +999,15 @@ func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 }
 
 func parseLet(obj Object, ctx *ParseContext) *LetExpr {
-	return parseLetLoop(obj, false, ctx)
+	return parseLetLoop(obj, "let", ctx)
 }
 
 func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
-	return (*LoopExpr)(parseLetLoop(obj, true, ctx))
+	return (*LoopExpr)(parseLetLoop(obj, "loop", ctx))
+}
+
+func parseLetfn(obj Object, ctx *ParseContext) *LoopExpr {
+	return (*LoopExpr)(parseLetLoop(obj, "letfn", ctx))
 }
 
 func isSkipUnused(obj Meta) bool {
@@ -996,11 +1019,7 @@ func isSkipUnused(obj Meta) bool {
 	return false
 }
 
-func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
-	formName := "let"
-	if isLoop {
-		formName = "loop"
-	}
+func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 	res := &LetExpr{
 		Position: GetPosition(obj),
 	}
@@ -1010,7 +1029,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		if b.count%2 != 0 {
 			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
 		}
-		if LINTER_MODE && !isLoop && b.count == 0 {
+		if LINTER_MODE && formName != "loop" && b.count == 0 {
 			pos := GetPosition(obj)
 			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
@@ -1019,6 +1038,7 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 		res.values = make([]Expr, b.count/2)
 		ctx.PushEmptyLocalFrame()
 		defer ctx.PopLocalFrame()
+
 		for i := 0; i < b.count/2; i++ {
 			s := b.at(i * 2)
 			switch sym := s.(type) {
@@ -1039,11 +1059,19 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
 				}
 			}
-			res.values[i] = Parse(b.at(i*2+1), ctx)
+			if formName != "letfn" {
+				res.values[i] = Parse(b.at(i*2+1), ctx)
+			}
 			ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 		}
 
-		if isLoop {
+		if formName == "letfn" {
+			for i := 0; i < b.count/2; i++ {
+				res.values[i] = Parse(b.at(i*2+1), ctx)
+			}
+		}
+
+		if formName == "loop" {
 			ctx.PushLoopBindings(res.names)
 			defer ctx.PopLoopBindings()
 
@@ -1061,10 +1089,15 @@ func parseLetLoop(obj Object, isLoop bool, ctx *ParseContext) *LetExpr {
 			}
 
 			if !skipUnused {
+				var unused []Symbol
 				for _, b := range ctx.localBindings.bindings {
 					if needsUnusedWarning(b) {
-						printParseWarning(GetPosition(b.name), "unused binding: "+b.name.ToString(false))
+						unused = append(unused, b.name)
 					}
+				}
+				sort.Sort(BySymbolName(unused))
+				for _, u := range unused {
+					printParseWarning(GetPosition(u), "unused binding: "+u.ToString(false))
 				}
 			}
 		}
@@ -1095,7 +1128,7 @@ func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 	}
 }
 
-func resolveMacro(obj Object, ctx *ParseContext) Callable {
+func resolveMacro(obj Object, ctx *ParseContext) *Var {
 	switch sym := obj.(type) {
 	case Symbol:
 		if ctx.GetLocalBinding(sym) != nil {
@@ -1107,7 +1140,7 @@ func resolveMacro(obj Object, ctx *ParseContext) Callable {
 		}
 		vr.isUsed = true
 		vr.ns.isUsed = true
-		return vr.Value.(Callable)
+		return vr
 	default:
 		return nil
 	}
@@ -1130,7 +1163,7 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 		}
 		return res.WithInfo(info)
 	case *Vector:
-		var res Conjable = EmptyVector
+		var res Conjable = EmptyVector()
 		for i := 0; i < s.count; i++ {
 			t := fixInfo(s.at(i), info)
 			res = res.Conj(t)
@@ -1161,13 +1194,13 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 
 func macroexpand1(seq Seq, ctx *ParseContext) Object {
 	op := seq.First()
-	macro := resolveMacro(op, ctx)
-	if macro != nil {
+	vr := resolveMacro(op, ctx)
+	if vr != nil {
 		expr := &MacroCallExpr{
 			Position: GetPosition(seq),
-			macro:    macro,
+			macro:    vr.Value.(Callable),
 			args:     ToSlice(seq.Rest().Cons(ctx.localBindings.ToMap()).Cons(seq)),
-			name:     *op.(Symbol).name,
+			name:     varCallableString(vr),
 		}
 		return fixInfo(Eval(expr, nil), seq.GetInfo())
 	} else {
@@ -1206,18 +1239,24 @@ func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 	return res
 }
 
+func selectArity(expr *FnExpr, passedArgsCount int) *FnArityExpr {
+	for _, arity := range expr.arities {
+		if len(arity.args) == passedArgsCount {
+			return &arity
+		}
+	}
+	if expr.variadic != nil && passedArgsCount >= len(expr.variadic.args)-1 {
+		return expr.variadic
+	}
+	return nil
+}
+
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) bool {
 	passedArgsCount := len(call.args)
 	if isMacro {
 		passedArgsCount += 2
 	}
-	for _, arity := range expr.arities {
-		if len(arity.args) == passedArgsCount {
-			return checkTypes(arity.args, call)
-		}
-	}
-	v := expr.variadic
-	if v != nil && passedArgsCount >= len(v.args)-1 {
+	if v := selectArity(expr, passedArgsCount); v != nil {
 		return checkTypes(v.args, call)
 	}
 	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
@@ -1239,9 +1278,9 @@ func checkArglist(arglist Seq, passedArgsCount int) bool {
 
 func setMacroMeta(vr *Var) {
 	if vr.meta == nil {
-		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		vr.meta = EmptyArrayMap().Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	} else {
-		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		vr.meta = vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	}
 }
 
@@ -1327,6 +1366,13 @@ func getRequireVar(ctx *ParseContext) *Var {
 	return REQUIRE_VAR
 }
 
+func getReferVar(ctx *ParseContext) *Var {
+	if REFER_VAR == nil {
+		REFER_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("refer")
+	}
+	return REFER_VAR
+}
+
 func getAliasVar(ctx *ParseContext) *Var {
 	if ALIAS_VAR == nil {
 		ALIAS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("alias")
@@ -1339,6 +1385,13 @@ func getCreateNsVar(ctx *ParseContext) *Var {
 		CREATE_NS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("create-ns")
 	}
 	return CREATE_NS_VAR
+}
+
+func getInNsVar(ctx *ParseContext) *Var {
+	if IN_NS_VAR == nil {
+		IN_NS_VAR = ctx.GlobalEnv.CoreNamespace.Resolve("in-ns")
+	}
+	return IN_NS_VAR
 }
 
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
@@ -1410,6 +1463,8 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseFn(obj, ctx)
 		case STR.let_:
 			return parseLet(obj, ctx)
+		case STR.letfn_:
+			return parseLetfn(obj, ctx)
 		case STR.loop_:
 			return parseLoop(obj, ctx)
 		case STR.recur:
@@ -1496,10 +1551,14 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				case *Fn:
 					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
 						require := getRequireVar(ctx)
+						refer := getReferVar(ctx)
 						alias := getAliasVar(ctx)
 						createNs := getCreateNsVar(ctx)
+						inNs := getInNsVar(ctx)
 						if (c.vr.Value.Equals(require.Value) ||
 							c.vr.Value.Equals(alias.Value) ||
+							c.vr.Value.Equals(refer.Value) ||
+							c.vr.Value.Equals(inNs.Value) ||
 							c.vr.Value.Equals(createNs.Value)) &&
 							areAllLiteralExprs(res.args) {
 							Eval(res, nil)
@@ -1552,14 +1611,14 @@ func isRecordConstructor(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
 }
 
+var fullClassNameRe = regexp.MustCompile(`.+\..+\..+`)
+
 func isJavaSymbol(sym Symbol) bool {
 	s := *sym.name
 	if sym.ns != nil {
 		s = *sym.ns
 	}
-	return strings.HasPrefix(s, "java.") ||
-		strings.HasPrefix(s, "javax.") ||
-		strings.HasPrefix(s, "clojure.lang.")
+	return fullClassNameRe.MatchString(s)
 }
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
@@ -1625,7 +1684,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	var res Expr
 	canHaveMeta := false
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Bool, Nil, *Ratio, Keyword, Regex, *Type:
+	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, Regex, *Type:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true
@@ -1680,6 +1739,7 @@ func init() {
 	SPECIAL_SYMBOLS[SYMBOLS.quote.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.fn_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.let_.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.letfn_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.loop_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.recur.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.setMacro_.name] = true

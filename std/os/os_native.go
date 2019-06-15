@@ -2,6 +2,7 @@ package os
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -20,35 +21,85 @@ func env() Object {
 	return res
 }
 
+func setEnv(key string, value string) Object {
+	err := os.Setenv(key, value)
+	PanicOnErr(err)
+	return NIL
+}
+
 func commandArgs() Object {
-	res := EmptyVector
+	res := EmptyVector()
 	for _, arg := range os.Args {
 		res = res.Conjoin(String{S: arg})
 	}
 	return res
 }
 
-const defaultFailedCode = 127  // seen from 'sh no-such-file' on OS X and Ubuntu
+const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
-func sh(dir string, name string, args []string) Object {
+func execute(name string, opts Map) Object {
+	var dir string
+	var args []string
+	var stdin io.Reader
+	ok, dirObj := opts.Get(MakeKeyword("dir"))
+	if ok {
+		dir = AssertString(dirObj, "dir must be a string").S
+	}
+	ok, argsObj := opts.Get(MakeKeyword("args"))
+	if ok {
+		s := AssertSeqable(argsObj, "args must be Seqable").Seq()
+		for !s.IsEmpty() {
+			args = append(args, AssertString(s.First(), "args must be strings").S)
+			s = s.Rest()
+		}
+	}
+	ok, stdinObj := opts.Get(MakeKeyword("stdin"))
+	if ok {
+		if stdinObj.Equals(MakeKeyword("pipe")) {
+			stdin = Stdin
+		} else {
+			stdin = strings.NewReader(AssertString(stdinObj, "stdin must be either :pipe keyword or a string").S)
+		}
+	}
+	return sh(dir, stdin, name, args)
+}
+
+func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	stdoutReader, err := cmd.StdoutPipe()
 	PanicOnErr(err)
 	stderrReader, err := cmd.StderrPipe()
 	PanicOnErr(err)
+	var stdinWriter io.WriteCloser
+	if stdin == Stdin {
+		cmd.Stdin = Stdin
+	} else {
+		writer, err := cmd.StdinPipe()
+		PanicOnErr(err)
+		stdinWriter = writer
+	}
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
 	}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stdoutReader)
-	stdoutString := buf.String()
-	buf = new(bytes.Buffer)
-	buf.ReadFrom(stderrReader)
-	stderrString := buf.String()
+
+	bufOut := new(bytes.Buffer)
+	bufErr := new(bytes.Buffer)
+
+	go io.Copy(bufOut, stdoutReader)
+	go io.Copy(bufErr, stderrReader)
+	if stdin != nil && stdinWriter != nil {
+		go func() {
+			io.Copy(stdinWriter, stdin)
+			stdinWriter.Close()
+		}()
+	}
+
 	err = cmd.Wait()
+	stdoutString := bufOut.String()
+	stderrString := bufErr.String()
 	res := EmptyArrayMap()
-	res.Add(MakeKeyword("success"), Bool{B: err == nil})
+	res.Add(MakeKeyword("success"), Boolean{B: err == nil})
 
 	var exitCode int
 	if err != nil {
@@ -81,7 +132,7 @@ func mkdir(name string, perm int) Object {
 func readDir(dirname string) Object {
 	files, err := ioutil.ReadDir(dirname)
 	PanicOnErr(err)
-	res := EmptyVector
+	res := EmptyVector()
 	name := MakeKeyword("name")
 	size := MakeKeyword("size")
 	mode := MakeKeyword("mode")
@@ -92,7 +143,7 @@ func readDir(dirname string) Object {
 		m.Add(name, MakeString(f.Name()))
 		m.Add(size, MakeInt(int(f.Size())))
 		m.Add(mode, MakeInt(int(f.Mode())))
-		m.Add(isDir, MakeBool(f.IsDir()))
+		m.Add(isDir, MakeBoolean(f.IsDir()))
 		m.Add(modTime, MakeInt(int(f.ModTime().Unix())))
 		res = res.Conjoin(m)
 	}
@@ -105,14 +156,14 @@ func getwd() string {
 	return res
 }
 
+func chdir(dirname string) Object {
+	err := os.Chdir(dirname)
+	PanicOnErr(err)
+	return NIL
+}
+
 func stat(filename string) Object {
 	info, err := os.Stat(filename)
 	PanicOnErr(err)
-	m := EmptyArrayMap()
-	m.Add(MakeKeyword("name"), MakeString(info.Name()))
-	m.Add(MakeKeyword("size"), MakeInt(int(info.Size())))
-	m.Add(MakeKeyword("mode"), MakeInt(int(info.Mode())))
-	m.Add(MakeKeyword("modtime"), MakeTime(info.ModTime()))
-	m.Add(MakeKeyword("dir?"), MakeBool(info.IsDir()))
-	return m
+	return FileInfoMap(info.Name(), info)
 }

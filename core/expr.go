@@ -27,7 +27,7 @@ func exprArrayMap(expr Expr, exprType string, pos bool) *ArrayMap {
 }
 
 func addVector(res *ArrayMap, body []Expr, name string, pos bool) {
-	b := EmptyVector
+	b := EmptyVector()
 	for _, e := range body {
 		b = b.Conjoin(e.Dump(pos))
 	}
@@ -101,6 +101,16 @@ func (expr *DefExpr) Dump(pos bool) Map {
 }
 
 func (expr *CallExpr) InferType() *Type {
+	switch callableExpr := expr.callable.(type) {
+	case *VarRefExpr:
+		switch f := callableExpr.vr.Value.(type) {
+		case *Fn:
+			if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil && arity.taggedType != nil {
+				return arity.taggedType
+			}
+		}
+		return callableExpr.vr.taggedType
+	}
 	return nil
 }
 
@@ -119,7 +129,7 @@ func (expr *MacroCallExpr) InferType() *Type {
 func (expr *MacroCallExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "macro-call", pos)
 	res.Add(MakeKeyword("name"), String{S: expr.name})
-	args := EmptyVector
+	args := EmptyVector()
 	for _, arg := range expr.args {
 		args = args.Conjoin(arg)
 	}
@@ -215,7 +225,7 @@ func (expr *FnArityExpr) InferType() *Type {
 
 func (expr *FnArityExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "arity", pos)
-	args := EmptyVector
+	args := EmptyVector()
 	for _, arg := range expr.args {
 		args = args.Conjoin(arg)
 	}
@@ -232,7 +242,7 @@ func (expr *FnExpr) Dump(pos bool) Map {
 	if expr.variadic != nil {
 		res.Add(MakeKeyword("variadic"), expr.variadic.Dump(pos))
 	}
-	arities := EmptyVector
+	arities := EmptyVector()
 	for _, a := range expr.arities {
 		arities = arities.Conjoin(a.Dump(pos))
 	}
@@ -246,7 +256,7 @@ func (expr *LetExpr) InferType() *Type {
 
 func (expr *LetExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "let", pos)
-	names := EmptyVector
+	names := EmptyVector()
 	for _, name := range expr.names {
 		names = names.Conjoin(name)
 	}
@@ -261,7 +271,7 @@ func (expr *LoopExpr) InferType() *Type {
 
 func (expr *LoopExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "loop", pos)
-	names := EmptyVector
+	names := EmptyVector()
 	for _, name := range expr.names {
 		names = names.Conjoin(name)
 	}
@@ -300,7 +310,7 @@ func (expr *TryExpr) Dump(pos bool) Map {
 	res := exprArrayMap(expr, "try", pos)
 	addVector(res, expr.body, "body", pos)
 	addVector(res, expr.finallyExpr, "finally", pos)
-	catches := EmptyVector
+	catches := EmptyVector()
 	for _, c := range expr.catches {
 		catches = catches.Conjoin(c.Dump(pos))
 	}

@@ -18,8 +18,8 @@
        ~@(map #(list 'def %) (remove resolve syms)))))
 
 (def *known-macros*
-  {'memfn nil 'defmulti nil
-   'letfn nil '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
+  {'memfn nil
+   '.. nil '. nil 'clojure.test/deftest nil 'clojure.test/is nil 'clojure.test/are nil 'tag__ nil})
 
 (defn ^:private taggify__
   [x]
@@ -141,16 +141,13 @@
                            (assoc m (keyword mname)
                                   (merge name-meta
                                          {:name (vary-meta mname assoc :doc doc :arglists arglists)
-                                          :arglists arglists
+                                          :arglists (map (fn [args] (mapv #(symbol (str "_" %)) args))
+                                                         arglists)
                                           :doc doc}))))
                        {} sigs))]
     `(do
        (def ~name)
        ~@(defmethods__ sigs))))
-
-(defmacro defmethod
-  [multifn dispatch-val & fn-tail]
-  `(do ~multifn (fn ~@fn-tail)))
 
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
@@ -183,19 +180,19 @@
 
 ;; Redefine some core functions with type hints
 
-(defn cons [x ^Seqable seq] (cons__ x seq))
+(defn cons ^Seq [x ^Seqable seq] (cons__ x seq))
 (defn first [^Seqable coll] (first__ coll))
-(defn next [^Seqable coll] (next__ coll))
-(defn rest [^Seqable coll] (rest__ coll))
-(defn seq [^Seqable coll] (seq__ coll))
-(defn instance? [^Type c x] (instance?__ c x))
+(defn next ^Seq [^Seqable coll] (next__ coll))
+(defn rest ^Seq [^Seqable coll] (rest__ coll))
+(defn seq ^Seq [^Seqable coll] (seq__ coll))
+(defn instance? ^Boolean [^Type c x] (instance?__ c x))
 (defn ex-info
-  ([^String msg ^Map map] (ex-info__ msg map))
-  ([^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
-(defn with-meta [^Meta obj ^Map m] (with-meta__ obj m))
-(defn vec [^Seqable coll] (vec__ coll))
-(defn not-every? [^Callable pred ^Seqable coll] (not (every? pred coll)))
-(defn not-any? [^Callable pred ^Seqable coll] (not (some pred coll)))
+  (^ExInfo [^String msg ^Map map] (ex-info__ msg map))
+  (^ExInfo [^String msg ^Map map ^Error cause] (ex-info__ msg map cause)))
+(defn with-meta [obj ^Map m] (with-meta__ obj m))
+(defn vec ^Vector [^Seqable coll] (vec__ coll))
+(defn not-every? ^Boolean [^Callable pred ^Seqable coll] (not (every? pred coll)))
+(defn not-any? ^Boolean [^Callable pred ^Seqable coll] (not (some pred coll)))
 (defn read-string [^String s] (read-string__ s))
 
 ;; Clojure special forms not supported by Joker
@@ -211,11 +208,8 @@
 (defn locking [x & body])
 (defn amap [a idx ret expr])
 (defn memfn [name & args])
-(defn defmulti [mm-name & options])
-(defn letfn [fnspecs & body])
 (defn .. [x form & more])
 (defn . [x m & args])
-(defn refer-clojure [& filters])
 
 ;; Clojure core functions not supported by Joker
 
@@ -238,57 +232,63 @@
 (def __map__ map)
 (defn map
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__map__ x coll))
-  ([^Callable x c & colls]
+  (^Seq [^Callable x c & colls]
    (apply __map__ x c colls)))
+
+(def __mapcat__ mapcat)
+(defn mapcat
+  ([^Callable x])
+  (^Seq [^Callable x & colls]
+   (apply __mapcat__ x colls)))
 
 (def __filter__ filter)
 (defn filter
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__filter__ x coll)))
 
 (def __remove__ remove)
 (defn remove
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__remove__ x coll)))
 
 (def __take__ take)
 (defn take
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__take__ x coll)))
 
 (def __take-while__ take-while)
 (defn take-while
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__take-while__ x coll)))
 
 (def __drop__ drop)
 (defn drop
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__drop__ x coll)))
 
 (def __drop-while__ drop-while)
 (defn drop-while
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__drop-while__ x coll)))
 
 (def __take-nth__ take-nth)
 (defn take-nth
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__take-nth__ x coll)))
 
 (def __distinct__ distinct)
 (defn distinct
   ([])
-  ([^Seqable coll]
+  (^Seq [^Seqable coll]
    (__distinct__ coll)))
 
 (def __replace__ replace)
@@ -300,7 +300,7 @@
 (def __interpose__ interpose)
 (defn interpose
   ([x])
-  ([x ^Seqable coll]
+  (^Seq [x ^Seqable coll]
    (__interpose__ x coll)))
 
 (def __into__ into)
@@ -312,33 +312,33 @@
 (def __partition-by__ partition-by)
 (defn partition-by
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__partition-by__ x coll)))
 
 (def __partition-all__ partition-all)
 (defn partition-all
   ([^Number n])
-  ([^Number n ^Seqable coll]
+  (^Seq [^Number n ^Seqable coll]
    (__partition-all__ n coll))
-  ([^Number n ^Number step ^Seqable coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (__partition-all__ n step coll)))
 
 (def __map-indexed__ map-indexed)
 (defn map-indexed
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__map-indexed__ x coll)))
 
 (def __keep__ keep)
 (defn keep
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__keep__ x coll)))
 
 (def __keep-indexed__ keep-indexed)
 (defn keep-indexed
   ([^Callable x])
-  ([^Callable x ^Seqable coll]
+  (^Seq [^Callable x ^Seqable coll]
    (__keep-indexed__ x coll)))
 
 (defn cat
@@ -347,22 +347,28 @@
 (def __dedupe__ dedupe)
 (defn dedupe
   ([])
-  ([^Seqable coll]
+  (^Seq [^Seqable coll]
    (__dedupe__ coll)))
 
 (def __random-sample__ random-sample)
 (defn random-sample
   ([^Number x])
-  ([^Number x ^Seqable coll]
+  (^Seq [^Number x ^Seqable coll]
    (__random-sample__ x coll)))
 
 (def __sequence__ sequence)
 (defn sequence
-  ([coll]
+  (^Seq [coll]
    (__sequence__ coll))
-  ([xform coll])
-  ([xform coll & colls]))
+  (^Seq [xform coll])
+  (^Seq [xform coll & colls]))
 
+(ns-unmap 'joker.core 'bigfloat?)
+(ns-unmap 'user 'bigfloat?)
+(ns-unmap 'joker.core 'bigfloat)
+(ns-unmap 'user 'bigfloat)
+(ns-unmap 'joker.core 'joker-version)
+(ns-unmap 'user 'joker-version)
 (ns-unmap 'joker.core 'pprint)
 (ns-unmap 'user 'pprint)
 (ns-unmap 'joker.core 'pr-err)
@@ -373,3 +379,5 @@
 (ns-unmap 'user 'print-err)
 (ns-unmap 'joker.core 'println-err)
 (ns-unmap 'user 'println-err)
+(ns-unmap 'joker.core 'ns-sources)
+(ns-unmap 'user 'ns-sources)

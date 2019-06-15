@@ -1,0 +1,32 @@
+Hello!
+Bonjour!
+I don't know the Spanish language
+1
+1
+6
+5040
+(120 24 6 2 1)
+str: mink and stoat
+str: bear, skunk and sloth
+str: dog, cat, cow and horse
+numbers: 1 and 2
+Caught this expected exception: <file>:0:0: Exception: No method in multimethod 'bat' for dispatch value: [Keyword Keyword]
+default: :hey then :there and finally (:you)
+1
+1
+-1
+Great function
+Better function
+(:foo 1 :bar)
+{:foo 1, :baz hello}
+Bob Dobbs
+Bob Dobbs
+???
+Drawing a red square
+Drawing a green triangle
+1500
+1099
+Drawing a red square
+Drawing a green triangle
+#object[Fn]
+nil

@@ -1,4 +1,10 @@
 (alias 'string 'joker.string)
+(require 'joker.walk)
+(require 'joker.tools.cli)
+(require 'joker.test)
+(require 'joker.template)
+(require 'joker.set)
+(require 'joker.repl)
 
 (def index-template
   (slurp "templates/index.html"))
@@ -20,13 +26,15 @@
 
 (defn type-name
   [v]
-  (cond
-    (not (bound? v)) "Object"
-    (:special-form (meta v)) "Special form"
-    (:macro (meta v)) "Macro"
-    (= Fn (type @v)) "Function"
-    (= Proc (type @v)) "Function"
-    :else (str (type @v))))
+  (let [m (meta v)]
+    (cond
+      (not (bound? v)) "Object"
+      (:special-form m) "Special form"
+      (:macro m) "Macro"
+      (= Fn (type @v)) "Function"
+      (= Proc (type @v)) "Function"
+      (:tag m) (str (:tag m))
+      :else (str (type @v)))))
 
 (defn link-item-doc
   [k]
@@ -42,6 +50,10 @@
                      (string/replace usage-template "{usage}" (str (apply list k arglist))))]
       (string/join "" examples))))
 
+(defn- source-file
+  [ns]
+  (string/join "_" (rest (string/split (str ns) #"\."))))
+
 (defn var-doc
   [k v]
   (let [m (meta v)]
@@ -54,12 +66,14 @@
         (string/replace "{name}" (str k))
         (string/replace "{type}" (type-name v))
         (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m)))
         (string/replace
          "{source}"
          (if (:line m)
-           (str "<a href=\"https://github.com/candid82/joker/blob/master/core/data/core.joke#L" (:line m) "\">source</a>")
+           (format "<a href=\"https://github.com/candid82/joker/blob/master/core/data/%s.joke#L%s\">source</a>"
+                   (source-file (:ns m))
+                   (str (:line m)))
            "")))))
 
 (defn namespace-doc
@@ -74,7 +88,7 @@
     (-> namespace-template
         (string/replace "{id}" k)
         (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>"))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
 (defn ns-doc
@@ -92,7 +106,7 @@
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
         (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (str (:doc m)))
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace  "{vars}" vars-doc)
         (string/replace "{index}" var-links-doc))))
 

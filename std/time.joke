@@ -7,7 +7,7 @@
   "Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately."
   {:added "1.0"
-  :go "sleep(d)"}
+  :go "! time.Sleep(time.Duration(d)); _res := NIL"}
   [^Int d])
 
 (defn ^Time now
@@ -41,12 +41,24 @@
   :go "t.Add(time.Duration(d))"}
   [^Time t ^Int d])
 
+(defn ^Time add-date
+  "Returns the time t + (years, months, days)."
+  {:added "1.0"
+   :go "t.AddDate(years, months, days)"}
+  [^Time t ^Int years ^Int months ^Int days])
+
+(defn ^Time parse
+  "Parses a time string."
+  {:added "1.0"
+   :go "!_res, err := time.Parse(layout, value); PanicOnErr(err)"}
+  [^String layout ^String value])
+
 (defn ^Int parse-duration
   "Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h."
   {:added "1.0"
-  :go "!t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)"}
+  :go "!t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)"}
   [^String s])
 
 (defn ^Int since
@@ -107,3 +119,150 @@
   {:added "1.0"
   :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
   [^Int d ^Int m])
+
+(def
+  ^{:doc "Number of nanoseconds in 1 nanosecond"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Nanosecond)"}
+  nanosecond)
+
+(def
+  ^{:doc "Number of nanoseconds in 1 microsecond"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Microsecond)"}
+  microsecond)
+
+(def
+  ^{:doc "Number of nanoseconds in 1 millisecond"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Millisecond)"}
+  millisecond)
+
+(def
+  ^{:doc "Number of nanoseconds in 1 second"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Second)"}
+  second)
+
+(def
+  ^{:doc "Number of nanoseconds in 1 minute"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Minute)"}
+  minute)
+
+(def
+  ^{:doc "Number of nanoseconds in 1 hour"
+    :added "1.0"
+    :tag Int
+    :go "int(time.Hour)"}
+  hour)
+
+(def
+  ^{:doc "Mon Jan _2 15:04:05 2006"
+    :added "1.0"
+    :tag String
+    :go "time.ANSIC"}
+  ansi-c)
+
+(def
+  ^{:doc "Mon Jan _2 15:04:05 MST 2006"
+    :added "1.0"
+    :tag String
+    :go "time.UnixDate"}
+  unix-date)
+
+(def
+  ^{:doc "Mon Jan 02 15:04:05 -0700 2006"
+    :added "1.0"
+    :tag String
+    :go "time.RubyDate"}
+  ruby-date)
+
+(def
+  ^{:doc "02 Jan 06 15:04 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC822"}
+  rfc822)
+
+(def
+  ^{:doc "02 Jan 06 15:04 -0700"
+    :added "1.0"
+    :tag String
+    :go "time.RFC822Z"}
+  rfc822-z)
+
+(def
+  ^{:doc "Monday, 02-Jan-06 15:04:05 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC850"}
+  rfc850)
+
+(def
+  ^{:doc "Mon, 02 Jan 2006 15:04:05 MST"
+    :added "1.0"
+    :tag String
+    :go "time.RFC1123"}
+  rfc1123)
+
+(def
+  ^{:doc "Mon, 02 Jan 2006 15:04:05 -0700"
+    :added "1.0"
+    :tag String
+    :go "time.RFC1123Z"}
+  rfc1123-z)
+
+(def
+  ^{:doc "2006-01-02T15:04:05Z07:00"
+    :added "1.0"
+    :tag String
+    :go "time.RFC3339"}
+  rfc3339)
+
+(def
+  ^{:doc "2006-01-02T15:04:05.999999999Z07:00"
+    :added "1.0"
+    :tag String
+    :go "time.RFC3339Nano"}
+  rfc3339-nano)
+
+(def
+  ^{:doc "3:04PM"
+    :added "1.0"
+    :tag String
+    :go "time.Kitchen"}
+  kitchen)
+
+(def
+  ^{:doc "Jan _2 15:04:05"
+    :added "1.0"
+    :tag String
+    :go "time.Stamp"}
+  stamp)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000"
+    :added "1.0"
+    :tag String
+    :go "time.StampMilli"}
+  stamp-milli)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000000"
+    :added "1.0"
+    :tag String
+    :go "time.StampMicro"}
+  stamp-micro)
+
+(def
+  ^{:doc "Jan _2 15:04:05.000000000"
+    :added "1.0"
+    :tag String
+    :go "time.StampNano"}
+  stamp-nano)

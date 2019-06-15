@@ -2,35 +2,45 @@
 
 (def __=__ =)
 (defn =
-  [x y & more]
+  ^Boolean [x y & more]
   (apply __=__ x y more))
 
 (def __not=__ not=)
 (defn not=
-  [x y & more]
+  ^Boolean [x y & more]
   (apply __not=__ x y more))
 
 (def __<__ <)
 (defn <
-  [^Number x ^Number y & more]
+  ^Boolean [^Number x ^Number y & more]
   (apply __<__ x y more))
 
 (def __>__ >)
 (defn >
-  [^Number x ^Number y & more]
+  ^Boolean [^Number x ^Number y & more]
   (apply __>__ x y more))
 
 (def __<=__ <=)
 (defn <=
-  [^Number x ^Number y & more]
+  ^Boolean [^Number x ^Number y & more]
   (apply __<=__ x y more))
 
 (def __>=__ >=)
 (defn >=
-  [^Number x ^Number y & more]
+  ^Boolean [^Number x ^Number y & more]
   (apply __>=__ x y more))
 
 (def __==__ ==)
 (defn ==
-  [^Number x ^Number y & more]
+  ^Boolean [^Number x ^Number y & more]
   (apply __==__ x y more))
+
+(def __merge__ merge)
+(defn merge
+  ^Map [^Map m1 & more]
+  (apply __merge__ m1 more))
+
+(def __merge-with__ merge-with)
+(defn merge-with
+  ^Map [^Callable f ^Map m1 & more]
+  (apply __merge-with__ f m1 more))

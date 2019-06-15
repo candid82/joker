@@ -23,22 +23,46 @@ type FileInfo struct {
 	filename string
 }
 
+/* The entries must be ordered such that a given namespace depends
+/* only upon namespaces loaded above it. E.g. joker.template depends
+/* on joker.walk, so is listed afterwards, not in alphabetical
+/* order. */
 var files []FileInfo = []FileInfo{
 	{
 		name:     "<joker.core>",
 		filename: "core.joke",
 	},
 	{
-		name:     "<joker.time>",
-		filename: "time.joke",
+		name:     "<joker.repl>",
+		filename: "repl.joke",
 	},
 	{
-		name:     "<joker.math>",
-		filename: "math.joke",
+		name:     "<joker.walk>",
+		filename: "walk.joke",
+	},
+	{
+		name:     "<joker.template>",
+		filename: "template.joke",
+	},
+	{
+		name:     "<joker.test>",
+		filename: "test.joke",
+	},
+	{
+		name:     "<joker.set>",
+		filename: "set.joke",
+	},
+	{
+		name:     "<joker.tools.cli>",
+		filename: "tools_cli.joke",
 	},
 	{
 		name:     "<joker.core>",
 		filename: "linter_all.joke",
+	},
+	{
+		name:     "<joker.core>",
+		filename: "linter_joker.joke",
 	},
 	{
 		name:     "<joker.core>",
@@ -59,7 +83,6 @@ const hextable = "0123456789abcdef"
 func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	for _, f := range files {
-		println("Generating " + f.filename)
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 		content, err := ioutil.ReadFile("data/" + f.filename)
 		if err != nil {

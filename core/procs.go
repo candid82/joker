@@ -14,19 +14,25 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 )
 
 var (
-	coreData        []byte
-	timeData        []byte
-	mathData        []byte
-	linter_allData  []byte
-	linter_cljxData []byte
-	linter_cljData  []byte
-	linter_cljsData []byte
+	coreData         []byte
+	replData         []byte
+	walkData         []byte
+	templateData     []byte
+	testData         []byte
+	setData          []byte
+	tools_cliData    []byte
+	linter_allData   []byte
+	linter_jokerData []byte
+	linter_cljxData  []byte
+	linter_cljData   []byte
+	linter_cljsData  []byte
 )
 
 type (
@@ -45,7 +51,9 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.10.1"
+const VERSION = "v0.12.4"
+
+var internalLibs map[string][]byte
 
 const (
 	CLJ Dialect = iota
@@ -54,6 +62,17 @@ const (
 	EDN
 	UNKNOWN
 )
+
+func InitInternalLibs() {
+	internalLibs = map[string][]byte{
+		"joker.walk":      walkData,
+		"joker.template":  templateData,
+		"joker.repl":      replData,
+		"joker.test":      testData,
+		"joker.set":       setData,
+		"joker.tools.cli": tools_cliData,
+	}
+}
 
 func ensureArrayMap(args []Object, index int) *ArrayMap {
 	switch obj := args[index].(type) {
@@ -76,6 +95,14 @@ func ExtractString(args []Object, index int) string {
 	return EnsureString(args, index).S
 }
 
+func ExtractKeyword(args []Object, index int) string {
+	return EnsureKeyword(args, index).ToString(false)
+}
+
+func ExtractStringable(args []Object, index int) string {
+	return EnsureStringable(args, index).S
+}
+
 func ExtractStrings(args []Object, index int) []string {
 	strs := make([]string, 0)
 	for i := index; i < len(args); i++ {
@@ -86,6 +113,14 @@ func ExtractStrings(args []Object, index int) []string {
 
 func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
+}
+
+func ExtractBoolean(args []Object, index int) bool {
+	return EnsureBoolean(args, index).B
+}
+
+func ExtractChar(args []Object, index int) rune {
+	return EnsureChar(args, index).Ch
 }
 
 func ExtractTime(args []Object, index int) time.Time {
@@ -135,19 +170,19 @@ var procWithMeta Proc = func(args []Object) Object {
 var procIsZero Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.IsZero(n)}
+	return Boolean{B: ops.IsZero(n)}
 }
 
 var procIsPos Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Gt(n, Int{I: 0})}
+	return Boolean{B: ops.Gt(n, Int{I: 0})}
 }
 
 var procIsNeg Proc = func(args []Object) Object {
 	n := EnsureNumber(args, 0)
 	ops := GetOps(n)
-	return Bool{B: ops.Lt(n, Int{I: 0})}
+	return Boolean{B: ops.Lt(n, Int{I: 0})}
 }
 
 var procAdd Proc = func(args []Object) Object {
@@ -273,7 +308,7 @@ var procBitFlip Proc = func(args []Object) Object {
 
 var procBitTest Proc = func(args []Object) Object {
 	x, y := AssertInts(args)
-	return Bool{B: x.I&(1<<uint(y.I)) != 0}
+	return Boolean{B: x.I&(1<<uint(y.I)) != 0}
 }
 
 var procBitShiftLeft Proc = func(args []Object) Object {
@@ -327,21 +362,38 @@ var procRegex Proc = func(args []Object) Object {
 	return Regex{R: r}
 }
 
+func reGroups(s string, indexes []int) Object {
+	if indexes == nil {
+		return NIL
+	} else if len(indexes) == 2 {
+		if indexes[0] == -1 {
+			return NIL
+		} else {
+			return String{S: s[indexes[0]:indexes[1]]}
+		}
+	} else {
+		v := EmptyVector()
+		for i := 0; i < len(indexes); i += 2 {
+			if indexes[i] == -1 {
+				v = v.Conjoin(NIL)
+			} else {
+				v = v.Conjoin(String{S: s[indexes[i]:indexes[i+1]]})
+			}
+		}
+		return v
+	}
+}
+
 var procReSeq Proc = func(args []Object) Object {
 	re := EnsureRegex(args, 0)
 	s := EnsureString(args, 1)
-	matches := re.R.FindAllStringSubmatch(s.S, -1)
+	matches := re.R.FindAllStringSubmatchIndex(s.S, -1)
+	if matches == nil {
+		return NIL
+	}
 	res := make([]Object, len(matches))
 	for i, match := range matches {
-		if len(match) == 1 {
-			res[i] = String{S: match[0]}
-		} else {
-			v := EmptyVector
-			for _, str := range match {
-				v = v.Conjoin(String{S: str})
-			}
-			res[i] = v
-		}
+		res[i] = reGroups(s.S, match)
 	}
 	return &ArraySeq{arr: res}
 }
@@ -349,18 +401,8 @@ var procReSeq Proc = func(args []Object) Object {
 var procReFind Proc = func(args []Object) Object {
 	re := EnsureRegex(args, 0)
 	s := EnsureString(args, 1)
-	match := re.R.FindStringSubmatch(s.S)
-	if len(match) == 0 {
-		return NIL
-	}
-	if len(match) == 1 {
-		return String{S: match[0]}
-	}
-	v := EmptyVector
-	for _, str := range match {
-		v = v.Conjoin(String{S: str})
-	}
-	return v
+	match := re.R.FindStringSubmatchIndex(s.S)
+	return reGroups(s.S, match)
 }
 
 var procRand Proc = func(args []Object) Object {
@@ -369,7 +411,7 @@ var procRand Proc = func(args []Object) Object {
 }
 
 var procIsSpecialSymbol Proc = func(args []Object) Object {
-	return Bool{B: IsSpecialSymbol(args[0])}
+	return Boolean{B: IsSpecialSymbol(args[0])}
 }
 
 var procSubs Proc = func(args []Object) Object {
@@ -476,7 +518,7 @@ var procEmpty = func(args []Object) Object {
 
 var procIsBound = func(args []Object) Object {
 	vr := EnsureVar(args, 0)
-	return Bool{B: vr.Value != nil}
+	return Boolean{B: vr.Value != nil}
 }
 
 func toNative(obj Object) interface{} {
@@ -554,7 +596,7 @@ var procSeq Proc = func(args []Object) Object {
 var procIsInstance Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	t := EnsureType(args, 0)
-	return Bool{B: IsInstance(t, args[1])}
+	return Boolean{B: IsInstance(t, args[1])}
 }
 
 var procAssoc Proc = func(args []Object) Object {
@@ -562,7 +604,7 @@ var procAssoc Proc = func(args []Object) Object {
 }
 
 var procEquals Proc = func(args []Object) Object {
-	return Bool{B: args[0].Equals(args[1])}
+	return Boolean{B: args[0].Equals(args[1])}
 }
 
 var procCount Proc = func(args []Object) Object {
@@ -707,7 +749,7 @@ var procForce Proc = func(args []Object) Object {
 }
 
 var procIdentical Proc = func(args []Object) Object {
-	return Bool{B: args[0] == args[1]}
+	return Boolean{B: args[0] == args[1]}
 }
 
 var procCompare Proc = func(args []Object) Object {
@@ -764,7 +806,7 @@ var procChar Proc = func(args []Object) Object {
 }
 
 var procBoolean Proc = func(args []Object) Object {
-	return Bool{B: toBool(args[0])}
+	return Boolean{B: toBool(args[0])}
 }
 
 var procNumerator Proc = func(args []Object) Object {
@@ -832,31 +874,31 @@ var procNth Proc = func(args []Object) Object {
 var procLt Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
 }
 
 var procLte Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
 }
 
 var procGt Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
 }
 
 var procGte Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
+	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
 }
 
 var procEq Proc = func(args []Object) Object {
 	a := AssertNumber(args[0], "")
 	b := AssertNumber(args[1], "")
-	return Bool{B: GetOps(a).Combine(GetOps(b)).Eq(a, b)}
+	return MakeBoolean(numbersEq(a, b))
 }
 
 var procMax Proc = func(args []Object) Object {
@@ -910,9 +952,9 @@ var procContains Proc = func(args []Object) Object {
 	case Gettable:
 		ok, _ := c.Get(args[1])
 		if ok {
-			return Bool{B: true}
+			return Boolean{B: true}
 		}
-		return Bool{B: false}
+		return Boolean{B: false}
 	}
 	panic(RT.NewError("contains? not supported on type " + args[0].GetType().ToString(false)))
 }
@@ -1011,7 +1053,7 @@ var procPprint Proc = func(args []Object) Object {
 	return NIL
 }
 
-func printObject(obj Object, w io.Writer) {
+func PrintObject(obj Object, w io.Writer) {
 	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
 	switch obj := obj.(type) {
 	case Printer:
@@ -1026,10 +1068,10 @@ var procPr Proc = func(args []Object) Object {
 	if n > 0 {
 		f := AssertIOWriter(GLOBAL_ENV.stdout.Value, "")
 		for _, arg := range args[:n-1] {
-			printObject(arg, f)
+			PrintObject(arg, f)
 			fmt.Fprint(f, " ")
 		}
-		printObject(args[n-1], f)
+		PrintObject(args[n-1], f)
 	}
 	return NIL
 }
@@ -1345,7 +1387,7 @@ var procShuffle Proc = func(args []Object) Object {
 }
 
 var procIsRealized Proc = func(args []Object) Object {
-	return Bool{B: EnsurePending(args, 0).IsRealized()}
+	return Boolean{B: EnsurePending(args, 0).IsRealized()}
 }
 
 var procDeriveInfo Proc = func(args []Object) Object {
@@ -1362,13 +1404,56 @@ var procHash Proc = func(args []Object) Object {
 	return Int{I: int(args[0].Hash())}
 }
 
+func loadFile(filename string) Object {
+	var reader *Reader
+	f, err := os.Open(filename)
+	PanicOnErr(err)
+	reader = NewReader(bufio.NewReader(f), filename)
+	ProcessReaderFromEval(reader, filename)
+	return NIL
+}
+
 var procLoadFile Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
-	var reader *Reader
-	f, err := os.Open(filename.S)
+	return loadFile(filename.S)
+}
+
+var procLoadLibFromPath Proc = func(args []Object) Object {
+	libname := EnsureSymbol(args, 0).Name()
+	pathname := EnsureString(args, 1).S
+	if d := internalLibs[libname]; d != nil {
+		processData(d)
+		return NIL
+	}
+	cp := GLOBAL_ENV.classPath.Value
+	cpvec := AssertVector(cp, "*classpath* must be a Vector, not a "+cp.GetType().ToString(false))
+	count := cpvec.Count()
+	var f *os.File
+	var err error
+	var canonicalErr error
+	var filename string
+	for i := 0; i < count; i++ {
+		elem := cpvec.at(i)
+		cpelem := AssertString(elem, "*classpath* must contain only Strings, not a "+elem.GetType().ToString(false)+" (at element "+strconv.Itoa(i)+")")
+		s := cpelem.S
+		if s == "" {
+			filename = pathname
+		} else {
+			filename = filepath.Join(s, filepath.Join(strings.Split(libname, ".")...)) + ".joke" // could cache inner join....
+		}
+		f, err = os.Open(filename)
+		if err == nil {
+			canonicalErr = nil
+			break
+		}
+		if s == "" {
+			canonicalErr = err
+		}
+	}
+	PanicOnErr(canonicalErr)
 	PanicOnErr(err)
-	reader = NewReader(bufio.NewReader(f), filename.S)
-	ProcessReader(reader, filename.S, EVAL)
+	reader := NewReader(bufio.NewReader(f), filename)
+	ProcessReaderFromEval(reader, filename)
 	return NIL
 }
 
@@ -1390,24 +1475,56 @@ var procIndexOf Proc = func(args []Object) Object {
 	return Int{I: -1}
 }
 
+func libExternalPath(sym Symbol) (path string, ok bool) {
+	nsSourcesVar, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*ns-sources*"))
+	nsSources := ToSlice(nsSourcesVar.Value.(*Vector).Seq())
+
+	var sourceKey string
+	var sourceMap Map
+	for _, source := range nsSources {
+		sourceKey = source.(*Vector).Nth(0).ToString(false)
+		match, _ := regexp.MatchString(sourceKey, sym.Name())
+		if match {
+			sourceMap = source.(*Vector).Nth(1).(Map)
+			break
+		}
+	}
+	if sourceMap != nil {
+		ok, url := sourceMap.Get(MakeKeyword("url"))
+		if !ok {
+			panic(RT.NewError("Key :url not found in ns-sources for: " + sourceKey))
+		} else {
+			return externalSourceToPath(sym.Name(), url.ToString(false)), true
+		}
+	}
+	return
+}
+
 var procLibPath Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
-	var file string
-	if GLOBAL_ENV.file.Value == nil {
-		var err error
-		file, err = filepath.Abs("user")
-		PanicOnErr(err)
-	} else {
-		file = AssertString(GLOBAL_ENV.file.Value, "").S
+	var path string
+
+	path, ok := libExternalPath(sym)
+
+	if !ok {
+		var file string
+		if GLOBAL_ENV.file.Value == nil {
+			var err error
+			file, err = filepath.Abs("user")
+			PanicOnErr(err)
+		} else {
+			file = AssertString(GLOBAL_ENV.file.Value, "").S
+		}
+		ns := GLOBAL_ENV.CurrentNamespace().Name
+
+		parts := strings.Split(ns.Name(), ".")
+		for _ = range parts {
+			file, _ = filepath.Split(file)
+			file = file[:len(file)-1]
+		}
+		path = filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...) + ".joke"
 	}
-	ns := GLOBAL_ENV.CurrentNamespace().Name
-	parts := strings.Split(ns.Name(), ".")
-	for _ = range parts {
-		file, _ = filepath.Split(file)
-		file = file[:len(file)-1]
-	}
-	path := filepath.Join(append([]string{file}, strings.Split(sym.Name(), ".")...)...)
-	return String{S: path + ".joke"}
+	return String{S: path}
 }
 
 var procInternFakeVar Proc = func(args []Object) Object {
@@ -1421,11 +1538,11 @@ var procInternFakeVar Proc = func(args []Object) Object {
 
 var procParse Proc = func(args []Object) Object {
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
-	lm.Value = Bool{B: true}
+	lm.Value = Boolean{B: true}
 	LINTER_MODE = true
 	defer func() {
 		LINTER_MODE = false
-		lm.Value = Bool{B: false}
+		lm.Value = Boolean{B: false}
 	}()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	res := Parse(args[0], parseContext)
@@ -1525,11 +1642,36 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	}
 }
 
-var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Bool{B: true}).(Map)
+func ProcessReaderFromEval(reader *Reader, filename string) {
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			return
+		}
+		PanicOnErr(err)
+		expr, err := TryParse(obj, parseContext)
+		PanicOnErr(err)
+		obj, err = TryEval(expr)
+		PanicOnErr(err)
+	}
+}
+
+var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Boolean{B: true}).(Map)
 
 func intern(name string, proc Proc) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
 	vr.Value = proc
+	vr.isPrivate = true
 	vr.meta = privateMeta
 }
 
@@ -1548,8 +1690,10 @@ func processData(data []byte) {
 
 func ProcessCoreData() {
 	processData(coreData)
-	processData(timeData)
-	processData(mathData)
+}
+
+func ProcessReplData() {
+	processData(replData)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -1713,13 +1857,24 @@ func removeJokerNamespaces() {
 	}
 }
 
+func markJokerNamespacesAsUsed() {
+	for k, ns := range GLOBAL_ENV.Namespaces {
+		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
+			ns.isUsed = true
+		}
+	}
+}
+
 func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
+		markJokerNamespacesAsUsed()
 		return
 	}
 	processData(linter_allData)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
+		markJokerNamespacesAsUsed()
+		processData(linter_jokerData)
 		return
 	}
 	processData(linter_cljxData)
@@ -1769,7 +1924,7 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Bool{B: true},
+	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Boolean{B: true},
 		MakeMeta(nil, "When set to logical false, assert is a noop. Defaults to true.", "1.0"))
 
 	intern("list__", procList)
@@ -1913,6 +2068,7 @@ func init() {
 	intern("bound?__", procIsBound)
 	intern("format__", procFormat)
 	intern("load-file__", procLoadFile)
+	intern("load-lib-from-path__", procLoadLibFromPath)
 	intern("reduce-kv__", procReduceKv)
 	intern("slurp__", procSlurp)
 	intern("spit__", procSpit)

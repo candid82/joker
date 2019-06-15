@@ -1,0 +1,1 @@
+tests/linter/extend-type-cljs/input.cljs:8:4: Exception: Parameter declaration missing

@@ -14,7 +14,6 @@ tests/linter/types-1/input.clj:13:10: Parse warning: arg[0] of core/ex-info must
 tests/linter/types-1/input.clj:13:13: Parse warning: arg[1] of core/ex-info must have type Map, got String
 tests/linter/types-1/input.clj:14:8: Parse warning: arg[0] of core/first must have type Seqable, got Int
 tests/linter/types-1/input.clj:15:8: Parse warning: arg[0] of core/assoc must have type Associative, got Int
-tests/linter/types-1/input.clj:16:12: Parse warning: arg[0] of core/with-meta must have type Meta, got String
 tests/linter/types-1/input.clj:17:15: Parse warning: arg[1] of core/with-meta must have type Map, got Int
 tests/linter/types-1/input.clj:18:7: Parse warning: arg[0] of core/last must have type Seqable, got Int
 tests/linter/types-1/input.clj:19:10: Parse warning: arg[0] of core/butlast must have type Seqable, got Int
@@ -163,6 +162,7 @@ tests/linter/types-1/input.clj:109:8: Parse warning: arg[0] of core/range must h
 tests/linter/types-1/input.clj:109:12: Parse warning: arg[1] of core/range must have type Number, got String
 tests/linter/types-1/input.clj:109:16: Parse warning: arg[2] of core/range must have type Number, got String
 tests/linter/types-1/input.clj:110:13: Parse warning: arg[0] of core/merge-with must have type Callable, got Int
+tests/linter/types-1/input.clj:110:15: Parse warning: arg[1] of core/merge-with must have type Map, got Int
 tests/linter/types-1/input.clj:111:9: Parse warning: arg[0] of core/zipmap must have type Seqable, got Int
 tests/linter/types-1/input.clj:111:11: Parse warning: arg[1] of core/zipmap must have type Seqable, got Int
 tests/linter/types-1/input.clj:112:7: Parse warning: arg[0] of core/sort must have type Comparator, got Int
@@ -190,8 +190,8 @@ tests/linter/types-1/input.clj:122:12: Parse warning: arg[0] of core/numerator m
 tests/linter/types-1/input.clj:123:14: Parse warning: arg[0] of core/denominator must have type Ratio, got String
 tests/linter/types-1/input.clj:124:14: Parse warning: arg[0] of core/read-string must have type String, got Int
 tests/linter/types-1/input.clj:125:9: Parse warning: arg[0] of core/subvec must have type Vector, got Int
-tests/linter/types-1/input.clj:125:11: Parse warning: arg[1] of core/subvec must have type Int, got String
-tests/linter/types-1/input.clj:125:15: Parse warning: arg[2] of core/subvec must have type Int, got String
+tests/linter/types-1/input.clj:125:11: Parse warning: arg[1] of core/subvec must have type Number, got String
+tests/linter/types-1/input.clj:125:15: Parse warning: arg[2] of core/subvec must have type Number, got String
 tests/linter/types-1/input.clj:126:14: Parse warning: arg[0] of core/load-string must have type String, got Int
 tests/linter/types-1/input.clj:127:6: Parse warning: arg[0] of core/set must have type Seqable, got Int
 tests/linter/types-1/input.clj:128:10: Parse warning: arg[0] of core/find-ns must have type Symbol, got Int
@@ -223,8 +223,8 @@ tests/linter/types-1/input.clj:146:11: Parse warning: arg[0] of core/rand-int mu
 tests/linter/types-1/input.clj:147:11: Parse warning: arg[0] of core/tree-seq must have type Callable, got Int
 tests/linter/types-1/input.clj:147:13: Parse warning: arg[1] of core/tree-seq must have type Callable, got Int
 tests/linter/types-1/input.clj:148:7: Parse warning: arg[0] of core/subs must have type String, got Int
-tests/linter/types-1/input.clj:148:9: Parse warning: arg[1] of core/subs must have type Int, got String
-tests/linter/types-1/input.clj:148:13: Parse warning: arg[2] of core/subs must have type Int, got String
+tests/linter/types-1/input.clj:148:9: Parse warning: arg[1] of core/subs must have type Number, got String
+tests/linter/types-1/input.clj:148:13: Parse warning: arg[2] of core/subs must have type Number, got String
 tests/linter/types-1/input.clj:149:10: Parse warning: arg[0] of core/max-key must have type Callable, got Int
 tests/linter/types-1/input.clj:150:10: Parse warning: arg[0] of core/min-key must have type Callable, got Int
 tests/linter/types-1/input.clj:151:11: Parse warning: arg[0] of core/distinct must have type Seqable, got Int

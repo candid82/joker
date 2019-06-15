@@ -1,5 +1,5 @@
 tests/linter/defrecord/input.clj:13:22: Parse error: Unable to resolve symbol: c
 tests/linter/defrecord/input.clj:19:24: Parse error: Unable to resolve symbol: d
 tests/linter/defrecord/input.clj:22:3: Parse error: Unable to resolve symbol: TestProtocol2
-tests/linter/defrecord/input.clj:30:1: Parse warning: Wrong number of args (2) passed to user/map->TestRecord
-tests/linter/defrecord/input.clj:31:1: Parse warning: Wrong number of args (1) passed to user/->TestRecord
+tests/linter/defrecord/input.clj:30:1: Parse warning: Wrong number of args (2) passed to test.test/map->TestRecord
+tests/linter/defrecord/input.clj:31:1: Parse warning: Wrong number of args (1) passed to test.test/->TestRecord

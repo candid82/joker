@@ -1,0 +1,246 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.strconv</h1>
+    <span class="var-added">v1.0</span>
+    <p class="var-docstr">Implements conversions to and from string representations of basic data types.</p>
+    <h2>Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#atoi">atoi</a>
+</li>
+<li>
+  <a href="#can-backquote?">can-backquote?</a>
+</li>
+<li>
+  <a href="#format-bool">format-bool</a>
+</li>
+<li>
+  <a href="#format-double">format-double</a>
+</li>
+<li>
+  <a href="#format-int">format-int</a>
+</li>
+<li>
+  <a href="#graphic?">graphic?</a>
+</li>
+<li>
+  <a href="#itoa">itoa</a>
+</li>
+<li>
+  <a href="#parse-bool">parse-bool</a>
+</li>
+<li>
+  <a href="#parse-double">parse-double</a>
+</li>
+<li>
+  <a href="#parse-int">parse-int</a>
+</li>
+<li>
+  <a href="#printable?">printable?</a>
+</li>
+<li>
+  <a href="#quote">quote</a>
+</li>
+<li>
+  <a href="#quote-char">quote-char</a>
+</li>
+<li>
+  <a href="#quote-char-to-ascii">quote-char-to-ascii</a>
+</li>
+<li>
+  <a href="#quote-char-to-graphic">quote-char-to-graphic</a>
+</li>
+<li>
+  <a href="#quote-to-ascii">quote-to-ascii</a>
+</li>
+<li>
+  <a href="#quote-to-graphic">quote-to-graphic</a>
+</li>
+<li>
+  <a href="#unquote">unquote</a>
+</li>
+
+    </ul>
+    <ul>
+      <li>
+  <h3 id="atoi">atoi</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(atoi s)</code></div>
+</pre>
+  <p class="var-docstr">Equivalent to (parse-int s 10 0).</p>
+  
+</li>
+<li>
+  <h3 id="can-backquote?">can-backquote?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(can-backquote? s)</code></div>
+</pre>
+  <p class="var-docstr">Reports whether the string s can be represented unchanged as a single-line backquoted string without control characters other than tab.</p>
+  
+</li>
+<li>
+  <h3 id="format-bool">format-bool</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(format-bool b)</code></div>
+</pre>
+  <p class="var-docstr">Returns "true" or "false" according to the value of b.</p>
+  
+</li>
+<li>
+  <h3 id="format-double">format-double</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(format-double f fmt prec bitSize)</code></div>
+</pre>
+  <p class="var-docstr">Converts the floating-point number f to a string, according to the format fmt and precision prec. It rounds the result assuming that the original was obtained from a floating-point value of bitSize bits (32 for float32, 64 for float64).<br>
+  The format fmt is one of 'b' (-ddddp±ddd, a binary exponent), 'e' (-d.dddde±dd, a decimal exponent), 'E' (-d.ddddE±dd, a decimal exponent), 'f' (-ddd.dddd, no exponent), 'g' ('e' for large exponents, 'f' otherwise), or 'G' ('E' for large exponents, 'f' otherwise).<br>
+  The precision prec controls the number of digits (excluding the exponent) printed by the 'e', 'E', 'f', 'g', and 'G' formats. For 'e', 'E', and 'f' it is the number of digits after the decimal point. For 'g' and 'G' it is the maximum number of significant digits (trailing zeros are removed). The special precision -1 uses the smallest number of digits necessary such that ParseFloat will return f exactly.</p>
+  
+</li>
+<li>
+  <h3 id="format-int">format-int</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(format-int i base)</code></div>
+</pre>
+  <p class="var-docstr">Returns the string representation of i in the given base, for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z' for digit values >= 10.</p>
+  
+</li>
+<li>
+  <h3 id="graphic?">graphic?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(graphic? c)</code></div>
+</pre>
+  <p class="var-docstr">Reports whether the char is defined as a Graphic by Unicode. Such characters include letters, marks, numbers, punctuation, symbols, and spaces, from categories L, M, N, P, S, and Zs.</p>
+  
+</li>
+<li>
+  <h3 id="itoa">itoa</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(itoa i)</code></div>
+</pre>
+  <p class="var-docstr">Equivalent to (format-int i 10).</p>
+  
+</li>
+<li>
+  <h3 id="parse-bool">parse-bool</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(parse-bool s)</code></div>
+</pre>
+  <p class="var-docstr">Returns the boolean value represented by the string. It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False. Any other value returns an error.</p>
+  
+</li>
+<li>
+  <h3 id="parse-double">parse-double</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(parse-double s)</code></div>
+</pre>
+  <p class="var-docstr">Converts the string s to a floating-point number.</p>
+  
+</li>
+<li>
+  <h3 id="parse-int">parse-int</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(parse-int s base bitSize)</code></div>
+</pre>
+  <p class="var-docstr">Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.<br>
+  If base == 0, the base is implied by the string's prefix: base 16 for "0x", base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.<br>
+  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. For a bitSize below 0 or above 64 an error is returned.</p>
+  
+</li>
+<li>
+  <h3 id="printable?">printable?</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(printable? c)</code></div>
+</pre>
+  <p class="var-docstr">Reports whether the char is defined as printable by Joker: letters, numbers, punctuation, symbols and ASCII space.</p>
+  
+</li>
+<li>
+  <h3 id="quote">quote</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote s)</code></div>
+</pre>
+  <p class="var-docstr">Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for control characters and non-printable characters as defined by printable?.</p>
+  
+</li>
+<li>
+  <h3 id="quote-char">quote-char</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote-char c)</code></div>
+</pre>
+  <p class="var-docstr">Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for control characters and non-printable characters as defined by printable?.</p>
+  
+</li>
+<li>
+  <h3 id="quote-char-to-ascii">quote-char-to-ascii</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote-char-to-ascii c)</code></div>
+</pre>
+  <p class="var-docstr">Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for non-ASCII characters and non-printable characters as defined by printable?.</p>
+  
+</li>
+<li>
+  <h3 id="quote-char-to-graphic">quote-char-to-graphic</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote-char-to-graphic c)</code></div>
+</pre>
+  <p class="var-docstr">Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for non-ASCII characters and non-printable characters as defined by graphic?.</p>
+  
+</li>
+<li>
+  <h3 id="quote-to-ascii">quote-to-ascii</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote-to-ascii s)</code></div>
+</pre>
+  <p class="var-docstr">Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for non-ASCII characters and non-printable characters as defined by printable?.</p>
+  
+</li>
+<li>
+  <h3 id="quote-to-graphic">quote-to-graphic</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(quote-to-graphic s)</code></div>
+</pre>
+  <p class="var-docstr">Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)<br>
+  for non-ASCII characters and non-printable characters as defined by graphic?.</p>
+  
+</li>
+<li>
+  <h3 id="unquote">unquote</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(unquote s)</code></div>
+</pre>
+  <p class="var-docstr">Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.<br>
+  (If s is single-quoted, it would be a Go character literal; Unquote returns the corresponding one-character string.)</p>
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+</html>

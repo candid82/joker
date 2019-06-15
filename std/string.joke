@@ -3,29 +3,29 @@
     :doc "Implements simple functions to manipulate strings."}
   string)
 
-(defn ^Bool ends-with?
+(defn ^Boolean ends-with?
   "True if s ends with substr."
   {:added "1.0"
   :go "strings.HasSuffix(s, substr)"}
-  [^String s ^String substr])
+  [^String s ^Stringable substr])
 
-(defn ^Bool starts-with?
+(defn ^Boolean starts-with?
   "True if s starts with substr."
   {:added "1.0"
   :go "strings.HasPrefix(s, substr)"}
-  [^String s ^String substr])
+  [^String s ^Stringable substr])
 
 (defn ^String pad-right
   "Returns s padded with pad at the end to length n."
   {:added "1.0"
   :go "padRight(s, pad, n)"}
-  [^String s ^String pad ^Int n])
+  [^String s ^Stringable pad ^Int n])
 
 (defn ^String pad-left
   "Returns s padded with pad at the beginning to length n."
   {:added "1.0"
   :go "padLeft(s, pad, n)"}
-  [^String s ^String pad ^Int n])
+  [^String s ^Stringable pad ^Int n])
 
 (defn split
   "Splits string on a regular expression. Returns vector of the splits."
@@ -47,7 +47,7 @@
   :go {1 "join(\"\", coll)"
        2 "join(separator, coll)"}}
   ([^Seqable coll])
-  ([^String separator ^Seqable coll]))
+  ([^Stringable separator ^Seqable coll]))
 
 (defn ^String replace
   "Replaces all instances of match (String or Regex) with string repl in string s.
@@ -58,7 +58,7 @@
   "
   {:added "1.0"
   :go "replace(s, match, repl)"}
-  [^String s ^Object match ^String repl])
+  [^String s ^Object match ^Stringable repl])
 
 (defn ^String replace-first
   "Replaces the first instance of match (String or Regex) with string repl in string s.
@@ -69,7 +69,7 @@
   "
   {:added "1.0"
   :go "replaceFirst(s, match, repl)"}
-  [^String s ^Object match ^String repl])
+  [^String s ^Object match ^Stringable repl])
 
 (defn ^String trim
   "Removes whitespace from both ends of string."
@@ -89,13 +89,25 @@
   :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
   [^String s])
 
+(defn ^String triml
+  "Removes whitespace from the left side of string."
+  {:added "1.0"
+   :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
+  [^String s])
+
 (defn ^String trim-right
   "Removes whitespace from the right side of string."
   {:added "1.0"
   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
   [^String s])
 
-(defn ^Bool blank?
+(defn ^String trimr
+  "Removes whitespace from the right side of string."
+  {:added "1.0"
+   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
+  [^String s])
+
+(defn ^Boolean blank?
   "True if s is nil, empty, or contains only whitespace."
   {:added "1.0"
   :go "isBlank(s)"}
@@ -106,7 +118,7 @@
   characters to lower-case."
   {:added "1.0"
   :go "capitalize(s)"}
-  [^String s])
+  [^Stringable s])
 
 (defn ^String escape
   "Return a new string, using cmap to escape each character ch
@@ -118,11 +130,11 @@
   :go "escape(s, cmap)"}
   [^String s ^Callable cmap])
 
-(defn ^Bool includes?
+(defn ^Boolean includes?
   "True if s includes substr."
   {:added "1.0"
   :go "strings.Contains(s, substr)"}
-  [^String s ^String substr])
+  [^String s ^Stringable substr])
 
 (defn index-of
   "Return index of value (string or char) in s, optionally searching
@@ -146,13 +158,13 @@
   "Converts string to all lower-case."
   {:added "1.0"
   :go "strings.ToLower(s)"}
-  [^String s])
+  [^Stringable s])
 
 (defn ^String upper-case
   "Converts string to all upper-case."
   {:added "1.0"
   :go "strings.ToUpper(s)"}
-  [^String s])
+  [^Stringable s])
 
 (defn ^String reverse
   "Returns s with its characters reversed."

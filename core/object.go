@@ -1,6 +1,6 @@
 //go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Bool Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Bool Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
 
@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -96,7 +97,7 @@ type (
 		InfoHolder
 		r big.Rat
 	}
-	Bool struct {
+	Boolean struct {
 		InfoHolder
 		B bool
 	}
@@ -146,8 +147,9 @@ type (
 	Fn   struct {
 		InfoHolder
 		MetaHolder
-		fnExpr *FnExpr
-		env    *LocalEnv
+		isMacro bool
+		fnExpr  *FnExpr
+		env     *LocalEnv
 	}
 	ExInfo struct {
 		ArrayMap
@@ -260,7 +262,7 @@ type (
 		Atom           *Type
 		BigFloat       *Type
 		BigInt         *Type
-		Bool           *Type
+		Boolean        *Type
 		Time           *Type
 		Buffer         *Type
 		Char           *Type
@@ -352,7 +354,7 @@ func init() {
 		Atom:           regRefType("Atom", (*Atom)(nil)),
 		BigFloat:       regRefType("BigFloat", (*BigFloat)(nil)),
 		BigInt:         regRefType("BigInt", (*BigInt)(nil)),
-		Bool:           regType("Bool", (*Bool)(nil)),
+		Boolean:        regType("Boolean", (*Boolean)(nil)),
 		Time:           regType("Time", (*Time)(nil)),
 		Buffer:         regRefType("Buffer", (*Buffer)(nil)),
 		Char:           regType("Char", (*Char)(nil)),
@@ -435,6 +437,18 @@ func MakeSymbol(nsname string) Symbol {
 	}
 }
 
+type BySymbolName []Symbol
+
+func (s BySymbolName) Len() int {
+	return len(s)
+}
+func (s BySymbolName) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s BySymbolName) Less(i, j int) bool {
+	return s[i].ToString(false) < s[j].ToString(false)
+}
+
 func MakeKeyword(nsname string) Keyword {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -459,11 +473,47 @@ func PanicArity(n int) {
 	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
 }
 
+func rangeString(min, max int) string {
+	if min == max {
+		return strconv.Itoa(min)
+	}
+	if min+1 == max {
+		return strconv.Itoa(min) + " or " + strconv.Itoa(max)
+	}
+	if min+2 == max {
+		return strconv.Itoa(min) + ", " + strconv.Itoa(min+1) + ", or " + strconv.Itoa(max)
+	}
+	if max >= 999 {
+		return "at least " + strconv.Itoa(min)
+	}
+	return "between " + strconv.Itoa(min) + " and " + strconv.Itoa(max) + ", inclusive"
+}
+
+func PanicArityMinMax(n, min, max int) {
+	name := RT.currentExpr.(Traceable).Name()
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s; expects %s", n, name, rangeString(min, max))))
+}
+
 func CheckArity(args []Object, min int, max int) {
 	n := len(args)
 	if n < min || n > max {
-		PanicArity(n)
+		PanicArityMinMax(n, min, max)
 	}
+}
+
+func getMap(k Object, args []Object) Object {
+	CheckArity(args, 1, 2)
+	switch m := args[0].(type) {
+	case Map:
+		ok, v := m.Get(k)
+		if ok {
+			return v
+		}
+	}
+	if len(args) == 2 {
+		return args[1]
+	}
+	return NIL
 }
 
 func (s SortableSlice) Len() int {
@@ -501,6 +551,15 @@ func hashGobEncoder(e gob.GobEncoder) uint32 {
 	PanicOnErr(err)
 	h.Write(b)
 	return h.Sum32()
+}
+
+func equalsNumbers(x Number, y interface{}) bool {
+	switch y := y.(type) {
+	case Number:
+		return category(x) == category(y) && numbersEq(x, y)
+	default:
+		return false
+	}
 }
 
 func (a *Atom) ToString(escape bool) string {
@@ -699,7 +758,11 @@ func (fn *Fn) Call(args []Object) Object {
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
-		PanicArity(len(args))
+		c := len(args)
+		if fn.isMacro {
+			c -= 2
+		}
+		PanicArity(c)
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {
@@ -717,11 +780,11 @@ func (fn *Fn) Call(args []Object) Object {
 
 func compare(c Callable, a, b Object) int {
 	switch r := c.Call([]Object{a, b}).(type) {
-	case Bool:
+	case Boolean:
 		if r.B {
 			return -1
 		}
-		if AssertBool(c.Call([]Object{b, a}), "").B {
+		if AssertBoolean(c.Call([]Object{b, a}), "").B {
 			return 1
 		}
 		return 0
@@ -930,22 +993,7 @@ func (rat *Ratio) ToString(escape bool) string {
 }
 
 func (rat *Ratio) Equals(other interface{}) bool {
-	if rat == other {
-		return true
-	}
-	switch r := other.(type) {
-	case *Ratio:
-		return rat.r.Cmp(&r.r) == 0
-	case *BigInt:
-		var otherRat big.Rat
-		otherRat.SetInt(&r.b)
-		return rat.r.Cmp(&otherRat) == 0
-	case Int:
-		var otherRat big.Rat
-		otherRat.SetInt64(int64(r.I))
-		return rat.r.Cmp(&otherRat) == 0
-	}
-	return false
+	return equalsNumbers(rat, other)
 }
 
 func (rat *Ratio) GetType() *Type {
@@ -965,17 +1013,7 @@ func (bi *BigInt) ToString(escape bool) string {
 }
 
 func (bi *BigInt) Equals(other interface{}) bool {
-	if bi == other {
-		return true
-	}
-	switch b := other.(type) {
-	case *BigInt:
-		return bi.b.Cmp(&b.b) == 0
-	case Int:
-		bi2 := big.NewInt(int64(b.I))
-		return bi.b.Cmp(bi2) == 0
-	}
-	return false
+	return equalsNumbers(bi, other)
 }
 
 func (bi *BigInt) GetType() *Type {
@@ -995,17 +1033,7 @@ func (bf *BigFloat) ToString(escape bool) string {
 }
 
 func (bf *BigFloat) Equals(other interface{}) bool {
-	if bf == other {
-		return true
-	}
-	switch b := other.(type) {
-	case *BigFloat:
-		return bf.b.Cmp(&b.b) == 0
-	case Double:
-		bf2 := big.NewFloat(b.D)
-		return bf.b.Cmp(bf2) == 0
-	}
-	return false
+	return equalsNumbers(bf, other)
 }
 
 func (bf *BigFloat) GetType() *Type {
@@ -1061,8 +1089,8 @@ func (c Char) Compare(other Object) int {
 	return 0
 }
 
-func MakeBool(b bool) Bool {
-	return Bool{B: b}
+func MakeBoolean(b bool) Boolean {
+	return Boolean{B: b}
 }
 
 func MakeTime(t time.Time) Time {
@@ -1078,12 +1106,7 @@ func (d Double) ToString(escape bool) string {
 }
 
 func (d Double) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case Double:
-		return d.D == other.D
-	default:
-		return false
-	}
+	return equalsNumbers(d, other)
 }
 
 func (d Double) GetType() *Type {
@@ -1115,12 +1138,7 @@ func MakeInt(i int) Int {
 }
 
 func (i Int) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case Int:
-		return i.I == other.I
-	default:
-		return false
-	}
+	return equalsNumbers(i, other)
 }
 
 func (i Int) GetType() *Type {
@@ -1143,28 +1161,28 @@ func (i Int) Compare(other Object) int {
 	return CompareNumbers(i, AssertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
 }
 
-func (b Bool) ToString(escape bool) string {
+func (b Boolean) ToString(escape bool) string {
 	return fmt.Sprintf("%t", b.B)
 }
 
-func (b Bool) Equals(other interface{}) bool {
+func (b Boolean) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case Bool:
+	case Boolean:
 		return b.B == other.B
 	default:
 		return false
 	}
 }
 
-func (b Bool) GetType() *Type {
-	return TYPE.Bool
+func (b Boolean) GetType() *Type {
+	return TYPE.Boolean
 }
 
-func (b Bool) Native() interface{} {
+func (b Boolean) Native() interface{} {
 	return b.B
 }
 
-func (b Bool) Hash() uint32 {
+func (b Boolean) Hash() uint32 {
 	h := getHash()
 	var bs = make([]byte, 1)
 	if b.B {
@@ -1176,8 +1194,8 @@ func (b Bool) Hash() uint32 {
 	return h.Sum32()
 }
 
-func (b Bool) Compare(other Object) int {
-	b2 := AssertBool(other, "Cannot compare Bool and "+other.GetType().ToString(false))
+func (b Boolean) Compare(other Object) int {
+	b2 := AssertBoolean(other, "Cannot compare Boolean and "+other.GetType().ToString(false))
 	if b.B == b2.B {
 		return 0
 	}
@@ -1264,18 +1282,7 @@ func (k Keyword) Compare(other Object) int {
 }
 
 func (k Keyword) Call(args []Object) Object {
-	CheckArity(args, 1, 2)
-	switch m := args[0].(type) {
-	case Map:
-		ok, v := m.Get(k)
-		if ok {
-			return v
-		}
-	}
-	if len(args) == 2 {
-		return args[1]
-	}
-	return NIL
+	return getMap(k, args)
 }
 
 func (rx Regex) ToString(escape bool) string {
@@ -1346,6 +1353,10 @@ func (s Symbol) Compare(other Object) int {
 	return strings.Compare(s.ToString(false), s2.ToString(false))
 }
 
+func (s Symbol) Call(args []Object) Object {
+	return getMap(s, args)
+}
+
 func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.S)
@@ -1355,6 +1366,14 @@ func (s String) ToString(escape bool) string {
 
 func MakeString(s string) String {
 	return String{S: s}
+}
+
+func MakeStringVector(ss []string) *Vector {
+	res := EmptyVector()
+	for _, s := range ss {
+		res = res.Conjoin(MakeString(s))
+	}
+	return res
 }
 
 func (s String) Equals(other interface{}) bool {
@@ -1481,7 +1500,7 @@ func IsSpecialSymbol(obj Object) bool {
 	}
 }
 
-func MakeMeta(arglists Seq, docstring string, added string) Map {
+func MakeMeta(arglists Seq, docstring string, added string) *ArrayMap {
 	res := EmptyArrayMap()
 	if arglists != nil {
 		res.Add(KEYWORDS.arglist, arglists)

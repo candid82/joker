@@ -13,6 +13,9 @@
   <a href="#add">add</a>
 </li>
 <li>
+  <a href="#ansi-c">ansi-c</a>
+</li>
+<li>
   <a href="#format">format</a>
 </li>
 <li>
@@ -23,6 +26,9 @@
 </li>
 <li>
   <a href="#hours">hours</a>
+</li>
+<li>
+  <a href="#kitchen">kitchen</a>
 </li>
 <li>
   <a href="#microsecond">microsecond</a>
@@ -46,7 +52,31 @@
   <a href="#parse-duration">parse-duration</a>
 </li>
 <li>
+  <a href="#rfc1123">rfc1123</a>
+</li>
+<li>
+  <a href="#rfc1123-z">rfc1123-z</a>
+</li>
+<li>
+  <a href="#rfc3339">rfc3339</a>
+</li>
+<li>
+  <a href="#rfc3339-nano">rfc3339-nano</a>
+</li>
+<li>
+  <a href="#rfc822">rfc822</a>
+</li>
+<li>
+  <a href="#rfc822-z">rfc822-z</a>
+</li>
+<li>
+  <a href="#rfc850">rfc850</a>
+</li>
+<li>
   <a href="#round">round</a>
+</li>
+<li>
+  <a href="#ruby-date">ruby-date</a>
 </li>
 <li>
   <a href="#second">second</a>
@@ -61,6 +91,18 @@
   <a href="#sleep">sleep</a>
 </li>
 <li>
+  <a href="#stamp">stamp</a>
+</li>
+<li>
+  <a href="#stamp-micro">stamp-micro</a>
+</li>
+<li>
+  <a href="#stamp-milli">stamp-milli</a>
+</li>
+<li>
+  <a href="#stamp-nano">stamp-nano</a>
+</li>
+<li>
   <a href="#string">string</a>
 </li>
 <li>
@@ -71,6 +113,9 @@
 </li>
 <li>
   <a href="#unix">unix</a>
+</li>
+<li>
+  <a href="#unix-date">unix-date</a>
 </li>
 <li>
   <a href="#until">until</a>
@@ -88,12 +133,24 @@
   
 </li>
 <li>
+  <h3 id="ansi-c">ansi-c</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan _2 15:04:05 2006</p>
+  
+</li>
+<li>
   <h3 id="format">format</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format t layout)</code></div>
 </pre>
-  <p class="var-docstr">Returns a textual representation of the time value formatted according to layout,<br>  which defines the format by showing how the reference time, defined to be<br>  Mon Jan 2 15:04:05 -0700 MST 2006<br>  would be displayed if it were the value; it serves as an example of the desired output.<br>  The same display rules will then be applied to the time value..</p>
+  <p class="var-docstr">Returns a textual representation of the time value formatted according to layout,<br>
+  which defines the format by showing how the reference time, defined to be<br>
+  Mon Jan 2 15:04:05 -0700 MST 2006<br>
+  would be displayed if it were the value; it serves as an example of the desired output.<br>
+  The same display rules will then be applied to the time value..</p>
   
 </li>
 <li>
@@ -102,7 +159,8 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(from-unix sec nsec)</code></div>
 </pre>
-  <p class="var-docstr">Returns the local Time corresponding to the given Unix time, sec seconds and<br>  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].</p>
+  <p class="var-docstr">Returns the local Time corresponding to the given Unix time, sec seconds and<br>
+  nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].</p>
   
 </li>
 <li>
@@ -111,7 +169,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 hour</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L28">source</a>
+  
 </li>
 <li>
   <h3 id="hours">hours</h3>
@@ -123,12 +181,20 @@
   
 </li>
 <li>
+  <h3 id="kitchen">kitchen</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">3:04PM</p>
+  
+</li>
+<li>
   <h3 id="microsecond">microsecond</h3>
   <span class="var-type Int">Int</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 microsecond</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L8">source</a>
+  
 </li>
 <li>
   <h3 id="millisecond">millisecond</h3>
@@ -136,7 +202,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 millisecond</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L13">source</a>
+  
 </li>
 <li>
   <h3 id="minute">minute</h3>
@@ -144,7 +210,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 minute</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L23">source</a>
+  
 </li>
 <li>
   <h3 id="minutes">minutes</h3>
@@ -161,7 +227,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 nanosecond</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3">source</a>
+  
 </li>
 <li>
   <h3 id="now">now</h3>
@@ -178,7 +244,65 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-duration s)</code></div>
 </pre>
-  <p class="var-docstr">Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,<br>  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are<br>  ns, us (or µs), ms, s, m, h.</p>
+  <p class="var-docstr">Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,<br>
+  each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are<br>
+  ns, us (or µs), ms, s, m, h.</p>
+  
+</li>
+<li>
+  <h3 id="rfc1123">rfc1123</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 MST</p>
+  
+</li>
+<li>
+  <h3 id="rfc1123-z">rfc1123-z</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 -0700</p>
+  
+</li>
+<li>
+  <h3 id="rfc3339">rfc3339</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">2006-01-02T15:04:05Z07:00</p>
+  
+</li>
+<li>
+  <h3 id="rfc3339-nano">rfc3339-nano</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">2006-01-02T15:04:05.999999999Z07:00</p>
+  
+</li>
+<li>
+  <h3 id="rfc822">rfc822</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">02 Jan 06 15:04 MST</p>
+  
+</li>
+<li>
+  <h3 id="rfc822-z">rfc822-z</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">02 Jan 06 15:04 -0700</p>
+  
+</li>
+<li>
+  <h3 id="rfc850">rfc850</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Monday, 02-Jan-06 15:04:05 MST</p>
   
 </li>
 <li>
@@ -187,7 +311,16 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(round d m)</code></div>
 </pre>
-  <p class="var-docstr">Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.<br>  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.</p>
+  <p class="var-docstr">Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.<br>
+  The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.</p>
+  
+</li>
+<li>
+  <h3 id="ruby-date">ruby-date</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan 02 15:04:05 -0700 2006</p>
   
 </li>
 <li>
@@ -196,7 +329,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Number of nanoseconds in 1 second</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L18">source</a>
+  
 </li>
 <li>
   <h3 id="seconds">seconds</h3>
@@ -222,7 +355,40 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sleep d)</code></div>
 </pre>
-  <p class="var-docstr">Pauses the execution thread for at least the duration d (expressed in nanoseconds).<br>  A negative or zero duration causes sleep to return immediately.</p>
+  <p class="var-docstr">Pauses the execution thread for at least the duration d (expressed in nanoseconds).<br>
+  A negative or zero duration causes sleep to return immediately.</p>
+  
+</li>
+<li>
+  <h3 id="stamp">stamp</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05</p>
+  
+</li>
+<li>
+  <h3 id="stamp-micro">stamp-micro</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000000</p>
+  
+</li>
+<li>
+  <h3 id="stamp-milli">stamp-milli</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000</p>
+  
+</li>
+<li>
+  <h3 id="stamp-nano">stamp-nano</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000000000</p>
   
 </li>
 <li>
@@ -259,6 +425,14 @@
   <pre class="var-usage"><div><code>(unix t)</code></div>
 </pre>
   <p class="var-docstr">Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.</p>
+  
+</li>
+<li>
+  <h3 id="unix-date">unix-date</h3>
+  <span class="var-type String">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan _2 15:04:05 MST 2006</p>
   
 </li>
 <li>

@@ -177,8 +177,11 @@ func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
 func (expr *SetMacroExpr) Eval(env *LocalEnv) Object {
 	expr.vr.isMacro = true
 	expr.vr.isUsed = false
+	if fn, ok := expr.vr.Value.(*Fn); ok {
+		fn.isMacro = true
+	}
 	setMacroMeta(expr.vr)
-	return NIL
+	return expr.vr
 }
 
 func (expr *BindingExpr) Eval(env *LocalEnv) Object {
@@ -193,7 +196,7 @@ func (expr *LiteralExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *VectorExpr) Eval(env *LocalEnv) Object {
-	res := EmptyVector
+	res := EmptyVector()
 	for _, e := range expr.v {
 		res = res.Conjoin(Eval(e, env))
 	}
@@ -201,7 +204,7 @@ func (expr *VectorExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *MapExpr) Eval(env *LocalEnv) Object {
-	if len(expr.keys) > HASHMAP_THRESHOLD/2 {
+	if int64(len(expr.keys)) > HASHMAP_THRESHOLD/2 {
 		res := EmptyHashMap
 		for i := range expr.keys {
 			key := Eval(expr.keys[i], env)
@@ -241,13 +244,15 @@ func (expr *DefExpr) Eval(env *LocalEnv) Object {
 	meta.Add(KEYWORDS.line, Int{I: expr.startLine})
 	meta.Add(KEYWORDS.column, Int{I: expr.startColumn})
 	meta.Add(KEYWORDS.file, String{S: *expr.filename})
+	meta.Add(KEYWORDS.ns, expr.vr.ns)
+	meta.Add(KEYWORDS.name, expr.vr.name)
 	expr.vr.meta = meta
 	if expr.meta != nil {
 		expr.vr.meta = expr.vr.meta.Merge(Eval(expr.meta, env).(Map))
 	}
 	// isMacro can be set by set-macro__ during parse stage
 	if expr.vr.isMacro {
-		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Bool{B: true}).(Map)
+		expr.vr.meta = expr.vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
 	}
 	return expr.vr
 }
@@ -367,7 +372,7 @@ func toBool(obj Object) bool {
 	switch obj := obj.(type) {
 	case Nil:
 		return false
-	case Bool:
+	case Boolean:
 		return obj.B
 	default:
 		return true

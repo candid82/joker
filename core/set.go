@@ -32,12 +32,12 @@ func (set *MapSet) Disjoin(key Object) Set {
 func (set *MapSet) Add(obj Object) bool {
 	switch m := set.m.(type) {
 	case *ArrayMap:
-		return m.Add(obj, Bool{B: true})
+		return m.Add(obj, Boolean{B: true})
 	case *HashMap:
 		if m.containsKey(obj) {
 			return false
 		}
-		set.m = set.m.Assoc(obj, Bool{B: true}).(Map)
+		set.m = set.m.Assoc(obj, Boolean{B: true}).(Map)
 		return true
 	default:
 		return false
@@ -45,7 +45,7 @@ func (set *MapSet) Add(obj Object) bool {
 }
 
 func (set *MapSet) Conj(obj Object) Conjable {
-	return &MapSet{m: set.m.Assoc(obj, Bool{B: true}).(Map)}
+	return &MapSet{m: set.m.Assoc(obj, Boolean{B: true}).(Map)}
 }
 
 func EmptySet() *MapSet {

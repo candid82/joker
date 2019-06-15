@@ -9,7 +9,7 @@
      ApplicationShutdownHooks                      ArithmeticException                           ArrayIndexOutOfBoundsException
      ArrayStoreException                           AssertionError                                AssertionStatusDirectives
      AutoCloseable                                 Boolean                                       BootstrapMethodError
-     BigDecimal
+     BigDecimal                                    BigInteger
      Byte                                          CharSequence                                  Character
      CharacterData                                 CharacterData00                               CharacterData01
      CharacterData02                               CharacterData0E                               CharacterDataLatin1
@@ -41,6 +41,7 @@
      StringBuffer                                  StringBuilder                                 StringCoding
      StringIndexOutOfBoundsException               SuppressWarnings                              System
      SystemClassLoaderAction                       Terminator                                    Thread
+     Thread$State                                  Thread$UncaughtExceptionHandler
      ThreadDeath                                   ThreadGroup                                   ThreadLocal
      Throwable                                     TypeNotPresentException                       UNIXProcess
      UnknownError                                  UnsatisfiedLinkError                          UnsupportedClassVersionError
@@ -59,10 +60,21 @@
 (defn deref
   ([^Deref ref]
    (__deref__ ref))
-  ([^Deref ref ^Int timeout-ms timeout-val]))
+  ([^Deref ref ^Number timeout-ms timeout-val]))
 
-(defn spit [f content & options])
-(defn slurp [f & options])
+(def __re-find__ re-find)
+(defn re-find
+  ([m])
+  ([^Regex re ^String s] (__re-find__ re s)))
+
+(defn ^Nil spit [f content & options])
+(defn ^String slurp [f & options])
+(defn read
+  ([])
+  ([stream])
+  ([stream eof-error? eof-value])
+  ([stream eof-error? eof-value recursive?])
+  ([opts stream]))
 
 
 ;; Clojure core functions not supported by Joker
@@ -86,7 +98,6 @@
 (defn char-array ([size-or-seq]) ([size init-val-or-seq]))
 (defn line-seq [rdr])
 (defn conj! ([]) ([coll]) ([coll x]))
-(defn class [x])
 (defn biginteger [x])
 (defn alter [ref fun & args])
 (defn unchecked-add [x y])
@@ -96,7 +107,6 @@
 (defn aset-double ([array idx val]) ([array idx idx2 & idxv]))
 (defn rsubseq ([sc test key]) ([sc start-test start-key end-test end-key]))
 (defn sorted? [coll])
-(defn remove-all-methods [multifn])
 (defn tagged-literal [tag form])
 (defn byte-array ([size-or-seq]) ([size init-val-or-seq]))
 (defn unchecked-dec [x])
@@ -116,7 +126,6 @@
 (defn aset-short ([array idx val]) ([array idx idx2 & idxv]))
 (defn float [x])
 (defn construct-proxy [c & ctor-args])
-(defn methods [multifn])
 (defn agent-error [a])
 (defn agent-errors [a])
 (defn ifn? [x])
@@ -201,7 +210,6 @@
 (defn chunk-rest [s])
 (defn isa? ([child parent]) ([h child parent]))
 (defn float-array ([size-or-seq]) ([size init-val-or-seq]))
-(defn get-method [multifn dispatch-val])
 (defn future-cancelled? [f])
 (defn unchecked-multiply [x y])
 (defn namespace-munge [ns])
@@ -216,7 +224,6 @@
 (defn unchecked-int [x])
 (defn unchecked-negate [x])
 (defn chars [xs])
-(defn prefer-method [multifn dispatch-val-x dispatch-val-y])
 (defn unchecked-short [x])
 (defn class? [x])
 (defn boolean-array ([size-or-seq]) ([size init-val-or-seq]))
@@ -259,7 +266,6 @@
 (defn enumeration-seq [e])
 (defn short-array ([size-or-seq]) ([size init-val-or-seq]))
 (defn transient [coll])
-(defn prefers [multifn])
 (defn compare-and-set! [atom oldval newval])
 (defn transduce ([xform f coll]) ([xform f init coll]))
 (defn unchecked-divide-int [x y])
@@ -271,7 +277,6 @@
 (defn re-groups [m])
 (defn pop! [coll])
 (defn commute [ref fun & args])
-(defn remove-method [multifn dispatch-val])
 (defn get-proxy-class [& bases])
 (defn method-sig [meth])
 (defn sorted-set-by [comparator & keys])
@@ -311,7 +316,6 @@
 (defn dosync [& exprs])
 (defn sync [flags-ignored-for-now & body])
 (defn io! [& body])
-(defn proxy [class-and-interfaces args & fs])
 (defn defstruct [name & keys])
 (defn with-local-vars [name-vals-vec & body])
 (defn definline [name & decl])
@@ -320,12 +324,33 @@
 (defn proxy-super [meth & args])
 (defn with-open [bindings & body])
 
+(defmacro proxy
+  [class-and-interfaces args & fs]
+  (when-not (vector? class-and-interfaces)
+    (throw (ex-info "Expected a vector of class and intefaces." {:form class-and-interfaces})))
+  (let [impls (fn [fs] (for [f fs]
+                         (derive-info__ (cons 'fn f) f)))]
+    `(fn [this]
+       ~class-and-interfaces
+       ~args
+       ~@(impls fs))))
+
 (def *known-macros*
   (merge
    *known-macros*
-   {'proxy nil 'defstruct nil 'with-local-vars nil 'definline nil 'gen-interface nil 'definterface nil
-    'proxy-super nil 'with-open nil 'defproject nil 'clojure.core.async/go-loop nil 'clojure.core.async/alt! nil
-    'clojure.core.async/alt!! nil 'clojure.core.async/alts! nil 'clojure.core.async/alts!! nil}
+   {'definline nil
+    'definterface nil
+    'defstruct nil
+    'gen-interface nil
+    'proxy-super nil
+    'with-local-vars nil
+    'with-open nil
+    'defproject nil
+    'clojure.core.async/go-loop nil
+    'clojure.core.async/alt! nil
+    'clojure.core.async/alt!! nil
+    'clojure.core.async/alts! nil
+    'clojure.core.async/alts!! nil}
    (:known-macros joker.core/*linter-config*)))
 
 ;; Clojure core vars not supported by Joker
@@ -339,6 +364,7 @@
 (def *compiler-options*)
 (def *agent*)
 (def *read-eval*)
+(def *print-namespace-maps*)
 (def *data-readers*)
 (def *verbose-defrecords*)
 (def *math-context*)

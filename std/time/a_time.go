@@ -3,350 +3,505 @@
 package time
 
 import (
-  "time"
-  . "github.com/candid82/joker/core"
+	. "github.com/candid82/joker/core"
+	"time"
 )
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
-var add_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    t := ExtractTime(args, 0)
-    d := ExtractInt(args, 1)
-    res := t.Add(time.Duration(d))
-    return MakeTime(res)
+var ansi_c_ = MakeString(time.ANSIC)
+var hour_ = MakeInt(int(time.Hour))
+var kitchen_ = MakeString(time.Kitchen)
+var microsecond_ = MakeInt(int(time.Microsecond))
+var millisecond_ = MakeInt(int(time.Millisecond))
+var minute_ = MakeInt(int(time.Minute))
+var nanosecond_ = MakeInt(int(time.Nanosecond))
+var rfc1123_ = MakeString(time.RFC1123)
+var rfc1123_z_ = MakeString(time.RFC1123Z)
+var rfc3339_ = MakeString(time.RFC3339)
+var rfc3339_nano_ = MakeString(time.RFC3339Nano)
+var rfc822_ = MakeString(time.RFC822)
+var rfc822_z_ = MakeString(time.RFC822Z)
+var rfc850_ = MakeString(time.RFC850)
+var ruby_date_ = MakeString(time.RubyDate)
+var second_ = MakeInt(int(time.Second))
+var stamp_ = MakeString(time.Stamp)
+var stamp_micro_ = MakeString(time.StampMicro)
+var stamp_milli_ = MakeString(time.StampMilli)
+var stamp_nano_ = MakeString(time.StampNano)
+var unix_date_ = MakeString(time.UnixDate)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+var add_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		t := ExtractTime(_args, 0)
+		d := ExtractInt(_args, 1)
+		_res := t.Add(time.Duration(d))
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var format_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    t := ExtractTime(args, 0)
-    layout := ExtractString(args, 1)
-    res := t.Format(layout)
-    return MakeString(res)
+var add_date_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 4:
+		t := ExtractTime(_args, 0)
+		years := ExtractInt(_args, 1)
+		months := ExtractInt(_args, 2)
+		days := ExtractInt(_args, 3)
+		_res := t.AddDate(years, months, days)
+		return MakeTime(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var from_unix_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    sec := ExtractInt(args, 0)
-    nsec := ExtractInt(args, 1)
-    res := time.Unix(int64(sec), int64(nsec))
-    return MakeTime(res)
+var format_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		t := ExtractTime(_args, 0)
+		layout := ExtractString(_args, 1)
+		_res := t.Format(layout)
+		return MakeString(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var hours_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    d := ExtractInt(args, 0)
-    res := time.Duration(d).Hours()
-    return MakeDouble(res)
+var from_unix_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		sec := ExtractInt(_args, 0)
+		nsec := ExtractInt(_args, 1)
+		_res := time.Unix(int64(sec), int64(nsec))
+		return MakeTime(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var minutes_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    d := ExtractInt(args, 0)
-    res := time.Duration(d).Minutes()
-    return MakeDouble(res)
+var hours_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		d := ExtractInt(_args, 0)
+		_res := time.Duration(d).Hours()
+		return MakeDouble(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var now_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 0:
-    
-    
-    res := time.Now()
-    return MakeTime(res)
+var minutes_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		d := ExtractInt(_args, 0)
+		_res := time.Duration(d).Minutes()
+		return MakeDouble(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var parse_duration_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    s := ExtractString(args, 0)
-    t, err := time.ParseDuration(s); PanicOnErr(err); res := int(t)
-    return MakeInt(res)
+var now_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := time.Now()
+		return MakeTime(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var round_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    d := ExtractInt(args, 0)
-    m := ExtractInt(args, 1)
-    res := int(time.Duration(d).Round(time.Duration(m)))
-    return MakeInt(res)
+var parse_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		layout := ExtractString(_args, 0)
+		value := ExtractString(_args, 1)
+		_res, err := time.Parse(layout, value)
+		PanicOnErr(err)
+		return MakeTime(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var seconds_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    d := ExtractInt(args, 0)
-    res := time.Duration(d).Seconds()
-    return MakeDouble(res)
+var parse_duration_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		t, err := time.ParseDuration(s)
+		PanicOnErr(err)
+		_res := int(t)
+		return MakeInt(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var since_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    t := ExtractTime(args, 0)
-    res := int(time.Since(t))
-    return MakeInt(res)
+var round_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		d := ExtractInt(_args, 0)
+		m := ExtractInt(_args, 1)
+		_res := int(time.Duration(d).Round(time.Duration(m)))
+		return MakeInt(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var sleep_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    d := ExtractInt(args, 0)
-    res := sleep(d)
-    return res
+var seconds_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		d := ExtractInt(_args, 0)
+		_res := time.Duration(d).Seconds()
+		return MakeDouble(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var string_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    d := ExtractInt(args, 0)
-    res := time.Duration(d).String()
-    return MakeString(res)
+var since_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		t := ExtractTime(_args, 0)
+		_res := int(time.Since(t))
+		return MakeInt(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var sub_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    t := ExtractTime(args, 0)
-    u := ExtractTime(args, 1)
-    res := int(t.Sub(u))
-    return MakeInt(res)
+var sleep_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		d := ExtractInt(_args, 0)
+		 time.Sleep(time.Duration(d))
+		_res := NIL
+		return _res
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var truncate_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 2:
-    
-    d := ExtractInt(args, 0)
-    m := ExtractInt(args, 1)
-    res := int(time.Duration(d).Truncate(time.Duration(m)))
-    return MakeInt(res)
+var string_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		d := ExtractInt(_args, 0)
+		_res := time.Duration(d).String()
+		return MakeString(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var unix_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    t := ExtractTime(args, 0)
-    res := int(t.Unix())
-    return MakeInt(res)
+var sub_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		t := ExtractTime(_args, 0)
+		u := ExtractTime(_args, 1)
+		_res := int(t.Sub(u))
+		return MakeInt(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
-var until_ Proc = func(args []Object) Object {
-  c := len(args)
-  switch  {
-  case c == 1:
-    
-    t := ExtractTime(args, 0)
-    res := int(time.Until(t))
-    return MakeInt(res)
+var truncate_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		d := ExtractInt(_args, 0)
+		m := ExtractInt(_args, 1)
+		_res := int(time.Duration(d).Truncate(time.Duration(m)))
+		return MakeInt(_res)
 
-  default:
-    PanicArity(c)
-  }
-  return NIL
+	default:
+		PanicArity(_c)
+	}
+	return NIL
 }
 
+var unix_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		t := ExtractTime(_args, 0)
+		_res := int(t.Unix())
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var until_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		t := ExtractTime(_args, 0)
+		_res := int(time.Until(t))
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
 
 func init() {
 
-timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
+	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
-timeNamespace.InternVar("add", add_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
-    `Returns the time t+d.`, "1.0"))
+	timeNamespace.InternVar("ansi-c", ansi_c_,
+		MakeMeta(
+			nil,
+			`Mon Jan _2 15:04:05 2006`, "1.0"))
 
-timeNamespace.InternVar("format", format_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("layout"))),
-    `Returns a textual representation of the time value formatted according to layout,
+	timeNamespace.InternVar("hour", hour_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 hour`, "1.0"))
+
+	timeNamespace.InternVar("kitchen", kitchen_,
+		MakeMeta(
+			nil,
+			`3:04PM`, "1.0"))
+
+	timeNamespace.InternVar("microsecond", microsecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 microsecond`, "1.0"))
+
+	timeNamespace.InternVar("millisecond", millisecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 millisecond`, "1.0"))
+
+	timeNamespace.InternVar("minute", minute_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 minute`, "1.0"))
+
+	timeNamespace.InternVar("nanosecond", nanosecond_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 nanosecond`, "1.0"))
+
+	timeNamespace.InternVar("rfc1123", rfc1123_,
+		MakeMeta(
+			nil,
+			`Mon, 02 Jan 2006 15:04:05 MST`, "1.0"))
+
+	timeNamespace.InternVar("rfc1123-z", rfc1123_z_,
+		MakeMeta(
+			nil,
+			`Mon, 02 Jan 2006 15:04:05 -0700`, "1.0"))
+
+	timeNamespace.InternVar("rfc3339", rfc3339_,
+		MakeMeta(
+			nil,
+			`2006-01-02T15:04:05Z07:00`, "1.0"))
+
+	timeNamespace.InternVar("rfc3339-nano", rfc3339_nano_,
+		MakeMeta(
+			nil,
+			`2006-01-02T15:04:05.999999999Z07:00`, "1.0"))
+
+	timeNamespace.InternVar("rfc822", rfc822_,
+		MakeMeta(
+			nil,
+			`02 Jan 06 15:04 MST`, "1.0"))
+
+	timeNamespace.InternVar("rfc822-z", rfc822_z_,
+		MakeMeta(
+			nil,
+			`02 Jan 06 15:04 -0700`, "1.0"))
+
+	timeNamespace.InternVar("rfc850", rfc850_,
+		MakeMeta(
+			nil,
+			`Monday, 02-Jan-06 15:04:05 MST`, "1.0"))
+
+	timeNamespace.InternVar("ruby-date", ruby_date_,
+		MakeMeta(
+			nil,
+			`Mon Jan 02 15:04:05 -0700 2006`, "1.0"))
+
+	timeNamespace.InternVar("second", second_,
+		MakeMeta(
+			nil,
+			`Number of nanoseconds in 1 second`, "1.0"))
+
+	timeNamespace.InternVar("stamp", stamp_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05`, "1.0"))
+
+	timeNamespace.InternVar("stamp-micro", stamp_micro_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000000`, "1.0"))
+
+	timeNamespace.InternVar("stamp-milli", stamp_milli_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000`, "1.0"))
+
+	timeNamespace.InternVar("stamp-nano", stamp_nano_,
+		MakeMeta(
+			nil,
+			`Jan _2 15:04:05.000000000`, "1.0"))
+
+	timeNamespace.InternVar("unix-date", unix_date_,
+		MakeMeta(
+			nil,
+			`Mon Jan _2 15:04:05 MST 2006`, "1.0"))
+
+	timeNamespace.InternVar("add", add_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
+			`Returns the time t+d.`, "1.0"))
+
+	timeNamespace.InternVar("add-date", add_date_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("years"), MakeSymbol("months"), MakeSymbol("days"))),
+			`Returns the time t + (years, months, days).`, "1.0"))
+
+	timeNamespace.InternVar("format", format_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("layout"))),
+			`Returns a textual representation of the time value formatted according to layout,
   which defines the format by showing how the reference time, defined to be
   Mon Jan 2 15:04:05 -0700 MST 2006
   would be displayed if it were the value; it serves as an example of the desired output.
   The same display rules will then be applied to the time value..`, "1.0"))
 
-timeNamespace.InternVar("from-unix", from_unix_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
-    `Returns the local Time corresponding to the given Unix time, sec seconds and
+	timeNamespace.InternVar("from-unix", from_unix_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
+			`Returns the local Time corresponding to the given Unix time, sec seconds and
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].`, "1.0"))
 
-timeNamespace.InternVar("hours", hours_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
-    `Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0"))
+	timeNamespace.InternVar("hours", hours_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			`Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0"))
 
-timeNamespace.InternVar("minutes", minutes_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
-    `Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes.`, "1.0"))
+	timeNamespace.InternVar("minutes", minutes_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			`Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes.`, "1.0"))
 
-timeNamespace.InternVar("now", now_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom()),
-    `Returns the current local time.`, "1.0"))
+	timeNamespace.InternVar("now", now_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the current local time.`, "1.0"))
 
-timeNamespace.InternVar("parse-duration", parse_duration_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-    `Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
+	timeNamespace.InternVar("parse", parse_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"))),
+			`Parses a time string.`, "1.0"))
+
+	timeNamespace.InternVar("parse-duration", parse_duration_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h.`, "1.0"))
 
-timeNamespace.InternVar("round", round_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
-    `Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
+	timeNamespace.InternVar("round", round_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+			`Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
   The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.`, "1.0"))
 
-timeNamespace.InternVar("seconds", seconds_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
-    `Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds.`, "1.0"))
+	timeNamespace.InternVar("seconds", seconds_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			`Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds.`, "1.0"))
 
-timeNamespace.InternVar("since", since_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
-    `Returns the time in nanoseconds elapsed since t.`, "1.0"))
+	timeNamespace.InternVar("since", since_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			`Returns the time in nanoseconds elapsed since t.`, "1.0"))
 
-timeNamespace.InternVar("sleep", sleep_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
-    `Pauses the execution thread for at least the duration d (expressed in nanoseconds).
+	timeNamespace.InternVar("sleep", sleep_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			`Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately.`, "1.0"))
 
-timeNamespace.InternVar("string", string_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"))),
-    `Returns a string representing the duration in the form 72h3m0.5s.`, "1.0"))
+	timeNamespace.InternVar("string", string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			`Returns a string representing the duration in the form 72h3m0.5s.`, "1.0"))
 
-timeNamespace.InternVar("sub", sub_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("u"))),
-    `Returns the duration t-u in nanoseconds.`, "1.0"))
+	timeNamespace.InternVar("sub", sub_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("u"))),
+			`Returns the duration t-u in nanoseconds.`, "1.0"))
 
-timeNamespace.InternVar("truncate", truncate_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
-    `Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged.`, "1.0"))
+	timeNamespace.InternVar("truncate", truncate_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+			`Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged.`, "1.0"))
 
-timeNamespace.InternVar("unix", unix_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
-    `Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.`, "1.0"))
+	timeNamespace.InternVar("unix", unix_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			`Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.`, "1.0"))
 
-timeNamespace.InternVar("until", until_,
-  MakeMeta(
-    NewListFrom(NewVectorFrom(MakeSymbol("t"))),
-    `Returns the duration in nanoseconds until t.`, "1.0"))
+	timeNamespace.InternVar("until", until_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			`Returns the duration in nanoseconds until t.`, "1.0"))
 
 }

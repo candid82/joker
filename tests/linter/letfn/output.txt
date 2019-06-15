@@ -1,0 +1,1 @@
+tests/linter/letfn/input.clj:6:1: Eval error: Wrong number of args (0) passed to core/letfn

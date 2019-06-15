@@ -14,11 +14,15 @@ import (
 
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/std/base64"
+	_ "github.com/candid82/joker/std/crypto"
+	_ "github.com/candid82/joker/std/filepath"
+	_ "github.com/candid82/joker/std/hex"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/http"
 	_ "github.com/candid82/joker/std/json"
 	_ "github.com/candid82/joker/std/math"
 	_ "github.com/candid82/joker/std/os"
+	_ "github.com/candid82/joker/std/strconv"
 	_ "github.com/candid82/joker/std/string"
 	_ "github.com/candid82/joker/std/time"
 	_ "github.com/candid82/joker/std/url"
@@ -101,8 +105,8 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 			case Error:
 				replContext.PushException(r)
 				fmt.Fprintln(Stderr, r)
-			// case *runtime.TypeAssertionError:
-			// 	fmt.Fprintln(Stderr, r)
+				// case *runtime.TypeAssertionError:
+				// 	fmt.Fprintln(Stderr, r)
 			default:
 				panic(r)
 			}
@@ -132,11 +136,14 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 
 	res := Eval(expr, nil)
 	replContext.PushValue(res)
-	fmt.Fprintln(Stdout, res.ToString(true))
+	PrintObject(res, Stdout)
+	fmt.Fprintln(Stdout, "")
 	return false
 }
 
 func srepl(port string, phase Phase) {
+	ProcessReplData()
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	l, err := net.Listen("tcp", replSocket)
 	if err != nil {
 		fmt.Fprintf(Stderr, "Cannot start srepl listening on %s: %s\n",
@@ -191,6 +198,8 @@ func srepl(port string, phase Phase) {
 }
 
 func repl(phase Phase) {
+	ProcessReplData()
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
@@ -233,7 +242,7 @@ func makeDialectKeyword(dialect Dialect) Keyword {
 	case CLJS:
 		return MakeKeyword("cljs")
 	default:
-		return MakeKeyword("joker ")
+		return MakeKeyword("joker")
 	}
 }
 
@@ -242,7 +251,7 @@ func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	LINTER_MODE = true
 	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
-	lm.Value = Bool{B: true}
+	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
 	ProcessLinterData(dialect)
 }
@@ -313,7 +322,7 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
 	fmt.Fprintln(out, "  --no-readline")
-	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful if joker is called with rlwrap.")
+	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
 	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
 	fmt.Fprintln(out, "  --dialect <dialect>")
@@ -346,6 +355,7 @@ var (
 	eval               string
 	replFlag           bool
 	replSocket         string
+	classPath          string
 	filename           string
 	remainingArgs      []string
 	profilerType       string = "runtime/pprof"
@@ -356,8 +366,13 @@ var (
 	noReadline         bool
 )
 
+func isNumber(s string) bool {
+	_, err := strconv.ParseInt(s, 10, 64)
+	return err == nil
+}
+
 func notOption(arg string) bool {
-	return arg == "-" || !strings.HasPrefix(arg, "-")
+	return arg == "-" || !strings.HasPrefix(arg, "-") || isNumber(arg[1:])
 }
 
 func parseArgs(args []string) {
@@ -365,6 +380,11 @@ func parseArgs(args []string) {
 	stop := false
 	missing := false
 	noFileFlag := false
+	if v, ok := os.LookupEnv("JOKER_CLASSPATH"); ok {
+		classPath = v
+	} else {
+		classPath = ""
+	}
 	var i int
 	for i = 1; i < length; i++ { // shift
 		if debugOut != nil {
@@ -427,7 +447,7 @@ func parseArgs(args []string) {
 		case "--hashmap-threshold":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
-				thresh, err := strconv.Atoi(args[i])
+				thresh, err := strconv.ParseInt(args[i], 10, 64)
 				if err != nil {
 					fmt.Fprintln(Stderr, "Error: ", err)
 					return
@@ -453,6 +473,13 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				replSocket = args[i]
+			}
+		case "-c", "--classpath":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				classPath = args[i]
+			} else {
+				missing = true
 			}
 		case "--no-readline":
 			noReadline = true
@@ -541,6 +568,7 @@ var runningProfile interface {
 }
 
 func main() {
+	InitInternalLibs()
 	ProcessCoreData()
 
 	SetExitJoker(func(code int) {
@@ -561,6 +589,7 @@ func main() {
 
 	parseArgs(os.Args)
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
+	GLOBAL_ENV.SetClassPath(classPath)
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
@@ -574,6 +603,7 @@ func main() {
 		fmt.Fprintf(debugOut, "eval=%v\n", eval)
 		fmt.Fprintf(debugOut, "replFlag=%v\n", replFlag)
 		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
+		fmt.Fprintf(debugOut, "classPath=%v\n", classPath)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
@@ -650,7 +680,9 @@ func main() {
 			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(eval), "<expr>")
-		ProcessReader(reader, "", phase)
+		if err := ProcessReader(reader, "", phase); err != nil {
+			ExitJoker(1)
+		}
 		return
 	}
 
@@ -675,7 +707,9 @@ func main() {
 	}
 
 	if filename != "" {
-		processFile(filename, phase)
+		if err := processFile(filename, phase); err != nil {
+			ExitJoker(1)
+		}
 		return
 	}
 

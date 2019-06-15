@@ -13,10 +13,16 @@
   <a href="#args">args</a>
 </li>
 <li>
+  <a href="#chdir">chdir</a>
+</li>
+<li>
   <a href="#cwd">cwd</a>
 </li>
 <li>
   <a href="#env">env</a>
+</li>
+<li>
+  <a href="#exec">exec</a>
 </li>
 <li>
   <a href="#exit">exit</a>
@@ -26,6 +32,9 @@
 </li>
 <li>
   <a href="#mkdir">mkdir</a>
+</li>
+<li>
+  <a href="#set-env">set-env</a>
 </li>
 <li>
   <a href="#sh">sh</a>
@@ -49,12 +58,22 @@
   
 </li>
 <li>
+  <h3 id="chdir">chdir</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(chdir dirname)</code></div>
+</pre>
+  <p class="var-docstr">Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.</p>
+  
+</li>
+<li>
   <h3 id="cwd">cwd</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cwd)</code></div>
 </pre>
-  <p class="var-docstr">Returns a rooted path name corresponding to the current directory. If the current directory can<br>  be reached via multiple paths (due to symbolic links), cwd may return any one of them.</p>
+  <p class="var-docstr">Returns a rooted path name corresponding to the current directory. If the current directory can<br>
+  be reached via multiple paths (due to symbolic links), cwd may return any one of them.</p>
   
 </li>
 <li>
@@ -64,6 +83,26 @@
   <pre class="var-usage"><div><code>(env)</code></div>
 </pre>
   <p class="var-docstr">Returns a map representing the environment.</p>
+  
+</li>
+<li>
+  <h3 id="exec">exec</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exec name opts)</code></div>
+</pre>
+  <p class="var-docstr">Executes the named program with the given arguments. opts is a map with the following keys (all optional):<br>
+  :args - vector of arguments (all arguments must be strings),<br>
+  :dir - if specified, working directory will be set to this value before executing the program,<br>
+  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.<br>
+  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,<br>
+  Joker's stdin will be redirected to the program's stdin.<br>
+  Returns a map with the following keys:<br>
+  :success - whether or not the execution was successful,<br>
+  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+  :exit - exit code of program (or attempt to execute it),<br>
+  :out - string capturing stdout of the program,<br>
+  :err - string capturing stderr of the program.</p>
   
 </li>
 <li>
@@ -94,12 +133,26 @@
   
 </li>
 <li>
+  <h3 id="set-env">set-env</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(set-env key value)</code></div>
+</pre>
+  <p class="var-docstr">Sets the specified key to the specified value in the environment.</p>
+  
+</li>
+<li>
   <h3 id="sh">sh</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sh name & arguments)</code></div>
 </pre>
-  <p class="var-docstr">Executes the named program with the given arguments. Returns a map with the following keys:<br>      :success - whether or not the execution was successful,<br>      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>      :exit - exit code of program (or attempt to execute it),<br>      :out - string capturing stdout of the program,<br>      :err - string capturing stderr of the program.</p>
+  <p class="var-docstr">Executes the named program with the given arguments. Returns a map with the following keys:<br>
+      :success - whether or not the execution was successful,<br>
+      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+      :exit - exit code of program (or attempt to execute it),<br>
+      :out - string capturing stdout of the program,<br>
+      :err - string capturing stderr of the program.</p>
   
 </li>
 <li>
@@ -108,7 +161,13 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sh-from dir name & arguments)</code></div>
 </pre>
-  <p class="var-docstr">Executes the named program with the given arguments and working directory set to dir.<br>  Returns a map with the following keys:<br>      :success - whether or not the execution was successful,<br>      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>      :exit - exit code of program (or attempt to execute it),<br>      :out - string capturing stdout of the program,<br>      :err - string capturing stderr of the program.</p>
+  <p class="var-docstr">Executes the named program with the given arguments and working directory set to dir.<br>
+  Returns a map with the following keys:<br>
+      :success - whether or not the execution was successful,<br>
+      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+      :exit - exit code of program (or attempt to execute it),<br>
+      :out - string capturing stdout of the program,<br>
+      :err - string capturing stderr of the program.</p>
   
 </li>
 <li>
@@ -117,7 +176,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(stat filename)</code></div>
 </pre>
-  <p class="var-docstr">Returns a map describing the named file. The info map has the following attributes:<br>  :name - base name of the file<br>  :size - length in bytes for regular files; system-dependent for others<br>  :mode - file mode bits<br>  :modtime - modification time<br>  :dir? - true if file is a directory</p>
+  <p class="var-docstr">Returns a map describing the named file. The info map has the following attributes:<br>
+  :name - base name of the file<br>
+  :size - length in bytes for regular files; system-dependent for others<br>
+  :mode - file mode bits<br>
+  :modtime - modification time<br>
+  :dir? - true if file is a directory</p>
   
 </li>
 

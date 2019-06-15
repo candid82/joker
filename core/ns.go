@@ -78,7 +78,9 @@ func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
 
 func (ns *Namespace) ReferAll(other *Namespace) {
 	for name, vr := range other.mappings {
-		ns.mappings[name] = vr
+		if !vr.isPrivate {
+			ns.mappings[name] = vr
+		}
 	}
 }
 
@@ -118,9 +120,11 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 	return existingVar
 }
 
-func (ns *Namespace) InternVar(name string, val Object, meta Map) *Var {
+func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
 	vr := ns.Intern(MakeSymbol(name))
 	vr.Value = val
+	meta.Add(KEYWORDS.ns, ns)
+	meta.Add(KEYWORDS.name, vr.name)
 	vr.meta = meta
 	return vr
 }

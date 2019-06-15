@@ -130,4 +130,8 @@
   "tests/flags/script-flags.joke -- something that is not a flag"
   "[-- something that is not a flag]")
 
+(testing :err "negative numbers parsed correctly"
+         "--hashmap-threshold -1 tests/flags/input.joke"
+         "")
+
 (joker.os/exit exit-code)

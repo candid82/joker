@@ -262,8 +262,7 @@ func scanRatio(str string, err error, reader *Reader) Object {
 	if _, ok := rat.SetString(str); !ok {
 		panic(err)
 	}
-	res := Ratio{r: rat}
-	return MakeReadObject(reader, &res)
+	return MakeReadObject(reader, ratioOrInt(&rat))
 }
 
 func scanBigFloat(str string, err error, reader *Reader) Object {
@@ -333,7 +332,7 @@ func readNumber(reader *Reader) Object {
 	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if isRatio {
-		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' {
+		if nonDigits > 2 || nonDigits > 1 && str[0] != '-' && str[0] != '+' {
 			panic(invalidNumberError)
 		}
 		return scanRatio(str, invalidNumberError, reader)
@@ -415,9 +414,9 @@ func readSymbol(reader *Reader, first rune) Object {
 	case str == "nil":
 		return MakeReadObject(reader, NIL)
 	case str == "true":
-		return MakeReadObject(reader, Bool{B: true})
+		return MakeReadObject(reader, Boolean{B: true})
 	case str == "false":
-		return MakeReadObject(reader, Bool{B: false})
+		return MakeReadObject(reader, Boolean{B: false})
 	default:
 		return MakeReadObject(reader, MakeSymbol(str))
 	}
@@ -537,7 +536,7 @@ func readList(reader *Reader) Object {
 }
 
 func readVector(reader *Reader) Object {
-	res := EmptyVector
+	res := EmptyVector()
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ']' {
@@ -605,7 +604,7 @@ func readMapWithNamespace(reader *Reader, nsname string) Object {
 	if len(objs)%2 != 0 {
 		panic(MakeReadError(reader, "Map literal must contain an even number of forms"))
 	}
-	if len(objs) > HASHMAP_THRESHOLD {
+	if int64(len(objs)) >= HASHMAP_THRESHOLD {
 		hashMap := NewHashMap()
 		for i := 0; i < len(objs); i += 2 {
 			key := resolveKey(objs[i], nsname)
@@ -664,7 +663,7 @@ func readMeta(reader *Reader) *ArrayMap {
 	case String, Symbol:
 		return &ArrayMap{arr: []Object{DeriveReadObject(obj, KEYWORDS.tag), obj}}
 	case Keyword:
-		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Bool{B: true})}}
+		return &ArrayMap{arr: []Object{obj, DeriveReadObject(obj, Boolean{B: true})}}
 	default:
 		panic(MakeReadError(reader, "Metadata must be Symbol, Keyword, String or Map"))
 	}
@@ -696,11 +695,11 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 		a[len(args)-1] = SYMBOLS.amp
 		a = append(a, v)
 	}
-	argVector := EmptyVector
+	argVector := EmptyVector()
 	for _, v := range a {
 		argVector = argVector.Conjoin(v)
 	}
-	return DeriveReadObject(body, NewListFrom(SYMBOLS.fn, argVector, body))
+	return DeriveReadObject(body, NewListFrom(MakeSymbol("joker.core/fn"), argVector, body))
 }
 
 func isTerminatingMacro(r rune) bool {
@@ -751,7 +750,7 @@ func isSelfEvaluating(obj Object) bool {
 		return true
 	}
 	switch obj.(type) {
-	case Bool, Double, Int, Char, Keyword, String:
+	case Boolean, Double, Int, Char, Keyword, String:
 		return true
 	default:
 		return false
@@ -900,7 +899,7 @@ func readConditional(reader *Reader) (Object, bool) {
 					msg := "Spliced form in reader conditional must be Seqable, got " + v.GetType().ToString(false)
 					if LINTER_MODE {
 						printReadError(reader, msg)
-						return EmptyVector, true
+						return EmptyVector(), true
 					} else {
 						panic(MakeReadError(reader, msg))
 					}
@@ -911,7 +910,7 @@ func readConditional(reader *Reader) (Object, bool) {
 		}
 		cond = cond.rest.rest
 	}
-	return EmptyVector, true
+	return EmptyVector(), true
 }
 
 func readNamespacedMap(reader *Reader) Object {
@@ -1041,12 +1040,12 @@ func Read(reader *Reader) (Object, bool) {
 	case unicode.IsDigit(r):
 		reader.Unget()
 		return readNumber(reader), false
-	case r == '-':
+	case r == '-' || r == '+':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readSymbol(reader, '-'), false
+		return readSymbol(reader, r), false
 	case r == '%' && ARGS != nil:
 		return readArgSymbol(reader), false
 	case isSymbolInitial(r):
@@ -1100,11 +1099,11 @@ func TryRead(reader *Reader) (obj Object, err error) {
 			err = r.(error)
 		}
 	}()
-	eatWhitespace(reader)
-	if reader.Peek() == EOF {
-		return NIL, io.EOF
-	}
 	for {
+		eatWhitespace(reader)
+		if reader.Peek() == EOF {
+			return NIL, io.EOF
+		}
 		obj, multi := Read(reader)
 		if !multi {
 			return obj, nil

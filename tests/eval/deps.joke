@@ -1,0 +1,14 @@
+(ns deps
+  (:require [joker.os :as os]
+            [joker.string :as str]))
+
+(def lib-dir
+  (-> (os/args)
+       (second)
+       (str/split #"/")
+       (butlast)
+       (concat ["lib"])
+       ((fn [x] (apply str (interpose "/" x))))))
+
+(ns-sources
+  {"test-local.*" {:url lib-dir}})

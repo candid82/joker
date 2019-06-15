@@ -1,0 +1,8 @@
+(ns joker.test-joker.os
+  (:require [joker.os :as os]
+            [joker.test :refer [deftest is]]))
+
+(deftest exec-pipe
+  (if (= (get (os/env) "TTY_TESTS") "1")
+    (is (= 0 (:exit (os/exec "stty" {:args ["echo"] :stdin :pipe}))))
+    (println "Skipping tty tests (STDIN is not a tty)")))
