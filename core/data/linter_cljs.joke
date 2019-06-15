@@ -1,6 +1,10 @@
 (doseq [sym '(js Math)]
   (inject-ns__ sym))
 
+(doseq [sym '(object string number array function boolean default)]
+  (when-not (resolve sym)
+    (intern__ *ns* sym)))
+
 (def require-macros require)
 
 (def ^:private require-opt-keys
