@@ -32,6 +32,26 @@ func seqFirstAfterBreak(seq Seq, w io.Writer, indent int) (Seq, int) {
 	return seq, indent
 }
 
+func formatBindings(v *Vector, w io.Writer, indent int) int {
+	fmt.Fprint(w, "[")
+	newIndent := indent +1
+	if v.count > 0 {
+		for i := 0; i < v.count; i+=2 {
+			newIndent = formatObject(v.at(i), indent+1, w)
+			if i + 1 < v.count {
+				fmt.Fprint(w, " ")
+				newIndent = formatObject(v.at(i+1), newIndent+1, w)
+			}
+			if i+2 < v.count {
+				fmt.Fprint(w, "\n")
+				writeIndent(w, indent+1)
+			}
+		}
+	}
+	fmt.Fprint(w, "]")
+	return newIndent + 1
+}
+
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
@@ -49,6 +69,13 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 				seq, i = seqFirstAfterSpace(seq, w, i)
 				seq, i = seqFirstAfterSpace(seq, w, i)
 			}
+		}
+	} else if obj.Equals(SYMBOLS.let) {
+		seq, i = seqFirst(seq, w, i)
+		if v, ok := seq.First().(*Vector); ok {
+			fmt.Fprint(w, " ")
+			i = formatBindings(v, w, i+1)
+			seq = seq.Rest()
 		}
 	}
 

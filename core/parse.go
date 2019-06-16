@@ -204,6 +204,7 @@ type (
 		fn_                Symbol
 		fn                 Symbol
 		let_               Symbol
+		let               Symbol
 		letfn_             Symbol
 		loop_              Symbol
 		recur              Symbol
@@ -305,6 +306,7 @@ var (
 		fn_:                MakeSymbol("fn*"),
 		fn:                 MakeSymbol("fn"),
 		let_:               MakeSymbol("let*"),
+		let:               MakeSymbol("let"),
 		letfn_:             MakeSymbol("letfn*"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
