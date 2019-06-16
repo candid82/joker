@@ -204,8 +204,9 @@ type (
 		fn_                Symbol
 		fn                 Symbol
 		let_               Symbol
-		let               Symbol
+		let                Symbol
 		letfn_             Symbol
+		letfn              Symbol
 		loop_              Symbol
 		recur              Symbol
 		setMacro_          Symbol
@@ -306,8 +307,9 @@ var (
 		fn_:                MakeSymbol("fn*"),
 		fn:                 MakeSymbol("fn"),
 		let_:               MakeSymbol("let*"),
-		let:               MakeSymbol("let"),
+		let:                MakeSymbol("let"),
 		letfn_:             MakeSymbol("letfn*"),
+		letfn:              MakeSymbol("letfn"),
 		loop_:              MakeSymbol("loop*"),
 		recur:              MakeSymbol("recur"),
 		setMacro_:          MakeSymbol("set-macro__"),
