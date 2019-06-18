@@ -96,6 +96,8 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			i = formatVectorVertically(v, w, i+1)
 			seq = seq.Rest()
 		}
+	} else if obj.Equals(SYMBOLS.do) {
+		seq, i = seqFirst(seq, w, i)
 	} else {
 		seq, i = seqFirst(seq, w, i)
 		for !seq.IsEmpty() {

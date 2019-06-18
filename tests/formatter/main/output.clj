@@ -47,3 +47,7 @@
                      (neven? (dec n))))]
   (neven? 10))
 
+(do
+  1
+  2)
+
