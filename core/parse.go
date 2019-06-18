@@ -208,6 +208,7 @@ type (
 		letfn_             Symbol
 		letfn              Symbol
 		loop_              Symbol
+		loop               Symbol
 		recur              Symbol
 		setMacro_          Symbol
 		def                Symbol
@@ -311,6 +312,7 @@ var (
 		letfn_:             MakeSymbol("letfn*"),
 		letfn:              MakeSymbol("letfn"),
 		loop_:              MakeSymbol("loop*"),
+		loop:               MakeSymbol("loop"),
 		recur:              MakeSymbol("recur"),
 		setMacro_:          MakeSymbol("set-macro__"),
 		def:                MakeSymbol("def"),

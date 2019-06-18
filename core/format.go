@@ -82,7 +82,7 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 				seq, i = seqFirstAfterSpace(seq, w, i)
 			}
 		}
-	} else if obj.Equals(SYMBOLS.let) {
+	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
 		seq, i = seqFirst(seq, w, i)
 		if v, ok := seq.First().(*Vector); ok {
 			fmt.Fprint(w, " ")
