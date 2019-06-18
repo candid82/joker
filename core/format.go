@@ -71,7 +71,7 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	if obj.Equals(SYMBOLS._if) {
 		seq, i = seqFirst(seq, w, i)
 		seq, i = seqFirstAfterSpace(seq, w, i)
-	} else if obj.Equals(SYMBOLS.fn) {
+	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
 		seq, i = seqFirst(seq, w, i)
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
@@ -96,7 +96,7 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			i = formatVectorVertically(v, w, i+1)
 			seq = seq.Rest()
 		}
-	} else if obj.Equals(SYMBOLS.do) {
+	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
 		seq, i = seqFirst(seq, w, i)
 	} else {
 		seq, i = seqFirst(seq, w, i)

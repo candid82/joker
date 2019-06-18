@@ -51,3 +51,10 @@
   1
   2)
 
+(try
+  1
+  (catch Exception e
+    2)
+  (finally
+    3))
+
