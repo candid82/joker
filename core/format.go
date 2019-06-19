@@ -64,15 +64,16 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 	return newIndent + 1
 }
 
+var defnSym = MakeSymbol("defn")
+
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
 	obj := seq.First()
-	if obj.Equals(SYMBOLS._if) {
-		seq, i = seqFirst(seq, w, i)
+	seq, i = seqFirst(seq, w, i)
+	if obj.Equals(SYMBOLS._if) || obj.Equals(defnSym) {
 		seq, i = seqFirstAfterSpace(seq, w, i)
 	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
-		seq, i = seqFirst(seq, w, i)
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
 			case *Vector:
@@ -83,23 +84,19 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			}
 		}
 	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
-		seq, i = seqFirst(seq, w, i)
 		if v, ok := seq.First().(*Vector); ok {
 			fmt.Fprint(w, " ")
 			i = formatBindings(v, w, i+1)
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.letfn) {
-		seq, i = seqFirst(seq, w, i)
 		if v, ok := seq.First().(*Vector); ok {
 			fmt.Fprint(w, " ")
 			i = formatVectorVertically(v, w, i+1)
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
-		seq, i = seqFirst(seq, w, i)
 	} else {
-		seq, i = seqFirst(seq, w, i)
 		for !seq.IsEmpty() {
 			seq, i = seqFirstAfterSpace(seq, w, i)
 		}

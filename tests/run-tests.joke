@@ -8,6 +8,20 @@
 
 (def exit-code 0)
 
+(defn first-diff-index
+  [s1 s2]
+  (let [c1 (count s1)
+        c2 (count s2)]
+    (loop [i 0]
+      (if (or (= i c1)
+              (= i c2))
+        (if (= c1 c2)
+          -1
+          i)
+        (if (= (nth s1 i) (nth s2 i))
+          (recur (inc i))
+          i)))))
+
 (let [[cmd root-dir output-k output-file-name] *command-line-args*
       output-k (keyword output-k)
       test-dirs (->> (joker.os/ls root-dir)
@@ -38,7 +52,11 @@
         (println "EXPECTED:")
         (println expected)
         (println "ACTUAL:")
-        (println output)
+        (let [diff-i (first-diff-index expected output)
+              output' (if (= -1 diff-i)
+                        output
+                        (str (subs output 0 diff-i) "❌" (subs output diff-i)))]
+          (println output'))
         (var-set #'exit-code 1)))))
 
 (joker.os/exit exit-code)

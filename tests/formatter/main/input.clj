@@ -27,3 +27,11 @@
 (do 1 2)
 
 (try 1 (catch Exception e 2) (finally 3))
+
+(defn plus [x y] (+ x y))
+
+(defn cast
+  "Throws an error if x is not of a type t, else returns x."
+  {:added "1.0"}
+  [t x]
+  (cast__ t x))

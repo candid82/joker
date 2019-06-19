@@ -58,3 +58,13 @@
   (finally
     3))
 
+(defn plus
+  [x y]
+  (+ x y))
+
+(defn cast
+  "Throws an error if x is not of a type t, else returns x."
+  {:added "1.0"}
+  [t x]
+  (cast__ t x))
+
