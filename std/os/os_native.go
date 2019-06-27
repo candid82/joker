@@ -2,6 +2,7 @@ package os
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -65,6 +66,9 @@ func execute(name string, opts Map) Object {
 }
 
 func sh(dir string, stdin io.Reader, name string, args []string) Object {
+	b, e := ioutil.ReadAll(stdin)
+	PanicOnErr(e)
+	fmt.Fprintf(Stderr, "stdin had %d bytes\n", len(b))
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	stdoutReader, err := cmd.StdoutPipe()
