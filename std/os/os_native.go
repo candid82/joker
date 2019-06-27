@@ -67,29 +67,14 @@ func execute(name string, opts Map) Object {
 func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
+	cmd.Stdin = stdin
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	var stdinWriter io.WriteCloser
-	if stdin == Stdin {
-		cmd.Stdin = Stdin
-	} else {
-		writer, err := cmd.StdinPipe()
-		PanicOnErr(err)
-		stdinWriter = writer
-	}
-
 	err := cmd.Start()
 	PanicOnErr(err)
-
-	if stdin != nil && stdinWriter != nil {
-		go func() {
-			io.Copy(stdinWriter, stdin)
-			stdinWriter.Close()
-		}()
-	}
 
 	err = cmd.Wait()
 
