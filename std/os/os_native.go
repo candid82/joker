@@ -67,10 +67,11 @@ func execute(name string, opts Map) Object {
 func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
-	stdoutReader, err := cmd.StdoutPipe()
-	PanicOnErr(err)
-	stderrReader, err := cmd.StderrPipe()
-	PanicOnErr(err)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
 	var stdinWriter io.WriteCloser
 	if stdin == Stdin {
 		cmd.Stdin = Stdin
@@ -80,15 +81,8 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 		stdinWriter = writer
 	}
 
-	bufOut := new(bytes.Buffer)
-	bufErr := new(bytes.Buffer)
-
-	go io.Copy(bufOut, stdoutReader)
-	go io.Copy(bufErr, stderrReader)
-
-	if err = cmd.Start(); err != nil {
-		panic(RT.NewError(err.Error()))
-	}
+	err := cmd.Start()
+	PanicOnErr(err)
 
 	if stdin != nil && stdinWriter != nil {
 		go func() {
@@ -98,8 +92,10 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 	}
 
 	err = cmd.Wait()
-	stdoutString := bufOut.String()
-	stderrString := bufErr.String()
+
+	stdoutString := string(stdout.Bytes())
+	stderrString := string(stderr.Bytes())
+
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Boolean{B: err == nil})
 
