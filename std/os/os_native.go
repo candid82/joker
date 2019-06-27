@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
-	"time"
 
 	. "github.com/candid82/joker/core"
 )
@@ -80,19 +79,16 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 		PanicOnErr(err)
 		stdinWriter = writer
 	}
+
 	bufOut := new(bytes.Buffer)
 	bufErr := new(bytes.Buffer)
 
 	go io.Copy(bufOut, stdoutReader)
 	go io.Copy(bufErr, stderrReader)
 
-	time.Sleep(1 * time.Second)
-
 	if err = cmd.Start(); err != nil {
 		panic(RT.NewError(err.Error()))
 	}
-
-	time.Sleep(1 * time.Second)
 
 	if stdin != nil && stdinWriter != nil {
 		go func() {
