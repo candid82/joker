@@ -68,3 +68,6 @@
   [t x]
   (cast__ t x))
 
+(deftest t
+  (is (= 1 2)))
+

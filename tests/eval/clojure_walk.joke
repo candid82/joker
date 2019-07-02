@@ -6,7 +6,7 @@
   (is (= (w/prewalk-replace {:a :b} [:a {:a :a} (list 3 :c :a)])
          [:b {:b :b} (list 3 :c :b)])))
 
-(deftest t-postwalk-replace 
+(deftest t-postwalk-replace
   (is (= (w/postwalk-replace {:a :b} [:a {:a :a} (list 3 :c :a)])
          [:b {:b :b} (list 3 :c :b)])))
 

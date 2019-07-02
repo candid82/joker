@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
+	"regexp"
 )
 
 func seqFirst(seq Seq, w io.Writer, indent int) (Seq, int) {
@@ -64,14 +65,23 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 	return newIndent + 1
 }
 
-var defnSym = MakeSymbol("defn")
+var defRegex *regexp.Regexp = regexp.MustCompile("def.+")
+
+func symMatching(obj Object, re *regexp.Regexp) bool {
+	switch s := obj.(type) {
+	case Symbol:
+		return re.MatchString(*s.name)
+	default:
+		return false
+	}
+}
 
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
 	obj := seq.First()
 	seq, i = seqFirst(seq, w, i)
-	if obj.Equals(SYMBOLS._if) || obj.Equals(defnSym) {
+	if obj.Equals(SYMBOLS._if) || symMatching(obj, defRegex) {
 		seq, i = seqFirstAfterSpace(seq, w, i)
 	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
 		if !seq.IsEmpty() {
