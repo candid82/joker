@@ -333,24 +333,27 @@ var procExInfo Proc = func(args []Object) Object {
 	res.Add(KEYWORDS.message, EnsureString(args, 0))
 	res.Add(KEYWORDS.data, EnsureMap(args, 1))
 	if len(args) == 3 {
-		res.Add(MakeKeyword("cause"), EnsureError(args, 2))
+		res.Add(KEYWORDS.cause, EnsureError(args, 2))
 	}
 	return res
 }
 
 var procExData Proc = func(args []Object) Object {
-	_, res := args[0].(*ExInfo).Get(KEYWORDS.data)
-	return res
+	if ok, res := args[0].(*ExInfo).Get(KEYWORDS.data); ok {
+		return res
+	}
+	return NIL
 }
 
 var procExCause Proc = func(args []Object) Object {
-	_, res := args[0].(*ExInfo).Get(KEYWORDS.cause)
-	return res
+	if ok, res := args[0].(*ExInfo).Get(KEYWORDS.cause); ok {
+		return res
+	}
+	return NIL
 }
 
 var procExMessage Proc = func(args []Object) Object {
-	_, res := args[0].(*ExInfo).Get(KEYWORDS.message)
-	return res
+	return args[0].(Error).Message()
 }
 
 var procRegex Proc = func(args []Object) Object {

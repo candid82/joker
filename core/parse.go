@@ -598,6 +598,10 @@ func (err *ParseError) WithInfo(info *ObjectInfo) Object {
 	return err
 }
 
+func (err *ParseError) Message() Object {
+	return MakeString(err.msg)
+}
+
 func (err ParseError) Error() string {
 	line, column, filename := 0, 0, "<file>"
 	info := err.obj.GetInfo()

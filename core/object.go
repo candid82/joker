@@ -55,6 +55,7 @@ type (
 	Error interface {
 		error
 		Object
+		Message() Object
 	}
 	Meta interface {
 		GetMeta() Map
@@ -695,6 +696,13 @@ func (exInfo *ExInfo) GetType() *Type {
 
 func (exInfo *ExInfo) Hash() uint32 {
 	return hashPtr(uintptr(unsafe.Pointer(exInfo)))
+}
+
+func (exInfo *ExInfo) Message() Object {
+	if ok, res := exInfo.Get(KEYWORDS.message); ok {
+		return res
+	}
+	return NIL
 }
 
 func (exInfo *ExInfo) Error() string {

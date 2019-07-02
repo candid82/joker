@@ -2883,7 +2883,7 @@
   Otherwise returns nil."
   {:added "1.0"}
   ^String [ex]
-  (when (instance? ExInfo ex)
+  (when (instance? Error ex)
     (ex-message__ ex)))
 
 (defn hash

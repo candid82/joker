@@ -157,6 +157,10 @@ func (err *EvalError) WithInfo(info *ObjectInfo) Object {
 	return err
 }
 
+func (err *EvalError) Message() Object {
+	return MakeString(err.msg)
+}
+
 func (err *EvalError) Error() string {
 	pos := err.pos
 	if len(err.rt.callstack.frames) > 0 && !LINTER_MODE {

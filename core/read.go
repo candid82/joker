@@ -125,6 +125,10 @@ func DeriveReadObject(base Object, obj Object) Object {
 	return obj
 }
 
+func (err ReadError) Message() Object {
+	return MakeString(err.msg)
+}
+
 func (err ReadError) Error() string {
 	return fmt.Sprintf("%s:%d:%d: Read error: %s", filename(err.filename), err.line, err.column, err.msg)
 }
