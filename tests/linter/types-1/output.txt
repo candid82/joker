@@ -284,3 +284,6 @@ tests/linter/types-1/input.clj:186:7: Parse warning: arg[0] of core/run! must ha
 tests/linter/types-1/input.clj:187:12: Parse warning: arg[0] of core/halt-when must have type Callable, got Int
 tests/linter/types-1/input.clj:187:14: Parse warning: arg[1] of core/halt-when must have type Callable, got Int
 tests/linter/types-1/input.clj:188:6: Parse warning: arg[0] of core/cat must have type Callable, got Int
+tests/linter/types-1/input.clj:189:14: Parse warning: arg[0] of core/read-string must have type String, got Int
+tests/linter/types-1/input.clj:190:14: Parse warning: arg[0] of core/read-string must have type Map, got Int
+tests/linter/types-1/input.clj:190:16: Parse warning: arg[1] of core/read-string must have type String, got Int
