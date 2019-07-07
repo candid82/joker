@@ -102,3 +102,9 @@
   {:added "1.0"
   :go "stat(filename)"}
   [^String filename])
+
+(defn ^Boolean exists?
+  "Returns true if file or directory with the given path exists. Otherwise returns false."
+  {:added "1.0"
+  :go "exists(path)"}
+  [^String path])

@@ -150,3 +150,14 @@ func stat(filename string) Object {
 	PanicOnErr(err)
 	return FileInfoMap(info.Name(), info)
 }
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	panic(RT.NewError(err.Error()))
+}

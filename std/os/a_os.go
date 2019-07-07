@@ -78,6 +78,20 @@ var exec_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var isexists_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := exists(path)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var exit_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -225,6 +239,11 @@ func init() {
   :exit - exit code of program (or attempt to execute it),
   :out - string capturing stdout of the program,
   :err - string capturing stderr of the program.`, "1.0"))
+
+	osNamespace.InternVar("exists?", isexists_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns true if file or directory with the given path exists. Otherwise returns false.`, "1.0"))
 
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
