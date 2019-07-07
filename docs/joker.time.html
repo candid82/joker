@@ -13,6 +13,9 @@
   <a href="#add">add</a>
 </li>
 <li>
+  <a href="#add-date">add-date</a>
+</li>
+<li>
   <a href="#ansi-c">ansi-c</a>
 </li>
 <li>
@@ -47,6 +50,9 @@
 </li>
 <li>
   <a href="#now">now</a>
+</li>
+<li>
+  <a href="#parse">parse</a>
 </li>
 <li>
   <a href="#parse-duration">parse-duration</a>
@@ -130,6 +136,15 @@
   <pre class="var-usage"><div><code>(add t d)</code></div>
 </pre>
   <p class="var-docstr">Returns the time t+d.</p>
+  
+</li>
+<li>
+  <h3 id="add-date">add-date</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(add-date t years months days)</code></div>
+</pre>
+  <p class="var-docstr">Returns the time t + (years, months, days).</p>
   
 </li>
 <li>
@@ -236,6 +251,15 @@
   <pre class="var-usage"><div><code>(now)</code></div>
 </pre>
   <p class="var-docstr">Returns the current local time.</p>
+  
+</li>
+<li>
+  <h3 id="parse">parse</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(parse layout value)</code></div>
+</pre>
+  <p class="var-docstr">Parses a time string.</p>
   
 </li>
 <li>
