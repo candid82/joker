@@ -1,0 +1,2 @@
+tests/linter/unused-keys/input.clj:5:7: Parse warning: unused binding: b
+tests/linter/unused-keys/input.clj:1:22: Parse warning: unused binding: m
