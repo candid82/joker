@@ -193,7 +193,9 @@
 (defn vec ^Vector [^Seqable coll] (vec__ coll))
 (defn not-every? ^Boolean [^Callable pred ^Seqable coll] (not (every? pred coll)))
 (defn not-any? ^Boolean [^Callable pred ^Seqable coll] (not (some pred coll)))
-(defn read-string [^String s] (read-string__ s))
+(defn read-string
+  ([^String s] (read-string__ s))
+  ([^Map opts ^String s] (read-string__ s)))
 
 ;; Clojure special forms not supported by Joker
 (defn new [& args])
