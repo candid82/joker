@@ -208,6 +208,7 @@ Below is the list of all configurable rules.
 | `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
 | `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
 | `unused-as`            | warn on unused `:as` binding                          | `true`        |
+| `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings | `true`        |
 | `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
 | `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
 
