@@ -2482,12 +2482,17 @@
          :tag ArrayMap}
   array-map array-map__)
 
+(defn ^:private mark-skip-unused__
+  [rule-name]
+  (fn [s]
+    (if (and *linter-mode* (false? (rule-name (:rules *linter-config*))))
+      (vary-meta s assoc :skip-unused true)
+      s)))
+
 ;redefine let and loop  with destructuring
 (defn ^:private destructure [bindings]
-  (let [mark-as (fn [s]
-                  (if (and *linter-mode* (false? (:unused-as (:rules *linter-config*))))
-                    (vary-meta s assoc :skip-unused true)
-                    s))
+  (let [mark-as (mark-skip-unused__ :unused-as)
+        mark-keys (mark-skip-unused__ :unused-keys)
         bents (partition 2 bindings)
         pb (fn pb [bvec b v]
              (let [pvec
@@ -2558,7 +2563,7 @@
                                      (dissoc b :as :or)
                                      transforms))]
                          (if (seq bes)
-                           (let [bb (key (first bes))
+                           (let [bb (mark-keys (key (first bes)))
                                  bk (val (first bes))
                                  local (if (instance? Named bb) (derive-info__ (with-meta (symbol nil (name bb)) (meta bb)) bb) bb)
                                  bv (if (contains? defaults local)
