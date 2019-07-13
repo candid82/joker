@@ -34,3 +34,11 @@ func (f *File) Hash() uint32 {
 func (f *File) WithInfo(info *ObjectInfo) Object {
 	return f
 }
+
+func MakeFile(f *os.File) *File {
+	return &File{f}
+}
+
+func ExtractFile(args []Object, index int) *File {
+	return EnsureFile(args, index)
+}

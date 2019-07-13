@@ -698,3 +698,24 @@ func EnsurePending(args []Object, index int) Pending {
 		panic(RT.NewArgTypeError(index, c, "Pending"))
 	}
 }
+
+func AssertFile(obj Object, msg string) *File {
+	switch c := obj.(type) {
+	case *File:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "File", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func EnsureFile(args []Object, index int) *File {
+	switch c := args[index].(type) {
+	case *File:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "File"))
+	}
+}

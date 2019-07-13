@@ -1847,6 +1847,23 @@
              (next vs))
       map)))
 
+(defn ^:private line-seq*
+  [rdr]
+  (when-let [line (reader-read-line__ rdr)]
+    (cons line (lazy-seq (line-seq* rdr)))))
+
+(defn line-seq
+  "Returns the lines of text from rdr as a lazy sequence of strings.
+  rdr must be File or BufferedReader."
+  {:added "1.0"}
+  [rdr]
+  (cond
+    (instance? BufferedReader rdr)
+    (line-seq* rdr)
+
+    :else
+    (line-seq* (buffered-reader__ rdr))))
+
 (defmacro declare
   "defs the supplied var names with no bindings, useful for making forward declarations."
   {:added "1.0"}

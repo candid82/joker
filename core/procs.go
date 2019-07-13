@@ -1120,6 +1120,15 @@ func AssertStringReader(obj Object, msg string) StringReader {
 	}
 }
 
+func EnsureStringReader(args []Object, index int) StringReader {
+	switch c := args[index].(type) {
+	case StringReader:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "StringReader"))
+	}
+}
+
 func EnsureIOWriter(args []Object, index int) io.Writer {
 	switch c := args[index].(type) {
 	case io.Writer:
@@ -1172,6 +1181,16 @@ var procReadLine Proc = func(args []Object) Object {
 	CheckArity(args, 0, 0)
 	f := AssertStringReader(GLOBAL_ENV.stdin.Value, "")
 	line, err := readLine(f)
+	if err != nil {
+		return NIL
+	}
+	return String{S: line}
+}
+
+var procReaderReadLine Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	rdr := EnsureStringReader(args, 0)
+	line, err := readLine(rdr)
 	if err != nil {
 		return NIL
 	}
@@ -1362,6 +1381,15 @@ var procBuffer Proc = func(args []Object) Object {
 		return &Buffer{bytes.NewBufferString(s.S)}
 	}
 	return &Buffer{&bytes.Buffer{}}
+}
+
+var procBufferedReader Proc = func(args []Object) Object {
+	switch rdr := args[0].(type) {
+	case io.Reader:
+		return &BufferedReader{bufio.NewReader(rdr)}
+	default:
+		panic(RT.NewArgTypeError(0, args[0], "IOReader"))
+	}
 }
 
 var procSlurp Proc = func(args []Object) Object {
@@ -2019,6 +2047,7 @@ func init() {
 	intern("flush__", procFlush)
 	intern("read__", procRead)
 	intern("read-line__", procReadLine)
+	intern("reader-read-line__", procReaderReadLine)
 	intern("read-string__", procReadString)
 	intern("nano-time__", procNanoTime)
 	intern("macroexpand-1__", procMacroexpand1)
@@ -2041,6 +2070,7 @@ func init() {
 	intern("ns-resolve__", procNsResolve)
 	intern("array-map__", procArrayMap)
 	intern("buffer__", procBuffer)
+	intern("buffered-reader__", procBufferedReader)
 	intern("ex-info__", procExInfo)
 	intern("ex-data__", procExData)
 	intern("ex-cause__", procExCause)
