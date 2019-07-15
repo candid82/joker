@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -10,6 +11,7 @@ type (
 	TypeInfo struct {
 		Name     string
 		TypeName string
+		ShowName string
 	}
 )
 
@@ -21,6 +23,7 @@ package core
 var importFmt string = `
 import (
 	"fmt"
+	"io"
 )
 `
 
@@ -31,7 +34,7 @@ func Assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
 		return c
 	default:
 		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "{{.Name}}", obj.GetType().ToString(false))
+			msg = fmt.Sprintf("Expected %s, got %s", "{{.ShowName}}", obj.GetType().ToString(false))
 		}
 		panic(RT.NewError(msg))
 	}
@@ -44,7 +47,7 @@ func Ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
 	case {{.TypeName}}:
 		return c
 	default:
-		panic(RT.NewArgTypeError(index, c, "{{.Name}}"))
+		panic(RT.NewArgTypeError(index, c, "{{.ShowName}}"))
 	}
 }
 `
@@ -76,9 +79,13 @@ func generateAssertions(types []string) {
 		typeInfo := TypeInfo{
 			Name:     t,
 			TypeName: t,
+			ShowName: t,
 		}
 		if t[0] == '*' {
 			typeInfo.Name = t[1:]
+			typeInfo.ShowName = typeInfo.Name
+		} else if strings.ContainsRune(t, '.') {
+			typeInfo.Name = strings.ReplaceAll(t, ".", "_")
 		}
 		assert.Execute(f, typeInfo)
 		ensure.Execute(f, typeInfo)

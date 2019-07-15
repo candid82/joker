@@ -4,6 +4,7 @@ package core
 
 import (
 	"fmt"
+	"io"
 )
 
 func AssertComparable(obj Object, msg string) Comparable {
@@ -717,5 +718,89 @@ func EnsureFile(args []Object, index int) *File {
 		return c
 	default:
 		panic(RT.NewArgTypeError(index, c, "File"))
+	}
+}
+
+func Assertio_Reader(obj Object, msg string) io.Reader {
+	switch c := obj.(type) {
+	case io.Reader:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "io.Reader", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func Ensureio_Reader(args []Object, index int) io.Reader {
+	switch c := args[index].(type) {
+	case io.Reader:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "io.Reader"))
+	}
+}
+
+func Assertio_Writer(obj Object, msg string) io.Writer {
+	switch c := obj.(type) {
+	case io.Writer:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "io.Writer", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func Ensureio_Writer(args []Object, index int) io.Writer {
+	switch c := args[index].(type) {
+	case io.Writer:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "io.Writer"))
+	}
+}
+
+func AssertStringReader(obj Object, msg string) StringReader {
+	switch c := obj.(type) {
+	case StringReader:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "StringReader", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func EnsureStringReader(args []Object, index int) StringReader {
+	switch c := args[index].(type) {
+	case StringReader:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "StringReader"))
+	}
+}
+
+func Assertio_RuneReader(obj Object, msg string) io.RuneReader {
+	switch c := obj.(type) {
+	case io.RuneReader:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "io.RuneReader", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func Ensureio_RuneReader(args []Object, index int) io.RuneReader {
+	switch c := args[index].(type) {
+	case io.RuneReader:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "io.RuneReader"))
 	}
 }

@@ -28,7 +28,7 @@ func (b *Buffer) GetType() *Type {
 }
 
 func (b *Buffer) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(b)))
+	return HashPtr(uintptr(unsafe.Pointer(b)))
 }
 
 func (b *Buffer) WithInfo(info *ObjectInfo) Object {

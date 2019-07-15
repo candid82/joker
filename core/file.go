@@ -28,7 +28,7 @@ func (f *File) GetType() *Type {
 }
 
 func (f *File) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(f)))
+	return HashPtr(uintptr(unsafe.Pointer(f)))
 }
 
 func (f *File) WithInfo(info *ObjectInfo) Object {

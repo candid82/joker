@@ -150,7 +150,7 @@ func (err *EvalError) GetType() *Type {
 }
 
 func (err *EvalError) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(err)))
+	return HashPtr(uintptr(unsafe.Pointer(err)))
 }
 
 func (err *EvalError) WithInfo(info *ObjectInfo) Object {

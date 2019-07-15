@@ -28,7 +28,7 @@ func (br *BufferedReader) GetType() *Type {
 }
 
 func (br *BufferedReader) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(br)))
+	return HashPtr(uintptr(unsafe.Pointer(br)))
 }
 
 func (br *BufferedReader) WithInfo(info *ObjectInfo) Object {

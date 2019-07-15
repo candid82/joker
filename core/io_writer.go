@@ -28,7 +28,7 @@ func (iow *IOWriter) GetType() *Type {
 }
 
 func (iow *IOWriter) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(iow)))
+	return HashPtr(uintptr(unsafe.Pointer(iow)))
 }
 
 func (iow *IOWriter) WithInfo(info *ObjectInfo) Object {

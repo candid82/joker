@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
+	_ "github.com/candid82/joker/std/csv"
 	_ "github.com/candid82/joker/std/string"
 )
 
@@ -31,6 +32,10 @@ var files []FileInfo = []FileInfo{
 	{
 		name:     "<joker.core>",
 		filename: "core.joke",
+	},
+	{
+		name:     "<joker.csv>",
+		filename: "csv.joke",
 	},
 	{
 		name:     "<joker.repl>",
