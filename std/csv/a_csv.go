@@ -4,39 +4,19 @@ package csv
 
 import (
 	. "github.com/candid82/joker/core"
-	"encoding/csv"
-	"io"
 )
 
 var csvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.csv"))
 
 
 
-var csv_read_ Proc = func(_args []Object) Object {
+var csv_seq_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		r := ExtractCSVReader(_args, 0)
-		 var _res Object = NIL
-		_t, err := r.Read()
-		if err != io.EOF { 
-		PanicOnErr(err)
-		_res = MakeStringVector(_t)}
+		rdr := ExtractIOReader(_args, 0)
+		_res := csvSeq(rdr)
 		return _res
-
-	default:
-		PanicArity(_c)
-	}
-	return NIL
-}
-
-var csv_reader_ Proc = func(_args []Object) Object {
-	_c := len(_args)
-	switch {
-	case _c == 1:
-		s := ExtractIOReader(_args, 0)
-		_res := csv.NewReader(s)
-		return MakeCSVReader(_res)
 
 	default:
 		PanicArity(_c)
@@ -49,14 +29,10 @@ func init() {
 	csvNamespace.ResetMeta(MakeMeta(nil, "Reads and writes comma-separated values (CSV) files as defined in RFC 4180.", "1.0"))
 
 	
-	csvNamespace.InternVar("csv-read", csv_read_,
+	csvNamespace.InternVar("csv-seq", csv_seq_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("r"))),
-			`Read reads one record from r.`, "1.0"))
-
-	csvNamespace.InternVar("csv-reader", csv_reader_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns a new CSVReader that reads from r.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("rdr"))),
+			`Returns the csv records from rdr as a lazy sequence.
+  rdr must implement io.Reader.`, "1.0"))
 
 }

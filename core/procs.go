@@ -23,7 +23,6 @@ import (
 var (
 	coreData         []byte
 	replData         []byte
-	csvData          []byte
 	walkData         []byte
 	templateData     []byte
 	testData         []byte
@@ -71,7 +70,6 @@ func InitInternalLibs() {
 		"joker.test":      testData,
 		"joker.set":       setData,
 		"joker.tools.cli": tools_cliData,
-		"joker.csv":       csvData,
 	}
 }
 

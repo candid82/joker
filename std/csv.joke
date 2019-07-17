@@ -1,19 +1,14 @@
 (ns
-  ^{:go-imports ["encoding/csv", "io"]
+  ^{:go-imports []
     :doc "Reads and writes comma-separated values (CSV) files as defined in RFC 4180."}
   csv)
 
-(defn ^CSVReader csv-reader
-  "Returns a new CSVReader that reads from r."
+(defn csv-seq
+  "Returns the csv records from rdr as a lazy sequence.
+  rdr must implement io.Reader."
   {:added "1.0"
-  :go "csv.NewReader(s)"}
-  [^IOReader s])
-
-(defn csv-read
-  "Read reads one record from r."
-  {:added "1.0"
-   :go "! var _res Object = NIL; _t, err := r.Read(); if err != io.EOF { ; PanicOnErr(err); _res = MakeStringVector(_t)}"}
-  [^CSVReader r])
+  :go "csvSeq(rdr)"}
+  [^IOReader rdr])
 
 
 
