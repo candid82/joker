@@ -34,10 +34,10 @@
   This is done even if the field delimiter, comma, is white space.
   Default value is false."
   {:added "1.0"
-  :go {1 "csvSeq(rdr)"
+  :go {1 "csvSeqOpts(rdr, EmptyArrayMap())"
        2 "csvSeqOpts(rdr, opts)"}}
-  ([^IOReader rdr])
-  ([^IOReader rdr ^Map opts]))
+  ([^Object rdr])
+  ([^Object rdr ^Map opts]))
 
 
 

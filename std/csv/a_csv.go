@@ -14,12 +14,12 @@ var csv_seq_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		rdr := ExtractIOReader(_args, 0)
-		_res := csvSeq(rdr)
+		rdr := ExtractObject(_args, 0)
+		_res := csvSeqOpts(rdr, EmptyArrayMap())
 		return _res
 
 	case _c == 2:
-		rdr := ExtractIOReader(_args, 0)
+		rdr := ExtractObject(_args, 0)
 		opts := ExtractMap(_args, 1)
 		_res := csvSeqOpts(rdr, opts)
 		return _res

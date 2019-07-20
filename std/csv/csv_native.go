@@ -3,6 +3,7 @@ package csv
 import (
 	"encoding/csv"
 	"io"
+	"strings"
 
 	. "github.com/candid82/joker/core"
 )
@@ -19,13 +20,16 @@ func csvLazySeq(rdr *csv.Reader) *LazySeq {
 	return NewLazySeq(c)
 }
 
-func csvSeq(rdr io.Reader) Object {
-	csvReader := csv.NewReader(rdr)
-	csvReader.ReuseRecord = true
-	return csvLazySeq(csvReader)
-}
-
-func csvSeqOpts(rdr io.Reader, opts Map) Object {
+func csvSeqOpts(src Object, opts Map) Object {
+	var rdr io.Reader
+	switch src := src.(type) {
+	case String:
+		rdr = strings.NewReader(src.S)
+	case io.Reader:
+		rdr = src
+	default:
+		panic(RT.NewError("src must be a string or io.Reader"))
+	}
 	csvReader := csv.NewReader(rdr)
 	csvReader.ReuseRecord = true
 	if ok, c := opts.Get(MakeKeyword("comma")); ok {
