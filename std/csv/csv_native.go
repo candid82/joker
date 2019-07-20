@@ -21,5 +21,27 @@ func csvLazySeq(rdr *csv.Reader) *LazySeq {
 
 func csvSeq(rdr io.Reader) Object {
 	csvReader := csv.NewReader(rdr)
+	csvReader.ReuseRecord = true
+	return csvLazySeq(csvReader)
+}
+
+func csvSeqOpts(rdr io.Reader, opts Map) Object {
+	csvReader := csv.NewReader(rdr)
+	csvReader.ReuseRecord = true
+	if ok, c := opts.Get(MakeKeyword("comma")); ok {
+		csvReader.Comma = AssertChar(c, "comma must be a char").Ch
+	}
+	if ok, c := opts.Get(MakeKeyword("comment")); ok {
+		csvReader.Comment = AssertChar(c, "comment must be a char").Ch
+	}
+	if ok, c := opts.Get(MakeKeyword("fields-per-record")); ok {
+		csvReader.FieldsPerRecord = AssertInt(c, "fields-per-record must be an integer").I
+	}
+	if ok, c := opts.Get(MakeKeyword("lazy-quotes")); ok {
+		csvReader.LazyQuotes = AssertBoolean(c, "lazy-quotes must be an boolean").B
+	}
+	if ok, c := opts.Get(MakeKeyword("trim-leading-space")); ok {
+		csvReader.TrimLeadingSpace = AssertBoolean(c, "trim-leading-space must be an boolean").B
+	}
 	return csvLazySeq(csvReader)
 }
