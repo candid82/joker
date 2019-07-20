@@ -39,5 +39,19 @@
   ([^Object rdr])
   ([^Object rdr ^Map opts]))
 
+(defn ^String write-string
+  "Writes records to a string in CSV format and returns the string.
+  data must be Seqable, each element of which must be Seqable as well.
+  opts may have the following keys:
+
+  :comma - field delimiter (defaults to ',')
+
+  :use-crlf - if true, uses \\r\\n as the line terminator. Default value is false."
+  {:added "1.0"
+  :go {1 "writeString(data, EmptyArrayMap())"
+       2 "writeString(data, opts)"}}
+  ([^Seqable data])
+  ([^Seqable data ^Map opts]))
+
 
 

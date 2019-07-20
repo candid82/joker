@@ -30,6 +30,26 @@ var csv_seq_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var write_string_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		data := ExtractSeqable(_args, 0)
+		_res := writeString(data, EmptyArrayMap())
+		return MakeString(_res)
+
+	case _c == 2:
+		data := ExtractSeqable(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := writeString(data, opts)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func init() {
 
 	csvNamespace.ResetMeta(MakeMeta(nil, "Reads and writes comma-separated values (CSV) files as defined in RFC 4180.", "1.0"))
@@ -67,5 +87,16 @@ func init() {
   :trim-leading-space - if true, leading white space in a field is ignored.
   This is done even if the field delimiter, comma, is white space.
   Default value is false.`, "1.0"))
+
+	csvNamespace.InternVar("write-string", write_string_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("data")), NewVectorFrom(MakeSymbol("data"), MakeSymbol("opts"))),
+			`Writes records to a string in CSV format and returns that string.
+  data must be Seqable, each element of which must be Seqable as well.
+  opts may have the following keys:
+
+  :comma - field delimiter (defaults to ',')
+
+  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.`, "1.0"))
 
 }
