@@ -53,5 +53,16 @@
   ([^Seqable data])
   ([^Seqable data ^Map opts]))
 
+(defn write
+  "Writes records to a CSV encoded file.
+  f must be io.Writer (for example, as returned by joker.os/create).
+  data must be Seqable, each element of which must be Seqable as well.
+  opts is as in joker.csv/write-string."
+  {:added "1.0"
+  :go {2 "write(f, data, EmptyArrayMap())"
+       3 "write(f, data, opts)"}}
+  ([^IOWriter f ^Seqable data])
+  ([^IOWriter f ^Seqable data ^Map opts]))
+
 
 

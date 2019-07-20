@@ -59,21 +59,30 @@ func sliceOfStrings(obj Object) (res []string) {
 	return
 }
 
-func writeString(data Seqable, opts Map) string {
-	var b strings.Builder
-	wr := csv.NewWriter(&b)
+func writeWriter(wr io.Writer, data Seqable, opts Map) {
+	csvWriter := csv.NewWriter(wr)
 	if ok, c := opts.Get(MakeKeyword("comma")); ok {
-		wr.Comma = AssertChar(c, "comma must be a char").Ch
+		csvWriter.Comma = AssertChar(c, "comma must be a char").Ch
 	}
 	if ok, c := opts.Get(MakeKeyword("use-crlf")); ok {
-		wr.UseCRLF = AssertBoolean(c, "use-crlf must be a boolean").B
+		csvWriter.UseCRLF = AssertBoolean(c, "use-crlf must be a boolean").B
 	}
 	s := data.Seq()
 	for !s.IsEmpty() {
-		err := wr.Write(sliceOfStrings(s.First()))
+		err := csvWriter.Write(sliceOfStrings(s.First()))
 		PanicOnErr(err)
 		s = s.Rest()
 	}
-	wr.Flush()
+	csvWriter.Flush()
+}
+
+func write(wr io.Writer, data Seqable, opts Map) Object {
+	writeWriter(wr, data, opts)
+	return NIL
+}
+
+func writeString(data Seqable, opts Map) string {
+	var b strings.Builder
+	writeWriter(&b, data, opts)
 	return b.String()
 }

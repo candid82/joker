@@ -116,6 +116,12 @@
   :go "! _res, err := os.Open(name); PanicOnErr(err)"}
   [^String name])
 
+(defn ^File create
+  "Creates the named file with mode 0666 (before umask), truncating it if it already exists."
+  {:added "1.0"
+  :go "! _res, err := os.Create(name); PanicOnErr(err)"}
+  [^String name])
+
 (defn close
   "Closes the file, rendering it unusable for I/O."
   {:added "1.0"

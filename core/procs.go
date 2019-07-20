@@ -141,6 +141,10 @@ func ExtractIOReader(args []Object, index int) io.Reader {
 	return Ensureio_Reader(args, index)
 }
 
+func ExtractIOWriter(args []Object, index int) io.Writer {
+	return Ensureio_Writer(args, index)
+}
+
 var procMeta Proc = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Meta:

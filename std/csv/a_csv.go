@@ -30,6 +30,28 @@ var csv_seq_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var write_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		f := ExtractIOWriter(_args, 0)
+		data := ExtractSeqable(_args, 1)
+		_res := write(f, data, EmptyArrayMap())
+		return _res
+
+	case _c == 3:
+		f := ExtractIOWriter(_args, 0)
+		data := ExtractSeqable(_args, 1)
+		opts := ExtractMap(_args, 2)
+		_res := write(f, data, opts)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var write_string_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -88,10 +110,18 @@ func init() {
   This is done even if the field delimiter, comma, is white space.
   Default value is false.`, "1.0"))
 
+	csvNamespace.InternVar("write", write_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("f"), MakeSymbol("data")), NewVectorFrom(MakeSymbol("f"), MakeSymbol("data"), MakeSymbol("opts"))),
+			`Writes records to a CSV encoded file.
+  f must be io.Writer (for example, as returned by joker.os/create).
+  data must be Seqable, each element of which must be Seqable as well.
+  opts is as in joker.csv/write-string.`, "1.0"))
+
 	csvNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data")), NewVectorFrom(MakeSymbol("data"), MakeSymbol("opts"))),
-			`Writes records to a string in CSV format and returns that string.
+			`Writes records to a string in CSV format and returns the string.
   data must be Seqable, each element of which must be Seqable as well.
   opts may have the following keys:
 

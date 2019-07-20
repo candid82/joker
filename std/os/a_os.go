@@ -54,6 +54,21 @@ var close_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var create_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		 _res, err := os.Create(name)
+		PanicOnErr(err)
+		return MakeFile(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var cwd_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -249,6 +264,11 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
 			`Closes the file, rendering it unusable for I/O.`, "1.0"))
+
+	osNamespace.InternVar("create", create_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			`Creates the named file with mode 0666 (before umask), truncating it if it already exists.`, "1.0"))
 
 	osNamespace.InternVar("cwd", cwd_,
 		MakeMeta(
