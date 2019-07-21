@@ -28,6 +28,7 @@ type (
 const EOF = -1
 
 var LINTER_MODE bool = false
+var FORMAT_MODE bool = false
 var PROBLEM_COUNT = 0
 var DIALECT Dialect
 var LINTER_CONFIG *Var
@@ -1069,6 +1070,9 @@ func Read(reader *Reader) (Object, bool) {
 		nextObj := readFirst(reader)
 		return makeQuote(nextObj, SYMBOLS.quote), false
 	case r == '@':
+		if FORMAT_MODE {
+			return readSymbol(reader, r), false
+		}
 		popPos()
 		nextObj := readFirst(reader)
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj)), false

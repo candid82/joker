@@ -1572,6 +1572,9 @@ var procIncProblemCount Proc = func(args []Object) Object {
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
+	if phase == FORMAT {
+		FORMAT_MODE = true
+	}
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value

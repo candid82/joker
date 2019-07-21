@@ -72,3 +72,5 @@
 (test-call
  1 2
  3)
+
+@mfatom
