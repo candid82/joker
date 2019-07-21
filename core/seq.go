@@ -191,6 +191,10 @@ func (seq *LazySeq) Cons(obj Object) Seq {
 
 func (seq *LazySeq) sequential() {}
 
+func NewLazySeq(c Callable) *LazySeq {
+	return &LazySeq{fn: c}
+}
+
 func (seq *ArraySeq) Seq() Seq {
 	return seq
 }
@@ -313,6 +317,13 @@ func (seq *ConsSeq) Cons(obj Object) Seq {
 }
 
 func (seq *ConsSeq) sequential() {}
+
+func NewConsSeq(first Object, rest Seq) *ConsSeq {
+	return &ConsSeq{
+		first: first,
+		rest:  rest,
+	}
+}
 
 func iter(seq Seq) *SeqIterator {
 	return &SeqIterator{seq: seq}

@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports []
+  ^{:go-imports ["os"]
     :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
@@ -102,3 +102,28 @@
   {:added "1.0"
   :go "stat(filename)"}
   [^String filename])
+
+(defn ^Boolean exists?
+  "Returns true if file or directory with the given path exists. Otherwise returns false."
+  {:added "1.0"
+  :go "exists(path)"}
+  [^String path])
+
+(defn ^File open
+  "Opens the named file for reading. If successful, the file can be used for reading;
+  the associated file descriptor has mode O_RDONLY."
+  {:added "1.0"
+  :go "! _res, err := os.Open(name); PanicOnErr(err)"}
+  [^String name])
+
+(defn ^File create
+  "Creates the named file with mode 0666 (before umask), truncating it if it already exists."
+  {:added "1.0"
+  :go "! _res, err := os.Create(name); PanicOnErr(err)"}
+  [^String name])
+
+(defn close
+  "Closes the file, rendering it unusable for I/O."
+  {:added "1.0"
+  :go "! err := f.Close(); PanicOnErr(err); _res := NIL"}
+  [^File f])

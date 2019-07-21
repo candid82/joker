@@ -4,6 +4,7 @@ package os
 
 import (
 	. "github.com/candid82/joker/core"
+	"os"
 )
 
 var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
@@ -30,6 +31,37 @@ var chdir_ Proc = func(_args []Object) Object {
 		dirname := ExtractString(_args, 0)
 		_res := chdir(dirname)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var close_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		f := ExtractFile(_args, 0)
+		 err := f.Close()
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var create_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		 _res, err := os.Create(name)
+		PanicOnErr(err)
+		return MakeFile(_res)
 
 	default:
 		PanicArity(_c)
@@ -78,6 +110,20 @@ var exec_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var isexists_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		_res := exists(path)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var exit_ Proc = func(_args []Object) Object {
 	_c := len(_args)
 	switch {
@@ -115,6 +161,21 @@ var mkdir_ Proc = func(_args []Object) Object {
 		perm := ExtractInt(_args, 1)
 		_res := mkdir(name, perm)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var open_ Proc = func(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		 _res, err := os.Open(name)
+		PanicOnErr(err)
+		return MakeFile(_res)
 
 	default:
 		PanicArity(_c)
@@ -199,6 +260,16 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
 			`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
 
+	osNamespace.InternVar("close", close_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
+			`Closes the file, rendering it unusable for I/O.`, "1.0"))
+
+	osNamespace.InternVar("create", create_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			`Creates the named file with mode 0666 (before umask), truncating it if it already exists.`, "1.0"))
+
 	osNamespace.InternVar("cwd", cwd_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
@@ -226,6 +297,11 @@ func init() {
   :out - string capturing stdout of the program,
   :err - string capturing stderr of the program.`, "1.0"))
 
+	osNamespace.InternVar("exists?", isexists_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Returns true if file or directory with the given path exists. Otherwise returns false.`, "1.0"))
+
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
@@ -240,6 +316,12 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
 			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+
+	osNamespace.InternVar("open", open_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			`Opens the named file for reading. If successful, the file can be used for reading;
+  the associated file descriptor has mode O_RDONLY.`, "1.0"))
 
 	osNamespace.InternVar("set-env", set_env_,
 		MakeMeta(

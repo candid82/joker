@@ -597,11 +597,15 @@ func (err *ParseError) GetType() *Type {
 }
 
 func (err *ParseError) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(err)))
+	return HashPtr(uintptr(unsafe.Pointer(err)))
 }
 
 func (err *ParseError) WithInfo(info *ObjectInfo) Object {
 	return err
+}
+
+func (err *ParseError) Message() Object {
+	return MakeString(err.msg)
 }
 
 func (err ParseError) Error() string {

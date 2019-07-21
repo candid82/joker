@@ -186,3 +186,5 @@
 (run! 1 2)
 (halt-when 1 2)
 (cat 1)
+(read-string 1)
+(read-string 1 2)

@@ -57,7 +57,7 @@ func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
 }
 
 func (ns *Namespace) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(ns)))
+	return HashPtr(uintptr(unsafe.Pointer(ns)))
 }
 
 func NewNamespace(sym Symbol) *Namespace {

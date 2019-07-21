@@ -1,5 +1,5 @@
 //go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
@@ -55,6 +55,7 @@ type (
 	Error interface {
 		error
 		Object
+		Message() Object
 	}
 	Meta interface {
 		GetMeta() Map
@@ -301,7 +302,7 @@ type (
 var TYPES = map[*string]*Type{}
 var TYPE Types
 
-func regRefType(name string, inst interface{}) *Type {
+func RegRefType(name string, inst interface{}) *Type {
 	t := &Type{name: name, reflectType: reflect.TypeOf(inst)}
 	TYPES[STRINGS.Intern(name)] = t
 	return t
@@ -346,47 +347,47 @@ func init() {
 		Sequential:     regInterface("Sequential", (*Sequential)(nil)),
 		Set:            regInterface("Set", (*Set)(nil)),
 		Stack:          regInterface("Stack", (*Stack)(nil)),
-		ArrayMap:       regRefType("ArrayMap", (*ArrayMap)(nil)),
-		ArrayMapSeq:    regRefType("ArrayMapSeq", (*ArrayMapSeq)(nil)),
-		ArrayNodeSeq:   regRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil)),
-		ArraySeq:       regRefType("ArraySeq", (*ArraySeq)(nil)),
-		MapSet:         regRefType("MapSet", (*MapSet)(nil)),
-		Atom:           regRefType("Atom", (*Atom)(nil)),
-		BigFloat:       regRefType("BigFloat", (*BigFloat)(nil)),
-		BigInt:         regRefType("BigInt", (*BigInt)(nil)),
+		ArrayMap:       RegRefType("ArrayMap", (*ArrayMap)(nil)),
+		ArrayMapSeq:    RegRefType("ArrayMapSeq", (*ArrayMapSeq)(nil)),
+		ArrayNodeSeq:   RegRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil)),
+		ArraySeq:       RegRefType("ArraySeq", (*ArraySeq)(nil)),
+		MapSet:         RegRefType("MapSet", (*MapSet)(nil)),
+		Atom:           RegRefType("Atom", (*Atom)(nil)),
+		BigFloat:       RegRefType("BigFloat", (*BigFloat)(nil)),
+		BigInt:         RegRefType("BigInt", (*BigInt)(nil)),
 		Boolean:        regType("Boolean", (*Boolean)(nil)),
 		Time:           regType("Time", (*Time)(nil)),
-		Buffer:         regRefType("Buffer", (*Buffer)(nil)),
+		Buffer:         RegRefType("Buffer", (*Buffer)(nil)),
 		Char:           regType("Char", (*Char)(nil)),
-		ConsSeq:        regRefType("ConsSeq", (*ConsSeq)(nil)),
-		Delay:          regRefType("Delay", (*Delay)(nil)),
+		ConsSeq:        RegRefType("ConsSeq", (*ConsSeq)(nil)),
+		Delay:          RegRefType("Delay", (*Delay)(nil)),
 		Double:         regType("Double", (*Double)(nil)),
-		EvalError:      regRefType("EvalError", (*EvalError)(nil)),
-		ExInfo:         regRefType("ExInfo", (*ExInfo)(nil)),
-		Fn:             regRefType("Fn", (*Fn)(nil)),
-		File:           regRefType("File", (*File)(nil)),
-		BufferedReader: regRefType("BufferedReader", (*BufferedReader)(nil)),
-		HashMap:        regRefType("HashMap", (*HashMap)(nil)),
+		EvalError:      RegRefType("EvalError", (*EvalError)(nil)),
+		ExInfo:         RegRefType("ExInfo", (*ExInfo)(nil)),
+		Fn:             RegRefType("Fn", (*Fn)(nil)),
+		File:           RegRefType("File", (*File)(nil)),
+		BufferedReader: RegRefType("BufferedReader", (*BufferedReader)(nil)),
+		HashMap:        RegRefType("HashMap", (*HashMap)(nil)),
 		Int:            regType("Int", (*Int)(nil)),
 		Keyword:        regType("Keyword", (*Keyword)(nil)),
-		LazySeq:        regRefType("LazySeq", (*LazySeq)(nil)),
-		List:           regRefType("List", (*List)(nil)),
-		MappingSeq:     regRefType("MappingSeq", (*MappingSeq)(nil)),
-		Namespace:      regRefType("Namespace", (*Namespace)(nil)),
+		LazySeq:        RegRefType("LazySeq", (*LazySeq)(nil)),
+		List:           RegRefType("List", (*List)(nil)),
+		MappingSeq:     RegRefType("MappingSeq", (*MappingSeq)(nil)),
+		Namespace:      RegRefType("Namespace", (*Namespace)(nil)),
 		Nil:            regType("Nil", (*Nil)(nil)),
-		NodeSeq:        regRefType("NodeSeq", (*NodeSeq)(nil)),
-		ParseError:     regRefType("ParseError", (*ParseError)(nil)),
-		Proc:           regRefType("Proc", (*Proc)(nil)),
-		Ratio:          regRefType("Ratio", (*Ratio)(nil)),
-		RecurBindings:  regRefType("RecurBindings", (*RecurBindings)(nil)),
+		NodeSeq:        RegRefType("NodeSeq", (*NodeSeq)(nil)),
+		ParseError:     RegRefType("ParseError", (*ParseError)(nil)),
+		Proc:           RegRefType("Proc", (*Proc)(nil)),
+		Ratio:          RegRefType("Ratio", (*Ratio)(nil)),
+		RecurBindings:  RegRefType("RecurBindings", (*RecurBindings)(nil)),
 		Regex:          regType("Regex", (*Regex)(nil)),
 		String:         regType("String", (*String)(nil)),
 		Symbol:         regType("Symbol", (*Symbol)(nil)),
-		Type:           regRefType("Type", (*Type)(nil)),
-		Var:            regRefType("Var", (*Var)(nil)),
-		Vector:         regRefType("Vector", (*Vector)(nil)),
-		VectorRSeq:     regRefType("VectorRSeq", (*VectorRSeq)(nil)),
-		VectorSeq:      regRefType("VectorSeq", (*VectorSeq)(nil)),
+		Type:           RegRefType("Type", (*Type)(nil)),
+		Var:            RegRefType("Var", (*Var)(nil)),
+		Vector:         RegRefType("Vector", (*Vector)(nil)),
+		VectorRSeq:     RegRefType("VectorRSeq", (*VectorRSeq)(nil)),
+		VectorSeq:      RegRefType("VectorSeq", (*VectorSeq)(nil)),
 	}
 }
 
@@ -528,7 +529,7 @@ func (s SortableSlice) Less(i, j int) bool {
 	return s.cmp.Compare(s.s[i], s.s[j]) == -1
 }
 
-func hashPtr(ptr uintptr) uint32 {
+func HashPtr(ptr uintptr) uint32 {
 	h := getHash()
 	b := make([]byte, unsafe.Sizeof(ptr))
 	b[0] = byte(ptr)
@@ -579,7 +580,7 @@ func (a *Atom) GetType() *Type {
 }
 
 func (a *Atom) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(a)))
+	return HashPtr(uintptr(unsafe.Pointer(a)))
 }
 
 func (a *Atom) WithInfo(info *ObjectInfo) Object {
@@ -622,7 +623,7 @@ func (d *Delay) GetType() *Type {
 }
 
 func (d *Delay) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(d)))
+	return HashPtr(uintptr(unsafe.Pointer(d)))
 }
 
 func (d *Delay) WithInfo(info *ObjectInfo) Object {
@@ -661,7 +662,7 @@ func (t *Type) GetType() *Type {
 }
 
 func (t *Type) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(t)))
+	return HashPtr(uintptr(unsafe.Pointer(t)))
 }
 
 func (rb RecurBindings) ToString(escape bool) string {
@@ -697,7 +698,14 @@ func (exInfo *ExInfo) GetType() *Type {
 }
 
 func (exInfo *ExInfo) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(exInfo)))
+	return HashPtr(uintptr(unsafe.Pointer(exInfo)))
+}
+
+func (exInfo *ExInfo) Message() Object {
+	if ok, res := exInfo.Get(KEYWORDS.message); ok {
+		return res
+	}
+	return NIL
 }
 
 func (exInfo *ExInfo) Error() string {
@@ -745,7 +753,7 @@ func (fn *Fn) GetType() *Type {
 }
 
 func (fn *Fn) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(fn)))
+	return HashPtr(uintptr(unsafe.Pointer(fn)))
 }
 
 func (fn *Fn) Call(args []Object) Object {
@@ -826,7 +834,7 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
-	return hashPtr(reflect.ValueOf(p).Pointer())
+	return HashPtr(reflect.ValueOf(p).Pointer())
 }
 
 func (i InfoHolder) GetInfo() *ObjectInfo {
@@ -882,7 +890,7 @@ func (v *Var) GetType() *Type {
 }
 
 func (v *Var) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(v)))
+	return HashPtr(uintptr(unsafe.Pointer(v)))
 }
 
 func (v *Var) Resolve() Object {
@@ -1310,7 +1318,7 @@ func (rx Regex) GetType() *Type {
 }
 
 func (rx Regex) Hash() uint32 {
-	return hashPtr(uintptr(unsafe.Pointer(rx.R)))
+	return HashPtr(uintptr(unsafe.Pointer(rx.R)))
 }
 
 func (s Symbol) ToString(escape bool) string {

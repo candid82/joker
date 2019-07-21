@@ -96,7 +96,6 @@
 (defn unchecked-subtract [x y])
 (defn file-seq [dir])
 (defn char-array ([size-or-seq]) ([size init-val-or-seq]))
-(defn line-seq [rdr])
 (defn conj! ([]) ([coll]) ([coll x]))
 (defn biginteger [x])
 (defn alter [ref fun & args])
