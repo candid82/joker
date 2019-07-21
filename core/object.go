@@ -1110,7 +1110,7 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%f", d.D)
+	return fmt.Sprintf("%g", d.D)
 }
 
 func (d Double) Equals(other interface{}) bool {

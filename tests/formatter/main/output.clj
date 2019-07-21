@@ -71,3 +71,37 @@
 (deftest t
   (is (= 1 2)))
 
+(def PI 3.14)
+
+(ns my.test
+  (:require my.test1
+            [my.test2]
+            [my.test3 :as test3 :refer [f1]])
+  (:import (java.time LocalDateTime ZonedDateTime ZoneId)
+           java.time.format.DateTimeFormatter))
+
+(defn test-docstring
+  "Given a multimethod and a dispatch value, returns the dispatch fn
+  that would apply to that value, or nil if none apply and no default"
+  {:added "1.0"}
+  [t]
+  (print "ha\n         ha"))
+
+(test-call 1 2 3)
+
+(test-call 1
+           2
+           3)
+
+(test-call 1 2
+           3)
+
+(test-call
+ 1
+ 2
+ 3)
+
+(test-call
+ 1 2
+ 3)
+
