@@ -76,6 +76,11 @@ func symMatching(obj Object, re *regexp.Regexp) bool {
 	}
 }
 
+func isNewLine(obj, nextObj Object) bool {
+	info, nextInfo := obj.GetInfo(), nextObj.GetInfo()
+	return !(info == nil || nextInfo == nil || info.endLine == nextInfo.startLine)
+}
+
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
 	fmt.Fprint(w, "(")
@@ -121,12 +126,12 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
 	} else {
 		newIndent := indent + 1
-		if !seq.IsEmpty() && obj.GetInfo().endLine == seq.First().GetInfo().startLine {
+		if !seq.IsEmpty() && isNewLine(obj, seq.First()) {
 			newIndent = i + 1
 		}
 		for !seq.IsEmpty() {
 			nextObj := seq.First()
-			if obj.GetInfo().endLine != nextObj.GetInfo().startLine {
+			if isNewLine(obj, nextObj) {
 				seq, i = seqFirstAfterBreak(seq, w, newIndent)
 			} else {
 				seq, i = seqFirstAfterSpace(seq, w, i)

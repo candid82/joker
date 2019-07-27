@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unicode/utf8"
 )
 
 var ExitJoker func(rc int)
@@ -31,13 +32,17 @@ func pprintObject(obj Object, indent int, w io.Writer) int {
 }
 
 func formatObject(obj Object, indent int, w io.Writer) int {
+	if info := obj.GetInfo(); info != nil {
+		fmt.Fprint(w, info.prefix)
+		indent += utf8.RuneCountInString(info.prefix)
+	}
 	switch obj := obj.(type) {
 	case Formatter:
 		return obj.Format(w, indent)
 	default:
 		s := obj.ToString(true)
 		fmt.Fprint(w, s)
-		return indent + len(s)
+		return indent + utf8.RuneCountInString(s)
 	}
 }
 

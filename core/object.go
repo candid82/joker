@@ -70,6 +70,7 @@ type (
 		meta Map
 	}
 	ObjectInfo struct {
+		prefix string
 		Position
 	}
 	InfoHolder struct {

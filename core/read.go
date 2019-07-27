@@ -1052,6 +1052,9 @@ func Read(reader *Reader) (Object, bool) {
 		}
 		return readSymbol(reader, r), false
 	case r == '%' && ARGS != nil:
+		if FORMAT_MODE {
+			return readSymbol(reader, r), false
+		}
 		return readArgSymbol(reader), false
 	case isSymbolInitial(r):
 		return readSymbol(reader, r), false
@@ -1068,6 +1071,10 @@ func Read(reader *Reader) (Object, bool) {
 	case r == '\'':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "'"
+			return nextObj, false
+		}
 		return makeQuote(nextObj, SYMBOLS.quote), false
 	case r == '@':
 		if FORMAT_MODE {
@@ -1081,13 +1088,25 @@ func Read(reader *Reader) (Object, bool) {
 		if reader.Peek() == '@' {
 			reader.Get()
 			nextObj := readFirst(reader)
+			if FORMAT_MODE {
+				nextObj.GetInfo().prefix = "~@"
+				return nextObj, false
+			}
 			return makeQuote(nextObj, SYMBOLS.unquoteSplicing), false
 		}
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "~"
+			return nextObj, false
+		}
 		return makeQuote(nextObj, SYMBOLS.unquote), false
 	case r == '`':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "`"
+			return nextObj, false
+		}
 		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader), false
 	case r == '^':
 		popPos()
