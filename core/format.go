@@ -126,7 +126,7 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
 	} else {
 		newIndent := indent + 1
-		if !seq.IsEmpty() && isNewLine(obj, seq.First()) {
+		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
 			newIndent = i + 1
 		}
 		for !seq.IsEmpty() {

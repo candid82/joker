@@ -75,6 +75,14 @@
 
 @mfatom
 
+@1
+
+#"t"
+
+#'t
+
+#^:t []
+
 #(inc %)
 
 'test
@@ -94,3 +102,44 @@
   ([x & next]
    `(let [and# ~x]
       (if and# (and ~@next) and#))))
+
+(def
+  ^{:arglists '([& items])
+    :doc "Creates a new list containing the items."
+    :added "1.0"
+    :tag List}
+  list list__)
+
+{1 2 3 4}
+
+{1 2
+ 3 4}
+
+[1 2
+ 3 4]
+
+#{1 2
+  3 4 5}
+
+[#?(:cljs 1)]
+(#?(:cljs 1))
+{#?(:cljs 1)}
+{#?@(:clj [1 2])}
+{#?@(:clj [])}
+#?(:clj 1)
+#?@(:cljs 3)
+(def regexp #?(:clj re-pattern :cljs js/XRegExp))
+
+
+;; Should FAIL
+
+#?(:cljs)
+#?(:cljs (let [] 1) :default (let [] 1))
+[#?@(:clj 1)]
+#?(:clj 234ewr :cljs 2)
+
+(defn ^:private line-seq*
+  [rdr]
+  (when-let [line (reader-read-line__ rdr)]
+    (cons line (lazy-seq (line-seq* rdr)))))
+

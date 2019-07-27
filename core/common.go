@@ -46,6 +46,16 @@ func formatObject(obj Object, indent int, w io.Writer) int {
 	}
 }
 
+func maybeNewLine(w io.Writer, obj, nextObj Object, baseIndent, currentIndent int) int {
+	if isNewLine(obj, nextObj) {
+		fmt.Fprint(w, "\n")
+		writeIndent(w, baseIndent)
+		return baseIndent
+	}
+	fmt.Fprint(w, " ")
+	return currentIndent + 1
+}
+
 func FileInfoMap(name string, info os.FileInfo) Map {
 	m := EmptyArrayMap()
 	m.Add(MakeKeyword("name"), MakeString(name))

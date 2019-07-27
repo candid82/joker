@@ -282,3 +282,7 @@ func (m *ArrayMap) Empty() Collection {
 func (m *ArrayMap) Pprint(w io.Writer, indent int) int {
 	return pprintMap(m, w, indent)
 }
+
+func (m *ArrayMap) Format(w io.Writer, indent int) int {
+	return formatMap(m, w, indent)
+}

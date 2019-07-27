@@ -485,3 +485,17 @@ func (v *Vector) Pprint(w io.Writer, indent int) int {
 	fmt.Fprint(w, "]")
 	return ind + 1
 }
+
+func (v *Vector) Format(w io.Writer, indent int) int {
+	ind := indent + 1
+	fmt.Fprint(w, "[")
+	if v.count > 0 {
+		for i := 0; i < v.count-1; i++ {
+			ind = formatObject(v.at(i), ind, w)
+			ind = maybeNewLine(w, v.at(i), v.at(i+1), indent+1, ind)
+		}
+		ind = pprintObject(v.at(v.count-1), ind, w)
+	}
+	fmt.Fprint(w, "]")
+	return ind + 1
+}

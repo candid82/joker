@@ -988,15 +988,29 @@ func readDispatch(reader *Reader) (Object, bool) {
 	case '\'':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "#'"
+			return nextObj, false
+		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj)), false
 	case '^':
 		popPos()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "#^"
+			return nextObj, false
+		}
 		return readWithMeta(reader), false
 	case '{':
 		return readSet(reader), false
 	case '(':
 		popPos()
 		reader.Unget()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "#"
+			return nextObj, false
+		}
 		ARGS = make(map[int]Symbol)
 		fn := readFirst(reader)
 		res := makeFnForm(ARGS, fn)
@@ -1077,11 +1091,12 @@ func Read(reader *Reader) (Object, bool) {
 		}
 		return makeQuote(nextObj, SYMBOLS.quote), false
 	case r == '@':
-		if FORMAT_MODE {
-			return readSymbol(reader, r), false
-		}
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "@"
+			return nextObj, false
+		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj)), false
 	case r == '~':
 		popPos()
@@ -1110,6 +1125,11 @@ func Read(reader *Reader) (Object, bool) {
 		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader), false
 	case r == '^':
 		popPos()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "^"
+			return nextObj, false
+		}
 		return readWithMeta(reader), false
 	case r == '#':
 		return readDispatch(reader)
