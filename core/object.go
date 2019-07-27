@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 	"unsafe"
 )
 
@@ -1405,7 +1406,7 @@ func (s String) Hash() uint32 {
 }
 
 func (s String) Count() int {
-	return len(s.S)
+	return utf8.RuneCountInString(s.S)
 }
 
 func (s String) Seq() Seq {
