@@ -888,6 +888,14 @@ func readConditional(reader *Reader) (Object, bool) {
 		panic(MakeReadError(reader, "Reader conditional body must be a list"))
 	}
 	cond := readList(reader).(*List)
+	if FORMAT_MODE {
+		if isSplicing {
+			cond.GetInfo().prefix = "#?@"
+		} else {
+			cond.GetInfo().prefix = "#?"
+		}
+		return cond, false
+	}
 	if cond.count%2 != 0 {
 		if LINTER_MODE {
 			printReadError(reader, "Reader conditional requires an even number of forms")
@@ -916,6 +924,17 @@ func readConditional(reader *Reader) (Object, bool) {
 		cond = cond.rest.rest
 	}
 	return EmptyVector(), true
+}
+
+func namespacedMapPrefix(auto bool, nsSym Object) string {
+	res := "#:"
+	if auto {
+		res += ":"
+	}
+	if nsSym != nil {
+		res += nsSym.ToString(false)
+	}
+	return res
 }
 
 func readNamespacedMap(reader *Reader) Object {
@@ -947,6 +966,11 @@ func readNamespacedMap(reader *Reader) Object {
 	}
 	if r != '{' {
 		panic(MakeReadError(reader, "Namespaced map must specify a map"))
+	}
+	if FORMAT_MODE {
+		obj := readMap(reader)
+		obj.GetInfo().prefix = namespacedMapPrefix(auto, sym)
+		return obj
 	}
 	var nsname string
 	if auto {

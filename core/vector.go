@@ -494,7 +494,7 @@ func (v *Vector) Format(w io.Writer, indent int) int {
 			ind = formatObject(v.at(i), ind, w)
 			ind = maybeNewLine(w, v.at(i), v.at(i+1), indent+1, ind)
 		}
-		ind = pprintObject(v.at(v.count-1), ind, w)
+		ind = formatObject(v.at(v.count-1), ind, w)
 	}
 	fmt.Fprint(w, "]")
 	return ind + 1
