@@ -856,6 +856,10 @@ func handleNoReaderError(reader *Reader, s Symbol) Object {
 
 func readTagged(reader *Reader) Object {
 	obj := readFirst(reader)
+	if FORMAT_MODE {
+		obj.GetInfo().prefix = "#"
+		return obj
+	}
 	switch s := obj.(type) {
 	case Symbol:
 		readersVar, ok := GLOBAL_ENV.CoreNamespace.mappings[SYMBOLS.defaultDataReaders.name]

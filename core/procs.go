@@ -1585,9 +1585,13 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.file.Value = String{S: s}
 	}
+	var prevObj Object
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
+			if FORMAT_MODE && prevObj != nil {
+				fmt.Fprint(Stdout, "\n")
+			}
 			return nil
 		}
 		if err != nil {
@@ -1598,8 +1602,15 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			continue
 		}
 		if phase == FORMAT {
+			if prevObj != nil {
+				if isNewLine(prevObj, obj) {
+					fmt.Fprint(Stdout, "\n\n")
+				} else {
+					fmt.Fprint(Stdout, " ")
+				}
+			}
 			formatObject(obj, 0, Stdout)
-			fmt.Fprint(Stdout, "\n\n")
+			prevObj = obj
 			continue
 		}
 		expr, err := TryParse(obj, parseContext)

@@ -143,6 +143,14 @@
 ;; Should FAIL
 #::{g 1}
 
+#inst 1
+#uuid 2
+
+;; Should FAIL
+
+#t 4
+#g [a]
+
 (defn ^:private line-seq*
   [rdr]
   (when-let [line (reader-read-line__ rdr)]

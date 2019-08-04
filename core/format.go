@@ -66,11 +66,13 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 }
 
 var defRegex *regexp.Regexp = regexp.MustCompile("def.+")
+var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
+var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
 
-func symMatching(obj Object, re *regexp.Regexp) bool {
+func isOneAndBodyExpr(obj Object) bool {
 	switch s := obj.(type) {
 	case Symbol:
-		return re.MatchString(*s.name)
+		return defRegex.MatchString(*s.name) || ifRegex.MatchString(*s.name) || whenRegex.MatchString(*s.name)
 	default:
 		return false
 	}
@@ -86,8 +88,10 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	fmt.Fprint(w, "(")
 	obj := seq.First()
 	seq, i = seqFirst(seq, w, i)
-	if obj.Equals(SYMBOLS._if) || obj.Equals(MakeSymbol("ns")) || symMatching(obj, defRegex) {
+	if obj.Equals(MakeSymbol("ns")) || isOneAndBodyExpr(obj) {
 		seq, i = seqFirstAfterSpace(seq, w, i)
+
+		// TODO: this should only apply to def*
 		if docString, ok := seq.First().(String); ok {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+2)
@@ -124,6 +128,7 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
+		// fmt.Fprint(w, "\n")
 	} else {
 		newIndent := indent + 1
 		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
@@ -143,8 +148,15 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	}
 
 	for !seq.IsEmpty() {
-		seq, i = seqFirstAfterBreak(seq, w, indent+2)
+		nextObj := seq.First()
+		if isNewLine(obj, nextObj) {
+			seq, i = seqFirstAfterBreak(seq, w, indent+2)
+		} else {
+			seq, i = seqFirstAfterSpace(seq, w, i)
+		}
+		obj = nextObj
 	}
+
 	fmt.Fprint(w, ")")
 	return i + 1
 }
