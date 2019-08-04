@@ -16,6 +16,12 @@
   <a href="#chdir">chdir</a>
 </li>
 <li>
+  <a href="#close">close</a>
+</li>
+<li>
+  <a href="#create">create</a>
+</li>
+<li>
   <a href="#cwd">cwd</a>
 </li>
 <li>
@@ -35,6 +41,9 @@
 </li>
 <li>
   <a href="#mkdir">mkdir</a>
+</li>
+<li>
+  <a href="#open">open</a>
 </li>
 <li>
   <a href="#set-env">set-env</a>
@@ -67,6 +76,24 @@
   <pre class="var-usage"><div><code>(chdir dirname)</code></div>
 </pre>
   <p class="var-docstr">Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.</p>
+  
+</li>
+<li>
+  <h3 id="close">close</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(close f)</code></div>
+</pre>
+  <p class="var-docstr">Closes the file, rendering it unusable for I/O.</p>
+  
+</li>
+<li>
+  <h3 id="create">create</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(create name)</code></div>
+</pre>
+  <p class="var-docstr">Creates the named file with mode 0666 (before umask), truncating it if it already exists.</p>
   
 </li>
 <li>
@@ -142,6 +169,16 @@
   <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
 </pre>
   <p class="var-docstr">Creates a new directory with the specified name and permission bits.</p>
+  
+</li>
+<li>
+  <h3 id="open">open</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(open name)</code></div>
+</pre>
+  <p class="var-docstr">Opens the named file for reading. If successful, the file can be used for reading;<br>
+  the associated file descriptor has mode O_RDONLY.</p>
   
 </li>
 <li>
