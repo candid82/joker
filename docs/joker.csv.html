@@ -1,0 +1,95 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.csv</h1>
+    <span class="var-added">v1.0</span>
+    <p class="var-docstr">Reads and writes comma-separated values (CSV) files as defined in RFC 4180.</p>
+    <h2>Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#csv-seq">csv-seq</a>
+</li>
+<li>
+  <a href="#write">write</a>
+</li>
+<li>
+  <a href="#write-string">write-string</a>
+</li>
+
+    </ul>
+    <ul>
+      <li>
+  <h3 id="csv-seq">csv-seq</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(csv-seq rdr)</code></div>
+<div><code>(csv-seq rdr opts)</code></div>
+</pre>
+  <p class="var-docstr">Returns the csv records from rdr as a lazy sequence.<br>
+  rdr must implement io.Reader.<br>
+  opts may have the following keys:<br>
+<br>
+  :comma - field delimiter (defaults to ',').<br>
+  Must be a valid char and must not be \r, \n,<br>
+  or the Unicode replacement character (0xFFFD).<br>
+<br>
+  :comment - comment character (defaults to 0 meaning no comments).<br>
+  Lines beginning with the comment character without preceding whitespace are ignored.<br>
+  With leading whitespace the comment character becomes part of the<br>
+  field, even if trim-leading-space is true.<br>
+  comment must be a valid chat and must not be \r, \n,<br>
+  or the Unicode replacement character (0xFFFD).<br>
+  It must also not be equal to comma.<br>
+<br>
+  :fields-per-record - number of expected fields per record.<br>
+  If fields-per-record is positive, csv-seq requires each record to<br>
+  have the given number of fields. If fields-per-record is 0 (default), csv-seq sets it to<br>
+  the number of fields in the first record, so that future records must<br>
+  have the same field count. If fields-per-record is negative, no check is<br>
+  made and records may have a variable number of fields.<br>
+<br>
+  :lazy-quotes - if true, a quote may appear in an unquoted field and a<br>
+  non-doubled quote may appear in a quoted field. Default value is false.<br>
+<br>
+  :trim-leading-space - if true, leading white space in a field is ignored.<br>
+  This is done even if the field delimiter, comma, is white space.<br>
+  Default value is false.</p>
+  
+</li>
+<li>
+  <h3 id="write">write</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(write f data)</code></div>
+<div><code>(write f data opts)</code></div>
+</pre>
+  <p class="var-docstr">Writes records to a CSV encoded file.<br>
+  f must be io.Writer (for example, as returned by joker.os/create).<br>
+  data must be Seqable, each element of which must be Seqable as well.<br>
+  opts is as in joker.csv/write-string.</p>
+  
+</li>
+<li>
+  <h3 id="write-string">write-string</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(write-string data)</code></div>
+<div><code>(write-string data opts)</code></div>
+</pre>
+  <p class="var-docstr">Writes records to a string in CSV format and returns the string.<br>
+  data must be Seqable, each element of which must be Seqable as well.<br>
+  opts may have the following keys:<br>
+<br>
+  :comma - field delimiter (defaults to ',')<br>
+<br>
+  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.</p>
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+</html>
