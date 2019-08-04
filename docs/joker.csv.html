@@ -29,7 +29,7 @@
 <div><code>(csv-seq rdr opts)</code></div>
 </pre>
   <p class="var-docstr">Returns the csv records from rdr as a lazy sequence.<br>
-  rdr must implement io.Reader.<br>
+  rdr must be a string or implement io.Reader.<br>
   opts may have the following keys:<br>
 <br>
   :comma - field delimiter (defaults to ',').<br>

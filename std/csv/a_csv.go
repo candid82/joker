@@ -81,7 +81,7 @@ func init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
 			`Returns the csv records from rdr as a lazy sequence.
-  rdr must implement io.Reader.
+  rdr must be a string or implement io.Reader.
   opts may have the following keys:
 
   :comma - field delimiter (defaults to ',').
