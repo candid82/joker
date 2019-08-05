@@ -10,11 +10,11 @@ import (
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
 var ansi_c_ = MakeString(time.ANSIC)
-var hour_ = MakeInt(int(time.Hour))
+var hour_ = MakeBigInt(int64(time.Hour))
 var kitchen_ = MakeString(time.Kitchen)
 var microsecond_ = MakeInt(int(time.Microsecond))
 var millisecond_ = MakeInt(int(time.Millisecond))
-var minute_ = MakeInt(int(time.Minute))
+var minute_ = MakeBigInt(int64(time.Minute))
 var nanosecond_ = MakeInt(int(time.Nanosecond))
 var rfc1123_ = MakeString(time.RFC1123)
 var rfc1123_z_ = MakeString(time.RFC1123Z)

@@ -1014,6 +1014,10 @@ func (rat *Ratio) Compare(other Object) int {
 	return CompareNumbers(rat, AssertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
 }
 
+func MakeBigInt(bi int64) *BigInt {
+	return &BigInt{b: *big.NewInt(bi)}
+}
+
 func (bi *BigInt) ToString(escape bool) string {
 	return bi.b.String() + "N"
 }
