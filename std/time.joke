@@ -151,15 +151,15 @@
 (def
   ^{:doc "Number of nanoseconds in 1 minute"
     :added "1.0"
-    :tag Int
-    :go "int(time.Minute)"}
+    :tag BigInt
+    :go "int64(time.Minute)"}
   minute)
 
 (def
   ^{:doc "Number of nanoseconds in 1 hour"
     :added "1.0"
-    :tag Int
-    :go "int(time.Hour)"}
+    :tag BigInt
+    :go "int64(time.Hour)"}
   hour)
 
 (def
