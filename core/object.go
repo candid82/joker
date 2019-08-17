@@ -1039,7 +1039,7 @@ func (bi *BigInt) Compare(other Object) int {
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
-	return bf.b.Text('g', 256) + "M"
+	return bf.b.Text('g', -1) + "M"
 }
 
 func (bf *BigFloat) Equals(other interface{}) bool {
