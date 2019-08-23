@@ -8,7 +8,6 @@ build() {
 }
 
 set -e  # Exit on error.
-set -x  # Show commands as they execute.
 
 build
 
