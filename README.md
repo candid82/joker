@@ -233,7 +233,7 @@ After building the native version (to autogenerate appropriate files, "vet" the 
 $ GOOS=linux GOARCH=arm GOARM=6 go build
 ```
 
-(The `run.sh` script is does not support cross-platform building.)
+(The `run.sh` script does not support cross-platform building.)
 
 ## Coding Guidelines
 
