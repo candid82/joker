@@ -316,3 +316,6 @@
     (not (odd? 8)))
   (is (thrown? Error (odd? 1/2)))
   (is (thrown? Error (odd? (double 10)))))
+
+(deftest test-int-promotion
+  (is (= 20000000000000000000 (/ 10000000000000000000 (/ 1 2)))))

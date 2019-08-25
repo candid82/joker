@@ -56,7 +56,10 @@ var (
 
 func ratioOrInt(r *big.Rat) Number {
 	if r.IsInt() {
-		return MakeInt(int(r.Num().Int64()))
+		if r.Num().IsInt64() {
+			return MakeInt(int(r.Num().Int64()))
+		}
+		return &BigInt{b: *r.Num()}
 	}
 	return &Ratio{r: *r}
 }
