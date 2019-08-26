@@ -32,6 +32,7 @@
 (defn ^Int sub
   "Returns the duration t-u in nanoseconds."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "int(t.Sub(u))"}
   [^Time t ^Time u])
 
@@ -58,18 +59,21 @@
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "!t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)"}
   [^String s])
 
 (defn ^Int since
   "Returns the time in nanoseconds elapsed since t."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "int(time.Since(t))"}
   [^Time t])
 
 (defn ^Int until
   "Returns the duration in nanoseconds until t."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "int(time.Until(t))"}
   [^Time t])
 
@@ -99,6 +103,7 @@
   "Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
   The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "int(time.Duration(d).Round(time.Duration(m)))"}
   [^Int d ^Int m])
 
@@ -117,6 +122,7 @@
 (defn ^Int truncate
   "Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged."
   {:added "1.0"
+  ;; TODO: 32-bit issue
   :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
   [^Int d ^Int m])
 

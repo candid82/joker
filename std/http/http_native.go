@@ -93,6 +93,7 @@ func respToMap(resp *http.Response) Map {
 		respHeaders.Add(MakeString(k), MakeString(strings.Join(v, ",")))
 	}
 	res.Add(MakeKeyword("headers"), respHeaders)
+	// TODO: 32-bit issue
 	res.Add(MakeKeyword("content-length"), MakeInt(int(resp.ContentLength)))
 	return res
 }

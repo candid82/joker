@@ -283,6 +283,7 @@ func scanInt(str string, base int, err error, reader *Reader) Object {
 	if e != nil {
 		return scanBigInt(str, base, err, reader)
 	}
+	// TODO: 32-bit issue
 	return MakeReadObject(reader, Int{I: int(i)})
 }
 
