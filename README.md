@@ -225,6 +225,16 @@ cd $GOPATH/src/github.com/candid82/joker
 ./run.sh --version && go install
 ```
 
+### Cross-platform Builds
+
+After building the native version (to autogenerate appropriate files, "vet" the source code, etc.), set the appropriate environment variables and invoke `go build`. E.g.:
+
+```
+$ GOOS=linux GOARCH=arm GOARM=6 go build
+```
+
+(The `run.sh` script does not support cross-platform building.)
+
 ## Coding Guidelines
 
 - Dashes (`-`) in namespaces are not converted to underscores (`_`) by Joker, so (unlike with Clojure) there's no need to name `.joke` files accordingly.
