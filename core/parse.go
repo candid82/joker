@@ -1625,6 +1625,15 @@ func isJavaSymbol(sym Symbol) bool {
 	return fullClassNameRe.MatchString(s)
 }
 
+func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
+	vr.isUsed = true
+	vr.ns.isUsed = true
+	return &VarRefExpr{
+		vr:       vr,
+		Position: GetPosition(obj),
+	}
+}
+
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
 	b := ctx.GetLocalBinding(sym)
@@ -1635,52 +1644,52 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			Position: GetPosition(obj),
 		}
 	}
-	vr, ok := ctx.GlobalEnv.Resolve(sym)
-	if !ok {
-		if sym.ns == nil && TYPES[sym.name] != nil {
-			return &LiteralExpr{
-				Position: GetPosition(obj),
-				obj:      TYPES[sym.name],
-			}
-		}
-		if !LINTER_MODE {
-			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-		}
-		if DIALECT == CLJS && sym.ns == nil {
-			// Check if this is a "callable namespace"
-			ns := ctx.GlobalEnv.FindNamespace(sym)
-			if ns == nil {
-				ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
-			}
-			if ns != nil {
-				ns.isUsed = true
-				return NewSurrogateExpr(obj)
-			}
-			// See if this is a JS interop (i.e. Math.PI)
-			parts := strings.Split(sym.Name(), ".")
-			if len(parts) > 1 && parts[0] != "" && parts[len(parts)-1] != "" {
-				return parseSymbol(DeriveReadObject(obj, MakeSymbol(strings.Join(parts[:len(parts)-1], "."))), ctx)
-			}
-		}
-		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
-		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-			if isInteropSymbol(sym) || isJavaSymbol(sym) {
-				return NewSurrogateExpr(sym)
-			}
-			if !ctx.isUnknownCallableScope {
-				if ctx.linterBindings.GetBinding(sym) == nil {
-					printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
-				}
-			}
-		}
-		vr = InternFakeSymbol(symNs, sym)
+	if vr, ok := ctx.GlobalEnv.Resolve(sym); ok {
+		return MakeVarRefExpr(vr, obj)
 	}
-	vr.isUsed = true
-	vr.ns.isUsed = true
-	return &VarRefExpr{
-		vr:       vr,
-		Position: GetPosition(obj),
+	if sym.ns == nil && TYPES[sym.name] != nil {
+		return &LiteralExpr{
+			Position: GetPosition(obj),
+			obj:      TYPES[sym.name],
+		}
 	}
+	if !LINTER_MODE {
+		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+	}
+	if DIALECT == CLJS && sym.ns == nil {
+		// Check if this is a "callable namespace"
+		ns := ctx.GlobalEnv.FindNamespace(sym)
+		if ns == nil {
+			ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
+		}
+		if ns != nil {
+			ns.isUsed = true
+			return NewSurrogateExpr(obj)
+		}
+		// See if this is a JS interop (i.e. Math.PI)
+		parts := strings.Split(sym.Name(), ".")
+		if len(parts) > 1 && parts[0] != "" && parts[len(parts)-1] != "" {
+			return parseSymbol(DeriveReadObject(obj, MakeSymbol(strings.Join(parts[:len(parts)-1], "."))), ctx)
+		}
+		// Check if this is a constructor call
+		if len(parts) == 2 && parts[0] != "" && parts[len(parts)-1] == "" {
+			if vr, ok := ctx.GlobalEnv.Resolve(MakeSymbol(parts[0])); ok {
+				return MakeVarRefExpr(vr, obj)
+			}
+		}
+	}
+	symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+	if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+		if isInteropSymbol(sym) || isJavaSymbol(sym) {
+			return NewSurrogateExpr(sym)
+		}
+		if !ctx.isUnknownCallableScope {
+			if ctx.linterBindings.GetBinding(sym) == nil {
+				printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
+			}
+		}
+	}
+	return MakeVarRefExpr(InternFakeSymbol(symNs, sym), obj)
 }
 
 func Parse(obj Object, ctx *ParseContext) Expr {
