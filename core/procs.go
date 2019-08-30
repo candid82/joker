@@ -1349,9 +1349,22 @@ var procSlurp Proc = func(args []Object) Object {
 var procSpit Proc = func(args []Object) Object {
 	filename := EnsureString(args, 0)
 	content := EnsureString(args, 1)
-	if err := ioutil.WriteFile(filename.S, []byte(content.S), 0666); err != nil {
-		panic(RT.NewError(err.Error()))
+	opts := EnsureMap(args, 2)
+	appendFile := false
+	if ok, append := opts.Get(MakeKeyword("append")); ok {
+		appendFile = toBool(append)
 	}
+	flags := os.O_CREATE | os.O_WRONLY
+	if appendFile {
+		flags |= os.O_APPEND
+	} else {
+		flags |= os.O_TRUNC
+	}
+	f, err := os.OpenFile(filename.S, flags, 0644)
+	PanicOnErr(err)
+	defer f.Close()
+	_, err = f.WriteString(content.S)
+	PanicOnErr(err)
 	return NIL
 }
 

@@ -67,7 +67,6 @@
   ([m])
   ([^Regex re ^String s] (__re-find__ re s)))
 
-(defn ^Nil spit [f content & options])
 (defn ^String slurp [f & options])
 (defn read
   ([])

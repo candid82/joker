@@ -3932,8 +3932,8 @@
   "Opposite of slurp.  Opens file f, writes content, then
   closes f."
   {:added "1.0"}
-  ^Nil [^String f ^String content]
-  (spit__ f content))
+  ^Nil [f content & options]
+  (spit__ f content (apply hash-map options)))
 
 (defn flatten
   "Takes any nested combination of sequential things (lists, vectors,
