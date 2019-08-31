@@ -999,6 +999,17 @@ func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 		}
 		seq = seq.Rest()
 	}
+	if LINTER_MODE {
+		if res.body == nil {
+			printParseWarning(res.Pos(), "try form with empty body")
+		}
+		if res.catches == nil && res.finallyExpr == nil {
+			printParseWarning(res.Pos(), "try form without catch or finally")
+		}
+		if res.finallyExpr != nil && len(res.finallyExpr) == 0 {
+			printParseWarning(res.Pos(), "finally form with empty body")
+		}
+	}
 	return res
 }
 
