@@ -1,0 +1,2 @@
+tests/linter/do/input.clj:1:1: Parse warning: do form with empty body
+tests/linter/do/input.clj:3:1: Parse warning: redundant do form

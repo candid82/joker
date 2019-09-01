@@ -13,7 +13,7 @@
                          (let [p (first spec) cs (rest spec)]
                            (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
                      [] specs)]
-    `(do
+    `(do nil nil
        ~@(map #(list 'joker.core/require (list 'quote %)) syms)
        ~@(map #(list 'def %) (remove resolve syms)))))
 
@@ -114,7 +114,7 @@
 (defmacro reify
   [& opts+specs]
   (let [impls (parse-opts+specs__ opts+specs)]
-    `(do
+    `(do nil nil
        ~@(defimpls__ impls))))
 
 (defmacro defprotocol
@@ -145,7 +145,7 @@
                                                          arglists)
                                           :doc doc}))))
                        {} sigs))]
-    `(do
+    `(do nil
        (def ~name)
        ~@(defmethods__ sigs))))
 

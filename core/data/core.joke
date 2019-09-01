@@ -384,13 +384,19 @@
   "Evaluates test. If logical true, evaluates body in an implicit do."
   {:added "1.0"}
   [test & body]
-  (list 'if test (cons 'do body) nil))
+  (let [b (if (>__ (count__ body) 1)
+            (cons 'do body)
+            (first body))]
+    (list 'if test b nil)))
 
 (defmacro when-not
   "Evaluates test. If logical false, evaluates body in an implicit do."
   {:added "1.0"}
   [test & body]
-  (list 'if test nil (cons 'do body)))
+  (let [b (if (>__ (count__ body) 1)
+              (cons 'do body)
+              (first body))]
+      (list 'if test nil b)))
 
 (defn false?
   "Returns true if x is the value false, false otherwise."
@@ -1867,7 +1873,7 @@
 (defmacro declare
   "defs the supplied var names with no bindings, useful for making forward declarations."
   {:added "1.0"}
-  [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
+  [& names] `(do nil nil ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
 
 (defn sort
   "Returns a sorted sequence of the items in coll. If no comparator is
@@ -1972,9 +1978,12 @@
   (assert-args
    (vector? seq-exprs) "a vector for its binding"
    (even? (count seq-exprs)) "an even number of forms in binding vector")
-  (let [step (fn step [recform exprs]
+  (let [b (if (> (count body) 1)
+            `(do ~@body)
+            (first body))
+        step (fn step [recform exprs]
                (if-not exprs
-                 [true `(do ~@body)]
+                 [true b]
                  (let [k (first exprs)
                        v (second exprs)
                        seqsym (when-not (keyword? k) (gensym))
@@ -1988,7 +1997,7 @@
                                             ~subform
                                             ~@(when needrec [recform]))]
                      (= k :when) [false `(if ~v
-                                           (do
+                                           (do nil
                                              ~subform
                                              ~@(when needrec [recform]))
                                            ~recform)]
