@@ -254,16 +254,31 @@
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
 
-(def ^:dynamic ^Atom *report-counters* nil)	  ; bound to an atom of a map in test-ns
+(def ^:dynamic
+  ^{:doc "Bound to an atom of a map in test-ns"
+    :added "1.0"
+    :tag Atom}
+  *report-counters* nil)
 
-(def ^:const *initial-report-counters*  ; used to initialize *report-counters*
-     {:test 0, :pass 0, :fail 0, :error 0})
+(def ^:const
+  ^{:doc "Used to initialize *report-counters*"
+    :added "1.0"}
+  *initial-report-counters* {:test 0, :pass 0, :fail 0, :error 0})
 
-(def ^:dynamic *testing-vars* (list))  ; bound to hierarchy of vars being tested
+(def ^:dynamic
+  ^{:doc "Bound to hierarchy of vars being tested"
+    :added "1.0"}
+  *testing-vars* (list))
 
-(def ^:dynamic *testing-contexts* (list)) ; bound to hierarchy of "testing" strings
+(def ^:dynamic
+  ^{:doc "Bound to hierarchy of \"testing\" strings"
+    :added "1.0"}
+  *testing-contexts* (list))
 
-(def ^:dynamic *test-out* *out*)         ; PrintWriter for test reporting output
+(def ^:dynamic
+  ^{:doc "PrintWriter for test reporting output"
+    :added "1.0"}
+  *test-out* *out*)
 
 (defmacro with-test-out
   "Runs body with *out* bound to the value of *test-out*."
@@ -450,6 +465,8 @@
 ;; symbol in the test expression.
 
 (defmulti assert-expr
+  "Don't call this; add methods to extend the 'is' macro."
+  {:added "1.0"}
   (fn [msg form]
     (cond
       (nil? form) :always-fail

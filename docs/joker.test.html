@@ -336,10 +336,10 @@
       <li>
   <h3 id="*initial-report-counters*">*initial-report-counters*</h3>
   <span class="var-type ArrayMap">ArrayMap</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L259">source</a>
+  <p class="var-docstr">Used to initialize *report-counters*</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L263">source</a>
 </li>
 <li>
   <h3 id="*load-tests*">*load-tests*</h3>
@@ -354,9 +354,9 @@
 <li>
   <h3 id="*report-counters*">*report-counters*</h3>
   <span class="var-type Atom">Atom</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
+  <p class="var-docstr">Bound to an atom of a map in test-ns</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L257">source</a>
 </li>
 <li>
@@ -372,26 +372,26 @@
 <li>
   <h3 id="*test-out*">*test-out*</h3>
   <span class="var-type IOWriter">IOWriter</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L266">source</a>
+  <p class="var-docstr">PrintWriter for test reporting output</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L278">source</a>
 </li>
 <li>
   <h3 id="*testing-contexts*">*testing-contexts*</h3>
   <span class="var-type List">List</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L264">source</a>
+  <p class="var-docstr">Bound to hierarchy of "testing" strings</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L273">source</a>
 </li>
 <li>
   <h3 id="*testing-vars*">*testing-vars*</h3>
   <span class="var-type List">List</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L262">source</a>
+  <p class="var-docstr">Bound to hierarchy of vars being tested</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L268">source</a>
 </li>
 <li>
   <h3 id="are">are</h3>
@@ -411,7 +411,7 @@
                (is (= 4 (* 2 2))))<br>
 <br>
   Note: This breaks some reporting features, such as line numbers.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L548">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L565">source</a>
 </li>
 <li>
   <h3 id="assert-any">assert-any</h3>
@@ -421,15 +421,15 @@
 </pre>
   <p class="var-docstr">Returns generic assertion code for any test, including macros, Java<br>
   method calls, or isolated symbols.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L431">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L446">source</a>
 </li>
 <li>
   <h3 id="assert-expr">assert-expr</h3>
   <span class="var-type Function">Function</span>
-  <span class="var-added">v</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
-  <p class="var-docstr"></p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L452">source</a>
+  <p class="var-docstr">Don't call this; add methods to extend the 'is' macro.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L467">source</a>
 </li>
 <li>
   <h3 id="assert-predicate">assert-predicate</h3>
@@ -442,7 +442,7 @@
   'actual' argument will contain the form with all its sub-forms<br>
   evaluated.  If the predicate returns false, the 'actual' form will<br>
   be wrapped in (not...).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L412">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L427">source</a>
 </li>
 <li>
   <h3 id="compose-fixtures">compose-fixtures</h3>
@@ -452,7 +452,7 @@
 </pre>
   <p class="var-docstr">Composes two fixture functions, creating a new fixture function<br>
   that combines their behavior.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L665">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L682">source</a>
 </li>
 <li>
   <h3 id="deftest">deftest</h3>
@@ -470,7 +470,7 @@
   itself.<br>
 <br>
   When *load-tests* is false, deftest is ignored.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L598">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L615">source</a>
 </li>
 <li>
   <h3 id="deftest-">deftest-</h3>
@@ -479,7 +479,7 @@
   <pre class="var-usage"><div><code>(deftest- name & body)</code></div>
 </pre>
   <p class="var-docstr">Like deftest but creates a private var.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L615">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L632">source</a>
 </li>
 <li>
   <h3 id="do-report">do-report</h3>
@@ -490,7 +490,7 @@
   <p class="var-docstr">Add file and line information to a test result and call report.<br>
    If you are writing a custom assert-expr method, call this function<br>
    to pass test results to report.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L327">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L342">source</a>
 </li>
 <li>
   <h3 id="function?">function?</h3>
@@ -500,7 +500,7 @@
 </pre>
   <p class="var-docstr">Returns true if argument is a function or a symbol that resolves to<br>
   a function (not a macro).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L400">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L415">source</a>
 </li>
 <li>
   <h3 id="get-possibly-unbound-var">get-possibly-unbound-var</h3>
@@ -509,7 +509,7 @@
   <pre class="var-usage"><div><code>(get-possibly-unbound-var v)</code></div>
 </pre>
   <p class="var-docstr">Like var-get but returns nil if the var is unbound.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L392">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L407">source</a>
 </li>
 <li>
   <h3 id="inc-report-counter">inc-report-counter</h3>
@@ -519,7 +519,7 @@
 </pre>
   <p class="var-docstr">Increments the named counter in *report-counters*, a ref to a map.<br>
   Does nothing if *report-counters* is nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L297">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L312">source</a>
 </li>
 <li>
   <h3 id="is">is</h3>
@@ -541,7 +541,7 @@
   (is (thrown-with-msg? c re body)) checks that an instance of c is<br>
   thrown AND that the message on the exception matches (with<br>
   re-find) the regular expression re.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L530">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L547">source</a>
 </li>
 <li>
   <h3 id="join-fixtures">join-fixtures</h3>
@@ -551,7 +551,7 @@
 </pre>
   <p class="var-docstr">Composes a collection of fixtures, in order.  Always returns a valid<br>
   fixture function, even if the collection is empty.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L672">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L689">source</a>
 </li>
 <li>
   <h3 id="report">report</h3>
@@ -564,7 +564,7 @@
    'report' will be a map with a :type key.  See the documentation at<br>
    the top of test_is.clj for more information on the types of<br>
    arguments for 'report'.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L307">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L322">source</a>
 </li>
 <li>
   <h3 id="run-all-tests">run-all-tests</h3>
@@ -577,7 +577,7 @@
   Optional argument is a regular expression; only namespaces with<br>
   names matching the regular expression (with re-matches) will be<br>
   tested.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L756">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L773">source</a>
 </li>
 <li>
   <h3 id="run-tests">run-tests</h3>
@@ -589,7 +589,7 @@
   <p class="var-docstr">Runs all tests in the given namespaces; prints results.<br>
   Defaults to current namespace if none given.  Returns a map<br>
   summarizing test results.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L744">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L761">source</a>
 </li>
 <li>
   <h3 id="set-test">set-test</h3>
@@ -602,7 +602,7 @@
   The var must already exist.  Does not modify the value of the var.<br>
 <br>
   When *load-tests* is false, set-test is ignored.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L624">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L641">source</a>
 </li>
 <li>
   <h3 id="successful?">successful?</h3>
@@ -612,7 +612,7 @@
 </pre>
   <p class="var-docstr">Returns true if the given test summary indicates all tests<br>
   were successful, false otherwise.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L765">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L782">source</a>
 </li>
 <li>
   <h3 id="test-all-vars">test-all-vars</h3>
@@ -621,7 +621,7 @@
   <pre class="var-usage"><div><code>(test-all-vars ns)</code></div>
 </pre>
   <p class="var-docstr">Calls test-vars on every var interned in the namespace, with fixtures.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L713">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L730">source</a>
 </li>
 <li>
   <h3 id="test-ns">test-ns</h3>
@@ -636,7 +636,7 @@
   Internally binds *report-counters* to a ref initialized to<br>
   *initial-report-counters*.  Returns the final, dereferenced state of<br>
   *report-counters*.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L719">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L736">source</a>
 </li>
 <li>
   <h3 id="test-var">test-var</h3>
@@ -646,7 +646,7 @@
 </pre>
   <p class="var-docstr">If v has a function in its :test metadata, calls that function,<br>
   with *testing-vars* bound to (conj *testing-vars* v).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L684">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L701">source</a>
 </li>
 <li>
   <h3 id="test-vars">test-vars</h3>
@@ -656,7 +656,7 @@
 </pre>
   <p class="var-docstr">Groups vars by their namespace and runs test-vars on them with<br>
    appropriate fixtures applied.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L699">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L716">source</a>
 </li>
 <li>
   <h3 id="testing">testing</h3>
@@ -666,7 +666,7 @@
 </pre>
   <p class="var-docstr">Adds a new string to the list of testing contexts.  May be nested,<br>
   but must occur inside a test function (deftest).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L573">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L590">source</a>
 </li>
 <li>
   <h3 id="testing-contexts-str">testing-contexts-str</h3>
@@ -676,7 +676,7 @@
 </pre>
   <p class="var-docstr">Returns a string representation of the current test context. Joins<br>
   strings in *testing-contexts* with spaces.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L290">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L305">source</a>
 </li>
 <li>
   <h3 id="testing-vars-str">testing-vars-str</h3>
@@ -687,7 +687,7 @@
   <p class="var-docstr">Returns a string representation of the current test.  Renders names<br>
   in *testing-vars* as a list, then the source file and line of<br>
   current assertion.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L277">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L292">source</a>
 </li>
 <li>
   <h3 id="try-expr">try-expr</h3>
@@ -697,7 +697,7 @@
 </pre>
   <p class="var-docstr">Used by the 'is' macro to catch unexpected exceptions.<br>
   You don't call this.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L514">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L531">source</a>
 </li>
 <li>
   <h3 id="use-fixtures">use-fixtures</h3>
@@ -707,7 +707,7 @@
   <p class="var-docstr">Wrap test runs in a fixture function to perform setup and<br>
   teardown. Using a fixture-type of :each wraps every test<br>
   individually, while :once wraps the whole run in a single function.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L646">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L663">source</a>
 </li>
 <li>
   <h3 id="with-test">with-test</h3>
@@ -720,7 +720,7 @@
 <br>
   When *load-tests* is false, only evaluates the definition, ignoring<br>
   the tests.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L585">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L602">source</a>
 </li>
 <li>
   <h3 id="with-test-out">with-test-out</h3>
@@ -729,7 +729,7 @@
   <pre class="var-usage"><div><code>(with-test-out & body)</code></div>
 </pre>
   <p class="var-docstr">Runs body with *out* bound to the value of *test-out*.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L268">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L283">source</a>
 </li>
 
     </ul>

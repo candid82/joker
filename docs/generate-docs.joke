@@ -56,11 +56,13 @@
 
 (defn var-doc
   [k v]
-  (let [m (meta v)]
+  (let [m (meta v)
+        ns (get m :ns "<internal>")
+        full-name (str ns "/" (str k))]
     (when-not (:added m)
-      (println "WARNING: public var without added meta key: " k))
+      (println "WARNING: public var without added meta key: " full-name))
     (when-not (:doc m)
-      (println "WARNING: public var without doc meta key: " k))
+      (println "WARNING: public var without doc meta key: " full-name))
     (-> var-template
         (string/replace "{id}" (str k))
         (string/replace "{name}" (str k))
@@ -135,8 +137,3 @@
       (spit (str ns ".html") (ns-doc ns)))))
 
 (full-doc)
-
-
-
-
-

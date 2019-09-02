@@ -98,8 +98,10 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Boolean{B: true}
-	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Boolean{B: LINTER_MODE}
-	res.CoreNamespace.Intern(MakeSymbol("*linter-config*")).Value = EmptyArrayMap()
+	res.CoreNamespace.InternVar("*linter-mode*", Boolean{B: LINTER_MODE},
+		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
+	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
+		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
 	return res
 }
 
