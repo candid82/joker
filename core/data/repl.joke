@@ -40,6 +40,9 @@
          :name name-symbol
          :special-form true))
 
+(defn- namespace-doc [nspace]
+  (assoc (meta nspace) :name (ns-name nspace)))
+
 (defn- print-doc [{n :ns
                    nm :name
                    :keys [forms arglists special-form doc url macro spec]
@@ -76,8 +79,8 @@
     `(#'print-doc (#'special-doc '~special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
-      ;      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
-      ;      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
+      (keyword? name) (println "Keywords (spec) not yet supported")
+      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
       (resolve name) `(#'print-doc (meta (var ~name))))))
 
 
