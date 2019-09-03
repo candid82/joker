@@ -91,6 +91,7 @@
   "Given a regular expression or stringable thing, return a seq of all
 public definitions in all currently-loaded namespaces that match the
 str-or-pattern."
+  {:added "1.0"}
   [str-or-pattern]
   (let [matches? (if (instance? Regex str-or-pattern)
                    #(re-find str-or-pattern (str %))
@@ -104,11 +105,13 @@ str-or-pattern."
 (defn dir-fn
   "Returns a sorted seq of symbols naming public vars in
   a namespace or namespace alias. Looks for aliases in *ns*"
+  {:added "1.0"}
   [ns]
   (sort (map first (ns-publics (the-ns (get (ns-aliases *ns*) ns ns))))))
 
 (defmacro dir
   "Prints a sorted directory of public vars in a namespace"
+  {:added "1.0"}
   [nsname]
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))
