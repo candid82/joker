@@ -72,7 +72,7 @@ var write_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	csvNamespace.ResetMeta(MakeMeta(nil, "Reads and writes comma-separated values (CSV) files as defined in RFC 4180.", "1.0"))
 
@@ -129,4 +129,8 @@ func init() {
 
   :use-crlf - if true, uses \r\n as the line terminator. Default value is false.`, "1.0"))
 
+}
+
+func init() {
+	csvNamespace.Lazy = Init
 }

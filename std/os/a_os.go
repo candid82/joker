@@ -245,7 +245,7 @@ var stat_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
 
@@ -359,4 +359,8 @@ func init() {
   :modtime - modification time
   :dir? - true if file is a directory`, "1.0"))
 
+}
+
+func init() {
+	osNamespace.Lazy = Init
 }

@@ -54,7 +54,7 @@ var start_server_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implementations", "1.0"))
 
@@ -87,4 +87,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
 			`Starts HTTP server on the TCP network address addr.`, "1.0"))
 
+}
+
+func init() {
+	httpNamespace.Lazy = Init
 }

@@ -38,7 +38,7 @@ var encode_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	base64Namespace.ResetMeta(MakeMeta(nil, "Implements base64 encoding as specified by RFC 4648.", "1.0"))
 
@@ -53,4 +53,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Returns the base64 encoding of s.`, "1.0"))
 
+}
+
+func init() {
+	base64Namespace.Lazy = Init
 }

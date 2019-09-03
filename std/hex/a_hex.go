@@ -41,7 +41,7 @@ var encode_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	hexNamespace.ResetMeta(MakeMeta(nil, "Implements hexadecimal encoding and decoding.", "1.0"))
 
@@ -56,4 +56,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Returns the hexadecimal encoding of s.`, "1.0"))
 
+}
+
+func init() {
+	hexNamespace.Lazy = Init
 }

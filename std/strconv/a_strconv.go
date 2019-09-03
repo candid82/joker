@@ -275,7 +275,7 @@ var unquote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	strconvNamespace.ResetMeta(MakeMeta(nil, "Implements conversions to and from string representations of basic data types.", "1.0"))
 
@@ -381,4 +381,8 @@ func init() {
 			`Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.
   (If s is single-quoted, it would be a Go character literal; Unquote returns the corresponding one-character string.)`, "1.0"))
 
+}
+
+func init() {
+	strconvNamespace.Lazy = Init
 }

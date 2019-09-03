@@ -150,7 +150,7 @@ var sha512_256_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	cryptoNamespace.ResetMeta(MakeMeta(nil, "Implements common cryptographic and hash functions.", "1.0"))
 
@@ -201,4 +201,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
 			`Returns the SHA512/256 checksum of the data.`, "1.0"))
 
+}
+
+func init() {
+	cryptoNamespace.Lazy = Init
 }

@@ -67,7 +67,7 @@ var query_unescape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	urlNamespace.ResetMeta(MakeMeta(nil, "Parses URLs and implements query escaping.", "1.0"))
 
@@ -98,4 +98,8 @@ func init() {
   substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts
   '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.`, "1.0"))
 
+}
+
+func init() {
+	urlNamespace.Lazy = Init
 }

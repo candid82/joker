@@ -402,6 +402,8 @@ func parseArgs(args []string) {
 			debugOut = Stderr
 		case "--debug=stdout":
 			debugOut = Stdout
+		case "--verbose":
+			Verbose = true
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else

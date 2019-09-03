@@ -390,7 +390,7 @@ var upper_case_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
 
@@ -532,4 +532,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Converts string to all upper-case.`, "1.0"))
 
+}
+
+func init() {
+	stringNamespace.Lazy = Init
 }
