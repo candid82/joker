@@ -54,7 +54,7 @@ var sin_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	mathNamespace.ResetMeta(MakeMeta(nil, "Provides basic constants and mathematical functions.", "1.0"))
 
@@ -78,4 +78,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns the sine of the radian argument x.`, "1.0"))
 
+}
+
+func init() {
+	mathNamespace.Lazy = Init
 }

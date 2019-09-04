@@ -259,7 +259,7 @@ var volume_name_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
 
@@ -403,4 +403,8 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			`Returns leading volume name. Given "C:\foo\bar" it returns "C:" on Windows. Given "\\host\share\foo"
   returns "\\host\share". On other platforms it returns "".`, "1.0"))
 
+}
+
+func init() {
+	filepathNamespace.Lazy = Init
 }

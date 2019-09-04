@@ -39,7 +39,7 @@ var unescape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	htmlNamespace.ResetMeta(MakeMeta(nil, "Provides functions for escaping and unescaping HTML text.", "1.0"))
 
@@ -54,4 +54,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Unescapes entities like &lt; to become <.`, "1.0"))
 
+}
+
+func init() {
+	htmlNamespace.Lazy = Init
 }

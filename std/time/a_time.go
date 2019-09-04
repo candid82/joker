@@ -296,7 +296,7 @@ var until_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 
@@ -504,4 +504,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
 			`Returns the duration in nanoseconds until t.`, "1.0"))
 
+}
+
+func init() {
+	timeNamespace.Lazy = Init
 }

@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,9 +11,10 @@ import (
 )
 
 var (
-	Stdin  io.Reader = os.Stdin
-	Stdout io.Writer = os.Stdout
-	Stderr io.Writer = os.Stderr
+	Stdin   io.Reader = os.Stdin
+	Stdout  io.Writer = os.Stdout
+	Stderr  io.Writer = os.Stderr
+	Verbose           = false
 )
 
 type (
@@ -139,6 +141,13 @@ func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 			res = env.Namespaces[s.ns]
 		}
 	}
+	if res != nil && res.Lazy != nil {
+		res.Lazy()
+		if Verbose {
+			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s\n", *res.Name.name)
+		}
+		res.Lazy = nil
+	}
 	return res
 }
 
@@ -159,7 +168,15 @@ func (env *Env) FindNamespace(s Symbol) *Namespace {
 	if s.ns != nil {
 		return nil
 	}
-	return env.Namespaces[s.name]
+	ns := env.Namespaces[s.name]
+	if ns != nil && ns.Lazy != nil {
+		ns.Lazy()
+		if Verbose {
+			fmt.Fprintf(Stderr, "FindNameSpace: Lazily initialized %s\n", *ns.Name.name)
+		}
+		ns.Lazy = nil
+	}
+	return ns
 }
 
 func (env *Env) RemoveNamespace(s Symbol) *Namespace {

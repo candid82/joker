@@ -38,7 +38,7 @@ var write_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-func init() {
+func Init() {
 
 	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
 
@@ -53,4 +53,8 @@ func init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
 			`Returns the JSON encoding of v.`, "1.0"))
 
+}
+
+func init() {
+	jsonNamespace.Lazy = Init
 }
