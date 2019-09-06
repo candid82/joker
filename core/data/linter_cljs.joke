@@ -19,6 +19,10 @@
          {'js #'joker.core/identity
           'queue #'joker.core/identity}))
 
+;; Redefine some core functions with type hints
+
+(defn instance? ^Boolean [^"Type|Fn" c x] (instance?__ c x))
+
 ;; ClojureScript core vars not supported by Joker
 
 (def *clojurescript-version*)

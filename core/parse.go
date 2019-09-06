@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"sort"
@@ -1240,14 +1241,58 @@ func getTaggedType(obj Meta) *Type {
 	return nil
 }
 
+func getTaggedTypes(obj Meta) []*Type {
+	var res []*Type
+	if m := obj.GetMeta(); m != nil {
+		if ok, typeName := m.Get(KEYWORDS.tag); ok {
+			switch typeDecl := typeName.(type) {
+			case Symbol:
+				if t := TYPES[typeDecl.name]; t != nil {
+					res = append(res, t)
+				}
+			case String:
+				parts := strings.Split(typeDecl.S, "|")
+				for _, p := range parts {
+					if t := TYPES[MakeSymbol(p).name]; t != nil {
+						res = append(res, t)
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
+func isTypeOneOf(abstractTypes []*Type, concreteType *Type) bool {
+	for _, t := range abstractTypes {
+		if IsEqualOrImplements(t, concreteType) {
+			return true
+		}
+	}
+	return false
+}
+
+func typesString(types []*Type) string {
+	var b bytes.Buffer
+	for i, t := range types {
+		b.WriteString(t.ToString(false))
+		if i < len(types)-1 {
+			b.WriteString(" or ")
+		}
+	}
+	return b.String()
+}
+
 func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 	res := false
 	for i, da := range declaredArgs {
-		if declaredType := getTaggedType(da); declaredType != nil {
+		if declaredTypes := getTaggedTypes(da); len(declaredTypes) > 0 {
 			passedType := call.args[i].InferType()
-			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
-				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), declaredType.ToString(false), passedType.ToString(false)))
-				res = true
+			if passedType != nil {
+				if !isTypeOneOf(declaredTypes, passedType) {
+					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), typesString(declaredTypes), passedType.ToString(false)))
+					res = true
+				}
 			}
 		}
 	}

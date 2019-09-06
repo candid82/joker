@@ -1,0 +1,1 @@
+tests/linter/types-cljs/input.cljs:3:12: Parse warning: arg[0] of core/instance? must have type Type or Fn, got Int
