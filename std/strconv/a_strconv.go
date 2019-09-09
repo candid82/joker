@@ -11,7 +11,9 @@ var strconvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.strconv"))
 
 
 
-var atoi_ Proc = func(_args []Object) Object {
+var atoi_ Proc
+
+func __atoi_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -26,7 +28,9 @@ var atoi_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var iscan_backquote_ Proc = func(_args []Object) Object {
+var iscan_backquote_ Proc
+
+func __iscan_backquote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -40,7 +44,9 @@ var iscan_backquote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_bool_ Proc = func(_args []Object) Object {
+var format_bool_ Proc
+
+func __format_bool_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -54,7 +60,9 @@ var format_bool_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_double_ Proc = func(_args []Object) Object {
+var format_double_ Proc
+
+func __format_double_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 4:
@@ -71,7 +79,9 @@ var format_double_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_int_ Proc = func(_args []Object) Object {
+var format_int_ Proc
+
+func __format_int_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -86,7 +96,9 @@ var format_int_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isgraphic_ Proc = func(_args []Object) Object {
+var isgraphic_ Proc
+
+func __isgraphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -100,7 +112,9 @@ var isgraphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var itoa_ Proc = func(_args []Object) Object {
+var itoa_ Proc
+
+func __itoa_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -114,7 +128,9 @@ var itoa_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_bool_ Proc = func(_args []Object) Object {
+var parse_bool_ Proc
+
+func __parse_bool_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -129,7 +145,9 @@ var parse_bool_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_double_ Proc = func(_args []Object) Object {
+var parse_double_ Proc
+
+func __parse_double_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -144,7 +162,9 @@ var parse_double_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_int_ Proc = func(_args []Object) Object {
+var parse_int_ Proc
+
+func __parse_int_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -162,7 +182,9 @@ var parse_int_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isprintable_ Proc = func(_args []Object) Object {
+var isprintable_ Proc
+
+func __isprintable_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -176,7 +198,9 @@ var isprintable_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_ Proc = func(_args []Object) Object {
+var quote_ Proc
+
+func __quote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -190,7 +214,9 @@ var quote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_ Proc = func(_args []Object) Object {
+var quote_char_ Proc
+
+func __quote_char_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -204,7 +230,9 @@ var quote_char_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_ascii_ Proc = func(_args []Object) Object {
+var quote_char_to_ascii_ Proc
+
+func __quote_char_to_ascii_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -218,7 +246,9 @@ var quote_char_to_ascii_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_graphic_ Proc = func(_args []Object) Object {
+var quote_char_to_graphic_ Proc
+
+func __quote_char_to_graphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -232,7 +262,9 @@ var quote_char_to_graphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_ascii_ Proc = func(_args []Object) Object {
+var quote_to_ascii_ Proc
+
+func __quote_to_ascii_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -246,7 +278,9 @@ var quote_to_ascii_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_graphic_ Proc = func(_args []Object) Object {
+var quote_to_graphic_ Proc
+
+func __quote_to_graphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -260,7 +294,9 @@ var quote_to_graphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var unquote_ Proc = func(_args []Object) Object {
+var unquote_ Proc
+
+func __unquote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -276,6 +312,25 @@ var unquote_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	atoi_ = __atoi_
+	iscan_backquote_ = __iscan_backquote_
+	format_bool_ = __format_bool_
+	format_double_ = __format_double_
+	format_int_ = __format_int_
+	isgraphic_ = __isgraphic_
+	itoa_ = __itoa_
+	parse_bool_ = __parse_bool_
+	parse_double_ = __parse_double_
+	parse_int_ = __parse_int_
+	isprintable_ = __isprintable_
+	quote_ = __quote_
+	quote_char_ = __quote_char_
+	quote_char_to_ascii_ = __quote_char_to_ascii_
+	quote_char_to_graphic_ = __quote_char_to_graphic_
+	quote_to_ascii_ = __quote_to_ascii_
+	quote_to_graphic_ = __quote_to_graphic_
+	unquote_ = __unquote_
 
 	strconvNamespace.ResetMeta(MakeMeta(nil, "Implements conversions to and from string representations of basic data types.", "1.0"))
 

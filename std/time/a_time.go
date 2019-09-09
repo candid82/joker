@@ -9,29 +9,31 @@ import (
 
 var timeNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.time"))
 
-var ansi_c_ = MakeString(time.ANSIC)
-var hour_ = MakeBigInt(int64(time.Hour))
-var kitchen_ = MakeString(time.Kitchen)
-var microsecond_ = MakeInt(int(time.Microsecond))
-var millisecond_ = MakeInt(int(time.Millisecond))
-var minute_ = MakeBigInt(int64(time.Minute))
-var nanosecond_ = MakeInt(int(time.Nanosecond))
-var rfc1123_ = MakeString(time.RFC1123)
-var rfc1123_z_ = MakeString(time.RFC1123Z)
-var rfc3339_ = MakeString(time.RFC3339)
-var rfc3339_nano_ = MakeString(time.RFC3339Nano)
-var rfc822_ = MakeString(time.RFC822)
-var rfc822_z_ = MakeString(time.RFC822Z)
-var rfc850_ = MakeString(time.RFC850)
-var ruby_date_ = MakeString(time.RubyDate)
-var second_ = MakeInt(int(time.Second))
-var stamp_ = MakeString(time.Stamp)
-var stamp_micro_ = MakeString(time.StampMicro)
-var stamp_milli_ = MakeString(time.StampMilli)
-var stamp_nano_ = MakeString(time.StampNano)
-var unix_date_ = MakeString(time.UnixDate)
+var ansi_c_ String
+var hour_ *BigInt
+var kitchen_ String
+var microsecond_ Int
+var millisecond_ Int
+var minute_ *BigInt
+var nanosecond_ Int
+var rfc1123_ String
+var rfc1123_z_ String
+var rfc3339_ String
+var rfc3339_nano_ String
+var rfc822_ String
+var rfc822_z_ String
+var rfc850_ String
+var ruby_date_ String
+var second_ Int
+var stamp_ String
+var stamp_micro_ String
+var stamp_milli_ String
+var stamp_nano_ String
+var unix_date_ String
 
-var add_ Proc = func(_args []Object) Object {
+var add_ Proc
+
+func __add_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -46,7 +48,9 @@ var add_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var add_date_ Proc = func(_args []Object) Object {
+var add_date_ Proc
+
+func __add_date_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 4:
@@ -63,7 +67,9 @@ var add_date_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_ Proc = func(_args []Object) Object {
+var format_ Proc
+
+func __format_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -78,7 +84,9 @@ var format_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var from_unix_ Proc = func(_args []Object) Object {
+var from_unix_ Proc
+
+func __from_unix_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -93,7 +101,9 @@ var from_unix_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var hours_ Proc = func(_args []Object) Object {
+var hours_ Proc
+
+func __hours_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -107,7 +117,9 @@ var hours_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var minutes_ Proc = func(_args []Object) Object {
+var minutes_ Proc
+
+func __minutes_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -121,7 +133,9 @@ var minutes_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var now_ Proc = func(_args []Object) Object {
+var now_ Proc
+
+func __now_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -134,7 +148,9 @@ var now_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_ Proc = func(_args []Object) Object {
+var parse_ Proc
+
+func __parse_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -150,7 +166,9 @@ var parse_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_duration_ Proc = func(_args []Object) Object {
+var parse_duration_ Proc
+
+func __parse_duration_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -166,7 +184,9 @@ var parse_duration_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var round_ Proc = func(_args []Object) Object {
+var round_ Proc
+
+func __round_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -181,7 +201,9 @@ var round_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var seconds_ Proc = func(_args []Object) Object {
+var seconds_ Proc
+
+func __seconds_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -195,7 +217,9 @@ var seconds_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var since_ Proc = func(_args []Object) Object {
+var since_ Proc
+
+func __since_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -209,7 +233,9 @@ var since_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sleep_ Proc = func(_args []Object) Object {
+var sleep_ Proc
+
+func __sleep_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -224,7 +250,9 @@ var sleep_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var string_ Proc = func(_args []Object) Object {
+var string_ Proc
+
+func __string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -238,7 +266,9 @@ var string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sub_ Proc = func(_args []Object) Object {
+var sub_ Proc
+
+func __sub_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -253,7 +283,9 @@ var sub_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var truncate_ Proc = func(_args []Object) Object {
+var truncate_ Proc
+
+func __truncate_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -268,7 +300,9 @@ var truncate_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var unix_ Proc = func(_args []Object) Object {
+var unix_ Proc
+
+func __unix_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -282,7 +316,9 @@ var unix_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var until_ Proc = func(_args []Object) Object {
+var until_ Proc
+
+func __until_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -297,6 +333,45 @@ var until_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+	ansi_c_ = MakeString(time.ANSIC)
+	hour_ = MakeBigInt(int64(time.Hour))
+	kitchen_ = MakeString(time.Kitchen)
+	microsecond_ = MakeInt(int(time.Microsecond))
+	millisecond_ = MakeInt(int(time.Millisecond))
+	minute_ = MakeBigInt(int64(time.Minute))
+	nanosecond_ = MakeInt(int(time.Nanosecond))
+	rfc1123_ = MakeString(time.RFC1123)
+	rfc1123_z_ = MakeString(time.RFC1123Z)
+	rfc3339_ = MakeString(time.RFC3339)
+	rfc3339_nano_ = MakeString(time.RFC3339Nano)
+	rfc822_ = MakeString(time.RFC822)
+	rfc822_z_ = MakeString(time.RFC822Z)
+	rfc850_ = MakeString(time.RFC850)
+	ruby_date_ = MakeString(time.RubyDate)
+	second_ = MakeInt(int(time.Second))
+	stamp_ = MakeString(time.Stamp)
+	stamp_micro_ = MakeString(time.StampMicro)
+	stamp_milli_ = MakeString(time.StampMilli)
+	stamp_nano_ = MakeString(time.StampNano)
+	unix_date_ = MakeString(time.UnixDate)
+	add_ = __add_
+	add_date_ = __add_date_
+	format_ = __format_
+	from_unix_ = __from_unix_
+	hours_ = __hours_
+	minutes_ = __minutes_
+	now_ = __now_
+	parse_ = __parse_
+	parse_duration_ = __parse_duration_
+	round_ = __round_
+	seconds_ = __seconds_
+	since_ = __since_
+	sleep_ = __sleep_
+	string_ = __string_
+	sub_ = __sub_
+	truncate_ = __truncate_
+	unix_ = __unix_
+	until_ = __until_
 
 	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
 

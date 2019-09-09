@@ -10,7 +10,9 @@ var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
 
 
-var read_string_ Proc = func(_args []Object) Object {
+var read_string_ Proc
+
+func __read_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -24,7 +26,9 @@ var read_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc = func(_args []Object) Object {
+var write_string_ Proc
+
+func __write_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -39,6 +43,9 @@ var write_string_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	read_string_ = __read_string_
+	write_string_ = __write_string_
 
 	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
 

@@ -10,7 +10,9 @@ var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
 
 
-var send_ Proc = func(_args []Object) Object {
+var send_ Proc
+
+func __send_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -24,7 +26,9 @@ var send_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var start_file_server_ Proc = func(_args []Object) Object {
+var start_file_server_ Proc
+
+func __start_file_server_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -39,7 +43,9 @@ var start_file_server_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var start_server_ Proc = func(_args []Object) Object {
+var start_server_ Proc
+
+func __start_server_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -55,6 +61,10 @@ var start_server_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	send_ = __send_
+	start_file_server_ = __start_file_server_
+	start_server_ = __start_server_
 
 	httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implementations", "1.0"))
 

@@ -11,7 +11,9 @@ var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
 
 
 
-var path_escape_ Proc = func(_args []Object) Object {
+var path_escape_ Proc
+
+func __path_escape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -25,7 +27,9 @@ var path_escape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var path_unescape_ Proc = func(_args []Object) Object {
+var path_unescape_ Proc
+
+func __path_unescape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -39,7 +43,9 @@ var path_unescape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var query_escape_ Proc = func(_args []Object) Object {
+var query_escape_ Proc
+
+func __query_escape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -53,7 +59,9 @@ var query_escape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var query_unescape_ Proc = func(_args []Object) Object {
+var query_unescape_ Proc
+
+func __query_unescape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -68,6 +76,11 @@ var query_unescape_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	path_escape_ = __path_escape_
+	path_unescape_ = __path_unescape_
+	query_escape_ = __query_escape_
+	query_unescape_ = __query_unescape_
 
 	urlNamespace.ResetMeta(MakeMeta(nil, "Parses URLs and implements query escaping.", "1.0"))
 
