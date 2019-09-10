@@ -59,7 +59,9 @@ func Init() {
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Parses the JSON-encoded data and return the result as a Joker value.`, "1.0"))
+			`Parses the JSON-encoded data and return the result as a Joker value.
+  Optional opts map may have the following keys:
+  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
 
 	jsonNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
