@@ -332,7 +332,7 @@ func Init() {
 	quote_to_graphic_ = __quote_to_graphic_
 	unquote_ = __unquote_
 
-	strconvNamespace.ResetMeta(MakeMeta(nil, "Implements conversions to and from string representations of basic data types.", "1.0"))
+	strconvNamespace.ResetMeta(MakeMeta(nil, `Implements conversions to and from string representations of basic data types.`, "1.0"))
 
 	
 	strconvNamespace.InternVar("atoi", atoi_,

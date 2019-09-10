@@ -50,7 +50,7 @@ func Init() {
 	decode_string_ = __decode_string_
 	encode_string_ = __encode_string_
 
-	hexNamespace.ResetMeta(MakeMeta(nil, "Implements hexadecimal encoding and decoding.", "1.0"))
+	hexNamespace.ResetMeta(MakeMeta(nil, `Implements hexadecimal encoding and decoding.`, "1.0"))
 
 	
 	hexNamespace.InternVar("decode-string", decode_string_,

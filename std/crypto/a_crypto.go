@@ -180,7 +180,7 @@ func Init() {
 	sha512_224_ = __sha512_224_
 	sha512_256_ = __sha512_256_
 
-	cryptoNamespace.ResetMeta(MakeMeta(nil, "Implements common cryptographic and hash functions.", "1.0"))
+	cryptoNamespace.ResetMeta(MakeMeta(nil, `Implements common cryptographic and hash functions.`, "1.0"))
 
 	
 	cryptoNamespace.InternVar("hmac", hmac_,

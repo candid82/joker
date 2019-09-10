@@ -247,7 +247,7 @@
                 (rpl "{non-fn-inits}" (s/join "\n" non-fn-inits))
                 (rpl "{fn-decls}" (s/join "\n" (map first fn-decls)))
                 (rpl "{fn-inits}" (s/join "\n" fn-inits))
-                (rpl "{nsDocstring}" (:doc m))
+                (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
                 (rpl "{non-fn-interns}" (s/join "\n\t" (map second non-fn-decls)))
                 (rpl "{fn-interns}" (s/join "\n\t" (map second fn-decls))))
         res (if (:empty m)

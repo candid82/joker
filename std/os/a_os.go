@@ -296,7 +296,7 @@ func Init() {
 	sh_from_ = __sh_from_
 	stat_ = __stat_
 
-	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
+	osNamespace.ResetMeta(MakeMeta(nil, `Provides a platform-independent interface to operating system functionality.`, "1.0"))
 
 	
 	osNamespace.InternVar("args", args_,

@@ -47,7 +47,7 @@ func Init() {
 	decode_string_ = __decode_string_
 	encode_string_ = __encode_string_
 
-	base64Namespace.ResetMeta(MakeMeta(nil, "Implements base64 encoding as specified by RFC 4648.", "1.0"))
+	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
 
 	
 	base64Namespace.InternVar("decode-string", decode_string_,

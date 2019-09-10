@@ -82,7 +82,7 @@ func Init() {
 	query_escape_ = __query_escape_
 	query_unescape_ = __query_unescape_
 
-	urlNamespace.ResetMeta(MakeMeta(nil, "Parses URLs and implements query escaping.", "1.0"))
+	urlNamespace.ResetMeta(MakeMeta(nil, `Parses URLs and implements query escaping.`, "1.0"))
 
 	
 	urlNamespace.InternVar("path-escape", path_escape_,

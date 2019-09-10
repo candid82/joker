@@ -53,7 +53,7 @@ func Init() {
 	read_string_ = __read_string_
 	write_string_ = __write_string_
 
-	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
+	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
 
 	
 	jsonNamespace.InternVar("read-string", read_string_,

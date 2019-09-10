@@ -47,7 +47,7 @@ func Init() {
 	read_string_ = __read_string_
 	write_string_ = __write_string_
 
-	yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
+	yamlNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of YAML.`, "1.0"))
 
 	
 	yamlNamespace.InternVar("read-string", read_string_,
