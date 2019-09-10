@@ -807,7 +807,7 @@ var procChar Proc = func(args []Object) Object {
 }
 
 var procBoolean Proc = func(args []Object) Object {
-	return Boolean{B: toBool(args[0])}
+	return Boolean{B: ToBool(args[0])}
 }
 
 var procNumerator Proc = func(args []Object) Object {
@@ -1055,7 +1055,7 @@ var procPprint Proc = func(args []Object) Object {
 }
 
 func PrintObject(obj Object, w io.Writer) {
-	printReadably := toBool(GLOBAL_ENV.printReadably.Value)
+	printReadably := ToBool(GLOBAL_ENV.printReadably.Value)
 	switch obj := obj.(type) {
 	case Printer:
 		obj.Print(w, printReadably)
@@ -1352,7 +1352,7 @@ var procSpit Proc = func(args []Object) Object {
 	opts := EnsureMap(args, 2)
 	appendFile := false
 	if ok, append := opts.Get(MakeKeyword("append")); ok {
-		appendFile = toBool(append)
+		appendFile = ToBool(append)
 	}
 	flags := os.O_CREATE | os.O_WRONLY
 	if appendFile {
@@ -1521,7 +1521,7 @@ var procLibPath Proc = func(args []Object) Object {
 var procInternFakeVar Proc = func(args []Object) Object {
 	nsSym := EnsureSymbol(args, 0)
 	sym := EnsureSymbol(args, 1)
-	isMacro := toBool(args[2])
+	isMacro := ToBool(args[2])
 	res := InternFakeSymbol(GLOBAL_ENV.FindNamespace(nsSym), sym)
 	res.isMacro = isMacro
 	return res
@@ -1823,13 +1823,13 @@ func ReadConfig(filename string, workingDir string) {
 			return
 		}
 		if ok, v := m.Get(KEYWORDS.ifWithoutElse); ok {
-			WARNINGS.ifWithoutElse = toBool(v)
+			WARNINGS.ifWithoutElse = ToBool(v)
 		}
 		if ok, v := m.Get(KEYWORDS.unusedFnParameters); ok {
-			WARNINGS.unusedFnParameters = toBool(v)
+			WARNINGS.unusedFnParameters = ToBool(v)
 		}
 		if ok, v := m.Get(KEYWORDS.fnWithEmptyBody); ok {
-			WARNINGS.fnWithEmptyBody = toBool(v)
+			WARNINGS.fnWithEmptyBody = ToBool(v)
 		}
 	}
 	LINTER_CONFIG.Value = configMap

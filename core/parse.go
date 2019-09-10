@@ -683,10 +683,10 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	meta := sym.GetMeta()
 	if meta != nil {
 		if ok, p := meta.Get(KEYWORDS.private); ok {
-			vr.isPrivate = toBool(p)
+			vr.isPrivate = ToBool(p)
 		}
 		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
-			vr.isDynamic = toBool(p)
+			vr.isDynamic = ToBool(p)
 		}
 		vr.taggedType = getTaggedType(sym)
 	}
@@ -1029,7 +1029,7 @@ func parseLetfn(obj Object, ctx *ParseContext) *LoopExpr {
 func isSkipUnused(obj Meta) bool {
 	if m := obj.GetMeta(); m != nil {
 		if ok, v := m.Get(KEYWORDS.skipUnused); ok {
-			return toBool(v)
+			return ToBool(v)
 		}
 	}
 	return false

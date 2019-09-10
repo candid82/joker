@@ -39,3 +39,14 @@ func FileInfoMap(name string, info os.FileInfo) Map {
 	m.Add(MakeKeyword("dir?"), MakeBoolean(info.IsDir()))
 	return m
 }
+
+func ToBool(obj Object) bool {
+	switch obj := obj.(type) {
+	case Nil:
+		return false
+	case Boolean:
+		return obj.B
+	default:
+		return true
+	}
+}

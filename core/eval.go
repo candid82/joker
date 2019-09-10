@@ -372,19 +372,8 @@ func (doExpr *DoExpr) Eval(env *LocalEnv) Object {
 	return evalBody(doExpr.body, env)
 }
 
-func toBool(obj Object) bool {
-	switch obj := obj.(type) {
-	case Nil:
-		return false
-	case Boolean:
-		return obj.B
-	default:
-		return true
-	}
-}
-
 func (expr *IfExpr) Eval(env *LocalEnv) Object {
-	if toBool(Eval(expr.cond, env)) {
+	if ToBool(Eval(expr.cond, env)) {
 		return Eval(expr.positive, env)
 	}
 	return Eval(expr.negative, env)

@@ -43,7 +43,7 @@ func fromObject(obj Object) interface{} {
 	}
 }
 
-func toObject(v interface{}) Object {
+func toObject(v interface{}, keywordize bool) Object {
 	switch v := v.(type) {
 	case string:
 		return MakeString(v)
@@ -56,13 +56,19 @@ func toObject(v interface{}) Object {
 	case []interface{}:
 		res := EmptyVector()
 		for _, v := range v {
-			res = res.Conjoin(toObject(v))
+			res = res.Conjoin(toObject(v, keywordize))
 		}
 		return res
 	case map[string]interface{}:
 		res := EmptyArrayMap()
 		for k, v := range v {
-			res.Add(String{S: k}, toObject(v))
+			var key Object
+			if keywordize {
+				key = MakeKeyword(k)
+			} else {
+				key = MakeString(k)
+			}
+			res.Add(key, toObject(v, keywordize))
 		}
 		return res
 	default:
@@ -70,12 +76,18 @@ func toObject(v interface{}) Object {
 	}
 }
 
-func readString(s string) Object {
+func readString(s string, opts Map) Object {
 	var v interface{}
 	if err := json.Unmarshal([]byte(s), &v); err != nil {
 		panic(RT.NewError("Invalid json: " + err.Error()))
 	}
-	return toObject(v)
+	var keywordize bool
+	if opts != nil {
+		if ok, v := opts.Get(MakeKeyword("keywords?")); ok {
+			keywordize = ToBool(v)
+		}
+	}
+	return toObject(v, keywordize)
 }
 
 func writeString(obj Object) String {
