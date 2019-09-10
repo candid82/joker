@@ -9,10 +9,12 @@ import (
 
 var filepathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.filepath"))
 
-var list_separator_ = MakeString(string(filepath.ListSeparator))
-var separator_ = MakeString(string(filepath.Separator))
+var list_separator_ String
+var separator_ String
 
-var abs_ Proc = func(_args []Object) Object {
+var abs_ Proc
+
+func __abs_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -27,7 +29,9 @@ var abs_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isabs_ Proc = func(_args []Object) Object {
+var isabs_ Proc
+
+func __isabs_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -41,7 +45,9 @@ var isabs_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var base_ Proc = func(_args []Object) Object {
+var base_ Proc
+
+func __base_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -55,7 +61,9 @@ var base_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var clean_ Proc = func(_args []Object) Object {
+var clean_ Proc
+
+func __clean_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -69,7 +77,9 @@ var clean_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var dir_ Proc = func(_args []Object) Object {
+var dir_ Proc
+
+func __dir_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -83,7 +93,9 @@ var dir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var eval_symlinks_ Proc = func(_args []Object) Object {
+var eval_symlinks_ Proc
+
+func __eval_symlinks_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -98,7 +110,9 @@ var eval_symlinks_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var ext_ Proc = func(_args []Object) Object {
+var ext_ Proc
+
+func __ext_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -112,7 +126,9 @@ var ext_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var file_seq_ Proc = func(_args []Object) Object {
+var file_seq_ Proc
+
+func __file_seq_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -126,7 +142,9 @@ var file_seq_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var from_slash_ Proc = func(_args []Object) Object {
+var from_slash_ Proc
+
+func __from_slash_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -140,7 +158,9 @@ var from_slash_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var glob_ Proc = func(_args []Object) Object {
+var glob_ Proc
+
+func __glob_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -155,7 +175,9 @@ var glob_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var join_ Proc = func(_args []Object) Object {
+var join_ Proc
+
+func __join_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
@@ -170,7 +192,9 @@ var join_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var ismatches_ Proc = func(_args []Object) Object {
+var ismatches_ Proc
+
+func __ismatches_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -186,7 +210,9 @@ var ismatches_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var rel_ Proc = func(_args []Object) Object {
+var rel_ Proc
+
+func __rel_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -202,7 +228,9 @@ var rel_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var split_ Proc = func(_args []Object) Object {
+var split_ Proc
+
+func __split_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -217,7 +245,9 @@ var split_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var split_list_ Proc = func(_args []Object) Object {
+var split_list_ Proc
+
+func __split_list_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -231,7 +261,9 @@ var split_list_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var to_slash_ Proc = func(_args []Object) Object {
+var to_slash_ Proc
+
+func __to_slash_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -245,7 +277,9 @@ var to_slash_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var volume_name_ Proc = func(_args []Object) Object {
+var volume_name_ Proc
+
+func __volume_name_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -260,6 +294,25 @@ var volume_name_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+	list_separator_ = MakeString(string(filepath.ListSeparator))
+	separator_ = MakeString(string(filepath.Separator))
+	abs_ = __abs_
+	isabs_ = __isabs_
+	base_ = __base_
+	clean_ = __clean_
+	dir_ = __dir_
+	eval_symlinks_ = __eval_symlinks_
+	ext_ = __ext_
+	file_seq_ = __file_seq_
+	from_slash_ = __from_slash_
+	glob_ = __glob_
+	join_ = __join_
+	ismatches_ = __ismatches_
+	rel_ = __rel_
+	split_ = __split_
+	split_list_ = __split_list_
+	to_slash_ = __to_slash_
+	volume_name_ = __volume_name_
 
 	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
 

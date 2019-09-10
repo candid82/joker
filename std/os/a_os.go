@@ -11,7 +11,9 @@ var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
 
 
-var args_ Proc = func(_args []Object) Object {
+var args_ Proc
+
+func __args_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -24,7 +26,9 @@ var args_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var chdir_ Proc = func(_args []Object) Object {
+var chdir_ Proc
+
+func __chdir_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -38,7 +42,9 @@ var chdir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var close_ Proc = func(_args []Object) Object {
+var close_ Proc
+
+func __close_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -54,7 +60,9 @@ var close_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var create_ Proc = func(_args []Object) Object {
+var create_ Proc
+
+func __create_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -69,7 +77,9 @@ var create_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var cwd_ Proc = func(_args []Object) Object {
+var cwd_ Proc
+
+func __cwd_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -82,7 +92,9 @@ var cwd_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var env_ Proc = func(_args []Object) Object {
+var env_ Proc
+
+func __env_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -95,7 +107,9 @@ var env_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var exec_ Proc = func(_args []Object) Object {
+var exec_ Proc
+
+func __exec_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -110,7 +124,9 @@ var exec_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isexists_ Proc = func(_args []Object) Object {
+var isexists_ Proc
+
+func __isexists_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -124,7 +140,9 @@ var isexists_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var exit_ Proc = func(_args []Object) Object {
+var exit_ Proc
+
+func __exit_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -139,7 +157,9 @@ var exit_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var ls_ Proc = func(_args []Object) Object {
+var ls_ Proc
+
+func __ls_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -153,7 +173,9 @@ var ls_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var mkdir_ Proc = func(_args []Object) Object {
+var mkdir_ Proc
+
+func __mkdir_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -168,7 +190,9 @@ var mkdir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var open_ Proc = func(_args []Object) Object {
+var open_ Proc
+
+func __open_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -183,7 +207,9 @@ var open_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var set_env_ Proc = func(_args []Object) Object {
+var set_env_ Proc
+
+func __set_env_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -198,7 +224,9 @@ var set_env_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sh_ Proc = func(_args []Object) Object {
+var sh_ Proc
+
+func __sh_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
@@ -214,7 +242,9 @@ var sh_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sh_from_ Proc = func(_args []Object) Object {
+var sh_from_ Proc
+
+func __sh_from_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
@@ -231,7 +261,9 @@ var sh_from_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var stat_ Proc = func(_args []Object) Object {
+var stat_ Proc
+
+func __stat_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -246,6 +278,23 @@ var stat_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	args_ = __args_
+	chdir_ = __chdir_
+	close_ = __close_
+	create_ = __create_
+	cwd_ = __cwd_
+	env_ = __env_
+	exec_ = __exec_
+	isexists_ = __isexists_
+	exit_ = __exit_
+	ls_ = __ls_
+	mkdir_ = __mkdir_
+	open_ = __open_
+	set_env_ = __set_env_
+	sh_ = __sh_
+	sh_from_ = __sh_from_
+	stat_ = __stat_
 
 	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
 

@@ -14,7 +14,9 @@ var cryptoNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.crypto"))
 
 
 
-var hmac_ Proc = func(_args []Object) Object {
+var hmac_ Proc
+
+func __hmac_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -30,7 +32,9 @@ var hmac_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var md5_ Proc = func(_args []Object) Object {
+var md5_ Proc
+
+func __md5_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -45,7 +49,9 @@ var md5_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha1_ Proc = func(_args []Object) Object {
+var sha1_ Proc
+
+func __sha1_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -60,7 +66,9 @@ var sha1_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha224_ Proc = func(_args []Object) Object {
+var sha224_ Proc
+
+func __sha224_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -75,7 +83,9 @@ var sha224_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha256_ Proc = func(_args []Object) Object {
+var sha256_ Proc
+
+func __sha256_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -90,7 +100,9 @@ var sha256_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha384_ Proc = func(_args []Object) Object {
+var sha384_ Proc
+
+func __sha384_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -105,7 +117,9 @@ var sha384_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha512_ Proc = func(_args []Object) Object {
+var sha512_ Proc
+
+func __sha512_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -120,7 +134,9 @@ var sha512_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha512_224_ Proc = func(_args []Object) Object {
+var sha512_224_ Proc
+
+func __sha512_224_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -135,7 +151,9 @@ var sha512_224_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sha512_256_ Proc = func(_args []Object) Object {
+var sha512_256_ Proc
+
+func __sha512_256_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -151,6 +169,16 @@ var sha512_256_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	hmac_ = __hmac_
+	md5_ = __md5_
+	sha1_ = __sha1_
+	sha224_ = __sha224_
+	sha256_ = __sha256_
+	sha384_ = __sha384_
+	sha512_ = __sha512_
+	sha512_224_ = __sha512_224_
+	sha512_256_ = __sha512_256_
 
 	cryptoNamespace.ResetMeta(MakeMeta(nil, "Implements common cryptographic and hash functions.", "1.0"))
 

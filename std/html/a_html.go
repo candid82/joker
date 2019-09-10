@@ -11,7 +11,9 @@ var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
 
 
-var escape_ Proc = func(_args []Object) Object {
+var escape_ Proc
+
+func __escape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -25,7 +27,9 @@ var escape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var unescape_ Proc = func(_args []Object) Object {
+var unescape_ Proc
+
+func __unescape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -40,6 +44,9 @@ var unescape_ Proc = func(_args []Object) Object {
 }
 
 func Init() {
+
+	escape_ = __escape_
+	unescape_ = __unescape_
 
 	htmlNamespace.ResetMeta(MakeMeta(nil, "Provides functions for escaping and unescaping HTML text.", "1.0"))
 
