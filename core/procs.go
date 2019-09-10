@@ -152,6 +152,11 @@ var procMeta Proc = func(args []Object) Object {
 		if meta != nil {
 			return meta
 		}
+	case *Type:
+		meta := obj.GetMeta()
+		if meta != nil {
+			return meta
+		}
 	}
 	return NIL
 }

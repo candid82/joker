@@ -71,7 +71,7 @@
   (when doc (println " " doc)))
 
 (defmacro doc
-  "Prints documentation for a var or special form given its name,
+  "Prints documentation for a var, type, or special form given its name,
   or for a spec if given a keyword"
   {:added "1.0"}
   [name]
@@ -81,8 +81,11 @@
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
       (keyword? name) (println "Keywords (spec) not yet supported")
       (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
-      (resolve name) `(#'print-doc (meta (var ~name))))))
-
+      (resolve name) (let [x# (resolve name)
+                           v# (if (type? x#)
+                                name
+                                `(var ~name))]
+                       `(#'print-doc (meta ~v#))))))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Clojure functions (Vars, really)
