@@ -305,7 +305,7 @@ func RegRefType(name string, inst interface{}, doc string) *Type {
 	if doc != "" {
 		doc = "\n  " + doc
 	}
-	meta := MakeMeta(nil, "(Concrete reference 'Type')"+doc, "1.0")
+	meta := MakeMeta(nil, "(Concrete reference type)"+doc, "1.0")
 	meta.Add(KEYWORDS.name, MakeString(name))
 	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst)}
 	TYPES[STRINGS.Intern(name)] = t
@@ -316,7 +316,7 @@ func regType(name string, inst interface{}, doc string) *Type {
 	if doc != "" {
 		doc = "\n  " + doc
 	}
-	meta := MakeMeta(nil, "(Concrete 'Type')"+doc, "1.0")
+	meta := MakeMeta(nil, "(Concrete type)"+doc, "1.0")
 	meta.Add(KEYWORDS.name, MakeString(name))
 	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst).Elem()}
 	TYPES[STRINGS.Intern(name)] = t
@@ -327,7 +327,7 @@ func regInterface(name string, inst interface{}, doc string) *Type {
 	if doc != "" {
 		doc = "\n  " + doc
 	}
-	meta := MakeMeta(nil, "(Abstract type, aka 'interface')"+doc, "1.0")
+	meta := MakeMeta(nil, "(Interface type)"+doc, "1.0")
 	meta.Add(KEYWORDS.name, MakeString(name))
 	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst).Elem()}
 	TYPES[STRINGS.Intern(name)] = t
