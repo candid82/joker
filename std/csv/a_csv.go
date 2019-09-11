@@ -84,7 +84,7 @@ func Init() {
 	write_ = __write_
 	write_string_ = __write_string_
 
-	csvNamespace.ResetMeta(MakeMeta(nil, "Reads and writes comma-separated values (CSV) files as defined in RFC 4180.", "1.0"))
+	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) files as defined in RFC 4180.`, "1.0"))
 
 	
 	csvNamespace.InternVar("csv-seq", csv_seq_,

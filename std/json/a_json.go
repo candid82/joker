@@ -53,13 +53,15 @@ func Init() {
 	read_string_ = __read_string_
 	write_string_ = __write_string_
 
-	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
+	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
 
 	
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Parses the JSON-encoded data and return the result as a Joker value.`, "1.0"))
+			`Parses the JSON-encoded data and return the result as a Joker value.
+  Optional opts map may have the following keys:
+  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
 
 	jsonNamespace.InternVar("write-string", write_string_,
 		MakeMeta(

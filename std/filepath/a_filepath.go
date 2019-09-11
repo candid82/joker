@@ -314,7 +314,7 @@ func Init() {
 	to_slash_ = __to_slash_
 	volume_name_ = __volume_name_
 
-	filepathNamespace.ResetMeta(MakeMeta(nil, "Implements utility routines for manipulating filename paths.", "1.0"))
+	filepathNamespace.ResetMeta(MakeMeta(nil, `Implements utility routines for manipulating filename paths.`, "1.0"))
 
 	filepathNamespace.InternVar("list-separator", list_separator_,
 		MakeMeta(

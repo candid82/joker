@@ -465,7 +465,7 @@ func Init() {
 	trimr_ = __trimr_
 	upper_case_ = __upper_case_
 
-	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
+	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))
 
 	
 	stringNamespace.InternVar("blank?", isblank_,

@@ -373,7 +373,7 @@ func Init() {
 	unix_ = __unix_
 	until_ = __until_
 
-	timeNamespace.ResetMeta(MakeMeta(nil, "Provides functionality for measuring and displaying time.", "1.0"))
+	timeNamespace.ResetMeta(MakeMeta(nil, `Provides functionality for measuring and displaying time.`, "1.0"))
 
 	timeNamespace.InternVar("ansi-c", ansi_c_,
 		MakeMeta(
