@@ -1,0 +1,10 @@
+(ns
+  ^{:go-imports []
+    :doc "Provides access to internals of Joker."}
+  private)
+
+(defn types
+  "Returns currently registered types as a map."
+  {:added "1.0"
+  :go "types()"}
+  [])

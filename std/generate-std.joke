@@ -1,4 +1,4 @@
-(def namespaces ['base64 'html 'http 'json 'math 'os 'string 'time 'url 'yaml 'strconv 'crypto 'hex 'filepath 'csv])
+(def namespaces ['base64 'html 'http 'json 'math 'os 'string 'time 'url 'yaml 'strconv 'crypto 'hex 'filepath 'csv 'private])
 
 (require '[joker.string :as s])
 
