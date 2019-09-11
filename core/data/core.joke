@@ -3582,11 +3582,6 @@
   (^Map [^Associative m k ^Callable f x y z & more]
    (assoc m k (apply f (get m k) x y z more))))
 
-(defmacro type?
-  "Returns whether the object is a type"
-  {:added "1.0"}
-  ^Boolean [x] `(= (type ~x) ~Type))
-
 (defn coll?
   "Returns true if x implements Collection"
   {:added "1.0"}
