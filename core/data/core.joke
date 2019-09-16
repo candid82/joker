@@ -4449,3 +4449,8 @@
   ^Map [multifn]
   (throw (ex-info "method preference not yet supported by joker.core" {})))
 
+(def ^{:private true
+       :doc "Returns currently registered types as a map."
+       :added "1.0"
+       :tag Map}
+  types__ types__)
