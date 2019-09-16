@@ -18,6 +18,9 @@
 (def namespace-template
   (slurp "templates/ns-summary.html"))
 
+(def type-template
+  (slurp "templates/type-summary.html"))
+
 (def link-item-template
   (slurp "templates/link-item.html"))
 
@@ -93,6 +96,19 @@
         (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
+(defn type-doc
+  [k]
+  (let [m (meta (get (joker.core/types__) k))]
+    (when-not (:added m)
+      (println "WARNING: type without added meta key: " k))
+    (when-not (:doc m)
+      (println "WARNING: type without doc meta key: " k))
+    (-> type-template
+        (string/replace "{id}" k)
+        (string/replace "{name}" k)
+        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
+        (string/replace "{added}" (str (:added m))))))
+
 (defn ns-doc
   [ns-sym]
   (let [ns (find-ns ns-sym)
@@ -113,7 +129,7 @@
         (string/replace "{index}" var-links-doc))))
 
 (defn index-doc
-  [namespaces]
+  [namespaces types]
   (let [namespaces-docs (string/join
                          ""
                          (for [ns-sym namespaces]
@@ -121,18 +137,31 @@
         ns-links-doc (string/join
                       ""
                       (->> namespaces
-                           (map #(link-item-doc (str %)))))]
+                           (map #(link-item-doc (str %)))))
+        types-docs (string/join
+                    ""
+                    (for [t types]
+                      (type-doc t)))
+        type-links-doc (string/join
+                        ""
+                        (->> types
+                             (map #(link-item-doc (str %)))))]
     (-> index-template
-        (string/replace "{index}" ns-links-doc)
-        (string/replace "{namespaces}" namespaces-docs))))
+        (string/replace "{index-of-namespaces}" ns-links-doc)
+        (string/replace "{namespaces}" namespaces-docs)
+        (string/replace "{index-of-types}" type-links-doc)
+        (string/replace "{types}" types-docs))))
 
 (defn full-doc
   []
   (let [namespaces (->> (all-ns)
                         (map ns-name)
                         (remove #(= 'user %))
-                        (sort))]
-    (spit "index.html" (index-doc namespaces))
+                        (sort))
+        types (->> (joker.core/types__)
+                   (map key)
+                   (sort))]
+    (spit "index.html" (index-doc namespaces types))
     (doseq [ns namespaces]
       (spit (str ns ".html") (ns-doc ns)))))
 
