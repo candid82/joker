@@ -66,7 +66,7 @@ func Init() {
 	start_file_server_ = __start_file_server_
 	start_server_ = __start_server_
 
-	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client and server implementations`, "1.0"))
+	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client and server implementations.`, "1.0"))
 
 	
 	httpNamespace.InternVar("send", send_,

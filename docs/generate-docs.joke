@@ -5,6 +5,7 @@
 (require 'joker.template)
 (require 'joker.set)
 (require 'joker.repl)
+(require 'joker.html)
 
 (def index-template
   (slurp "templates/index.html"))
@@ -68,7 +69,7 @@
         (string/replace "{name}" (str k))
         (string/replace "{type}" (type-name v))
         (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
+        (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m)))
         (string/replace
          "{source}"
@@ -77,6 +78,10 @@
                    (source-file (:ns m))
                    (str (:line m)))
            "")))))
+
+(defn- first-line
+  [s]
+  (first (string/split s #"\n")))
 
 (defn namespace-doc
   [ns-sym]
@@ -90,7 +95,7 @@
     (-> namespace-template
         (string/replace "{id}" k)
         (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
+        (string/replace "{docstring}" (string/replace (joker.html/escape (first-line (:doc m))) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
 (defn ns-doc
@@ -108,7 +113,7 @@
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
         (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
+        (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (string/replace  "{vars}" vars-doc)
         (string/replace "{index}" var-links-doc))))
 
