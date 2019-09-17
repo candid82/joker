@@ -23,8 +23,11 @@
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(read-string s)</code></div>
+<div><code>(read-string s opts)</code></div>
 </pre>
-  <p class="var-docstr">Parses the JSON-encoded data and return the result as a Joker value.</p>
+  <p class="var-docstr">Parses the JSON-encoded data and return the result as a Joker value.<br>
+  Optional opts map may have the following keys:<br>
+  :keywords? - if true, JSON keys will be converted from strings to keywords.</p>
   
 </li>
 <li>
