@@ -1,6 +1,6 @@
 (ns
   ^{:go-imports []
-    :doc "Provides HTTP client and server implementations"}
+    :doc "Provides HTTP client and server implementations."}
   http)
 
 (defn send
