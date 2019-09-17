@@ -31,8 +31,8 @@
   apply-template will recursively replace argument symbols in expr<br>
   with their corresponding values, returning a modified expr.<br>
 <br>
-  Example: (apply-template '[x] '(+ x x) '[2])<br>
-           ;=> (+ 2 2)</p>
+  Example: (apply-template &#39;[x] &#39;(+ x x) &#39;[2])<br>
+           ;=&gt; (+ 2 2)</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/template.joke#L31">source</a>
 </li>
 <li>
@@ -45,8 +45,8 @@
   in values.  values are automatically partitioned by the number of<br>
   arguments in argv, an argument vector as in defn.<br>
 <br>
-  Example: (macroexpand '(do-template [x y] (+ y x) 2 4 3 5))<br>
-           ;=> (do (+ 4 2) (+ 5 3))</p>
+  Example: (macroexpand &#39;(do-template [x y] (+ y x) 2 4 3 5))<br>
+           ;=&gt; (do (+ 4 2) (+ 5 3))</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/template.joke#L47">source</a>
 </li>
 

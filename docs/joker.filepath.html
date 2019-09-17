@@ -97,7 +97,7 @@
   <pre class="var-usage"><div><code>(base path)</code></div>
 </pre>
   <p class="var-docstr">Returns the last element of path. Trailing path separators are removed before<br>
-  extracting the last element. If the path is empty, returns ".". If the path consists<br>
+  extracting the last element. If the path is empty, returns &#34;.&#34;. If the path consists<br>
   entirely of separators, returns a single separator.</p>
   
 </li>
@@ -115,13 +115,13 @@
 3. Eliminate each inner .. path name element (the parent directory)<br>
    along with the non-.. element that precedes it.<br>
 4. Eliminate .. elements that begin a rooted path:<br>
-   that is, replace "/.." by "/" at the beginning of a path,<br>
-   assuming separator is '/'.<br>
-The returned path ends in a slash only if it represents a root directory, such as "/" on Unix or `C:\` on Windows.<br>
+   that is, replace &#34;/..&#34; by &#34;/&#34; at the beginning of a path,<br>
+   assuming separator is &#39;/&#39;.<br>
+The returned path ends in a slash only if it represents a root directory, such as &#34;/&#34; on Unix or `C:\` on Windows.<br>
 <br>
 Finally, any occurrences of slash are replaced by separator.<br>
 <br>
-If the result of this process is an empty string, returns the string ".".</p>
+If the result of this process is an empty string, returns the string &#34;.&#34;.</p>
   
 </li>
 <li>
@@ -130,9 +130,9 @@ If the result of this process is an empty string, returns the string ".".</p>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dir path)</code></div>
 </pre>
-  <p class="var-docstr">Returns all but the last element of path, typically the path's directory.<br>
+  <p class="var-docstr">Returns all but the last element of path, typically the path&#39;s directory.<br>
   After dropping the final element, calls clean on the path and trailing slashes are removed.<br>
-  If the path is empty, returns ".". If the path consists entirely of separators,<br>
+  If the path is empty, returns &#34;.&#34;. If the path consists entirely of separators,<br>
   returns a single separator. The returned path does not end in a separator unless it is the root directory.</p>
   
 </li>
@@ -172,7 +172,7 @@ If the result of this process is an empty string, returns the string ".".</p>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(from-slash path)</code></div>
 </pre>
-  <p class="var-docstr">Returns the result of replacing each slash ('/') character in path with a separator character.<br>
+  <p class="var-docstr">Returns the result of replacing each slash (&#39;/&#39;) character in path with a separator character.<br>
   Multiple slashes are replaced by multiple separators.</p>
   
 </li>
@@ -184,7 +184,7 @@ If the result of this process is an empty string, returns the string ".".</p>
 </pre>
   <p class="var-docstr">Returns the names of all files matching pattern or nil if there is no matching file.<br>
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical<br>
-  names such as /usr/*/bin/ed (assuming the separator is '/').<br>
+  names such as /usr/*/bin/ed (assuming the separator is &#39;/&#39;).<br>
 <br>
   Ignores file system errors such as I/O errors reading directories.<br>
   Throws exception when pattern is malformed.</p>
@@ -218,7 +218,7 @@ If the result of this process is an empty string, returns the string ".".</p>
   <p class="var-docstr">Reports whether name matches the shell file name pattern.<br>
   Requires pattern to match all of name, not just a substring.<br>
   Throws exception if pattern is malformed.<br>
-  On Windows, escaping is disabled. Instead, '\' is treated as path separator.</p>
+  On Windows, escaping is disabled. Instead, &#39;\&#39; is treated as path separator.</p>
   
 </li>
 <li>
@@ -229,7 +229,7 @@ If the result of this process is an empty string, returns the string ".".</p>
 </pre>
   <p class="var-docstr">Returns a relative path that is lexically equivalent to targpath when joined to basepath<br>
   with an intervening separator. On success, the returned path will always be relative to basepath,<br>
-  even if basepath and targpath share no elements. An exception is thrown if targpath can't be made<br>
+  even if basepath and targpath share no elements. An exception is thrown if targpath can&#39;t be made<br>
   relative to basepath or if knowing the current working directory would be necessary to compute it.<br>
   Calls clean on the result.</p>
   
@@ -269,7 +269,7 @@ If the result of this process is an empty string, returns the string ".".</p>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(to-slash path)</code></div>
 </pre>
-  <p class="var-docstr">Returns the result of replacing each separator character in path with a slash ('/') character.<br>
+  <p class="var-docstr">Returns the result of replacing each separator character in path with a slash (&#39;/&#39;) character.<br>
   Multiple separators are replaced by multiple slashes.</p>
   
 </li>
@@ -279,8 +279,8 @@ If the result of this process is an empty string, returns the string ".".</p>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(volume-name path)</code></div>
 </pre>
-  <p class="var-docstr">Returns leading volume name. Given "C:\foo\bar" it returns "C:" on Windows. Given "\\host\share\foo"<br>
-  returns "\\host\share". On other platforms it returns "".</p>
+  <p class="var-docstr">Returns leading volume name. Given &#34;C:\foo\bar&#34; it returns &#34;C:&#34; on Windows. Given &#34;\\host\share\foo&#34;<br>
+  returns &#34;\\host\share&#34;. On other platforms it returns &#34;&#34;.</p>
   
 </li>
 

@@ -6,14 +6,14 @@
   <div class="main">
     <h1>Namespace: joker.walk</h1>
     <span class="var-added">v1.0</span>
-    <p class="var-docstr">This file defines a generic tree walker for Clojure data<br>
-         structures.  It takes any data structure (list, vector, map, set,<br>
-         seq), calls a function on every element, and uses the return value<br>
-         of the function in place of the original.  This makes it fairly<br>
-         easy to write recursive search-and-replace functions, as shown in<br>
+    <p class="var-docstr">Defines a generic tree walker for Clojure data structures.<br>
+         Takes any data structure (list, vector, map, set, seq), calls<br>
+         a function on every element, and uses the return value of the<br>
+         function in place of the original.  This makes it fairly easy<br>
+         to write recursive search-and-replace functions, as shown in<br>
          the examples.<br>
 <br>
-         Note: "walk" supports all Clojure data structures EXCEPT maps<br>
+         Note: &#34;walk&#34; supports all Clojure data structures EXCEPT maps<br>
          created with sorted-map-by.  There is no (obvious) way to retrieve<br>
          the sorting function.</p>
     <h2>Index</h2>
@@ -76,7 +76,7 @@
   <pre class="var-usage"><div><code>(postwalk f form)</code></div>
 </pre>
   <p class="var-docstr">Performs a depth-first, post-order traversal of form.  Calls f on<br>
-  each sub-form, uses f's return value in place of the original.<br>
+  each sub-form, uses f&#39;s return value in place of the original.<br>
   Recognizes all Clojure data structures. Consumes seqs as with doall.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L56">source</a>
 </li>

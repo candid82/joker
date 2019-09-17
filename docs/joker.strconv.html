@@ -90,7 +90,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format-bool b)</code></div>
 </pre>
-  <p class="var-docstr">Returns "true" or "false" according to the value of b.</p>
+  <p class="var-docstr">Returns &#34;true&#34; or &#34;false&#34; according to the value of b.</p>
   
 </li>
 <li>
@@ -100,8 +100,8 @@
   <pre class="var-usage"><div><code>(format-double f fmt prec bitSize)</code></div>
 </pre>
   <p class="var-docstr">Converts the floating-point number f to a string, according to the format fmt and precision prec. It rounds the result assuming that the original was obtained from a floating-point value of bitSize bits (32 for float32, 64 for float64).<br>
-  The format fmt is one of 'b' (-ddddp±ddd, a binary exponent), 'e' (-d.dddde±dd, a decimal exponent), 'E' (-d.ddddE±dd, a decimal exponent), 'f' (-ddd.dddd, no exponent), 'g' ('e' for large exponents, 'f' otherwise), or 'G' ('E' for large exponents, 'f' otherwise).<br>
-  The precision prec controls the number of digits (excluding the exponent) printed by the 'e', 'E', 'f', 'g', and 'G' formats. For 'e', 'E', and 'f' it is the number of digits after the decimal point. For 'g' and 'G' it is the maximum number of significant digits (trailing zeros are removed). The special precision -1 uses the smallest number of digits necessary such that ParseFloat will return f exactly.</p>
+  The format fmt is one of &#39;b&#39; (-ddddp±ddd, a binary exponent), &#39;e&#39; (-d.dddde±dd, a decimal exponent), &#39;E&#39; (-d.ddddE±dd, a decimal exponent), &#39;f&#39; (-ddd.dddd, no exponent), &#39;g&#39; (&#39;e&#39; for large exponents, &#39;f&#39; otherwise), or &#39;G&#39; (&#39;E&#39; for large exponents, &#39;f&#39; otherwise).<br>
+  The precision prec controls the number of digits (excluding the exponent) printed by the &#39;e&#39;, &#39;E&#39;, &#39;f&#39;, &#39;g&#39;, and &#39;G&#39; formats. For &#39;e&#39;, &#39;E&#39;, and &#39;f&#39; it is the number of digits after the decimal point. For &#39;g&#39; and &#39;G&#39; it is the maximum number of significant digits (trailing zeros are removed). The special precision -1 uses the smallest number of digits necessary such that ParseFloat will return f exactly.</p>
   
 </li>
 <li>
@@ -110,7 +110,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format-int i base)</code></div>
 </pre>
-  <p class="var-docstr">Returns the string representation of i in the given base, for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z' for digit values >= 10.</p>
+  <p class="var-docstr">Returns the string representation of i in the given base, for 2 &lt;= base &lt;= 36. The result uses the lower-case letters &#39;a&#39; to &#39;z&#39; for digit values &gt;= 10.</p>
   
 </li>
 <li>
@@ -156,7 +156,7 @@
   <pre class="var-usage"><div><code>(parse-int s base bitSize)</code></div>
 </pre>
   <p class="var-docstr">Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.<br>
-  If base == 0, the base is implied by the string's prefix: base 16 for "0x", base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.<br>
+  If base == 0, the base is implied by the string&#39;s prefix: base 16 for &#34;0x&#34;, base 8 for &#34;0&#34;, and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.<br>
   The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. For a bitSize below 0 or above 64 an error is returned.</p>
   
 </li>

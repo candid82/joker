@@ -82,7 +82,7 @@
   By default, options are toggles that default to nil, but the second string<br>
   parameter may be used to specify that an option requires an argument.<br>
 <br>
-    e.g. ["-p" "--port PORT"] specifies that --port requires an argument,<br>
+    e.g. [&#34;-p&#34; &#34;--port PORT&#34;] specifies that --port requires an argument,<br>
          of which PORT is a short description.<br>
 <br>
   The :property value pairs are optional and take precedence over the<br>
@@ -99,14 +99,14 @@
                   This option is mandatory.<br>
 <br>
     :short-opt    The short format for this option, normally set by the first<br>
-                  positional string parameter: e.g. "-p". Must be unique.<br>
+                  positional string parameter: e.g. &#34;-p&#34;. Must be unique.<br>
 <br>
     :long-opt     The long format for this option, normally set by the second<br>
-                  positional string parameter; e.g. "--port". Must be unique.<br>
+                  positional string parameter; e.g. &#34;--port&#34;. Must be unique.<br>
 <br>
     :required     A description of the required argument for this option if<br>
                   one is required; normally set in the second positional<br>
-                  string parameter after the long option: "--port PORT".<br>
+                  string parameter after the long option: &#34;--port PORT&#34;.<br>
 <br>
                   The absence of this entry indicates that the option is a<br>
                   boolean toggle that is set to true when specified on the<br>
@@ -148,14 +148,14 @@
                   If this is a boolean option, parse-fn will receive the value<br>
                   true. This may be used to invert the logic of this option:<br>
 <br>
-                  ["-q" "--quiet"<br>
+                  [&#34;-q&#34; &#34;--quiet&#34;<br>
                    :id :verbose<br>
                    :default true<br>
                    :parse-fn not]<br>
 <br>
     :assoc-fn     A function that receives the current option map, the current<br>
                   option :id, and the current parsed option value, and returns<br>
-                  a new option map. The default is 'assoc'.<br>
+                  a new option map. The default is &#39;assoc&#39;.<br>
 <br>
                   For non-idempotent options, where you need to compute a option<br>
                   value based on the current value and a new value from the<br>
@@ -167,20 +167,20 @@
 <br>
     :update-fn    A function that receives the the current parsed option value,<br>
                   and returns a new option value, for each option :id present.<br>
-                  The default is 'identity'.<br>
+                  The default is &#39;identity&#39;.<br>
 <br>
                   This may be used to create non-idempotent options where you<br>
                   only need the current value, like setting a verbosity level by<br>
-                  specifying an option multiple times. ("-vvv" -> 3)<br>
+                  specifying an option multiple times. (&#34;-vvv&#34; -&gt; 3)<br>
 <br>
-                  ["-v" "--verbose"<br>
+                  [&#34;-v&#34; &#34;--verbose&#34;<br>
                    :default 0<br>
                    :update-fn inc]<br>
 <br>
                   :default is applied first. If you wish to omit the :default<br>
                   option value, use fnil in your :update-fn as follows:<br>
 <br>
-                  ["-v" "--verbose"<br>
+                  [&#34;-v&#34; &#34;--verbose&#34;<br>
                    :update-fn (fnil inc 0)]<br>
 <br>
                   You cannot specify both :assoc-fn and :update-fn for an<br>
@@ -223,7 +223,7 @@
                   you have a parse error).<br>
 <br>
     :summary-fn   A function that receives the sequence of compiled option specs<br>
-                  (documented at #'clojure.tools.cli/compile-option-specs), and<br>
+                  (documented at #&#39;clojure.tools.cli/compile-option-specs), and<br>
                   returns a custom option summary string.<br>
   </p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L379">source</a>
@@ -236,7 +236,7 @@
 </pre>
   <p class="var-docstr">Reduce options specs into a options summary for printing at a terminal.<br>
   Note that the specs argument should be the compiled version. That effectively<br>
-  means that you shouldn't call summarize directly. When you call parse-opts<br>
+  means that you shouldn&#39;t call summarize directly. When you call parse-opts<br>
   you get back a :summary key which is the result of calling summarize (or<br>
   your user-supplied :summary-fn option) on the compiled option specs.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/tools_cli.joke#L347">source</a>
