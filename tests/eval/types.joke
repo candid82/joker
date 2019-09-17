@@ -1,0 +1,7 @@
+(ns joker.test-clojure.types
+  (:require [joker.test :refer [deftest is are testing]]
+            [tests.test-helper :refer [exception]]))
+
+(deftest test-types
+  (is (= (get (joker.core/types__) "Boolean") Boolean))
+  (is (= (get (joker.core/types__) "Int") Int)))
