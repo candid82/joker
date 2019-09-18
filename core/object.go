@@ -833,7 +833,11 @@ func (p Proc) ToString(escape bool) string {
 }
 
 func (p Proc) Equals(other interface{}) bool {
-	return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+	switch other := other.(type) {
+	case Proc:
+		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+	}
+	return false
 }
 
 func (p Proc) GetInfo() *ObjectInfo {
