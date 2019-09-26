@@ -2508,26 +2508,33 @@
          :tag ArrayMap}
   array-map array-map__)
 
-(defn ^:private mark-skip-unused__
+(defn ^:private make-mark-skip-unused__
   [rule-name]
   (fn [s]
     (if (and *linter-mode* (false? (rule-name (:rules *linter-config*))))
       (vary-meta s assoc :skip-unused true)
       s)))
 
+(defn ^:private mark-skip-unused__
+  [s]
+  (if *linter-mode* (vary-meta s assoc :skip-unused true) s))
+
 ;redefine let and loop  with destructuring
 (defn ^:private destructure [bindings]
-  (let [mark-as (mark-skip-unused__ :unused-as)
-        mark-keys (mark-skip-unused__ :unused-keys)
+  (let [mark-as (make-mark-skip-unused__ :unused-as)
+        mark-keys (make-mark-skip-unused__ :unused-keys)
         bents (partition 2 bindings)
         pb (fn pb [bvec b v]
              (let [pvec
                    (fn [bvec b val]
+                     (when (and *linter-mode* (not (seq b)))
+                       (println-linter__ (ex-info "destructuring with no bindings"
+                                                  {:form b :_prefix "Parse warning"})))
                      (let [gvec (gensym "vec__")
                            gseq (gensym "seq__")
                            gfirst (gensym "first__")
                            has-rest (some #{'&} b)]
-                       (loop [ret (let [ret (conj bvec gvec val)]
+                       (loop [ret (let [ret (conj bvec (mark-skip-unused__ gvec) val)]
                                     (if has-rest
                                       (conj ret gseq (list `seq gvec))
                                       ret))
@@ -2559,11 +2566,14 @@
                            ret))))
                    pmap
                    (fn [bvec b v]
+                     (when (and *linter-mode* (not (seq b)))
+                       (println-linter__ (ex-info "destructuring with no bindings"
+                                                  {:form b :_prefix "Parse warning"})))
                      (let [gmap (gensym "map__")
                            gmapseq (with-meta gmap {:tag 'Seq})
                            defaults (:or b)]
                        (loop [ret (-> bvec (conj gmap) (conj v)
-                                      (conj gmap) (conj `(if (seq? ~gmap) (apply array-map__ (seq ~gmapseq)) ~gmap))
+                                      (conj (mark-skip-unused__ gmap)) (conj `(if (seq? ~gmap) (apply array-map__ (seq ~gmapseq)) ~gmap))
                                       ((fn [ret]
                                          (if (:as b)
                                            (conj ret (mark-as (:as b)) gmap)
