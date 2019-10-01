@@ -41,45 +41,62 @@ func execute(name string, opts Map) Object {
 	var dir string
 	var args []string
 	var stdin io.Reader
-	ok, dirObj := opts.Get(MakeKeyword("dir"))
-	if ok {
+	var stdout, stderr io.Writer
+	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok {
 		dir = AssertString(dirObj, "dir must be a string").S
 	}
-	ok, argsObj := opts.Get(MakeKeyword("args"))
-	if ok {
+	if ok, argsObj := opts.Get(MakeKeyword("args")); ok {
 		s := AssertSeqable(argsObj, "args must be Seqable").Seq()
 		for !s.IsEmpty() {
 			args = append(args, AssertString(s.First(), "args must be strings").S)
 			s = s.Rest()
 		}
 	}
-	ok, stdinObj := opts.Get(MakeKeyword("stdin"))
-	if ok {
+	if ok, stdinObj := opts.Get(MakeKeyword("stdin")); ok {
 		if stdinObj.Equals(MakeKeyword("pipe")) {
 			stdin = Stdin
 		} else {
 			stdin = strings.NewReader(AssertString(stdinObj, "stdin must be either :pipe keyword or a string").S)
 		}
 	}
-	return sh(dir, stdin, name, args)
+	if ok, stdoutObj := opts.Get(MakeKeyword("stdout")); ok {
+		if stdoutObj.Equals(MakeKeyword("pipe")) {
+			stdout = Stdout
+		} else {
+			panic(RT.NewError("stdout option must be :pipe"))
+		}
+	}
+	if ok, stderrObj := opts.Get(MakeKeyword("stderr")); ok {
+		if stderrObj.Equals(MakeKeyword("pipe")) {
+			stderr = Stderr
+		} else {
+			panic(RT.NewError("stderr option must be :pipe"))
+		}
+	}
+	return sh(dir, stdin, stdout, stderr, name, args)
 }
 
-func sh(dir string, stdin io.Reader, name string, args []string) Object {
+func sh(dir string, stdin io.Reader, stdout io.Writer, stderr io.Writer, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	cmd.Stdin = stdin
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	var stdoutBuffer, stderrBuffer bytes.Buffer
+	if stdout != nil {
+		cmd.Stdout = stdout
+	} else {
+		cmd.Stdout = &stdoutBuffer
+	}
+	if stderr != nil {
+		cmd.Stderr = stderr
+	} else {
+		cmd.Stderr = &stderrBuffer
+	}
 
 	err := cmd.Start()
 	PanicOnErr(err)
 
 	err = cmd.Wait()
-
-	stdoutString := string(stdout.Bytes())
-	stderrString := string(stderr.Bytes())
 
 	res := EmptyArrayMap()
 	res.Add(MakeKeyword("success"), Boolean{B: err == nil})
@@ -92,17 +109,18 @@ func sh(dir string, stdin io.Reader, name string, args []string) Object {
 			exitCode = ws.ExitStatus()
 		} else {
 			exitCode = defaultFailedCode
-			if stderrString == "" {
-				stderrString = err.Error()
-			}
 		}
 	} else {
 		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
 		exitCode = ws.ExitStatus()
 	}
 	res.Add(MakeKeyword("exit"), Int{I: exitCode})
-	res.Add(MakeKeyword("out"), String{S: stdoutString})
-	res.Add(MakeKeyword("err"), String{S: stderrString})
+	if stdout == nil {
+		res.Add(MakeKeyword("out"), String{S: string(stdoutBuffer.Bytes())})
+	}
+	if stderr == nil {
+		res.Add(MakeKeyword("err"), String{S: string(stderrBuffer.Bytes())})
+	}
 	return res
 }
 

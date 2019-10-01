@@ -35,7 +35,7 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(\"\", nil, name, arguments)"}
+  :go "sh(\"\", nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
 (defn sh-from
@@ -47,7 +47,7 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(dir, nil, name, arguments)"}
+  :go "sh(dir, nil, nil, nil, name, arguments)"}
   [^String dir ^String name & ^String arguments])
 
 (defn exec
@@ -57,12 +57,16 @@
   :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
   If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
   Joker's stdin will be redirected to the program's stdin.
+  :stdout - if specified, must be :pipe keyword, in which case the program's stdout will be redirected
+  to Joker's stdout.
+  :stderr - if specified, must be :pipe keyword, in which case the program's stderr will be redirected
+  to Joker's stderr.
   Returns a map with the following keys:
   :success - whether or not the execution was successful,
   :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
-  :out - string capturing stdout of the program,
-  :err - string capturing stderr of the program."
+  :out - string capturing stdout of the program (unless :pipe was passed for :stdout option)
+  :err - string capturing stderr of the program (unless :pipe was passed for :stderr option)."
   {:added "1.0"
   :go "execute(name, opts)"}
   [^String name ^Map opts])

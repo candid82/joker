@@ -233,7 +233,7 @@ func __sh_(_args []Object) Object {
 		CheckArity(_args, 1, 999)
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
-		_res := sh("", nil, name, arguments)
+		_res := sh("", nil, nil, nil, name, arguments)
 		return _res
 
 	default:
@@ -252,7 +252,7 @@ func __sh_from_(_args []Object) Object {
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)
-		_res := sh(dir, nil, name, arguments)
+		_res := sh(dir, nil, nil, nil, name, arguments)
 		return _res
 
 	default:
@@ -339,12 +339,16 @@ func Init() {
   :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
   If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
   Joker's stdin will be redirected to the program's stdin.
+  :stdout - if specified, must be :pipe keyword, in which case the program's stdout will be redirected
+  to Joker's stdout.
+  :stderr - if specified, must be :pipe keyword, in which case the program's stderr will be redirected
+  to Joker's stderr.
   Returns a map with the following keys:
   :success - whether or not the execution was successful,
   :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
-  :out - string capturing stdout of the program,
-  :err - string capturing stderr of the program.`, "1.0"))
+  :out - string capturing stdout of the program (unless :pipe was passed for :stdout option)
+  :err - string capturing stderr of the program (unless :pipe was passed for :stderr option).`, "1.0"))
 
 	osNamespace.InternVar("exists?", isexists_,
 		MakeMeta(
