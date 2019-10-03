@@ -30,9 +30,11 @@ You can also [build](#building) Joker from the source code.
 
 `joker` - launch REPL
 
-`joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`.
+`joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--file <filename>`
+in which case drops into the REPL after the script is (successfully) executed. (Note use of `--file` in this case, to ensure `<filename>` is not treated as a `<socket>` specification for the repl.)
 
-`joker -e <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`
+`joker --eval <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--eval`,
+in which case drops into the REPL after the expression is (successfully) executed.
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
