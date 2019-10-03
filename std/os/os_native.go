@@ -53,24 +53,38 @@ func execute(name string, opts Map) Object {
 		}
 	}
 	if ok, stdinObj := opts.Get(MakeKeyword("stdin")); ok {
-		if stdinObj.Equals(MakeKeyword("pipe")) {
+		switch s := stdinObj.(type) {
+		case Nil:
+		case *IOReader:
+			stdin = s.Reader
+		case io.Reader:
 			stdin = Stdin
-		} else {
-			stdin = strings.NewReader(AssertString(stdinObj, "stdin must be either :pipe keyword or a string").S)
+		case String:
+			stdin = strings.NewReader(s.S)
+		default:
+			panic(RT.NewError("stdin option must be either an IOReader or a string, got " + stdinObj.GetType().ToString(false)))
 		}
 	}
 	if ok, stdoutObj := opts.Get(MakeKeyword("stdout")); ok {
-		if stdoutObj.Equals(MakeKeyword("pipe")) {
-			stdout = Stdout
-		} else {
-			panic(RT.NewError("stdout option must be :pipe"))
+		switch s := stdoutObj.(type) {
+		case Nil:
+		case *IOWriter:
+			stdout = s.Writer
+		case io.Writer:
+			stdout = s
+		default:
+			panic(RT.NewError("stdout option must be an IOWriter, got " + stdoutObj.GetType().ToString(false)))
 		}
 	}
 	if ok, stderrObj := opts.Get(MakeKeyword("stderr")); ok {
-		if stderrObj.Equals(MakeKeyword("pipe")) {
-			stderr = Stderr
-		} else {
-			panic(RT.NewError("stderr option must be :pipe"))
+		switch s := stderrObj.(type) {
+		case Nil:
+		case *IOWriter:
+			stderr = s.Writer
+		case io.Writer:
+			stderr = s
+		default:
+			panic(RT.NewError("stderr option must be an IOWriter, got " + stderrObj.GetType().ToString(false)))
 		}
 	}
 	return sh(dir, stdin, stdout, stderr, name, args)

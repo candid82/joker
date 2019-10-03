@@ -19,7 +19,7 @@
     (println (str "Running test in subdirectory " test-dir)))
   (let [dir (str "tests/eval/" test-dir "/")
         filename "input.joke"
-        stdin (slurp-or (str dir "stdin.txt") :pipe)
+        stdin (slurp-or (str dir "stdin.txt") *in*)
         res (joker.os/exec joker-cmd {:dir dir :args [filename] :stdin stdin})
         out (:out res)
         err (:err res)
