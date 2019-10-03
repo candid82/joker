@@ -58,7 +58,7 @@ func execute(name string, opts Map) Object {
 		case *IOReader:
 			stdin = s.Reader
 		case io.Reader:
-			stdin = Stdin
+			stdin = s
 		case String:
 			stdin = strings.NewReader(s.S)
 		default:
