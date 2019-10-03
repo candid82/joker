@@ -124,18 +124,15 @@
   <p class="var-docstr">Executes the named program with the given arguments. opts is a map with the following keys (all optional):<br>
   :args - vector of arguments (all arguments must be strings),<br>
   :dir - if specified, working directory will be set to this value before executing the program,<br>
-  :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.<br>
-  If it&#39;s a string, the string&#39;s content will serve as stdin for the program. IOReader can be, for example,<br>
-  *in* (in which case Joker&#39;s stdin will be redirected to the program&#39;s stdin) or the value returned by (joker.os/open).<br>
-  :stdout - if specified, must be an IOWriter. It can be, for example, *out* (in which case the program&#39;s stdout will be redirected<br>
-  to Joker&#39;s stdout) or the value returned by (joker.os/create).<br>
-  :stderr - the same as :stdout, but for stderr.<br>
+  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.<br>
+  If it&#39;s a string, the string&#39;s content will serve as stdin for the program. If it&#39;s :pipe,<br>
+  Joker&#39;s stdin will be redirected to the program&#39;s stdin.<br>
   Returns a map with the following keys:<br>
   :success - whether or not the execution was successful,<br>
   :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
   :exit - exit code of program (or attempt to execute it),<br>
-  :out - string capturing stdout of the program (unless :stdout option was passed)<br>
-  :err - string capturing stderr of the program (unless :stderr option was passed).</p>
+  :out - string capturing stdout of the program,<br>
+  :err - string capturing stderr of the program.</p>
   
 </li>
 <li>
