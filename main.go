@@ -302,7 +302,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "   or: joker [args] --repl [<socket>] [-- <repl-args>]")
 	fmt.Fprintln(out, "                                                    starts a repl (on optional network socket)")
 	fmt.Fprintln(out, "   or: joker [args] --eval <expr> [-- <expr-args>]  evaluate <expr>, print if non-nil")
-	fmt.Fprintln(out, "   or: joker [args] <filename> [<script-args>]      input from file")
+	fmt.Fprintln(out, "   or: joker [args] [--file] <filename> [<script-args>]")
+	fmt.Fprintln(out, "                                                    input from file")
 	fmt.Fprintln(out, "   or: joker [args] --lint <filename>               lint the code in file")
 	fmt.Fprintln(out, "\nNotes:")
 	fmt.Fprintln(out, "  -e is a synonym for --eval.")
@@ -320,6 +321,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
 	fmt.Fprintln(out, "    Read, parse, and evaluate the input (default unless --lint in effect).")
+	fmt.Fprintln(out, "  --exit-to-repl [<socket>]")
+	fmt.Fprintln(out, "    After processing --eval or --file, drop into repl instead of exiting.")
 	fmt.Fprintln(out, "  --no-readline")
 	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
@@ -363,6 +366,7 @@ var (
 	cpuProfileRateFlag bool
 	memProfileName     string
 	noReadline         bool
+	exitToRepl         bool
 )
 
 func isNumber(s string) bool {
@@ -482,6 +486,17 @@ func parseArgs(args []string) {
 			}
 		case "--no-readline":
 			noReadline = true
+		case "--exit-to-repl":
+			exitToRepl = true
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				replSocket = args[i]
+			}
+		case "--file":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				filename = args[i]
+			}
 		case "--profiler":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
@@ -547,7 +562,7 @@ func parseArgs(args []string) {
 		fmt.Fprintf(Stderr, "Error: Missing argument for '%s' option\n", args[i])
 		ExitJoker(3)
 	}
-	if i < length && !noFileFlag {
+	if i < length && !noFileFlag && filename == "" {
 		if debugOut != nil {
 			fmt.Fprintf(debugOut, "filename=%s\n", args[i])
 		}
@@ -606,6 +621,7 @@ func main() {
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
+		fmt.Fprintf(debugOut, "exitToRepl=%v\n", exitToRepl)
 	}
 
 	if helpFlag {
@@ -667,7 +683,7 @@ func main() {
 			ExitJoker(6)
 		}
 		if replFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --eval/-e and --[n]repl.\n")
+			fmt.Fprintf(Stderr, "Error: Cannot combine --eval/-e and --repl.\n")
 			ExitJoker(7)
 		}
 		if workingDir != "" {
@@ -682,13 +698,19 @@ func main() {
 		if err := ProcessReader(reader, "", phase); err != nil {
 			ExitJoker(1)
 		}
-		return
+		if !exitToRepl {
+			return
+		}
 	}
 
 	if lintFlag {
 		if replFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --lint and --[n]repl.\n")
+			fmt.Fprintf(Stderr, "Error: Cannot combine --lint and --repl.\n")
 			ExitJoker(10)
+		}
+		if exitToRepl {
+			fmt.Fprintf(Stderr, "Error: Cannot combine --lint and --exit-to-repl.\n")
+			ExitJoker(14)
 		}
 		if dialect == UNKNOWN {
 			dialect = detectDialect(filename)
@@ -709,7 +731,9 @@ func main() {
 		if err := processFile(filename, phase); err != nil {
 			ExitJoker(1)
 		}
-		return
+		if !exitToRepl {
+			return
+		}
 	}
 
 	if replSocket != "" {
