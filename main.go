@@ -20,6 +20,7 @@ import (
 	_ "github.com/candid82/joker/std/hex"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/http"
+	_ "github.com/candid82/joker/std/io"
 	_ "github.com/candid82/joker/std/json"
 	_ "github.com/candid82/joker/std/math"
 	_ "github.com/candid82/joker/std/os"

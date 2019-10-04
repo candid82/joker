@@ -1,0 +1,13 @@
+(ns
+  ^{:go-imports ["io"]
+    :doc "Provides basic interfaces to I/O primitives."}
+  io)
+
+(defn ^Int copy
+  "Copies from src to dst until either EOF is reached on src or an error occurs.
+  Returns the number of bytes copied or throws an error.
+  src must be IOReader, e.g. as returned by joker.os/open.
+  dst must be IOWriter, e.g. as returned by joker.os/create."
+  {:added "1.0"
+  :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
+  [^IOWriter dst ^IOReader src])
