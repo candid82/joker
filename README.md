@@ -108,6 +108,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
   - `slurp` only takes one argument - a filename (string). No options are supported.
   - `ifn?` is called `callable?`
   - Map entry is represented as a two-element vector.
+  - resolving unbound var returns `nil`, not the value `Unbound`. You can still check if the var is bound with `bound?` function.
 
 ## Linter mode
 
