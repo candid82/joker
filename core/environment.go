@@ -26,6 +26,7 @@ type (
 		stderr        *Var
 		printReadably *Var
 		file          *Var
+		MainFile      *Var
 		args          *Var
 		classPath     *Var
 		ns            *Var
@@ -89,6 +90,7 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
 	res.stderr.Value = &IOWriter{stderr}
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
+	res.MainFile = res.CoreNamespace.Intern(MakeSymbol("*main-file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
 		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
 			:incremental and :qualifier keys. Feature releases may increment

@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
@@ -80,6 +81,11 @@ func processFile(filename string, phase Phase) error {
 		if err != nil {
 			return err
 		}
+	}
+	if filename != "" {
+		f, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		GLOBAL_ENV.MainFile.Value = MakeString(f)
 	}
 	return ProcessReader(reader, filename, phase)
 }

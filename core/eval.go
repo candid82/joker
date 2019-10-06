@@ -174,7 +174,6 @@ func (err *EvalError) Error() string {
 }
 
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
-	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
 	return expr.vr.Resolve()
 }
 

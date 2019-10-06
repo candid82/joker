@@ -914,7 +914,7 @@ func (v *Var) Hash() uint32 {
 
 func (v *Var) Resolve() Object {
 	if v.Value == nil {
-		panic(RT.NewError("Unbound var: " + v.ToString(false)))
+		return NIL
 	}
 	return v.Value
 }
