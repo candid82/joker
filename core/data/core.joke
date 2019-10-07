@@ -3768,6 +3768,12 @@
   When there is no file, e.g. in the REPL, the value is not defined."
   {:added "1.0"})
 
+(add-doc-and-meta *main-file*
+  "The absolute path of <filename> on the command line, as a String.
+
+  When there is no file, e.g. in the REPL, the value is not defined."
+  {:added "1.0"})
+
 (add-doc-and-meta *command-line-args*
   "A sequence of the supplied command line arguments, or nil if
   none were supplied"
