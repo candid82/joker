@@ -53,16 +53,23 @@ func execute(name string, opts Map) Object {
 		}
 	}
 	if ok, stdinObj := opts.Get(MakeKeyword("stdin")); ok {
-		switch s := stdinObj.(type) {
-		case Nil:
-		case *IOReader:
-			stdin = s.Reader
-		case io.Reader:
-			stdin = s
-		case String:
-			stdin = strings.NewReader(s.S)
-		default:
-			panic(RT.NewError("stdin option must be either an IOReader or a string, got " + stdinObj.GetType().ToString(false)))
+		// Check if the intent was to pipe stdin into the program being called and
+		// use Stdin directly rather than GLOBAL_ENV.stdin.Value, which is a buffered wrapper.
+		// TODO: this won't work correctly if GLOBAL_ENV.stdin is bound to something other than Stdin
+		if GLOBAL_ENV.IsStdIn(stdinObj) {
+			stdin = Stdin
+		} else {
+			switch s := stdinObj.(type) {
+			case Nil:
+			case *IOReader:
+				stdin = s.Reader
+			case io.Reader:
+				stdin = s
+			case String:
+				stdin = strings.NewReader(s.S)
+			default:
+				panic(RT.NewError("stdin option must be either an IOReader or a string, got " + stdinObj.GetType().ToString(false)))
+			}
 		}
 	}
 	if ok, stdoutObj := opts.Get(MakeKeyword("stdout")); ok {

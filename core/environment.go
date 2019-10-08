@@ -84,7 +84,7 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &IOReader{stdin}
+	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
 	res.stdout.Value = &IOWriter{stdout}
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
@@ -113,6 +113,10 @@ func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
 	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
 	env.stdout.Value = &IOWriter{stdout}
 	env.stderr.Value = &IOWriter{stderr}
+}
+
+func (env *Env) IsStdIn(obj Object) bool {
+	return env.stdin.Value == obj
 }
 
 func (env *Env) CurrentNamespace() *Namespace {
