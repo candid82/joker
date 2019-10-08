@@ -1,7 +1,11 @@
 (ns joker.test-clojure.types
-  (:require [joker.test :refer [deftest is are testing]]
-            [tests.test-helper :refer [exception]]))
+  (:require [joker.test :refer [deftest is]]))
 
 (deftest test-types
   (is (= (get (joker.core/types__) "Boolean") Boolean))
   (is (= (get (joker.core/types__) "Int") Int)))
+
+(deftest stdin
+  (is (instance? BufferedReader *in*)
+      "*in* must be BufferedReader (technically it must implement StringReader interface)
+      for (read-line) to work"))
