@@ -7,6 +7,11 @@
        ~@forms
        (recur))))
 
+;; Read from a String.
 (with-in-str (slurp "lines.txt")
   (while-let [line (read-line)]
-    (println line)))
+    (println "|" line)))
+
+;; Now read from actual stdin.txt.
+(while-let [line (read-line)]
+  (println "|" line))

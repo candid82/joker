@@ -1,0 +1,2 @@
+This file becomes :stdin during the exec of Joker via run-forked-test.
+So it should appear in the output too.

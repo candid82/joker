@@ -1,3 +1,4 @@
-This is test input.
-Would be cool to automate this for all tests.
-But sh/sh-from don't support the :in keyword yet.
+| This is test input.
+| It is substituted for :stdin via with-in-str in the test itself.
+| This file becomes :stdin during the exec of Joker via run-forked-test.
+| So it should appear in the output too.
