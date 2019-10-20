@@ -14,7 +14,7 @@ brew install candid82/brew/joker
 
 The same command can be used on Linux if you use [Linuxbrew](http://linuxbrew.sh/).
 
-If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker/).
+If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker-bin/).
 
 If you use [Nix](https://nixos.org/nix/), then you can install Joker with
 
