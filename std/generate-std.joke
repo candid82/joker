@@ -18,6 +18,9 @@
 (def intern-template
   (slurp "intern.tmpl"))
 
+(def addmeta-template
+  (slurp "addmeta.tmpl"))
+
 (defn q
   [s]
   (str "\"" s "\""))
@@ -99,6 +102,23 @@
                       (str "MakeSymbol(" (q (str arg)) ")")))
        ")"))
 
+(defn make-value
+  "Returns code to make the Joker object representing the given value.
+
+  E.g. 'String{S: \"value\"}'. Except for integers, the values are treated as strings (for now)."
+  [v]
+  (condp = (str (type v))
+    "Int" (str "Int{I: " v "}")
+    (str "String{S: " (q v) "}")))
+
+(defn add-other-meta
+  "Append meta tags other than what are normally present or irrelevant (:go)."
+  [m]
+  (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
+    (s/trim-right (apply str (mapv #(-> addmeta-template
+                                        (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
+                                        (rpl "{value}" (make-value (val %)))) m)))))
+
 (defn generate-fn-decl
   [ns-name ns-name-final k v]
   (let [m (meta v)
@@ -115,6 +135,7 @@
                        (rpl "{goName}" go-fn-name)
                        (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
                        (rpl "{added}" (:added m))
+                       (rpl "{moreMeta}" (add-other-meta m))
                        (rpl "{args}"
                             (str "NewListFrom("
                                  (s/join ", " (for [args arglists]
@@ -169,6 +190,7 @@
                        (rpl "{goName}" go-non-fn-name)
                        (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
                        (rpl "{added}" (:added m))
+                       (rpl "{moreMeta}" (add-other-meta m))
                        (rpl "{args}" "nil"))]
     [non-fn-str intern-str]))
 
