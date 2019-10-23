@@ -19,7 +19,7 @@
   (slurp "intern.tmpl"))
 
 (def addmeta-template
-  (slurp "addmeta.tmpl"))
+  (s/trim-right (slurp "addmeta.tmpl")))
 
 (defn q
   [s]
@@ -115,9 +115,9 @@
   "Append meta tags other than what are normally present or irrelevant (:go)."
   [m]
   (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
-    (s/trim-right (apply str (mapv #(-> addmeta-template
-                                        (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
-                                        (rpl "{value}" (make-value (val %)))) m)))))
+    (s/join "" (map #(-> addmeta-template
+                    (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
+                    (rpl "{value}" (make-value (val %)))) m))))
 
 (defn generate-fn-decl
   [ns-name ns-name-final k v]
