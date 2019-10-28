@@ -137,7 +137,7 @@ func Init() {
 
   :comma - field delimiter (defaults to ',')
 
-  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.`, "1.0"))
+  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
 

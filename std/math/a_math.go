@@ -71,22 +71,22 @@ func Init() {
 	mathNamespace.InternVar("pi", pi_,
 		MakeMeta(
 			nil,
-			`Pi`, "1.0"))
+			`Pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("cos", cos_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-			`Returns the cosine of the radian argument x.`, "1.0"))
+			`Returns the cosine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("hypot", hypot_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
-			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0"))
+			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sin", sin_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-			`Returns the sine of the radian argument x.`, "1.0"))
+			`Returns the sine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 }
 

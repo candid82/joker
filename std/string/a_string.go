@@ -471,18 +471,18 @@ func Init() {
 	stringNamespace.InternVar("blank?", isblank_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`True if s is nil, empty, or contains only whitespace.`, "1.0"))
+			`True if s is nil, empty, or contains only whitespace.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("capitalize", capitalize_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Converts first character of the string to upper-case, all other
-  characters to lower-case.`, "1.0"))
+  characters to lower-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("ends-with?", isends_with_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s ends with substr.`, "1.0"))
+			`True if s ends with substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("escape", escape_,
 		MakeMeta(
@@ -491,12 +491,12 @@ func Init() {
   from s as follows:
 
   If (cmap ch) is nil, append ch to the new string.
-  If (cmap ch) is non-nil, append (str (cmap ch)) instead.`, "1.0"))
+  If (cmap ch) is non-nil, append (str (cmap ch)) instead.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("includes?", isincludes_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s includes substr.`, "1.0"))
+			`True if s includes substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("index-of", index_of_,
 		MakeMeta(
@@ -507,7 +507,7 @@ func Init() {
 	stringNamespace.InternVar("join", join_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("coll")), NewVectorFrom(MakeSymbol("separator"), MakeSymbol("coll"))),
-			`Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.`, "1.0"))
+			`Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("last-index-of", last_index_of_,
 		MakeMeta(
@@ -518,17 +518,17 @@ func Init() {
 	stringNamespace.InternVar("lower-case", lower_case_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts string to all lower-case.`, "1.0"))
+			`Converts string to all lower-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("pad-left", pad_left_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the beginning to length n.`, "1.0"))
+			`Returns s padded with pad at the beginning to length n.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("pad-right", pad_right_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the end to length n.`, "1.0"))
+			`Returns s padded with pad at the end to length n.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("replace", replace_,
 		MakeMeta(
@@ -538,7 +538,7 @@ func Init() {
   If match is Regex, $1, $2, etc. in the replacement string repl are
   substituted with the string that matched the corresponding
   parenthesized group in the pattern.
-  `, "1.0"))
+  `, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("replace-first", replace_first_,
 		MakeMeta(
@@ -548,12 +548,12 @@ func Init() {
   If match is Regex, $1, $2, etc. in the replacement string repl are
   substituted with the string that matched the corresponding
   parenthesized group in the pattern.
-  `, "1.0"))
+  `, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("reverse", reverse_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns s with its characters reversed.`, "1.0"))
+			`Returns s with its characters reversed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("split", split_,
 		MakeMeta(
@@ -568,42 +568,42 @@ func Init() {
 	stringNamespace.InternVar("starts-with?", isstarts_with_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s starts with substr.`, "1.0"))
+			`True if s starts with substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("trim", trim_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from both ends of string.`, "1.0"))
+			`Removes whitespace from both ends of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-left", trim_left_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the left side of string.`, "1.0"))
+			`Removes whitespace from the left side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-newline", trim_newline_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes all trailing newline \n or return \r characters from string.`, "1.0"))
+			`Removes all trailing newline \n or return \r characters from string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-right", trim_right_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the right side of string.`, "1.0"))
+			`Removes whitespace from the right side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("triml", triml_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the left side of string.`, "1.0"))
+			`Removes whitespace from the left side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trimr", trimr_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the right side of string.`, "1.0"))
+			`Removes whitespace from the right side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("upper-case", upper_case_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts string to all upper-case.`, "1.0"))
+			`Converts string to all upper-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
 
