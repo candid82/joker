@@ -36,8 +36,9 @@ var (
 )
 
 type internalNamespaceInfo struct {
-	data *[]byte
-	init func()
+	data      *[]byte
+	init      func()
+	available bool
 }
 
 var (
@@ -1439,7 +1440,7 @@ var procLoadLibFromPath Proc = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
 	if info := internalLibs[libname]; info != nil {
-		processNamespaceInfo(info)
+		processNamespaceInfo(info, libname)
 		return NIL
 	}
 	cp := GLOBAL_ENV.classPath.Value
@@ -1696,15 +1697,18 @@ func intern(name string, proc Proc) {
 	vr.meta = privateMeta
 }
 
-func processNamespaceInfo(info *internalNamespaceInfo) {
+func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	if !info.available {
+		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_data.go missing?", name))
+	}
 	if info.init != nil {
 		info.init()
 		info.init = nil
 	}
-	if info.data != nil && len(*info.data) > 0 {
+	if info.data != nil {
 		header, p := UnpackHeader(*info.data, GLOBAL_ENV)
 		for len(p) > 0 {
 			var expr Expr
@@ -1717,11 +1721,11 @@ func processNamespaceInfo(info *internalNamespaceInfo) {
 }
 
 func ProcessCoreNamespaceInfo() {
-	processNamespaceInfo(&coreNamespaceInfo)
+	processNamespaceInfo(&coreNamespaceInfo, "joker.core")
 }
 
 func ProcessReplNamespaceInfo() {
-	processNamespaceInfo(&replNamespaceInfo)
+	processNamespaceInfo(&replNamespaceInfo, "joker.repl")
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -1898,19 +1902,19 @@ func ProcessLinterNamespaceInfo(dialect Dialect) {
 		markJokerNamespacesAsUsed()
 		return
 	}
-	processNamespaceInfo(&linter_allNamespaceInfo)
+	processNamespaceInfo(&linter_allNamespaceInfo, "linter_all")
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		markJokerNamespacesAsUsed()
-		processNamespaceInfo(&linter_jokerNamespaceInfo)
+		processNamespaceInfo(&linter_jokerNamespaceInfo, "linter_joker")
 		return
 	}
-	processNamespaceInfo(&linter_cljxNamespaceInfo)
+	processNamespaceInfo(&linter_cljxNamespaceInfo, "linter_cljx")
 	switch dialect {
 	case CLJ:
-		processNamespaceInfo(&linter_cljNamespaceInfo)
+		processNamespaceInfo(&linter_cljNamespaceInfo, "linter_clj")
 	case CLJS:
-		processNamespaceInfo(&linter_cljsNamespaceInfo)
+		processNamespaceInfo(&linter_cljsNamespaceInfo, "linter_cljs")
 	}
 	removeJokerNamespaces()
 }
