@@ -152,6 +152,16 @@ func (m *ArrayMap) Add(key Object, value Object) bool {
 	return true
 }
 
+func (m *ArrayMap) Plus(key Object, value Object) *ArrayMap {
+	i := m.indexOf(key)
+	if i != -1 {
+		return m
+	}
+	m.arr = append(m.arr, key)
+	m.arr = append(m.arr, value)
+	return m
+}
+
 func (m *ArrayMap) Count() int {
 	return len(m.arr) / 2
 }
