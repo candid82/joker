@@ -34,6 +34,25 @@ import (
 	"github.com/pkg/profile"
 )
 
+var dataRead = []rune{}
+var saveForRepl = true
+
+type replayable struct {
+	reader *Reader
+}
+
+func (r *replayable) ReadRune() (ch rune, size int, err error) {
+	ch = r.reader.Get()
+	if ch == EOF {
+		err = io.EOF
+		size = 0
+	} else {
+		dataRead = append(dataRead, ch)
+		size = 1
+	}
+	return
+}
+
 type (
 	ReplContext struct {
 		first  *Var
@@ -86,6 +105,9 @@ func processFile(filename string, phase Phase) error {
 		f, err := filepath.Abs(filename)
 		PanicOnErr(err)
 		GLOBAL_ENV.MainFile.Value = MakeString(f)
+	}
+	if saveForRepl {
+		reader = NewReader(&replayable{reader}, "<replay>")
 	}
 	return ProcessReader(reader, filename, phase)
 }
@@ -225,6 +247,10 @@ func repl(phase Phase) {
 		}
 		defer rl.Close()
 		runeReader = NewLineRuneReader(rl)
+		for _, line := range strings.Split(string(dataRead), "\n") {
+			rl.SaveHistory(line)
+		}
+		dataRead = []rune{}
 	}
 
 	reader := NewReader(runeReader, "<repl>")
@@ -621,6 +647,8 @@ func main() {
 	}
 
 	parseArgs(os.Args)
+	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
+
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
 
@@ -642,6 +670,7 @@ func main() {
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
 		fmt.Fprintf(debugOut, "exitToRepl=%v\n", exitToRepl)
 		fmt.Fprintf(debugOut, "errorToRepl=%v\n", errorToRepl)
+		fmt.Fprintf(debugOut, "saveForRepl=%v\n", saveForRepl)
 	}
 
 	if helpFlag {
@@ -715,6 +744,9 @@ func main() {
 			ExitJoker(9)
 		}
 		reader := NewReader(strings.NewReader(eval), "<expr>")
+		if saveForRepl {
+			reader = NewReader(&replayable{reader}, "<replay>")
+		}
 		if err := ProcessReader(reader, "", phase); err != nil {
 			if !errorToRepl {
 				ExitJoker(1)
