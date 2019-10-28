@@ -1790,6 +1790,10 @@ func processNamespaceInfo(info *internalNamespaceInfo) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	if info.init != nil {
+		info.init()
+		info.init = nil
+	}
 	if info.data != nil && len(*info.data) > 0 {
 		header, p := UnpackHeader(*info.data, GLOBAL_ENV)
 		for len(p) > 0 {
@@ -1798,6 +1802,7 @@ func processNamespaceInfo(info *internalNamespaceInfo) {
 			_, err := TryEval(expr)
 			PanicOnErr(err)
 		}
+		info.data = nil
 	}
 }
 
