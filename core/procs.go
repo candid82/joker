@@ -23,7 +23,7 @@ import (
 type internalNamespaceInfo struct {
 	data      []byte
 	init      func()
-	generated *func()
+	generated func()
 	available bool
 }
 
@@ -1689,6 +1689,11 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
 	if !info.available {
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_data.go missing?", name))
+	}
+	if info.generated != nil {
+		info.generated()
+		info.generated = nil
+		return
 	}
 	if info.init != nil {
 		info.init()

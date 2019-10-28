@@ -78,6 +78,9 @@ func (ns *Namespace) Refer(sym Symbol, vr *Var) *Var {
 }
 
 func (ns *Namespace) ReferAll(other *Namespace) {
+	if other == nil {
+		panic(RT.NewError("Can't refer from unpopulated namespace into " + ns.ToString(false)))
+	}
 	for name, vr := range other.mappings {
 		if !vr.isPrivate {
 			ns.mappings[name] = vr
