@@ -20,24 +20,10 @@ import (
 	"unicode/utf8"
 )
 
-var (
-	coreData         []byte
-	replData         []byte
-	walkData         []byte
-	templateData     []byte
-	testData         []byte
-	setData          []byte
-	tools_cliData    []byte
-	linter_allData   []byte
-	linter_jokerData []byte
-	linter_cljxData  []byte
-	linter_cljData   []byte
-	linter_cljsData  []byte
-)
-
 type internalNamespaceInfo struct {
-	data      *[]byte
+	data      []byte
 	init      func()
+	generated *func()
 	available bool
 }
 
@@ -1709,7 +1695,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		info.init = nil
 	}
 	if info.data != nil {
-		header, p := UnpackHeader(*info.data, GLOBAL_ENV)
+		header, p := UnpackHeader(info.data, GLOBAL_ENV)
 		for len(p) > 0 {
 			var expr Expr
 			expr, p = UnpackExpr(p, header)
