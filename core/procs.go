@@ -39,6 +39,26 @@ var (
 	better_condData  []byte
 )
 
+type internalNamespaceInfo struct {
+	data *[]byte
+	init func()
+}
+
+var (
+	coreNamespaceInfo         internalNamespaceInfo
+	replNamespaceInfo         internalNamespaceInfo
+	walkNamespaceInfo         internalNamespaceInfo
+	templateNamespaceInfo     internalNamespaceInfo
+	testNamespaceInfo         internalNamespaceInfo
+	setNamespaceInfo          internalNamespaceInfo
+	tools_cliNamespaceInfo    internalNamespaceInfo
+	linter_allNamespaceInfo   internalNamespaceInfo
+	linter_jokerNamespaceInfo internalNamespaceInfo
+	linter_cljxNamespaceInfo  internalNamespaceInfo
+	linter_cljNamespaceInfo   internalNamespaceInfo
+	linter_cljsNamespaceInfo  internalNamespaceInfo
+)
+
 type (
 	Phase        int
 	Dialect      int
@@ -56,7 +76,7 @@ const (
 
 const VERSION = "v0.14.1"
 
-var internalLibs map[string][]byte
+var internalLibs map[string]*internalNamespaceInfo
 
 const (
 	CLJ Dialect = iota
@@ -67,15 +87,16 @@ const (
 )
 
 func InitInternalLibs() {
-	internalLibs = map[string][]byte{
-		"joker.walk":        walkData,
-		"joker.template":    templateData,
-		"joker.repl":        replData,
-		"joker.test":        testData,
-		"joker.set":         setData,
-		"joker.tools.cli":   tools_cliData,
-		"joker.hiccup":      hiccupData,
-		"joker.better-cond": better_condData,
+	internalLibs = map[string]*internalNamespaceInfo{
+		"joker.core":        &coreNamespaceInfo,
+		"joker.walk":        &walkNamespaceInfo,
+		"joker.template":    &templateNamespaceInfo,
+		"joker.repl":        &replNamespaceInfo,
+		"joker.test":        &testNamespaceInfo,
+		"joker.set":         &setNamespaceInfo,
+		"joker.tools.cli":   &tools_cliNamespaceInfo,
+		"joker.hiccup":      &hiccupNamespaceInfo,
+		"joker.better-cond": &better_condNamespaceInfo,
 	}
 }
 
@@ -1426,8 +1447,8 @@ var procLoadFile Proc = func(args []Object) Object {
 var procLoadLibFromPath Proc = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
-	if d := internalLibs[libname]; d != nil {
-		processData(d)
+	if info := internalLibs[libname]; info != nil {
+		processNamespaceInfo(info)
 		return NIL
 	}
 	cp := GLOBAL_ENV.classPath.Value
@@ -1763,16 +1784,18 @@ func intern(name string, proc Proc) {
 	vr.meta = privateMeta
 }
 
-func processData(data []byte) {
+func processNamespaceInfo(info *internalNamespaceInfo) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
-	header, p := UnpackHeader(data, GLOBAL_ENV)
-	for len(p) > 0 {
-		var expr Expr
-		expr, p = UnpackExpr(p, header)
-		_, err := TryEval(expr)
-		PanicOnErr(err)
+	if info.data != nil && len(*info.data) > 0 {
+		header, p := UnpackHeader(*info.data, GLOBAL_ENV)
+		for len(p) > 0 {
+			var expr Expr
+			expr, p = UnpackExpr(p, header)
+			_, err := TryEval(expr)
+			PanicOnErr(err)
+		}
 	}
 }
 
@@ -1794,16 +1817,12 @@ func setCoreNamespaces() {
 
 var haveSetCoreNamespaces bool
 
-func ProcessCoreData() {
-	processData(coreData)
-	if !haveSetCoreNamespaces {
-		setCoreNamespaces()
-		haveSetCoreNamespaces = true
-	}
+func ProcessCoreNamespaceInfo() {
+	processNamespaceInfo(&coreNamespaceInfo)
 }
 
-func ProcessReplData() {
-	processData(replData)
+func ProcessReplNamespaceInfo() {
+	processNamespaceInfo(&replNamespaceInfo)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -2008,24 +2027,24 @@ func markJokerNamespacesAsUsed() {
 	}
 }
 
-func ProcessLinterData(dialect Dialect) {
+func ProcessLinterNamespaceInfo(dialect Dialect) {
 	if dialect == EDN {
 		markJokerNamespacesAsUsed()
 		return
 	}
-	processData(linter_allData)
+	processNamespaceInfo(&linter_allNamespaceInfo)
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		markJokerNamespacesAsUsed()
-		processData(linter_jokerData)
+		processNamespaceInfo(&linter_jokerNamespaceInfo)
 		return
 	}
-	processData(linter_cljxData)
+	processNamespaceInfo(&linter_cljxNamespaceInfo)
 	switch dialect {
 	case CLJ:
-		processData(linter_cljData)
+		processNamespaceInfo(&linter_cljNamespaceInfo)
 	case CLJS:
-		processData(linter_cljsData)
+		processNamespaceInfo(&linter_cljsNamespaceInfo)
 	}
 	removeJokerNamespaces()
 }

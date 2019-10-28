@@ -171,7 +171,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 }
 
 func srepl(port string, phase Phase) {
-	ProcessReplData()
+	ProcessReplNamespaceInfo()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	l, err := net.Listen("tcp", replSocket)
 	if err != nil {
@@ -249,7 +249,7 @@ func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
-	ProcessLinterData(dialect)
+	ProcessLinterNamespaceInfo(dialect)
 }
 
 func detectDialect(filename string) Dialect {
@@ -653,7 +653,7 @@ var runningProfile interface {
 func main() {
 	RT.GIL.Lock()
 	InitInternalLibs()
-	ProcessCoreData()
+	ProcessCoreNamespaceInfo()
 
 	SetExitJoker(func(code int) {
 		finish()
