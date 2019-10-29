@@ -1691,15 +1691,24 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_data.go missing?", name))
 	}
 	if info.generated != nil {
+		if Verbose {
+			fmt.Fprintf(Stderr, "processNamespaceinfo: Running generated code for %s\n", name)
+		}
 		info.generated()
 		info.generated = nil
 		return
 	}
 	if info.init != nil {
+		if Verbose {
+			fmt.Fprintf(Stderr, "processNamespaceinfo: Running init() for %s\n", name)
+		}
 		info.init()
 		info.init = nil
 	}
 	if info.data != nil {
+		if Verbose {
+			fmt.Fprintf(Stderr, "processNamespaceinfo: Evaluating code for %s\n", name)
+		}
 		header, p := UnpackHeader(info.data, GLOBAL_ENV)
 		for len(p) > 0 {
 			var expr Expr

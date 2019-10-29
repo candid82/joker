@@ -418,6 +418,16 @@ func notOption(arg string) bool {
 }
 
 func parseArgs(args []string) {
+	if len(os.Args) > 1 {
+		// peek to see if the first arg is "--debug*"
+		switch os.Args[1] {
+		case "--debug", "--debug=stderr":
+			debugOut = Stderr
+		case "--debug=stdout":
+			debugOut = Stdout
+		}
+	}
+
 	length := len(args)
 	stop := false
 	missing := false
@@ -627,6 +637,10 @@ var runningProfile interface {
 }
 
 func main() {
+	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
+
+	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
+
 	InitInternalLibs()
 	ProcessCoreNamespaceInfo()
 
@@ -635,19 +649,6 @@ func main() {
 		os.Exit(code)
 	})
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-
-	if len(os.Args) > 1 {
-		// peek to see if the first arg is "--debug*"
-		switch os.Args[1] {
-		case "--debug", "--debug=stderr":
-			debugOut = Stderr
-		case "--debug=stdout":
-			debugOut = Stdout
-		}
-	}
-
-	parseArgs(os.Args)
-	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
