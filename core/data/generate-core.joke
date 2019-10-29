@@ -1,0 +1,317 @@
+;;; (set-macro__ ...)
+;;; (defonce ...)
+;;; (defn- ...) (metadata only?)
+;;; (add-doc-and-meta ...) (probably okay, but what about preexisting symbols like *in*?)
+
+(require '[joker.string :as s])
+
+(def rpl s/replace)
+
+(defn debug
+  [& args]
+  (when ((joker.os/env) "JOKER_DEBUG_STD")
+    (apply println args)))
+
+;;; Discover namespaces dynamically by finding *.joke files.
+(def namespaces
+  (vec (->> (joker.os/ls ".")
+            (remove :dir?)
+            (map :name)
+            (remove #(= "generate-std.joke" %))
+            (filter #(s/ends-with? % ".joke"))
+            (map #(rpl % #"[.]joke$" ""))
+            (map symbol))))
+
+(debug "Namespaces:" namespaces)
+(apply require :reload namespaces) ; :reload in case namespaces become 'joker.base64 etc.
+
+(def fn-template
+  (slurp "fn.tmpl"))
+
+(def arity-template
+  (slurp "arity.tmpl"))
+
+(def package-template
+  (slurp "package.tmpl"))
+
+(def intern-template
+  (slurp "intern.tmpl"))
+
+(def addmeta-template
+  (s/trim-right (slurp "addmeta.tmpl")))
+
+(defn q
+  [s]
+  (str "\"" s "\""))
+
+(defn raw-quoted-string
+  "Returns a Go-style backtick-quoted string with backticks handled by appending double-quoted backticks"
+  [s]
+  (str "`" (rpl s "`" "` + \"`\" + `") "`")
+  )
+
+(defn go-name
+  "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
+  [fn-name]
+  (let [n (-> fn-name
+              (rpl "-" "_")
+              (rpl "?" "")
+              (str "_"))]
+    (if (s/ends-with? fn-name "?")
+      (str "is" n)
+      n)))
+
+(defn extract-args
+  "Generate code to extract the arguments in the list, assigning the extracted values to variable names corresponding to the argument names."
+  [args]
+  (s/join
+   "\n\t\t"
+   (map-indexed
+    (fn [i arg]
+      (let [m (meta arg)
+            t (cond-> (:tag m)
+                (:varargs m) (str "s"))]
+        (str arg " := Extract" t "(_args, " (str i) ")")))
+    args)))
+
+(defn handle-varargs
+  [args]
+  (let [c (count args)]
+    (if (and (> c 1)
+             (= '& (nth args (- c 2))))
+      (let [vargs (vary-meta (last args) assoc :varargs true)]
+        (conj (subvec args 0 (- c 2)) vargs))
+      args)))
+
+(defn ^:private type-name
+  [tag]
+  (if (vector? tag)
+    (str (first tag) "Vector")
+    (str tag)))
+
+(defn generate-arity
+  [args go tag]
+  (let [handle-args (handle-varargs args)
+        cnt (count handle-args)
+        varargs? (< cnt (count args))
+        go-expr (cond
+                  (string? go) go
+                  varargs? (:varargs go)
+                  :else (get go cnt))
+        go-res (if (s/starts-with? go-expr "!")
+                 (subs go-expr 1)
+                 (str "_res := " go-expr))]
+    (-> arity-template
+        (rpl "{arity}" (if varargs? "true" (str "_c == " (count args))))
+        (rpl "{arityCheck}" (if varargs?
+                              (str "CheckArity(_args, " (dec cnt) ", " 999 ")")
+                              "{blank}"))
+        (rpl "{args}" (if (empty? args)
+                        "{blank}"
+                        (extract-args handle-args)))
+        (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
+        (rpl "{return}"
+             (if tag
+               (str "return Make" (type-name tag) "(_res)")
+               "return _res")))))
+
+(defn generate-arglist
+  [args]
+  (str "NewVectorFrom("
+       (s/join ", " (for [arg args]
+                      (str "MakeSymbol(" (q (str arg)) ")")))
+       ")"))
+
+(defn make-value
+  "Returns code to make the Joker object representing the given value.
+
+  E.g. 'String{S: \"value\"}'. Except for integers, the values are treated as strings (for now)."
+  [v]
+  (condp = (str (type v))
+    "Int" (str "Int{I: " v "}")
+    (str "String{S: " (q v) "}")))
+
+(defn add-other-meta
+  "Append meta tags other than what are normally present or irrelevant (:go)."
+  [m]
+  (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
+    (s/join "" (map #(-> addmeta-template
+                    (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
+                    (rpl "{value}" (make-value (val %)))) m))))
+
+(defn generate-fn-decl
+  [ns-name ns-name-final k v]
+  (let [m (meta v)
+        arglists (:arglists m)
+        go-fn-name (go-name (str k))
+        arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
+        fn-str (-> fn-template
+                   (rpl "{fnName}" go-fn-name)
+                   (rpl "{arities}" arities))
+        intern-str (-> intern-template
+                       (rpl "{nsFullName}" ns-name)
+                       (rpl "{nsName}" ns-name-final)
+                       (rpl "{fnName}" (str k))
+                       (rpl "{goName}" go-fn-name)
+                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
+                       (rpl "{added}" (:added m))
+                       (rpl "{moreMeta}" (add-other-meta m))
+                       (rpl "{args}"
+                            (str "NewListFrom("
+                                 (s/join ", " (for [args arglists]
+                                                (generate-arglist args)))
+                                 ")")))]
+    [fn-str intern-str]))
+
+(defn generate-fn-init
+  [v]
+  (let [g (go-name (str v))]
+    (format "\t%s = __%s" g g)))
+
+(defn go-return-type
+  "Returns the return type of the Make<t>() function. Would be unnecessary if Go code could declare a var as having 'the type returned by <func>'."
+  [t]
+  (condp = t
+    "BigInt" "*BigInt"
+    "BigIntU" "*BigInt"
+    "Number" "*BigInt"
+    "StringVector" "*Vector"
+    "Error" "String"
+    t))
+
+(defn generate-const-or-var-decl
+  [name m]
+  (let [type (type-name (:tag m))]
+    (if (= type "Var")
+      (format "var %s *GoVar" name)  ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
+      (format "var %s %s" name (go-return-type type)))))
+
+(defn generate-const-or-var-init
+  [name m]
+  (let [type (type-name (:tag m))]
+    (if (= type "Var")
+      (format "\t%s = &GoVar{Value: &%s}"  ; Get pointer to the actual var, not a copy of the var
+              name
+              (:go m))
+      (format "\t%s = Make%s(%s)"
+              name
+              type
+              (:go m)))))
+
+(defn generate-non-fn-decl
+  [ns-name ns-name-final k v]
+  (let [m (meta v)
+        go-non-fn-name (go-name (str k))
+        non-fn-str (generate-const-or-var-decl go-non-fn-name m)
+        intern-str (-> intern-template
+                       (rpl "{nsFullName}" ns-name)
+                       (rpl "{nsName}" ns-name-final)
+                       (rpl "{fnName}" (str k))
+                       (rpl "{goName}" go-non-fn-name)
+                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
+                       (rpl "{added}" (:added m))
+                       (rpl "{moreMeta}" (add-other-meta m))
+                       (rpl "{args}" "nil"))]
+    [non-fn-str intern-str]))
+
+(defn generate-non-fn-init
+  [ns-name-final k v]
+  (let [m (meta v)
+        go-non-fn-name (go-name (str k))
+        non-fn-str (generate-const-or-var-init go-non-fn-name m)]
+    non-fn-str))
+
+(defn comment-out
+  [s]
+  (-> s
+      (rpl "\n// " "\n")
+      (rpl "\n" "\n//")
+      (rpl "\n// package" "\npackage")))
+
+(defn compare-imports
+  [^String l ^String r]
+  (cond
+    (s/starts-with? l ". ") (if (s/starts-with? r ". ")
+                              (compare l r)
+                              -1)
+    (s/starts-with? r ". ") 1
+    :else (compare l r)))
+
+(defn- ns-public-fns
+  "Return only publics that are functions."
+  [ns]
+  (remove #(:macro (meta (val %)))
+          (filter #(:arglists (meta (val %))) (ns-publics ns))))
+
+(defn- ns-public-non-fns
+  "Return only publics that are not functions."
+  [ns]
+  (remove #(:macro (meta (val %)))
+          (remove #(:arglists (meta (val %))) (ns-publics ns))))
+
+(defn- ns-public-go-fns
+  "Return only publics that are functions and have additional Go-specific metadata."
+  [ns]
+  (filter #(:go (meta (val %))) (ns-public-fns ns)))
+
+(defn- ns-public-go-non-fns
+  "Return only publics that are not functions and have additional Go-specific metadata."
+  [ns]
+  (filter #(:go (meta (val %))) (ns-public-non-fns ns)))
+
+(defn- warn-about-skipped-publics
+  [skipped]
+  (when (> (count skipped) 0)
+    (println-err "WARNING: skipping publics that are not Go-calling functions or vars:" skipped)))
+
+(defn generate-ns
+  [ns-sym ns-name ns-name-final]
+  (let [ns (find-ns ns-sym)
+        m (meta ns)
+        go-non-fns (sort-by first (ns-public-go-non-fns ns))
+        go-fns (sort-by first (ns-public-go-fns ns))
+        fn-decls (for [[k v] go-fns]
+              (generate-fn-decl ns-name ns-name-final k v))
+        fn-inits (for [[k _] go-fns]
+                    (generate-fn-init k))
+        non-fn-decls (for [[k v] go-non-fns]
+                       (generate-non-fn-decl ns-name ns-name-final k v))
+        non-fn-inits (for [[k v] go-non-fns]
+                       (generate-non-fn-init ns-name-final k v))
+        res (-> package-template
+                (rpl "{nsFullName}" ns-name)
+                (rpl "{nsName}" ns-name-final)
+                (rpl "{imports}"
+                     (s/join "\n\t" (sort compare-imports (conj
+                                                           (mapv q (:go-imports m))
+                                                           ". \"github.com/candid82/joker/core\""))))
+                (rpl "{non-fn-decls}" (s/join "\n" (map first non-fn-decls)))
+                (rpl "{non-fn-inits}" (s/join "\n" non-fn-inits))
+                (rpl "{fn-decls}" (s/join "\n" (map first fn-decls)))
+                (rpl "{fn-inits}" (s/join "\n" fn-inits))
+                (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
+                (rpl "{non-fn-interns}" (s/join "\n\t" (map second non-fn-decls)))
+                (rpl "{fn-interns}" (s/join "\n\t" (map second fn-decls))))
+        res (if (:empty m)
+              (comment-out res)
+              res)]
+    (warn-about-skipped-publics (remove (set (concat (map key go-fns)
+                                                     (map key go-non-fns)))
+                                        (map #(key %) (ns-publics ns))))
+    res))
+
+(defn ns-file-name
+  [dir ns-name-final]
+  (str dir "/a_" ns-name-final ".go"))
+
+(defn remove-blanky-lines
+  [s]
+  (-> s
+      (rpl #"[[:space:]]*{blank}" "")))
+
+(doseq [ns-sym namespaces]
+  (let [ns-name (str ns-sym)
+        dir (rpl ns-name "." "/")
+        ns-name-final (rpl ns-name #".*[.]" "")]
+    (spit (ns-file-name dir ns-name-final)
+          (remove-blanky-lines (generate-ns ns-sym ns-name ns-name-final)))))
