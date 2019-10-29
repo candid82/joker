@@ -9,27 +9,24 @@
 
 (defn debug
   [& args]
-  (when ((joker.os/env) "JOKER_DEBUG_STD")
+  (when ((joker.os/env) "JOKER_DEBUG_CORE")
     (apply println args)))
 
-;;; Discover namespaces dynamically by finding *.joke files.
+;;; Discover namespaces dynamically by finding *.joke files that map
+;;; to loadable namespaces.
 (def namespaces
   (vec (->> (joker.os/ls ".")
             (remove :dir?)
             (map :name)
-            (remove #(= "generate-std.joke" %))
             (filter #(s/ends-with? % ".joke"))
             (map #(rpl % #"[.]joke$" ""))
-            (map symbol))))
+            (map #(rpl % "_" "."))
+            (map #(str "joker." %))
+            (map symbol)
+            (filter #(try (require %) true (catch Error e nil)))
+            )))
 
 (debug "Namespaces:" namespaces)
-(apply require :reload namespaces) ; :reload in case namespaces become 'joker.base64 etc.
-
-(def fn-template
-  (slurp "fn.tmpl"))
-
-(def arity-template
-  (slurp "arity.tmpl"))
 
 (def package-template
   (slurp "package.tmpl"))
