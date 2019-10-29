@@ -75,16 +75,16 @@
   (when ((joker.os/env) "JOKER_DEBUG_STD")
     (apply println args)))
 
-;;; Discover namespaces dynamically by finding *.joke files.
-;;; TODO: Replace dependencies on the very libraries being converted
-;;; already being present.  E.g. have run.sh (or a new script)
-;;; dynamically discover the *.joke files to convert, replacing the
-;;; code below (to set <namespaces>) to take the list from
-;;; *command-line-args*, which could also support a --debug flag.
-;;; I.e. one should be able to delete all the std/*/*.go files,
-;;; rebuild Joker without them, and still run this script. But since
-;;; those files currently come with the source distribution, this
-;;; doesn't seem urgent.
+;;; Discover namespaces dynamically by finding *.joke files.  TODO:
+;;; Replace dependencies on the very libraries being converted already
+;;; being present.  E.g. have run.sh (or a new script) dynamically
+;;; discover the *.joke files to convert, replacing the code below (to
+;;; set <namespaces>) to take the list from *command-line-args*, which
+;;; could also support a --debug flag.  I.e. one should be able to
+;;; delete all the std/*/*.go files, rebuild Joker without them, and
+;;; still run this script. But since those files currently come with
+;;; the source distribution, this doesn't seem urgent, especially
+;;; given the preexisting dependency on joker.string.
 (def namespaces
   (vec (->> (joker.os/ls ".")
             (remove :dir?)
