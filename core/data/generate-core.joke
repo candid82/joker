@@ -50,8 +50,15 @@
   "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
   [fn-name]
   (let [n (-> fn-name
-              (rpl "-" "_")
+              (rpl "-" "_minus_")
               (rpl "?" "")
+              (rpl "*" "_star_")
+              (rpl "<" "_lt_")
+              (rpl ">" "_gt_")
+              (rpl "=" "_eq_")
+              (rpl "'" "_apos_")
+              (rpl "+" "_plus_")
+              (rpl "/" "_slash_")
               (str "_"))]
     (if (s/ends-with? fn-name "?")
       (str "is" n)
