@@ -43,9 +43,8 @@
 
 (defn raw-quoted-string
   "Returns a Go-style backtick-quoted string with backticks handled by appending double-quoted backticks"
-  [s]
-  (str "`" (rpl s "`" "` + \"`\" + `") "`")
-  )
+  [^String s]
+  (str "`" (rpl s "`" "` + \"`\" + `") "`"))
 
 (defn go-name
   "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
@@ -98,8 +97,8 @@
                        (rpl "{nsName}" ns-name-final)
                        (rpl "{fnName}" (str k))
                        (rpl "{goName}" go-fn-name)
-                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
-                       (rpl "{added}" (:added m))
+                       (rpl "{fnDocstring}" (if-let [d (:doc m)] (raw-quoted-string d) ""))
+                       (rpl "{added}" (if-let [a (:added m)] a ""))
                        (rpl "{moreMeta}" (add-other-meta m))
                        (rpl "{args}"
                             (str "NewListFrom("
@@ -151,8 +150,8 @@
                        (rpl "{nsName}" ns-name-final)
                        (rpl "{fnName}" (str k))
                        (rpl "{goName}" go-non-fn-name)
-                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
-                       (rpl "{added}" (:added m))
+                       (rpl "{fnDocstring}" (if-let [d (:doc m)] (raw-quoted-string d) ""))
+                       (rpl "{added}" (if-let [a (:added m)] a ""))
                        (rpl "{moreMeta}" (add-other-meta m))
                        (rpl "{args}" "nil"))]
     [non-fn-str intern-str]))
