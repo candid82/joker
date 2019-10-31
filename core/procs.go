@@ -1555,8 +1555,14 @@ var procTypes Proc = func(args []Object) Object {
 	return res
 }
 
-var procGoSpew Proc = func(args []Object) Object {
+var procGoSpew Proc = func(args []Object) (res Object) {
+	res = NIL
 	CheckArity(args, 1, 2)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(Stderr, "Error: %v\n", r)
+		}
+	}()
 	scs := spew.NewDefaultConfig()
 	if len(args) > 1 {
 		m := ExtractMap(args, 1)
@@ -1566,9 +1572,30 @@ var procGoSpew Proc = func(args []Object) Object {
 		if yes, k := m.Get(MakeKeyword("MaxDepth")); yes {
 			scs.MaxDepth = k.(Native).Native().(int)
 		}
+		if yes, k := m.Get(MakeKeyword("DisableMethods")); yes {
+			scs.DisableMethods = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("DisablePointerMethods")); yes {
+			scs.DisablePointerMethods = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("DisablePointerAddresses")); yes {
+			scs.DisablePointerAddresses = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("DisableCapacities")); yes {
+			scs.DisableCapacities = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("ContinueOnMethod")); yes {
+			scs.ContinueOnMethod = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("SortKeys")); yes {
+			scs.SortKeys = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("SpewKeys")); yes {
+			scs.SpewKeys = k.(Native).Native().(bool)
+		}
 	}
 	scs.Fdump(Stderr, args[0])
-	return NIL
+	return
 }
 
 func PackReader(reader *Reader, filename string) ([]byte, error) {

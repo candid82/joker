@@ -4472,9 +4472,13 @@
   types__ types__)
 
 (defn- go-spew
-  "Dump ('spew') internal Go structures for object."
+  "Dump ('spew') internal Go structures for object.
+
+  Use the optional (map) argument to specify ConfigState
+  settings. E.g. {:MaxDepth 10} specifies a maximum depth of 10
+  levels. Defaults are per the default config state."
   {:added "1.0"}
-  ([o]
+  (^Nil [o]
    (go-spew__ o))
-  ([o cfg]
+  (^Nil [o ^Map cfg]
    (go-spew__ o cfg)))
