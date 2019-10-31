@@ -156,6 +156,7 @@ type (
 		unusedFnParameters      bool
 		fnWithEmptyBody         bool
 		ignoredUnusedNamespaces Set
+		IgnoredFileRegexes      []*regexp.Regexp
 	}
 	Keywords struct {
 		tag                Keyword

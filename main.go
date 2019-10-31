@@ -315,6 +315,58 @@ func lintFile(filename string, dialect Dialect, workingDir string) {
 	}
 }
 
+func matchesDialect(path string, dialect Dialect) bool {
+	ext := ".clj"
+	switch dialect {
+	case CLJS:
+		ext = ".cljs"
+	case JOKER:
+		ext = ".joke"
+	case EDN:
+		ext = ".edn"
+	}
+	return strings.HasSuffix(path, ext)
+}
+
+func isIgnored(path string) bool {
+	for _, r := range WARNINGS.IgnoredFileRegexes {
+		m := r.FindStringSubmatchIndex(path)
+		if len(m) > 0 {
+			if m[1]-m[0] == len(path) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func lintDir(dirname string, dialect Dialect) {
+	var err error
+	phase := PARSE
+	if dialect == EDN {
+		phase = READ
+	}
+	ns := GLOBAL_ENV.CurrentNamespace()
+	ReadConfig("", dirname)
+	configureLinterMode(dialect, "", dirname)
+	filepath.Walk(dirname, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Fprintln(Stderr, "Error: ", err)
+			return nil
+		}
+		if !info.IsDir() && matchesDialect(path, dialect) && !isIgnored(path) {
+			GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
+			err = processFile(path, phase)
+			GLOBAL_ENV.SetCurrentNamespace(ns)
+		}
+		return nil
+	})
+	if err == nil {
+		WarnOnUnusedNamespaces()
+		WarnOnUnusedVars()
+	}
+}
+
 func dialectFromArg(arg string) Dialect {
 	switch strings.ToLower(arg) {
 	case "clj":
@@ -774,7 +826,14 @@ func main() {
 		if dialect == UNKNOWN {
 			dialect = detectDialect(filename)
 		}
-		lintFile(filename, dialect, workingDir)
+		if filename != "" {
+			lintFile(filename, dialect, workingDir)
+		} else if workingDir != "" {
+			lintDir(workingDir, dialect)
+		} else {
+			fmt.Fprintf(Stderr, "Error: Missing --file or --working-dir argument.\n")
+			ExitJoker(16)
+		}
 		if PROBLEM_COUNT > 0 {
 			ExitJoker(1)
 		}

@@ -1697,18 +1697,21 @@ func ProcessReplData() {
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
+	var err error
 	configName := ".joker"
 	if findDir {
 		configName = ".jokerd"
 	}
-	filename, err := filepath.Abs(filename)
-	if err != nil {
-		fmt.Fprintln(Stderr, "Error reading config file "+filename+": ", err)
-		return ""
+	if filename != "" {
+		filename, err = filepath.Abs(filename)
+		if err != nil {
+			fmt.Fprintln(Stderr, "Error reading config file "+filename+": ", err)
+			return ""
+		}
 	}
 
 	if workingDir != "" {
-		workingDir, err = filepath.Abs(workingDir)
+		workingDir, err := filepath.Abs(workingDir)
 		if err != nil {
 			fmt.Fprintln(Stderr, "Error resolving working directory"+workingDir+": ", err)
 			return ""
@@ -1798,6 +1801,25 @@ func ReadConfig(filename string, workingDir string) {
 			WARNINGS.ignoredUnusedNamespaces = NewSetFromSeq(seq.Seq())
 		} else {
 			printConfigError(configFileName, ":ignored-unused-namespaces value must be a vector, got "+ignoredUnusedNamespaces.GetType().ToString(false))
+			return
+		}
+	}
+	ok, ignoredFileRegexes := configMap.Get(MakeKeyword("ignored-file-regexes"))
+	if ok {
+		seq, ok1 := ignoredFileRegexes.(Seqable)
+		if ok1 {
+			s := seq.Seq()
+			for !s.IsEmpty() {
+				regex, ok2 := s.First().(Regex)
+				if !ok2 {
+					printConfigError(configFileName, ":ignored-file-regexes elements must be regexes, got "+s.First().GetType().ToString(false))
+					return
+				}
+				WARNINGS.IgnoredFileRegexes = append(WARNINGS.IgnoredFileRegexes, regex.R)
+				s = s.Rest()
+			}
+		} else {
+			printConfigError(configFileName, ":ignored-file-regexes value must be a vector, got "+ignoredFileRegexes.GetType().ToString(false))
 			return
 		}
 	}
