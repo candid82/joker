@@ -28,6 +28,9 @@
 
 (debug "Namespaces:" namespaces)
 
+(def fn-template
+  (slurp "fn.tmpl"))
+
 (def package-template
   (slurp "package.tmpl"))
 
@@ -99,6 +102,8 @@
   (let [m (meta v)
         arglists (:arglists m)
         go-fn-name (go-name (str k))
+        fn-str (-> fn-template
+                   (rpl "{fnName}" go-fn-name))
         intern-str (-> intern-template
                        (rpl "{nsFullName}" ns-name)
                        (rpl "{nsName}" ns-name-final)
@@ -112,30 +117,21 @@
                                  (s/join ", " (for [args arglists]
                                                 (generate-arglist args)))
                                  ")")))]
-    intern-str))
+    [fn-str intern-str]))
 
 (defn generate-fn-init
   [v]
   (let [g (go-name (str v))]
     (format "\t%s = __%s" g g)))
 
-(defn go-return-type
-  "Returns the return type of the Make<t>() function. Would be unnecessary if Go code could declare a var as having 'the type returned by <func>'."
-  [t]
-  (condp = t
-    "BigInt" "*BigInt"
-    "BigIntU" "*BigInt"
-    "Number" "*BigInt"
-    "StringVector" "*Vector"
-    "Error" "String"
-    t))
+(defn go-data-type
+  "Returns the type of the object."
+  [obj]
+  "Object")
 
 (defn generate-const-or-var-decl
   [name m]
-  (let [type (type-name (:tag m))]
-    (if (= type "Var")
-      (format "var %s *GoVar" name)  ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
-      (format "var %s %s" name (go-return-type type)))))
+  (format "var %s %s" name (go-data-type name)))
 
 (defn generate-const-or-var-init
   [name m]
@@ -147,11 +143,10 @@
 
 (defn generate-non-fn-decl
   [ns-name ns-name-final k v]
-  (println "ns-name=" ns-name " ns-name-final=" ns-name-final " k=" k " v=" v)
+  (debug "ns-name=" ns-name " ns-name-final=" ns-name-final " k=" k " v=" v)
   (let [m (meta v)
         go-non-fn-name (go-name (str k))
         non-fn-str (generate-const-or-var-decl go-non-fn-name m)
-        _ (println (:added m))
         intern-str (-> intern-template
                        (rpl "{nsFullName}" ns-name)
                        (rpl "{nsName}" ns-name-final)
@@ -231,6 +226,7 @@
                                                            ". \"github.com/candid82/joker/core\""))))
                 (rpl "{non-fn-decls}" (s/join "\n" (map first non-fn-decls)))
                 (rpl "{non-fn-inits}" (s/join "\n" non-fn-inits))
+                (rpl "{fn-decls}" (s/join "\n" (map first fn-decls)))
                 (rpl "{fn-inits}" (s/join "\n" fn-inits))
                 (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
                 (rpl "{non-fn-interns}" (s/join "\n\t" (map second non-fn-decls)))
