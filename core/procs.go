@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -1554,6 +1555,22 @@ var procTypes Proc = func(args []Object) Object {
 	return res
 }
 
+var procGoSpew Proc = func(args []Object) Object {
+	CheckArity(args, 1, 2)
+	scs := spew.NewDefaultConfig()
+	if len(args) > 1 {
+		m := ExtractMap(args, 1)
+		if yes, k := m.Get(MakeKeyword("Indent")); yes {
+			scs.Indent = k.(Native).Native().(string)
+		}
+		if yes, k := m.Get(MakeKeyword("MaxDepth")); yes {
+			scs.MaxDepth = k.(Native).Native().(int)
+		}
+	}
+	scs.Fdump(Stderr, args[0])
+	return NIL
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
@@ -2087,4 +2104,5 @@ func init() {
 	intern("parse__", procParse)
 	intern("inc-problem-count__", procIncProblemCount)
 	intern("types__", procTypes)
+	intern("go-spew__", procGoSpew)
 }
