@@ -27,10 +27,12 @@ type (
 
 const EOF = -1
 
-var LINTER_MODE bool = false
-var PROBLEM_COUNT = 0
-var DIALECT Dialect
-var LINTER_CONFIG *Var
+var (
+	LINTER_MODE   bool = false
+	PROBLEM_COUNT      = 0
+	DIALECT       Dialect
+	LINTER_CONFIG *Var
+)
 
 var (
 	ARGS   map[int]Symbol

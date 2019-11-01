@@ -341,7 +341,7 @@ func isIgnored(path string) bool {
 }
 
 func lintDir(dirname string, dialect Dialect) {
-	var err error
+	var processErr error
 	phase := PARSE
 	if dialect == EDN {
 		phase = READ
@@ -356,15 +356,16 @@ func lintDir(dirname string, dialect Dialect) {
 		}
 		if !info.IsDir() && matchesDialect(path, dialect) && !isIgnored(path) {
 			GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
-			err = processFile(path, phase)
+			processErr = processFile(path, phase)
+			if processErr == nil {
+				WarnOnUnusedNamespaces()
+				WarnOnUnusedVars()
+			}
+			ResetUsage()
 			GLOBAL_ENV.SetCurrentNamespace(ns)
 		}
 		return nil
 	})
-	if err == nil {
-		WarnOnUnusedNamespaces()
-		WarnOnUnusedVars()
-	}
 }
 
 func dialectFromArg(arg string) Dialect {

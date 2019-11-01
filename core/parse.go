@@ -515,6 +515,18 @@ func isIgnoredUnusedNamespace(ns *Namespace) bool {
 	return ok
 }
 
+func ResetUsage() {
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		ns.isUsed = true
+		for _, vr := range ns.mappings {
+			vr.isUsed = true
+		}
+	}
+}
+
 func WarnOnUnusedNamespaces() {
 	var names []string
 	positions := make(map[string]Position)
