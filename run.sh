@@ -2,6 +2,7 @@
 
 build() {
   go clean
+  rm -f core/a_*.go
   go generate ./...
   go vet ./...
   go build
