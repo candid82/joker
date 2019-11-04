@@ -122,7 +122,7 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
-### Intergration with editors
+### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
 - Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
@@ -151,7 +151,7 @@ Symbol `baz` is introduced inside `def-something` macro. The code is totally val
 
 Please note that the symbols are namespace qualified and unquoted. Also, Joker knows about some commonly used macros (outside of `clojure.core` namespace) like `clojure.test/deftest` or `clojure.core.async/go-loop`, so you won't have to add those to your config file.
 
-Joker also allows to specify symbols that are introduced by a macro:
+Joker also allows you to specify symbols that are introduced by a macro:
 
 ```clojure
 {:known-macros [[riemann.streams/where [service event]]]}
