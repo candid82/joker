@@ -366,6 +366,10 @@ func lintDir(dirname string, dialect Dialect) {
 		}
 		return nil
 	})
+	if processErr == nil {
+		WarnOnGloballyUnusedNamespaces()
+		WarnOnGloballyUnusedVars()
+	}
 }
 
 func dialectFromArg(arg string) Dialect {

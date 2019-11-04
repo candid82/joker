@@ -1220,6 +1220,7 @@ var procInjectNamespace Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
 	ns := GLOBAL_ENV.EnsureNamespace(sym)
 	ns.isUsed = true
+	ns.isGloballyUsed = true
 	return ns
 }
 
@@ -1823,6 +1824,16 @@ func ReadConfig(filename string, workingDir string) {
 			return
 		}
 	}
+	ok, entryPoints := configMap.Get(MakeKeyword("entry-points"))
+	if ok {
+		seq, ok1 := entryPoints.(Seqable)
+		if ok1 {
+			WARNINGS.entryPoints = NewSetFromSeq(seq.Seq())
+		} else {
+			printConfigError(configFileName, ":entry-points value must be a vector, got "+entryPoints.GetType().ToString(false))
+			return
+		}
+	}
 	ok, knownNamespaces := configMap.Get(MakeKeyword("known-namespaces"))
 	if ok {
 		if _, ok1 := knownNamespaces.(Seqable); !ok1 {
@@ -1883,6 +1894,7 @@ func markJokerNamespacesAsUsed() {
 	for k, ns := range GLOBAL_ENV.Namespaces {
 		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 		}
 	}
 }

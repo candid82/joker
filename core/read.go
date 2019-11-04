@@ -415,6 +415,7 @@ func readSymbol(reader *Reader, first rune) Object {
 				panic(MakeReadError(reader, msg))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			return MakeReadObject(reader, MakeKeyword(*ns.Name.name+"/"+*sym.name))
 		}
 		return MakeReadObject(reader, MakeKeyword(str))
@@ -967,6 +968,7 @@ func readNamespacedMap(reader *Reader) Object {
 				panic(MakeReadError(reader, "Unknown auto-resolved namespace alias: "+sym.ToString(false)))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			nsname = ns.Name.Name()
 		}
 	} else {
