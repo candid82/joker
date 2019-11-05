@@ -135,10 +135,10 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',', '\\':
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, '\\':
 		return true
 	}
-	return unicode.IsSpace(r)
+	return isWhitespace(r)
 }
 
 func eatString(reader *Reader, str string) {
@@ -709,7 +709,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 
 func isTerminatingMacro(r rune) bool {
 	switch r {
-	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', '%':
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\':
 		return true
 	default:
 		return false
