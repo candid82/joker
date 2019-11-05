@@ -207,10 +207,12 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 		if ns == nil || ns.Name.name == s.ns {
 			if ns != nil {
 				ns.isUsed = true
+				ns.isGloballyUsed = true
 			}
 			return s
 		}
 		ns.isUsed = true
+		ns.isGloballyUsed = true
 		return Symbol{
 			name: s.name,
 			ns:   ns.Name.name,
@@ -224,7 +226,9 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 		}
 	}
 	vr.isUsed = true
+	vr.isGloballyUsed = true
 	vr.ns.isUsed = true
+	vr.ns.isGloballyUsed = true
 	return Symbol{
 		name: vr.name.name,
 		ns:   vr.ns.Name.name,

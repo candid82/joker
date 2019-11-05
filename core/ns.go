@@ -10,11 +10,12 @@ import (
 type (
 	Namespace struct {
 		MetaHolder
-		Name     Symbol
-		Lazy     func()
-		mappings map[*string]*Var
-		aliases  map[*string]*Namespace
-		isUsed   bool
+		Name           Symbol
+		Lazy           func()
+		mappings       map[*string]*Var
+		aliases        map[*string]*Namespace
+		isUsed         bool
+		isGloballyUsed bool
 	}
 )
 

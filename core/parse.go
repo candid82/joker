@@ -156,6 +156,8 @@ type (
 		unusedFnParameters      bool
 		fnWithEmptyBody         bool
 		ignoredUnusedNamespaces Set
+		IgnoredFileRegexes      []*regexp.Regexp
+		entryPoints             Set
 	}
 	Keywords struct {
 		tag                Keyword
@@ -210,6 +212,7 @@ type (
 		recur              Symbol
 		setMacro_          Symbol
 		def                Symbol
+		defLinter          Symbol
 		_var               Symbol
 		do                 Symbol
 		throw              Symbol
@@ -238,6 +241,7 @@ type (
 		recur     *string
 		setMacro_ *string
 		def       *string
+		defLinter *string
 		_var      *string
 		do        *string
 		throw     *string
@@ -257,6 +261,7 @@ var (
 	IN_NS_VAR       *Var
 	WARNINGS        = Warnings{
 		fnWithEmptyBody: true,
+		entryPoints:     EmptySet(),
 	}
 	KEYWORDS = Keywords{
 		tag:                MakeKeyword("tag"),
@@ -311,6 +316,7 @@ var (
 		recur:              MakeSymbol("recur"),
 		setMacro_:          MakeSymbol("set-macro__"),
 		def:                MakeSymbol("def"),
+		defLinter:          MakeSymbol("def-linter__"),
 		_var:               MakeSymbol("var"),
 		do:                 MakeSymbol("do"),
 		throw:              MakeSymbol("throw"),
@@ -339,6 +345,7 @@ var (
 		recur:     STRINGS.Intern("recur"),
 		setMacro_: STRINGS.Intern("set-macro__"),
 		def:       STRINGS.Intern("def"),
+		defLinter: STRINGS.Intern("def-linter__"),
 		_var:      STRINGS.Intern("var"),
 		do:        STRINGS.Intern("do"),
 		throw:     STRINGS.Intern("throw"),
@@ -514,6 +521,44 @@ func isIgnoredUnusedNamespace(ns *Namespace) bool {
 	return ok
 }
 
+func ResetUsage() {
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		ns.isUsed = true
+		for _, vr := range ns.mappings {
+			vr.isUsed = true
+		}
+	}
+}
+
+func isEntryPointNs(ns *Namespace) bool {
+	ok, _ := WARNINGS.entryPoints.Get(ns.Name)
+	return ok
+}
+
+func WarnOnGloballyUnusedNamespaces() {
+	var names []string
+	positions := make(map[string]Position)
+
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if !ns.isGloballyUsed && !isIgnoredUnusedNamespace(ns) && !isEntryPointNs(ns) {
+			pos := ns.Name.GetInfo()
+			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
+				name := ns.Name.ToString(false)
+				names = append(names, name)
+				positions[name] = pos.Position
+			}
+		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "globally unused namespace "+name)
+	}
+}
+
 func WarnOnUnusedNamespaces() {
 	var names []string
 	positions := make(map[string]Position)
@@ -532,6 +577,44 @@ func WarnOnUnusedNamespaces() {
 	sort.Strings(names)
 	for _, name := range names {
 		printParseWarning(positions[name], "unused namespace "+name)
+	}
+}
+
+func isEntryPointVar(vr *Var) bool {
+	if isEntryPointNs(vr.ns) {
+		return true
+	}
+	sym := Symbol{
+		ns:   vr.ns.Name.name,
+		name: vr.name.name,
+	}
+	ok, _ := WARNINGS.entryPoints.Get(sym)
+	return ok
+}
+
+func WarnOnGloballyUnusedVars() {
+	var names []string
+	positions := make(map[string]Position)
+
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		for _, vr := range ns.mappings {
+			if vr.ns == ns && !vr.isGloballyUsed && !vr.isPrivate && !isRecordConstructor(vr.name) && !isEntryPointVar(vr) {
+				pos := vr.GetInfo()
+				if pos != nil {
+					varName := vr.Name()
+					names = append(names, varName)
+					positions[varName] = pos.Position
+				}
+			}
+		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "globally unused var "+name)
 	}
 }
 
@@ -692,7 +775,7 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	}
 }
 
-func parseDef(obj Object, ctx *ParseContext) *DefExpr {
+func parseDef(obj Object, ctx *ParseContext, isLinter bool) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
 	s := Second(seq)
@@ -708,6 +791,9 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
+		if isLinter {
+			vr.isGloballyUsed = true
+		}
 		res := &DefExpr{
 			vr:       vr,
 			name:     sym,
@@ -1155,7 +1241,9 @@ func resolveMacro(obj Object, ctx *ParseContext) *Var {
 			return nil
 		}
 		vr.isUsed = true
+		vr.isGloballyUsed = true
 		vr.ns.isUsed = true
+		vr.ns.isGloballyUsed = true
 		return vr
 	default:
 		return nil
@@ -1536,7 +1624,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseSetMacro(obj, ctx)
 
 		case STR.def:
-			return parseDef(obj, ctx)
+			return parseDef(obj, ctx, false)
+		case STR.defLinter:
+			return parseDef(obj, ctx, true)
 		case STR._var:
 			checkForm(obj, 2, 2)
 			switch sym := Second(seq).(type) {
@@ -1555,7 +1645,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					vr = InternFakeSymbol(symNs, sym)
 				}
 				vr.isUsed = true
+				vr.isGloballyUsed = true
 				vr.ns.isUsed = true
+				vr.ns.isGloballyUsed = true
 				return &LiteralExpr{
 					obj:      vr,
 					Position: pos,
@@ -1691,7 +1783,9 @@ func isJavaSymbol(sym Symbol) bool {
 
 func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
 	vr.isUsed = true
+	vr.isGloballyUsed = true
 	vr.ns.isUsed = true
+	vr.ns.isGloballyUsed = true
 	return &VarRefExpr{
 		vr:       vr,
 		Position: GetPosition(obj),
@@ -1728,6 +1822,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 		if ns != nil {
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			return NewSurrogateExpr(obj)
 		}
 		// See if this is a JS interop (i.e. Math.PI)
@@ -1821,6 +1916,7 @@ func init() {
 	SPECIAL_SYMBOLS[SYMBOLS.recur.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.setMacro_.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.def.name] = true
+	SPECIAL_SYMBOLS[SYMBOLS.defLinter.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS._var.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.do.name] = true
 	SPECIAL_SYMBOLS[SYMBOLS.throw.name] = true
