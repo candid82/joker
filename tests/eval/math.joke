@@ -1,0 +1,69 @@
+
+(ns joker.test-joker.math
+  (:require [joker.test :refer [deftest is are]]
+            [joker.math :as m]))
+
+(deftest abs
+  (are [x y] (= x y)
+    (m/abs 1.51) 1.51
+    (m/abs -1.51) 1.51))
+
+(deftest ceil
+  (are [x y] (= x y)
+    (m/ceil 1.51) 2.0
+    (m/ceil -1.51) -1.0))
+
+(deftest cube-root
+  (are [x y] (= x y)
+    (m/cube-root 8) 2.0
+    (m/cube-root -27.) -3.0))
+
+(deftest copy-sign
+  (are [x y] (= x y)
+    (m/copy-sign 7 -1) -7.0
+    (m/copy-sign 7 1) 7.0
+    (m/copy-sign -7 -1) -7.0
+    (m/copy-sign -7 1) 7.0
+    (m/copy-sign -5 0) 5.0))
+
+(deftest dim
+  (are [x y] (= x y)
+    (m/dim 3 2) 1.0
+    (m/dim 2 3) 0.0))
+
+(deftest exp
+  (are [x lo hi] (< lo x hi)
+    (m/exp 1) 2.7 2.8
+    (m/exp 2) 7.38 7.39))
+
+(deftest exp-2
+  (are [x lo hi] (<= lo x hi)
+    (m/exp-2 1) 2 2
+    (m/exp-2 2) 4 4
+    (m/exp-2 1.5) 2.828 2.829))
+
+(deftest exp-minus-1
+  (are [x lo hi] (< lo x hi)
+    (m/exp-minus-1 1) 1.7 1.8
+    (m/exp-minus-1 2) 6.38 6.39))
+
+(deftest floor
+  (are [x y] (= x y)
+    (m/floor 1.51) 1.0
+    (m/floor -1.51) -2.0))
+
+(deftest inf
+  (are [x sign] (m/inf? x sign)
+    (m/inf 0) 0
+    (m/inf 0) 1
+    (m/inf -1) -1))
+
+(deftest not-inf
+  (are [x sign] (not (m/inf? x sign))
+    (m/inf 0) -1
+    (m/inf 0) -1
+    (m/inf -1) 1))
+
+(deftest nan
+  (is (m/nan? (m/nan)))
+  (is (not (m/nan? 3.0))))
