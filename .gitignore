@@ -5,3 +5,4 @@ core/a_*.go
 *.exe
 *~
 *.zip
+core/data/a_*.go
