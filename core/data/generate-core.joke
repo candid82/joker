@@ -118,6 +118,7 @@
                        (rpl "{nsName}" ns-name-final)
                        (rpl "{varName}" (str k))
                        (rpl "{goName}" go-var-name)
+                       (rpl "{goComment}" (str (type (deref v))))
                        (rpl "{varDocstring}" (if-let [d (:doc m)] (raw-quoted-string d) "\"\""))
                        (rpl "{added}" (if-let [a (:added m)] a ""))
                        (rpl "{moreMeta}" (add-other-meta m))
