@@ -38,6 +38,8 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
+`joker --lint --working-dir <dirname>` - recursively lint all Clojure files in a directory.
+
 `joker -` - execute a script on standard input (os.Stdin).
 
 ## Documentation
@@ -194,6 +196,31 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
     (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
 
 I generally prefer first option for `clojure.test` namespace.
+
+### Linting directories
+
+To recursively lint all files in a directory pass `--working-dir <dirname>` parameter. Please note that if you also pass file argument (or `--file` parameter) Joker will lint that single file and will only use `--working-dir` to locate `.joker` config file. That is,
+
+```bash
+joker --lint --working-dir my-project
+```
+
+lints all Clojure files in `my-project` directory, whereas
+
+```bash
+joker --lint --working-dir my-project foo.clj
+```
+
+lints single file `foo.clj` but uses `.joker` config file from `my-project` directory.
+
+When linting directories Joker lints all files with the extension corresponding to the selected dialect (`*.clj`, `*.cljs`, `*.joke`, or `*.edn`). To exclude certain files specify regex patterns in `:ignored-file-regexes` vector in `.joker` file, e.g. `:ignored-file-regexes [#".*user\.clj" #".*/dev/profiling\.clj"]`.
+
+When linting directories Joker can report globally unused namespaces and public vars. This is turned off by default but can be enabled with `--report-globally-unused` flag, e.g. `joker --lint --working-dir my-project --report-globally-unused`. This is useful for finding "dead" code. Some namespaces or vars are intended to be used by external systems (e.g. public API of a library or main function of a program). To exclude such namespaces and vars from being reported as globally unused list them in `:entry-points` vector in `.joker` file, which may contain the names of namespaces or fully qualified names of vars. For example:
+
+```clojure
+:entry-points [my-project.public-api
+               my-project.core/-main]
+```
 
 ### Optional rules
 
