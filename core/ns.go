@@ -62,6 +62,16 @@ func (ns *Namespace) Hash() uint32 {
 	return HashPtr(uintptr(unsafe.Pointer(ns)))
 }
 
+func (ns *Namespace) MaybeLazy(doc string) {
+	if ns.Lazy != nil {
+		ns.Lazy()
+		if Verbose {
+			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s\n", *ns.Name.name)
+		}
+		ns.Lazy = nil
+	}
+}
+
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		Name:     sym,

@@ -1741,6 +1741,8 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		}
 		info.generated()
 		info.generated = nil
+		info.init = nil
+		info.data = nil
 		return
 	}
 	if info.init != nil {
@@ -1749,6 +1751,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		}
 		info.init()
 		info.init = nil
+		info.data = nil
 	}
 	if info.data != nil {
 		if Verbose {
