@@ -80,14 +80,15 @@
                       (str "MakeSymbol(" (q (str arg)) ")")))
        ")"))
 
-(defn make-value
-  "Returns code to make the Joker object representing the given value.
-
-  E.g. 'String{S: \"value\"}'. Except for integers, the values are treated as strings (for now)."
-  [v]
-  (condp = (str (type v))
-    "Int" (str "Int{I: " v "}")
-    (str "String{S: " (q v) "}")))
+(defn go-object-for
+  [indent o]
+  (condp = (type o)
+    Boolean (str "Boolean{B: " o "}")
+    Int (str "Int{I: " o "}")
+    Keyword (str "MakeKeyword(" (q (name o)) ")")
+    String (str "String{S: " (q o) "}")
+    Vector (str "NewVectorFrom(\n" indent "\t" (s/join (str ",\n" indent "\t") (conj (mapv #(go-object-for (str indent "\t") %) o) ")")))
+    (str "NIL /* " (str (type o)) " */")))
 
 (defn add-other-meta
   "Append meta tags other than what are normally present or irrelevant (:go)."
@@ -95,30 +96,18 @@
   (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
     (s/join "" (map #(-> addmeta-template
                     (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
-                    (rpl "{value}" (make-value (val %)))) m))))
-
-(defn generate-init
-  [v]
-  "")
-  ;; (let [g (go-name (str v))]
-  ;;   (format "\t%s = __%s" g g)))
-
-(defn go-data-type
-  "Returns the type of the object."
-  [obj]
-  "Object")
+                    (rpl "{value}" (go-object-for "" (val %)))) m))))
 
 (defn generate-decl
   [ns-name ns-name-final k v]
   (debug "ns-name=" ns-name " ns-name-final=" ns-name-final " k=" k " v=" v)
   (let [m (meta v)
-        go-var-name "NIL"  ; (go-name (str k))
+        go-object (go-object-for "\t\t" (deref v))
         intern-str (-> intern-template
                        (rpl "{nsFullName}" ns-name)
                        (rpl "{nsName}" ns-name-final)
                        (rpl "{varName}" (str k))
-                       (rpl "{goName}" go-var-name)
-                       (rpl "{goComment}" (str (type (deref v))))
+                       (rpl "{goObject}" go-object)
                        (rpl "{varDocstring}" (if-let [d (:doc m)] (raw-quoted-string d) "\"\""))
                        (rpl "{added}" (if-let [a (:added m)] a ""))
                        (rpl "{moreMeta}" (add-other-meta m))
@@ -164,8 +153,8 @@
         vars (sort-by first (ns-interned ns))
         decls (for [[k v] vars]
                 (generate-decl ns-name ns-name-final k v))
-        inits (for [[k _] vars]
-                (generate-init k))
+        ;; inits (for [[k _] vars]
+        ;;         (generate-init k))
         ns-info (ns-info-name ns-name)
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
@@ -176,7 +165,7 @@
                                                            []  ; TODO: any more imports needed?
                                                            ". \"github.com/candid82/joker/core\""))))
                 (rpl "{decls}" (s/join "\n" (map first decls)))  ; Currently absent from template
-                (rpl "{inits}" (s/join "\n" inits))  ; Currently absent from template
+                ;; (rpl "{inits}" (s/join "\n" inits))  ; Currently absent from template
                 (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
                 (rpl "{interns}" (s/join "\n\t" (map second decls))))
         res (if (:empty m)
