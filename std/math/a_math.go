@@ -315,6 +315,22 @@ func __log_plus_1_(_args []Object) Object {
 	return NIL
 }
 
+var modf_ Proc
+
+func __modf_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := modf(x.Double().D)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var nan_ Proc
 
 func __nan_(_args []Object) Object {
@@ -346,6 +362,104 @@ func __isnan_(_args []Object) Object {
 	return NIL
 }
 
+var next_after_ Proc
+
+func __next_after_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Nextafter(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var pow_ Proc
+
+func __pow_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Pow(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var pow_10_ Proc
+
+func __pow_10_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractInt(_args, 0)
+		_res := math.Pow10(x)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var round_ Proc
+
+func __round_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Round(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var round_to_even_ Proc
+
+func __round_to_even_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.RoundToEven(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var sign_bit_ Proc
+
+func __sign_bit_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Signbit(x.Double().D)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var sin_ Proc
 
 func __sin_(_args []Object) Object {
@@ -354,6 +468,38 @@ func __sin_(_args []Object) Object {
 	case _c == 1:
 		x := ExtractNumber(_args, 0)
 		_res := math.Sin(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var sqrt_ Proc
+
+func __sqrt_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Sqrt(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var trunc_ Proc
+
+func __trunc_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Trunc(x.Double().D)
 		return MakeDouble(_res)
 
 	default:
@@ -394,9 +540,18 @@ func Init() {
 	log_2_ = __log_2_
 	log_binary_ = __log_binary_
 	log_plus_1_ = __log_plus_1_
+	modf_ = __modf_
 	nan_ = __nan_
 	isnan_ = __isnan_
+	next_after_ = __next_after_
+	pow_ = __pow_
+	pow_10_ = __pow_10_
+	round_ = __round_
+	round_to_even_ = __round_to_even_
+	sign_bit_ = __sign_bit_
 	sin_ = __sin_
+	sqrt_ = __sqrt_
+	trunc_ = __trunc_
 
 	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))
 
@@ -561,6 +716,13 @@ func Init() {
 
   This is more accurate than (log (+ 1 x)) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
+	mathNamespace.InternVar("modf", modf_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns a vector with the integer and fractional floating-point numbers that sum to x.
+
+  Both values have the same sign as x.`, "1.0"))
+
 	mathNamespace.InternVar("nan", nan_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
@@ -571,10 +733,50 @@ func Init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns whether x is an IEEE 754 "not-a-number" value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
+	mathNamespace.InternVar("next-after", next_after_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns the next representable Double value after x towards y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("pow", pow_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns x**y, the base-x exponential of y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("pow-10", pow_10_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns 10**x, the base-10 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("round", round_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer nearest to x, rounding half away from zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("round-to-even", round_to_even_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer nearest to x, rounding ties to the nearest even integer.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sign-bit", sign_bit_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns whether x is negative or negative zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
 	mathNamespace.InternVar("sin", sin_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns the sine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt", sqrt_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the square root of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("trunc", trunc_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer value of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 }
 

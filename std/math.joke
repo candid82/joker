@@ -123,6 +123,14 @@
    :go "math.Logb(x.Double().D)"}
   [^Number x])
 
+(defn modf
+  "Returns a vector with the integer and fractional floating-point numbers that sum to x.
+
+  Both values have the same sign as x."
+  {:added "1.0"
+   :go "modf(x.Double().D)"}
+  [^Number x])
+
 (defn ^Double nan
   "Returns an IEEE 754 \"not-a-number\" value."
   {:added "1.0"
@@ -133,6 +141,54 @@
   "Returns whether x is an IEEE 754 \"not-a-number\" value."
   {:added "1.0"
    :go "math.IsNaN(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double next-after
+  "Returns the next representable Double value after x towards y."
+  {:added "1.0"
+   :go "math.Nextafter(x.Double().D, y.Double().D)"}
+  [^Number x, ^Number y])
+
+(defn ^Double pow
+  "Returns x**y, the base-x exponential of y."
+  {:added "1.0"
+   :go "math.Pow(x.Double().D, y.Double().D)"}
+  [^Number x, ^Number y])
+
+(defn ^Double pow-10
+  "Returns 10**x, the base-10 exponential of x."
+  {:added "1.0"
+   :go "math.Pow10(x)"}
+  [^Int x])
+
+(defn ^Double round
+  "Returns the integer nearest to x, rounding half away from zero."
+  {:added "1.0"
+   :go "math.Round(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double round-to-even
+  "Returns the integer nearest to x, rounding ties to the nearest even integer."
+  {:added "1.0"
+   :go "math.RoundToEven(x.Double().D)"}
+  [^Number x])
+
+(defn ^Boolean sign-bit
+  "Returns whether x is negative or negative zero."
+  {:added "1.0"
+   :go "math.Signbit(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double sqrt
+  "Returns the square root of x."
+  {:added "1.0"
+   :go "math.Sqrt(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double trunc
+  "Returns the integer value of x."
+  {:added "1.0"
+   :go "math.Trunc(x.Double().D)"}
   [^Number x])
 
 (def
