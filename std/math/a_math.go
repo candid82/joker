@@ -235,6 +235,86 @@ func __isinf_(_args []Object) Object {
 	return NIL
 }
 
+var log_ Proc
+
+func __log_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_10_ Proc
+
+func __log_10_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log10(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_2_ Proc
+
+func __log_2_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log2(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_binary_ Proc
+
+func __log_binary_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Logb(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_plus_1_ Proc
+
+func __log_plus_1_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log1p(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var nan_ Proc
 
 func __nan_(_args []Object) Object {
@@ -309,6 +389,11 @@ func Init() {
 	hypot_ = __hypot_
 	inf_ = __inf_
 	isinf_ = __isinf_
+	log_ = __log_
+	log_10_ = __log_10_
+	log_2_ = __log_2_
+	log_binary_ = __log_binary_
+	log_plus_1_ = __log_plus_1_
 	nan_ = __nan_
 	isnan_ = __isnan_
 	sin_ = __sin_
@@ -448,6 +533,33 @@ func Init() {
 			`Returns whether x is an infinity.
 
   If sign > 0, returns whether x is positive infinity; if < 0, whether negative infinity; if == 0, whether either infinity.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
+	mathNamespace.InternVar("log", log_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the natural logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-10", log_10_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the decimal logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-2", log_2_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the binary logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-binary", log_binary_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the binary exponent of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-plus-1", log_plus_1_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the natural logarithm of 1 plus x.
+
+  This is more accurate than (log (+ 1 x)) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("nan", nan_,
 		MakeMeta(

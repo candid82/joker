@@ -91,6 +91,38 @@
    :go "math.IsInf(x.Double().D, sign)"}
   [^Number x, ^Int sign])
 
+(defn ^Double log
+  "Returns the natural logarithm of x."
+  {:added "1.0"
+   :go "math.Log(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double log-10
+  "Returns the decimal logarithm of x."
+  {:added "1.0"
+   :go "math.Log10(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double log-plus-1
+  "Returns the natural logarithm of 1 plus x.
+
+  This is more accurate than (log (+ 1 x)) when x is near zero."
+  {:added "1.0"
+   :go "math.Log1p(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double log-2
+  "Returns the binary logarithm of x."
+  {:added "1.0"
+   :go "math.Log2(x.Double().D)"}
+  [^Number x])
+
+(defn ^Double log-binary
+  "Returns the binary exponent of x."
+  {:added "1.0"
+   :go "math.Logb(x.Double().D)"}
+  [^Number x])
+
 (defn ^Double nan
   "Returns an IEEE 754 \"not-a-number\" value."
   {:added "1.0"
