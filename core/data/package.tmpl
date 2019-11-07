@@ -2,10 +2,6 @@
 
 package core
 
-import (
-	{imports}
-)
-
 var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("{nsFullName}"))
 
 func {nsName}Generated() {
@@ -15,5 +11,5 @@ func {nsName}Generated() {
 }
 
 func init() {
-	{nsName}NamespaceInfo.generated = {nsName}Generated
+	{nsInfoName}NamespaceInfo.generated = {nsName}Generated
 }

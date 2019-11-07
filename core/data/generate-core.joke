@@ -150,6 +150,12 @@
                                                  (= ns (joker.core/var-ns__ v))))
                            (ns-map ns))))
 
+(defn ^String ns-info-name
+  [^String ns]
+  (-> ns
+       (rpl "joker." "")
+       (rpl "." "_")))
+
 (defn generate-ns
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
@@ -159,10 +165,12 @@
                 (generate-decl ns-name ns-name-final k v))
         inits (for [[k _] vars]
                 (generate-init k))
+        ns-info (ns-info-name ns-name)
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
-                (rpl "{imports}"
+                (rpl "{nsInfoName}" ns-info)
+                (rpl "{imports}"  ; Currently absent from template
                      (s/join "\n\t" (sort compare-imports (conj
                                                            []  ; TODO: any more imports needed?
                                                            ". \"github.com/candid82/joker/core\""))))
@@ -177,7 +185,7 @@
 
 (defn ns-file-name
   [dir ns-name-final]
-  (str dir "/a_" ns-name-final ".go"))
+  (str dir "/../a_" ns-name-final "_code.go"))
 
 (defn remove-blanky-lines
   [s]
