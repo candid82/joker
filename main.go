@@ -699,6 +699,11 @@ var runningProfile interface {
 }
 
 func main() {
+	SetExitJoker(func(code int) {
+		finish()
+		os.Exit(code)
+	})
+
 	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
 
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
@@ -706,10 +711,6 @@ func main() {
 	InitInternalLibs()
 	ProcessCoreNamespaceInfo()
 
-	SetExitJoker(func(code int) {
-		finish()
-		os.Exit(code)
-	})
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
