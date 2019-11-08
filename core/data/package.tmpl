@@ -4,6 +4,8 @@ package core
 
 var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("{nsFullName}"))
 
+{decls}
+
 func {nsName}Generated() {
 	{nsName}Namespace.ResetMeta(MakeMeta(nil, {nsDocstring}, "1.0"))
 

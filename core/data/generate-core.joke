@@ -50,9 +50,9 @@
   (str "`" (rpl s "`" "` + \"`\" + `") "`"))
 
 (defn go-name
-  "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
-  [fn-name]
-  (let [n (-> fn-name
+  "Convert Clojure-style name to unique Go-style name suitable as its internal implementation."
+  [name]
+  (let [n (-> name
               (rpl "-" "_minus_")
               (rpl "?" "")
               (rpl "*" "_star_")
@@ -62,8 +62,9 @@
               (rpl "'" "_apos_")
               (rpl "+" "_plus_")
               (rpl "/" "_slash_")
+              (rpl "!" "_bang_")
               (str "_"))]
-    (if (s/ends-with? fn-name "?")
+    (if (s/ends-with? name "?")
       (str "is" n)
       n)))
 
@@ -105,17 +106,18 @@
   [ns-name ns-name-final k v]
   (debug "ns-name=" ns-name " ns-name-final=" ns-name-final " k=" k " v=" v)
   (let [m (meta v)
-        go-object (go-object-for "\t\t" (deref v))
+        go-object-name (go-name (str k))
+        go-init (str "var " go-object-name " = " (go-object-for "" (deref v)))
         intern-str (-> intern-template
                        (rpl "{nsFullName}" ns-name)
                        (rpl "{nsName}" ns-name-final)
                        (rpl "{varName}" (str k))
-                       (rpl "{goObject}" go-object)
+                       (rpl "{goObject}" go-object-name)
                        (rpl "{varDocstring}" (if-let [d (:doc m)] (raw-quoted-string d) "\"\""))
                        (rpl "{added}" (if-let [a (:added m)] a ""))
                        (rpl "{moreMeta}" (add-other-meta m))
                        (rpl "{args}" "nil"))]
-    ["" intern-str]))
+    [go-init intern-str]))
 
 (defn comment-out
   [s]
@@ -167,7 +169,7 @@
                      (s/join "\n\t" (sort compare-imports (conj
                                                            []  ; TODO: any more imports needed?
                                                            ". \"github.com/candid82/joker/core\""))))
-                (rpl "{decls}" (s/join "\n" (map first decls)))  ; Currently absent from template
+                (rpl "{decls}" (s/join "\n\n" (map first decls)))
                 ;; (rpl "{inits}" (s/join "\n" inits))  ; Currently absent from template
                 (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
                 (rpl "{interns}" (s/join "\n\t" (map second decls))))
