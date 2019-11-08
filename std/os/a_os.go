@@ -11,7 +11,7 @@ var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
 
 
 
-var args_ Proc
+var args_ ProcFn
 
 func __args_(_args []Object) Object {
 	_c := len(_args)
@@ -26,7 +26,7 @@ func __args_(_args []Object) Object {
 	return NIL
 }
 
-var chdir_ Proc
+var chdir_ ProcFn
 
 func __chdir_(_args []Object) Object {
 	_c := len(_args)
@@ -42,7 +42,7 @@ func __chdir_(_args []Object) Object {
 	return NIL
 }
 
-var close_ Proc
+var close_ ProcFn
 
 func __close_(_args []Object) Object {
 	_c := len(_args)
@@ -60,7 +60,7 @@ func __close_(_args []Object) Object {
 	return NIL
 }
 
-var create_ Proc
+var create_ ProcFn
 
 func __create_(_args []Object) Object {
 	_c := len(_args)
@@ -77,7 +77,7 @@ func __create_(_args []Object) Object {
 	return NIL
 }
 
-var cwd_ Proc
+var cwd_ ProcFn
 
 func __cwd_(_args []Object) Object {
 	_c := len(_args)
@@ -92,7 +92,7 @@ func __cwd_(_args []Object) Object {
 	return NIL
 }
 
-var env_ Proc
+var env_ ProcFn
 
 func __env_(_args []Object) Object {
 	_c := len(_args)
@@ -107,7 +107,7 @@ func __env_(_args []Object) Object {
 	return NIL
 }
 
-var exec_ Proc
+var exec_ ProcFn
 
 func __exec_(_args []Object) Object {
 	_c := len(_args)
@@ -124,7 +124,7 @@ func __exec_(_args []Object) Object {
 	return NIL
 }
 
-var isexists_ Proc
+var isexists_ ProcFn
 
 func __isexists_(_args []Object) Object {
 	_c := len(_args)
@@ -140,7 +140,7 @@ func __isexists_(_args []Object) Object {
 	return NIL
 }
 
-var exit_ Proc
+var exit_ ProcFn
 
 func __exit_(_args []Object) Object {
 	_c := len(_args)
@@ -157,7 +157,7 @@ func __exit_(_args []Object) Object {
 	return NIL
 }
 
-var ls_ Proc
+var ls_ ProcFn
 
 func __ls_(_args []Object) Object {
 	_c := len(_args)
@@ -173,7 +173,7 @@ func __ls_(_args []Object) Object {
 	return NIL
 }
 
-var mkdir_ Proc
+var mkdir_ ProcFn
 
 func __mkdir_(_args []Object) Object {
 	_c := len(_args)
@@ -190,7 +190,7 @@ func __mkdir_(_args []Object) Object {
 	return NIL
 }
 
-var open_ Proc
+var open_ ProcFn
 
 func __open_(_args []Object) Object {
 	_c := len(_args)
@@ -207,7 +207,7 @@ func __open_(_args []Object) Object {
 	return NIL
 }
 
-var set_env_ Proc
+var set_env_ ProcFn
 
 func __set_env_(_args []Object) Object {
 	_c := len(_args)
@@ -224,7 +224,7 @@ func __set_env_(_args []Object) Object {
 	return NIL
 }
 
-var sh_ Proc
+var sh_ ProcFn
 
 func __sh_(_args []Object) Object {
 	_c := len(_args)
@@ -242,7 +242,7 @@ func __sh_(_args []Object) Object {
 	return NIL
 }
 
-var sh_from_ Proc
+var sh_from_ ProcFn
 
 func __sh_from_(_args []Object) Object {
 	_c := len(_args)
@@ -261,7 +261,7 @@ func __sh_from_(_args []Object) Object {
 	return NIL
 }
 
-var stat_ Proc
+var stat_ ProcFn
 
 func __stat_(_args []Object) Object {
 	_c := len(_args)

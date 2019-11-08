@@ -10,7 +10,7 @@ var csvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.csv"))
 
 
 
-var csv_seq_ Proc
+var csv_seq_ ProcFn
 
 func __csv_seq_(_args []Object) Object {
 	_c := len(_args)
@@ -32,7 +32,7 @@ func __csv_seq_(_args []Object) Object {
 	return NIL
 }
 
-var write_ Proc
+var write_ ProcFn
 
 func __write_(_args []Object) Object {
 	_c := len(_args)
@@ -56,7 +56,7 @@ func __write_(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc
+var write_string_ ProcFn
 
 func __write_string_(_args []Object) Object {
 	_c := len(_args)

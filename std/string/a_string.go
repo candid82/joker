@@ -12,7 +12,7 @@ var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
 
 
-var isblank_ Proc
+var isblank_ ProcFn
 
 func __isblank_(_args []Object) Object {
 	_c := len(_args)
@@ -28,7 +28,7 @@ func __isblank_(_args []Object) Object {
 	return NIL
 }
 
-var capitalize_ Proc
+var capitalize_ ProcFn
 
 func __capitalize_(_args []Object) Object {
 	_c := len(_args)
@@ -44,7 +44,7 @@ func __capitalize_(_args []Object) Object {
 	return NIL
 }
 
-var isends_with_ Proc
+var isends_with_ ProcFn
 
 func __isends_with_(_args []Object) Object {
 	_c := len(_args)
@@ -61,7 +61,7 @@ func __isends_with_(_args []Object) Object {
 	return NIL
 }
 
-var escape_ Proc
+var escape_ ProcFn
 
 func __escape_(_args []Object) Object {
 	_c := len(_args)
@@ -78,7 +78,7 @@ func __escape_(_args []Object) Object {
 	return NIL
 }
 
-var isincludes_ Proc
+var isincludes_ ProcFn
 
 func __isincludes_(_args []Object) Object {
 	_c := len(_args)
@@ -95,7 +95,7 @@ func __isincludes_(_args []Object) Object {
 	return NIL
 }
 
-var index_of_ Proc
+var index_of_ ProcFn
 
 func __index_of_(_args []Object) Object {
 	_c := len(_args)
@@ -119,7 +119,7 @@ func __index_of_(_args []Object) Object {
 	return NIL
 }
 
-var join_ Proc
+var join_ ProcFn
 
 func __join_(_args []Object) Object {
 	_c := len(_args)
@@ -141,7 +141,7 @@ func __join_(_args []Object) Object {
 	return NIL
 }
 
-var last_index_of_ Proc
+var last_index_of_ ProcFn
 
 func __last_index_of_(_args []Object) Object {
 	_c := len(_args)
@@ -165,7 +165,7 @@ func __last_index_of_(_args []Object) Object {
 	return NIL
 }
 
-var lower_case_ Proc
+var lower_case_ ProcFn
 
 func __lower_case_(_args []Object) Object {
 	_c := len(_args)
@@ -181,7 +181,7 @@ func __lower_case_(_args []Object) Object {
 	return NIL
 }
 
-var pad_left_ Proc
+var pad_left_ ProcFn
 
 func __pad_left_(_args []Object) Object {
 	_c := len(_args)
@@ -199,7 +199,7 @@ func __pad_left_(_args []Object) Object {
 	return NIL
 }
 
-var pad_right_ Proc
+var pad_right_ ProcFn
 
 func __pad_right_(_args []Object) Object {
 	_c := len(_args)
@@ -217,7 +217,7 @@ func __pad_right_(_args []Object) Object {
 	return NIL
 }
 
-var replace_ Proc
+var replace_ ProcFn
 
 func __replace_(_args []Object) Object {
 	_c := len(_args)
@@ -235,7 +235,7 @@ func __replace_(_args []Object) Object {
 	return NIL
 }
 
-var replace_first_ Proc
+var replace_first_ ProcFn
 
 func __replace_first_(_args []Object) Object {
 	_c := len(_args)
@@ -253,7 +253,7 @@ func __replace_first_(_args []Object) Object {
 	return NIL
 }
 
-var reverse_ Proc
+var reverse_ ProcFn
 
 func __reverse_(_args []Object) Object {
 	_c := len(_args)
@@ -269,7 +269,7 @@ func __reverse_(_args []Object) Object {
 	return NIL
 }
 
-var split_ Proc
+var split_ ProcFn
 
 func __split_(_args []Object) Object {
 	_c := len(_args)
@@ -293,7 +293,7 @@ func __split_(_args []Object) Object {
 	return NIL
 }
 
-var split_lines_ Proc
+var split_lines_ ProcFn
 
 func __split_lines_(_args []Object) Object {
 	_c := len(_args)
@@ -309,7 +309,7 @@ func __split_lines_(_args []Object) Object {
 	return NIL
 }
 
-var isstarts_with_ Proc
+var isstarts_with_ ProcFn
 
 func __isstarts_with_(_args []Object) Object {
 	_c := len(_args)
@@ -326,7 +326,7 @@ func __isstarts_with_(_args []Object) Object {
 	return NIL
 }
 
-var trim_ Proc
+var trim_ ProcFn
 
 func __trim_(_args []Object) Object {
 	_c := len(_args)
@@ -342,7 +342,7 @@ func __trim_(_args []Object) Object {
 	return NIL
 }
 
-var trim_left_ Proc
+var trim_left_ ProcFn
 
 func __trim_left_(_args []Object) Object {
 	_c := len(_args)
@@ -358,7 +358,7 @@ func __trim_left_(_args []Object) Object {
 	return NIL
 }
 
-var trim_newline_ Proc
+var trim_newline_ ProcFn
 
 func __trim_newline_(_args []Object) Object {
 	_c := len(_args)
@@ -374,7 +374,7 @@ func __trim_newline_(_args []Object) Object {
 	return NIL
 }
 
-var trim_right_ Proc
+var trim_right_ ProcFn
 
 func __trim_right_(_args []Object) Object {
 	_c := len(_args)
@@ -390,7 +390,7 @@ func __trim_right_(_args []Object) Object {
 	return NIL
 }
 
-var triml_ Proc
+var triml_ ProcFn
 
 func __triml_(_args []Object) Object {
 	_c := len(_args)
@@ -406,7 +406,7 @@ func __triml_(_args []Object) Object {
 	return NIL
 }
 
-var trimr_ Proc
+var trimr_ ProcFn
 
 func __trimr_(_args []Object) Object {
 	_c := len(_args)
@@ -422,7 +422,7 @@ func __trimr_(_args []Object) Object {
 	return NIL
 }
 
-var upper_case_ Proc
+var upper_case_ ProcFn
 
 func __upper_case_(_args []Object) Object {
 	_c := len(_args)

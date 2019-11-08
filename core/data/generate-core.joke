@@ -88,6 +88,7 @@
     Keyword (str "MakeKeyword(" (q (name o)) ")")
     String (str "String{S: " (q o) "}")
     Vector (str "NewVectorFrom(\n" indent "\t" (s/join (str ",\n" indent "\t") (conj (mapv #(go-object-for (str indent "\t") %) o) ")")))
+    Proc (let [p (rpl (str o) #".*:(.*)[]]" "$1")] (str "Proc{fn: " p ", name: " (q p) "}"))
     (str "NIL /* " (str (type o)) " */")))
 
 (defn add-other-meta

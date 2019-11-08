@@ -11,7 +11,7 @@ var ioNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.io"))
 
 
 
-var copy_ Proc
+var copy_ ProcFn
 
 func __copy_(_args []Object) Object {
 	_c := len(_args)

@@ -23,7 +23,7 @@ var sqrt_of_e_ Double
 var sqrt_of_phi_ Double
 var sqrt_of_pi_ Double
 
-var abs_ Proc
+var abs_ ProcFn
 
 func __abs_(_args []Object) Object {
 	_c := len(_args)
@@ -39,7 +39,7 @@ func __abs_(_args []Object) Object {
 	return NIL
 }
 
-var ceil_ Proc
+var ceil_ ProcFn
 
 func __ceil_(_args []Object) Object {
 	_c := len(_args)
@@ -55,7 +55,7 @@ func __ceil_(_args []Object) Object {
 	return NIL
 }
 
-var copy_sign_ Proc
+var copy_sign_ ProcFn
 
 func __copy_sign_(_args []Object) Object {
 	_c := len(_args)
@@ -72,7 +72,7 @@ func __copy_sign_(_args []Object) Object {
 	return NIL
 }
 
-var cos_ Proc
+var cos_ ProcFn
 
 func __cos_(_args []Object) Object {
 	_c := len(_args)
@@ -88,7 +88,7 @@ func __cos_(_args []Object) Object {
 	return NIL
 }
 
-var cube_root_ Proc
+var cube_root_ ProcFn
 
 func __cube_root_(_args []Object) Object {
 	_c := len(_args)
@@ -104,7 +104,7 @@ func __cube_root_(_args []Object) Object {
 	return NIL
 }
 
-var dim_ Proc
+var dim_ ProcFn
 
 func __dim_(_args []Object) Object {
 	_c := len(_args)
@@ -121,7 +121,7 @@ func __dim_(_args []Object) Object {
 	return NIL
 }
 
-var exp_ Proc
+var exp_ ProcFn
 
 func __exp_(_args []Object) Object {
 	_c := len(_args)
@@ -137,7 +137,7 @@ func __exp_(_args []Object) Object {
 	return NIL
 }
 
-var exp_2_ Proc
+var exp_2_ ProcFn
 
 func __exp_2_(_args []Object) Object {
 	_c := len(_args)
@@ -153,7 +153,7 @@ func __exp_2_(_args []Object) Object {
 	return NIL
 }
 
-var exp_minus_1_ Proc
+var exp_minus_1_ ProcFn
 
 func __exp_minus_1_(_args []Object) Object {
 	_c := len(_args)
@@ -169,7 +169,7 @@ func __exp_minus_1_(_args []Object) Object {
 	return NIL
 }
 
-var floor_ Proc
+var floor_ ProcFn
 
 func __floor_(_args []Object) Object {
 	_c := len(_args)
@@ -185,7 +185,7 @@ func __floor_(_args []Object) Object {
 	return NIL
 }
 
-var hypot_ Proc
+var hypot_ ProcFn
 
 func __hypot_(_args []Object) Object {
 	_c := len(_args)
@@ -202,7 +202,7 @@ func __hypot_(_args []Object) Object {
 	return NIL
 }
 
-var inf_ Proc
+var inf_ ProcFn
 
 func __inf_(_args []Object) Object {
 	_c := len(_args)
@@ -218,7 +218,7 @@ func __inf_(_args []Object) Object {
 	return NIL
 }
 
-var isinf_ Proc
+var isinf_ ProcFn
 
 func __isinf_(_args []Object) Object {
 	_c := len(_args)
@@ -235,7 +235,7 @@ func __isinf_(_args []Object) Object {
 	return NIL
 }
 
-var log_ Proc
+var log_ ProcFn
 
 func __log_(_args []Object) Object {
 	_c := len(_args)
@@ -251,7 +251,7 @@ func __log_(_args []Object) Object {
 	return NIL
 }
 
-var log_10_ Proc
+var log_10_ ProcFn
 
 func __log_10_(_args []Object) Object {
 	_c := len(_args)
@@ -267,7 +267,7 @@ func __log_10_(_args []Object) Object {
 	return NIL
 }
 
-var log_2_ Proc
+var log_2_ ProcFn
 
 func __log_2_(_args []Object) Object {
 	_c := len(_args)
@@ -283,7 +283,7 @@ func __log_2_(_args []Object) Object {
 	return NIL
 }
 
-var log_binary_ Proc
+var log_binary_ ProcFn
 
 func __log_binary_(_args []Object) Object {
 	_c := len(_args)
@@ -299,7 +299,7 @@ func __log_binary_(_args []Object) Object {
 	return NIL
 }
 
-var log_plus_1_ Proc
+var log_plus_1_ ProcFn
 
 func __log_plus_1_(_args []Object) Object {
 	_c := len(_args)
@@ -315,7 +315,7 @@ func __log_plus_1_(_args []Object) Object {
 	return NIL
 }
 
-var modf_ Proc
+var modf_ ProcFn
 
 func __modf_(_args []Object) Object {
 	_c := len(_args)
@@ -331,7 +331,7 @@ func __modf_(_args []Object) Object {
 	return NIL
 }
 
-var nan_ Proc
+var nan_ ProcFn
 
 func __nan_(_args []Object) Object {
 	_c := len(_args)
@@ -346,7 +346,7 @@ func __nan_(_args []Object) Object {
 	return NIL
 }
 
-var isnan_ Proc
+var isnan_ ProcFn
 
 func __isnan_(_args []Object) Object {
 	_c := len(_args)
@@ -362,7 +362,7 @@ func __isnan_(_args []Object) Object {
 	return NIL
 }
 
-var next_after_ Proc
+var next_after_ ProcFn
 
 func __next_after_(_args []Object) Object {
 	_c := len(_args)
@@ -379,7 +379,7 @@ func __next_after_(_args []Object) Object {
 	return NIL
 }
 
-var pow_ Proc
+var pow_ ProcFn
 
 func __pow_(_args []Object) Object {
 	_c := len(_args)
@@ -396,7 +396,7 @@ func __pow_(_args []Object) Object {
 	return NIL
 }
 
-var pow_10_ Proc
+var pow_10_ ProcFn
 
 func __pow_10_(_args []Object) Object {
 	_c := len(_args)
@@ -412,7 +412,7 @@ func __pow_10_(_args []Object) Object {
 	return NIL
 }
 
-var round_ Proc
+var round_ ProcFn
 
 func __round_(_args []Object) Object {
 	_c := len(_args)
@@ -428,7 +428,7 @@ func __round_(_args []Object) Object {
 	return NIL
 }
 
-var round_to_even_ Proc
+var round_to_even_ ProcFn
 
 func __round_to_even_(_args []Object) Object {
 	_c := len(_args)
@@ -444,7 +444,7 @@ func __round_to_even_(_args []Object) Object {
 	return NIL
 }
 
-var sign_bit_ Proc
+var sign_bit_ ProcFn
 
 func __sign_bit_(_args []Object) Object {
 	_c := len(_args)
@@ -460,7 +460,7 @@ func __sign_bit_(_args []Object) Object {
 	return NIL
 }
 
-var sin_ Proc
+var sin_ ProcFn
 
 func __sin_(_args []Object) Object {
 	_c := len(_args)
@@ -476,7 +476,7 @@ func __sin_(_args []Object) Object {
 	return NIL
 }
 
-var sqrt_ Proc
+var sqrt_ ProcFn
 
 func __sqrt_(_args []Object) Object {
 	_c := len(_args)
@@ -492,7 +492,7 @@ func __sqrt_(_args []Object) Object {
 	return NIL
 }
 
-var trunc_ Proc
+var trunc_ ProcFn
 
 func __trunc_(_args []Object) Object {
 	_c := len(_args)

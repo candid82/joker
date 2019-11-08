@@ -31,7 +31,7 @@ var stamp_milli_ String
 var stamp_nano_ String
 var unix_date_ String
 
-var add_ Proc
+var add_ ProcFn
 
 func __add_(_args []Object) Object {
 	_c := len(_args)
@@ -48,7 +48,7 @@ func __add_(_args []Object) Object {
 	return NIL
 }
 
-var add_date_ Proc
+var add_date_ ProcFn
 
 func __add_date_(_args []Object) Object {
 	_c := len(_args)
@@ -67,7 +67,7 @@ func __add_date_(_args []Object) Object {
 	return NIL
 }
 
-var format_ Proc
+var format_ ProcFn
 
 func __format_(_args []Object) Object {
 	_c := len(_args)
@@ -84,7 +84,7 @@ func __format_(_args []Object) Object {
 	return NIL
 }
 
-var from_unix_ Proc
+var from_unix_ ProcFn
 
 func __from_unix_(_args []Object) Object {
 	_c := len(_args)
@@ -101,7 +101,7 @@ func __from_unix_(_args []Object) Object {
 	return NIL
 }
 
-var hours_ Proc
+var hours_ ProcFn
 
 func __hours_(_args []Object) Object {
 	_c := len(_args)
@@ -117,7 +117,7 @@ func __hours_(_args []Object) Object {
 	return NIL
 }
 
-var minutes_ Proc
+var minutes_ ProcFn
 
 func __minutes_(_args []Object) Object {
 	_c := len(_args)
@@ -133,7 +133,7 @@ func __minutes_(_args []Object) Object {
 	return NIL
 }
 
-var now_ Proc
+var now_ ProcFn
 
 func __now_(_args []Object) Object {
 	_c := len(_args)
@@ -148,7 +148,7 @@ func __now_(_args []Object) Object {
 	return NIL
 }
 
-var parse_ Proc
+var parse_ ProcFn
 
 func __parse_(_args []Object) Object {
 	_c := len(_args)
@@ -166,7 +166,7 @@ func __parse_(_args []Object) Object {
 	return NIL
 }
 
-var parse_duration_ Proc
+var parse_duration_ ProcFn
 
 func __parse_duration_(_args []Object) Object {
 	_c := len(_args)
@@ -184,7 +184,7 @@ func __parse_duration_(_args []Object) Object {
 	return NIL
 }
 
-var round_ Proc
+var round_ ProcFn
 
 func __round_(_args []Object) Object {
 	_c := len(_args)
@@ -201,7 +201,7 @@ func __round_(_args []Object) Object {
 	return NIL
 }
 
-var seconds_ Proc
+var seconds_ ProcFn
 
 func __seconds_(_args []Object) Object {
 	_c := len(_args)
@@ -217,7 +217,7 @@ func __seconds_(_args []Object) Object {
 	return NIL
 }
 
-var since_ Proc
+var since_ ProcFn
 
 func __since_(_args []Object) Object {
 	_c := len(_args)
@@ -233,7 +233,7 @@ func __since_(_args []Object) Object {
 	return NIL
 }
 
-var sleep_ Proc
+var sleep_ ProcFn
 
 func __sleep_(_args []Object) Object {
 	_c := len(_args)
@@ -250,7 +250,7 @@ func __sleep_(_args []Object) Object {
 	return NIL
 }
 
-var string_ Proc
+var string_ ProcFn
 
 func __string_(_args []Object) Object {
 	_c := len(_args)
@@ -266,7 +266,7 @@ func __string_(_args []Object) Object {
 	return NIL
 }
 
-var sub_ Proc
+var sub_ ProcFn
 
 func __sub_(_args []Object) Object {
 	_c := len(_args)
@@ -283,7 +283,7 @@ func __sub_(_args []Object) Object {
 	return NIL
 }
 
-var truncate_ Proc
+var truncate_ ProcFn
 
 func __truncate_(_args []Object) Object {
 	_c := len(_args)
@@ -300,7 +300,7 @@ func __truncate_(_args []Object) Object {
 	return NIL
 }
 
-var unix_ Proc
+var unix_ ProcFn
 
 func __unix_(_args []Object) Object {
 	_c := len(_args)
@@ -316,7 +316,7 @@ func __unix_(_args []Object) Object {
 	return NIL
 }
 
-var until_ Proc
+var until_ ProcFn
 
 func __until_(_args []Object) Object {
 	_c := len(_args)

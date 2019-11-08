@@ -12,7 +12,7 @@ var filepathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.filepath"))
 var list_separator_ String
 var separator_ String
 
-var abs_ Proc
+var abs_ ProcFn
 
 func __abs_(_args []Object) Object {
 	_c := len(_args)
@@ -29,7 +29,7 @@ func __abs_(_args []Object) Object {
 	return NIL
 }
 
-var isabs_ Proc
+var isabs_ ProcFn
 
 func __isabs_(_args []Object) Object {
 	_c := len(_args)
@@ -45,7 +45,7 @@ func __isabs_(_args []Object) Object {
 	return NIL
 }
 
-var base_ Proc
+var base_ ProcFn
 
 func __base_(_args []Object) Object {
 	_c := len(_args)
@@ -61,7 +61,7 @@ func __base_(_args []Object) Object {
 	return NIL
 }
 
-var clean_ Proc
+var clean_ ProcFn
 
 func __clean_(_args []Object) Object {
 	_c := len(_args)
@@ -77,7 +77,7 @@ func __clean_(_args []Object) Object {
 	return NIL
 }
 
-var dir_ Proc
+var dir_ ProcFn
 
 func __dir_(_args []Object) Object {
 	_c := len(_args)
@@ -93,7 +93,7 @@ func __dir_(_args []Object) Object {
 	return NIL
 }
 
-var eval_symlinks_ Proc
+var eval_symlinks_ ProcFn
 
 func __eval_symlinks_(_args []Object) Object {
 	_c := len(_args)
@@ -110,7 +110,7 @@ func __eval_symlinks_(_args []Object) Object {
 	return NIL
 }
 
-var ext_ Proc
+var ext_ ProcFn
 
 func __ext_(_args []Object) Object {
 	_c := len(_args)
@@ -126,7 +126,7 @@ func __ext_(_args []Object) Object {
 	return NIL
 }
 
-var file_seq_ Proc
+var file_seq_ ProcFn
 
 func __file_seq_(_args []Object) Object {
 	_c := len(_args)
@@ -142,7 +142,7 @@ func __file_seq_(_args []Object) Object {
 	return NIL
 }
 
-var from_slash_ Proc
+var from_slash_ ProcFn
 
 func __from_slash_(_args []Object) Object {
 	_c := len(_args)
@@ -158,7 +158,7 @@ func __from_slash_(_args []Object) Object {
 	return NIL
 }
 
-var glob_ Proc
+var glob_ ProcFn
 
 func __glob_(_args []Object) Object {
 	_c := len(_args)
@@ -175,7 +175,7 @@ func __glob_(_args []Object) Object {
 	return NIL
 }
 
-var join_ Proc
+var join_ ProcFn
 
 func __join_(_args []Object) Object {
 	_c := len(_args)
@@ -192,7 +192,7 @@ func __join_(_args []Object) Object {
 	return NIL
 }
 
-var ismatches_ Proc
+var ismatches_ ProcFn
 
 func __ismatches_(_args []Object) Object {
 	_c := len(_args)
@@ -210,7 +210,7 @@ func __ismatches_(_args []Object) Object {
 	return NIL
 }
 
-var rel_ Proc
+var rel_ ProcFn
 
 func __rel_(_args []Object) Object {
 	_c := len(_args)
@@ -228,7 +228,7 @@ func __rel_(_args []Object) Object {
 	return NIL
 }
 
-var split_ Proc
+var split_ ProcFn
 
 func __split_(_args []Object) Object {
 	_c := len(_args)
@@ -245,7 +245,7 @@ func __split_(_args []Object) Object {
 	return NIL
 }
 
-var split_list_ Proc
+var split_list_ ProcFn
 
 func __split_list_(_args []Object) Object {
 	_c := len(_args)
@@ -261,7 +261,7 @@ func __split_list_(_args []Object) Object {
 	return NIL
 }
 
-var to_slash_ Proc
+var to_slash_ ProcFn
 
 func __to_slash_(_args []Object) Object {
 	_c := len(_args)
@@ -277,7 +277,7 @@ func __to_slash_(_args []Object) Object {
 	return NIL
 }
 
-var volume_name_ Proc
+var volume_name_ ProcFn
 
 func __volume_name_(_args []Object) Object {
 	_c := len(_args)

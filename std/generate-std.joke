@@ -10,7 +10,7 @@
 ;;;;
 ;;;; This results in the following code in a_foo.go:
 ;;;;
-;;;;   var GOFN Proc = func(_args []Object) Object { BODY }"
+;;;;   var GOFN ProcFn = func(_args []Object) Object { BODY }"
 ;;;;
 ;;;; GOFN is a slightly mangled form of FN (it's capitalized to be a
 ;;;; public method, an underscore is appended, etc.; see "go-name",

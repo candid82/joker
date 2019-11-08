@@ -11,7 +11,7 @@ var strconvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.strconv"))
 
 
 
-var atoi_ Proc
+var atoi_ ProcFn
 
 func __atoi_(_args []Object) Object {
 	_c := len(_args)
@@ -28,7 +28,7 @@ func __atoi_(_args []Object) Object {
 	return NIL
 }
 
-var iscan_backquote_ Proc
+var iscan_backquote_ ProcFn
 
 func __iscan_backquote_(_args []Object) Object {
 	_c := len(_args)
@@ -44,7 +44,7 @@ func __iscan_backquote_(_args []Object) Object {
 	return NIL
 }
 
-var format_bool_ Proc
+var format_bool_ ProcFn
 
 func __format_bool_(_args []Object) Object {
 	_c := len(_args)
@@ -60,7 +60,7 @@ func __format_bool_(_args []Object) Object {
 	return NIL
 }
 
-var format_double_ Proc
+var format_double_ ProcFn
 
 func __format_double_(_args []Object) Object {
 	_c := len(_args)
@@ -79,7 +79,7 @@ func __format_double_(_args []Object) Object {
 	return NIL
 }
 
-var format_int_ Proc
+var format_int_ ProcFn
 
 func __format_int_(_args []Object) Object {
 	_c := len(_args)
@@ -96,7 +96,7 @@ func __format_int_(_args []Object) Object {
 	return NIL
 }
 
-var isgraphic_ Proc
+var isgraphic_ ProcFn
 
 func __isgraphic_(_args []Object) Object {
 	_c := len(_args)
@@ -112,7 +112,7 @@ func __isgraphic_(_args []Object) Object {
 	return NIL
 }
 
-var itoa_ Proc
+var itoa_ ProcFn
 
 func __itoa_(_args []Object) Object {
 	_c := len(_args)
@@ -128,7 +128,7 @@ func __itoa_(_args []Object) Object {
 	return NIL
 }
 
-var parse_bool_ Proc
+var parse_bool_ ProcFn
 
 func __parse_bool_(_args []Object) Object {
 	_c := len(_args)
@@ -145,7 +145,7 @@ func __parse_bool_(_args []Object) Object {
 	return NIL
 }
 
-var parse_double_ Proc
+var parse_double_ ProcFn
 
 func __parse_double_(_args []Object) Object {
 	_c := len(_args)
@@ -162,7 +162,7 @@ func __parse_double_(_args []Object) Object {
 	return NIL
 }
 
-var parse_int_ Proc
+var parse_int_ ProcFn
 
 func __parse_int_(_args []Object) Object {
 	_c := len(_args)
@@ -182,7 +182,7 @@ func __parse_int_(_args []Object) Object {
 	return NIL
 }
 
-var isprintable_ Proc
+var isprintable_ ProcFn
 
 func __isprintable_(_args []Object) Object {
 	_c := len(_args)
@@ -198,7 +198,7 @@ func __isprintable_(_args []Object) Object {
 	return NIL
 }
 
-var quote_ Proc
+var quote_ ProcFn
 
 func __quote_(_args []Object) Object {
 	_c := len(_args)
@@ -214,7 +214,7 @@ func __quote_(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_ Proc
+var quote_char_ ProcFn
 
 func __quote_char_(_args []Object) Object {
 	_c := len(_args)
@@ -230,7 +230,7 @@ func __quote_char_(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_ascii_ Proc
+var quote_char_to_ascii_ ProcFn
 
 func __quote_char_to_ascii_(_args []Object) Object {
 	_c := len(_args)
@@ -246,7 +246,7 @@ func __quote_char_to_ascii_(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_graphic_ Proc
+var quote_char_to_graphic_ ProcFn
 
 func __quote_char_to_graphic_(_args []Object) Object {
 	_c := len(_args)
@@ -262,7 +262,7 @@ func __quote_char_to_graphic_(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_ascii_ Proc
+var quote_to_ascii_ ProcFn
 
 func __quote_to_ascii_(_args []Object) Object {
 	_c := len(_args)
@@ -278,7 +278,7 @@ func __quote_to_ascii_(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_graphic_ Proc
+var quote_to_graphic_ ProcFn
 
 func __quote_to_graphic_(_args []Object) Object {
 	_c := len(_args)
@@ -294,7 +294,7 @@ func __quote_to_graphic_(_args []Object) Object {
 	return NIL
 }
 
-var unquote_ Proc
+var unquote_ ProcFn
 
 func __unquote_(_args []Object) Object {
 	_c := len(_args)
