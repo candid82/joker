@@ -58,7 +58,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.12.9"
+const VERSION = "v0.13.0"
 
 var internalLibs map[string]*internalNamespaceInfo
 
@@ -1751,7 +1751,6 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		}
 		info.init()
 		info.init = nil
-		info.data = nil
 	}
 	if info.data != nil {
 		if Verbose {
