@@ -94,7 +94,7 @@
 (defn add-other-meta
   "Append meta tags other than what are normally present or irrelevant (:go)."
   [m]
-  (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
+  (let [m (dissoc m :doc :added :ns :name)]
     (s/join "" (map #(-> addmeta-template
                     (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
                     (rpl "{value}" (go-object-for "" (val %)))) m))))
