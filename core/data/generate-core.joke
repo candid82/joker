@@ -86,9 +86,11 @@
     Boolean (str "Boolean{B: " o "}")
     Int (str "Int{I: " o "}")
     Keyword (str "MakeKeyword(" (q (name o)) ")")
-    String (str "String{S: " (q o) "}")
-    Vector (str "NewVectorFrom(\n" indent "\t" (s/join (str ",\n" indent "\t") (conj (mapv #(go-object-for (str indent "\t") %) o) ")")))
+    List (str "NewListFrom(\n" indent "\t" (s/join (str ",\n" indent "\t") (conj (mapv #(go-object-for (str indent "\t") %) o) ")")))
     Proc (let [p (rpl (str o) #".*:(.*)[]]" "$1")] (str "Proc{fn: " p ", name: " (q p) "}"))
+    String (str "String{S: " (q o) "}")
+    Symbol (str "MakeSymbol(" (q (name o)) ")")
+    Vector (str "NewVectorFrom(\n" indent "\t" (s/join (str ",\n" indent "\t") (conj (mapv #(go-object-for (str indent "\t") %) o) ")")))
     (str "NIL /* " (str (type o)) " */")))
 
 (defn add-other-meta
