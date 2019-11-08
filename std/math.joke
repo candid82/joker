@@ -128,7 +128,7 @@
 
   Both values have the same sign as x."
   {:added "1.0"
-   :go "Modf(x.Double().D)"}
+   :go "modf(x.Double().D)"}
   [^Number x])
 
 (defn ^Double nan
