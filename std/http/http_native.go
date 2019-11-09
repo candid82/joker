@@ -139,6 +139,33 @@ func sendRequest(request Map) Map {
 	return respToMap(resp)
 }
 
+func future(f func() Object) *Future {
+	ch := make(chan FutureResult)
+	go func() {
+
+		defer func() {
+			if r := recover(); r != nil {
+				switch r := r.(type) {
+				case Error:
+					ch <- MakeFutureResult(NIL, r)
+				default:
+					panic(r)
+				}
+			}
+		}()
+
+		res := f()
+		ch <- MakeFutureResult(res, nil)
+	}()
+	return MakeFuture(ch)
+}
+
+func sendRequestAsync(request Map) *Future {
+	return future(func() Object {
+		return sendRequest(request)
+	})
+}
+
 func startServer(addr string, handler Callable) Object {
 	i := strings.LastIndexByte(addr, byte(':'))
 	host, port := MakeString(addr), MakeString("")

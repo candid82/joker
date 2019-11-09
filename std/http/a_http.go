@@ -26,6 +26,22 @@ func __send_(_args []Object) Object {
 	return NIL
 }
 
+var send_async_ Proc
+
+func __send_async_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		request := ExtractMap(_args, 0)
+		_res := sendRequestAsync(request)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var start_file_server_ Proc
 
 func __start_file_server_(_args []Object) Object {
@@ -63,6 +79,7 @@ func __start_server_(_args []Object) Object {
 func Init() {
 
 	send_ = __send_
+	send_async_ = __send_async_
 	start_file_server_ = __start_file_server_
 	start_server_ = __start_server_
 
@@ -85,6 +102,11 @@ func Init() {
   - body (string)
   - headers (map)
   - content-length (int)`, "1.0"))
+
+	httpNamespace.InternVar("send-async", send_async_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
+			`Same as send, but sends the request asynchronously and returns a Future.`, "1.0"))
 
 	httpNamespace.InternVar("start-file-server", start_file_server_,
 		MakeMeta(
