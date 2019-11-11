@@ -1593,6 +1593,44 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 	}
 }
 
+func CodeWriter(reader *Reader, filename string) ([]byte, error) {
+	var p []byte
+	codeEnv := NewCodeEnv()
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	if filename != "" {
+		currentFilename := parseContext.GlobalEnv.file.Value
+		defer func() {
+			parseContext.GlobalEnv.file.Value = currentFilename
+		}()
+		s, err := filepath.Abs(filename)
+		PanicOnErr(err)
+		parseContext.GlobalEnv.file.Value = String{S: s}
+	}
+	for {
+		obj, err := TryRead(reader)
+		if err == io.EOF {
+			var hp []byte
+			hp = packEnv.Code(hp)
+			return append(hp, p...), nil
+		}
+		if err != nil {
+			fmt.Fprintln(Stderr, err)
+			return nil, err
+		}
+		expr, err := TryParse(obj, parseContext)
+		if err != nil {
+			fmt.Fprintln(Stderr, err)
+			return nil, err
+		}
+		p = expr.Code(p, codeEnv)
+		_, err = TryEval(expr)
+		if err != nil {
+			fmt.Fprintln(Stderr, err)
+			return nil, err
+		}
+	}
+}
+
 var procIncProblemCount Proc = func(args []Object) Object {
 	PROBLEM_COUNT++
 	return NIL
