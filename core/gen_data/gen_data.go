@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
+	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 )
 
@@ -75,6 +76,10 @@ var files []FileInfo = []FileInfo{
 	{
 		name:     "<joker.core>",
 		filename: "linter_cljs.joke",
+	},
+	{
+		name:     "<joker.markup>",
+		filename: "markup.joke",
 	},
 }
 

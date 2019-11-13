@@ -6,6 +6,7 @@
 (require 'joker.set)
 (require 'joker.repl)
 (require 'joker.html)
+(require 'joker.markup)
 
 (def index-template
   (slurp "templates/index.html"))
