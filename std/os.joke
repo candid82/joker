@@ -38,6 +38,12 @@
   :go "sh(\"\", nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
+(defn sh-async
+  "Same as sh, but executes the program asynchronously and returns a Future."
+  {:added "1.0"
+  :go "shAsync(name, arguments)"}
+  [^String name & ^String arguments])
+
 (defn sh-from
   "Executes the named program with the given arguments and working directory set to dir.
   Returns a map with the following keys:
