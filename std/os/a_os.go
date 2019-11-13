@@ -242,6 +242,24 @@ func __sh_(_args []Object) Object {
 	return NIL
 }
 
+var sh_async_ Proc
+
+func __sh_async_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case true:
+		CheckArity(_args, 1, 999)
+		name := ExtractString(_args, 0)
+		arguments := ExtractStrings(_args, 1)
+		_res := shAsync(name, arguments)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var sh_from_ Proc
 
 func __sh_from_(_args []Object) Object {
@@ -293,6 +311,7 @@ func Init() {
 	open_ = __open_
 	set_env_ = __set_env_
 	sh_ = __sh_
+	sh_async_ = __sh_async_
 	sh_from_ = __sh_from_
 	stat_ = __stat_
 
@@ -389,6 +408,11 @@ func Init() {
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
+
+	osNamespace.InternVar("sh-async", sh_async_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
+			`Same as sh, but executes the program asynchronously and returns a Future.`, "1.0"))
 
 	osNamespace.InternVar("sh-from", sh_from_,
 		MakeMeta(

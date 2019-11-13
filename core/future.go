@@ -62,3 +62,24 @@ func (d *Future) Deref() Object {
 	}
 	return d.result.value
 }
+
+func ExecFuture(f func() Object) *Future {
+	ch := make(chan FutureResult)
+	go func() {
+
+		defer func() {
+			if r := recover(); r != nil {
+				switch r := r.(type) {
+				case Error:
+					ch <- MakeFutureResult(NIL, r)
+				default:
+					panic(r)
+				}
+			}
+		}()
+
+		res := f()
+		ch <- MakeFutureResult(res, nil)
+	}()
+	return MakeFuture(ch)
+}
