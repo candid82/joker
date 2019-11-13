@@ -1,8 +1,8 @@
-(ns joker.markup
+(ns joker.hiccup
   "Renders HTML, XML, or XHTML markup to a string, based on prior work in Hiccup.
 
   https://github.com/weavejester/hiccup"
-  {:added "0.14.0"}
+  {:added "1.0"}
   (:require
    [joker.html :refer [escape]]
    [joker.string :as str]))
@@ -108,7 +108,7 @@
   (cond
     (string? content)
     (escape content)
-    
+
     (nil? content)
     ""
 
@@ -123,7 +123,7 @@
 
     (named? content)
     (name content)
-        
+
     :else
     ;; Not sure what it might be at this point
     (escape-html content)))
@@ -145,7 +145,7 @@
 (defn raw-string
   "A raw string is pre-rendered content that is added directly to the output markup
    without any interpretation or escaping."
-  {:added "0.14.0"}
+  {:added "1.0"}
   [content]
   [::raw-string content])
 
@@ -156,7 +156,7 @@
   The first parameter may be a map, which is options for the entire render.
 
   The :mode option defaults to :xhtml but can also be :html, :xml, or :sgml."
-  {:added "0.14.0"}
+  {:added "1.0"}
   [& content]
   (let [maybe-options (first content)
         [options content'] (if (map? maybe-options)

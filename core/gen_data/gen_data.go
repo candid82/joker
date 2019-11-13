@@ -78,8 +78,8 @@ var files []FileInfo = []FileInfo{
 		filename: "linter_cljs.joke",
 	},
 	{
-		name:     "<joker.markup>",
-		filename: "markup.joke",
+		name:     "<joker.hiccup>",
+		filename: "hiccup.joke",
 	},
 }
 

@@ -1,7 +1,7 @@
-(ns joker.test-joker.markup
+(ns joker.test-joker.hiccup
   (:require
    [joker.test :refer [deftest is testing]]
-   [joker.markup :refer [html raw-string]]))
+   [joker.hiccup :refer [html raw-string]]))
 
 ;; These tests are largely copied from the Hiccup source
 

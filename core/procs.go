@@ -33,7 +33,7 @@ var (
 	linter_cljxData  []byte
 	linter_cljData   []byte
 	linter_cljsData  []byte
-	markupData       []byte
+	hiccupData       []byte
 )
 
 type (
@@ -71,7 +71,7 @@ func InitInternalLibs() {
 		"joker.test":      testData,
 		"joker.set":       setData,
 		"joker.tools.cli": tools_cliData,
-		"joker.markup":    markupData,
+		"joker.hiccup":    hiccupData,
 	}
 }
 
