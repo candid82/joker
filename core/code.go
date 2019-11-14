@@ -1,5 +1,9 @@
 package core
 
+import (
+	"fmt"
+)
+
 type (
 	CodeEnv struct {
 		Strings          map[*string]uint16
@@ -37,7 +41,9 @@ func NewCodeEnv() *CodeEnv {
 	}
 }
 
-func (env *CodeEnv) Emit(code string) string {
+var item = 0
+
+func (env *CodeEnv) Emit(code string) (string, string) {
 	// var bp string
 	// bp = appendInt(bp, len(env.Bindings))
 	// for k, v := range env.Bindings {
@@ -56,7 +62,8 @@ func (env *CodeEnv) Emit(code string) string {
 	// }
 	// p = append(p, bp...)
 	// return p
-	return code + "/*CodeEnv*/"
+	item++
+	return fmt.Sprintf("var var_%d Object\n", item), fmt.Sprintf("intern(\"something\", var_%d)\n", item)
 }
 
 // func UnpackHeader(p []byte, env *Env) (*EmitHeader, []byte) {

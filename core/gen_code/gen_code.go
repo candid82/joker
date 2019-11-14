@@ -89,13 +89,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		var code string
+		var code, interns string
 		code, interns, err = CodeWriter(NewReader(bytes.NewReader(content), f.name), "")
 		PanicOnErr(err)
 
 		name := f.filename[0 : len(f.filename)-5] // assumes .joke extension
-		fileContent := strings.Replace(template, "{code}", code, 1)
-		fileContent := strings.Replace(fileContent, "{interns}", interns, 1)
+		fileContent := strings.Replace(strings.Replace(template, "{code}", code, 1), "{interns}", interns, 1)
 		ioutil.WriteFile("a_"+name+"_code.go", []byte(fileContent), 0666)
 	}
 }
