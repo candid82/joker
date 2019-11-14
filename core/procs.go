@@ -1715,16 +1715,16 @@ func intern(name string, proc Proc) {
 }
 
 func processData(data []byte) {
-	ns := GLOBAL_ENV.CurrentNamespace()
-	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
-	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
-	header, p := UnpackHeader(data, GLOBAL_ENV)
-	for len(p) > 0 {
-		var expr Expr
-		expr, p = UnpackExpr(p, header)
-		_, err := TryEval(expr)
-		PanicOnErr(err)
-	}
+	// ns := GLOBAL_ENV.CurrentNamespace()
+	// GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
+	// defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	// header, p := UnpackHeader(data, GLOBAL_ENV)
+	// for len(p) > 0 {
+	// 	var expr Expr
+	// 	expr, p = UnpackExpr(p, header)
+	// 	_, err := TryEval(expr)
+	// 	PanicOnErr(err)
+	// }
 }
 
 func ProcessCoreData() {
