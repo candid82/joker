@@ -1595,8 +1595,8 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 	}
 }
 
-func CodeWriter(reader *Reader, filename string) ([]byte, error) {
-	var p []byte
+func CodeWriter(reader *Reader, filename string) (string, error) {
+	code := ""
 	codeEnv := NewCodeEnv()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
@@ -1611,24 +1611,22 @@ func CodeWriter(reader *Reader, filename string) ([]byte, error) {
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
-			var hp []byte
-			hp = packEnv.Code(hp)
-			return append(hp, p...), nil
+			return codeEnv.Emit(code), nil
 		}
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
-			return nil, err
+			return "", err
 		}
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
-			return nil, err
+			return "", err
 		}
-		p = expr.Code(p, codeEnv)
+		code = expr.Emit(code, codeEnv)
 		_, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
-			return nil, err
+			return "", err
 		}
 	}
 }
