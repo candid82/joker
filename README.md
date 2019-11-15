@@ -38,6 +38,8 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
+`joker --lint --working-dir <dirname>` - recursively lint all Clojure files in a directory.
+
 `joker -` - execute a script on standard input (os.Stdin).
 
 ## Documentation
@@ -122,7 +124,7 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
-### Intergration with editors
+### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
 - Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
@@ -151,7 +153,7 @@ Symbol `baz` is introduced inside `def-something` macro. The code is totally val
 
 Please note that the symbols are namespace qualified and unquoted. Also, Joker knows about some commonly used macros (outside of `clojure.core` namespace) like `clojure.test/deftest` or `clojure.core.async/go-loop`, so you won't have to add those to your config file.
 
-Joker also allows to specify symbols that are introduced by a macro:
+Joker also allows you to specify symbols that are introduced by a macro:
 
 ```clojure
 {:known-macros [[riemann.streams/where [service event]]]}
@@ -194,6 +196,31 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
     (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
 
 I generally prefer first option for `clojure.test` namespace.
+
+### Linting directories
+
+To recursively lint all files in a directory pass `--working-dir <dirname>` parameter. Please note that if you also pass file argument (or `--file` parameter) Joker will lint that single file and will only use `--working-dir` to locate `.joker` config file. That is,
+
+```bash
+joker --lint --working-dir my-project
+```
+
+lints all Clojure files in `my-project` directory, whereas
+
+```bash
+joker --lint --working-dir my-project foo.clj
+```
+
+lints single file `foo.clj` but uses `.joker` config file from `my-project` directory.
+
+When linting directories Joker lints all files with the extension corresponding to the selected dialect (`*.clj`, `*.cljs`, `*.joke`, or `*.edn`). To exclude certain files specify regex patterns in `:ignored-file-regexes` vector in `.joker` file, e.g. `:ignored-file-regexes [#".*user\.clj" #".*/dev/profiling\.clj"]`.
+
+When linting directories Joker can report globally unused namespaces and public vars. This is turned off by default but can be enabled with `--report-globally-unused` flag, e.g. `joker --lint --working-dir my-project --report-globally-unused`. This is useful for finding "dead" code. Some namespaces or vars are intended to be used by external systems (e.g. public API of a library or main function of a program). To exclude such namespaces and vars from being reported as globally unused list them in `:entry-points` vector in `.joker` file, which may contain the names of namespaces or fully qualified names of vars. For example:
+
+```clojure
+:entry-points [my-project.public-api
+               my-project.core/-main]
+```
 
 ### Optional rules
 
@@ -242,6 +269,10 @@ $ GOOS=linux GOARCH=arm GOARM=6 go build
 
 - Dashes (`-`) in namespaces are not converted to underscores (`_`) by Joker, so (unlike with Clojure) there's no need to name `.joke` files accordingly.
 - Avoid `:refer :all` and the `use` function, as that reduces the effectiveness of linting.
+
+## Developer Notes
+
+See [`DEVELOPER.md`](https://github.com/candid82/joker/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
 ## Contributors
 

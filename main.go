@@ -30,7 +30,6 @@ import (
 	_ "github.com/candid82/joker/std/time"
 	_ "github.com/candid82/joker/std/url"
 	_ "github.com/candid82/joker/std/yaml"
-	"github.com/chzyer/readline"
 	"github.com/pkg/profile"
 )
 
@@ -227,46 +226,6 @@ func srepl(port string, phase Phase) {
 	}
 }
 
-func repl(phase Phase) {
-	ProcessReplData()
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
-	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
-	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
-	replContext := NewReplContext(parseContext.GlobalEnv)
-
-	var runeReader io.RuneReader
-	var rl *readline.Instance
-	var err error
-	if noReadline {
-		runeReader = bufio.NewReader(Stdin)
-	} else {
-		rl, err = readline.New("")
-		if err != nil {
-			fmt.Println("Error: " + err.Error())
-			return
-		}
-		defer rl.Close()
-		runeReader = NewLineRuneReader(rl)
-		for _, line := range strings.Split(string(dataRead), "\n") {
-			rl.SaveHistory(line)
-		}
-		dataRead = []rune{}
-	}
-
-	reader := NewReader(runeReader, "<repl>")
-
-	for {
-		if noReadline {
-			print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
-		} else {
-			rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
-		}
-		if processReplCommand(reader, phase, parseContext, replContext) {
-			return
-		}
-	}
-}
-
 func makeDialectKeyword(dialect Dialect) Keyword {
 	switch dialect {
 	case EDN:
@@ -312,6 +271,63 @@ func lintFile(filename string, dialect Dialect, workingDir string) {
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
 		WarnOnUnusedVars()
+	}
+}
+
+func matchesDialect(path string, dialect Dialect) bool {
+	ext := ".clj"
+	switch dialect {
+	case CLJS:
+		ext = ".cljs"
+	case JOKER:
+		ext = ".joke"
+	case EDN:
+		ext = ".edn"
+	}
+	return strings.HasSuffix(path, ext)
+}
+
+func isIgnored(path string) bool {
+	for _, r := range WARNINGS.IgnoredFileRegexes {
+		m := r.FindStringSubmatchIndex(path)
+		if len(m) > 0 {
+			if m[1]-m[0] == len(path) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func lintDir(dirname string, dialect Dialect, reportGloballyUnused bool) {
+	var processErr error
+	phase := PARSE
+	if dialect == EDN {
+		phase = READ
+	}
+	ns := GLOBAL_ENV.CurrentNamespace()
+	ReadConfig("", dirname)
+	configureLinterMode(dialect, "", dirname)
+	filepath.Walk(dirname, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Fprintln(Stderr, "Error: ", err)
+			return nil
+		}
+		if !info.IsDir() && matchesDialect(path, dialect) && !isIgnored(path) {
+			GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
+			processErr = processFile(path, phase)
+			if processErr == nil {
+				WarnOnUnusedNamespaces()
+				WarnOnUnusedVars()
+			}
+			ResetUsage()
+			GLOBAL_ENV.SetCurrentNamespace(ns)
+		}
+		return nil
+	})
+	if processErr == nil && reportGloballyUnused {
+		WarnOnGloballyUnusedNamespaces()
+		WarnOnGloballyUnusedVars()
 	}
 }
 
@@ -364,7 +380,9 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "  --no-readline")
 	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
-	fmt.Fprintln(out, "    Specify working directory for lint configuration (requires --lint).")
+	fmt.Fprintln(out, "    Specify directory to lint or working directory for lint configuration if linting single file (requires --lint).")
+	fmt.Fprintln(out, "  --report-globally-unused")
+	fmt.Fprintln(out, "    Report globally unused namespaces and public vars when linting directories (requires --lint and --working-dir).")
 	fmt.Fprintln(out, "  --dialect <dialect>")
 	fmt.Fprintln(out, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
 	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
@@ -385,27 +403,28 @@ func usage(out io.Writer) {
 }
 
 var (
-	debugOut           io.Writer
-	helpFlag           bool
-	versionFlag        bool
-	phase              Phase = EVAL // --read, --parse, --evaluate
-	workingDir         string
-	lintFlag           bool
-	dialect            Dialect = UNKNOWN
-	eval               string
-	replFlag           bool
-	replSocket         string
-	classPath          string
-	filename           string
-	remainingArgs      []string
-	profilerType       string = "runtime/pprof"
-	cpuProfileName     string
-	cpuProfileRate     int
-	cpuProfileRateFlag bool
-	memProfileName     string
-	noReadline         bool
-	exitToRepl         bool
-	errorToRepl        bool
+	debugOut                 io.Writer
+	helpFlag                 bool
+	versionFlag              bool
+	phase                    Phase = EVAL // --read, --parse, --evaluate
+	workingDir               string
+	lintFlag                 bool
+	reportGloballyUnusedFlag bool
+	dialect                  Dialect = UNKNOWN
+	eval                     string
+	replFlag                 bool
+	replSocket               string
+	classPath                string
+	filename                 string
+	remainingArgs            []string
+	profilerType             string = "runtime/pprof"
+	cpuProfileName           string
+	cpuProfileRate           int
+	cpuProfileRateFlag       bool
+	memProfileName           string
+	noReadline               bool
+	exitToRepl               bool
+	errorToRepl              bool
 )
 
 func isNumber(s string) bool {
@@ -465,6 +484,8 @@ func parseArgs(args []string) {
 			} else {
 				missing = true
 			}
+		case "--report-globally-unused":
+			reportGloballyUnusedFlag = true
 		case "--lint":
 			lintFlag = true
 		case "--lintclj":
@@ -658,6 +679,7 @@ func main() {
 		fmt.Fprintf(debugOut, "versionFlag=%v\n", versionFlag)
 		fmt.Fprintf(debugOut, "phase=%v\n", phase)
 		fmt.Fprintf(debugOut, "lintFlag=%v\n", lintFlag)
+		fmt.Fprintf(debugOut, "reportGloballyUnusedFlag=%v\n", reportGloballyUnusedFlag)
 		fmt.Fprintf(debugOut, "dialect=%v\n", dialect)
 		fmt.Fprintf(debugOut, "workingDir=%v\n", workingDir)
 		fmt.Fprintf(debugOut, "HASHMAP_THRESHOLD=%v\n", HASHMAP_THRESHOLD)
@@ -739,6 +761,10 @@ func main() {
 			fmt.Fprintf(Stderr, "Error: Cannot combine --eval/-e and --working-dir.\n")
 			ExitJoker(8)
 		}
+		if reportGloballyUnusedFlag {
+			fmt.Fprintf(Stderr, "Error: Cannot combine --eval/-e and --report-globally-unused.\n")
+			ExitJoker(17)
+		}
 		if filename != "" {
 			fmt.Fprintf(Stderr, "Error: Cannot combine --eval/-e and a <filename> argument.\n")
 			ExitJoker(9)
@@ -774,7 +800,14 @@ func main() {
 		if dialect == UNKNOWN {
 			dialect = detectDialect(filename)
 		}
-		lintFile(filename, dialect, workingDir)
+		if filename != "" {
+			lintFile(filename, dialect, workingDir)
+		} else if workingDir != "" {
+			lintDir(workingDir, dialect, reportGloballyUnusedFlag)
+		} else {
+			fmt.Fprintf(Stderr, "Error: Missing --file or --working-dir argument.\n")
+			ExitJoker(16)
+		}
 		if PROBLEM_COUNT > 0 {
 			ExitJoker(1)
 		}

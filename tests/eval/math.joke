@@ -1,0 +1,175 @@
+
+(ns joker.test-joker.math
+  (:require [joker.test :refer [deftest is are]]
+            [joker.math :as m]))
+
+(deftest abs
+  (are [x y] (= x y)
+    (m/abs 1.51) 1.51
+    (m/abs -1.51) 1.51))
+
+(deftest ceil
+  (are [x y] (= x y)
+    (m/ceil 1.51) 2.0
+    (m/ceil -1.51) -1.0))
+
+(deftest cube-root
+  (are [x y] (= x y)
+    (m/cube-root 8) 2.0
+    (m/cube-root -27.) -3.0))
+
+(deftest copy-sign
+  (are [x y] (= x y)
+    (m/copy-sign 7 -1) -7.0
+    (m/copy-sign 7 1) 7.0
+    (m/copy-sign -7 -1) -7.0
+    (m/copy-sign -7 1) 7.0
+    (m/copy-sign -5 0) 5.0))
+
+(deftest dim
+  (are [x y] (= x y)
+    (m/dim 3 2) 1.0
+    (m/dim 2 3) 0.0))
+
+(deftest exp
+  (are [x lo hi] (< lo x hi)
+    (m/exp 1) 2.7 2.8
+    (m/exp 2) 7.38 7.39))
+
+(deftest exp-2
+  (are [x lo hi] (<= lo x hi)
+    (m/exp-2 1) 2 2
+    (m/exp-2 2) 4 4
+    (m/exp-2 1.5) 2.828 2.829))
+
+(deftest exp-minus-1
+  (are [x lo hi] (< lo x hi)
+    (m/exp-minus-1 1) 1.7 1.8
+    (m/exp-minus-1 2) 6.38 6.39))
+
+(deftest floor
+  (are [x y] (= x y)
+    (m/floor 1.51) 1.0
+    (m/floor -1.51) -2.0))
+
+(deftest inf
+  (are [x sign] (m/inf? x sign)
+    (m/inf 0) 0
+    (m/inf 0) 1
+    (m/inf -1) -1))
+
+(deftest not-inf
+  (are [x sign] (not (m/inf? x sign))
+    (m/inf 0) -1
+    (m/inf 0) -1
+    (m/inf -1) 1))
+
+(deftest log
+  (are [x lo hi] (< lo x hi)
+    (m/log 2.72) 1.0 1.1
+    (m/log 4) 1.386 1.387))
+
+(deftest log-10
+  (are [x lo hi] (<= lo x hi)
+    (m/log-10 1) 0 0
+    (m/log-10 10) 1 1
+    (m/log-10 100) 2 2
+    (m/log-10 15) 1.176 1.177))
+
+(deftest log-plus-1
+  (are [x lo hi] (< lo x hi)
+    (m/log-plus-1 1.72) 1.0 1.1
+    (m/log-plus-1 3) 1.386 1.387))
+
+(deftest log-2
+  (are [x lo hi] (<= lo x hi)
+    (m/log-2 1) 0 0
+    (m/log-2 2) 1 1
+    (m/log-2 4) 2 2
+    (m/log-2 15) 3.906 3.907))
+
+(deftest log-binary
+  (are [x lo hi] (<= lo x hi)
+    (m/log-binary 1) 0 0
+    (m/log-binary 10) 3 3
+    (m/log-binary 100) 6 6
+    (m/log-binary 16) 4 4))
+
+(deftest modf
+  (let [v (m/modf 2.3)
+        vi (v 0)
+        vf (v 1)
+        v-neg (m/modf -2.3)
+        vi-neg (v-neg 0)
+        vf-neg (v-neg 1)]
+    (= vi 2.0)
+    (< vf 2.99 3.01)
+    (= vi-neg -2.0)
+    (< vf-neg -3.01 -2.99)))
+
+(deftest nan
+  (is (m/nan? (m/nan)))
+  (is (not (m/nan? 3.0))))
+
+(deftest next-after
+  (are [x lo hi] (< lo x hi)
+    (m/next-after 3 2) 2.99 3.0
+    (m/next-after 2 3) 2.0 2.01))
+
+(deftest pow
+  (are [x lo hi] (<= lo x hi)
+    (m/pow 3 2) 9.0 9.0
+    (m/pow 2 3) 8.0 8.0
+    (m/pow 2.1 -3.2) 0.093 0.094))
+
+(deftest pow-10
+  (are [x y] (= x y)
+    (m/pow-10 2) 100.0
+    (m/pow-10 3) 1000.0
+    (m/pow-10 -2) 0.01))
+
+(deftest round
+  (are [x y] (= x y)
+    (m/round 2.1) 2.0
+    (m/round 2.5) 3.0
+    (m/round 2.8) 3.0
+    (m/round 3.5) 4.0
+    (m/round -2.1) -2.0
+    (m/round -2.5) -3.0
+    (m/round -2.8) -3.0
+    (m/round -3.5) -4.0))
+
+(deftest round-to-even
+  (are [x y] (= x y)
+    (m/round-to-even 2.1) 2.0
+    (m/round-to-even 2.5) 2.0
+    (m/round-to-even 2.8) 3.0
+    (m/round-to-even 3.5) 4.0
+    (m/round-to-even -2.1) -2.0
+    (m/round-to-even -2.5) -2.0
+    (m/round-to-even -2.8) -3.0
+    (m/round-to-even -3.5) -4.0))
+
+(deftest sign-bit
+  (is (m/sign-bit -0.0))
+  (is (m/sign-bit -1))
+  (is (not (m/sign-bit 1)))
+  (is (not (m/sign-bit 0.0))))
+
+(deftest sqrt
+  (are [x lo hi] (<= lo x hi)
+    (m/sqrt 0) 0 0
+    (m/sqrt 2) 1.41 1.42
+    (m/sqrt 4) 2 2)
+  (is (m/nan? (m/sqrt -2.0))))
+
+(deftest trunc
+  (are [x y] (= x y)
+    (m/trunc 2.1) 2.0
+    (m/trunc 2.5) 2.0
+    (m/trunc 2.8) 2.0
+    (m/trunc 3.5) 3.0
+    (m/trunc -2.1) -2.0
+    (m/trunc -2.5) -2.0
+    (m/trunc -2.8) -2.0
+    (m/trunc -3.5) -3.0))

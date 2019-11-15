@@ -1,0 +1,166 @@
+(ns joker.hiccup
+  "Renders HTML, XML, or XHTML markup to a string, based on prior work in Hiccup.
+
+  https://github.com/weavejester/hiccup"
+  {:added "1.0"}
+  (:require
+   [joker.html :refer [escape]]
+   [joker.string :as str]))
+
+(defn ^:private named?
+  [v]
+  (or (keyword? v)
+      (string? v)
+      (symbol? v)))
+
+(defn ^:private as-str
+  [v]
+  (cond
+    (named? v)
+    (name v)
+
+    (nil? v)
+    ""
+
+    (number? v)
+    (str v)
+
+    :else
+    (str v)))
+
+(defn ^:private xml-mode?
+  [mode]
+  (#{:xml :xhtml} mode))
+
+(defn ^:private html-mode?
+  [mode]
+  (#{:html :xhtml} mode))
+
+(defn ^:private end-tag
+  [mode]
+  (if (xml-mode? mode) " />" ">"))
+
+(defn ^:private escape-html
+  [v]
+  (-> v as-str escape))
+
+(defn ^:private xml-attribute
+  [name value]
+  (str " " (as-str name) "=" \" (escape-html value) \"))
+
+(defn ^:private render-attribute
+  [mode name value]
+  (cond
+    (true? value)
+    (if (xml-mode? mode)
+      (xml-attribute name name)
+      (str " " (as-str name)))
+
+    (not value)
+    ""
+
+    :else
+    (xml-attribute name value)))
+
+(defn ^:private render-attr-map
+  [mode attrs]
+  (->> attrs
+       (map (fn [[name value]]
+              (render-attribute mode name value)))
+       sort
+       str/join))
+
+(def ^:private void-tags
+  "HTML Elements that must be rendered without a closing tag."
+  #{"area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link"
+    "meta" "param" "source" "track" "wbr"})
+
+(defn ^:private container-tag?
+  [mode tag content]
+  (or content
+      (and (html-mode? mode) (not (void-tags tag)))))
+
+(defn ^:private merge-attributes [{:keys [id class]} map-attrs]
+  (->> map-attrs
+       (merge (when id {:id id}))
+       (merge-with #(if %1 (str %1 " " %2) %2) (when class {:class class}))))
+
+;; RE for parsing CSS-style id and class from element tag.
+(def ^:private re-tag #"([^\s\.#]+)(?:#([^\s\.#]+))?(?:\.([^\s#]+))?")
+
+(defn ^:private normalize-element
+  "Ensure an element vector is of the form [tag-name attrs content]."
+  [[tag & content]]
+  (when (not (named? tag))
+    (throw (ex-info (str tag " is not a valid element name" {:tag tag}))))
+  (let [[_ tag id class] (re-matches re-tag (as-str tag))
+        tag-attrs        {:id id
+                          :class (if class (str/replace  class "." " "))}
+        map-attrs        (first content)]
+    (if (map? map-attrs)
+      [tag (merge-attributes tag-attrs map-attrs) (next content)]
+      [tag tag-attrs content])))
+
+(def ^:private render-element)
+
+(defn ^:private render-markup
+  [mode content]
+  (cond
+    (string? content)
+    (escape content)
+
+    (nil? content)
+    ""
+
+    (vector? content)
+    (render-element mode content)
+
+    (seq? content)
+    ;; Any other kind of list, typically a lazy list via for
+    (->> content
+         (map #(render-markup mode %))
+         str/join)
+
+    (named? content)
+    (name content)
+
+    :else
+    ;; Not sure what it might be at this point
+    (escape-html content)))
+
+(defn ^:private render-element
+  [mode element]
+  (if (= ::raw-string (first element))
+    (second element)
+    (let [[tag attrs content] (normalize-element element)
+          attribute-markup (render-attr-map mode attrs)
+          content-markup (when content
+                           (render-markup mode content))]
+      (if (container-tag? mode tag content)
+        (str "<" tag attribute-markup ">"
+             content-markup
+             "</" tag ">")
+        (str "<" tag attribute-markup (end-tag mode))))))
+
+(defn raw-string
+  "A raw string is pre-rendered content that is added directly to the output markup
+   without any interpretation or escaping."
+  {:added "1.0"}
+  [content]
+  [::raw-string content])
+
+(defn html
+  "Renders the Hiccup-style content as HTML markup, returning a string of
+  the markup.
+
+  The first parameter may be a map, which is options for the entire render.
+
+  The :mode option defaults to :xhtml but can also be :html, :xml, or :sgml."
+  {:added "1.0"}
+  [& content]
+  (let [maybe-options (first content)
+        [options content'] (if (map? maybe-options)
+                             [maybe-options (rest content)]
+                             [nil content])
+        mode (or (:mode options) :xhtml)]
+    (render-markup mode content')))

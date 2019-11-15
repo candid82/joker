@@ -27,10 +27,12 @@ type (
 
 const EOF = -1
 
-var LINTER_MODE bool = false
-var PROBLEM_COUNT = 0
-var DIALECT Dialect
-var LINTER_CONFIG *Var
+var (
+	LINTER_MODE   bool = false
+	PROBLEM_COUNT      = 0
+	DIALECT       Dialect
+	LINTER_CONFIG *Var
+)
 
 var (
 	ARGS   map[int]Symbol
@@ -135,10 +137,10 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',', '\\':
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, '\\':
 		return true
 	}
-	return unicode.IsSpace(r)
+	return isWhitespace(r)
 }
 
 func eatString(reader *Reader, str string) {
@@ -413,6 +415,7 @@ func readSymbol(reader *Reader, first rune) Object {
 				panic(MakeReadError(reader, msg))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			return MakeReadObject(reader, MakeKeyword(*ns.Name.name+"/"+*sym.name))
 		}
 		return MakeReadObject(reader, MakeKeyword(str))
@@ -709,7 +712,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 
 func isTerminatingMacro(r rune) bool {
 	switch r {
-	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', '%':
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\':
 		return true
 	default:
 		return false
@@ -735,7 +738,7 @@ func registerArg(index int) Symbol {
 
 func readArgSymbol(reader *Reader) Object {
 	r := reader.Peek()
-	if unicode.IsSpace(r) || isTerminatingMacro(r) {
+	if isWhitespace(r) || isTerminatingMacro(r) {
 		return MakeReadObject(reader, registerArg(1))
 	}
 	obj := readFirst(reader)
@@ -965,6 +968,7 @@ func readNamespacedMap(reader *Reader) Object {
 				panic(MakeReadError(reader, "Unknown auto-resolved namespace alias: "+sym.ToString(false)))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			nsname = ns.Name.Name()
 		}
 	} else {

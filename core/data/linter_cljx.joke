@@ -15,7 +15,7 @@
                      [] specs)]
     `(do nil nil
        ~@(map #(list 'joker.core/require (list 'quote %)) syms)
-       ~@(map #(list 'def %) (remove resolve syms)))))
+       ~@(map #(list 'def-linter__ %) (remove resolve syms)))))
 
 (def *known-macros*
   {'memfn nil
@@ -98,7 +98,7 @@
   (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
-       (def ~(symbol (str name)))
+       (def-linter__ ~(symbol (str name)))
        (defn ~(symbol (str  "map->" name)) [~(symbol "_")] nil)
        ~@(defimpls__ impls))))
 
@@ -108,7 +108,7 @@
   (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
-       (def ~(symbol (str name)))
+       (def-linter__ ~(symbol (str name)))
        ~@(defimpls__ impls))))
 
 (defmacro reify

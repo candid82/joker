@@ -34,6 +34,7 @@ var (
 	linter_cljxData  []byte
 	linter_cljData   []byte
 	linter_cljsData  []byte
+	hiccupData       []byte
 )
 
 type (
@@ -51,7 +52,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.12.9"
+const VERSION = "v0.13.0"
 
 var internalLibs map[string][]byte
 
@@ -71,6 +72,7 @@ func InitInternalLibs() {
 		"joker.test":      testData,
 		"joker.set":       setData,
 		"joker.tools.cli": tools_cliData,
+		"joker.hiccup":    hiccupData,
 	}
 }
 
@@ -1221,6 +1223,7 @@ var procInjectNamespace Proc = func(args []Object) Object {
 	sym := EnsureSymbol(args, 0)
 	ns := GLOBAL_ENV.EnsureNamespace(sym)
 	ns.isUsed = true
+	ns.isGloballyUsed = true
 	return ns
 }
 
@@ -1741,18 +1744,21 @@ func ProcessReplData() {
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
+	var err error
 	configName := ".joker"
 	if findDir {
 		configName = ".jokerd"
 	}
-	filename, err := filepath.Abs(filename)
-	if err != nil {
-		fmt.Fprintln(Stderr, "Error reading config file "+filename+": ", err)
-		return ""
+	if filename != "" {
+		filename, err = filepath.Abs(filename)
+		if err != nil {
+			fmt.Fprintln(Stderr, "Error reading config file "+filename+": ", err)
+			return ""
+		}
 	}
 
 	if workingDir != "" {
-		workingDir, err = filepath.Abs(workingDir)
+		workingDir, err := filepath.Abs(workingDir)
 		if err != nil {
 			fmt.Fprintln(Stderr, "Error resolving working directory"+workingDir+": ", err)
 			return ""
@@ -1845,6 +1851,35 @@ func ReadConfig(filename string, workingDir string) {
 			return
 		}
 	}
+	ok, ignoredFileRegexes := configMap.Get(MakeKeyword("ignored-file-regexes"))
+	if ok {
+		seq, ok1 := ignoredFileRegexes.(Seqable)
+		if ok1 {
+			s := seq.Seq()
+			for !s.IsEmpty() {
+				regex, ok2 := s.First().(Regex)
+				if !ok2 {
+					printConfigError(configFileName, ":ignored-file-regexes elements must be regexes, got "+s.First().GetType().ToString(false))
+					return
+				}
+				WARNINGS.IgnoredFileRegexes = append(WARNINGS.IgnoredFileRegexes, regex.R)
+				s = s.Rest()
+			}
+		} else {
+			printConfigError(configFileName, ":ignored-file-regexes value must be a vector, got "+ignoredFileRegexes.GetType().ToString(false))
+			return
+		}
+	}
+	ok, entryPoints := configMap.Get(MakeKeyword("entry-points"))
+	if ok {
+		seq, ok1 := entryPoints.(Seqable)
+		if ok1 {
+			WARNINGS.entryPoints = NewSetFromSeq(seq.Seq())
+		} else {
+			printConfigError(configFileName, ":entry-points value must be a vector, got "+entryPoints.GetType().ToString(false))
+			return
+		}
+	}
 	ok, knownNamespaces := configMap.Get(MakeKeyword("known-namespaces"))
 	if ok {
 		if _, ok1 := knownNamespaces.(Seqable); !ok1 {
@@ -1905,6 +1940,7 @@ func markJokerNamespacesAsUsed() {
 	for k, ns := range GLOBAL_ENV.Namespaces {
 		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 		}
 	}
 }

@@ -1,6 +1,6 @@
-//go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Future
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen_data/gen_data.go
 
 package core
 
@@ -136,15 +136,16 @@ type (
 	Var struct {
 		InfoHolder
 		MetaHolder
-		ns         *Namespace
-		name       Symbol
-		Value      Object
-		expr       Expr
-		isMacro    bool
-		isPrivate  bool
-		isDynamic  bool
-		isUsed     bool
-		taggedType *Type
+		ns             *Namespace
+		name           Symbol
+		Value          Object
+		expr           Expr
+		isMacro        bool
+		isPrivate      bool
+		isDynamic      bool
+		isUsed         bool
+		isGloballyUsed bool
+		taggedType     *Type
 	}
 	Proc func([]Object) Object
 	Fn   struct {
@@ -236,6 +237,7 @@ type (
 		Comparator     *Type
 		Counted        *Type
 		Deref          *Type
+		Future         *Type
 		Error          *Type
 		Gettable       *Type
 		Indexed        *Type
@@ -375,6 +377,7 @@ func init() {
 		Char:           regType("Char", (*Char)(nil), ""),
 		ConsSeq:        RegRefType("ConsSeq", (*ConsSeq)(nil), ""),
 		Delay:          RegRefType("Delay", (*Delay)(nil), ""),
+		Future:         RegRefType("Future", (*Future)(nil), ""),
 		Double:         regType("Double", (*Double)(nil), ""),
 		EvalError:      RegRefType("EvalError", (*EvalError)(nil), ""),
 		ExInfo:         RegRefType("ExInfo", (*ExInfo)(nil), ""),
@@ -880,8 +883,12 @@ func (sym Symbol) WithMeta(meta Map) Object {
 	return res
 }
 
+func (v *Var) Name() string {
+	return v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+}
+
 func (v *Var) ToString(escape bool) string {
-	return "#'" + v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+	return "#'" + v.Name()
 }
 
 func (v *Var) Equals(other interface{}) bool {

@@ -9,7 +9,68 @@ import (
 
 var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
 
+var e_ Double
+var ln_of_10_ Double
+var ln_of_2_ Double
+var log_10_of_e_ Double
+var log_2_of_e_ Double
+var max_double_ Double
+var phi_ Double
 var pi_ Double
+var smallest_nonzero_double_ Double
+var sqrt_of_2_ Double
+var sqrt_of_e_ Double
+var sqrt_of_phi_ Double
+var sqrt_of_pi_ Double
+
+var abs_ Proc
+
+func __abs_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Abs(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var ceil_ Proc
+
+func __ceil_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Ceil(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var copy_sign_ Proc
+
+func __copy_sign_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Copysign(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
 
 var cos_ Proc
 
@@ -19,6 +80,103 @@ func __cos_(_args []Object) Object {
 	case _c == 1:
 		x := ExtractNumber(_args, 0)
 		_res := math.Cos(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var cube_root_ Proc
+
+func __cube_root_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Cbrt(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var dim_ Proc
+
+func __dim_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Dim(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var exp_ Proc
+
+func __exp_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Exp(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var exp_2_ Proc
+
+func __exp_2_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Exp2(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var exp_minus_1_ Proc
+
+func __exp_minus_1_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Expm1(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var floor_ Proc
+
+func __floor_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Floor(x.Double().D)
 		return MakeDouble(_res)
 
 	default:
@@ -44,6 +202,264 @@ func __hypot_(_args []Object) Object {
 	return NIL
 }
 
+var inf_ Proc
+
+func __inf_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		sign := ExtractInt(_args, 0)
+		_res := math.Inf(sign)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var isinf_ Proc
+
+func __isinf_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		sign := ExtractInt(_args, 1)
+		_res := math.IsInf(x.Double().D, sign)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_ Proc
+
+func __log_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_10_ Proc
+
+func __log_10_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log10(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_2_ Proc
+
+func __log_2_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log2(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_binary_ Proc
+
+func __log_binary_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Logb(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var log_plus_1_ Proc
+
+func __log_plus_1_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Log1p(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var modf_ Proc
+
+func __modf_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := modf(x.Double().D)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var nan_ Proc
+
+func __nan_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := math.NaN()
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var isnan_ Proc
+
+func __isnan_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.IsNaN(x.Double().D)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var next_after_ Proc
+
+func __next_after_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Nextafter(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var pow_ Proc
+
+func __pow_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		x := ExtractNumber(_args, 0)
+		y := ExtractNumber(_args, 1)
+		_res := math.Pow(x.Double().D, y.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var pow_10_ Proc
+
+func __pow_10_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractInt(_args, 0)
+		_res := math.Pow10(x)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var round_ Proc
+
+func __round_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Round(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var round_to_even_ Proc
+
+func __round_to_even_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.RoundToEven(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var sign_bit_ Proc
+
+func __sign_bit_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Signbit(x.Double().D)
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var sin_ Proc
 
 func __sin_(_args []Object) Object {
@@ -60,33 +476,307 @@ func __sin_(_args []Object) Object {
 	return NIL
 }
 
+var sqrt_ Proc
+
+func __sqrt_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Sqrt(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var trunc_ Proc
+
+func __trunc_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		x := ExtractNumber(_args, 0)
+		_res := math.Trunc(x.Double().D)
+		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func Init() {
+	e_ = MakeDouble(math.E)
+	ln_of_10_ = MakeDouble(math.Ln10)
+	ln_of_2_ = MakeDouble(math.Ln2)
+	log_10_of_e_ = MakeDouble(math.Log10E)
+	log_2_of_e_ = MakeDouble(math.Log2E)
+	max_double_ = MakeDouble(math.MaxFloat64)
+	phi_ = MakeDouble(math.Phi)
 	pi_ = MakeDouble(math.Pi)
+	smallest_nonzero_double_ = MakeDouble(math.SmallestNonzeroFloat64)
+	sqrt_of_2_ = MakeDouble(math.Sqrt2)
+	sqrt_of_e_ = MakeDouble(math.SqrtE)
+	sqrt_of_phi_ = MakeDouble(math.SqrtPhi)
+	sqrt_of_pi_ = MakeDouble(math.SqrtPi)
+	abs_ = __abs_
+	ceil_ = __ceil_
+	copy_sign_ = __copy_sign_
 	cos_ = __cos_
+	cube_root_ = __cube_root_
+	dim_ = __dim_
+	exp_ = __exp_
+	exp_2_ = __exp_2_
+	exp_minus_1_ = __exp_minus_1_
+	floor_ = __floor_
 	hypot_ = __hypot_
+	inf_ = __inf_
+	isinf_ = __isinf_
+	log_ = __log_
+	log_10_ = __log_10_
+	log_2_ = __log_2_
+	log_binary_ = __log_binary_
+	log_plus_1_ = __log_plus_1_
+	modf_ = __modf_
+	nan_ = __nan_
+	isnan_ = __isnan_
+	next_after_ = __next_after_
+	pow_ = __pow_
+	pow_10_ = __pow_10_
+	round_ = __round_
+	round_to_even_ = __round_to_even_
+	sign_bit_ = __sign_bit_
 	sin_ = __sin_
+	sqrt_ = __sqrt_
+	trunc_ = __trunc_
 
 	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))
+
+	mathNamespace.InternVar("e", e_,
+		MakeMeta(
+			nil,
+			`e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("ln-of-10", ln_of_10_,
+		MakeMeta(
+			nil,
+			`Natural logarithm of 10`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("ln-of-2", ln_of_2_,
+		MakeMeta(
+			nil,
+			`Natural logarithm of 2`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-10-of-e", log_10_of_e_,
+		MakeMeta(
+			nil,
+			`Base-10 logarithm of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-2-of-e", log_2_of_e_,
+		MakeMeta(
+			nil,
+			`Base-2 logarithm of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("max-double", max_double_,
+		MakeMeta(
+			nil,
+			`Largest finite value representable by Double`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("phi", phi_,
+		MakeMeta(
+			nil,
+			`Phi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("pi", pi_,
 		MakeMeta(
 			nil,
-			`Pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("smallest-nonzero-double", smallest_nonzero_double_,
+		MakeMeta(
+			nil,
+			`Smallest positive, non-zero value representable by Double`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt-of-2", sqrt_of_2_,
+		MakeMeta(
+			nil,
+			`Square root of 2`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt-of-e", sqrt_of_e_,
+		MakeMeta(
+			nil,
+			`Square root of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt-of-phi", sqrt_of_phi_,
+		MakeMeta(
+			nil,
+			`Square root of phi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt-of-pi", sqrt_of_pi_,
+		MakeMeta(
+			nil,
+			`Square root of pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("abs", abs_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the absolute value of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("ceil", ceil_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the least integer value greater than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("copy-sign", copy_sign_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns value with the magnitude of x and the sign of y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("cos", cos_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns the cosine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
+	mathNamespace.InternVar("cube-root", cube_root_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the cube root of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("dim", dim_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns the maximum of x-y and 0.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("exp", exp_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns e**x, the base-e exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("exp-2", exp_2_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns 2**x, the base-2 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("exp-minus-1", exp_minus_1_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns e**x - 1, the base-e exponential of x minus 1.
+
+  This is more accurate than (- (exp x) 1.) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("floor", floor_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the greatest integer value greater than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
 	mathNamespace.InternVar("hypot", hypot_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
 			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
+	mathNamespace.InternVar("inf", inf_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("sign"))),
+			`Returns positive infinity if sign >= 0, negative infinity if sign < 0.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("inf?", isinf_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("sign"))),
+			`Returns whether x is an infinity.
+
+  If sign > 0, returns whether x is positive infinity; if < 0, whether negative infinity; if == 0, whether either infinity.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
+	mathNamespace.InternVar("log", log_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the natural logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-10", log_10_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the decimal logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-2", log_2_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the binary logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-binary", log_binary_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the binary exponent of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("log-plus-1", log_plus_1_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the natural logarithm of 1 plus x.
+
+  This is more accurate than (log (+ 1 x)) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("modf", modf_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns a vector with the integer and fractional floating-point numbers that sum to x.
+
+  Both values have the same sign as x.`, "1.0"))
+
+	mathNamespace.InternVar("nan", nan_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns an IEEE 754 "not-a-number" value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("nan?", isnan_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns whether x is an IEEE 754 "not-a-number" value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
+	mathNamespace.InternVar("next-after", next_after_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns the next representable Double value after x towards y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("pow", pow_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			`Returns x**y, the base-x exponential of y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("pow-10", pow_10_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns 10**x, the base-10 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("round", round_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer nearest to x, rounding half away from zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("round-to-even", round_to_even_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer nearest to x, rounding ties to the nearest even integer.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sign-bit", sign_bit_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns whether x is negative or negative zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
 	mathNamespace.InternVar("sin", sin_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns the sine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("sqrt", sqrt_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the square root of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("trunc", trunc_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			`Returns the integer value of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 }
 
