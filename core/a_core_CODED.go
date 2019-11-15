@@ -2,9 +2,12 @@
 
 package core
 
-var var_1 = &DefExpr{name: MakeSymbol("+")}
+var sym_1 = &Symbol{ns: nil}
+var var_1 = &DefExpr{name: *sym_1}
 
 func init() {
-	v1 := GLOBAL_ENV.CurrentNamespace().Intern(MakeSymbol("+"))
+	string_1 := STRINGS.Intern("+")
+	sym_1.name = string_1
+	v1 := GLOBAL_ENV.CurrentNamespace().Intern(*sym_1)
 	var_1.vr = v1
 }
