@@ -11,6 +11,12 @@ type (
 		nextStringIndex  uint16
 		nextBindingIndex int
 	}
+
+	EmitHeader struct {
+		GlobalEnv *Env
+		Strings   []*string
+		Bindings  []Binding
+	}
 )
 
 func (b *Binding) Emit(p []byte, env *CodeEnv) string {
@@ -490,7 +496,12 @@ func (expr *DefExpr) Emit(code string, env *CodeEnv) string {
 	// p = EmitExprOrNull(expr.meta, p, env)
 	// p = expr.vr.info.Emit(p, env)
 	// return p
-	return code + "/*DefExpr*/"
+	return fmt.Sprintf("&DefExpr{Position: %s, vr: %s, name: %s, value: %s, meta: %s}",
+		expr.Pos().Emit("", env),
+		"nil /*vr*/",
+		expr.name.Emit("", env),
+		EmitExprOrNull(expr.value, "", env),
+		EmitExprOrNull(expr.meta, "", env))
 }
 
 // func unpackDefExpr(p []byte, header *EmitHeader) (*DefExpr, []byte) {
