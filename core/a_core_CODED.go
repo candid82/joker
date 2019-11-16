@@ -3,9 +3,6 @@
 package core
 
 var sym_1 = &Symbol{ns: nil}
-var var_1 = &Var{
-	Value: procFirst,
-}
 
 var sym_2 = &Symbol{ns: nil}
 var var_2 = &DefExpr{
