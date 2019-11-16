@@ -3,11 +3,28 @@
 package core
 
 var sym_1 = &Symbol{ns: nil}
-var var_1 = &DefExpr{name: *sym_1}
+var var_1 = &Var{
+	Value: procFirst,
+}
+
+var sym_2 = &Symbol{ns: nil}
+var var_2 = &DefExpr{
+	name: *sym_2,
+	value: &FnExpr{
+		//		arities: &FnArityExpr{},
+		self: *sym_2,
+	}}
 
 func init() {
-	string_1 := STRINGS.Intern("+")
+	_ns := GLOBAL_ENV.CurrentNamespace()
+
+	string_1 := STRINGS.Intern("first")
 	sym_1.name = string_1
-	v1 := GLOBAL_ENV.CurrentNamespace().Intern(*sym_1)
-	var_1.vr = v1
+	v1 := _ns.Intern(*sym_1)
+	v1.Value = procFirst
+
+	string_2 := STRINGS.Intern("second")
+	sym_2.name = string_2
+	v2 := _ns.Intern(*sym_2)
+	var_2.vr = v2
 }
