@@ -204,14 +204,18 @@ var value_%s = %s
 		}
 
 		if v_expr != "" {
-			code += fmt.Sprintf(`
+			intermediary := v_expr[1:]
+			if v_expr[0] != '!' {
+				intermediary = fmt.Sprintf("expr_%s", name)
+				code += fmt.Sprintf(`
 var expr_%s = %s
 `[1:],
-				name, v_expr)
+					name, v_expr)
+			}
 			interns += fmt.Sprintf(`
-	v_%s.expr = expr_%s
+	v_%s.expr = %s
 `[1:],
-				name, name)
+				name, intermediary)
 		}
 	}
 
