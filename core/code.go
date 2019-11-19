@@ -847,7 +847,10 @@ func (expr *VarRefExpr) Emit(env *CodeEnv) string {
 	// p = expr.Pos().Emit(p, env)
 	// p = expr.vr.Emit(p, env)
 	// return p
-	return "!(*VarRefExpr)(nil)"
+	return fmt.Sprintf(`&VarRefExpr{
+	vr: %s,
+}`,
+		noBang(expr.vr.Emit(env)))
 }
 
 // func unpackVarRefExpr(p []byte, header *EmitHeader) (*VarRefExpr, []byte) {
