@@ -189,14 +189,18 @@ var sym_%s = &Symbol{ns: nil}
 			name, *s, name, name, v_assign, name)
 
 		if v_value != "" {
-			code += fmt.Sprintf(`
+			intermediary := v_value[1:]
+			if v_value[0] != '!' {
+				intermediary = fmt.Sprintf("value_%s", name)
+				code += fmt.Sprintf(`
 var value_%s = %s
 `[1:],
-				name, v_value)
+					name, v_value)
+			}
 			interns += fmt.Sprintf(`
-	v_%s.Value = value_%s
+	v_%s.Value = %s
 `[1:],
-				name, name)
+				name, intermediary)
 		}
 
 		if v_expr != "" {
@@ -409,7 +413,7 @@ func (t *Type) Emit(env *CodeEnv) string {
 // }
 
 func emitProc(p Proc, env *CodeEnv) string {
-	return p.name
+	return "!" + p.name
 }
 
 func (le *LocalEnv) Emit(env *CodeEnv) string {
