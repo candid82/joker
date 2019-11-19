@@ -15,6 +15,7 @@ type (
 		nextStringIndex  uint16
 		nextBindingIndex int
 		codeWriterEnv    *CodeWriterEnv
+		runtime          string
 	}
 
 	CodeWriterEnv struct {
@@ -243,7 +244,7 @@ var expr_%s = %s
 		}
 	}
 
-	return code, interns
+	return code, interns + env.runtime
 }
 
 // func UnpackHeader(p []byte, env *Env) (*EmitHeader, []byte) {
@@ -829,14 +830,17 @@ func (vr *Var) Emit(env *CodeEnv) string {
 	// p = vr.ns.Name.Emit(p, env)
 	// p = vr.name.Emit(p, env)
 	// return p
+	ns := *vr.ns.Name.name
+	sym := *vr.name.name
+	g := NameAsGo(sym)
 	runtime := fmt.Sprintf(`
-	v_%s := GLOBAL_ENV.FindNameSpace(nsName).mappings[%s]
+	v_%s := GLOBAL_ENV.FindNameSpace("%s").mappings["%s"]
 	if v_%s == nil {
  		panic(RT.NewError("Error unpacking var: cannot find var %s/%s"))
  	}
 	%s = v_%s
 `,
-		*nsName.name, *name.name)
+		g, ns, sym, g, ns, sym, "a.b.c", g) // TODO: build up assignment target while recursing
 	env.runtime += runtime
 	return "!(*Var)(nil)" // TODO: Runtime initialization needed!
 }
