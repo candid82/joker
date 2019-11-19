@@ -409,7 +409,7 @@ func (t *Type) Emit(env *CodeEnv) string {
 // }
 
 func emitProc(p Proc, env *CodeEnv) string {
-	return "" /* TODO: Use direct assignment */
+	return p.name
 }
 
 func (le *LocalEnv) Emit(env *CodeEnv) string {

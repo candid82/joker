@@ -1770,7 +1770,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
 	if !info.available {
-		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_data.go missing?", name))
+		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
 	}
 	if info.generated != nil {
 		if Verbose {
