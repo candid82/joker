@@ -57,26 +57,26 @@ var files []FileInfo = []FileInfo{
 		name:     "<joker.tools.cli>",
 		filename: "tools_cli.joke",
 	},
-	{
-		name:     "<joker.core>",
-		filename: "linter_all.joke",
-	},
-	{
-		name:     "<joker.core>",
-		filename: "linter_joker.joke",
-	},
-	{
-		name:     "<joker.core>",
-		filename: "linter_cljx.joke",
-	},
-	{
-		name:     "<joker.core>",
-		filename: "linter_clj.joke",
-	},
-	{
-		name:     "<joker.core>",
-		filename: "linter_cljs.joke",
-	},
+	// {
+	// 	name:     "<joker.core>",
+	// 	filename: "linter_all.joke",
+	// },
+	// {
+	// 	name:     "<joker.core>",
+	// 	filename: "linter_joker.joke",
+	// },
+	// {
+	// 	name:     "<joker.core>",
+	// 	filename: "linter_cljx.joke",
+	// },
+	// {
+	// 	name:     "<joker.core>",
+	// 	filename: "linter_clj.joke",
+	// },
+	// {
+	// 	name:     "<joker.core>",
+	// 	filename: "linter_cljs.joke",
+	// },
 }
 
 const hextable = "0123456789abcdef"

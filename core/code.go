@@ -8,8 +8,8 @@ import (
 type (
 	CodeEnv struct {
 		Namespace        *Namespace
-		Definitions      map[string]struct{}
-		Symbols          []Symbol
+		Definitions      map[*string]struct{}
+		Symbols          []*string
 		Strings          map[*string]uint16
 		Bindings         map[*Binding]int
 		nextStringIndex  uint16
@@ -70,8 +70,8 @@ func (b *Binding) Emit(p []byte, env *CodeEnv) string {
 func NewCodeEnv() *CodeEnv {
 	return &CodeEnv{
 		Namespace:   GLOBAL_ENV.CoreNamespace,
-		Definitions: make(map[string]struct{}),
-		Symbols:     []Symbol{},
+		Definitions: make(map[*string]struct{}),
+		Symbols:     []*string{},
 		Strings:     make(map[*string]uint16),
 		Bindings:    make(map[*Binding]int),
 	}
@@ -94,10 +94,10 @@ func (env *CodeEnv) AddForm(o Object) {
 				}
 				next := seq.First()
 				if sym, ok := next.(Symbol); ok && v.ns == nil && v.name != nil {
-					if _, ok := env.Definitions[*sym.name]; ok {
+					if _, ok := env.Definitions[sym.name]; ok {
 					} else {
-						env.Symbols = append(env.Symbols, sym)
-						env.Definitions[*sym.name] = struct{}{}
+						env.Symbols = append(env.Symbols, sym.name)
+						env.Definitions[sym.name] = struct{}{}
 					}
 					return
 				}
@@ -129,8 +129,6 @@ func (env *CodeEnv) AddForm(o Object) {
 	fmt.Printf("code.go: Ignoring %s\n", o.ToString(false))
 }
 
-var item = 0
-
 func (env *CodeEnv) Emit() (string, string) {
 	// var bp string
 	// bp = appendInt(bp, len(env.Bindings))
@@ -151,16 +149,61 @@ func (env *CodeEnv) Emit() (string, string) {
 	// p = append(p, bp...)
 	// return p
 	code := ""
+	interns := ""
 	for ix, s := range env.Symbols {
-		v, ok := env.Namespace.mappings[s.name]
+		v, ok := env.Namespace.mappings[s]
 		if !ok {
-			fmt.Printf("code.go: cannot find %s [%d] in %s\n", *s.name, ix, *env.Namespace.Name.name)
-		} else {
-			code += v.Emit(env)
+			fmt.Printf("code.go: cannot find %s [%d] in %s\n", *s, ix, *env.Namespace.Name.name)
+			continue
+		}
+
+		name := nameAsGo(*s)
+
+		code += fmt.Sprintf(`
+var sym_%s = &Symbol{ns: nil}
+`,
+			name)
+
+		v_value := ""
+		if v.Value != nil {
+			v_value = emitObject(v.Value, env)
+		}
+		v_expr := ""
+		if v.expr != nil {
+			v_expr = v.expr.Emit(env)
+		}
+
+		interns += fmt.Sprintf(`
+	string_%s := STRINGS.Intern("%s")
+	sym_%s.name = string_%s
+	v_%s := _ns.Intern(*sym_%s)
+`,
+			name, *s, name, name, name, name)
+
+		if v_value != "" {
+			code += fmt.Sprintf(`
+var value_%s = %s
+`[1:],
+				name, v_value)
+			interns += fmt.Sprintf(`
+	v_%s.Value = value_%s
+`[1:],
+				name, name)
+		}
+
+		if v_expr != "" {
+			code += fmt.Sprintf(`
+var expr_%s = %s
+`[1:],
+				name, v_expr)
+			interns += fmt.Sprintf(`
+	v_%s.expr = expr_%s
+`[1:],
+				name, name)
 		}
 	}
-	item++
-	return code, fmt.Sprintf("intern(\"something\", var_%d)\n", item)
+
+	return code, interns
 }
 
 // func UnpackHeader(p []byte, env *Env) (*EmitHeader, []byte) {
@@ -594,7 +637,7 @@ func (expr *DefExpr) Emit(env *CodeEnv) string {
 	name := nameAsGo(*expr.name.name)
 
 	initial := fmt.Sprintf(`
-var var_%s = &DefExpr{
+&DefExpr{
 	Position: %s,
 	vr: %s,
 	name: %s,
