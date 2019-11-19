@@ -400,29 +400,47 @@ func (t *Type) Emit(env *CodeEnv) string {
 // 	return TYPES[s.name], p
 // }
 
+func emitProc(p Proc, env *CodeEnv) string {
+	return "" /* Use direct assignment */
+}
+
+func (le *LocalEnv) Emit(env *CodeEnv) string {
+	return "nil /**LocalEnv*/"
+}
+
+func emitFn(fn *Fn, env *CodeEnv) string {
+	fields := []string{}
+	if fn.isMacro {
+		fields = append(fields, "\tisMacro: true,")
+	}
+	if fn.fnExpr != nil {
+		fields = append(fields, fmt.Sprintf("\tfnExpr: %s,", fn.fnExpr.Emit(env)))
+	}
+	if fn.env != nil {
+		fields = append(fields, fmt.Sprintf("\tenv: %s,", fn.env.Emit(env)))
+	}
+	f := strings.Join(fields, "\n")
+	if f != "" {
+		f = "\n" + f + "\n"
+	}
+	return fmt.Sprintf("&Fn{%s}", f)
+}
+
 func emitObject(obj Object, env *CodeEnv) string {
-	// switch obj := obj.(type) {
-	// case Symbol:
-	// 	p = append(p, SYMBOL_OBJ)
-	// 	return obj.Emit(p, env)
-	// case *Var:
-	// 	p = append(p, VAR_OBJ)
-	// 	p = obj.Emit(p, env)
-	// 	return p
-	// case *Type:
-	// 	p = append(p, TYPE_OBJ)
-	// 	p = obj.Emit(p, env)
-	// 	return p
-	// default:
-	// 	p = append(p, NULL)
-	// 	var buf bytes.Buffer
-	// 	PrintObject(obj, &buf)
-	// 	bb := buf.Bytes()
-	// 	p = appendInt(p, len(bb))
-	// 	p = append(p, bb...)
-	// 	return p
-	// }
-	return "nil /*emitObject*/"
+	switch obj := obj.(type) {
+	case Symbol:
+		return obj.Emit(env)
+	case *Var:
+		return obj.Emit(env)
+	case *Type:
+		return obj.Emit(env)
+	case Proc:
+		return emitProc(obj, env)
+	case *Fn:
+		return emitFn(obj, env)
+	default:
+		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
+	}
 }
 
 // func unpackObject(p []byte, header *EmitHeader) (Object, []byte) {
