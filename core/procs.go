@@ -1645,18 +1645,9 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 	}
 }
 
-func CodeWriter(reader *Reader, filename string) (string, string, error) {
-	codeEnv := NewCodeEnv()
+func CodeWriter(reader *Reader, cwe *CodeWriterEnv) (string, string, error) {
+	codeEnv := NewCodeEnv(cwe)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
-	if filename != "" {
-		currentFilename := parseContext.GlobalEnv.file.Value
-		defer func() {
-			parseContext.GlobalEnv.file.Value = currentFilename
-		}()
-		s, err := filepath.Abs(filename)
-		PanicOnErr(err)
-		parseContext.GlobalEnv.file.Value = String{S: s}
-	}
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {

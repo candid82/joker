@@ -14,6 +14,12 @@ type (
 		Bindings         map[*Binding]int
 		nextStringIndex  uint16
 		nextBindingIndex int
+		codeWriterEnv    *CodeWriterEnv
+	}
+
+	CodeWriterEnv struct {
+		NeedSyms map[*string]struct{}
+		HaveSyms map[*string]struct{}
 	}
 
 	EmitHeader struct {
@@ -37,6 +43,7 @@ var tr = [][2]string{
 	{"-", "DASH"},
 	{"*", "STAR"},
 	{"/", "SLASH"},
+	{"&", "AMP"},
 }
 
 func nameAsGo(name string) string {
@@ -51,6 +58,13 @@ func noBang(s string) string {
 		return s[1:]
 	}
 	return s
+}
+
+func indirect(s string) string {
+	if s[0] == '&' {
+		return s[1:]
+	}
+	return "*" + s
 }
 
 func (b *Binding) Emit(p []byte, env *CodeEnv) string {
@@ -74,13 +88,14 @@ func (b *Binding) Emit(p []byte, env *CodeEnv) string {
 // 	}, p
 // }
 
-func NewCodeEnv() *CodeEnv {
+func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
-		Namespace:   GLOBAL_ENV.CoreNamespace,
-		Definitions: make(map[*string]struct{}),
-		Symbols:     []*string{},
-		Strings:     make(map[*string]uint16),
-		Bindings:    make(map[*Binding]int),
+		Namespace:     GLOBAL_ENV.CoreNamespace,
+		Definitions:   make(map[*string]struct{}),
+		Symbols:       []*string{},
+		Strings:       make(map[*string]uint16),
+		Bindings:      make(map[*Binding]int),
+		codeWriterEnv: cwe,
 	}
 }
 
@@ -385,13 +400,11 @@ func EmitObjectOrNull(obj Object, env *CodeEnv) string {
 // }
 
 func (s Symbol) Emit(env *CodeEnv) string {
-	// p = s.info.Emit(p, env)
-	// p = EmitObjectOrNull(s.meta, p, env)
-	// p = appendUint16(p, env.stringIndex(s.name))
-	// p = appendUint16(p, env.stringIndex(s.ns))
-	// p = appendUint32(p, s.hash)
-	// return p
-	return "!(Symbol)(nil)"
+	if s.name == nil {
+		return "Symbol{}"
+	}
+	env.codeWriterEnv.NeedSyms[s.name] = struct{}{}
+	return fmt.Sprintf("*sym_%s", nameAsGo(*s.name))
 }
 
 // func unpackSymbol(p []byte, header *EmitHeader) (Symbol, []byte) {
@@ -589,25 +602,17 @@ func emitSymbolSeq(s []Symbol, env *CodeEnv) string {
 // 	return res, p
 // }
 
-func emitFnArityExprSeq(s []FnArityExpr, env *CodeEnv) string {
-	// p = appendInt(p, len(s))
-	// for _, e := range s {
-	// 	p = e.Emit(p, env)
-	// }
-	// return p
-	return "!(*FnArityExprSeq)(nil)"
+func emitFnArityExprSeq(fns []FnArityExpr, env *CodeEnv) string {
+	fnae := []string{}
+	for _, fn := range fns {
+		fnae = append(fnae, "\t"+indirect(noBang(fn.Emit(env)))+",")
+	}
+	ret := strings.Join(fnae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]FnArityExpr{%s}`, ret)
 }
-
-// func unpackFnArityExprSeq(p []byte, header *EmitHeader) ([]FnArityExpr, []byte) {
-// 	c, p := extractInt(p)
-// 	res := make([]FnArityExpr, c)
-// 	for i := 0; i < c; i++ {
-// 		var e *FnArityExpr
-// 		e, p = unpackFnArityExpr(p, header)
-// 		res[i] = *e
-// 	}
-// 	return res, p
-// }
 
 func emitCatchExprSeq(s []*CatchExpr, env *CodeEnv) string {
 	// p = appendInt(p, len(s))
@@ -714,8 +719,8 @@ func (expr *DefExpr) Emit(env *CodeEnv) string {
 	// p = append(p, DEF_EXPR)
 	// p = expr.Pos().Emit(p, env)
 	// p = expr.name.Emit(p, env)
-	// p = EmitExprOrNull(expr.value, p, env)
-	// p = EmitExprOrNull(expr.meta, p, env)
+	// p = emitExprOrNull(expr.value, p, env)
+	// p = emitExprOrNull(expr.meta, p, env)
 	// p = expr.vr.info.Emit(p, env)
 	// return p
 	if expr.value == nil {
@@ -737,8 +742,8 @@ func (expr *DefExpr) Emit(env *CodeEnv) string {
 		noBang(expr.Pos().Emit(env)),
 		noBang(expr.vr.Emit(env)),
 		noBang(expr.name.Emit(env)),
-		noBang(EmitExprOrNull(expr.value, env)),
-		noBang(EmitExprOrNull(expr.meta, env)))
+		noBang(emitExprOrNull(expr.value, env)),
+		noBang(emitExprOrNull(expr.meta, env)))
 
 	return fmt.Sprintf(`
 var sym_%s = &Symbol{}
@@ -923,19 +928,45 @@ func (expr *DoExpr) Emit(env *CodeEnv) string {
 // 	return res, p
 // }
 
+// func (expr *FnArityExpr) Emit(env *CodeEnv) string {
+// 	// p = append(p, FN_ARITY_EXPR)
+// 	// p = expr.Pos().Emit(p, env)
+// 	// p = packSymbolSeq(p, expr.args, env)
+// 	// p = packSeq(p, expr.body, env)
+// 	// if expr.taggedType != nil {
+// 	// 	p = append(p, NOT_NULL)
+// 	// 	p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.taggedType.name)))
+// 	// } else {
+// 	// 	p = append(p, NULL)
+// 	// }
+// 	// return p
+// 	return "!(*FnArityExpr)(nil)"
+// }
+
+func emitSymbolArray(syms []Symbol, env *CodeEnv) string {
+	symv := []string{}
+	for _, sym := range syms {
+		symv = append(symv, "\t"+noBang(sym.Emit(env))+",")
+	}
+	ret := strings.Join(symv, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]Symbol{%s}`, ret)
+}
+
 func (expr *FnArityExpr) Emit(env *CodeEnv) string {
-	// p = append(p, FN_ARITY_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSymbolSeq(p, expr.args, env)
-	// p = packSeq(p, expr.body, env)
-	// if expr.taggedType != nil {
-	// 	p = append(p, NOT_NULL)
-	// 	p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.taggedType.name)))
-	// } else {
-	// 	p = append(p, NULL)
-	// }
-	// return p
-	return "!(*FnArityExpr)(nil)"
+	if expr == nil {
+		return "(&FnArityExpr)(nil)"
+	}
+	return fmt.Sprintf(`&FnArityExpr{
+	args: %s,
+	body: %s,
+	taggedType: %s,
+}`,
+		emitSymbolArray(expr.args, env),
+		emitSeq(expr.body, env),
+		expr.taggedType.Emit(env))
 }
 
 // func unpackFnArityExpr(p []byte, header *EmitHeader) (*FnArityExpr, []byte) {
@@ -962,18 +993,14 @@ func (expr *FnArityExpr) Emit(env *CodeEnv) string {
 // }
 
 func (expr *FnExpr) Emit(env *CodeEnv) string {
-	// p = append(p, FN_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packFnArityExprSeq(p, expr.arities, env)
-	// if expr.variadic == nil {
-	// 	p = append(p, NULL)
-	// } else {
-	// 	p = append(p, NOT_NULL)
-	// 	p = expr.variadic.Emit(p, env)
-	// }
-	// p = expr.self.Emit(p, env)
-	// return p
-	return "!(*FnExpr)(nil)"
+	return fmt.Sprintf(`&FnExpr{
+	arities: %s,
+	variadic: %s,
+	self: %s,
+}`,
+		emitFnArityExprSeq(expr.arities, env),
+		noBang(emitExprOrNull(expr.variadic, env)),
+		noBang(expr.self.Emit(env)))
 }
 
 // func unpackFnExpr(p []byte, header *EmitHeader) (*FnExpr, []byte) {
@@ -1117,13 +1144,11 @@ func (expr *TryExpr) Emit(env *CodeEnv) string {
 // 	return res, p
 // }
 
-func EmitExprOrNull(expr Expr, env *CodeEnv) string {
-	// if expr == nil {
-	// 	return append(p, NULL)
-	// }
-	// p = append(p, NOT_NULL)
-	// return expr.Emit(p, env)
-	return "!(*Expr)(nil)"
+func emitExprOrNull(expr Expr, env *CodeEnv) string {
+	if expr == nil {
+		return "nil"
+	}
+	return expr.Emit(env)
 }
 
 // func UnpackExprOrNull(p []byte, header *EmitHeader) (Expr, []byte) {
