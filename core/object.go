@@ -147,8 +147,12 @@ type (
 		isGloballyUsed bool
 		taggedType     *Type
 	}
-	Proc func([]Object) Object
-	Fn   struct {
+	ProcFn func([]Object) Object
+	Proc   struct {
+		fn   ProcFn
+		name string
+	}
+	Fn struct {
 		InfoHolder
 		MetaHolder
 		isMacro bool
@@ -287,6 +291,7 @@ type (
 		NodeSeq        *Type
 		ParseError     *Type
 		Proc           *Type
+		ProcFn         *Type
 		Ratio          *Type
 		RecurBindings  *Type
 		Regex          *Type
@@ -396,6 +401,7 @@ func init() {
 		NodeSeq:       RegRefType("NodeSeq", (*NodeSeq)(nil), ""),
 		ParseError:    RegRefType("ParseError", (*ParseError)(nil), ""),
 		Proc:          RegRefType("Proc", (*Proc)(nil), ""),
+		ProcFn:        RegRefType("ProcFn", (*ProcFn)(nil), ""),
 		Ratio:         RegRefType("Ratio", (*Ratio)(nil), ""),
 		RecurBindings: RegRefType("RecurBindings", (*RecurBindings)(nil), ""),
 		Regex:         regType("Regex", (*Regex)(nil), ""),
@@ -824,7 +830,7 @@ func (fn *Fn) Compare(a, b Object) int {
 }
 
 func (p Proc) Call(args []Object) Object {
-	return p(args)
+	return p.fn(args)
 }
 
 func (p Proc) Compare(a, b Object) int {
@@ -832,13 +838,13 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return "#object[Proc]"
+	return fmt.Sprintf("#object[Proc:%s]", p.name)
 }
 
 func (p Proc) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Proc:
-		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+		return p.fn.Equals(other.fn)
 	}
 	return false
 }
@@ -856,6 +862,42 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
+	return p.fn.Hash()
+}
+
+func (p ProcFn) Call(args []Object) Object {
+	return p(args)
+}
+
+func (p ProcFn) Compare(a, b Object) int {
+	return compare(p, a, b)
+}
+
+func (p ProcFn) ToString(escape bool) string {
+	return "#object[ProcFn]"
+}
+
+func (p ProcFn) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case ProcFn:
+		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+	}
+	return false
+}
+
+func (p ProcFn) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (p ProcFn) WithInfo(*ObjectInfo) Object {
+	return p
+}
+
+func (p ProcFn) GetType() *Type {
+	return TYPE.ProcFn
+}
+
+func (p ProcFn) Hash() uint32 {
 	return HashPtr(reflect.ValueOf(p).Pointer())
 }
 

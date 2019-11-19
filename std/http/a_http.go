@@ -10,7 +10,7 @@ var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
 
 
-var send_ Proc
+var send_ ProcFn
 
 func __send_(_args []Object) Object {
 	_c := len(_args)
@@ -26,7 +26,7 @@ func __send_(_args []Object) Object {
 	return NIL
 }
 
-var send_async_ Proc
+var send_async_ ProcFn
 
 func __send_async_(_args []Object) Object {
 	_c := len(_args)
@@ -42,7 +42,7 @@ func __send_async_(_args []Object) Object {
 	return NIL
 }
 
-var start_file_server_ Proc
+var start_file_server_ ProcFn
 
 func __start_file_server_(_args []Object) Object {
 	_c := len(_args)
@@ -59,7 +59,7 @@ func __start_file_server_(_args []Object) Object {
 	return NIL
 }
 
-var start_server_ Proc
+var start_server_ ProcFn
 
 func __start_server_(_args []Object) Object {
 	_c := len(_args)

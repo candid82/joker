@@ -171,7 +171,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 }
 
 func srepl(port string, phase Phase) {
-	ProcessReplData()
+	ProcessReplNamespaceInfo()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	l, err := net.Listen("tcp", replSocket)
 	if err != nil {
@@ -246,7 +246,7 @@ func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
-	ProcessLinterData(dialect)
+	ProcessLinterNamespaceInfo(dialect)
 }
 
 func detectDialect(filename string) Dialect {
@@ -437,6 +437,16 @@ func notOption(arg string) bool {
 }
 
 func parseArgs(args []string) {
+	if len(os.Args) > 1 {
+		// peek to see if the first arg is "--debug*"
+		switch os.Args[1] {
+		case "--debug", "--debug=stderr":
+			debugOut = Stderr
+		case "--debug=stdout":
+			debugOut = Stdout
+		}
+	}
+
 	length := len(args)
 	stop := false
 	missing := false
@@ -648,27 +658,19 @@ var runningProfile interface {
 }
 
 func main() {
-	InitInternalLibs()
-	ProcessCoreData()
-
 	SetExitJoker(func(code int) {
 		finish()
 		os.Exit(code)
 	})
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
-	if len(os.Args) > 1 {
-		// peek to see if the first arg is "--debug*"
-		switch os.Args[1] {
-		case "--debug", "--debug=stderr":
-			debugOut = Stderr
-		case "--debug=stdout":
-			debugOut = Stdout
-		}
-	}
+	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
 
-	parseArgs(os.Args)
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
+
+	InitInternalLibs()
+	ProcessCoreNamespaceInfo()
+
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)

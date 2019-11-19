@@ -14,7 +14,7 @@ var cryptoNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.crypto"))
 
 
 
-var hmac_ Proc
+var hmac_ ProcFn
 
 func __hmac_(_args []Object) Object {
 	_c := len(_args)
@@ -32,7 +32,7 @@ func __hmac_(_args []Object) Object {
 	return NIL
 }
 
-var md5_ Proc
+var md5_ ProcFn
 
 func __md5_(_args []Object) Object {
 	_c := len(_args)
@@ -49,7 +49,7 @@ func __md5_(_args []Object) Object {
 	return NIL
 }
 
-var sha1_ Proc
+var sha1_ ProcFn
 
 func __sha1_(_args []Object) Object {
 	_c := len(_args)
@@ -66,7 +66,7 @@ func __sha1_(_args []Object) Object {
 	return NIL
 }
 
-var sha224_ Proc
+var sha224_ ProcFn
 
 func __sha224_(_args []Object) Object {
 	_c := len(_args)
@@ -83,7 +83,7 @@ func __sha224_(_args []Object) Object {
 	return NIL
 }
 
-var sha256_ Proc
+var sha256_ ProcFn
 
 func __sha256_(_args []Object) Object {
 	_c := len(_args)
@@ -100,7 +100,7 @@ func __sha256_(_args []Object) Object {
 	return NIL
 }
 
-var sha384_ Proc
+var sha384_ ProcFn
 
 func __sha384_(_args []Object) Object {
 	_c := len(_args)
@@ -117,7 +117,7 @@ func __sha384_(_args []Object) Object {
 	return NIL
 }
 
-var sha512_ Proc
+var sha512_ ProcFn
 
 func __sha512_(_args []Object) Object {
 	_c := len(_args)
@@ -134,7 +134,7 @@ func __sha512_(_args []Object) Object {
 	return NIL
 }
 
-var sha512_224_ Proc
+var sha512_224_ ProcFn
 
 func __sha512_224_(_args []Object) Object {
 	_c := len(_args)
@@ -151,7 +151,7 @@ func __sha512_224_(_args []Object) Object {
 	return NIL
 }
 
-var sha512_256_ Proc
+var sha512_256_ ProcFn
 
 func __sha512_256_(_args []Object) Object {
 	_c := len(_args)

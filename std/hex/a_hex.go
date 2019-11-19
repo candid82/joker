@@ -11,7 +11,7 @@ var hexNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.hex"))
 
 
 
-var decode_string_ Proc
+var decode_string_ ProcFn
 
 func __decode_string_(_args []Object) Object {
 	_c := len(_args)
@@ -29,7 +29,7 @@ func __decode_string_(_args []Object) Object {
 	return NIL
 }
 
-var encode_string_ Proc
+var encode_string_ ProcFn
 
 func __encode_string_(_args []Object) Object {
 	_c := len(_args)

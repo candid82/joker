@@ -10,7 +10,7 @@ var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
 
 
-var read_string_ Proc
+var read_string_ ProcFn
 
 func __read_string_(_args []Object) Object {
 	_c := len(_args)
@@ -26,7 +26,7 @@ func __read_string_(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc
+var write_string_ ProcFn
 
 func __write_string_(_args []Object) Object {
 	_c := len(_args)

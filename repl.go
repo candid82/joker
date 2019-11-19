@@ -13,7 +13,7 @@ import (
 )
 
 func repl(phase Phase) {
-	ProcessReplData()
+	ProcessReplNamespaceInfo()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
