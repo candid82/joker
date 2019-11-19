@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -86,6 +87,11 @@ var files []FileInfo = []FileInfo{
 const hextable = "0123456789abcdef"
 
 func main() {
+	codeWriterEnv := &CodeWriterEnv{
+		NeedSyms: map[*string]struct{}{},
+		HaveSyms: map[*string]struct{}{},
+	}
+
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	for _, f := range files {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
@@ -95,11 +101,7 @@ func main() {
 		}
 
 		var code, interns string
-		code, interns, err = CodeWriter(NewReader(bytes.NewReader(content), f.name),
-			&CodeWriterEnv{
-				NeedSyms: map[*string]struct{}{},
-				HaveSyms: map[*string]struct{}{},
-			})
+		code, interns, err = CodeWriter(NewReader(bytes.NewReader(content), f.name), codeWriterEnv)
 		PanicOnErr(err)
 
 		name := f.filename[0 : len(f.filename)-5] // assumes .joke extension
@@ -117,8 +119,25 @@ func init() {
 }
 `
 
-	symbols := ""
 	code := ""
+	symbols := ""
+	for s, _ := range codeWriterEnv.NeedSyms {
+		if _, ok := codeWriterEnv.HaveSyms[s]; ok {
+			continue
+		}
+		name := NameAsGo(*s)
+		code += fmt.Sprintf(`
+var sym_%s = &Symbol{ns: nil}
+`[1:],
+			name)
+
+		symbols += fmt.Sprintf(`
+	string_%s := STRINGS.Intern("%s")
+	sym_%s.name = string_%s
+`[1:],
+			name, *s, name, name)
+	}
+
 	fileContent := strings.Replace(strings.Replace(allTemplate, "{symbols}", symbols, 1), "{code}", code, 1)
 	ioutil.WriteFile("a_code.go", []byte(fileContent), 0666)
 }

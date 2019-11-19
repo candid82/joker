@@ -46,7 +46,7 @@ var tr = [][2]string{
 	{"&", "AMP"},
 }
 
-func nameAsGo(name string) string {
+func NameAsGo(name string) string {
 	for _, t := range tr {
 		name = strings.ReplaceAll(name, t[0], "_"+t[1]+"_")
 	}
@@ -182,12 +182,13 @@ func (env *CodeEnv) Emit() (string, string) {
 			continue
 		}
 
-		name := nameAsGo(*s)
+		name := NameAsGo(*s)
 
 		code += fmt.Sprintf(`
 var sym_%s = &Symbol{ns: nil}
 `,
 			name)
+		env.codeWriterEnv.HaveSyms[s] = struct{}{}
 
 		v_value := ""
 		if v.Value != nil {
@@ -404,7 +405,7 @@ func (s Symbol) Emit(env *CodeEnv) string {
 		return "Symbol{}"
 	}
 	env.codeWriterEnv.NeedSyms[s.name] = struct{}{}
-	return fmt.Sprintf("*sym_%s", nameAsGo(*s.name))
+	return fmt.Sprintf("*sym_%s", NameAsGo(*s.name))
 }
 
 // func unpackSymbol(p []byte, header *EmitHeader) (Symbol, []byte) {
@@ -426,9 +427,10 @@ func (s Symbol) Emit(env *CodeEnv) string {
 // }
 
 func (t *Type) Emit(env *CodeEnv) string {
-	// s := MakeSymbol(t.name)
-	// return s.Emit(p, env)
-	return "!(*Type)(nil)"
+	if t == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("!TYPES[%s]", t.name)
 }
 
 // func unpackType(p []byte, header *EmitHeader) (*Type, []byte) {
@@ -566,13 +568,16 @@ func (expr *LiteralExpr) Emit(env *CodeEnv) string {
 // 	return res, p
 // }
 
-func emitSeq(s []Expr, env *CodeEnv) string {
-	// p = appendInt(p, len(s))
-	// for _, e := range s {
-	// 	p = e.Emit(p, env)
-	// }
-	// return p
-	return "!(*Seq)(nil)"
+func emitSeq(exprs []Expr, env *CodeEnv) string {
+	exprae := []string{}
+	for _, expr := range exprs {
+		exprae = append(exprae, "\t"+noBang(expr.Emit(env))+",")
+	}
+	ret := strings.Join(exprae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]Expr{%s}`, ret)
 }
 
 // func unpackSeq(p []byte, header *EmitHeader) ([]Expr, []byte) {
@@ -727,7 +732,7 @@ func (expr *DefExpr) Emit(env *CodeEnv) string {
 		return "" // just (declare name), which can be ignored here
 	}
 
-	name := nameAsGo(*expr.name.name)
+	name := NameAsGo(*expr.name.name)
 
 	initial := fmt.Sprintf(`
 &DefExpr{
@@ -745,6 +750,7 @@ func (expr *DefExpr) Emit(env *CodeEnv) string {
 		noBang(emitExprOrNull(expr.value, env)),
 		noBang(emitExprOrNull(expr.meta, env)))
 
+	env.codeWriterEnv.HaveSyms[expr.name.name] = struct{}{}
 	return fmt.Sprintf(`
 var sym_%s = &Symbol{}
 %s`,
@@ -966,7 +972,7 @@ func (expr *FnArityExpr) Emit(env *CodeEnv) string {
 }`,
 		emitSymbolArray(expr.args, env),
 		emitSeq(expr.body, env),
-		expr.taggedType.Emit(env))
+		noBang(expr.taggedType.Emit(env)))
 }
 
 // func unpackFnArityExpr(p []byte, header *EmitHeader) (*FnArityExpr, []byte) {
