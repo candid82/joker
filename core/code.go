@@ -20,8 +20,9 @@ type (
 	}
 
 	CodeWriterEnv struct {
-		NeedSyms map[*string]struct{}
-		NeedStrs map[string]struct{}
+		NeedSyms     map[*string]struct{}
+		NeedStrs     map[string]struct{}
+		NeedBindings map[*Binding]struct{}
 	}
 
 	EmitHeader struct {
@@ -70,12 +71,29 @@ func indirect(s string) string {
 	return "*" + s
 }
 
-func (b *Binding) Emit(target string, p []byte, env *CodeEnv) string {
+func (b *Binding) Name() *string {
+	return b.name.name
+}
+
+func (b *Binding) Index() int {
+	return b.index
+}
+
+func (b *Binding) Frame() int {
+	return b.frame
+}
+
+func (b *Binding) IsUsed() bool {
+	return b.isUsed
+}
+
+func (b *Binding) Emit(target string, env *CodeEnv) string {
 	// p = b.name.Emit(p, env)
 	// p = appendInt(p, b.index)
 	// p = appendInt(p, b.frame)
 	// p = appendBool(p, b.isUsed)
-	return "!(*Binding)(nil)"
+	env.codeWriterEnv.NeedBindings[b] = struct{}{}
+	return fmt.Sprintf("&binding_%p", b)
 }
 
 // func unpackBinding(p []byte, header *EmitHeader) (Binding, []byte) {
@@ -887,7 +905,7 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&BindingExpr{
 	binding: %s,
 }`,
-		"nil /*ABEND: TODO*/")
+		indirect(noBang(expr.binding.Emit(target+".binding", env))))
 }
 
 // func unpackBindingExpr(p []byte, header *EmitHeader) (*BindingExpr, []byte) {
