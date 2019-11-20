@@ -850,7 +850,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	// p = vr.ns.Name.Emit(p, env)
 	// p = vr.name.Emit(p, env)
 	// return p
-	ns := *vr.ns.Name.name
+	//	ns := *vr.ns.Name.name
 	sym := *vr.name.name
 	g := NameAsGo(sym)
 
@@ -861,12 +861,12 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 		}
 		env.HaveVars[g] = struct{}{}
 		return fmt.Sprintf(`
-	v_%s := GLOBAL_ENV.FindNamespace("%s").mappings["%s"]
+	v_%s := GLOBAL_ENV.CoreNamespace.mappings[&"%s"]
 	if v_%s == nil {
- 		panic(RT.NewError("Error unpacking var: cannot find var %s/%s"))
+		panic(RT.NewError("Error unpacking var: cannot find var %s"))
  	}
 `,
-			g, ns, sym, g, ns, sym)
+			g, sym, g, sym)
 	}
 	env.runtime = append(env.runtime, runtimeDefineVarFn)
 
