@@ -11,9 +11,9 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-func shAsync(name string, args []string) *Future {
+func shAsync(dir string, name string, args []string) *Future {
 	return ExecFuture(func() Object {
-		return sh("", nil, nil, nil, name, args)
+		return sh(dir, nil, nil, nil, name, args)
 	})
 }
 
