@@ -23,7 +23,6 @@ type (
 		NeedSyms map[*string]struct{}
 		HaveSyms map[*string]struct{}
 		NeedStrs map[string]struct{}
-		HaveStrs map[string]struct{}
 	}
 
 	EmitHeader struct {
@@ -189,13 +188,12 @@ func (env *CodeEnv) Emit() (string, string) {
 		}
 
 		name := NameAsGo(*s)
-		env.codeWriterEnv.HaveStrs[*s] = struct{}{}
+		env.codeWriterEnv.NeedStrs[*s] = struct{}{}
 
 		code += fmt.Sprintf(`
-var string_%s *string
 var sym_%s = &Symbol{ns: nil}
 `,
-			name, name)
+			name)
 		env.codeWriterEnv.HaveSyms[s] = struct{}{}
 
 		v_value := ""
@@ -213,13 +211,12 @@ var sym_%s = &Symbol{ns: nil}
 			env.HaveVars[name] = struct{}{}
 		}
 
-		env.codeWriterEnv.HaveStrs[name] = struct{}{}
+		env.codeWriterEnv.NeedStrs[*s] = struct{}{}
 		interns += fmt.Sprintf(`
-	string_%s = STRINGS.Intern("%s")
 	sym_%s.name = string_%s
 	%s_ns.Intern(*sym_%s)
 `,
-			name, *s, name, name, v_assign, name)
+			name, name, v_assign, name)
 
 		if v_value != "" {
 			intermediary := v_value[1:]
@@ -447,7 +444,7 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 func (t *Type) Emit(target string, env *CodeEnv) string {
 	if t != nil {
 		name := NameAsGo(t.name)
-		env.codeWriterEnv.NeedStrs[name] = struct{}{}
+		env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
 		typeFn := func() string {
 			return fmt.Sprintf(`
 	%s = TYPES[string_%s]

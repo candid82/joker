@@ -91,7 +91,6 @@ func main() {
 		NeedSyms: map[*string]struct{}{},
 		HaveSyms: map[*string]struct{}{},
 		NeedStrs: map[string]struct{}{},
-		HaveStrs: map[string]struct{}{},
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
@@ -117,6 +116,7 @@ package core
 
 {code}
 func init() {
+{strings}
 {symbols}
 }
 `
@@ -142,9 +142,6 @@ var sym_%s = &Symbol{ns: nil}
 
 	strs := ""
 	for s, _ := range codeWriterEnv.NeedStrs {
-		if _, ok := codeWriterEnv.HaveStrs[s]; ok {
-			continue
-		}
 		name := NameAsGo(s)
 		code += fmt.Sprintf(`
 var string_%s *string
