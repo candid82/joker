@@ -77,6 +77,7 @@ func main() {
 		NeedSyms:     map[*string]struct{}{},
 		NeedStrs:     map[string]struct{}{},
 		NeedBindings: map[*Binding]struct{}{},
+		NeedKeywords: map[uint32]Keyword{},
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
@@ -116,6 +117,7 @@ package core
 
 {strDefs}
 {symDefs}
+{kwDefs}
 {bindingDefs}
 func init() {
 {strInterns}
@@ -154,6 +156,25 @@ var sym_%s = &Symbol{ns: nil}
 			name, name)
 	}
 
+	kwDefs := ""
+	for _, k := range codeWriterEnv.NeedKeywords {
+		ns := "nil"
+		if k.NsField() != nil {
+			ns = "string_" + NameAsGo(*k.NsField())
+
+		}
+		name := "string_" + NameAsGo(*k.NameField())
+
+		kwId := fmt.Sprintf("kw_%d", k.HashField())
+
+		kwDefs += fmt.Sprintf(`
+var %s = Keyword{
+	ns: %s,
+	name: %s,
+}`,
+			kwId, ns, name)
+	}
+
 	strDefs := ""
 	strInterns := ""
 	for s, _ := range codeWriterEnv.NeedStrs {
@@ -172,6 +193,7 @@ var string_%s *string
 	var tr = [][2]string{
 		{"{strDefs}", strDefs},
 		{"{symDefs}", symDefs},
+		{"{kwDefs}", kwDefs},
 		{"{bindingDefs}", bindingDefs},
 		{"{strInterns}", strInterns},
 		{"{symInterns}", symInterns},

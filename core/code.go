@@ -24,6 +24,7 @@ type (
 		NeedSyms     map[*string]struct{}
 		NeedStrs     map[string]struct{}
 		NeedBindings map[*Binding]struct{}
+		NeedKeywords map[uint32]Keyword
 	}
 
 	EmitHeader struct {
@@ -193,7 +194,7 @@ func (env *CodeEnv) Emit() (string, string) {
 
 		v_value := ""
 		if v.Value != nil {
-			v_value = emitObject("value_"+name, v.Value, env)
+			v_value = emitObject("value_"+name, true, v.Value, env)
 		}
 		v_expr := ""
 		if v.expr != nil {
@@ -386,6 +387,15 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 // 	return res, p
 // }
 
+func directAssign(target string) string {
+	cmp := strings.Split(target, ".")
+	final := cmp[len(cmp)-1]
+	if final[0] == '(' && final[len(final)-1] == ')' {
+		return strings.Join(cmp[:len(cmp)-1], ".")
+	}
+	return target
+}
+
 func (t *Type) Emit(target string, env *CodeEnv) string {
 	if t != nil {
 		name := NameAsGo(t.name)
@@ -394,7 +404,7 @@ func (t *Type) Emit(target string, env *CodeEnv) string {
 			return fmt.Sprintf(`
 	%s = TYPES[string_%s]
 `,
-				target, name)
+				directAssign(target), name)
 		}
 		env.runtime = append(env.runtime, typeFn)
 	}
@@ -470,6 +480,43 @@ func (s String) Emit(target string, env *CodeEnv) string {
 		strconv.Quote(s.S))
 }
 
+func (k Keyword) NsField() *string {
+	return k.ns
+}
+
+func (k Keyword) NameField() *string {
+	return k.name
+}
+
+func (k Keyword) HashField() uint32 {
+	return k.hash
+}
+
+func (k Keyword) Emit(target string, env *CodeEnv) string {
+	ns := "nil"
+	if k.ns != nil {
+		ns = "string_" + NameAsGo(*k.ns)
+		env.codeWriterEnv.NeedStrs[*k.ns] = struct{}{}
+
+	}
+	name := "string_" + NameAsGo(*k.name)
+	env.codeWriterEnv.NeedStrs[*k.name] = struct{}{}
+
+	kwId := fmt.Sprintf("kw_%d", k.hash)
+
+	hashFn := func() string {
+		return fmt.Sprintf(`
+	%s.hash = hashSymbol(%s, %s)
+`,
+			kwId, ns, name)
+	}
+	env.runtime = append(env.runtime, hashFn)
+
+	env.codeWriterEnv.NeedKeywords[k.hash] = k
+
+	return fmt.Sprintf(`&%s  /* :%s */`, kwId, k.Name())
+}
+
 func (i Int) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&Int{
 	I: %d,
@@ -479,45 +526,54 @@ func (i Int) Emit(target string, env *CodeEnv) string {
 
 func (d Double) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&Double{
-	I: %v,
+	D: %v,
 }`,
 		d.D)
 }
 
-func emitObject(target string, obj Object, env *CodeEnv) string {
+func makeTypedTarget(target string, typedTarget bool, typeStr string) string {
+	if typedTarget {
+		return target
+	}
+	return target + typeStr
+}
+
+func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) string {
 	switch obj := obj.(type) {
 	case Symbol:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Symbol)"), env)
 	case *Var:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Var)"), env)
 	case *Type:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Type)"), env)
 	case Proc:
-		return emitProc(target, obj, env)
+		return emitProc(makeTypedTarget(target, typedTarget, ".(Proc)"), obj, env)
 	case *Fn:
-		return emitFn(target, obj, env)
+		return emitFn(makeTypedTarget(target, typedTarget, ".(*Fn)"), obj, env)
 	case Boolean:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Boolean)"), env)
 	case *MapSet:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*MapSet)"), env)
 	case *List:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*List)"), env)
 	case *Vector:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Vector)"), env)
 	case *ArrayMap:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*ArrayMap)"), env)
 	case *HashMap:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*HashMap)"), env)
 	case Nil:
 		return "Nil{}"
 	case *IOWriter:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), env)
 	case String:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(String)"), env)
+	case Keyword:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Keyword)"), env)
 	case Int:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Int)"), env)
 	case Double:
-		return obj.Emit(target, env)
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
 	default:
 		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
 	}
@@ -546,7 +602,7 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 	obj: %s,
 	isSurrogate: %v,
 }`,
-		noBang(emitObject(target+".obj", expr.obj, env)), expr.isSurrogate)
+		noBang(emitObject(target+".obj", false, expr.obj, env)), expr.isSurrogate)
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
@@ -850,7 +906,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 		return fmt.Sprintf(`
 	%s = v_%s
 `[1:],
-			target, g)
+			directAssign(target), g)
 	}
 	env.runtime = append(env.runtime, runtimeAssignFn)
 
