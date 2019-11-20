@@ -90,6 +90,8 @@ func main() {
 	codeWriterEnv := &CodeWriterEnv{
 		NeedSyms: map[*string]struct{}{},
 		HaveSyms: map[*string]struct{}{},
+		NeedStrs: map[string]struct{}{},
+		HaveStrs: map[string]struct{}{},
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
@@ -138,6 +140,23 @@ var sym_%s = &Symbol{ns: nil}
 			name, *s, name, name)
 	}
 
-	fileContent := strings.Replace(strings.Replace(allTemplate, "{symbols}", symbols, 1), "{code}", code, 1)
+	strs := ""
+	for s, _ := range codeWriterEnv.NeedStrs {
+		if _, ok := codeWriterEnv.HaveStrs[s]; ok {
+			continue
+		}
+		name := NameAsGo(s)
+		code += fmt.Sprintf(`
+var string_%s *string
+`[1:],
+			name)
+
+		strs += fmt.Sprintf(`
+	string_%s = STRINGS.Intern("%s")
+`[1:],
+			name, s)
+	}
+
+	fileContent := strings.Replace(strings.Replace(strings.Replace(allTemplate, "{strings}", strs, 1), "{symbols}", symbols, 1), "{code}", code, 1)
 	ioutil.WriteFile("a_code.go", []byte(fileContent), 0666)
 }

@@ -22,6 +22,8 @@ type (
 	CodeWriterEnv struct {
 		NeedSyms map[*string]struct{}
 		HaveSyms map[*string]struct{}
+		NeedStrs map[string]struct{}
+		HaveStrs map[string]struct{}
 	}
 
 	EmitHeader struct {
@@ -187,11 +189,13 @@ func (env *CodeEnv) Emit() (string, string) {
 		}
 
 		name := NameAsGo(*s)
+		env.codeWriterEnv.HaveStrs[*s] = struct{}{}
 
 		code += fmt.Sprintf(`
+var string_%s *string
 var sym_%s = &Symbol{ns: nil}
 `,
-			name)
+			name, name)
 		env.codeWriterEnv.HaveSyms[s] = struct{}{}
 
 		v_value := ""
@@ -209,8 +213,9 @@ var sym_%s = &Symbol{ns: nil}
 			env.HaveVars[name] = struct{}{}
 		}
 
+		env.codeWriterEnv.HaveStrs[name] = struct{}{}
 		interns += fmt.Sprintf(`
-	string_%s := STRINGS.Intern("%s")
+	string_%s = STRINGS.Intern("%s")
 	sym_%s.name = string_%s
 	%s_ns.Intern(*sym_%s)
 `,
@@ -441,11 +446,13 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 
 func (t *Type) Emit(target string, env *CodeEnv) string {
 	if t != nil {
+		name := NameAsGo(t.name)
+		env.codeWriterEnv.NeedStrs[name] = struct{}{}
 		typeFn := func() string {
 			return fmt.Sprintf(`
-	%s = TYPES["%s"]
+	%s = TYPES[string_%s]
 `,
-				target, t.name)
+				target, name)
 		}
 		env.runtime = append(env.runtime, typeFn)
 	}
@@ -857,6 +864,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	//	ns := *vr.ns.Name.name
 	sym := *vr.name.name
 	g := NameAsGo(sym)
+	env.codeWriterEnv.NeedStrs[sym] = struct{}{}
 
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
@@ -865,12 +873,12 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 		}
 		env.HaveVars[g] = struct{}{}
 		return fmt.Sprintf(`
-	v_%s := GLOBAL_ENV.CoreNamespace.mappings[&string{"%s"}]
+	v_%s := GLOBAL_ENV.CoreNamespace.mappings[string_%s]
 	if v_%s == nil {
 		panic(RT.NewError("Error unpacking var: cannot find var %s"))
  	}
 `,
-			g, sym, g, sym)
+			g, g, g, sym)
 	}
 	env.runtime = append(env.runtime, runtimeDefineVarFn)
 
