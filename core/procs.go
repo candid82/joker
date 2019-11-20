@@ -36,6 +36,7 @@ var (
 	testNamespaceInfo         internalNamespaceInfo
 	setNamespaceInfo          internalNamespaceInfo
 	tools_cliNamespaceInfo    internalNamespaceInfo
+	hiccupNamespaceInfo       internalNamespaceInfo
 	linter_allNamespaceInfo   internalNamespaceInfo
 	linter_jokerNamespaceInfo internalNamespaceInfo
 	linter_cljxNamespaceInfo  internalNamespaceInfo
@@ -79,6 +80,7 @@ func InitInternalLibs() {
 		"joker.test":      &testNamespaceInfo,
 		"joker.set":       &setNamespaceInfo,
 		"joker.tools.cli": &tools_cliNamespaceInfo,
+		"joker.hiccup":    &hiccupNamespaceInfo,
 	}
 }
 

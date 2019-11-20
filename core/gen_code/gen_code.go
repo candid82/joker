@@ -24,30 +24,30 @@ var files []FileInfo = []FileInfo{
 		name:     "<joker.core>",
 		filename: "core.joke",
 	},
-	{
-		name:     "<joker.repl>",
-		filename: "repl.joke",
-	},
-	{
-		name:     "<joker.walk>",
-		filename: "walk.joke",
-	},
-	{
-		name:     "<joker.template>",
-		filename: "template.joke",
-	},
-	{
-		name:     "<joker.test>",
-		filename: "test.joke",
-	},
-	{
-		name:     "<joker.set>",
-		filename: "set.joke",
-	},
-	{
-		name:     "<joker.tools.cli>",
-		filename: "tools_cli.joke",
-	},
+	// {
+	// 	name:     "<joker.repl>",
+	// 	filename: "repl.joke",
+	// },
+	// {
+	// 	name:     "<joker.walk>",
+	// 	filename: "walk.joke",
+	// },
+	// {
+	// 	name:     "<joker.template>",
+	// 	filename: "template.joke",
+	// },
+	// {
+	// 	name:     "<joker.test>",
+	// 	filename: "test.joke",
+	// },
+	// {
+	// 	name:     "<joker.set>",
+	// 	filename: "set.joke",
+	// },
+	// {
+	// 	name:     "<joker.tools.cli>",
+	// 	filename: "tools_cli.joke",
+	// },
 	// {
 	// 	name:     "<joker.core>",
 	// 	filename: "linter_all.joke",
