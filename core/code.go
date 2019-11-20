@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -48,6 +49,7 @@ var tr = [][2]string{
 	{"/", "SLASH"},
 	{"&", "AMP"},
 	{"#", "HASH"},
+	{".", "DOT"},
 }
 
 func NameAsGo(name string) string {
@@ -88,26 +90,9 @@ func (b *Binding) IsUsed() bool {
 }
 
 func (b *Binding) Emit(target string, env *CodeEnv) string {
-	// p = b.name.Emit(p, env)
-	// p = appendInt(p, b.index)
-	// p = appendInt(p, b.frame)
-	// p = appendBool(p, b.isUsed)
 	env.codeWriterEnv.NeedBindings[b] = struct{}{}
 	return fmt.Sprintf("&binding_%p", b)
 }
-
-// func unpackBinding(p []byte, header *EmitHeader) (Binding, []byte) {
-// 	name, p := unpackSymbol(p, header)
-// 	index, p := extractInt(p)
-// 	frame, p := extractInt(p)
-// 	isUsed, p := extractBool(p)
-// 	return Binding{
-// 		name:   name,
-// 		index:  index,
-// 		frame:  frame,
-// 		isUsed: isUsed,
-// 	}, p
-// }
 
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
@@ -478,6 +463,20 @@ func (io *IOWriter) Emit(target string, env *CodeEnv) string {
 	return "!(*IOWriter)(nil)"
 }
 
+func (s String) Emit(target string, env *CodeEnv) string {
+	return fmt.Sprintf(`&String{
+	S: %s,
+}`,
+		strconv.Quote(s.S))
+}
+
+func (i Int) Emit(target string, env *CodeEnv) string {
+	return fmt.Sprintf(`&Int{
+	I: %d,
+}`,
+		i.I)
+}
+
 func emitObject(target string, obj Object, env *CodeEnv) string {
 	switch obj := obj.(type) {
 	case Symbol:
@@ -506,6 +505,10 @@ func emitObject(target string, obj Object, env *CodeEnv) string {
 		return "Nil{}"
 	case *IOWriter:
 		return obj.Emit(target, env)
+	case String:
+		return obj.Emit(target, env)
+	case Int:
+		return obj.Emit(target, env)
 	default:
 		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
 	}
@@ -530,12 +533,11 @@ func emitObject(target string, obj Object, env *CodeEnv) string {
 // }
 
 func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, LITERAL_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = appendBool(p, expr.isSurrogate)
-	// p = packObject(expr.obj, p, env)
-	// return p
-	return "!(*LiteralExpr)(nil)"
+	return fmt.Sprintf(`&LiteralExpr{
+	obj: %s,
+	isSurrogate: %v,
+}`,
+		noBang(emitObject(target+".obj", expr.obj, env)), expr.isSurrogate)
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
