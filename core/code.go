@@ -196,11 +196,11 @@ var sym_%s = &Symbol{ns: nil}
 
 		v_value := ""
 		if v.Value != nil {
-			v_value = emitObject("value_"+name+".Value", v.Value, env)
+			v_value = emitObject("value_"+name, v.Value, env)
 		}
 		v_expr := ""
 		if v.expr != nil {
-			v_expr = v.expr.Emit("expr_"+name+".expr", env)
+			v_expr = v.expr.Emit("expr_"+name, env)
 		}
 
 		v_assign := ""
@@ -587,10 +587,14 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 // 	return res, p
 // }
 
+func coreType(e interface{}) string {
+	return strings.Replace(fmt.Sprintf("%T", e), "core.", "", 1)
+}
+
 func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 	exprae := []string{}
 	for ix, expr := range exprs {
-		exprae = append(exprae, "\t"+noBang(expr.Emit(fmt.Sprintf("%s[%d]", target, ix), env))+",")
+		exprae = append(exprae, "\t"+noBang(expr.Emit(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(expr)), env))+",")
 	}
 	ret := strings.Join(exprae, "\n")
 	if ret != "" {
@@ -810,7 +814,7 @@ func (expr *CallExpr) Emit(target string, env *CodeEnv) string {
 	callable: %s,
 	args: %s,
 }`,
-		noBang(expr.callable.Emit(target+".callable", env)),
+		noBang(expr.callable.Emit(fmt.Sprintf(target+".callable.(%s)", coreType(expr.callable)), env)),
 		emitSeq(target+".args", expr.args, env))
 }
 
@@ -861,7 +865,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 		}
 		env.HaveVars[g] = struct{}{}
 		return fmt.Sprintf(`
-	v_%s := GLOBAL_ENV.CoreNamespace.mappings[&"%s"]
+	v_%s := GLOBAL_ENV.CoreNamespace.mappings[&string{"%s"}]
 	if v_%s == nil {
 		panic(RT.NewError("Error unpacking var: cannot find var %s"))
  	}
