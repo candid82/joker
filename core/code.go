@@ -477,6 +477,13 @@ func (i Int) Emit(target string, env *CodeEnv) string {
 		i.I)
 }
 
+func (d Double) Emit(target string, env *CodeEnv) string {
+	return fmt.Sprintf(`&Double{
+	I: %v,
+}`,
+		d.D)
+}
+
 func emitObject(target string, obj Object, env *CodeEnv) string {
 	switch obj := obj.(type) {
 	case Symbol:
@@ -508,6 +515,8 @@ func emitObject(target string, obj Object, env *CodeEnv) string {
 	case String:
 		return obj.Emit(target, env)
 	case Int:
+		return obj.Emit(target, env)
+	case Double:
 		return obj.Emit(target, env)
 	default:
 		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
