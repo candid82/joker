@@ -21,7 +21,6 @@ type (
 
 	CodeWriterEnv struct {
 		NeedSyms map[*string]struct{}
-		HaveSyms map[*string]struct{}
 		NeedStrs map[string]struct{}
 	}
 
@@ -188,13 +187,6 @@ func (env *CodeEnv) Emit() (string, string) {
 		}
 
 		name := NameAsGo(*s)
-		env.codeWriterEnv.NeedStrs[*s] = struct{}{}
-
-		code += fmt.Sprintf(`
-var sym_%s = &Symbol{ns: nil}
-`,
-			name)
-		env.codeWriterEnv.HaveSyms[s] = struct{}{}
 
 		v_value := ""
 		if v.Value != nil {
@@ -211,12 +203,11 @@ var sym_%s = &Symbol{ns: nil}
 			env.HaveVars[name] = struct{}{}
 		}
 
-		env.codeWriterEnv.NeedStrs[*s] = struct{}{}
+		env.codeWriterEnv.NeedSyms[s] = struct{}{}
 		interns += fmt.Sprintf(`
-	sym_%s.name = string_%s
 	%s_ns.Intern(*sym_%s)
 `,
-			name, name, v_assign, name)
+			v_assign, name)
 
 		if v_value != "" {
 			intermediary := v_value[1:]
@@ -311,55 +302,6 @@ func (env *CodeEnv) bindingIndex(b *Binding) int {
 	env.nextBindingIndex++
 	return env.nextBindingIndex - 1
 }
-
-// func appendBool(p []byte, b bool) []byte {
-// 	var bb byte
-// 	if b {
-// 		bb = 1
-// 	}
-// 	return append(p, bb)
-// }
-
-// func extractBool(p []byte) (bool, []byte) {
-// 	var b bool
-// 	if p[0] == 1 {
-// 		b = true
-// 	}
-// 	return b, p[1:]
-// }
-
-// func appendUint16(p []byte, i uint16) []byte {
-// 	pp := make([]byte, 2)
-// 	binary.BigEndian.PutUint16(pp, i)
-// 	p = append(p, pp...)
-// 	return p
-// }
-
-// func extractUInt16(p []byte) (uint16, []byte) {
-// 	return binary.BigEndian.Uint16(p[0:2]), p[2:]
-// }
-
-// func appendUint32(p []byte, i uint32) []byte {
-// 	pp := make([]byte, 4)
-// 	binary.BigEndian.PutUint32(pp, i)
-// 	p = append(p, pp...)
-// 	return p
-// }
-
-// func extractUInt32(p []byte) (uint32, []byte) {
-// 	return binary.BigEndian.Uint32(p[0:4]), p[4:]
-// }
-
-// func appendInt(p []byte, i int) []byte {
-// 	pp := make([]byte, 8)
-// 	binary.BigEndian.PutUint64(pp, uint64(i))
-// 	p = append(p, pp...)
-// 	return p
-// }
-
-// func extractInt(p []byte) (int, []byte) {
-// 	return int(binary.BigEndian.Uint64(p[0:8])), p[8:]
-// }
 
 func (pos Position) Emit(target string, env *CodeEnv) string {
 	// p = appendInt(p, pos.startLine)
@@ -780,11 +722,7 @@ func (expr *DefExpr) Emit(target string, env *CodeEnv) string {
 		noBang(emitExprOrNil(target+".value", expr.value, env)),
 		noBang(emitExprOrNil(target+".meta", expr.meta, env)))
 
-	env.codeWriterEnv.HaveSyms[expr.name.name] = struct{}{}
-	return fmt.Sprintf(`
-var sym_%s = &Symbol{}
-%s`,
-		name, initial)
+	return initial
 }
 
 // func unpackDefExpr(p []byte, header *EmitHeader) (*DefExpr, []byte) {
@@ -946,7 +884,10 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 	// p = expr.Pos().Emit(p, env)
 	// p = appendInt(p, env.bindingIndex(expr.binding))
 	// return p
-	return "!(*BindingExpr)(nil)"
+	return fmt.Sprintf(`&BindingExpr{
+	binding: %s,
+}`,
+		"nil /*ABEND: TODO*/")
 }
 
 // func unpackBindingExpr(p []byte, header *EmitHeader) (*BindingExpr, []byte) {
