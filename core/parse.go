@@ -43,10 +43,11 @@ type (
 	}
 	DefExpr struct {
 		Position
-		vr    *Var
-		name  Symbol
-		value Expr
-		meta  Expr
+		vr               *Var
+		name             Symbol
+		value            Expr
+		meta             Expr
+		isCreatedByMacro bool
 	}
 	CallExpr struct {
 		Position
@@ -232,20 +233,21 @@ type (
 		deref              Symbol
 	}
 	Str struct {
-		_if       *string
-		quote     *string
-		fn_       *string
-		let_      *string
-		letfn_    *string
-		loop_     *string
-		recur     *string
-		setMacro_ *string
-		def       *string
-		defLinter *string
-		_var      *string
-		do        *string
-		throw     *string
-		try       *string
+		_if          *string
+		quote        *string
+		fn_          *string
+		let_         *string
+		letfn_       *string
+		loop_        *string
+		recur        *string
+		setMacro_    *string
+		def          *string
+		defLinter    *string
+		_var         *string
+		do           *string
+		throw        *string
+		try          *string
+		coreFilename *string
 	}
 )
 
@@ -336,20 +338,21 @@ var (
 		deref:              MakeSymbol("deref"),
 	}
 	STR = Str{
-		_if:       STRINGS.Intern("if"),
-		quote:     STRINGS.Intern("quote"),
-		fn_:       STRINGS.Intern("fn*"),
-		let_:      STRINGS.Intern("let*"),
-		letfn_:    STRINGS.Intern("letfn*"),
-		loop_:     STRINGS.Intern("loop*"),
-		recur:     STRINGS.Intern("recur"),
-		setMacro_: STRINGS.Intern("set-macro__"),
-		def:       STRINGS.Intern("def"),
-		defLinter: STRINGS.Intern("def-linter__"),
-		_var:      STRINGS.Intern("var"),
-		do:        STRINGS.Intern("do"),
-		throw:     STRINGS.Intern("throw"),
-		try:       STRINGS.Intern("try"),
+		_if:          STRINGS.Intern("if"),
+		quote:        STRINGS.Intern("quote"),
+		fn_:          STRINGS.Intern("fn*"),
+		let_:         STRINGS.Intern("let*"),
+		letfn_:       STRINGS.Intern("letfn*"),
+		loop_:        STRINGS.Intern("loop*"),
+		recur:        STRINGS.Intern("recur"),
+		setMacro_:    STRINGS.Intern("set-macro__"),
+		def:          STRINGS.Intern("def"),
+		defLinter:    STRINGS.Intern("def-linter__"),
+		_var:         STRINGS.Intern("var"),
+		do:           STRINGS.Intern("do"),
+		throw:        STRINGS.Intern("throw"),
+		try:          STRINGS.Intern("try"),
+		coreFilename: STRINGS.Intern("<joker.core>"),
 	}
 )
 
@@ -775,7 +778,7 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	}
 }
 
-func parseDef(obj Object, ctx *ParseContext, isLinter bool) *DefExpr {
+func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
 	s := Second(seq)
@@ -791,14 +794,15 @@ func parseDef(obj Object, ctx *ParseContext, isLinter bool) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
-		if isLinter {
+		if isForLinter {
 			vr.isGloballyUsed = true
 		}
 		res := &DefExpr{
-			vr:       vr,
-			name:     sym,
-			value:    nil,
-			Position: GetPosition(obj),
+			vr:               vr,
+			name:             sym,
+			value:            nil,
+			Position:         GetPosition(obj),
+			isCreatedByMacro: seq.First().GetInfo().Pos().filename == STR.coreFilename,
 		}
 		meta = sym.GetMeta()
 		if count == 3 {
@@ -840,6 +844,11 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 			panic(&ParseError{obj: ro, msg: "Can only recur from tail position"})
 		}
 		res = append(res, expr)
+		if LINTER_MODE {
+			if expr, ok := expr.(*DefExpr); ok && !expr.isCreatedByMacro {
+				printParseWarning(expr.Pos(), "inline def")
+			}
+		}
 	}
 	return res
 }
