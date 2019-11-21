@@ -51,6 +51,7 @@ var tr = [][2]string{
 	{"&", "AMP"},
 	{"#", "HASH"},
 	{".", "DOT"},
+	{"%", "PCT"},
 }
 
 func NameAsGo(name string) string {
@@ -524,6 +525,13 @@ func (i Int) Emit(target string, env *CodeEnv) string {
 		i.I)
 }
 
+func (ch Char) Emit(target string, env *CodeEnv) string {
+	return fmt.Sprintf(`&Char{
+	Ch: %v,
+}`,
+		ch.Ch)
+}
+
 func (d Double) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&Double{
 	D: %v,
@@ -572,6 +580,8 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Keyword)"), env)
 	case Int:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Int)"), env)
+	case Char:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Char)"), env)
 	case Double:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
 	default:
@@ -676,13 +686,16 @@ func emitFnArityExprSeq(target string, fns []FnArityExpr, env *CodeEnv) string {
 	return fmt.Sprintf(`[]FnArityExpr{%s}`, ret)
 }
 
-func emitCatchExprSeq(s []*CatchExpr, env *CodeEnv) string {
-	// p = appendInt(p, len(s))
-	// for _, e := range s {
-	// 	p = e.Emit(p, env)
-	// }
-	// return p
-	return "!(*CatchExprSeq)(nil)"
+func emitCatchExprSeq(target string, ces []*CatchExpr, env *CodeEnv) string {
+	ceae := []string{}
+	for ix, ce := range ces {
+		ceae = append(ceae, "\t"+noBang(ce.Emit(fmt.Sprintf("%s[%d]", target, ix), env))+",")
+	}
+	ret := strings.Join(ceae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]*CatchExpr{%s}`, ret)
 }
 
 // func unpackCatchExprSeq(p []byte, header *EmitHeader) ([]*CatchExpr, []byte) {
@@ -695,10 +708,10 @@ func emitCatchExprSeq(s []*CatchExpr, env *CodeEnv) string {
 // }
 
 func (expr *VectorExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, VECTOR_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// return packSeq(p, expr.v, env)
-	return "!(*VectorExpr)(nil)"
+	return fmt.Sprintf(`&VectorExpr{
+	v: %s,
+}`,
+		emitSeq(target+".v", expr.v, env))
 }
 
 // func unpackVectorExpr(p []byte, header *EmitHeader) (*VectorExpr, []byte) {
@@ -731,12 +744,12 @@ func (expr *SetExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *MapExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, MAP_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSeq(p, expr.keys, env)
-	// p = packSeq(p, expr.values, env)
-	// return p
-	return "!(*MapExpr)(nil)"
+	return fmt.Sprintf(`&MapExpr{
+	keys: %s,
+	values: %s,
+}`,
+		emitSeq(target+".keys", expr.keys, env),
+		emitSeq(target+".values", expr.values, env))
 }
 
 // func unpackMapExpr(p []byte, header *EmitHeader) (*MapExpr, []byte) {
@@ -753,13 +766,14 @@ func (expr *MapExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *IfExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, IF_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.cond.Emit(p, env)
-	// p = expr.positive.Emit(p, env)
-	// p = expr.negative.Emit(p, env)
-	// return p
-	return "!(*IfExpr)(nil)"
+	return fmt.Sprintf(`&IfExpr{
+	cond: %s,
+	positive: %s,
+	negative: %s,
+}`,
+		expr.cond.Emit(target+".cond", env),
+		expr.positive.Emit(target+".positive", env),
+		expr.negative.Emit(target+".negative", env))
 }
 
 // func unpackIfExpr(p []byte, header *EmitHeader) (*IfExpr, []byte) {
@@ -859,11 +873,10 @@ func (expr *CallExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *RecurExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, RECUR_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSeq(p, expr.args, env)
-	// return p
-	return "!(*RecurExpr)(nil)"
+	return fmt.Sprintf(`&RecurExpr{
+	args: %s,
+}`,
+		emitSeq(target+".args", expr.args, env))
 }
 
 // func unpackRecurExpr(p []byte, header *EmitHeader) (*RecurExpr, []byte) {
@@ -1009,11 +1022,10 @@ func (expr *MetaExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *DoExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, DO_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSeq(p, expr.body, env)
-	// return p
-	return "!(*DoExpr)(nil)"
+	return fmt.Sprintf(`&DoExpr{
+	body: %s,
+}`,
+		emitSeq(target+".body", expr.body, env))
 }
 
 // func unpackDoExpr(p []byte, header *EmitHeader) (*DoExpr, []byte) {
@@ -1113,13 +1125,14 @@ func (expr *FnExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *LetExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, LET_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSymbolSeq(p, expr.names, env)
-	// p = packSeq(p, expr.values, env)
-	// p = packSeq(p, expr.body, env)
-	// return p
-	return "!(*LetExpr)(nil)"
+	return fmt.Sprintf(`&LetExpr{
+	names: %s,
+	values: %s,
+	body: %s,
+}`,
+		emitSymbolSeq(target+".names", expr.names, env),
+		emitSeq(target+".values", expr.values, env),
+		emitSeq(target+".body", expr.body, env))
 }
 
 // func unpackLetExpr(p []byte, header *EmitHeader) (*LetExpr, []byte) {
@@ -1144,7 +1157,7 @@ func (expr *LoopExpr) Emit(target string, env *CodeEnv) string {
 	// p = packSeq(p, expr.values, env)
 	// p = packSeq(p, expr.body, env)
 	// return p
-	return "!(*LoopExpr)(nil)"
+	return ((*LetExpr)(expr)).Emit(target, env)
 }
 
 // func unpackLoopExpr(p []byte, header *EmitHeader) (*LoopExpr, []byte) {
@@ -1163,11 +1176,10 @@ func (expr *LoopExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, THROW_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.e.Emit(p, env)
-	// return p
-	return "!(*ThrowExpr)(nil)"
+	return fmt.Sprintf(`&ThrowExpr{
+	e: %s,
+}`,
+		expr.e.Emit(target+".e", env))
 }
 
 // func unpackThrowExpr(p []byte, header *EmitHeader) (*ThrowExpr, []byte) {
@@ -1182,13 +1194,14 @@ func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, CATCH_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.excType.name)))
-	// p = expr.excSymbol.Emit(p, env)
-	// p = packSeq(p, expr.body, env)
-	// return p
-	return "!(*CatchExpr)(nil)"
+	return fmt.Sprintf(`&CatchExpr{
+	excType: %s,
+	excSymbol: %s,
+	body: %s,
+}`,
+		expr.excType.Emit(target+".values", env),
+		expr.excSymbol.Emit(target+".names", env),
+		emitSeq(target+".body", expr.body, env))
 }
 
 // func unpackCatchExpr(p []byte, header *EmitHeader) (*CatchExpr, []byte) {
@@ -1208,13 +1221,14 @@ func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *TryExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, TRY_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSeq(p, expr.body, env)
-	// p = packCatchExprSeq(p, expr.catches, env)
-	// p = packSeq(p, expr.finallyExpr, env)
-	// return p
-	return "!(*TryExpr)(nil)"
+	return fmt.Sprintf(`&TryExpr{
+	body: %s,
+	catches: %s,
+	finallyExpr: %s,
+}`,
+		emitSeq(target+".body", expr.body, env),
+		emitCatchExprSeq(target+".catches", expr.catches, env),
+		emitSeq(target+".finallyExpr", expr.finallyExpr, env))
 }
 
 // func unpackTryExpr(p []byte, header *EmitHeader) (*TryExpr, []byte) {
