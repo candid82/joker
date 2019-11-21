@@ -34,6 +34,12 @@ func commandArgs() Object {
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
+func executeAsync(name string, opts Map) *Future {
+	return ExecFuture(func() Object {
+		return execute(name, opts)
+	})
+}
+
 func execute(name string, opts Map) Object {
 	var dir string
 	var args []string

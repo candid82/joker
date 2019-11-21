@@ -144,7 +144,7 @@ func (env *CodeEnv) AddForm(o Object) {
 			seq = seq.Rest()
 			if l, ok := seq.First().(*List); ok {
 				if q, ok := l.First().(Symbol); !ok || *q.name != "quote" {
-					fmt.Printf("code.go: unexpected form where namespace expected: %s\n", l)
+					fmt.Printf("code.go: unexpected form where namespace expected: %s\n", l.ToString(false))
 					return
 				}
 				env.Namespace = GLOBAL_ENV.EnsureNamespace(l.Second().(Symbol))

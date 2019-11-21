@@ -1,0 +1,1 @@
+tests/linter/inline-def/input.clj:2:3: Parse warning: inline def
