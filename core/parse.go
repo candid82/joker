@@ -79,7 +79,8 @@ type (
 	}
 	DoExpr struct {
 		Position
-		body []Expr
+		body             []Expr
+		isCreatedByMacro bool
 	}
 	FnArityExpr struct {
 		Position
@@ -778,6 +779,10 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	}
 }
 
+func isCreatedByMacro(formSeq Seq) bool {
+	return formSeq.First().GetInfo().Pos().filename == STR.coreFilename
+}
+
 func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
@@ -802,7 +807,7 @@ func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 			name:             sym,
 			value:            nil,
 			Position:         GetPosition(obj),
-			isCreatedByMacro: seq.First().GetInfo().Pos().filename == STR.coreFilename,
+			isCreatedByMacro: isCreatedByMacro(seq),
 		}
 		meta = sym.GetMeta()
 		if count == 3 {
@@ -845,8 +850,10 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 		}
 		res = append(res, expr)
 		if LINTER_MODE {
-			if expr, ok := expr.(*DefExpr); ok && !expr.isCreatedByMacro {
-				printParseWarning(expr.Pos(), "inline def")
+			if defExpr, ok := expr.(*DefExpr); ok && !defExpr.isCreatedByMacro {
+				printParseWarning(defExpr.Pos(), "inline def")
+			} else if doExpr, ok := expr.(*DoExpr); ok && !doExpr.isCreatedByMacro {
+				printParseWarning(doExpr.Pos(), "redundant do form")
 			}
 		}
 	}
@@ -1666,8 +1673,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}
 		case STR.do:
 			res := &DoExpr{
-				body:     parseBody(seq.Rest(), ctx),
-				Position: pos,
+				body:             parseBody(seq.Rest(), ctx),
+				Position:         pos,
+				isCreatedByMacro: isCreatedByMacro(seq),
 			}
 			if LINTER_MODE {
 				if len(res.body) == 0 {
