@@ -142,12 +142,8 @@ func (env *CodeEnv) AddForm(o Object) {
 				}
 				fmt.Printf("code.go: strange symbol name in %s\n", v.ToString(false))
 			}
-		case "add-doc-and-meta":
-			return // TODO: implement add-doc-and-meta
-		case "doseq":
-			return // TODO: implement doseq
-		case "ns-unmap":
-			return // TODO: implement ns-unmap
+		case "add-doc-and-meta", "set-macro__", "joker.core/refer":
+			return // Reflected, after evaluation, in final version of form
 		case "ns", "in-ns":
 			fmt.Printf("At %s\n", o.ToString(false))
 			seq = seq.Rest()
@@ -161,8 +157,10 @@ func (env *CodeEnv) AddForm(o Object) {
 				env.Namespace = GLOBAL_ENV.EnsureNamespace(seq.First().(Symbol))
 			}
 			return
-		case "joker.core/refer", "comment", "set-macro__":
-			return
+		case "comment":
+			return // Ok to ignore
+		default:
+			panic(fmt.Sprintf("%s unsupported", v.ToString(false))) // TODO: implement these (doseq, ns-unmap, etc.)
 		}
 	}
 	fmt.Printf("code.go: Ignoring %s\n", o.ToString(false))
