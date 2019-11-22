@@ -730,10 +730,10 @@ func (expr *VectorExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *SetExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, SET_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// return packSeq(p, expr.elements, env)
-	return "!(*SetExpr)(nil)"
+	return fmt.Sprintf(`&SetExpr{
+	elements: %s,
+}`,
+		emitSeq(target+".elements", expr.elements, env))
 }
 
 // func unpackSetExpr(p []byte, header *EmitHeader) (*SetExpr, []byte) {
