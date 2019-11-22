@@ -185,7 +185,7 @@ func (env *CodeEnv) Emit() (string, string) {
 	// }
 	// p = append(p, bp...)
 	// return p
-	code := ""
+	inits := ""
 	interns := fmt.Sprintf(`
 	_ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
@@ -206,7 +206,7 @@ func (env *CodeEnv) Emit() (string, string) {
 			intermediary := v_value[1:]
 			if v_value[0] != '!' {
 				intermediary = fmt.Sprintf("&value_%s", name)
-				code += fmt.Sprintf(`
+				inits += fmt.Sprintf(`
 var value_%s = %s
 `[1:],
 					name, indirect(v_value))
@@ -222,7 +222,7 @@ var value_%s = %s
 			intermediary := v_expr[1:]
 			if v_expr[0] != '!' {
 				intermediary = fmt.Sprintf("&expr_%s", name)
-				code += fmt.Sprintf(`
+				inits += fmt.Sprintf(`
 var expr_%s = %s
 `[1:],
 					name, indirect(v_expr))
@@ -285,7 +285,7 @@ var expr_%s = %s
 		interns += inits
 	}
 
-	return code, interns + joinStringFns(env.runtime)
+	return inits, interns + joinStringFns(env.runtime)
 }
 
 func joinStringFns(fns []func() string) string {

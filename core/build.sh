@@ -3,7 +3,7 @@
 set -e  # Exit on error.
 set -x  # Echo commands
 
-rm -fv a_*_{code,data}.go a_code.go
+rm -fv a_*.go
 
 # Build gen_data before generating code that would otherwise be
 # unnecessarily compiled into it.
