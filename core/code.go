@@ -495,7 +495,20 @@ func (b Boolean) Emit(target string, env *CodeEnv) string {
 }
 
 func (m *MapSet) Emit(target string, env *CodeEnv) string {
-	return "!(*MapSet)(nil)"
+	return fmt.Sprintf(`&MapSet{
+	m: %s,
+}`,
+		noBang(emitMap(target+".m", false, m.m, env)))
+}
+
+func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
+	switch m := m.(type) {
+	case *ArrayMap:
+		return m.Emit(target, env)
+	case *HashMap:
+		return m.Emit(target, env)
+	}
+	return fmt.Sprintf("nil /*ABEND: %T*/", m)
 }
 
 func (l *List) Emit(target string, env *CodeEnv) string {
@@ -507,7 +520,10 @@ func (v *Vector) Emit(target string, env *CodeEnv) string {
 }
 
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
-	return "!(*ArrayMap)(nil)"
+	return fmt.Sprintf(`&ArrayMap{
+	arr: %s,
+}`,
+		emitObjectSeq(target+".arr", m.arr, env))
 }
 
 func (m *HashMap) Emit(target string, env *CodeEnv) string {
@@ -687,6 +703,18 @@ func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]Expr{%s}`, ret)
+}
+
+func emitObjectSeq(target string, objs []Object, env *CodeEnv) string {
+	objae := []string{}
+	for ix, obj := range objs {
+		objae = append(objae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
+	}
+	ret := strings.Join(objae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]Object{%s}`, ret)
 }
 
 // func unpackSeq(p []byte, header *EmitHeader) ([]Expr, []byte) {
