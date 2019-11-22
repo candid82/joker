@@ -1278,8 +1278,9 @@
    (let [form (bindings 0) tst (bindings 1)]
      `(let [temp# ~tst]
         (if temp#
-          (let [~form temp#]
-            ~then)))))
+          (let [~form temp#
+                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+            t#)))))
   ([bindings then else & oldform]
    (assert-args
     (vector? bindings) "a vector for its binding"
@@ -1288,8 +1289,9 @@
    (let [form (bindings 0) tst (bindings 1)]
      `(let [temp# ~tst]
         (if temp#
-          (let [~form temp#]
-            ~then)
+          (let [~form temp#
+                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+            t#)
           ~else)))))
 
 (defmacro when-let
