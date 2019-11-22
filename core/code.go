@@ -278,7 +278,7 @@ var expr_%s = %s
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
 		interns += fmt.Sprintf(`
-	%s_ns.Intern(*sym_%s)
+	%s_ns.Intern(sym_%s)
 `,
 			v_assign, name)
 
@@ -407,7 +407,7 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 		return "Symbol{}"
 	}
 	env.codeWriterEnv.NeedSyms[s.name] = struct{}{}
-	return fmt.Sprintf("*sym_%s", NameAsGo(*s.name))
+	return fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 }
 
 // func unpackSymbol(p []byte, header *EmitHeader) (Symbol, []byte) {
@@ -669,13 +669,15 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 	obj := noBang(emitObject(target+".obj", false, expr.obj, env))
 	if obj != "" {
 		obj = `
-	obj: ` + obj + `,`
+	obj: ` + obj + `,
+`
 	}
 
 	return fmt.Sprintf(`&LiteralExpr{
 %s	isSurrogate: %v,
 }`,
-		obj, expr.isSurrogate)
+		obj,
+		expr.isSurrogate)
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
@@ -1056,7 +1058,7 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&BindingExpr{
 	binding: %s,
 }`,
-		indirect(noBang(expr.binding.Emit(target+".binding", env))))
+		noBang(expr.binding.Emit(target+".binding", env)))
 }
 
 // func unpackBindingExpr(p []byte, header *EmitHeader) (*BindingExpr, []byte) {

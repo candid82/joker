@@ -128,8 +128,8 @@ func init() {
 	bindingDefs := ""
 	for b, _ := range codeWriterEnv.NeedBindings {
 		bindingDefs += fmt.Sprintf(`
-var binding_%p = &Binding{
-	name: *sym_%s,
+var binding_%p = Binding{
+	name: sym_%s,
 	index: %d,
 	frame: %d,
 	isUsed: %v,
@@ -145,7 +145,7 @@ var binding_%p = &Binding{
 	for s, _ := range codeWriterEnv.NeedSyms {
 		name := NameAsGo(*s)
 		symDefs += fmt.Sprintf(`
-var sym_%s = &Symbol{ns: nil}
+var sym_%s = Symbol{}
 `[1:],
 			name)
 
