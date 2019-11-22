@@ -75,6 +75,14 @@ func indirect(s string) string {
 	return "*" + s
 }
 
+func coreType(e interface{}) string {
+	return strings.Replace(fmt.Sprintf("%T", e), "core.", "", 1)
+}
+
+func assertType(e interface{}) string {
+	return ".(" + coreType(e) + ")"
+}
+
 func (b *Binding) Name() *string {
 	return b.name.name
 }
@@ -392,7 +400,7 @@ func directAssign(target string) string {
 	cmp := strings.Split(target, ".")
 	final := cmp[len(cmp)-1]
 	if final[0] == '(' && final[len(final)-1] == ')' {
-		return strings.Join(cmp[:len(cmp)-1], ".")
+		return strings.Join(cmp[:len(cmp)-2], ".")
 	}
 	return target
 }
@@ -612,7 +620,7 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 	obj: %s,
 	isSurrogate: %v,
 }`,
-		noBang(emitObject(target+".obj", false, expr.obj, env)), expr.isSurrogate)
+		noBang(emitObject(target+".obj"+assertType(expr.obj), false, expr.obj, env)), expr.isSurrogate)
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
@@ -627,10 +635,6 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 // 	}
 // 	return res, p
 // }
-
-func coreType(e interface{}) string {
-	return strings.Replace(fmt.Sprintf("%T", e), "core.", "", 1)
-}
 
 func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 	exprae := []string{}
@@ -771,9 +775,9 @@ func (expr *IfExpr) Emit(target string, env *CodeEnv) string {
 	positive: %s,
 	negative: %s,
 }`,
-		expr.cond.Emit(target+".cond", env),
-		expr.positive.Emit(target+".positive", env),
-		expr.negative.Emit(target+".negative", env))
+		expr.cond.Emit(target+".cond"+assertType(expr.cond), env),
+		expr.positive.Emit(target+".positive"+assertType(expr.positive), env),
+		expr.negative.Emit(target+".negative"+assertType(expr.negative), env))
 }
 
 // func unpackIfExpr(p []byte, header *EmitHeader) (*IfExpr, []byte) {
@@ -818,8 +822,8 @@ func (expr *DefExpr) Emit(target string, env *CodeEnv) string {
 		noBang(expr.Pos().Emit(target+".Position", env)),
 		noBang(expr.vr.Emit(target+".vr", env)),
 		noBang(expr.name.Emit(target+".name", env)),
-		noBang(emitExprOrNil(target+".value", expr.value, env)),
-		noBang(emitExprOrNil(target+".meta", expr.meta, env)))
+		noBang(emitExprOrNil(target+".value"+assertType(expr.value), expr.value, env)),
+		noBang(emitExprOrNil(target+".meta"+assertType(expr.meta), expr.meta, env)))
 
 	return initial
 }
@@ -855,7 +859,7 @@ func (expr *CallExpr) Emit(target string, env *CodeEnv) string {
 	callable: %s,
 	args: %s,
 }`,
-		noBang(expr.callable.Emit(fmt.Sprintf(target+".callable.(%s)", coreType(expr.callable)), env)),
+		noBang(expr.callable.Emit(target+".callable"+assertType(expr.callable), env)),
 		emitSeq(target+".args", expr.args, env))
 }
 
@@ -1151,13 +1155,14 @@ func (expr *LetExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *LoopExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, LOOP_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = packSymbolSeq(p, expr.names, env)
-	// p = packSeq(p, expr.values, env)
-	// p = packSeq(p, expr.body, env)
-	// return p
-	return ((*LetExpr)(expr)).Emit(target, env)
+	return fmt.Sprintf(`&LoopExpr{
+	names: %s,
+	values: %s,
+	body: %s,
+}`,
+		emitSymbolSeq(target+".names", expr.names, env),
+		emitSeq(target+".values", expr.values, env),
+		emitSeq(target+".body", expr.body, env))
 }
 
 // func unpackLoopExpr(p []byte, header *EmitHeader) (*LoopExpr, []byte) {
@@ -1179,7 +1184,7 @@ func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&ThrowExpr{
 	e: %s,
 }`,
-		expr.e.Emit(target+".e", env))
+		expr.e.Emit(target+".e"+assertType(expr.e), env))
 }
 
 // func unpackThrowExpr(p []byte, header *EmitHeader) (*ThrowExpr, []byte) {
@@ -1199,8 +1204,8 @@ func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
 	excSymbol: %s,
 	body: %s,
 }`,
-		expr.excType.Emit(target+".values", env),
-		expr.excSymbol.Emit(target+".names", env),
+		expr.excType.Emit(target+".excType", env),
+		expr.excSymbol.Emit(target+".excSymbol", env),
 		emitSeq(target+".body", expr.body, env))
 }
 
