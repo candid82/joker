@@ -453,9 +453,9 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 
 func (b Boolean) Emit(target string, env *CodeEnv) string {
 	if b.B {
-		return "&Boolean{B: true}"
+		return "Boolean{B: true}"
 	}
-	return "&Boolean{B: false}"
+	return "Boolean{B: false}"
 }
 
 func (m *MapSet) Emit(target string, env *CodeEnv) string {
@@ -483,7 +483,7 @@ func (io *IOWriter) Emit(target string, env *CodeEnv) string {
 }
 
 func (s String) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&String{
+	return fmt.Sprintf(`String{
 	S: %s,
 }`,
 		strconv.Quote(s.S))
@@ -527,21 +527,21 @@ func (k Keyword) Emit(target string, env *CodeEnv) string {
 }
 
 func (i Int) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&Int{
+	return fmt.Sprintf(`Int{
 	I: %d,
 }`,
 		i.I)
 }
 
 func (ch Char) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&Char{
+	return fmt.Sprintf(`Char{
 	Ch: %v,
 }`,
 		ch.Ch)
 }
 
 func (d Double) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&Double{
+	return fmt.Sprintf(`Double{
 	D: %v,
 }`,
 		d.D)

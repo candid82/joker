@@ -1791,6 +1791,9 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 			var expr Expr
 			expr, p = UnpackExpr(p, header)
 			_, err := TryEval(expr)
+			if err != nil {
+				fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
+			}
 			PanicOnErr(err)
 		}
 		info.data = nil
