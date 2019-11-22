@@ -62,7 +62,7 @@ func NameAsGo(name string) string {
 }
 
 func noBang(s string) string {
-	if s[0] == '!' {
+	if len(s) > 0 && s[0] == '!' {
 		return s[1:]
 	}
 	return s
@@ -201,17 +201,79 @@ func (env *CodeEnv) Emit() (string, string) {
 
 		name := NameAsGo(*s)
 
-		v_value := ""
+		inits := ""
+
 		if v.Value != nil {
-			v_value = emitObject("value_"+name, true, v.Value, env)
-		}
-		v_expr := ""
-		if v.expr != nil {
-			v_expr = v.expr.Emit("expr_"+name, env)
+			v_value := emitObject("value_"+name, true, v.Value, env)
+			intermediary := v_value[1:]
+			if v_value[0] != '!' {
+				intermediary = fmt.Sprintf("value_%s", name)
+				code += fmt.Sprintf(`
+var value_%s = %s
+`[1:],
+					name, v_value)
+			}
+			inits += fmt.Sprintf(`
+	v_%s.Value = %s
+`[1:],
+				name, intermediary)
 		}
 
+		if v.expr != nil {
+			v_expr := v.expr.Emit("expr_"+name, env)
+			intermediary := v_expr[1:]
+			if v_expr[0] != '!' {
+				intermediary = fmt.Sprintf("expr_%s", name)
+				code += fmt.Sprintf(`
+var expr_%s = %s
+`[1:],
+					name, v_expr)
+			}
+			inits += fmt.Sprintf(`
+	v_%s.expr = %s
+`[1:],
+				name, intermediary)
+		}
+
+		if v.isMacro {
+			inits += fmt.Sprintf(`
+	v_%s.isMacro = true
+`[1:],
+				name)
+		}
+
+		if v.isPrivate {
+			inits += fmt.Sprintf(`
+	v_%s.isPrivate = true
+`[1:],
+				name)
+		}
+
+		if v.isDynamic {
+			inits += fmt.Sprintf(`
+	v_%s.isDynamic = true
+`[1:],
+				name)
+		}
+
+		if v.isUsed {
+			inits += fmt.Sprintf(`
+	v_%s.isUsed = true
+`[1:],
+				name)
+		}
+
+		if v.isGloballyUsed {
+			inits += fmt.Sprintf(`
+	v_%s.isGloballyUsed = true
+`[1:],
+				name)
+		}
+
+		inits += v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), env)
+
 		v_assign := ""
-		if v_value != "" || v_expr != "" {
+		if inits != "" {
 			v_assign = fmt.Sprintf("v_%s := ", name)
 			env.HaveVars[name] = struct{}{}
 		}
@@ -222,35 +284,7 @@ func (env *CodeEnv) Emit() (string, string) {
 `,
 			v_assign, name)
 
-		if v_value != "" {
-			intermediary := v_value[1:]
-			if v_value[0] != '!' {
-				intermediary = fmt.Sprintf("value_%s", name)
-				code += fmt.Sprintf(`
-var value_%s = %s
-`[1:],
-					name, v_value)
-			}
-			interns += fmt.Sprintf(`
-	v_%s.Value = %s
-`[1:],
-				name, intermediary)
-		}
-
-		if v_expr != "" {
-			intermediary := v_expr[1:]
-			if v_expr[0] != '!' {
-				intermediary = fmt.Sprintf("expr_%s", name)
-				code += fmt.Sprintf(`
-var expr_%s = %s
-`[1:],
-					name, v_expr)
-			}
-			interns += fmt.Sprintf(`
-	v_%s.expr = %s
-`[1:],
-				name, intermediary)
-		}
+		interns += inits
 	}
 
 	return code, interns + joinStringFns(env.runtime)
@@ -400,24 +434,26 @@ func directAssign(target string) string {
 	cmp := strings.Split(target, ".")
 	final := cmp[len(cmp)-1]
 	if final[0] == '(' && final[len(final)-1] == ')' {
-		return strings.Join(cmp[:len(cmp)-2], ".")
+		return strings.Join(cmp[:len(cmp)-1], ".")
 	}
 	return target
 }
 
 func (t *Type) Emit(target string, env *CodeEnv) string {
-	if t != nil {
-		name := NameAsGo(t.name)
-		env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
-		typeFn := func() string {
-			return fmt.Sprintf(`
-	%s = TYPES[string_%s]
-`,
-				directAssign(target), name)
-		}
-		env.runtime = append(env.runtime, typeFn)
+	if t == nil {
+		return ""
 	}
-	return "nil"
+	name := NameAsGo(t.name)
+	env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
+	// return fmt.Sprintf("!TYPES[string_%s]", name)
+	typeFn := func() string {
+		return fmt.Sprintf(`
+	%s = TYPES[string_%s]
+`[1:],
+			directAssign(target), name)
+	}
+	env.runtime = append(env.runtime, typeFn)
+	return ""
 }
 
 // func unpackType(p []byte, header *EmitHeader) (*Type, []byte) {
@@ -616,11 +652,16 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 // }
 
 func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
+	obj := noBang(emitObject(target+".obj", false, expr.obj, env))
+	if obj != "" {
+		obj = `
+	obj: ` + obj + `,`
+	}
+
 	return fmt.Sprintf(`&LiteralExpr{
-	obj: %s,
-	isSurrogate: %v,
+%s	isSurrogate: %v,
 }`,
-		noBang(emitObject(target+".obj"+assertType(expr.obj), false, expr.obj, env)), expr.isSurrogate)
+		obj, expr.isSurrogate)
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
@@ -906,7 +947,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
 		if _, ok := env.HaveVars[g]; ok {
-			return ""
+			return "\n"
 		}
 		env.HaveVars[g] = struct{}{}
 		return fmt.Sprintf(`
@@ -927,7 +968,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	}
 	env.runtime = append(env.runtime, runtimeAssignFn)
 
-	return "!(*Var)(nil)" // TODO: Runtime initialization needed!
+	return "!(*Var)(nil)"
 }
 
 // func unpackVar(p []byte, header *EmitHeader) (*Var, []byte) {
@@ -1048,14 +1089,22 @@ func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
 		return "(*FnArityExpr)(nil)"
 	}
 
-	return fmt.Sprintf(`&FnArityExpr{
+	res := fmt.Sprintf(`&FnArityExpr{
 	args: %s,
 	body: %s,
-	taggedType: %s,
-}`,
+`,
 		emitSymbolSeq(target+".args", expr.args, env),
-		emitSeq(target+".body", expr.body, env),
-		noBang(expr.taggedType.Emit(target+".taggedType", env)))
+		emitSeq(target+".body", expr.body, env))
+
+	ty := noBang(expr.taggedType.Emit(target+".taggedType", env))
+	if ty != "" {
+		res += fmt.Sprintf(`
+	taggedType: %s,
+`[1:],
+			ty)
+	}
+
+	return res + `}`
 }
 
 // func (expr *FnArityExpr) Emit(env *CodeEnv) string {
@@ -1199,12 +1248,17 @@ func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
+	excType := noBang(expr.excType.Emit(target+".excType", env))
+	if excType != "" {
+		excType = `
+	excType: ` + excType + `,`
+	}
+
 	return fmt.Sprintf(`&CatchExpr{
-	excType: %s,
-	excSymbol: %s,
+%s	excSymbol: %s,
 	body: %s,
 }`,
-		expr.excType.Emit(target+".excType", env),
+		excType,
 		expr.excSymbol.Emit(target+".excSymbol", env),
 		emitSeq(target+".body", expr.body, env))
 }
