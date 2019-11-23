@@ -3224,7 +3224,10 @@
   "Sets *ns* to the namespace named by the symbol, creating it if needed."
   {:added "1.0"}
   ^Namespace [^Symbol name]
-  (var-set #'joker.core/*ns* (joker.core/create-ns name)))
+  (let [new-ns (joker.core/create-ns name)]
+    (println "in-ns: changing " joker.core/*ns* " to " new-ns)
+    (var-set #'joker.core/*ns* new-ns)
+    (println "  ...it is now " joker.core/*ns*)))
 
 (defonce ^:dynamic
   ^{:private true
