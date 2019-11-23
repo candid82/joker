@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 type (
@@ -25,7 +26,7 @@ type (
 	CodeWriterEnv struct {
 		NeedSyms     map[*string]struct{}
 		NeedStrs     map[string]struct{}
-		NeedBindings map[*Binding]struct{}
+		NeedBindings map[string]*Binding
 		NeedKeywords map[uint32]Keyword
 		Generated    map[string]struct{}
 	}
@@ -101,7 +102,11 @@ func (b *Binding) SymName() *string {
 }
 
 func (b *Binding) UniqueId() string {
-	return fmt.Sprintf("%s_%d_%d", *b.SymName(), b.Index(), b.Frame())
+	isUsed := ""
+	if b.IsUsed() {
+		isUsed = "_used"
+	}
+	return fmt.Sprintf("%s_%d_%d%s", *b.SymName(), b.Index(), b.Frame(), isUsed)
 }
 
 func (b *Binding) Index() int {
@@ -117,8 +122,9 @@ func (b *Binding) IsUsed() bool {
 }
 
 func (b *Binding) Emit(target string, env *CodeEnv) string {
-	env.codeWriterEnv.NeedBindings[b] = struct{}{}
-	return fmt.Sprintf("&binding_%p", b)
+	id := NameAsGo(b.UniqueId())
+	env.codeWriterEnv.NeedBindings[id] = b
+	return fmt.Sprintf("&binding_%s", id)
 }
 
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
@@ -422,8 +428,38 @@ func emitProc(target string, p Proc, env *CodeEnv) string {
 	return "!" + p.name
 }
 
+func (le *LocalEnv) Hash() uint32 {
+	return HashPtr(uintptr(unsafe.Pointer(le)))
+}
+
 func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
-	return "!(*LocalEnv)(nil)"
+	name := uniqueName(target, "localEnv_", le.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		fields := []string{}
+		f := deferObjectSeq(target+".bindings", le.bindings, env)
+		if f != "" {
+			f = fmt.Sprintf("\tbindings: %s,", f)
+		}
+		fields = append(fields, f)
+		if le.parent != nil {
+			f := noBang(le.parent.Emit(name+".parent", env))
+			if f != "" {
+				fields = append(fields, fmt.Sprintf("\tparent: %s,", f))
+			}
+		}
+		fields = append(fields, fmt.Sprintf("\tframe: %d,", le.frame))
+		f = strings.Join(fields, "\n")
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = LocalEnv{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
@@ -497,11 +533,60 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 }
 
 func (l *List) Emit(target string, env *CodeEnv) string {
-	return "!(*List)(nil)"
+	name := uniqueName(target, "list_", l.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		fields := []string{}
+		f := noBang(emitObject(name+".first", false, l.first, env))
+		if f != "" {
+			fields = append(fields, fmt.Sprintf("\tfirst: %s,", f))
+		}
+		if l.rest != nil {
+			f := noBang(l.rest.Emit(name+".rest", env))
+			if f != "" {
+				fields = append(fields, fmt.Sprintf("\trest: %s,", f))
+			}
+		}
+		if l.count != 0 {
+			fields = append(fields, fmt.Sprintf("\tcount: %d,", l.count))
+		}
+		f = strings.Join(fields, "\n")
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = List{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func (v *Vector) Emit(target string, env *CodeEnv) string {
-	return "!(*Vector)(nil)"
+	name := uniqueName(target, "vector_", v.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		fields := []string{}
+		fields = append(fields, fmt.Sprintf("\troot: %s,", emitInterfaceSeq(name+".root", v.root, env)))
+		fields = append(fields, fmt.Sprintf("\ttail: %s,", emitInterfaceSeq(name+".tail", v.tail, env)))
+		if v.count != 0 {
+			fields = append(fields, fmt.Sprintf("\tcount: %d,", v.count))
+		}
+		if v.shift != 0 {
+			fields = append(fields, fmt.Sprintf("\tshift: %d,", v.shift))
+		}
+		f := strings.Join(fields, "\n")
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Vector{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
@@ -551,6 +636,14 @@ func (k Keyword) HashField() uint32 {
 	return k.hash
 }
 
+func (k Keyword) UniqueId() string {
+	name := NameAsGo(*k.NameField())
+	if k.NsField() != nil {
+		return NameAsGo(*k.NsField()) + "_FW_" + name
+	}
+	return name
+}
+
 func (k Keyword) Emit(target string, env *CodeEnv) string {
 	ns := "nil"
 	if k.ns != nil {
@@ -561,7 +654,7 @@ func (k Keyword) Emit(target string, env *CodeEnv) string {
 	name := "string_" + NameAsGo(*k.name)
 	env.codeWriterEnv.NeedStrs[*k.name] = struct{}{}
 
-	kwId := fmt.Sprintf("kw_%d", k.hash)
+	kwId := fmt.Sprintf("kw_%s", k.UniqueId())
 
 	hashFn := func() string {
 		return fmt.Sprintf(`
@@ -669,7 +762,7 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 	obj := noBang(emitObject(target+".obj", false, expr.obj, env))
 	if obj != "" {
 		obj = `
-	obj: ` + obj + `,
+	obj: `[1:] + obj + `,
 `
 	}
 
@@ -693,6 +786,22 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 // 	return res, p
 // }
 
+func emitInterfaceSeq(target string, thingies []interface{}, env *CodeEnv) string {
+	thingyae := []string{}
+	for ix, thingy := range thingies {
+		if thingy == nil {
+			continue
+		} else {
+			thingyae = append(thingyae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(thingy)), false, thingy.(Object), env))+",")
+		}
+	}
+	ret := strings.Join(thingyae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]interface{}{%s}`, ret)
+}
+
 func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 	exprae := []string{}
 	for ix, expr := range exprs {
@@ -709,6 +818,25 @@ func emitObjectSeq(target string, objs []Object, env *CodeEnv) string {
 	objae := []string{}
 	for ix, obj := range objs {
 		objae = append(objae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
+	}
+	ret := strings.Join(objae, "\n")
+	if ret != "" {
+		ret = "\n" + ret + "\n"
+	}
+	return fmt.Sprintf(`[]Object{%s}`, ret)
+}
+
+func deferObjectSeq(target string, objs []Object, env *CodeEnv) string {
+	objae := []string{}
+	for ix, obj := range objs {
+		objae = append(objae, fmt.Sprintf("\t(%s)(nil),", coreType(obj)))
+		objFn := func() string {
+			return fmt.Sprintf(`
+	%s = %s
+`[1:],
+				directAssign(target), noBang(emitObject(fmt.Sprintf("%s[%d]", target, ix), false, obj, env)))
+		}
+		env.runtime = append(env.runtime, objFn)
 	}
 	ret := strings.Join(objae, "\n")
 	if ret != "" {

@@ -78,7 +78,7 @@ func main() {
 	codeWriterEnv := &CodeWriterEnv{
 		NeedSyms:     map[*string]struct{}{},
 		NeedStrs:     map[string]struct{}{},
-		NeedBindings: map[*Binding]struct{}{},
+		NeedBindings: map[string]*Binding{},
 		NeedKeywords: map[uint32]Keyword{},
 		Generated:    map[string]struct{}{},
 	}
@@ -139,9 +139,8 @@ func init() {
 `
 
 	bindingDefs := []string{}
-	for b, _ := range codeWriterEnv.NeedBindings {
+	for id, b := range codeWriterEnv.NeedBindings {
 		symName := NameAsGo(*b.SymName())
-		uniqueId := NameAsGo(b.UniqueId())
 		bindingDefs = append(bindingDefs, fmt.Sprintf(`
 var binding_%s = Binding{
 	name: sym_%s,
@@ -149,7 +148,7 @@ var binding_%s = Binding{
 	frame: %d,
 	isUsed: %v,
 }`[1:],
-			uniqueId, symName, b.Index(), b.Frame(), b.IsUsed()))
+			id, symName, b.Index(), b.Frame(), b.IsUsed()))
 
 		codeWriterEnv.NeedSyms[b.SymName()] = struct{}{}
 	}
@@ -181,7 +180,7 @@ var sym_%s = Symbol{}`[1:],
 		}
 		strName := "string_" + name
 
-		kwId := "kw_" + name
+		kwId := "kw_" + k.UniqueId()
 
 		if strNs != "" {
 			strNs = "\tns: " + strNs + ",\n"
