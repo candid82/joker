@@ -3225,9 +3225,11 @@
   {:added "1.0"}
   ^Namespace [^Symbol name]
   (let [new-ns (joker.core/create-ns name)]
-    (println "in-ns: changing " joker.core/*ns* " to " new-ns)
+    (when *verbose*
+      (println "in-ns: changing " joker.core/*ns* " to " new-ns))
     (var-set #'joker.core/*ns* new-ns)
-    (println "  ...it is now " joker.core/*ns*)))
+    (when *verbose*
+      (println "  ...it is now " joker.core/*ns*))))
 
 (defonce ^:dynamic
   ^{:private true
@@ -3830,6 +3832,10 @@
   non-alphanumeric characters converted to the appropriate escape sequences.
 
   Defaults to true"
+  {:added "1.0"})
+
+(add-doc-and-meta *verbose*
+  "Whether --verbose (or equivalent) was specified by the Joker invocation."
   {:added "1.0"})
 
 (defmacro letfn

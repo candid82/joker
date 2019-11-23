@@ -674,6 +674,9 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
+	if Verbose {
+		GLOBAL_ENV.SetVerbose(Verbose)
+	}
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
