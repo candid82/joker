@@ -28,6 +28,7 @@ type (
 		MainFile      *Var
 		args          *Var
 		classPath     *Var
+		verbose       *Var
 		ns            *Var
 		NS_VAR        *Var
 		IN_NS_VAR     *Var
@@ -72,6 +73,11 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
+func (env *Env) SetVerbose(verbose bool) {
+	env.verbose.Value = Boolean{B: verbose}
+}
+
+/* Called by parse.go in an outer var block, this runs before func main(). */
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -109,6 +115,9 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
+	res.verbose = res.CoreNamespace.Intern(MakeSymbol("*verbose*"))
+	res.verbose.Value = Boolean{B: false}
+	res.verbose.isPrivate = true
 	return res
 }
 
