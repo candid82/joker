@@ -463,10 +463,23 @@ func (b Boolean) Emit(target string, env *CodeEnv) string {
 }
 
 func (m *MapSet) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&MapSet{
-	m: %s,
-}`,
-		noBang(emitMap(target+".m", false, m.m, env)))
+	name := uniqueName(target, "mapset_", m.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		f := noBang(emitMap(target+".m", false, m.m, env))
+		if f != "" {
+			f = fmt.Sprintf("\tm: %s,", f)
+		}
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = MapSet{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
@@ -488,10 +501,23 @@ func (v *Vector) Emit(target string, env *CodeEnv) string {
 }
 
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&ArrayMap{
-	arr: %s,
-}`,
-		emitObjectSeq(target+".arr", m.arr, env))
+	name := uniqueName(target, "arraymap_", m.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		f := emitObjectSeq(target+".arr", m.arr, env)
+		if f != "" {
+			f = fmt.Sprintf("\tarr: %s,", f)
+		}
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = ArrayMap{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func (m *HashMap) Emit(target string, env *CodeEnv) string {
