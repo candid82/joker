@@ -111,6 +111,9 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			name: sym,
 		}
 		ns.mappings[sym.name] = newVar
+		if Verbose {
+			fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s)\n", *ns.Name.name, *sym.name)
+		}
 		return newVar
 	}
 	if existingVar.ns != ns {
@@ -123,6 +126,9 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			if !strings.HasPrefix(ns.Name.Name(), "joker.") {
 				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
+			}
+			if Verbose {
+				fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
 			}
 			return newVar
 		}
@@ -153,6 +159,9 @@ func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
 		v.ns = ns
 		v.name = sym
 		ns.mappings[sym.name] = v
+		if Verbose {
+			fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s)\n", *ns.Name.name, *sym.name)
+		}
 		return
 	}
 	if existingVar == v {
@@ -166,6 +175,9 @@ func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
 			if !strings.HasPrefix(ns.Name.Name(), "joker.") {
 				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), v.ToString(false)))
+			}
+			if Verbose {
+				fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
 			}
 			return
 		}
