@@ -16,6 +16,8 @@ type (
 		Bindings         map[*Binding]int
 		nextStringIndex  uint16
 		nextBindingIndex int
+		statics          string
+		interns          string
 		runtime          []func() string
 		HaveVars         map[string]struct{}
 	}
@@ -169,26 +171,9 @@ func (env *CodeEnv) AddForm(o Object) {
 	fmt.Printf("code.go: Ignoring %s\n", o.ToString(false))
 }
 
-func (env *CodeEnv) Emit() (statics, interns string) {
-	// var bp string
-	// bp = appendInt(bp, len(env.Bindings))
-	// for k, v := range env.Bindings {
-	// 	bp = appendInt(bp, v)
-	// 	bp = k.Emit(bp, env)
-	// }
-	// p = appendInt(p, len(env.Strings))
-	// for k, v := range env.Strings {
-	// 	p = appendUint16(p, v)
-	// 	if k == nil {
-	// 		p = appendInt(p, -1)
-	// 	} else {
-	// 		p = appendInt(p, len(*k))
-	// 		p = append(p, *k...)
-	// 	}
-	// }
-	// p = append(p, bp...)
-	// return p
-	interns = fmt.Sprintf(`
+func (env *CodeEnv) Emit() {
+	statics := ""
+	interns := fmt.Sprintf(`
 	_ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
 	)
@@ -302,7 +287,8 @@ var p_v_%s = &v_%s
 		statics += v_var
 	}
 
-	return statics, interns + joinStringFns(env.runtime)
+	env.statics += statics
+	env.interns += interns + joinStringFns(env.runtime)
 }
 
 func joinStringFns(fns []func() string) string {

@@ -1653,8 +1653,8 @@ func CodeWriter(reader *Reader, cwe *CodeWriterEnv) (string, string, error) {
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
-			code, interns := codeEnv.Emit()
-			return code, interns, nil
+			codeEnv.Emit()
+			return codeEnv.statics, codeEnv.interns, nil
 		}
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
