@@ -1,9 +1,14 @@
 #!/bin/bash
 
 set -e  # Exit on error.
-set -x  # Echo commands
 
-rm -fv a_*.go
+NOW="_test_AA/$(date +%Y%m%d%H%M%S).dir"
+mkdir -p "$NOW"
+mv -iv a_*.go "$NOW" || :
+[ -x ../joker ] && cp -aiv ../joker "$NOW"
+(git log -n 1; git status) > "$NOW/git.txt"
+
+set -x  # Echo commands
 
 # Build gen_data before generating code that would otherwise be
 # unnecessarily compiled into it.
