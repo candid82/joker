@@ -20,4 +20,4 @@ time ./gen_data/gen_data
 
 time go fmt a_*.go
 
-cd ..; time go build
+cd ..; KEEP_A_FILES=true time ./run.sh

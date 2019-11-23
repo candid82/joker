@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+[ -z "$KEEP_A_FILES" ] && KEEP_A_FILES=false
+
 build() {
   go clean
-  rm -f core/a_*.go
+  $KEEP_A_FILES || rm -f core/a_*.go
   go generate ./...
   go vet ./...
   go build
