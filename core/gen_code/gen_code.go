@@ -91,7 +91,7 @@ func init() {
 	{name}NamespaceInfo = internalNamespaceInfo{init: {name}Init, generated: {name}NamespaceInfo.generated, available: true}
 }
 
-{inits}
+{statics}
 func {name}Init() {
 {interns}
 }
@@ -103,8 +103,8 @@ func {name}Init() {
 			panic(err)
 		}
 
-		var inits, interns string
-		inits, interns, err = CodeWriter(NewReader(bytes.NewReader(content), f.name), codeWriterEnv)
+		var statics, interns string
+		statics, interns, err = CodeWriter(NewReader(bytes.NewReader(content), f.name), codeWriterEnv)
 		PanicOnErr(err)
 
 		name := f.filename[0 : len(f.filename)-5] // assumes .joke extension
@@ -113,7 +113,7 @@ func {name}Init() {
 			panic(fmt.Sprintf("I think Go initializes things alphabetically, so %s must come after %s due to dependencies; rename accordingly",
 				newFile, masterFile))
 		}
-		fileContent := strings.Replace(strings.Replace(strings.ReplaceAll(fileTemplate, "{name}", name), "{inits}", inits, 1), "{interns}", interns, 1)
+		fileContent := strings.Replace(strings.Replace(strings.ReplaceAll(fileTemplate, "{name}", name), "{statics}", statics, 1), "{interns}", interns, 1)
 		ioutil.WriteFile(newFile, []byte(fileContent), 0666)
 	}
 

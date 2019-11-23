@@ -72,6 +72,9 @@ func indirect(s string) string {
 	if s[0] == '&' {
 		return s[1:]
 	}
+	if s[0] == '!' {
+		return s
+	}
 	return "*" + s
 }
 
@@ -166,7 +169,7 @@ func (env *CodeEnv) AddForm(o Object) {
 	fmt.Printf("code.go: Ignoring %s\n", o.ToString(false))
 }
 
-func (env *CodeEnv) Emit() (string, string) {
+func (env *CodeEnv) Emit() (statics, interns string) {
 	// var bp string
 	// bp = appendInt(bp, len(env.Bindings))
 	// for k, v := range env.Bindings {
@@ -185,8 +188,7 @@ func (env *CodeEnv) Emit() (string, string) {
 	// }
 	// p = append(p, bp...)
 	// return p
-	inits := ""
-	interns := fmt.Sprintf(`
+	interns = fmt.Sprintf(`
 	_ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
 	)
@@ -199,93 +201,108 @@ func (env *CodeEnv) Emit() (string, string) {
 
 		name := NameAsGo(*s)
 
-		inits := ""
+		v_var := ""
 
 		if v.Value != nil {
-			v_value := emitObject("value_"+name, true, v.Value, env)
+			v_value := indirect(emitObject("value_"+name, true, v.Value, env))
 			intermediary := v_value[1:]
 			if v_value[0] != '!' {
 				intermediary = fmt.Sprintf("&value_%s", name)
-				inits += fmt.Sprintf(`
+				statics += fmt.Sprintf(`
 var value_%s = %s
 `[1:],
-					name, indirect(v_value))
+					name, v_value)
 			}
-			inits += fmt.Sprintf(`
-	v_%s.Value = %s
+			v_var += fmt.Sprintf(`
+	Value: %s,
 `[1:],
-				name, intermediary)
+				intermediary)
 		}
 
 		if v.expr != nil {
-			v_expr := v.expr.Emit("expr_"+name, env)
+			v_expr := indirect(v.expr.Emit("expr_"+name, env))
 			intermediary := v_expr[1:]
 			if v_expr[0] != '!' {
 				intermediary = fmt.Sprintf("&expr_%s", name)
-				inits += fmt.Sprintf(`
+				statics += fmt.Sprintf(`
 var expr_%s = %s
 `[1:],
-					name, indirect(v_expr))
+					name, v_expr)
 			}
-			inits += fmt.Sprintf(`
-	v_%s.expr = %s
+			v_var += fmt.Sprintf(`
+	expr: %s,
 `[1:],
-				name, intermediary)
+				intermediary)
 		}
 
 		if v.isMacro {
-			inits += fmt.Sprintf(`
-	v_%s.isMacro = true
-`[1:],
-				name)
+			v_var += fmt.Sprintf(`
+	isMacro: true,
+`[1:])
 		}
 
 		if v.isPrivate {
-			inits += fmt.Sprintf(`
-	v_%s.isPrivate = true
-`[1:],
-				name)
+			v_var += fmt.Sprintf(`
+	isPrivate: true,
+`[1:])
 		}
 
 		if v.isDynamic {
-			inits += fmt.Sprintf(`
-	v_%s.isDynamic = true
-`[1:],
-				name)
+			v_var += fmt.Sprintf(`
+	isDynamic: true,
+`[1:])
 		}
 
 		if v.isUsed {
-			inits += fmt.Sprintf(`
-	v_%s.isUsed = true
-`[1:],
-				name)
+			v_var += fmt.Sprintf(`
+	isUsed: true,
+`[1:])
 		}
 
 		if v.isGloballyUsed {
-			inits += fmt.Sprintf(`
-	v_%s.isGloballyUsed = true
+			v_var += fmt.Sprintf(`
+	isGloballyUsed: true,
+`[1:])
+		}
+
+		v_tt := v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), env)
+		if v_tt != "" {
+			intermediary := v_tt[1:]
+			if v_tt[0] != '!' {
+				intermediary = fmt.Sprintf("&taggedType_%s", name)
+				statics += fmt.Sprintf(`
+var taggedType_%s = %s
 `[1:],
-				name)
+					v_tt)
+			}
+			v_var += fmt.Sprintf(`
+	taggedType: %s,
+`[1:],
+				intermediary)
 		}
 
-		inits += v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), env)
-
-		v_assign := ""
-		if inits != "" {
-			v_assign = fmt.Sprintf("v_%s := ", name)
-			env.HaveVars[name] = struct{}{}
+		if v_var != "" {
+			v_var = `
+` + v_var + `
+`
 		}
+		v_var = fmt.Sprintf(`
+var v_%s = Var{%s}
+var p_v_%s = &v_%s
+`[1:],
+			name, v_var, name, name)
+		env.HaveVars[name] = struct{}{}
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
 		interns += fmt.Sprintf(`
-	%s_ns.Intern(sym_%s)
+	_ns.InternExistingVar(sym_%s, p_v_%s)
 `,
-			v_assign, name)
+			name, name)
 
-		interns += inits
+		statics += v_var
 	}
 
-	return inits, interns + joinStringFns(env.runtime)
+	return statics, interns + joinStringFns(env.runtime)
 }
 
 func joinStringFns(fns []func() string) string {
@@ -979,18 +996,15 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 		}
 		env.HaveVars[g] = struct{}{}
 		return fmt.Sprintf(`
-	v_%s := GLOBAL_ENV.CoreNamespace.mappings[string_%s]
-	if v_%s == nil {
-		panic(RT.NewError("Error unpacking var: cannot find var %s"))
- 	}
+	p_v_%s := GLOBAL_ENV.CoreNamespace.mappings[string_%s]
 `,
-			g, g, g, sym)
+			g, g)
 	}
 	env.runtime = append(env.runtime, runtimeDefineVarFn)
 
 	runtimeAssignFn := func() string {
 		return fmt.Sprintf(`
-	%s = v_%s
+	%s = p_v_%s
 `[1:],
 			directAssign(target), g)
 	}
