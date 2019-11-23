@@ -79,6 +79,7 @@ func main() {
 		NeedStrs:     map[string]struct{}{},
 		NeedBindings: map[*Binding]struct{}{},
 		NeedKeywords: map[uint32]Keyword{},
+		Generated:    map[string]struct{}{},
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)

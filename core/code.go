@@ -27,6 +27,7 @@ type (
 		NeedStrs     map[string]struct{}
 		NeedBindings map[*Binding]struct{}
 		NeedKeywords map[uint32]Keyword
+		Generated    map[string]struct{}
 	}
 
 	EmitHeader struct {
@@ -78,6 +79,13 @@ func indirect(s string) string {
 		return s
 	}
 	return "*" + s
+}
+
+func uniqueName(target, prefix string, hash uint32) string {
+	if strings.Contains(target, ".") {
+		return fmt.Sprintf("fn_%d", hash)
+	}
+	return prefix + target
 }
 
 func coreType(e interface{}) string {
@@ -299,38 +307,6 @@ func joinStringFns(fns []func() string) string {
 	return strings.Join(strs, "")
 }
 
-// func UnpackHeader(p []byte, env *Env) (*EmitHeader, []byte) {
-// 	stringCount, p := extractInt(p)
-// 	strs := make([]*string, stringCount)
-// 	for i := 0; i < stringCount; i++ {
-// 		var index uint16
-// 		var length int
-// 		index, p = extractUInt16(p)
-// 		length, p = extractInt(p)
-// 		if length == -1 {
-// 			strs[index] = nil
-// 		} else {
-// 			strs[index] = STRINGS.Intern(string(p[:length]))
-// 			p = p[length:]
-// 		}
-// 	}
-// 	header := &EmitHeader{
-// 		GlobalEnv: env,
-// 		Strings:   strs,
-// 	}
-// 	bindingCount, p := extractInt(p)
-// 	bindings := make([]Binding, bindingCount)
-// 	for i := 0; i < bindingCount; i++ {
-// 		var index int
-// 		var b Binding
-// 		index, p = extractInt(p)
-// 		b, p = unpackBinding(p, header)
-// 		bindings[index] = b
-// 	}
-// 	header.Bindings = bindings
-// 	return header, p
-// }
-
 func (env *CodeEnv) stringIndex(s *string) uint16 {
 	index, ok := env.Strings[s]
 	if ok {
@@ -413,24 +389,6 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 }
 
-// func unpackSymbol(p []byte, header *EmitHeader) (Symbol, []byte) {
-// 	info, p := unpackObjectInfo(p, header)
-// 	meta, p := UnpackObjectOrNil(p, header)
-// 	iname, p := extractUInt16(p)
-// 	ins, p := extractUInt16(p)
-// 	hash, p := extractUInt32(p)
-// 	res := Symbol{
-// 		InfoHolder: InfoHolder{info: info},
-// 		name:       header.Strings[iname],
-// 		ns:         header.Strings[ins],
-// 		hash:       hash,
-// 	}
-// 	if meta != nil {
-// 		res.meta = meta.(Map)
-// 	}
-// 	return res, p
-// }
-
 func directAssign(target string) string {
 	cmp := strings.Split(target, ".")
 	final := cmp[len(cmp)-1]
@@ -446,7 +404,6 @@ func (t *Type) Emit(target string, env *CodeEnv) string {
 	}
 	name := NameAsGo(t.name)
 	env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
-	// return fmt.Sprintf("!TYPES[string_%s]", name)
 	typeFn := func() string {
 		return fmt.Sprintf(`
 	%s = TYPES[string_%s]
@@ -457,11 +414,6 @@ func (t *Type) Emit(target string, env *CodeEnv) string {
 	return ""
 }
 
-// func unpackType(p []byte, header *EmitHeader) (*Type, []byte) {
-// 	s, p := unpackSymbol(p, header)
-// 	return TYPES[s.name], p
-// }
-
 func emitProc(target string, p Proc, env *CodeEnv) string {
 	return "!" + p.name
 }
@@ -471,21 +423,36 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 }
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
-	fields := []string{}
-	if fn.isMacro {
-		fields = append(fields, "\tisMacro: true,")
+	name := uniqueName(target, "fn_", fn.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = struct{}{}
+		fields := []string{}
+		if fn.isMacro {
+			fields = append(fields, "\tisMacro: true,")
+		}
+		if fn.fnExpr != nil {
+			f := noBang(fn.fnExpr.Emit(name+".fnExpr", env))
+			if f != "" {
+				fields = append(fields, fmt.Sprintf("\tfnExpr: %s,", f))
+			}
+		}
+		if fn.env != nil {
+			f := noBang(fn.env.Emit(name+".env", env))
+			if f != "" {
+				fields = append(fields, fmt.Sprintf("\tenv: %s,", f))
+			}
+		}
+		f := strings.Join(fields, "\n")
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Fn{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
 	}
-	if fn.fnExpr != nil {
-		fields = append(fields, fmt.Sprintf("\tfnExpr: %s,", noBang(fn.fnExpr.Emit(target+".fnExpr", env))))
-	}
-	if fn.env != nil {
-		fields = append(fields, fmt.Sprintf("\tenv: %s,", noBang(fn.env.Emit(target+".env", env))))
-	}
-	f := strings.Join(fields, "\n")
-	if f != "" {
-		f = "\n" + f + "\n"
-	}
-	return fmt.Sprintf("&Fn{%s}", f)
+	return "!p_" + name
 }
 
 func (b Boolean) Emit(target string, env *CodeEnv) string {
