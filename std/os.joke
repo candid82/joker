@@ -148,3 +148,18 @@
   {:added "1.0"
   :go "! err := f.Close(); PanicOnErr(err); _res := NIL"}
   [^File f])
+
+(defn remove
+  "Removes the named file or (empty) directory."
+  {:added "1.0"
+   :go "! err := os.Remove(name); PanicOnErr(err); _res := NIL"}
+  [^String name])
+
+(defn remove-all
+  "Removes path and any children it contains.
+
+  It removes everything it can, then panics with the first error (if
+  any) it encountered."
+  {:added "1.0"
+   :go "! err := os.RemoveAll(path); PanicOnErr(err); _res := NIL"}
+  [^String path])

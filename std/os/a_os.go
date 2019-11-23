@@ -224,6 +224,42 @@ func __open_(_args []Object) Object {
 	return NIL
 }
 
+var remove_ Proc
+
+func __remove_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		 err := os.Remove(name)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var remove_all_ Proc
+
+func __remove_all_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		 err := os.RemoveAll(path)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var set_env_ Proc
 
 func __set_env_(_args []Object) Object {
@@ -346,6 +382,8 @@ func Init() {
 	ls_ = __ls_
 	mkdir_ = __mkdir_
 	open_ = __open_
+	remove_ = __remove_
+	remove_all_ = __remove_all_
 	set_env_ = __set_env_
 	sh_ = __sh_
 	sh_async_ = __sh_async_
@@ -436,6 +474,19 @@ func Init() {
 			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
 			`Opens the named file for reading. If successful, the file can be used for reading;
   the associated file descriptor has mode O_RDONLY.`, "1.0").Plus(MakeKeyword("tag"), String{S: "File"}))
+
+	osNamespace.InternVar("remove", remove_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			`Removes the named file or (empty) directory.`, "1.0"))
+
+	osNamespace.InternVar("remove-all", remove_all_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			`Removes path and any children it contains.
+
+  It removes everything it can, then panics with the first error (if
+  any) it encountered.`, "1.0"))
 
 	osNamespace.InternVar("set-env", set_env_,
 		MakeMeta(
