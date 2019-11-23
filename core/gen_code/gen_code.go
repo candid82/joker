@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -123,87 +124,98 @@ func {name}Init() {
 package core
 
 {strDefs}
+
 {symDefs}
+
 {kwDefs}
+
 {bindingDefs}
+
 func init() {
 {strInterns}
+
 {symInterns}
 }
 `
 
-	bindingDefs := ""
+	bindingDefs := []string{}
 	for b, _ := range codeWriterEnv.NeedBindings {
-		bindingDefs += fmt.Sprintf(`
-var binding_%p = Binding{
+		symName := NameAsGo(*b.SymName())
+		uniqueId := NameAsGo(b.UniqueId())
+		bindingDefs = append(bindingDefs, fmt.Sprintf(`
+var binding_%s = Binding{
 	name: sym_%s,
 	index: %d,
 	frame: %d,
 	isUsed: %v,
-}
-`[1:],
-			b, NameAsGo(*b.Name()), b.Index(), b.Frame(), b.IsUsed())
+}`[1:],
+			uniqueId, symName, b.Index(), b.Frame(), b.IsUsed()))
 
-		codeWriterEnv.NeedSyms[b.Name()] = struct{}{}
+		codeWriterEnv.NeedSyms[b.SymName()] = struct{}{}
 	}
+	sort.Strings(bindingDefs)
 
-	symDefs := ""
-	symInterns := ""
+	symDefs := []string{}
+	symInterns := []string{}
 	for s, _ := range codeWriterEnv.NeedSyms {
 		name := NameAsGo(*s)
-		symDefs += fmt.Sprintf(`
-var sym_%s = Symbol{}
-`[1:],
-			name)
+		symDefs = append(symDefs, fmt.Sprintf(`
+var sym_%s = Symbol{}`[1:],
+			name))
 
 		codeWriterEnv.NeedStrs[*s] = struct{}{}
-		symInterns += fmt.Sprintf(`
-	sym_%s.name = string_%s
-`[1:],
-			name, name)
+		symInterns = append(symInterns, fmt.Sprintf(`
+	sym_%s.name = string_%s`[1:],
+			name, name))
 	}
+	sort.Strings(symDefs)
+	sort.Strings(symInterns)
 
-	kwDefs := ""
+	kwDefs := []string{}
 	for _, k := range codeWriterEnv.NeedKeywords {
-		ns := "nil"
+		strNs := ""
+		name := NameAsGo(*k.NameField())
 		if k.NsField() != nil {
-			ns = "string_" + NameAsGo(*k.NsField())
-
+			nsName := NameAsGo(*k.NsField())
+			strNs = "string_" + nsName
 		}
-		name := "string_" + NameAsGo(*k.NameField())
+		strName := "string_" + name
 
-		kwId := fmt.Sprintf("kw_%d", k.HashField())
+		kwId := "kw_" + name
 
-		kwDefs += fmt.Sprintf(`
+		if strNs != "" {
+			strNs = "\tns: " + strNs + ",\n"
+		}
+		kwDefs = append(kwDefs, fmt.Sprintf(`
 var %s = Keyword{
-	ns: %s,
-	name: %s,
-}`,
-			kwId, ns, name)
+%s	name: %s,
+}`[1:],
+			kwId, strNs, strName))
 	}
+	sort.Strings(kwDefs)
 
-	strDefs := ""
-	strInterns := ""
+	strDefs := []string{}
+	strInterns := []string{}
 	for s, _ := range codeWriterEnv.NeedStrs {
 		name := NameAsGo(s)
-		strDefs += fmt.Sprintf(`
-var string_%s *string
-`[1:],
-			name)
+		strDefs = append(strDefs, fmt.Sprintf(`
+var string_%s *string`[1:],
+			name))
 
-		strInterns += fmt.Sprintf(`
-	string_%s = STRINGS.Intern("%s")
-`[1:],
-			name, s)
+		strInterns = append(strInterns, fmt.Sprintf(`
+	string_%s = STRINGS.Intern("%s")`[1:],
+			name, s))
 	}
+	sort.Strings(strDefs)
+	sort.Strings(strInterns)
 
 	var tr = [][2]string{
-		{"{strDefs}", strDefs},
-		{"{symDefs}", symDefs},
-		{"{kwDefs}", kwDefs},
-		{"{bindingDefs}", bindingDefs},
-		{"{strInterns}", strInterns},
-		{"{symInterns}", symInterns},
+		{"{strDefs}", strings.Join(strDefs, "\n")},
+		{"{symDefs}", strings.Join(symDefs, "\n")},
+		{"{kwDefs}", strings.Join(kwDefs, "\n\n")},
+		{"{bindingDefs}", strings.Join(bindingDefs, "\n\n")},
+		{"{strInterns}", strings.Join(strInterns, "\n")},
+		{"{symInterns}", strings.Join(symInterns, "\n")},
 	}
 	for _, t := range tr {
 		fileContent = strings.Replace(fileContent, t[0], t[1], 1)

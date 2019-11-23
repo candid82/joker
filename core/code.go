@@ -96,8 +96,12 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
-func (b *Binding) Name() *string {
+func (b *Binding) SymName() *string {
 	return b.name.name
+}
+
+func (b *Binding) UniqueId() string {
+	return fmt.Sprintf("%s_%d_%d", *b.SymName(), b.Index(), b.Frame())
 }
 
 func (b *Binding) Index() int {
