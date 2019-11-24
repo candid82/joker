@@ -1134,7 +1134,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	}
 	env.runtime = append(env.runtime, runtimeAssignFn)
 
-	return "!(*Var)(nil)"
+	return fmt.Sprintf(`!p_v_%s`, g)
 }
 
 // func unpackVar(p []byte, header *EmitHeader) (*Var, []byte) {
