@@ -135,6 +135,8 @@ func init() {
 {strInterns}
 
 {symInterns}
+
+{kwHashes}
 }
 `
 
@@ -171,27 +173,35 @@ var sym_%s = Symbol{}`[1:],
 	sort.Strings(symInterns)
 
 	kwDefs := []string{}
+	kwHashes := []string{}
 	for _, k := range codeWriterEnv.NeedKeywords {
-		strNs := ""
-		name := NameAsGo(*k.NameField())
+		strName := "string_" + NameAsGo(*k.NameField())
+
+		strNs := "nil"
 		if k.NsField() != nil {
-			nsName := NameAsGo(*k.NsField())
+			ns := *k.NsField()
+			nsName := NameAsGo(ns)
 			strNs = "string_" + nsName
 		}
-		strName := "string_" + name
 
 		kwId := "kw_" + k.UniqueId()
 
-		if strNs != "" {
-			strNs = "\tns: " + strNs + ",\n"
+		initNs := ""
+		if strNs != "nil" {
+			initNs = "\tns: " + strNs + ",\n"
 		}
 		kwDefs = append(kwDefs, fmt.Sprintf(`
 var %s = Keyword{
 %s	name: %s,
 }`[1:],
+			kwId, initNs, strName))
+
+		kwHashes = append(kwHashes, fmt.Sprintf(`
+	%s.hash = hashSymbol(%s, %s)`[1:],
 			kwId, strNs, strName))
 	}
 	sort.Strings(kwDefs)
+	sort.Strings(kwHashes)
 
 	strDefs := []string{}
 	strInterns := []string{}
@@ -215,6 +225,7 @@ var string_%s *string`[1:],
 		{"{bindingDefs}", strings.Join(bindingDefs, "\n\n")},
 		{"{strInterns}", strings.Join(strInterns, "\n")},
 		{"{symInterns}", strings.Join(symInterns, "\n")},
+		{"{kwHashes}", strings.Join(kwHashes, "\n")},
 	}
 	for _, t := range tr {
 		fileContent = strings.Replace(fileContent, t[0], t[1], 1)

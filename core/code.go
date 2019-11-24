@@ -657,28 +657,17 @@ func (k Keyword) UniqueId() string {
 }
 
 func (k Keyword) Emit(target string, env *CodeEnv) string {
-	ns := "nil"
 	if k.ns != nil {
-		ns = "string_" + NameAsGo(*k.ns)
 		env.codeWriterEnv.NeedStrs[*k.ns] = struct{}{}
 
 	}
-	name := "string_" + NameAsGo(*k.name)
 	env.codeWriterEnv.NeedStrs[*k.name] = struct{}{}
 
 	kwId := fmt.Sprintf("kw_%s", k.UniqueId())
 
-	hashFn := func() string {
-		return fmt.Sprintf(`
-	%s.hash = hashSymbol(%s, %s)
-`,
-			kwId, ns, name)
-	}
-	env.runtime = append(env.runtime, hashFn)
-
 	env.codeWriterEnv.NeedKeywords[k.hash] = k
 
-	return fmt.Sprintf(`&%s  /* :%s */`, kwId, k.Name())
+	return fmt.Sprintf(`&%s`, kwId)
 }
 
 func (i Int) Emit(target string, env *CodeEnv) string {
