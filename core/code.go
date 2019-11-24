@@ -20,7 +20,6 @@ type (
 		statics          string
 		interns          string
 		runtime          []func() string
-		HaveVars         map[string]struct{}
 	}
 
 	CodeWriterEnv struct {
@@ -135,7 +134,6 @@ func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 		Symbols:       []*string{},
 		Strings:       make(map[*string]uint16),
 		Bindings:      make(map[*Binding]int),
-		HaveVars:      make(map[string]struct{}),
 	}
 }
 
@@ -294,7 +292,7 @@ var v_%s = Var{%s}
 var p_v_%s = &v_%s
 `[1:],
 			name, v_var, name, name)
-		env.HaveVars[name] = struct{}{}
+		env.codeWriterEnv.Generated[v] = v
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
 		interns += fmt.Sprintf(`
@@ -464,9 +462,7 @@ var p_%s = &%s
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
 	name := uniqueName(target, "fn_", fn.Hash())
-	if gen, ok := env.codeWriterEnv.Generated[name]; ok {
-		fmt.Printf("already have %v(%T) so not generating %v(%T)\n", gen, gen, *fn, *fn)
-	} else {
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = fn
 		fields := []string{}
 		if fn.isMacro {
@@ -1008,18 +1004,26 @@ func (expr *DefExpr) Emit(target string, env *CodeEnv) string {
 
 	name := NameAsGo(*expr.name.name)
 
+	vr := noBang(expr.vr.Emit(target+".vr", env))
+	if vr != "" {
+		vr = fmt.Sprintf(`
+	vr: %s,
+`[1:],
+			vr)
+
+	}
+
 	initial := fmt.Sprintf(`
 &DefExpr{
 	Position: %s,
-	vr: %s,
-	name: %s,
+%s	name: %s,
 	value: %s,
 	meta: %s,
 	}
 `[1:],
 		name,
 		noBang(expr.Pos().Emit(target+".Position", env)),
-		noBang(expr.vr.Emit(target+".vr", env)),
+		vr,
 		noBang(expr.name.Emit(target+".name", env)),
 		noBang(emitExprOrNil(target+".value"+assertType(expr.value), expr.value, env)),
 		noBang(emitExprOrNil(target+".meta"+assertType(expr.meta), expr.meta, env)))
@@ -1104,12 +1108,20 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
-		if _, ok := env.HaveVars[g]; ok {
+		if _, ok := env.codeWriterEnv.Generated[vr]; ok {
 			return "\n"
 		}
-		env.HaveVars[g] = struct{}{}
+
+		env.codeWriterEnv.Generated[vr] = vr
+
+		decl := fmt.Sprintf(`
+var p_v_%s *Var
+`[1:],
+			g)
+		env.statics += decl
+
 		return fmt.Sprintf(`
-	p_v_%s := GLOBAL_ENV.CoreNamespace.mappings[string_%s]
+	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[string_%s]
 `,
 			g, g)
 	}
@@ -1123,7 +1135,7 @@ func (vr *Var) Emit(target string, env *CodeEnv) string {
 	}
 	env.runtime = append(env.runtime, runtimeAssignFn)
 
-	return fmt.Sprintf(`!p_v_%s`, g)
+	return ""
 }
 
 // func unpackVar(p []byte, header *EmitHeader) (*Var, []byte) {
@@ -1141,10 +1153,16 @@ func (expr *VarRefExpr) Emit(target string, env *CodeEnv) string {
 	// p = expr.Pos().Emit(p, env)
 	// p = expr.vr.Emit(p, env)
 	// return p
-	return fmt.Sprintf(`&VarRefExpr{
+	vr := noBang(expr.vr.Emit(target+".vr", env))
+	if vr != "" {
+		vr = fmt.Sprintf(`
 	vr: %s,
-}`,
-		noBang(expr.vr.Emit(target+".vr", env)))
+`,
+			vr)
+
+	}
+
+	return fmt.Sprintf(`&VarRefExpr{%s}`, vr)
 }
 
 // func unpackVarRefExpr(p []byte, header *EmitHeader) (*VarRefExpr, []byte) {
