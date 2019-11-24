@@ -361,7 +361,7 @@ func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
 	// }
 	// p = append(p, NOT_NULL)
 	// return info.Pos().Emit(p, env)
-	return "!(*ObjectInfo)(nil)"
+	return fmt.Sprintf("/* ABEND: *ObjectInfo of type %T */", info)
 }
 
 // func unpackObjectInfo(p []byte, header *EmitHeader) (*ObjectInfo, []byte) {
@@ -371,22 +371,6 @@ func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
 // 	p = p[1:]
 // 	pos, p := unpackPosition(p, header)
 // 	return &ObjectInfo{Position: pos}, p
-// }
-
-func EmitObjectOrNil(obj Object, env *CodeEnv) string {
-	// if obj == nil {
-	// 	return append(p, NULL)
-	// }
-	// p = append(p, NOT_NULL)
-	// return packObject(obj, p, env)
-	return "!(*Object)(nil)"
-}
-
-// func UnpackObjectOrNil(p []byte, header *EmitHeader) (Object, []byte) {
-// 	if p[0] == NULL {
-// 		return nil, p[1:]
-// 	}
-// 	return unpackObject(p[1:], header)
 // }
 
 func (s Symbol) Emit(target string, env *CodeEnv) string {
@@ -1259,7 +1243,7 @@ func (expr *DoExpr) Emit(target string, env *CodeEnv) string {
 
 func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
 	if expr == nil {
-		return "(*FnArityExpr)(nil)"
+		return ""
 	}
 
 	res := fmt.Sprintf(`&FnArityExpr{
@@ -1319,13 +1303,19 @@ func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *FnExpr) Emit(target string, env *CodeEnv) string {
+	variadic := ""
+	if expr.variadic != nil {
+		variadic = fmt.Sprintf(`
+	variadic: %s,
+`[1:],
+			noBang(emitExprOrNil(target+".variadic", expr.variadic, env)))
+	}
 	return fmt.Sprintf(`&FnExpr{
 	arities: %s,
-	variadic: %s,
-	self: %s,
+%s	self: %s,
 }`,
 		emitFnArityExprSeq(target+".arities", expr.arities, env),
-		noBang(emitExprOrNil(target+".variadic", expr.variadic, env)),
+		variadic,
 		noBang(expr.self.Emit(target+".self", env)))
 }
 
