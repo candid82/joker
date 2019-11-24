@@ -4472,3 +4472,23 @@
        :added "1.0"
        :tag Map}
   types__ types__)
+
+(defn ^:private go*
+  [f]
+  (go__ f))
+
+(defmacro go
+  "Schedules a block to run inside a goroutine.
+  Immediately returns a Future that will deref to whatever the block returns.
+  If exception is thrown inside the block, it will be caught and re-thrown upon
+  derefing the returned Future.
+
+  Joker is single threaded and uses the GIL (Global Interpreter Lock) to make sure
+  only one goroutine (including the root one) executes at the same time.
+  However, Future's deref and some I/O functions (joker.http/send, joker.os/sh*, joker.os/exec,
+  and joker.time/sleep) release the GIL and allow other goroutines to run.
+  So using goroutines only makes sense if you do I/O (specifically, calling the above functions)
+  inside them. Also, note that a goroutine may never have a chance to run if the root goroutine
+  (or another goroutine) doesn't deref a Future or do any I/O."
+  [& body]
+  `(go* (fn [] ~@body)))

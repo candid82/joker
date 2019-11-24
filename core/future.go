@@ -54,7 +54,9 @@ func ExtractFuture(args []Object, index int) *Future {
 
 func (d *Future) Deref() Object {
 	if !d.isDelivered {
+		RT.GIL.Unlock()
 		d.result = <-d.ch
+		RT.GIL.Lock()
 		d.isDelivered = true
 	}
 	if d.result.err != nil {

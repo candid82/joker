@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 
 	. "github.com/candid82/joker/core"
 )
@@ -134,7 +133,10 @@ func mapToResp(response Map, w http.ResponseWriter) {
 }
 
 func sendRequest(request Map) Map {
-	resp, err := client.Do(mapToReq(request))
+	req := mapToReq(request)
+	RT.GIL.Unlock()
+	resp, err := client.Do(req)
+	RT.GIL.Lock()
 	PanicOnErr(err)
 	return respToMap(resp)
 }
@@ -152,11 +154,12 @@ func startServer(addr string, handler Callable) Object {
 		host = MakeString(addr[:i])
 		port = MakeString(addr[i+1:])
 	}
-	var mutex sync.Mutex
+	RT.GIL.Unlock()
+	defer RT.GIL.Lock()
 	err := http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		mutex.Lock()
+		RT.GIL.Lock()
 		defer func() {
-			mutex.Unlock()
+			RT.GIL.Unlock()
 			if r := recover(); r != nil {
 				w.WriteHeader(500)
 				io.WriteString(w, "Internal server error")

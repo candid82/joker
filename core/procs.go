@@ -1557,6 +1557,32 @@ var procTypes Proc = func(args []Object) Object {
 	return res
 }
 
+var procGo Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	f := EnsureCallable(args, 0)
+	ch := make(chan FutureResult, 1)
+	go func() {
+
+		defer func() {
+			if r := recover(); r != nil {
+				switch r := r.(type) {
+				case Error:
+					ch <- MakeFutureResult(NIL, r)
+				default:
+					RT.GIL.Unlock()
+					panic(r)
+				}
+			}
+			RT.GIL.Unlock()
+		}()
+
+		RT.GIL.Lock()
+		res := f.Call([]Object{})
+		ch <- MakeFutureResult(res, nil)
+	}()
+	return MakeFuture(ch)
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
@@ -2123,4 +2149,5 @@ func init() {
 	intern("parse__", procParse)
 	intern("inc-problem-count__", procIncProblemCount)
 	intern("types__", procTypes)
+	intern("go__", procGo)
 }

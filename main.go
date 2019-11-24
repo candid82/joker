@@ -648,6 +648,7 @@ var runningProfile interface {
 }
 
 func main() {
+	RT.GIL.Lock()
 	InitInternalLibs()
 	ProcessCoreData()
 
