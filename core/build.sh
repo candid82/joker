@@ -18,10 +18,10 @@ $time go build -o gen_data/gen_data gen_data/gen_data.go
 
 $time go run gen_code/gen_code.go
 
-exit 0  # TODO: Revert this once all the forms are being generated
-
 $time ./gen_data/gen_data
 
 $time go fmt a_*.go
+
+#exit 0  # TODO: Revert this once all the forms are being generated
 
 cd ..; KEEP_A_FILES=true $time ./run.sh "$@"
