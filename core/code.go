@@ -81,9 +81,9 @@ func indirect(s string) string {
 	return "*" + s
 }
 
-func uniqueName(target, prefix string, hash uint32) string {
+func uniqueName(target, prefix, f string, id interface{}) string {
 	if strings.Contains(target, ".") {
-		return fmt.Sprintf("%s%d", prefix, hash)
+		return fmt.Sprintf("%s"+f, prefix, id)
 	}
 	return prefix + target
 }
@@ -102,7 +102,7 @@ func metaHolder(target string, m Map, env *CodeEnv) string {
 		return ""
 	}
 	return fmt.Sprintf(`
-	meta: %s,`,
+	MetaHolder: MetaHolder{meta: %s},`,
 		res)
 }
 
@@ -425,7 +425,7 @@ func (le *LocalEnv) Hash() uint32 {
 }
 
 func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "localEnv_", le.Hash())
+	name := uniqueName(target, "localEnv_", "%d", le.Hash())
 	if _, ok := env.codeWriterEnv.Generated[le]; !ok {
 		env.codeWriterEnv.Generated[le] = le
 		fields := []string{}
@@ -455,7 +455,7 @@ var p_%s = &%s
 }
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
-	name := uniqueName(target, "fn_", fn.Hash())
+	name := uniqueName(target, "fn_", "%d", fn.Hash())
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = fn
 		fields := []string{}
@@ -495,7 +495,7 @@ func (b Boolean) Emit(target string, env *CodeEnv) string {
 }
 
 func (m *MapSet) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "mapset_", m.Hash())
+	name := uniqueName(target, "mapset_", "%d", m.Hash())
 	if _, ok := env.codeWriterEnv.Generated[m]; !ok {
 		env.codeWriterEnv.Generated[m] = m
 		f := noBang(emitMap(target+".m", false, m.m, env))
@@ -527,7 +527,7 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 }
 
 func (l *List) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "list_", l.Hash())
+	name := uniqueName(target, "list_", "%d", l.Hash())
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = nil
 		fields := []string{}
@@ -568,7 +568,7 @@ var p_%s = &%s
 }
 
 func (v *Vector) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "vector_", v.Hash())
+	name := uniqueName(target, "vector_", "%p", v)
 	if _, ok := env.codeWriterEnv.Generated[v]; !ok {
 		env.codeWriterEnv.Generated[v] = v
 		fields := []string{}
@@ -593,8 +593,30 @@ var p_%s = &%s
 	return "!p_" + name
 }
 
+func (v *VectorSeq) Emit(target string, env *CodeEnv) string {
+	name := uniqueName(target, "vectorSeq_", "%p", v)
+	if _, ok := env.codeWriterEnv.Generated[v]; !ok {
+		env.codeWriterEnv.Generated[v] = v
+		fields := []string{}
+		fields = append(fields, fmt.Sprintf("\tvector: %s,", noBang(v.vector.Emit(name+".root", env))))
+		if v.index != 0 {
+			fields = append(fields, fmt.Sprintf("\tindex: %d,", v.index))
+		}
+		f := strings.Join(fields, "\n")
+		if f != "" {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = VectorSeq{%s%s}
+var p_%s = &%s
+`,
+			name, metaHolder("v_"+name, v.meta, env), f, name, name)
+	}
+	return "!p_" + name
+}
+
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "arraymap_", m.Hash())
+	name := uniqueName(target, "arraymap_", "%d", m.Hash())
 	if _, ok := env.codeWriterEnv.Generated[m]; !ok {
 		env.codeWriterEnv.Generated[m] = m
 		f := emitObjectSeq(target+".arr", m.arr, env)
@@ -721,6 +743,8 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*List)"), env)
 	case *Vector:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Vector)"), env)
+	case *VectorSeq:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*VectorSeq)"), env)
 	case *ArrayMap:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*ArrayMap)"), env)
 	case *HashMap:
