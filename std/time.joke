@@ -7,7 +7,7 @@
   "Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately."
   {:added "1.0"
-  :go "! time.Sleep(time.Duration(d)); _res := NIL"}
+  :go "! RT.GIL.Unlock(); time.Sleep(time.Duration(d)); RT.GIL.Lock(); _res := NIL"}
   [^Int d])
 
 (defn ^Time now

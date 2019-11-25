@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"sync"
 	"unsafe"
 )
 
@@ -26,6 +27,7 @@ type (
 	Runtime struct {
 		callstack   *Callstack
 		currentExpr Expr
+		GIL         sync.Mutex
 	}
 )
 

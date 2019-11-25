@@ -667,6 +667,7 @@ func main() {
 
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
 
+	RT.GIL.Lock()
 	InitInternalLibs()
 	ProcessCoreNamespaceInfo()
 
