@@ -96,6 +96,16 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
+func metaHolder(target string, m Map, env *CodeEnv) string {
+	res := noBang(emitMap(target+".meta", false, m, env))
+	if res == "" {
+		return ""
+	}
+	return fmt.Sprintf(`
+	meta: %s,`,
+		res)
+}
+
 func (b *Binding) SymName() *string {
 	return b.name.name
 }
@@ -288,10 +298,10 @@ var taggedType_%s = %s
 `
 		}
 		v_var = fmt.Sprintf(`
-var v_%s = Var{%s}
+var v_%s = Var{%s%s}
 var p_v_%s = &v_%s
 `[1:],
-			name, v_var, name, name)
+			name, metaHolder("v_"+name, v.meta, env), v_var, name, name)
 		env.codeWriterEnv.Generated[v] = v
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
@@ -469,10 +479,10 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
-var %s = Fn{%s}
+var %s = Fn{%s%s}
 var p_%s = &%s
 `,
-			name, f, name, name)
+			name, metaHolder(target, fn.meta, env), f, name, name)
 	}
 	return "!p_" + name
 }
@@ -510,6 +520,8 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 		return m.Emit(target, env)
 	case *HashMap:
 		return m.Emit(target, env)
+	case nil:
+		return ""
 	}
 	return fmt.Sprintf("nil /*ABEND: %T*/", m)
 }
@@ -609,6 +621,17 @@ func (io *IOWriter) Emit(target string, env *CodeEnv) string {
 	return "!(*IOWriter)(nil)"
 }
 
+func (ns *Namespace) Emit(target string, env *CodeEnv) string {
+	if *ns.Name.name != "joker.core" {
+		panic(fmt.Sprintf("code.go: (*Namespace)Emit() supports only ns=joker.core, not =%s\n", *ns.Name.name))
+	}
+	nsFn := func() string {
+		return fmt.Sprintf("\t%s = _ns\n", target)
+	}
+	env.runtime = append(env.runtime, nsFn)
+	return "nil"
+}
+
 func (s String) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`!String{
 	S: %s,
@@ -702,10 +725,10 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*ArrayMap)"), env)
 	case *HashMap:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*HashMap)"), env)
-	case Nil:
-		return "Nil{}"
 	case *IOWriter:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), env)
+	case *Namespace:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), env)
 	case String:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(String)"), env)
 	case Keyword:
@@ -716,6 +739,8 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Char)"), env)
 	case Double:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
+	case Nil:
+		return "Nil{}"
 	default:
 		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
 	}
@@ -974,46 +999,46 @@ func (expr *IfExpr) Emit(target string, env *CodeEnv) string {
 // 	return res, p
 // }
 
-func (expr *DefExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, DEF_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.name.Emit(p, env)
-	// p = emitExprOrNil(expr.value, p, env)
-	// p = emitExprOrNil(expr.meta, p, env)
-	// p = expr.vr.info.Emit(p, env)
-	// return p
-	if expr.value == nil {
-		return "" // just (declare name), which can be ignored here
-	}
+// func (expr *DefExpr) Emit(target string, env *CodeEnv) string {
+// 	// p = append(p, DEF_EXPR)
+// 	// p = expr.Pos().Emit(p, env)
+// 	// p = expr.name.Emit(p, env)
+// 	// p = emitExprOrNil(expr.value, p, env)
+// 	// p = emitExprOrNil(expr.meta, p, env)
+// 	// p = expr.vr.info.Emit(p, env)
+// 	// return p
+// 	if expr.value == nil {
+// 		return "" // just (declare name), which can be ignored here
+// 	}
 
-	name := NameAsGo(*expr.name.name)
+// 	name := NameAsGo(*expr.name.name)
 
-	vr := noBang(expr.vr.Emit(target+".vr", env))
-	if vr != "" {
-		vr = fmt.Sprintf(`
-	vr: %s,
-`[1:],
-			vr)
+// 	vr := noBang(expr.vr.Emit(target+".vr", env))
+// 	if vr != "" {
+// 		vr = fmt.Sprintf(`
+// 	vr: %s,
+// `[1:],
+// 			vr)
 
-	}
+// 	}
 
-	initial := fmt.Sprintf(`
-&DefExpr{
-	Position: %s,
-%s	name: %s,
-	value: %s,
-	meta: %s,
-	}
-`[1:],
-		name,
-		noBang(expr.Pos().Emit(target+".Position", env)),
-		vr,
-		noBang(expr.name.Emit(target+".name", env)),
-		noBang(emitExprOrNil(target+".value"+assertType(expr.value), expr.value, env)),
-		noBang(emitExprOrNil(target+".meta"+assertType(expr.meta), expr.meta, env)))
+// 	initial := fmt.Sprintf(`
+// &DefExpr{
+// 	Position: %s,
+// %s	name: %s,
+// 	value: %s,
+// 	meta: %s,
+// 	}
+// `[1:],
+// 		name,
+// 		noBang(expr.Pos().Emit(target+".Position", env)),
+// 		vr,
+// 		noBang(expr.name.Emit(target+".name", env)),
+// 		noBang(emitExprOrNil(target+".value"+assertType(expr.value), expr.value, env)),
+// 		noBang(emitExprOrNil(target+".meta"+assertType(expr.meta), expr.meta, env)))
 
-	return initial
-}
+// 	return initial
+// }
 
 // func unpackDefExpr(p []byte, header *EmitHeader) (*DefExpr, []byte) {
 // 	p = p[1:]
