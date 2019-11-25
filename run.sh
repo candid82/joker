@@ -6,7 +6,7 @@ build() {
   go clean
   $KEEP_A_FILES || rm -f core/a_*.go
   go generate ./...
-  [ -f OPTIMIZE-STARTUP.flag ] && (cd core; go run gen_code/gen_code.go && go fmt a_*.go)
+  [ -f OPTIMIZE-STARTUP.flag ] && (cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
   (cd core; go run gen_data/gen_data.go)
   go vet ./...
   go build
@@ -29,11 +29,11 @@ if [ -n "$OUT" ]; then
     echo >&2 "Unable to generate fresh library files; exiting."
     exit 2
 fi
+(cd std; go fmt ./... > /dev/null)
 NEW_SUM256="$(go run tools/sum256dir/main.go std)"
 
 if [ "$SUM256" != "$NEW_SUM256" ]; then
     echo 'std has changed, rebuilding...'
-    (cd std; go fmt ./...)
     build
 fi
 
