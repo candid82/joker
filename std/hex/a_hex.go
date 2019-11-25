@@ -3,13 +3,11 @@
 package hex
 
 import (
-	. "github.com/candid82/joker/core"
 	"encoding/hex"
+	. "github.com/candid82/joker/core"
 )
 
 var hexNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.hex"))
-
-
 
 var decode_string_ ProcFn
 
@@ -18,7 +16,7 @@ func __decode_string_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		s := ExtractString(_args, 0)
-		 t, err := hex.DecodeString(s)
+		t, err := hex.DecodeString(s)
 		PanicOnErr(err)
 		_res := string(t)
 		return MakeString(_res)
@@ -52,7 +50,6 @@ func Init() {
 
 	hexNamespace.ResetMeta(MakeMeta(nil, `Implements hexadecimal encoding and decoding.`, "1.0"))
 
-	
 	hexNamespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

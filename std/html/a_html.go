@@ -9,8 +9,6 @@ import (
 
 var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
-
-
 var escape_ ProcFn
 
 func __escape_(_args []Object) Object {
@@ -50,7 +48,6 @@ func Init() {
 
 	htmlNamespace.ResetMeta(MakeMeta(nil, `Provides functions for escaping and unescaping HTML text.`, "1.0"))
 
-	
 	htmlNamespace.InternVar("escape", escape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

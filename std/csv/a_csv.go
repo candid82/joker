@@ -8,8 +8,6 @@ import (
 
 var csvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.csv"))
 
-
-
 var csv_seq_ ProcFn
 
 func __csv_seq_(_args []Object) Object {
@@ -86,7 +84,6 @@ func Init() {
 
 	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) files as defined in RFC 4180.`, "1.0"))
 
-	
 	csvNamespace.InternVar("csv-seq", csv_seq_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),

@@ -8,8 +8,6 @@ import (
 
 var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
-
-
 var decode_string_ ProcFn
 
 func __decode_string_(_args []Object) Object {
@@ -49,7 +47,6 @@ func Init() {
 
 	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
 
-	
 	base64Namespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

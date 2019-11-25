@@ -1566,7 +1566,7 @@ var procTypes ProcFn = func(args []Object) Object {
 	return res
 }
 
-var procGo Proc = func(args []Object) Object {
+var procGo ProcFn = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	f := EnsureCallable(args, 0)
 	ch := make(chan FutureResult, 1)

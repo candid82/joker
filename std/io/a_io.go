@@ -9,8 +9,6 @@ import (
 
 var ioNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.io"))
 
-
-
 var copy_ ProcFn
 
 func __copy_(_args []Object) Object {
@@ -19,7 +17,7 @@ func __copy_(_args []Object) Object {
 	case _c == 2:
 		dst := ExtractIOWriter(_args, 0)
 		src := ExtractIOReader(_args, 1)
-		 n, err := io.Copy(dst, src)
+		n, err := io.Copy(dst, src)
 		PanicOnErr(err)
 		_res := int(n)
 		return MakeInt(_res)
@@ -36,7 +34,6 @@ func Init() {
 
 	ioNamespace.ResetMeta(MakeMeta(nil, `Provides basic interfaces to I/O primitives.`, "1.0"))
 
-	
 	ioNamespace.InternVar("copy", copy_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dst"), MakeSymbol("src"))),

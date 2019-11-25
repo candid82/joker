@@ -8,8 +8,6 @@ import (
 
 var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
-
-
 var read_string_ ProcFn
 
 func __read_string_(_args []Object) Object {
@@ -49,7 +47,6 @@ func Init() {
 
 	yamlNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of YAML.`, "1.0"))
 
-	
 	yamlNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

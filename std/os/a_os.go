@@ -222,17 +222,14 @@ func __open_(_args []Object) Object {
 	return NIL
 }
 
-<<<<<<< HEAD
-var set_env_ ProcFn
-=======
-var remove_ Proc
+var remove_ ProcFn
 
 func __remove_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 err := os.Remove(name)
+		err := os.Remove(name)
 		PanicOnErr(err)
 		_res := NIL
 		return _res
@@ -243,14 +240,14 @@ func __remove_(_args []Object) Object {
 	return NIL
 }
 
-var remove_all_ Proc
+var remove_all_ ProcFn
 
 func __remove_all_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		path := ExtractString(_args, 0)
-		 err := os.RemoveAll(path)
+		err := os.RemoveAll(path)
 		PanicOnErr(err)
 		_res := NIL
 		return _res
@@ -261,8 +258,7 @@ func __remove_all_(_args []Object) Object {
 	return NIL
 }
 
-var set_env_ Proc
->>>>>>> upstream
+var set_env_ ProcFn
 
 func __set_env_(_args []Object) Object {
 	_c := len(_args)
