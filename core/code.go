@@ -96,10 +96,21 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
+func isEmpty(s string) bool {
+	return s == "" || (s[0:2] == "/*" && s[len(s)-2:] == "*/")
+}
+
+func maybeEmpty(s string, obj interface{}) string {
+	if !isEmpty(s) {
+		return ""
+	}
+	return fmt.Sprintf("// (%T) ", obj)
+}
+
 func metaHolder(target string, m Map, env *CodeEnv) string {
 	res := noBang(emitMap(target+".meta", false, m, env))
-	if res == "" {
-		return ""
+	if isEmpty(res) {
+		return res
 	}
 	return fmt.Sprintf(`
 	MetaHolder: MetaHolder{meta: %s},`,
@@ -215,7 +226,7 @@ func (env *CodeEnv) Emit() {
 		v_var := ""
 
 		if v.Value != nil {
-			v_value := indirect(emitObject("value_"+name, true, v.Value, env))
+			v_value := indirect(emitInterface("value_"+name, true, v.Value, env))
 			intermediary := v_value[1:]
 			if v_value[0] != '!' {
 				intermediary = fmt.Sprintf("&value_%s", name)
@@ -277,7 +288,7 @@ var expr_%s = %s
 		}
 
 		v_tt := v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), env)
-		if v_tt != "" {
+		if v_tt != "" && v_tt != "nil" {
 			intermediary := v_tt[1:]
 			if v_tt[0] != '!' {
 				intermediary = fmt.Sprintf("&taggedType_%s", name)
@@ -287,12 +298,12 @@ var taggedType_%s = %s
 					v_tt)
 			}
 			v_var += fmt.Sprintf(`
-	taggedType: %s,
+	%staggedType: %s,
 `[1:],
-				intermediary)
+				maybeEmpty(v_tt, v.taggedType), intermediary)
 		}
 
-		if v_var != "" {
+		if !isEmpty(v_var) {
 			v_var = `
 ` + v_var + `
 `
@@ -395,14 +406,14 @@ func directAssign(target string) string {
 	cmp := strings.Split(target, ".")
 	final := cmp[len(cmp)-1]
 	if final[0] == '(' && final[len(final)-1] == ')' {
-		return strings.Join(cmp[:len(cmp)-1], ".")
+		return directAssign(strings.Join(cmp[:len(cmp)-1], "."))
 	}
 	return target
 }
 
 func (t *Type) Emit(target string, env *CodeEnv) string {
 	if t == nil {
-		return ""
+		return "nil"
 	}
 	name := NameAsGo(t.name)
 	env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
@@ -413,7 +424,7 @@ func (t *Type) Emit(target string, env *CodeEnv) string {
 			directAssign(target), name)
 	}
 	env.runtime = append(env.runtime, typeFn)
-	return ""
+	return "nil"
 }
 
 func emitProc(target string, p Proc, env *CodeEnv) string {
@@ -431,18 +442,18 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 		fields := []string{}
 		f := deferObjectSeq(target+".bindings", le.bindings, env)
 		if f != "" {
-			f = fmt.Sprintf("\tbindings: %s,", f)
+			f = fmt.Sprintf("\t%sbindings: %s,", maybeEmpty(f, le.bindings), f)
 		}
 		fields = append(fields, f)
 		if le.parent != nil {
 			f := noBang(le.parent.Emit(name+".parent", env))
 			if f != "" {
-				fields = append(fields, fmt.Sprintf("\tparent: %s,", f))
+				fields = append(fields, fmt.Sprintf("\t%sparent: %s,", maybeEmpty(f, le.parent), f))
 			}
 		}
 		fields = append(fields, fmt.Sprintf("\tframe: %d,", le.frame))
 		f = strings.Join(fields, "\n")
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
@@ -465,24 +476,24 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 		if fn.fnExpr != nil {
 			f := noBang(fn.fnExpr.Emit(name+".fnExpr", env))
 			if f != "" {
-				fields = append(fields, fmt.Sprintf("\tfnExpr: %s,", f))
+				fields = append(fields, fmt.Sprintf("\t%sfnExpr: %s,", maybeEmpty(f, fn.fnExpr), f))
 			}
 		}
 		if fn.env != nil {
 			f := noBang(fn.env.Emit(name+".env", env))
 			if f != "" {
-				fields = append(fields, fmt.Sprintf("\tenv: %s,", f))
+				fields = append(fields, fmt.Sprintf("\t%senv: %s,", maybeEmpty(f, fn.env), f))
 			}
 		}
 		f := strings.Join(fields, "\n")
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
 var %s = Fn{%s%s}
 var p_%s = &%s
 `,
-			name, metaHolder(target, fn.meta, env), f, name, name)
+			name, metaHolder(name, fn.meta, env), f, name, name)
 	}
 	return "!p_" + name
 }
@@ -500,9 +511,9 @@ func (m *MapSet) Emit(target string, env *CodeEnv) string {
 		env.codeWriterEnv.Generated[m] = m
 		f := noBang(emitMap(target+".m", false, m.m, env))
 		if f != "" {
-			f = fmt.Sprintf("\tm: %s,", f)
+			f = fmt.Sprintf("\t%sm: %s,", maybeEmpty(f, m.m), f)
 		}
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
@@ -517,9 +528,9 @@ var p_%s = &%s
 func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 	switch m := m.(type) {
 	case *ArrayMap:
-		return m.Emit(target, env)
+		return m.Emit(makeTypedTarget(target, typedTarget, ".(*ArrayMap)"), env)
 	case *HashMap:
-		return m.Emit(target, env)
+		return m.Emit(makeTypedTarget(target, typedTarget, ".(*HashMap)"), env)
 	case nil:
 		return ""
 	}
@@ -531,9 +542,9 @@ func (l *List) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = nil
 		fields := []string{}
-		f := noBang(emitObject(name+".first", false, l.first, env))
+		f := noBang(emitInterface(name+".first", false, l.first, env))
 		if f != "" {
-			fields = append(fields, fmt.Sprintf("\tfirst: %s,", f))
+			fields = append(fields, fmt.Sprintf("\t%sfirst: %s,", maybeEmpty(f, l.first), f))
 		}
 		field := name + ".rest"
 		if status, found := env.codeWriterEnv.Generated[l.rest]; l.rest != nil && (!found || status == nil) {
@@ -541,20 +552,20 @@ func (l *List) Emit(target string, env *CodeEnv) string {
 				return fmt.Sprintf(`
 	%s = %s
 `[1:],
-					field, noBang(l.rest.Emit(field, env)))
+					directAssign(field), noBang(l.rest.Emit(field, env)))
 			}
 			env.runtime = append(env.runtime, fieldFn)
 		} else if l.rest != nil {
 			f := noBang(l.rest.Emit(field, env))
 			if f != "" {
-				fields = append(fields, fmt.Sprintf("\trest: %s,", f))
+				fields = append(fields, fmt.Sprintf("\t%srest: %s,", maybeEmpty(f, l.rest), f))
 			}
 		}
 		if l.count != 0 {
 			fields = append(fields, fmt.Sprintf("\tcount: %d,", l.count))
 		}
 		f = strings.Join(fields, "\n")
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
@@ -581,7 +592,7 @@ func (v *Vector) Emit(target string, env *CodeEnv) string {
 			fields = append(fields, fmt.Sprintf("\tshift: %d,", v.shift))
 		}
 		f := strings.Join(fields, "\n")
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
@@ -598,45 +609,91 @@ func (v *VectorSeq) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[v]; !ok {
 		env.codeWriterEnv.Generated[v] = v
 		fields := []string{}
-		fields = append(fields, fmt.Sprintf("\tvector: %s,", noBang(v.vector.Emit(name+".root", env))))
+		f := noBang(v.vector.Emit(name+".root", env))
+		if f != "" {
+			fields = append(fields, fmt.Sprintf("\t%svector: %s,", maybeEmpty(f, v.vector), f))
+		}
 		if v.index != 0 {
 			fields = append(fields, fmt.Sprintf("\tindex: %d,", v.index))
 		}
-		f := strings.Join(fields, "\n")
-		if f != "" {
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
 var %s = VectorSeq{%s%s}
 var p_%s = &%s
 `,
-			name, metaHolder("v_"+name, v.meta, env), f, name, name)
+			name, metaHolder(name, v.meta, env), f, name, name)
 	}
 	return "!p_" + name
 }
 
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
-	name := uniqueName(target, "arraymap_", "%d", m.Hash())
+	name := uniqueName(target, "arrayMap_", "%d", m.Hash())
 	if _, ok := env.codeWriterEnv.Generated[m]; !ok {
 		env.codeWriterEnv.Generated[m] = m
 		f := emitObjectSeq(target+".arr", m.arr, env)
 		if f != "" {
-			f = fmt.Sprintf("\tarr: %s,", f)
+			f = fmt.Sprintf("\t%sarr: %s,", maybeEmpty(f, m.arr), f)
 		}
-		if f != "" {
+		if !isEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.statics += fmt.Sprintf(`
-var %s = ArrayMap{%s}
+var %s = ArrayMap{%s%s}
 var p_%s = &%s
 `,
-			name, f, name, name)
+			name, metaHolder(name, m.meta, env), f, name, name)
 	}
 	return "!p_" + name
 }
 
 func (m *HashMap) Emit(target string, env *CodeEnv) string {
-	return "!(*HashMap)(nil)"
+	name := uniqueName(target, "hashMap_", "%d", m.Hash())
+	if _, ok := env.codeWriterEnv.Generated[m]; !ok {
+		env.codeWriterEnv.Generated[m] = m
+		fields := []string{}
+		if m.count != 0 {
+			fields = append(fields, fmt.Sprintf("\tcount: %d,", m.count))
+		}
+		f := noBang(emitInterface(target+".root", false, m.root, env))
+		if f != "" {
+			fields = append(fields, fmt.Sprintf("\t%sroot: %s,", maybeEmpty(f, m.root), f))
+		}
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = HashMap{%s%s}
+var p_%s = &%s
+`,
+			name, metaHolder(name, m.meta, env), f, name, name)
+	}
+	return "!p_" + name
+}
+
+func (b *BitmapIndexedNode) Emit(target string, env *CodeEnv) string {
+	name := uniqueName(target, "bitmapIndexedNode_", "%p", b)
+	if _, ok := env.codeWriterEnv.Generated[b]; !ok {
+		env.codeWriterEnv.Generated[b] = b
+		fields := []string{}
+		if b.bitmap != 0 {
+			fields = append(fields, fmt.Sprintf("\tbitmap: %d,", b.bitmap))
+		}
+		fields = append(fields, fmt.Sprintf("\tarray: %s,", emitInterfaceSeq(name+".array", b.array, env)))
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = BitmapIndexedNode{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 func (io *IOWriter) Emit(target string, env *CodeEnv) string {
@@ -648,7 +705,7 @@ func (ns *Namespace) Emit(target string, env *CodeEnv) string {
 		panic(fmt.Sprintf("code.go: (*Namespace)Emit() supports only ns=joker.core, not =%s\n", *ns.Name.name))
 	}
 	nsFn := func() string {
-		return fmt.Sprintf("\t%s = _ns\n", target)
+		return fmt.Sprintf("\t%s = _ns\n", directAssign(target))
 	}
 	env.runtime = append(env.runtime, nsFn)
 	return "nil"
@@ -723,7 +780,7 @@ func makeTypedTarget(target string, typedTarget bool, typeStr string) string {
 	return target + typeStr
 }
 
-func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) string {
+func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEnv) string {
 	switch obj := obj.(type) {
 	case Symbol:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Symbol)"), env)
@@ -753,6 +810,8 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), env)
 	case *Namespace:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), env)
+	case *BitmapIndexedNode:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BitmapIndexedNode)"), env)
 	case String:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(String)"), env)
 	case Keyword:
@@ -789,8 +848,8 @@ func emitObject(target string, typedTarget bool, obj Object, env *CodeEnv) strin
 // }
 
 func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
-	obj := noBang(emitObject(target+".obj", false, expr.obj, env))
-	if obj != "" {
+	obj := noBang(emitInterface(target+".obj", false, expr.obj, env))
+	if !isEmpty(obj) {
 		obj = `
 	obj: `[1:] + obj + `,
 `
@@ -820,13 +879,14 @@ func emitInterfaceSeq(target string, thingies []interface{}, env *CodeEnv) strin
 	thingyae := []string{}
 	for ix, thingy := range thingies {
 		if thingy == nil {
-			continue
+			thingyae = append(thingyae, "\tnil, // Empty")
 		} else {
-			thingyae = append(thingyae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(thingy)), false, thingy.(Object), env))+",")
+			f := noBang(emitInterface(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(thingy)), false, thingy, env))
+			thingyae = append(thingyae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, thingy), f))
 		}
 	}
 	ret := strings.Join(thingyae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]interface{}{%s}`, ret)
@@ -838,7 +898,7 @@ func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 		exprae = append(exprae, "\t"+noBang(expr.Emit(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(expr)), env))+",")
 	}
 	ret := strings.Join(exprae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]Expr{%s}`, ret)
@@ -847,10 +907,10 @@ func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 func emitObjectSeq(target string, objs []Object, env *CodeEnv) string {
 	objae := []string{}
 	for ix, obj := range objs {
-		objae = append(objae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
+		objae = append(objae, "\t"+noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
 	}
 	ret := strings.Join(objae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]Object{%s}`, ret)
@@ -865,12 +925,12 @@ func deferObjectSeq(target string, objs []Object, env *CodeEnv) string {
 			return fmt.Sprintf(`
 	%s = %s
 `[1:],
-				directAssign(el), noBang(emitObject(el, false, obj, env)))
+				directAssign(el), noBang(emitInterface(el, false, obj, env)))
 		}
 		env.runtime = append(env.runtime, objFn)
 	}
 	ret := strings.Join(objae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]Object{%s}`, ret)
@@ -891,7 +951,7 @@ func emitSymbolSeq(target string, syms []Symbol, env *CodeEnv) string {
 		symv = append(symv, "\t"+noBang(sym.Emit(fmt.Sprintf("%s[%d]", target, ix), env))+",")
 	}
 	ret := strings.Join(symv, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]Symbol{%s}`, ret)
@@ -912,7 +972,7 @@ func emitFnArityExprSeq(target string, fns []FnArityExpr, env *CodeEnv) string {
 		fnae = append(fnae, "\t"+indirect(noBang(fn.Emit(fmt.Sprintf("%s[%d]", target, ix), env)))+",")
 	}
 	ret := strings.Join(fnae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]FnArityExpr{%s}`, ret)
@@ -924,7 +984,7 @@ func emitCatchExprSeq(target string, ces []*CatchExpr, env *CodeEnv) string {
 		ceae = append(ceae, "\t"+noBang(ce.Emit(fmt.Sprintf("%s[%d]", target, ix), env))+",")
 	}
 	ret := strings.Join(ceae, "\n")
-	if ret != "" {
+	if !isEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
 	return fmt.Sprintf(`[]*CatchExpr{%s}`, ret)
@@ -1189,9 +1249,9 @@ func (expr *VarRefExpr) Emit(target string, env *CodeEnv) string {
 	vr := noBang(expr.vr.Emit(target+".vr", env))
 	if vr != "" {
 		vr = fmt.Sprintf(`
-	vr: %s,
+	%svr: %s,
 `,
-			vr)
+			maybeEmpty(vr, expr.vr), vr)
 
 	}
 
@@ -1305,9 +1365,9 @@ func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
 	ty := noBang(expr.taggedType.Emit(target+".taggedType", env))
 	if ty != "" {
 		res += fmt.Sprintf(`
-	taggedType: %s,
+	%staggedType: %s,
 `[1:],
-			ty)
+			maybeEmpty(ty, expr.taggedType), ty)
 	}
 
 	return res + `}`
