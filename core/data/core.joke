@@ -4490,5 +4490,6 @@
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine
   (or another goroutine) doesn't deref a Future or do any I/O."
+  {:added "1.0"}
   [& body]
   `(go* (fn [] ~@body)))
