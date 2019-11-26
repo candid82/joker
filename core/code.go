@@ -111,6 +111,14 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
+func joinStringFns(fns []func() string) string {
+	strs := make([]string, len(fns))
+	for ix, fn := range fns {
+		strs[ix] = fn()
+	}
+	return strings.Join(strs, "")
+}
+
 func isEmpty(s string) bool {
 	return s == "" || (s[0:2] == "/*" && s[len(s)-2:] == "*/")
 }
@@ -138,41 +146,6 @@ func emitString(s *string, env *CodeEnv) string {
 	}
 	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
 	return "string_" + NameAsGo(*s)
-}
-
-func position(target string, p Position, env *CodeEnv) string {
-	fields := []string{}
-	if p.endLine != 0 {
-		fields = append(fields, fmt.Sprintf(`
-	endLine: %d,`[1:],
-			p.endLine))
-	}
-	if p.endColumn != 0 {
-		fields = append(fields, fmt.Sprintf(`
-	endColumn: %d,`[1:],
-			p.endColumn))
-	}
-	if p.startLine != 0 {
-		fields = append(fields, fmt.Sprintf(`
-	startLine: %d,`[1:],
-			p.startLine))
-	}
-	if p.startColumn != 0 {
-		fields = append(fields, fmt.Sprintf(`
-	startColumn: %d,`[1:],
-			p.startColumn))
-	}
-	f := noBang(emitString(p.filename, env))
-	if notNil(f) {
-		fields = append(fields, fmt.Sprintf(`
-	filename: %s,`[1:],
-			f))
-	}
-	f = strings.Join(fields, "\n")
-	if f != "" {
-		f = "\n" + f + "\n"
-	}
-	return fmt.Sprintf(`Position{%s}`, f)
 }
 
 func (b *Binding) SymName() *string {
@@ -375,53 +348,40 @@ var p_v_%s = &v_%s
 	env.interns += interns + joinStringFns(env.runtime)
 }
 
-func joinStringFns(fns []func() string) string {
-	strs := make([]string, len(fns))
-	for ix, fn := range fns {
-		strs[ix] = fn()
+func (p Position) Emit(target string, env *CodeEnv) string {
+	fields := []string{}
+	if p.endLine != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	endLine: %d,`[1:],
+			p.endLine))
 	}
-	return strings.Join(strs, "")
-}
-
-func (env *CodeEnv) stringIndex(s *string) uint16 {
-	index, ok := env.Strings[s]
-	if ok {
-		return index
+	if p.endColumn != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	endColumn: %d,`[1:],
+			p.endColumn))
 	}
-	env.Strings[s] = env.nextStringIndex
-	env.nextStringIndex++
-	return env.nextStringIndex - 1
-}
-
-func (env *CodeEnv) bindingIndex(b *Binding) int {
-	index, ok := env.Bindings[b]
-	if ok {
-		return index
+	if p.startLine != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	startLine: %d,`[1:],
+			p.startLine))
 	}
-	env.Bindings[b] = env.nextBindingIndex
-	env.nextBindingIndex++
-	return env.nextBindingIndex - 1
+	if p.startColumn != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	startColumn: %d,`[1:],
+			p.startColumn))
+	}
+	f := noBang(emitString(p.filename, env))
+	if notNil(f) {
+		fields = append(fields, fmt.Sprintf(`
+	filename: %s,`[1:],
+			f))
+	}
+	f = strings.Join(fields, "\n")
+	if f != "" {
+		f = "\n" + f + "\n"
+	}
+	return fmt.Sprintf(`Position{%s}`, f)
 }
-
-func (pos Position) Emit(target string, env *CodeEnv) string {
-	// p = appendInt(p, pos.startLine)
-	// p = appendInt(p, pos.endLine)
-	// p = appendInt(p, pos.startColumn)
-	// p = appendInt(p, pos.endColumn)
-	// p = appendUint16(p, env.stringIndex(pos.filename))
-	// return p
-	return "!(Position)(nil)"
-}
-
-// func unpackPosition(p []byte, header *EmitHeader) (pos Position, pp []byte) {
-// 	pos.startLine, p = extractInt(p)
-// 	pos.endLine, p = extractInt(p)
-// 	pos.startColumn, p = extractInt(p)
-// 	pos.endColumn, p = extractInt(p)
-// 	i, p := extractUInt16(p)
-// 	pos.filename = header.Strings[i]
-// 	return pos, p
-// }
 
 func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
 	// if info == nil {
@@ -1366,7 +1326,7 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
 		env.codeWriterEnv.Generated[expr] = expr
 		fields := []string{}
-		f := position(target, expr.Position, env)
+		f := expr.Position.Emit(target, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	%sPosition: %s,`[1:], maybeEmpty(f, expr.binding), f))
