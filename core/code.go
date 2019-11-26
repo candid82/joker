@@ -148,6 +148,24 @@ func metaHolderField(target string, m MetaHolder, fields []string, env *CodeEnv)
 	return append(fields, f)
 }
 
+func infoHolder(target string, i InfoHolder, env *CodeEnv) string {
+	res := noBang(i.info.Emit(target+".info", env))
+	if isEmpty(res) {
+		return res
+	}
+	return fmt.Sprintf(`
+	InfoHolder: InfoHolder{info: %s},`[1:],
+		res)
+}
+
+func infoHolderField(target string, m InfoHolder, fields []string, env *CodeEnv) []string {
+	f := infoHolder(target, m, env)
+	if isEmpty(f) {
+		return fields
+	}
+	return append(fields, f)
+}
+
 func emitString(s *string, env *CodeEnv) string {
 	if s == nil {
 		return "nil"
@@ -354,14 +372,19 @@ var taggedType_%s = %s
 ` + v_var + `
 `
 		}
+		info := infoHolder("v_"+name, v.InfoHolder, env)
+		if info != "" {
+			info = "\n" + info
+		}
 		meta := metaHolder("v_"+name, v.meta, env)
 		if meta != "" {
 			meta = "\n" + meta
 		}
 		v_var = fmt.Sprintf(`
-var v_%s = Var{%s%s}
+var v_%s = Var{%s%s%s}
+var p_v_%s = &v_%s
 `[1:],
-			name, meta, v_var)
+			name, info, meta, v_var, name, name)
 		env.codeWriterEnv.Generated[v] = v
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
@@ -413,7 +436,27 @@ func (p Position) Emit(target string, env *CodeEnv) string {
 }
 
 func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
-	return "ABEND: *ObjectInfo"
+	if info == nil {
+		return "nil"
+	}
+	name := uniqueName(target, "objectInfo_", "%p", info)
+	if _, ok := env.codeWriterEnv.Generated[info]; !ok {
+		env.codeWriterEnv.Generated[info] = info
+		fields := []string{}
+		f := noBang(info.Position.Emit(name+".Position", env))
+		if f != "" {
+			fields = append(fields, f+",")
+		}
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = ObjectInfo{%s}
+`,
+			name, f)
+	}
+	return "!&" + name
 }
 
 func (s Symbol) Emit(target string, env *CodeEnv) string {
@@ -497,7 +540,7 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = fn
 		fields := []string{}
-		//		fields = infoHolder(name, fields, env)
+		fields = infoHolderField(name, fn.InfoHolder, fields, env)
 		fields = metaHolderField(name, fn.MetaHolder, fields, env)
 		if fn.isMacro {
 			fields = append(fields, "\tisMacro: true,")
