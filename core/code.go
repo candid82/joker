@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/binary"
 	"fmt"
 	"strconv"
 	"strings"
@@ -129,6 +130,13 @@ func maybeEmpty(s string, obj interface{}) string {
 		return ""
 	}
 	return fmt.Sprintf("// (%T) ", obj)
+}
+
+func makeTypedTarget(target string, typedTarget bool, typeStr string) string {
+	if typedTarget {
+		return target
+	}
+	return target + typeStr
 }
 
 func metaHolder(target string, m Map, env *CodeEnv) string {
@@ -399,6 +407,21 @@ var p_v_%s = &v_%s
 
 	env.statics += statics
 	env.interns += interns + joinStringFns(env.runtime)
+}
+
+func (p Position) Hash() uint32 {
+	h := getHash()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(p.endLine))
+	h.Write(b)
+	binary.LittleEndian.PutUint64(b, uint64(p.endColumn))
+	h.Write(b)
+	binary.LittleEndian.PutUint64(b, uint64(p.startLine))
+	h.Write(b)
+	binary.LittleEndian.PutUint64(b, uint64(p.startColumn))
+	h.Write(b)
+	h.Write([]byte(*p.filename))
+	return h.Sum32()
 }
 
 func (p Position) Emit(target string, env *CodeEnv) string {
@@ -895,11 +918,26 @@ var %s = Double{%s}
 	return "!" + name
 }
 
-func makeTypedTarget(target string, typedTarget bool, typeStr string) string {
-	if typedTarget {
-		return target
+func (n Nil) Emit(target string, env *CodeEnv) string {
+	var hash uint32
+	if n.InfoHolder.info != nil {
+		hash = n.InfoHolder.info.Position.Hash()
 	}
-	return target + typeStr
+	name := uniqueName(target, "nil_", "%d", hash)
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = n
+		fields := []string{}
+		fields = infoHolderField(name, n.InfoHolder, fields, env)
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Nil{%s}
+`,
+			name, f)
+	}
+	return "!" + name
 }
 
 func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEnv) string {
@@ -945,7 +983,7 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 	case Double:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
 	case Nil:
-		return "Nil{}"
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Nil)"), env)
 	default:
 		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
 	}
