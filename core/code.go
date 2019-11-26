@@ -404,9 +404,18 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 
 func directAssign(target string) string {
 	cmp := strings.Split(target, ".")
+	if len(cmp) < 2 {
+		return target
+	}
 	final := cmp[len(cmp)-1]
 	if final[0] == '(' && final[len(final)-1] == ')' {
-		return directAssign(strings.Join(cmp[:len(cmp)-1], "."))
+		if len(cmp) > 2 {
+			penultimate := cmp[len(cmp)-2]
+			if penultimate[0] == '(' && penultimate[len(final)-1] == ')' {
+				panic(fmt.Sprintf("directAssign(\"%s\")", target))
+			}
+		}
+		return strings.Join(cmp[:len(cmp)-1], ".")
 	}
 	return target
 }
@@ -881,7 +890,7 @@ func emitInterfaceSeq(target string, thingies []interface{}, env *CodeEnv) strin
 		if thingy == nil {
 			thingyae = append(thingyae, "\tnil, // Empty")
 		} else {
-			f := noBang(emitInterface(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(thingy)), false, thingy, env))
+			f := noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, thingy, env))
 			thingyae = append(thingyae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, thingy), f))
 		}
 	}
