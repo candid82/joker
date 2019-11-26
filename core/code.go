@@ -37,6 +37,17 @@ type (
 	}
 )
 
+func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
+	return &CodeEnv{
+		codeWriterEnv: cwe,
+		Namespace:     GLOBAL_ENV.CoreNamespace,
+		Definitions:   make(map[*string]struct{}),
+		Symbols:       []*string{},
+		Strings:       make(map[*string]uint16),
+		Bindings:      make(map[*Binding]int),
+	}
+}
+
 var tr = [][2]string{
 	{"_", "US"},
 	{"?", "Q"},
@@ -194,17 +205,6 @@ func (b *Binding) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf("&binding_%s", id)
 }
 
-func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
-	return &CodeEnv{
-		codeWriterEnv: cwe,
-		Namespace:     GLOBAL_ENV.CoreNamespace,
-		Definitions:   make(map[*string]struct{}),
-		Symbols:       []*string{},
-		Strings:       make(map[*string]uint16),
-		Bindings:      make(map[*Binding]int),
-	}
-}
-
 func (env *CodeEnv) AddForm(o Object) {
 	seq, ok := o.(Seq)
 	if !ok {
@@ -335,7 +335,7 @@ var expr_%s = %s
 		}
 
 		v_tt := v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), env)
-		if v_tt != "" && v_tt != "nil" {
+		if notNil(v_tt) {
 			intermediary := v_tt[1:]
 			if v_tt[0] != '!' {
 				intermediary = fmt.Sprintf("&taggedType_%s", name)

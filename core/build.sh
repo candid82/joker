@@ -7,6 +7,7 @@ mkdir -p "$NOW"
 mv -iv a_*.go "$NOW" || :
 [ -x ../joker ] && cp -aiv ../joker "$NOW"
 (git log -n 1; git status) > "$NOW/git.txt"
+ln -sfTv "$NOW" _test_AA/LATEST
 
 time=$(which time)
 
