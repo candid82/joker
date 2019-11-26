@@ -171,7 +171,7 @@ func emitString(s *string, env *CodeEnv) string {
 		return "nil"
 	}
 	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
-	return "string_" + NameAsGo(*s)
+	return "s_" + NameAsGo(*s)
 }
 
 func directAssign(target string) string {
@@ -488,7 +488,7 @@ func (t *Type) Emit(target string, env *CodeEnv) string {
 	env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
 	typeFn := func() string {
 		return fmt.Sprintf(`
-	%s = TYPES[string_%s]
+	%s = TYPES[s_%s]
 `[1:],
 			directAssign(target), name)
 	}
@@ -1292,7 +1292,7 @@ var p_v_%s *Var
 		env.statics += decl
 
 		return fmt.Sprintf(`
-	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[string_%s]
+	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[s_%s]
 `,
 			g, g)
 	}

@@ -166,7 +166,7 @@ var sym_%s Symbol`[1:],
 
 		codeWriterEnv.NeedStrs[*s] = struct{}{}
 		symInterns = append(symInterns, fmt.Sprintf(`
-	sym_%s.name = string_%s`[1:],
+	sym_%s.name = s_%s`[1:],
 			name, name))
 	}
 	sort.Strings(symDefs)
@@ -175,13 +175,13 @@ var sym_%s Symbol`[1:],
 	kwDefs := []string{}
 	kwHashes := []string{}
 	for _, k := range codeWriterEnv.NeedKeywords {
-		strName := "string_" + NameAsGo(*k.NameField())
+		strName := "s_" + NameAsGo(*k.NameField())
 
 		strNs := "nil"
 		if k.NsField() != nil {
 			ns := *k.NsField()
 			nsName := NameAsGo(ns)
-			strNs = "string_" + nsName
+			strNs = "s_" + nsName
 		}
 
 		kwId := "kw_" + k.UniqueId()
@@ -211,11 +211,11 @@ var %s Keyword`[1:],
 	for s, _ := range codeWriterEnv.NeedStrs {
 		name := NameAsGo(s)
 		strDefs = append(strDefs, fmt.Sprintf(`
-var string_%s *string`[1:],
+var s_%s *string`[1:],
 			name))
 
 		strInterns = append(strInterns, fmt.Sprintf(`
-	string_%s = STRINGS.Intern("%s")`[1:],
+	s_%s = STRINGS.Intern("%s")`[1:],
 			name, s))
 	}
 	sort.Strings(strDefs)
