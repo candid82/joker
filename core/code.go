@@ -66,6 +66,7 @@ var tr = [][2]string{
 	{"#", "HASH"},
 	{".", "DOT"},
 	{"%", "PCT"},
+	{".", "DOT"},
 }
 
 func NameAsGo(name string) string {
@@ -831,24 +832,67 @@ func (k Keyword) Emit(target string, env *CodeEnv) string {
 }
 
 func (i Int) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`!Int{
-	I: %d,
-}`,
-		i.I)
+	name := uniqueName(target, "int_", "%d", i.I)
+	if _, ok := env.codeWriterEnv.Generated[i.I]; !ok {
+		env.codeWriterEnv.Generated[i.I] = i
+		fields := []string{}
+		fields = infoHolderField(name, i.InfoHolder, fields, env)
+		fields = append(fields, fmt.Sprintf(`
+	I: %d,`[1:],
+			i.I))
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Int{%s}
+`,
+			name, f)
+	}
+	return "!" + name
 }
 
 func (ch Char) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`!Char{
-	Ch: %v,
-}`,
-		ch.Ch)
+	name := uniqueName(target, "char_", "%d", ch.Ch)
+	if _, ok := env.codeWriterEnv.Generated[ch.Ch]; !ok {
+		env.codeWriterEnv.Generated[ch.Ch] = ch
+		fields := []string{}
+		fields = infoHolderField(name, ch.InfoHolder, fields, env)
+		fields = append(fields, fmt.Sprintf(`
+	Ch: '%c',`[1:],
+			ch.Ch))
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Char{%s}
+`,
+			name, f)
+	}
+	return "!" + name
 }
 
 func (d Double) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`!Double{
-	D: %v,
-}`,
-		d.D)
+	dValue := strconv.FormatFloat(d.D, 'g', -1, 64)
+	name := uniqueName(target, "double_", "%s", NameAsGo(dValue))
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = d
+		fields := []string{}
+		fields = infoHolderField(name, d.InfoHolder, fields, env)
+		fields = append(fields, fmt.Sprintf(`
+	D: %s,`[1:],
+			dValue))
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = Double{%s}
+`,
+			name, f)
+	}
+	return "!" + name
 }
 
 func makeTypedTarget(target string, typedTarget bool, typeStr string) string {
@@ -1257,22 +1301,7 @@ func (expr *RecurExpr) Emit(target string, env *CodeEnv) string {
 		emitSeq(target+".args", expr.args, env))
 }
 
-// func unpackRecurExpr(p []byte, header *EmitHeader) (*RecurExpr, []byte) {
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	args, p := unpackSeq(p, header)
-// 	res := &RecurExpr{
-// 		Position: pos,
-// 		args:     args,
-// 	}
-// 	return res, p
-// }
-
 func (vr *Var) Emit(target string, env *CodeEnv) string {
-	// p = vr.ns.Name.Emit(p, env)
-	// p = vr.name.Emit(p, env)
-	// return p
-	//	ns := *vr.ns.Name.name
 	sym := *vr.name.name
 	g := NameAsGo(sym)
 	env.codeWriterEnv.NeedStrs[sym] = struct{}{}
@@ -1308,16 +1337,6 @@ var p_v_%s *Var
 
 	return ""
 }
-
-// func unpackVar(p []byte, header *EmitHeader) (*Var, []byte) {
-// 	nsName, p := unpackSymbol(p, header)
-// 	name, p := unpackSymbol(p, header)
-// 	vr := GLOBAL_ENV.FindNamespace(nsName).mappings[name.name]
-// 	if vr == nil {
-// 		panic(RT.NewError("Error unpacking var: cannot find var " + *nsName.name + "/" + *name.name))
-// 	}
-// 	return vr, p
-// }
 
 func (expr *VarRefExpr) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "varRefExpr_", "%p", expr)
