@@ -23,8 +23,8 @@ $time ./gen_data/gen_data
 
 $time go fmt a_*.go
 
-(cd ..; $time go vet ./...)
+JUSTVET=false
 
-#exit 0  # TODO: Revert this once all the forms are being generated
+$JUSTVET && (cd ..; $time go vet ./...)
 
-(cd ..; KEEP_A_FILES=true $time ./run.sh "$@")
+$JUSTVET || (cd ..; KEEP_A_FILES=true $time ./run.sh "$@")
