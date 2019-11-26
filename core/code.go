@@ -93,7 +93,7 @@ func indirect(s string) string {
 }
 
 func notNil(s string) bool {
-	return s != "" && s != "nil"
+	return s != "" && s != "nil" && !strings.HasSuffix(s, "{}")
 }
 
 func uniqueName(target, prefix, f string, id interface{}) string {
@@ -330,14 +330,13 @@ var taggedType_%s = %s
 		}
 		v_var = fmt.Sprintf(`
 var v_%s = Var{%s%s}
-var p_v_%s = &v_%s
 `[1:],
-			name, metaHolder("v_"+name, v.meta, env), v_var, name, name)
+			name, metaHolder("v_"+name, v.meta, env), v_var)
 		env.codeWriterEnv.Generated[v] = v
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
 		interns += fmt.Sprintf(`
-	_ns.InternExistingVar(sym_%s, p_v_%s)
+	_ns.InternExistingVar(sym_%s, &v_%s)
 `,
 			name, name)
 
@@ -487,11 +486,10 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = LocalEnv{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
@@ -520,11 +518,10 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = Fn{%s%s}
-var p_%s = &%s
 `,
-			name, metaHolder(name, fn.meta, env), f, name, name)
+			name, metaHolder(name, fn.meta, env), f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (b Boolean) Emit(target string, env *CodeEnv) string {
@@ -547,11 +544,10 @@ func (m *MapSet) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = MapSet{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
@@ -599,12 +595,11 @@ func (l *List) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = List{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 		env.codeWriterEnv.Generated[name] = l
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (v *Vector) Emit(target string, env *CodeEnv) string {
@@ -626,11 +621,10 @@ func (v *Vector) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = Vector{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (v *VectorSeq) Emit(target string, env *CodeEnv) string {
@@ -651,11 +645,10 @@ func (v *VectorSeq) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = VectorSeq{%s%s}
-var p_%s = &%s
 `,
-			name, metaHolder(name, v.meta, env), f, name, name)
+			name, metaHolder(name, v.meta, env), f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
@@ -671,11 +664,10 @@ func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = ArrayMap{%s%s}
-var p_%s = &%s
 `,
-			name, metaHolder(name, m.meta, env), f, name, name)
+			name, metaHolder(name, m.meta, env), f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (m *HashMap) Emit(target string, env *CodeEnv) string {
@@ -696,11 +688,10 @@ func (m *HashMap) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = HashMap{%s%s}
-var p_%s = &%s
 `,
-			name, metaHolder(name, m.meta, env), f, name, name)
+			name, metaHolder(name, m.meta, env), f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (b *BitmapIndexedNode) Emit(target string, env *CodeEnv) string {
@@ -718,11 +709,10 @@ func (b *BitmapIndexedNode) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = BitmapIndexedNode{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
 
 func (io *IOWriter) Emit(target string, env *CodeEnv) string {
@@ -1271,32 +1261,31 @@ var p_v_%s *Var
 // }
 
 func (expr *VarRefExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, VARREF_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.vr.Emit(p, env)
-	// return p
-	vr := noBang(expr.vr.Emit(target+".vr", env))
-	if vr != "" {
-		vr = fmt.Sprintf(`
-	%svr: %s,
+	name := uniqueName(target, "varRefExpr_", "%p", expr)
+	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
+		env.codeWriterEnv.Generated[expr] = expr
+		fields := []string{}
+		f := expr.Position.Emit(name+".Position", env)
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	Position: %s,`[1:], f))
+		}
+		f = noBang(expr.vr.Emit(name+".vr", env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	%svr: %s,`[1:], maybeEmpty(f, expr.vr), f))
+		}
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = VarRefExpr{%s}
 `,
-			maybeEmpty(vr, expr.vr), vr)
-
+			name, f)
 	}
-
-	return fmt.Sprintf(`&VarRefExpr{%s}`, vr)
+	return "!&" + name
 }
-
-// func unpackVarRefExpr(p []byte, header *EmitHeader) (*VarRefExpr, []byte) {
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	vr, p := unpackVar(p, header)
-// 	res := &VarRefExpr{
-// 		Position: pos,
-// 		vr:       vr,
-// 	}
-// 	return res, p
-// }
 
 func (expr *SetMacroExpr) Emit(target string, env *CodeEnv) string {
 	// p = append(p, SET_MACRO_EXPR)
@@ -1318,20 +1307,16 @@ func (expr *SetMacroExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, BINDING_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = appendInt(p, env.bindingIndex(expr.binding))
-	// return p
 	name := uniqueName(target, "bindingExpr_", "%p", expr)
 	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
 		env.codeWriterEnv.Generated[expr] = expr
 		fields := []string{}
-		f := expr.Position.Emit(target, env)
+		f := expr.Position.Emit(name+".Position", env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
-	%sPosition: %s,`[1:], maybeEmpty(f, expr.binding), f))
+	Position: %s,`[1:], f))
 		}
-		f = noBang(expr.binding.Emit(target+".binding", env))
+		f = noBang(expr.binding.Emit(name+".binding", env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	%sbinding: %s,`[1:], maybeEmpty(f, expr.binding), f))
@@ -1342,23 +1327,11 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 		}
 		env.statics += fmt.Sprintf(`
 var %s = BindingExpr{%s}
-var p_%s = &%s
 `,
-			name, f, name, name)
+			name, f)
 	}
-	return "!p_" + name
+	return "!&" + name
 }
-
-// func unpackBindingExpr(p []byte, header *EmitHeader) (*BindingExpr, []byte) {
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	index, p := extractInt(p)
-// 	res := &BindingExpr{
-// 		Position: pos,
-// 		binding:  &header.Bindings[index],
-// 	}
-// 	return res, p
-// }
 
 func (expr *MetaExpr) Emit(target string, env *CodeEnv) string {
 	// p = append(p, META_EXPR)
@@ -1366,27 +1339,34 @@ func (expr *MetaExpr) Emit(target string, env *CodeEnv) string {
 	// p = expr.meta.Emit(p, env)
 	// p = expr.expr.Emit(p, env)
 	// return p
-	return "!(*MetaExpr)(nil)"
+	return "ABEND(*MetaExpr)"
 }
 
-// func unpackMetaExpr(p []byte, header *EmitHeader) (*MetaExpr, []byte) {
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	meta, p := unpackMapExpr(p, header)
-// 	expr, p := UnpackExpr(p, header)
-// 	res := &MetaExpr{
-// 		Position: pos,
-// 		meta:     meta,
-// 		expr:     expr,
-// 	}
-// 	return res, p
-// }
-
 func (expr *DoExpr) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`&DoExpr{
-	body: %s,
-}`,
-		emitSeq(target+".body", expr.body, env))
+	name := uniqueName(target, "doExpr_", "%p", expr)
+	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
+		env.codeWriterEnv.Generated[expr] = expr
+		fields := []string{}
+		f := expr.Position.Emit(name+".Position", env)
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	Position: %s,`[1:], f))
+		}
+		f = emitSeq(name+".body", expr.body, env)
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	%sbody: %s,`[1:], maybeEmpty(f, expr.body), f))
+		}
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = DoExpr{%s}
+`,
+			name, f)
+	}
+	return "!&" + name
 }
 
 // func unpackDoExpr(p []byte, header *EmitHeader) (*DoExpr, []byte) {
