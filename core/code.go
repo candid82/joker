@@ -81,6 +81,10 @@ func indirect(s string) string {
 	return "*" + s
 }
 
+func notNil(s string) bool {
+	return s != "" && s != "nil"
+}
+
 func uniqueName(target, prefix, f string, id interface{}) string {
 	if strings.Contains(target, ".") {
 		return fmt.Sprintf("%s"+f, prefix, id)
@@ -115,6 +119,49 @@ func metaHolder(target string, m Map, env *CodeEnv) string {
 	return fmt.Sprintf(`
 	MetaHolder: MetaHolder{meta: %s},`,
 		res)
+}
+
+func emitString(s *string, env *CodeEnv) string {
+	if s == nil {
+		return "nil"
+	}
+	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
+	return "string_" + NameAsGo(*s)
+}
+
+func position(target string, p Position, env *CodeEnv) string {
+	fields := []string{}
+	if p.endLine != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	endLine: %d,`[1:],
+			p.endLine))
+	}
+	if p.endColumn != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	endColumn: %d,`[1:],
+			p.endColumn))
+	}
+	if p.startLine != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	startLine: %d,`[1:],
+			p.startLine))
+	}
+	if p.startColumn != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	startColumn: %d,`[1:],
+			p.startColumn))
+	}
+	f := noBang(emitString(p.filename, env))
+	if notNil(f) {
+		fields = append(fields, fmt.Sprintf(`
+	filename: %s,`[1:],
+			f))
+	}
+	f = strings.Join(fields, "\n")
+	if f != "" {
+		f = "\n" + f + "\n"
+	}
+	return fmt.Sprintf(`Position{%s}`, f)
 }
 
 func (b *Binding) SymName() *string {
@@ -1085,9 +1132,9 @@ func (expr *IfExpr) Emit(target string, env *CodeEnv) string {
 	positive: %s,
 	negative: %s,
 }`,
-		expr.cond.Emit(target+".cond"+assertType(expr.cond), env),
-		expr.positive.Emit(target+".positive"+assertType(expr.positive), env),
-		expr.negative.Emit(target+".negative"+assertType(expr.negative), env))
+		noBang(expr.cond.Emit(target+".cond"+assertType(expr.cond), env)),
+		noBang(expr.positive.Emit(target+".positive"+assertType(expr.positive), env)),
+		noBang(expr.negative.Emit(target+".negative"+assertType(expr.negative), env)))
 }
 
 // func unpackIfExpr(p []byte, header *EmitHeader) (*IfExpr, []byte) {
@@ -1315,10 +1362,31 @@ func (expr *BindingExpr) Emit(target string, env *CodeEnv) string {
 	// p = expr.Pos().Emit(p, env)
 	// p = appendInt(p, env.bindingIndex(expr.binding))
 	// return p
-	return fmt.Sprintf(`&BindingExpr{
-	binding: %s,
-}`,
-		noBang(expr.binding.Emit(target+".binding", env)))
+	name := uniqueName(target, "bindingExpr_", "%p", expr)
+	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
+		env.codeWriterEnv.Generated[expr] = expr
+		fields := []string{}
+		f := position(target, expr.Position, env)
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	%sPosition: %s,`[1:], maybeEmpty(f, expr.binding), f))
+		}
+		f = noBang(expr.binding.Emit(target+".binding", env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	%sbinding: %s,`[1:], maybeEmpty(f, expr.binding), f))
+		}
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = BindingExpr{%s}
+var p_%s = &%s
+`,
+			name, f, name, name)
+	}
+	return "!p_" + name
 }
 
 // func unpackBindingExpr(p []byte, header *EmitHeader) (*BindingExpr, []byte) {
@@ -1528,7 +1596,7 @@ func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
 	return fmt.Sprintf(`&ThrowExpr{
 	e: %s,
 }`,
-		expr.e.Emit(target+".e"+assertType(expr.e), env))
+		noBang(expr.e.Emit(target+".e"+assertType(expr.e), env)))
 }
 
 // func unpackThrowExpr(p []byte, header *EmitHeader) (*ThrowExpr, []byte) {
@@ -1546,7 +1614,7 @@ func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
 	fields := []string{}
 
 	f := noBang(expr.excType.Emit(target+".excType", env))
-	if f != "" && f != "nil" {
+	if notNil(f) {
 		fields = append(fields, fmt.Sprintf(`
 	excType: %s,`[1:],
 			f))
