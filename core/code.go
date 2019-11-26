@@ -989,37 +989,38 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 	}
 }
 
-// func unpackObject(p []byte, header *EmitHeader) (Object, []byte) {
-// 	switch p[0] {
-// 	case SYMBOL_OBJ:
-// 		return unpackSymbol(p[1:], header)
-// 	case VAR_OBJ:
-// 		return unpackVar(p[1:], header)
-// 	case TYPE_OBJ:
-// 		return unpackType(p[1:], header)
-// 	case NULL:
-// 		var size int
-// 		size, p = extractInt(p[1:])
-// 		obj := readFromReader(bytes.NewReader(p[:size]))
-// 		return obj, p[size:]
-// 	default:
-// 		panic(RT.NewError(fmt.Sprintf("Unknown object tag: %d", p[0])))
-// 	}
-// }
-
 func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
-	obj := noBang(emitInterface(target+".obj", false, expr.obj, env))
-	if !isEmpty(obj) {
-		obj = `
-	obj: `[1:] + obj + `,
-`
-	}
+	name := uniqueName(target, "literalExpr_", "%p", expr)
+	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
+		env.codeWriterEnv.Generated[expr] = expr
+		fields := []string{}
+		f := expr.Position.Emit(name+".Position", env)
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	Position: %s,`[1:],
+				f))
+		}
+		f = noBang(emitInterface(name+".obj", false, expr.obj, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	obj: %s,`[1:],
+				f))
+		}
+		if expr.isSurrogate {
+			fields = append(fields, `
+	isSurrogate: true,`[1:])
+		}
 
-	return fmt.Sprintf(`&LiteralExpr{
-%s	isSurrogate: %v,
-}`,
-		obj,
-		expr.isSurrogate)
+		f = strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = LiteralExpr{%s}
+`,
+			name, f)
+	}
+	return "!&" + name
 }
 
 // func unpackLiteralExpr(p []byte, header *EmitHeader) (*LiteralExpr, []byte) {
