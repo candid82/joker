@@ -161,7 +161,7 @@ var binding_%s = Binding{
 	for s, _ := range codeWriterEnv.NeedSyms {
 		name := NameAsGo(*s)
 		symDefs = append(symDefs, fmt.Sprintf(`
-var sym_%s = Symbol{}`[1:],
+var sym_%s Symbol`[1:],
 			name))
 
 		codeWriterEnv.NeedStrs[*s] = struct{}{}
@@ -188,17 +188,20 @@ var sym_%s = Symbol{}`[1:],
 
 		initNs := ""
 		if strNs != "nil" {
-			initNs = "\tns: " + strNs + ",\n"
+			initNs = fmt.Sprintf(`
+	%s.ns = %s
+`[1:],
+				kwId, strNs)
 		}
+
 		kwDefs = append(kwDefs, fmt.Sprintf(`
-var %s = Keyword{
-%s	name: %s,
-}`[1:],
-			kwId, initNs, strName))
+var %s Keyword`[1:],
+			kwId))
 
 		kwHashes = append(kwHashes, fmt.Sprintf(`
+%s	%s.name = %s
 	%s.hash = hashSymbol(%s, %s)`[1:],
-			kwId, strNs, strName))
+			initNs, kwId, strName, kwId, strNs, strName))
 	}
 	sort.Strings(kwDefs)
 	sort.Strings(kwHashes)
@@ -221,7 +224,7 @@ var string_%s *string`[1:],
 	var tr = [][2]string{
 		{"{strDefs}", strings.Join(strDefs, "\n")},
 		{"{symDefs}", strings.Join(symDefs, "\n")},
-		{"{kwDefs}", strings.Join(kwDefs, "\n\n")},
+		{"{kwDefs}", strings.Join(kwDefs, "\n")},
 		{"{bindingDefs}", strings.Join(bindingDefs, "\n\n")},
 		{"{strInterns}", strings.Join(strInterns, "\n")},
 		{"{symInterns}", strings.Join(symInterns, "\n")},

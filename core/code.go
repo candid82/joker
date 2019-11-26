@@ -226,7 +226,7 @@ func (env *CodeEnv) Emit() {
 		v_var := ""
 
 		if v.Value != nil {
-			v_value := indirect(emitInterface("value_"+name, true, v.Value, env))
+			v_value := indirect(emitInterface(fmt.Sprintf("v_%s.Value.(%s)", name, coreType(v.Value)), true, v.Value, env))
 			intermediary := v_value[1:]
 			if v_value[0] != '!' {
 				intermediary = fmt.Sprintf("&value_%s", name)
@@ -396,10 +396,23 @@ func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
 
 func (s Symbol) Emit(target string, env *CodeEnv) string {
 	if s.name == nil {
-		return "Symbol{}"
+		if s.ns == nil && s.hash == 0 {
+			return ""
+		}
+		return "Symbol{ABEND: No name!!}"
 	}
+
 	env.codeWriterEnv.NeedSyms[s.name] = struct{}{}
-	return fmt.Sprintf("sym_%s", NameAsGo(*s.name))
+
+	sym := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
+
+	env.runtime = append(env.runtime, func() string {
+		return fmt.Sprintf(`
+	%s = %s
+`[1:],
+			directAssign(target), sym)
+	})
+	return "!Symbol{}"
 }
 
 func directAssign(target string) string {
@@ -1428,13 +1441,14 @@ func (expr *FnExpr) Emit(target string, env *CodeEnv) string {
 `[1:],
 			noBang(emitExprOrNil(target+".variadic", expr.variadic, env)))
 	}
+
+	expr.self.Emit(target+".self", env)
+
 	return fmt.Sprintf(`&FnExpr{
 	arities: %s,
-%s	self: %s,
-}`,
+%s}`,
 		emitFnArityExprSeq(target+".arities", expr.arities, env),
-		variadic,
-		noBang(expr.self.Emit(target+".self", env)))
+		variadic)
 }
 
 // func unpackFnExpr(p []byte, header *EmitHeader) (*FnExpr, []byte) {
@@ -1529,19 +1543,35 @@ func (expr *ThrowExpr) Emit(target string, env *CodeEnv) string {
 // }
 
 func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
-	excType := noBang(expr.excType.Emit(target+".excType", env))
-	if excType != "" {
-		excType = `
-	excType: ` + excType + `,`
+	fields := []string{}
+
+	f := noBang(expr.excType.Emit(target+".excType", env))
+	if f != "" && f != "nil" {
+		fields = append(fields, fmt.Sprintf(`
+	excType: %s,`[1:],
+			f))
 	}
 
-	return fmt.Sprintf(`&CatchExpr{
-%s	excSymbol: %s,
-	body: %s,
-}`,
-		excType,
-		expr.excSymbol.Emit(target+".excSymbol", env),
-		emitSeq(target+".body", expr.body, env))
+	f = noBang(expr.excSymbol.Emit(target+".excSymbol", env))
+	if f != "Symbol{}" {
+		fields = append(fields, fmt.Sprintf(`
+	excSymbol: %s,`[1:],
+			f))
+	}
+
+	f = emitSeq(target+".body", expr.body, env)
+	if f != "" {
+		fields = append(fields, fmt.Sprintf(`
+	body: %s,`[1:],
+			f))
+	}
+
+	f = strings.Join(fields, "\n")
+	if f != "" {
+		f = "\n" + f + "\n"
+	}
+
+	return fmt.Sprintf(`&CatchExpr{%s}`, f)
 }
 
 // func unpackCatchExpr(p []byte, header *EmitHeader) (*CatchExpr, []byte) {
