@@ -776,10 +776,24 @@ func (ns *Namespace) Emit(target string, env *CodeEnv) string {
 }
 
 func (s String) Emit(target string, env *CodeEnv) string {
-	return fmt.Sprintf(`!String{
-	S: %s,
-}`,
-		strconv.Quote(s.S))
+	name := uniqueName(target, "string_", "%d", s.Hash())
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = s
+		fields := []string{}
+		fields = infoHolderField(name, s.InfoHolder, fields, env)
+		fields = append(fields, fmt.Sprintf(`
+	S: %s,`[1:],
+			strconv.Quote(s.S)))
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = String{%s}
+`,
+			name, f)
+	}
+	return "!" + name
 }
 
 func (k Keyword) NsField() *string {
