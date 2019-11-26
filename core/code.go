@@ -136,8 +136,16 @@ func metaHolder(target string, m Map, env *CodeEnv) string {
 		return res
 	}
 	return fmt.Sprintf(`
-	MetaHolder: MetaHolder{meta: %s},`,
+	MetaHolder: MetaHolder{meta: %s},`[1:],
 		res)
+}
+
+func metaHolderField(target string, m MetaHolder, fields []string, env *CodeEnv) []string {
+	f := metaHolder(target, m.meta, env)
+	if isEmpty(f) {
+		return fields
+	}
+	return append(fields, f)
 }
 
 func emitString(s *string, env *CodeEnv) string {
@@ -146,6 +154,24 @@ func emitString(s *string, env *CodeEnv) string {
 	}
 	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
 	return "string_" + NameAsGo(*s)
+}
+
+func directAssign(target string) string {
+	cmp := strings.Split(target, ".")
+	if len(cmp) < 2 {
+		return target
+	}
+	final := cmp[len(cmp)-1]
+	if final[0] == '(' && final[len(final)-1] == ')' {
+		if len(cmp) > 2 {
+			penultimate := cmp[len(cmp)-2]
+			if penultimate[0] == '(' && penultimate[len(final)-1] == ')' {
+				panic(fmt.Sprintf("directAssign(\"%s\")", target))
+			}
+		}
+		return strings.Join(cmp[:len(cmp)-1], ".")
+	}
+	return target
 }
 
 func (b *Binding) SymName() *string {
@@ -328,10 +354,14 @@ var taggedType_%s = %s
 ` + v_var + `
 `
 		}
+		meta := metaHolder("v_"+name, v.meta, env)
+		if meta != "" {
+			meta = "\n" + meta
+		}
 		v_var = fmt.Sprintf(`
 var v_%s = Var{%s%s}
 `[1:],
-			name, metaHolder("v_"+name, v.meta, env), v_var)
+			name, meta, v_var)
 		env.codeWriterEnv.Generated[v] = v
 
 		env.codeWriterEnv.NeedSyms[s] = struct{}{}
@@ -383,22 +413,8 @@ func (p Position) Emit(target string, env *CodeEnv) string {
 }
 
 func (info *ObjectInfo) Emit(target string, env *CodeEnv) string {
-	// if info == nil {
-	// 	return append(p, NULL)
-	// }
-	// p = append(p, NOT_NULL)
-	// return info.Pos().Emit(p, env)
-	return fmt.Sprintf("/* ABEND: *ObjectInfo of type %T */", info)
+	return "ABEND: *ObjectInfo"
 }
-
-// func unpackObjectInfo(p []byte, header *EmitHeader) (*ObjectInfo, []byte) {
-// 	if p[0] == NULL {
-// 		return nil, p[1:]
-// 	}
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	return &ObjectInfo{Position: pos}, p
-// }
 
 func (s Symbol) Emit(target string, env *CodeEnv) string {
 	if s.name == nil {
@@ -419,24 +435,6 @@ func (s Symbol) Emit(target string, env *CodeEnv) string {
 			directAssign(target), sym)
 	})
 	return "!Symbol{}"
-}
-
-func directAssign(target string) string {
-	cmp := strings.Split(target, ".")
-	if len(cmp) < 2 {
-		return target
-	}
-	final := cmp[len(cmp)-1]
-	if final[0] == '(' && final[len(final)-1] == ')' {
-		if len(cmp) > 2 {
-			penultimate := cmp[len(cmp)-2]
-			if penultimate[0] == '(' && penultimate[len(final)-1] == ')' {
-				panic(fmt.Sprintf("directAssign(\"%s\")", target))
-			}
-		}
-		return strings.Join(cmp[:len(cmp)-1], ".")
-	}
-	return target
 }
 
 func (t *Type) Emit(target string, env *CodeEnv) string {
@@ -468,7 +466,7 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[le]; !ok {
 		env.codeWriterEnv.Generated[le] = le
 		fields := []string{}
-		f := deferObjectSeq(target+".bindings", le.bindings, env)
+		f := deferObjectSeq(name+".bindings", le.bindings, env)
 		if f != "" {
 			f = fmt.Sprintf("\t%sbindings: %s,", maybeEmpty(f, le.bindings), f)
 		}
@@ -479,7 +477,9 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 				fields = append(fields, fmt.Sprintf("\t%sparent: %s,", maybeEmpty(f, le.parent), f))
 			}
 		}
-		fields = append(fields, fmt.Sprintf("\tframe: %d,", le.frame))
+		if le.frame != 0 {
+			fields = append(fields, fmt.Sprintf("\tframe: %d,", le.frame))
+		}
 		f = strings.Join(fields, "\n")
 		if !isEmpty(f) {
 			f = "\n" + f + "\n"
@@ -497,6 +497,8 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = fn
 		fields := []string{}
+		//		fields = infoHolder(name, fields, env)
+		fields = metaHolderField(name, fn.MetaHolder, fields, env)
 		if fn.isMacro {
 			fields = append(fields, "\tisMacro: true,")
 		}
