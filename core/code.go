@@ -171,12 +171,19 @@ func infoHolderField(target string, m InfoHolder, fields []string, env *CodeEnv)
 	return append(fields, f)
 }
 
-func emitString(s *string, env *CodeEnv) string {
+func emitString(target string, s *string, env *CodeEnv) string {
 	if s == nil {
 		return "nil"
 	}
 	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
-	return "s_" + NameAsGo(*s)
+	name := "s_" + NameAsGo(*s)
+	env.runtime = append(env.runtime, func() string {
+		return fmt.Sprintf(`
+	%s = %s
+`[1:],
+			directAssign(target), name)
+	})
+	return "nil"
 }
 
 func directAssign(target string) string {
@@ -413,7 +420,7 @@ func (p Position) Emit(target string, env *CodeEnv) string {
 	startColumn: %d,`[1:],
 			p.startColumn))
 	}
-	f := noBang(emitString(p.filename, env))
+	f := noBang(emitString(target+".filename", p.filename, env))
 	if notNil(f) {
 		fields = append(fields, fmt.Sprintf(`
 	filename: %s,`[1:],
