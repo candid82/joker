@@ -1174,17 +1174,6 @@ var %s = SetExpr{%s}
 	return "!&" + name
 }
 
-// func unpackSetExpr(p []byte, header *EmitHeader) (*SetExpr, []byte) {
-// 	p = p[1:]
-// 	pos, p := unpackPosition(p, header)
-// 	v, p := unpackSeq(p, header)
-// 	res := &SetExpr{
-// 		Position: pos,
-// 		elements: v,
-// 	}
-// 	return res, p
-// }
-
 func (expr *MapExpr) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "mapExpr_", "%p", expr)
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
@@ -1455,13 +1444,13 @@ var %s = VarRefExpr{%s}
 	return "!&" + name
 }
 
-func (expr *SetMacroExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, SET_MACRO_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.vr.Emit(p, env)
-	// return p
-	return "ABEND(*SetMacroExpr)"
-}
+// func (expr *SetMacroExpr) Emit(target string, env *CodeEnv) string {
+// 	// p = append(p, SET_MACRO_EXPR)
+// 	// p = expr.Pos().Emit(p, env)
+// 	// p = expr.vr.Emit(p, env)
+// 	// return p
+// 	return "ABEND(*SetMacroExpr)"
+// }
 
 // func unpackSetMacroExpr(p []byte, header *EmitHeader) (*SetMacroExpr, []byte) {
 // 	p = p[1:]
@@ -1501,14 +1490,14 @@ var %s = BindingExpr{%s}
 	return "!&" + name
 }
 
-func (expr *MetaExpr) Emit(target string, env *CodeEnv) string {
-	// p = append(p, META_EXPR)
-	// p = expr.Pos().Emit(p, env)
-	// p = expr.meta.Emit(p, env)
-	// p = expr.expr.Emit(p, env)
-	// return p
-	return "ABEND(*MetaExpr)"
-}
+// func (expr *MetaExpr) Emit(target string, env *CodeEnv) string {
+// 	// p = append(p, META_EXPR)
+// 	// p = expr.Pos().Emit(p, env)
+// 	// p = expr.meta.Emit(p, env)
+// 	// p = expr.expr.Emit(p, env)
+// 	// return p
+// 	return "ABEND(*MetaExpr)"
+// }
 
 func (expr *DoExpr) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "doExpr_", "%p", expr)
