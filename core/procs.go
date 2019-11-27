@@ -448,7 +448,7 @@ var procSubs ProcFn = func(args []Object) Object {
 	return String{S: string([]rune(s)[start:end])}
 }
 
-var procIntern = func(args []Object) Object {
+var procIntern ProcFn = func(args []Object) Object {
 	ns := EnsureNamespace(args, 0)
 	sym := EnsureSymbol(args, 1)
 	vr := ns.Intern(sym)
@@ -458,14 +458,14 @@ var procIntern = func(args []Object) Object {
 	return vr
 }
 
-var procSetMeta = func(args []Object) Object {
+var procSetMeta ProcFn = func(args []Object) Object {
 	vr := EnsureVar(args, 0)
 	meta := EnsureMap(args, 1)
 	vr.meta = meta
 	return NIL
 }
 
-var procAtom = func(args []Object) Object {
+var procAtom ProcFn = func(args []Object) Object {
 	res := &Atom{
 		value: args[0],
 	}
@@ -478,11 +478,11 @@ var procAtom = func(args []Object) Object {
 	return res
 }
 
-var procDeref = func(args []Object) Object {
+var procDeref ProcFn = func(args []Object) Object {
 	return EnsureDeref(args, 0).Deref()
 }
 
-var procSwap = func(args []Object) Object {
+var procSwap ProcFn = func(args []Object) Object {
 	a := EnsureAtom(args, 0)
 	f := EnsureCallable(args, 1)
 	fargs := append([]Object{a.value}, args[2:]...)
@@ -490,7 +490,7 @@ var procSwap = func(args []Object) Object {
 	return a.value
 }
 
-var procSwapVals = func(args []Object) Object {
+var procSwapVals ProcFn = func(args []Object) Object {
 	a := EnsureAtom(args, 0)
 	f := EnsureCallable(args, 1)
 	fargs := append([]Object{a.value}, args[2:]...)
@@ -499,32 +499,32 @@ var procSwapVals = func(args []Object) Object {
 	return NewVectorFrom(oldValue, a.value)
 }
 
-var procReset = func(args []Object) Object {
+var procReset ProcFn = func(args []Object) Object {
 	a := EnsureAtom(args, 0)
 	a.value = args[1]
 	return a.value
 }
 
-var procResetVals = func(args []Object) Object {
+var procResetVals ProcFn = func(args []Object) Object {
 	a := EnsureAtom(args, 0)
 	oldValue := a.value
 	a.value = args[1]
 	return NewVectorFrom(oldValue, a.value)
 }
 
-var procAlterMeta = func(args []Object) Object {
+var procAlterMeta ProcFn = func(args []Object) Object {
 	r := EnsureRef(args, 0)
 	f := EnsureFn(args, 1)
 	return r.AlterMeta(f, args[2:])
 }
 
-var procResetMeta = func(args []Object) Object {
+var procResetMeta ProcFn = func(args []Object) Object {
 	r := EnsureRef(args, 0)
 	m := EnsureMap(args, 1)
 	return r.ResetMeta(m)
 }
 
-var procEmpty = func(args []Object) Object {
+var procEmpty ProcFn = func(args []Object) Object {
 	switch c := args[0].(type) {
 	case Collection:
 		return c.Empty()
@@ -533,7 +533,7 @@ var procEmpty = func(args []Object) Object {
 	}
 }
 
-var procIsBound = func(args []Object) Object {
+var procIsBound ProcFn = func(args []Object) Object {
 	vr := EnsureVar(args, 0)
 	return Boolean{B: vr.Value != nil}
 }
@@ -547,7 +547,7 @@ func toNative(obj Object) interface{} {
 	}
 }
 
-var procFormat = func(args []Object) Object {
+var procFormat ProcFn = func(args []Object) Object {
 	s := EnsureString(args, 0)
 	objs := args[1:]
 	fargs := make([]interface{}, len(objs))

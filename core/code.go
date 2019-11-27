@@ -88,7 +88,7 @@ func indirect(s string) string {
 	if s[0] == '&' {
 		return s[1:]
 	}
-	if s[0] == '!' {
+	if s[0] == '!' || !notNil(s) {
 		return s
 	}
 	return "*" + s
@@ -287,31 +287,27 @@ func (env *CodeEnv) Emit() {
 	_ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
 	)
-	for ix, s := range env.Symbols {
-		v, ok := env.Namespace.mappings[s]
-		if !ok {
-			fmt.Printf("code.go: cannot find %s [%d] in %s\n", *s, ix, *env.Namespace.Name.name)
-			continue
-		}
-
+	for s, v := range env.Namespace.mappings {
 		name := NameAsGo(*s)
 
 		v_var := ""
 
 		if v.Value != nil {
 			v_value := indirect(emitInterface(fmt.Sprintf("v_%s.Value.(%s)", name, coreType(v.Value)), true, v.Value, env))
-			intermediary := v_value[1:]
-			if v_value[0] != '!' {
-				intermediary = fmt.Sprintf("&value_%s", name)
-				statics += fmt.Sprintf(`
+			if notNil(v_value) {
+				intermediary := v_value[1:]
+				if v_value[0] != '!' {
+					intermediary = fmt.Sprintf("&value_%s", name)
+					statics += fmt.Sprintf(`
 var value_%s = %s
 `[1:],
-					name, v_value)
-			}
-			v_var += fmt.Sprintf(`
+						name, v_value)
+				}
+				v_var += fmt.Sprintf(`
 	Value: %s,
 `[1:],
-				intermediary)
+					intermediary)
+			}
 		}
 
 		if v.expr != nil {
@@ -787,6 +783,28 @@ var %s = BitmapIndexedNode{%s}
 	return "!&" + name
 }
 
+func (b *BufferedReader) Emit(target string, env *CodeEnv) string {
+	name := uniqueName(target, "bufferedReader_", "%p", b)
+	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
+		env.codeWriterEnv.Generated[name] = b
+		fields := []string{}
+
+		// if b != nil && b.Reader != nil && b.Reader.Fd() != os.Stdin {
+		// 	panic(fmt.Sprintf("hey that is not right, it is %v", *b))
+		// }
+
+		f := strings.Join(fields, "\n")
+		if !isEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.statics += fmt.Sprintf(`
+var %s = BufferedReader{%s}
+`,
+			name, f)
+	}
+	return "!&" + name
+}
+
 func (io *IOWriter) Emit(target string, env *CodeEnv) string {
 	return "!(*IOWriter)(nil)"
 }
@@ -975,6 +993,8 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), env)
 	case *BitmapIndexedNode:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BitmapIndexedNode)"), env)
+	case *BufferedReader:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BufferedReader)"), env)
 	case String:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(String)"), env)
 	case Keyword:
