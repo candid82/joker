@@ -12,8 +12,6 @@ type (
 	CodeEnv struct {
 		codeWriterEnv    *CodeWriterEnv
 		Namespace        *Namespace
-		Definitions      map[*string]struct{}
-		Symbols          []*string
 		Strings          map[*string]uint16
 		Bindings         map[*Binding]int
 		nextStringIndex  uint16
@@ -42,8 +40,6 @@ func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
 		codeWriterEnv: cwe,
 		Namespace:     GLOBAL_ENV.CoreNamespace,
-		Definitions:   make(map[*string]struct{}),
-		Symbols:       []*string{},
 		Strings:       make(map[*string]uint16),
 		Bindings:      make(map[*Binding]int),
 	}
@@ -240,27 +236,8 @@ func (env *CodeEnv) AddForm(o Object) {
 	first := seq.First()
 	if v, ok := first.(Symbol); ok {
 		switch v.ToString(false) {
-		case "def", "defn", "defn-", "defmacro", "defonce", "defmulti", "defmethod":
-			for {
-				seq = seq.Rest()
-				if seq == nil {
-					break
-				}
-				next := seq.First()
-				if sym, ok := next.(Symbol); ok && v.ns == nil && v.name != nil {
-					if _, ok := env.Definitions[sym.name]; ok {
-					} else {
-						env.Symbols = append(env.Symbols, sym.name)
-						env.Definitions[sym.name] = struct{}{}
-					}
-					return
-				}
-				fmt.Printf("code.go: strange symbol name in %s\n", v.ToString(false))
-			}
-		case "add-doc-and-meta", "set-macro__", "joker.core/refer":
-			return // Reflected, after evaluation, in final version of form
 		case "ns", "in-ns":
-			fmt.Printf("At %s\n", o.ToString(false))
+			fmt.Printf("core/code.go: Switching to namespace %s\n", o.ToString(false))
 			seq = seq.Rest()
 			if l, ok := seq.First().(*List); ok {
 				if q, ok := l.First().(Symbol); !ok || *q.name != "quote" {
@@ -271,14 +248,8 @@ func (env *CodeEnv) AddForm(o Object) {
 			} else {
 				env.Namespace = GLOBAL_ENV.EnsureNamespace(seq.First().(Symbol))
 			}
-			return
-		case "comment":
-			return // Ok to ignore
-		default:
-			panic(fmt.Sprintf("%s unsupported", v.ToString(false))) // TODO: implement these (doseq, ns-unmap, etc.)
 		}
 	}
-	fmt.Printf("code.go: Ignoring %s\n", o.ToString(false))
 }
 
 func (env *CodeEnv) Emit() {
