@@ -425,6 +425,8 @@ var (
 	noReadline               bool
 	exitToRepl               bool
 	errorToRepl              bool
+	trace                    bool
+	maxDepth                 uint
 )
 
 func isNumber(s string) bool {
@@ -573,6 +575,24 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				filename = args[i]
 			}
+		case "--trace":
+			trace = true
+		case "--max-depth":
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				m, err := strconv.ParseInt(args[i], 10, 64)
+				if err != nil {
+					fmt.Fprintln(Stderr, "Error: ", err)
+					return
+				}
+				if m < 0 || m > math.MaxUint32 {
+					fmt.Fprintf(Stderr, "Out of range: --max-depth %s\n", args[i])
+					return
+				}
+				maxDepth = uint(m)
+			} else {
+				missing = true
+			}
 		case "--profiler":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
@@ -678,6 +698,8 @@ func main() {
 	if Verbose {
 		GLOBAL_ENV.SetVerbose(Verbose)
 	}
+	GLOBAL_ENV.Trace = trace
+	GLOBAL_ENV.MaxDepth = maxDepth
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)

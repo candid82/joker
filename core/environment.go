@@ -32,6 +32,9 @@ type (
 		ns            *Var
 		version       *Var
 		Features      Set
+		Trace         bool
+		CurDepth      uint
+		MaxDepth      uint
 	}
 )
 
