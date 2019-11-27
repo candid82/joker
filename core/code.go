@@ -271,7 +271,7 @@ func (env *CodeEnv) Emit() {
 		v_var := ""
 
 		if v.Value != nil {
-			v_value := indirect(emitInterface(fmt.Sprintf("v_%s.Value.(%s)", name, coreType(v.Value)), true, v.Value, env))
+			v_value := indirect(emitObject(fmt.Sprintf("v_%s.Value.(%s)", name, coreType(v.Value)), true, &v.Value, env))
 			if notNil(v_value) {
 				intermediary := v_value[1:]
 				if v_value[0] != '!' {
@@ -394,7 +394,9 @@ func (p Position) Hash() uint32 {
 	h.Write(b)
 	binary.LittleEndian.PutUint64(b, uint64(p.startColumn))
 	h.Write(b)
-	h.Write([]byte(*p.filename))
+	if p.filename != nil {
+		h.Write([]byte(*p.filename))
+	}
 	return h.Sum32()
 }
 
@@ -506,8 +508,9 @@ func (le *LocalEnv) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "localEnv_", "%d", le.Hash())
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = le
+
 		fields := []string{}
-		f := deferObjectSeq(name+".bindings", le.bindings, env)
+		f := deferObjectSeq(name+".bindings", &le.bindings, env)
 		if f != "" {
 			f = fmt.Sprintf("\t%sbindings: %s,", maybeEmpty(f, le.bindings), f)
 		}
@@ -544,9 +547,13 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 			fields = append(fields, "\tisMacro: true,")
 		}
 		if fn.fnExpr != nil {
-			f := noBang(fn.fnExpr.Emit(name+".fnExpr", env))
+			fnExpr := fn.fnExpr
+			if len(fnExpr.arities) > 0 && fnExpr.arities[0].Position.startLine/10 == 73 {
+				fmt.Printf("Fn@%p is %s\n", fn, name)
+			}
+			f := noBang(fnExpr.Emit(name+".fnExpr", env))
 			if f != "" {
-				fields = append(fields, fmt.Sprintf("\t%sfnExpr: %s,", maybeEmpty(f, fn.fnExpr), f))
+				fields = append(fields, fmt.Sprintf("\t%sfnExpr: %s,", maybeEmpty(f, fnExpr), f))
 			}
 		}
 		if fn.env != nil {
@@ -610,7 +617,7 @@ func (l *List) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = nil
 		fields := []string{}
-		f := noBang(emitInterface(name+".first", false, l.first, env))
+		f := noBang(emitObject(name+".first", false, &l.first, env))
 		if f != "" {
 			fields = append(fields, fmt.Sprintf("\t%sfirst: %s,", maybeEmpty(f, l.first), f))
 		}
@@ -653,8 +660,8 @@ func (v *Vector) Emit(target string, env *CodeEnv) string {
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = v
 		fields := []string{}
-		fields = append(fields, fmt.Sprintf("\troot: %s,", emitInterfaceSeq(name+".root", v.root, env)))
-		fields = append(fields, fmt.Sprintf("\ttail: %s,", emitInterfaceSeq(name+".tail", v.tail, env)))
+		fields = append(fields, fmt.Sprintf("\troot: %s,", emitInterfaceSeq(name+".root", &v.root, env)))
+		fields = append(fields, fmt.Sprintf("\ttail: %s,", emitInterfaceSeq(name+".tail", &v.tail, env)))
 		if v.count != 0 {
 			fields = append(fields, fmt.Sprintf("\tcount: %d,", v.count))
 		}
@@ -701,7 +708,7 @@ func (m *ArrayMap) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "arrayMap_", "%d", m.Hash())
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = m
-		f := emitObjectSeq(name+".arr", m.arr, env)
+		f := emitObjectSeq(name+".arr", &m.arr, env)
 		if f != "" {
 			f = fmt.Sprintf("\t%sarr: %s,", maybeEmpty(f, m.arr), f)
 		}
@@ -724,7 +731,7 @@ func (m *HashMap) Emit(target string, env *CodeEnv) string {
 		if m.count != 0 {
 			fields = append(fields, fmt.Sprintf("\tcount: %d,", m.count))
 		}
-		f := noBang(emitInterface(name+".root", false, m.root, env))
+		f := noBang(emitInterface(name+".root", false, &m.root, env))
 		if f != "" {
 			fields = append(fields, fmt.Sprintf("\t%sroot: %s,", maybeEmpty(f, m.root), f))
 		}
@@ -748,7 +755,7 @@ func (b *BitmapIndexedNode) Emit(target string, env *CodeEnv) string {
 		if b.bitmap != 0 {
 			fields = append(fields, fmt.Sprintf("\tbitmap: %d,", b.bitmap))
 		}
-		fields = append(fields, fmt.Sprintf("\tarray: %s,", emitInterfaceSeq(name+".array", b.array, env)))
+		fields = append(fields, fmt.Sprintf("\tarray: %s,", emitInterfaceSeq(name+".array", &b.array, env)))
 		f := strings.Join(fields, "\n")
 		if !isEmpty(f) {
 			f = "\n" + f + "\n"
@@ -940,6 +947,9 @@ var %s = Nil{%s}
 }
 
 func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEnv) string {
+	if obj == nil {
+		return "nil"
+	}
 	switch obj := obj.(type) {
 	case Symbol:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Symbol)"), env)
@@ -985,9 +995,57 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
 	case Nil:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Nil)"), env)
-	default:
-		return fmt.Sprintf("/*ABEND: unknown object type %T*/", obj)
 	}
+	return fmt.Sprintf("/*ABEND: unknown interface{} type %T: %+v*/", obj, obj)
+}
+
+func emitObject(target string, typedTarget bool, objPtr *Object, env *CodeEnv) string {
+	obj := *objPtr
+	switch obj := obj.(type) {
+	case Symbol:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Symbol)"), env)
+	case *Var:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Var)"), env)
+	case *Type:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Type)"), env)
+	case Proc:
+		return emitProc(makeTypedTarget(target, typedTarget, ".(Proc)"), obj, env)
+	case *Fn:
+		return emitFn(makeTypedTarget(target, typedTarget, ".(*Fn)"), obj, env)
+	case Boolean:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Boolean)"), env)
+	case *MapSet:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*MapSet)"), env)
+	case *List:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*List)"), env)
+	case *Vector:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Vector)"), env)
+	case *VectorSeq:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*VectorSeq)"), env)
+	case *ArrayMap:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*ArrayMap)"), env)
+	case *HashMap:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*HashMap)"), env)
+	case *IOWriter:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), env)
+	case *Namespace:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), env)
+	case *BufferedReader:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BufferedReader)"), env)
+	case String:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(String)"), env)
+	case Keyword:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Keyword)"), env)
+	case Int:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Int)"), env)
+	case Char:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Char)"), env)
+	case Double:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Double)"), env)
+	case Nil:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Nil)"), env)
+	}
+	return fmt.Sprintf("/*ABEND: unknown object type %T: %+v*/", obj, obj)
 }
 
 func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
@@ -1001,7 +1059,7 @@ func (expr *LiteralExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = noBang(emitInterface(name+".obj", false, expr.obj, env))
+		f = noBang(emitObject(name+".obj", false, &expr.obj, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	obj: %s,`[1:],
@@ -1024,9 +1082,10 @@ var %s = LiteralExpr{%s}
 	return "!&" + name
 }
 
-func emitInterfaceSeq(target string, thingies []interface{}, env *CodeEnv) string {
+func emitInterfaceSeq(target string, thingies *[]interface{}, env *CodeEnv) string {
 	thingyae := []string{}
-	for ix, thingy := range thingies {
+	for ix, _ := range *thingies {
+		thingy := &((*thingies)[ix])
 		if thingy == nil {
 			thingyae = append(thingyae, "\tnil, // Empty")
 		} else {
@@ -1041,10 +1100,11 @@ func emitInterfaceSeq(target string, thingies []interface{}, env *CodeEnv) strin
 	return fmt.Sprintf(`[]interface{}{%s}`, ret)
 }
 
-func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
+func emitSeq(target string, exprs *[]Expr, env *CodeEnv) string {
 	exprae := []string{}
-	for ix, expr := range exprs {
-		exprae = append(exprae, "\t"+noBang(expr.Emit(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(expr)), env))+",")
+	for ix, _ := range *exprs {
+		expr := &((*exprs)[ix])
+		exprae = append(exprae, "\t"+noBang((*expr).Emit(fmt.Sprintf("%s[%d].(%s)", target, ix, coreType(expr)), env))+",")
 	}
 	ret := strings.Join(exprae, "\n")
 	if !isEmpty(ret) {
@@ -1053,10 +1113,11 @@ func emitSeq(target string, exprs []Expr, env *CodeEnv) string {
 	return fmt.Sprintf(`[]Expr{%s}`, ret)
 }
 
-func emitObjectSeq(target string, objs []Object, env *CodeEnv) string {
+func emitObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 	objae := []string{}
-	for ix, obj := range objs {
-		objae = append(objae, "\t"+noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
+	for ix, _ := range *objs {
+		obj := &((*objs)[ix])
+		objae = append(objae, "\t"+noBang(emitObject(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))+",")
 	}
 	ret := strings.Join(objae, "\n")
 	if !isEmpty(ret) {
@@ -1065,16 +1126,17 @@ func emitObjectSeq(target string, objs []Object, env *CodeEnv) string {
 	return fmt.Sprintf(`[]Object{%s}`, ret)
 }
 
-func deferObjectSeq(target string, objs []Object, env *CodeEnv) string {
+func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 	objae := []string{}
-	for ix, obj := range objs {
-		objae = append(objae, fmt.Sprintf("\t(%s)(nil),", coreType(obj)))
+	for ix, _ := range *objs {
+		obj := &((*objs)[ix])
+		objae = append(objae, "\tnil,")
 		objFn := func() string {
 			el := fmt.Sprintf("%s[%d]", target, ix)
 			return fmt.Sprintf(`
 	%s = %s
 `[1:],
-				directAssign(el), noBang(emitInterface(el, false, obj, env)))
+				directAssign(el), noBang(emitObject(el, false, obj, env)))
 		}
 		env.runtime = append(env.runtime, objFn)
 	}
@@ -1085,9 +1147,10 @@ func deferObjectSeq(target string, objs []Object, env *CodeEnv) string {
 	return fmt.Sprintf(`[]Object{%s}`, ret)
 }
 
-func emitSymbolSeq(target string, syms []Symbol, env *CodeEnv) string {
+func emitSymbolSeq(target string, syms *[]Symbol, env *CodeEnv) string {
 	symv := []string{}
-	for ix, sym := range syms {
+	for ix, _ := range *syms {
+		sym := &((*syms)[ix])
 		symv = append(symv, "\t"+noBang(sym.Emit(fmt.Sprintf("%s[%d]", target, ix), env))+",")
 	}
 	ret := strings.Join(symv, "\n")
@@ -1097,9 +1160,13 @@ func emitSymbolSeq(target string, syms []Symbol, env *CodeEnv) string {
 	return fmt.Sprintf(`[]Symbol{%s}`, ret)
 }
 
-func emitFnArityExprSeq(target string, fns []FnArityExpr, env *CodeEnv) string {
+func emitFnArityExprSeq(target string, fns *[]FnArityExpr, env *CodeEnv) string {
 	fnae := []string{}
-	for ix, fn := range fns {
+	for ix, _ := range *fns {
+		fn := &((*fns)[ix])
+		if fn.Position.startLine/10 == 73 {
+			fmt.Printf("FnArityExprSeq([%d]@%p %s)\n", ix, fn, fn.Position)
+		}
 		fnae = append(fnae, "\t"+indirect(noBang(fn.Emit(fmt.Sprintf("%s[%d]", target, ix), env)))+",")
 	}
 	ret := strings.Join(fnae, "\n")
@@ -1132,7 +1199,7 @@ func (expr *VectorExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".v", expr.v, env)
+		f = emitSeq(name+".v", &expr.v, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	v: %s,`[1:],
@@ -1162,7 +1229,7 @@ func (expr *SetExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".elements", expr.elements, env)
+		f = emitSeq(name+".elements", &expr.elements, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	elements: %s,`[1:],
@@ -1192,13 +1259,13 @@ func (expr *MapExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".keys", expr.keys, env)
+		f = emitSeq(name+".keys", &expr.keys, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	keys: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".values", expr.values, env)
+		f = emitSeq(name+".values", &expr.values, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
@@ -1338,7 +1405,7 @@ func (expr *CallExpr) Emit(target string, env *CodeEnv) string {
 	callable: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".args", expr.args, env)
+		f = emitSeq(name+".args", &expr.args, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
@@ -1368,7 +1435,7 @@ func (expr *RecurExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".args", expr.args, env)
+		f = emitSeq(name+".args", &expr.args, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
@@ -1510,17 +1577,23 @@ func (expr *DoExpr) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "doExpr_", "%p", expr)
 	if _, ok := env.codeWriterEnv.Generated[expr]; !ok {
 		env.codeWriterEnv.Generated[expr] = expr
+
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	Position: %s,`[1:], f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	%sbody: %s,`[1:], maybeEmpty(f, expr.body), f))
 		}
+		if expr.isCreatedByMacro {
+			fields = append(fields, fmt.Sprintf(`
+	isCreatedByMacro: true,`))
+		}
+
 		f = strings.Join(fields, "\n")
 		if !isEmpty(f) {
 			f = "\n" + f + "\n"
@@ -1533,11 +1606,8 @@ var %s = DoExpr{%s}
 	return "!&" + name
 }
 
-func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
-	if expr == nil {
-		return "nil"
-	}
-	name := uniqueName(target, "fnArityExpr_", "%p", expr)
+func (expr FnArityExpr) Emit(target string, env *CodeEnv) string {
+	name := uniqueName(target, "fnArityExpr_", "%d", expr.Hash())
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1547,13 +1617,13 @@ func (expr *FnArityExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSymbolSeq(name+".args", expr.args, env)
+		f = emitSymbolSeq(name+".args", &expr.args, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
@@ -1582,6 +1652,7 @@ func (expr *FnExpr) Emit(target string, env *CodeEnv) string {
 	name := uniqueName(target, "fnExpr_", "%p", expr)
 	if _, ok := env.codeWriterEnv.Generated[name]; !ok {
 		env.codeWriterEnv.Generated[name] = expr
+
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", env)
 		if notNil(f) {
@@ -1589,18 +1660,23 @@ func (expr *FnExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitFnArityExprSeq(name+".arities", expr.arities, env)
+		if len(expr.arities) > 0 && expr.arities[0].Position.startLine/10 == 73 {
+			fmt.Printf("FnExpr@%p is %s\n", expr, name)
+		}
+		f = emitFnArityExprSeq(name+".arities", &expr.arities, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	arities: %s,`[1:],
 				f))
 		}
-		f = noBang(expr.variadic.Emit(name+".variadic", env))
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		if expr.variadic != nil {
+			f = noBang(expr.variadic.Emit(name+".variadic", env))
+			if notNil(f) {
+				fields = append(fields, fmt.Sprintf(`
 	variadic: %s,
 `[1:],
-				f))
+					f))
+			}
 		}
 		f = noBang(expr.self.Emit(name+".self", env))
 		if notNil(f) {
@@ -1633,19 +1709,19 @@ func (expr *LetExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSymbolSeq(name+".names", expr.names, env)
+		f = emitSymbolSeq(name+".names", &expr.names, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	names: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".values", expr.values, env)
+		f = emitSeq(name+".values", &expr.values, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
@@ -1675,19 +1751,19 @@ func (expr *LoopExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSymbolSeq(name+".names", expr.names, env)
+		f = emitSymbolSeq(name+".names", &expr.names, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	names: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".values", expr.values, env)
+		f = emitSeq(name+".values", &expr.values, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
@@ -1759,7 +1835,7 @@ func (expr *CatchExpr) Emit(target string, env *CodeEnv) string {
 	excSymbol: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
@@ -1789,7 +1865,7 @@ func (expr *TryExpr) Emit(target string, env *CodeEnv) string {
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", expr.body, env)
+		f = emitSeq(name+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
@@ -1801,7 +1877,7 @@ func (expr *TryExpr) Emit(target string, env *CodeEnv) string {
 	catches: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".finallyExpr", expr.finallyExpr, env)
+		f = emitSeq(name+".finallyExpr", &expr.finallyExpr, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	finallyExpr: %s,`[1:],
