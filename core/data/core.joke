@@ -4473,10 +4473,6 @@
        :tag Map}
   types__ types__)
 
-(defn ^:private go*
-  [f]
-  (go__ f))
-
 (defmacro go
   "Schedules a block to run inside a goroutine.
   Immediately returns a Future that will deref to whatever the block returns.
@@ -4492,4 +4488,24 @@
   (or another goroutine) doesn't deref a Future or do any I/O."
   {:added "1.0"}
   [& body]
-  `(go* (fn [] ~@body)))
+  `(go__ (fn [] ~@body)))
+
+(defn chan
+  "Returns a new channel with an optional buffer of size n."
+  {:added "1.0"}
+  ([] (chan__ 0))
+  ([n] (chan__ n)))
+
+(def ^{:doc "Receives a value from a channel."
+       :added "1.0"}
+  <! <!__)
+
+(def ^{:doc "Sends a value to a channel."
+       :added "1.0"}
+  >! >!__)
+
+(def ^{:doc "Closes a channel."
+       :added "1.0"}
+  close! close!__)
+
+

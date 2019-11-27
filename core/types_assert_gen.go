@@ -825,3 +825,24 @@ func EnsureFuture(args []Object, index int) *Future {
 		panic(RT.NewArgTypeError(index, c, "Future"))
 	}
 }
+
+func AssertChannel(obj Object, msg string) *Channel {
+	switch c := obj.(type) {
+	case *Channel:
+		return c
+	default:
+		if msg == "" {
+			msg = fmt.Sprintf("Expected %s, got %s", "Channel", obj.GetType().ToString(false))
+		}
+		panic(RT.NewError(msg))
+	}
+}
+
+func EnsureChannel(args []Object, index int) *Channel {
+	switch c := args[index].(type) {
+	case *Channel:
+		return c
+	default:
+		panic(RT.NewArgTypeError(index, c, "Channel"))
+	}
+}

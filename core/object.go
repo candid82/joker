@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Future
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Future *Channel
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 //go:generate go run gen_data/gen_data.go
 
@@ -238,6 +238,7 @@ type (
 		Counted        *Type
 		Deref          *Type
 		Future         *Type
+		Channel        *Type
 		Error          *Type
 		Gettable       *Type
 		Indexed        *Type
@@ -378,6 +379,7 @@ func init() {
 		ConsSeq:        RegRefType("ConsSeq", (*ConsSeq)(nil), ""),
 		Delay:          RegRefType("Delay", (*Delay)(nil), ""),
 		Future:         RegRefType("Future", (*Future)(nil), ""),
+		Channel:        RegRefType("Channel", (*Channel)(nil), ""),
 		Double:         regType("Double", (*Double)(nil), ""),
 		EvalError:      RegRefType("EvalError", (*EvalError)(nil), ""),
 		ExInfo:         RegRefType("ExInfo", (*ExInfo)(nil), ""),

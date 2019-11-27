@@ -1557,17 +1557,59 @@ var procTypes Proc = func(args []Object) Object {
 	return res
 }
 
+var procCreateChan Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	n := EnsureInt(args, 0)
+	ch := make(chan FutureResult, n.I)
+	return MakeChannel(ch)
+}
+
+var procCloseChan Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	EnsureChannel(args, 0).Close()
+	return NIL
+}
+
+var procSend Proc = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	ch := EnsureChannel(args, 0)
+	if ch.isClosed {
+		return MakeBoolean(false)
+	}
+	v := args[1]
+	RT.GIL.Unlock()
+	ch.ch <- MakeFutureResult(v, nil)
+	RT.GIL.Lock()
+	return MakeBoolean(true)
+}
+
+var procReceive Proc = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	ch := EnsureChannel(args, 0)
+	if ch.isClosed {
+		return NIL
+	}
+	RT.GIL.Unlock()
+	res := <-ch.ch
+	RT.GIL.Lock()
+	if res.err != nil {
+		panic(res.err)
+	}
+	return res.value
+}
+
 var procGo Proc = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	f := EnsureCallable(args, 0)
-	ch := make(chan FutureResult, 1)
+	ch := MakeChannel(make(chan FutureResult, 1))
 	go func() {
 
 		defer func() {
 			if r := recover(); r != nil {
 				switch r := r.(type) {
 				case Error:
-					ch <- MakeFutureResult(NIL, r)
+					ch.ch <- MakeFutureResult(NIL, r)
+					ch.Close()
 				default:
 					RT.GIL.Unlock()
 					panic(r)
@@ -1578,9 +1620,10 @@ var procGo Proc = func(args []Object) Object {
 
 		RT.GIL.Lock()
 		res := f.Call([]Object{})
-		ch <- MakeFutureResult(res, nil)
+		ch.ch <- MakeFutureResult(res, nil)
+		ch.Close()
 	}()
-	return MakeFuture(ch)
+	return ch
 }
 
 func PackReader(reader *Reader, filename string) ([]byte, error) {
@@ -2150,4 +2193,8 @@ func init() {
 	intern("inc-problem-count__", procIncProblemCount)
 	intern("types__", procTypes)
 	intern("go__", procGo)
+	intern("<!__", procReceive)
+	intern(">!__", procSend)
+	intern("chan__", procCreateChan)
+	intern("close!__", procCloseChan)
 }
