@@ -1131,13 +1131,15 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 	for ix, _ := range *objs {
 		obj := &((*objs)[ix])
 		objae = append(objae, "\tnil,")
-		objFn := func() string {
-			el := fmt.Sprintf("%s[%d]", target, ix)
-			return fmt.Sprintf(`
+		objFn := func(innerIx int) func() string {
+			return func() string {
+				el := fmt.Sprintf("%s[%d]", target, innerIx)
+				return fmt.Sprintf(`
 	%s = %s  // deferObjectSeq[%d]
 `[1:],
-				directAssign(el), noBang(emitObject(el, false, obj, env)), ix)
-		}
+					directAssign(el), noBang(emitObject(el, false, obj, env)), innerIx)
+			}
+		}(ix) // Need an inner binding to capture the current val of ix
 		env.runtime = append(env.runtime, objFn)
 	}
 	ret := strings.Join(objae, "\n")
