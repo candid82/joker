@@ -18,7 +18,7 @@ type (
 		nextBindingIndex int
 		statics          string
 		interns          string
-		runtime          []runtimeFn
+		runtime          []func() string
 	}
 
 	CodeWriterEnv struct {
@@ -33,11 +33,6 @@ type (
 		GlobalEnv *Env
 		Strings   []*string
 		Bindings  []Binding
-	}
-
-	runtimeFn struct {
-		fn func(i interface{}) string
-		i  interface{}
 	}
 )
 
@@ -114,10 +109,10 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
-func joinStringFns(fns []runtimeFn) string {
+func joinStringFns(fns []func() string) string {
 	strs := make([]string, len(fns))
 	for ix, fn := range fns {
-		strs[ix] = fn.fn(fn.i)
+		strs[ix] = fn()
 	}
 	return strings.Join(strs, "")
 }
@@ -182,13 +177,12 @@ func emitString(target string, s *string, env *CodeEnv) string {
 	}
 	env.codeWriterEnv.NeedStrs[*s] = struct{}{}
 	name := "s_" + NameAsGo(*s)
-	env.runtime = append(env.runtime, runtimeFn{func(_ interface{}) string {
+	env.runtime = append(env.runtime, func() string {
 		return fmt.Sprintf(`
 	%s = %s
 `[1:],
 			directAssign(target), name)
-	},
-		nil})
+	})
 	return "nil"
 }
 
@@ -477,13 +471,12 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 
 	sym := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 
-	env.runtime = append(env.runtime, runtimeFn{func(_ interface{}) string {
+	env.runtime = append(env.runtime, func() string {
 		return fmt.Sprintf(`
 	%s = %s
 `[1:],
 			directAssign(target), sym)
-	},
-		nil})
+	})
 	return "!Symbol{}"
 }
 
@@ -493,13 +486,13 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	}
 	name := NameAsGo(t.name)
 	env.codeWriterEnv.NeedStrs[t.name] = struct{}{}
-	typeFn := func(_ interface{}) string {
+	typeFn := func() string {
 		return fmt.Sprintf(`
 	%s = TYPES[s_%s]
 `[1:],
 			directAssign(target), name)
 	}
-	env.runtime = append(env.runtime, runtimeFn{typeFn, nil})
+	env.runtime = append(env.runtime, typeFn)
 	return "nil"
 }
 
@@ -632,13 +625,13 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		if l.rest != nil {
 			restName := uniqueName(target, "list_", "%d", l.rest.Hash(), nil)
 			if status, found := env.codeWriterEnv.Generated[restName]; !found || status == nil {
-				fieldFn := func(_ interface{}) string {
+				fieldFn := func() string {
 					return fmt.Sprintf(`
 	%s = %s
 `[1:],
 						directAssign(field), noBang(l.rest.Emit(field, nil, env)))
 				}
-				env.runtime = append(env.runtime, runtimeFn{fieldFn, nil})
+				env.runtime = append(env.runtime, fieldFn)
 			}
 		} else if l.rest != nil {
 			f := noBang(l.rest.Emit(field, nil, env))
@@ -805,10 +798,10 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 	if *ns.Name.name != "joker.core" {
 		panic(fmt.Sprintf("code.go: (*Namespace)Emit() supports only ns=joker.core, not =%s\n", *ns.Name.name))
 	}
-	nsFn := func(_ interface{}) string {
+	nsFn := func() string {
 		return fmt.Sprintf("\t%s = _ns\n", directAssign(target))
 	}
-	env.runtime = append(env.runtime, runtimeFn{nsFn, nil})
+	env.runtime = append(env.runtime, nsFn)
 	return "nil"
 }
 
@@ -1138,14 +1131,14 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 	for ix, _ := range *objs {
 		obj := &((*objs)[ix])
 		objae = append(objae, "\tnil,")
-		objFn := func(i interface{}) string {
-			el := fmt.Sprintf("%s[%d]", target, i.(int))
+		objFn := func() string {
+			el := fmt.Sprintf("%s[%d]", target, ix)
 			return fmt.Sprintf(`
 	%s = %s  // deferObjectSeq[%d]
 `[1:],
-				directAssign(el), noBang(emitObject(el, false, obj, env)), i.(int))
+				directAssign(el), noBang(emitObject(el, false, obj, env)), ix)
 		}
-		env.runtime = append(env.runtime, runtimeFn{objFn, ix})
+		env.runtime = append(env.runtime, objFn)
 	}
 	ret := strings.Join(objae, "\n")
 	if !isEmpty(ret) {
@@ -1466,7 +1459,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	g := NameAsGo(sym)
 	env.codeWriterEnv.NeedStrs[sym] = struct{}{}
 
-	runtimeDefineVarFn := func(_ interface{}) string {
+	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
 		if _, ok := env.codeWriterEnv.Generated[vr]; ok {
 			return "\n"
@@ -1485,15 +1478,15 @@ var p_v_%s *Var
 `,
 			g, g)
 	}
-	env.runtime = append(env.runtime, runtimeFn{runtimeDefineVarFn, nil})
+	env.runtime = append(env.runtime, runtimeDefineVarFn)
 
-	runtimeAssignFn := func(_ interface{}) string {
+	runtimeAssignFn := func() string {
 		return fmt.Sprintf(`
 	%s = p_v_%s
 `[1:],
 			directAssign(target), g)
 	}
-	env.runtime = append(env.runtime, runtimeFn{runtimeAssignFn, nil})
+	env.runtime = append(env.runtime, runtimeAssignFn)
 
 	return ""
 }

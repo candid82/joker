@@ -27,7 +27,7 @@ $time ./gen_data/gen_data
 
 $time go fmt a_*.go
 
-JUSTVET=false
+JUSTVET=true
 
 $JUSTVET && (cd ..; $time go vet ./...)
 
