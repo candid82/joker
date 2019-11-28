@@ -4474,18 +4474,19 @@
   types__ types__)
 
 (defmacro go
-  "Schedules a block to run inside a goroutine.
-  Immediately returns a Future that will deref to whatever the block returns.
-  If exception is thrown inside the block, it will be caught and re-thrown upon
-  derefing the returned Future.
+  "Schedules the body to run inside a goroutine.
+  Immediately returns a channel which will receive the result of the body when
+  completed.
+  If exception is thrown inside the body, it will be caught and re-thrown upon
+  reading from the returned channel.
 
   Joker is single threaded and uses the GIL (Global Interpreter Lock) to make sure
   only one goroutine (including the root one) executes at the same time.
-  However, Future's deref and some I/O functions (joker.http/send, joker.os/sh*, joker.os/exec,
+  However, channel operations and some I/O functions (joker.http/send, joker.os/sh*, joker.os/exec,
   and joker.time/sleep) release the GIL and allow other goroutines to run.
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine
-  (or another goroutine) doesn't deref a Future or do any I/O."
+  (or another goroutine) doesn't do any I/O or channel operations (<! or >!)."
   {:added "1.0"}
   [& body]
   `(go__ (fn [] ~@body)))
@@ -4493,19 +4494,35 @@
 (defn chan
   "Returns a new channel with an optional buffer of size n."
   {:added "1.0"}
-  ([] (chan__ 0))
-  ([n] (chan__ n)))
+  (^Channel [] (chan__ 0))
+  (^Channel [^Int n] (chan__ n)))
 
-(def ^{:doc "Receives a value from a channel."
-       :added "1.0"}
-  <! <!__)
+(defn <!
+  "Takes a value from ch.
+  Returns nil if ch is closed and nothing is available on ch.
+  Blocks if nothing is available on ch and ch is not closed."
+  {:added "1.0"}
+  [^Channel ch]
+  (<!__ ch))
 
-(def ^{:doc "Sends a value to a channel."
-       :added "1.0"}
-  >! >!__)
+(defn >!
+  "Puts val into ch.
+  Throws an exception if val is nil.
+  Blocks if ch is full (no buffer space is available).
+  Returns true unless ch is already closed."
+  {:added "1.0"}
+  [^Channel ch val]
+  (>!__ ch val))
 
-(def ^{:doc "Closes a channel."
-       :added "1.0"}
-  close! close!__)
+(defn close!
+  "Closes a channel. The channel will no longer accept any puts (they
+  will be ignored). Data in the channel remains available for taking, until
+  exhausted, after which takes will return nil. If there are any
+  pending takes, they will be dispatched with nil. Closing a closed
+  channel is a no-op. Returns nil.
 
-
+  Logically closing happens after all puts have been delivered. Therefore, any
+  blocked puts will remain blocked until a taker releases them."
+  {:added "1.0"}
+  [^Channel ch]
+  (close!__ ch))

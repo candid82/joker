@@ -1570,7 +1570,7 @@ var procCloseChan Proc = func(args []Object) Object {
 	return NIL
 }
 
-var procSend Proc = func(args []Object) Object {
+var procSend Proc = func(args []Object) (obj Object) {
 	CheckArity(args, 2, 2)
 	ch := EnsureChannel(args, 0)
 	v := args[1]
@@ -1580,21 +1580,28 @@ var procSend Proc = func(args []Object) Object {
 	if ch.isClosed {
 		return MakeBoolean(false)
 	}
+	obj = MakeBoolean(true)
+	defer func() {
+		if r := recover(); r != nil {
+			RT.GIL.Lock()
+			obj = MakeBoolean(false)
+		}
+	}()
 	RT.GIL.Unlock()
 	ch.ch <- MakeFutureResult(v, nil)
 	RT.GIL.Lock()
-	return MakeBoolean(true)
+	return
 }
 
 var procReceive Proc = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	ch := EnsureChannel(args, 0)
-	if ch.isClosed {
+	RT.GIL.Unlock()
+	res, ok := <-ch.ch
+	RT.GIL.Lock()
+	if !ok {
 		return NIL
 	}
-	RT.GIL.Unlock()
-	res := <-ch.ch
-	RT.GIL.Lock()
 	if res.err != nil {
 		panic(res.err)
 	}
