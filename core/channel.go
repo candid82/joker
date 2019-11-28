@@ -5,11 +5,19 @@ import (
 )
 
 type (
+	FutureResult struct {
+		value Object
+		err   Error
+	}
 	Channel struct {
 		ch       chan FutureResult
 		isClosed bool
 	}
 )
+
+func MakeFutureResult(value Object, err Error) FutureResult {
+	return FutureResult{value: value, err: err}
+}
 
 func (ch *Channel) ToString(escape bool) string {
 	return "#object[Channel]"

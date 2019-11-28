@@ -11,12 +11,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-func shAsync(dir string, name string, args []string) *Future {
-	return ExecFuture(func() Object {
-		return sh(dir, nil, nil, nil, name, args)
-	})
-}
-
 func sh(dir string, stdin io.Reader, stdout io.Writer, stderr io.Writer, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir

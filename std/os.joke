@@ -38,12 +38,6 @@
   :go "sh(\"\", nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
-(defn sh-async
-  "Same as sh, but executes the program asynchronously and returns a Future."
-  {:added "1.0"
-  :go "shAsync(\"\", name, arguments)"}
-  [^String name & ^String arguments])
-
 (defn sh-from
   "Executes the named program with the given arguments and working directory set to dir.
   Returns a map with the following keys:
@@ -54,12 +48,6 @@
       :err - string capturing stderr of the program."
   {:added "1.0"
   :go "sh(dir, nil, nil, nil, name, arguments)"}
-  [^String dir ^String name & ^String arguments])
-
-(defn sh-from-async
-  "Same as sh-from, but executes the program asynchronously and returns a Future."
-  {:added "1.0"
-  :go "shAsync(dir, name, arguments)"}
   [^String dir ^String name & ^String arguments])
 
 (defn exec
@@ -80,12 +68,6 @@
   :err - string capturing stderr of the program (unless :stderr option was passed)."
   {:added "1.0"
   :go "execute(name, opts)"}
-  [^String name ^Map opts])
-
-(defn exec-async
-  "Same as exec, but executes the program asynchronously and returns a Future."
-  {:added "1.0"
-  :go "executeAsync(name, opts)"}
   [^String name ^Map opts])
 
 (defn mkdir
