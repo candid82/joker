@@ -1137,9 +1137,9 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 		objFn := func() string {
 			el := fmt.Sprintf("%s[%d]", target, ix)
 			return fmt.Sprintf(`
-	%s = %s
+	%s = %s  // deferObjectSeq[%d]
 `[1:],
-				directAssign(el), noBang(emitObject(el, false, obj, env)))
+				directAssign(el), noBang(emitObject(el, false, obj, env)), ix)
 		}
 		env.runtime = append(env.runtime, objFn)
 	}
