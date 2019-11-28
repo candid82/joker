@@ -103,10 +103,7 @@ func uniqueName(target, prefix, f string, id, actual interface{}) string {
 	if actual != nil {
 		id = actual
 	}
-	if strings.Contains(target, ".") {
-		return fmt.Sprintf("%s"+f, prefix, id)
-	}
-	return prefix + target
+	return fmt.Sprintf("%s"+f, prefix, id)
 }
 
 func coreType(e interface{}) string {
@@ -1006,7 +1003,7 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 	case Nil:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Nil)"), nil, env)
 	}
-	return fmt.Sprintf("/*ABEND: unknown interface{} type %T: %+v*/", obj, obj)
+	return fmt.Sprintf("nil /*ABEND: unknown interface{} type %T: %+v*/", obj, obj)
 }
 
 func emitObject(target string, typedTarget bool, objPtr *Object, env *CodeEnv) string {

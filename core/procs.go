@@ -1775,7 +1775,6 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 }
 
 var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Boolean{B: true}).(Map)
-var procs = map[*Proc]string{}
 
 func intern(name string, proc ProcFn, procName string) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
