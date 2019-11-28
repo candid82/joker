@@ -1573,10 +1573,13 @@ var procCloseChan Proc = func(args []Object) Object {
 var procSend Proc = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	ch := EnsureChannel(args, 0)
+	v := args[1]
+	if v.Equals(NIL) {
+		panic(RT.NewError("Can't put nil on channel"))
+	}
 	if ch.isClosed {
 		return MakeBoolean(false)
 	}
-	v := args[1]
 	RT.GIL.Unlock()
 	ch.ch <- MakeFutureResult(v, nil)
 	RT.GIL.Lock()
