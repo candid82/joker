@@ -28,6 +28,7 @@ var (
 	testData         []byte
 	setData          []byte
 	tools_cliData    []byte
+	tools_multiData  []byte
 	linter_allData   []byte
 	linter_jokerData []byte
 	linter_cljxData  []byte
@@ -65,13 +66,14 @@ const (
 
 func InitInternalLibs() {
 	internalLibs = map[string][]byte{
-		"joker.walk":      walkData,
-		"joker.template":  templateData,
-		"joker.repl":      replData,
-		"joker.test":      testData,
-		"joker.set":       setData,
-		"joker.tools.cli": tools_cliData,
-		"joker.hiccup":    hiccupData,
+		"joker.walk":        walkData,
+		"joker.template":    templateData,
+		"joker.repl":        replData,
+		"joker.test":        testData,
+		"joker.set":         setData,
+		"joker.tools.cli":   tools_cliData,
+		"joker.tools.multi": tools_multiData,
+		"joker.hiccup":      hiccupData,
 	}
 }
 

@@ -1,6 +1,7 @@
 (alias 'string 'joker.string)
 (require 'joker.walk)
 (require 'joker.tools.cli)
+(require 'joker.tools.multi)
 (require 'joker.test)
 (require 'joker.template)
 (require 'joker.set)

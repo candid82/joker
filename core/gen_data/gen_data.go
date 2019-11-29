@@ -7,6 +7,7 @@ import (
 
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/std/html"
+	_ "github.com/candid82/joker/std/os"
 	_ "github.com/candid82/joker/std/string"
 )
 
@@ -56,6 +57,10 @@ var files []FileInfo = []FileInfo{
 	{
 		name:     "<joker.tools.cli>",
 		filename: "tools_cli.joke",
+	},
+	{
+		name:     "<joker.tools.multi>",
+		filename: "tools_multi.joke",
 	},
 	{
 		name:     "<joker.core>",

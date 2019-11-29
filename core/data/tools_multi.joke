@@ -1,0 +1,442 @@
+(ns joker.tools.multi
+  "A complement to joker.tools.cli that allows a single tool, a Joker script, to 
+  contain multiple commands, each with its own command line options and arguments.
+
+  joker.tools.multi makes use of metadata on the vars of one or
+  more namespaces to identify the available commands, and the command line options
+  and arguments allowed for each command.
+
+  multi uses the following meta data keys:
+
+  :command (boolean) - indicates the function is a command
+  :command-name (string, optional) -- overrides the name of the command, normally the symbol
+  :doc (string) -- the command's docstring is the command description, used when printing help
+  :command-opts - a list of option specs, passed to joker.tools.cli/parse-opts
+  :command-args - a list of positional argument specs 
+
+  A command option, -h / --help, is added to all commands automatically.
+
+  A help command is also added; it displays the list of commands available.
+
+  The help command displays the first line of each command's docstring, as a summary
+  of the command.
+
+  The command function is ultimately passed a map containing two sub maps:
+  The :options map contains the command options, and the :arguments
+  map contains parsed and validated command line arguments.
+
+  Whereas command option parsing is driven by the option names, command argument
+  parsing is positional. Each command option spec will consume one command line argument
+  (exception: the last spec may be repeatable).
+
+  command argument specs are similar to command option specs; each spec is a vector that starts
+  with one or two strings; the first string is always the label (by convention,
+  in upper case). The optional second string is the documentation of the argument.
+
+  Following that are key/value pairs:
+
+  :id (keyword) - identifies which key is used in the :arguments map; by default,
+    this is the label converted to a lower case keyword
+  :doc (string) - documentation for the argument
+  :optional (boolean) -- if true, the argument may be omitted if there isn't a
+     command line argument to match
+  :repeatable (boolean) -- if true, then any remaining command line arguments are processed
+    by the argument
+  :parse-fn - passed the command line argument, returns a value, or throws an exception
+  :validate - a vector of function/message pairs
+  :update-fn - function used to update the (initially nil) entry for the argument in the
+   :arguments map
+
+  For repeatable arguments, the default update function will construct a vector of values.
+  For normal arguments, the default update function simply sets the value.
+
+  An example command function:
+
+  (defn ^{:command true
+          :command-opts [[\"-v\" \"--verbose\" \"Enable verbose logging\"]]
+          :command-args [[\"HOST\" \"System configuration URL\"
+                          :validate [#(re-matches #\"https?://.+\" %) \"must be a URL\"]]
+                        [\"DATA\" \"Data to configure as KEY=VALUE\"
+                          :id :key-values
+                          :parse-fn (fn [s]
+                                      (when-let [[_ k v] (re-matches #\"(.+)=(.+)\" s)]
+                                        [(keyword k) v]))
+                          :update-fn (fn [m [k v]]
+                                      (assoc m k v))
+                          :repeatable true]]}
+    configure
+    \"Configures the system with keys and values\"
+    [parsed-opts]
+    (pprint (select-keys parsed-opts [:options :arguments])))
+
+
+  > bin/example configure --help
+  Usage: example configure [OPTIONS] HOST DATA+
+  Configures the system with keys and values
+
+  Options:
+    -v, --verbose  Enable verbose logging
+    -h, --help     This command summary
+
+  Arguments:
+    HOST: System configuration URL
+    DATA: Data to configure as KEY=VALUE
+
+  > bin/example configure http://localhost:9983 retries=3 alerts=on -v
+  {:options {:verbose true},
+   :arguments {:host \"http://localhost:9983\",
+               :key-values {:retries \"3\",
+                            :alerts \"on\"}}}
+"
+  (:require
+   [joker.tools.cli :as cli]
+   [joker.string :as str]
+   [joker.os :as os]))
+
+;; TODO:
+;; Make :update-fn simpler, add :assoc-fn
+;; Add :default and maybe :default-fn
+;; Maybe invert :optional and :required to aligne with j.t.cli
+;; Pass thru options to j.t.cli
+;; Validate that argument ids are unique
+;; Should we continue to pass values through later validator fn's if earlier ones fail?
+
+(defmacro ^:private cond-let
+  [& clauses]
+  (cond
+    (empty? clauses)
+    nil
+
+    (not (even? (count clauses)))
+    (throw (ex-info (str `cond-let " requires an even number of forms")
+                    {:form &form
+                     :meta (meta &form)}))
+
+    :else
+    (let [[test expr-or-binding-form & more-clauses] clauses]
+      (if (= :let test)
+        `(let ~expr-or-binding-form (cond-let ~@more-clauses))
+            ;; Standard case
+        `(if ~test
+           ~expr-or-binding-form
+           (cond-let ~@more-clauses))))))
+
+(defn ^:private default-update-fn
+  [_ value]
+  value)
+
+(defn ^:private show-errors
+  [errors]
+  (when (seq errors)
+    (println)
+    (println (if (= 1 (count errors)) "Error:" "Errors:"))
+    (doseq [e errors]
+      (println (str "  " e)))))
+
+(defn ^:private show-tool-help
+  [parsed-opts errors]
+  (let [{:keys [tool-name ::command-map]} parsed-opts
+        ks (-> command-map keys sort)
+        width (+ 2 (apply max (map count ks)))]
+    (println "Usage:" tool-name "COMMAND ...")
+    (println)
+    (println "Commands:")
+    (doseq [k ks
+            :let [doc-string (-> command-map (get k) meta :doc (or ""))
+                  first-doc (-> doc-string str/split-lines first)]]
+      (println (str (str/pad-left k " " width) ": " first-doc))))
+  (show-errors errors))
+
+(defn ^:private help
+  "Lists available commands"
+  [parsed-opts]
+  (show-tool-help parsed-opts nil))
+
+(defn ^:private extract-command-map
+  "Returns map of command name (string) to var"
+  [namespace-symbols]
+  (let [f (fn [m namespace-symbol]
+            ;; Ensure the namespace is loaded
+            (require namespace-symbol)
+            (->> (find-ns namespace-symbol)
+                 ns-map
+                 (reduce (fn [m [sym v]]
+                           (if (-> v meta :command)
+                             (let [command-name (or (-> v meta :command-name)
+                                                    (name sym))]
+                               (assoc m command-name v))
+                             m))
+                         m)))]
+    (reduce f
+            {"help" #'help}
+            namespace-symbols)))
+
+(defn ^:private arg-spec->str
+  [arg-spec]
+  (let [{:keys [label optional repeatable]} arg-spec]
+    (apply str
+           (when optional "[")
+           label
+           (when optional "]")
+           (when repeatable
+             (if optional "*" "+")))))
+
+(defn show-summary
+  "Displays the command's summary; partially generated by joker.tools.cli, and then
+  enhanced with more information about command line arguments.
+
+  errors is a seq of strings to display as errors."
+  [parsed-opts errors]
+  (let [{:keys [tool-name command-name summary ::positional-specs doc]} parsed-opts]
+    (apply println
+           (remove nil? (concat ["Usage:" tool-name command-name
+                                 "[OPTIONS]"]
+                                (map arg-spec->str positional-specs))))
+    (when doc
+      (println doc))
+      ;; There's always at least -h/--help:
+    (println "\nOptions:")
+    (println summary)
+
+    (when (seq positional-specs)
+      (let [label-width (->> positional-specs
+                             (map :label)
+                             (map count)
+                             (reduce max)
+                                ;; For indentation
+                             (+ 2))]
+        (println "\nArguments:")
+        (doseq [{:keys [label doc]} positional-specs]
+          (println (str
+                    (str/pad-left label " " label-width)
+                    ": "
+                    doc)))))
+
+    (show-errors errors)))
+
+;; (def ^:private spec-keys [:id :doc :required :default :parse-fn :update-fn])
+
+(defn ^:private compile-positional-spec
+  "Positional specs are similar to option specs."
+  [command-name terms]
+  (let [[label & more] terms]
+    ;; The label is required, then it's the optional documentation string
+    (if (-> more first string?)
+      (recur command-name
+             (into [label :doc (first more)]
+                   (rest more)))
+      (let [spec-map (apply hash-map more)
+            id (or (:id spec-map)
+                   (-> label str/lower-case keyword))
+            invalid-keys (-> spec-map
+                             (dissoc :id :doc :optional :repeatable :default :parse-fn :update-fn)
+                             keys
+                             sort)
+            {:keys [validate update-fn repeatable doc optional parse-fn]} spec-map
+            update-fn' (cond
+                         update-fn
+                         update-fn
+
+                         repeatable
+                         (fnil conj [])
+
+                         :else
+                         default-update-fn)
+            validate-pairs (when (seq validate)
+                             (->> (partition 2 2 validate)
+                                  (map vec)))]
+        (when (seq invalid-keys)
+          (println-err (format "Warning: command %s, argument %s contains invalid keys: %s"
+                               command-name
+                               id
+                               (str/join ", " invalid-keys))))
+        {:label label
+         :id id
+         :doc doc
+         :optional optional
+         :repeatable repeatable
+         :update-fn update-fn'
+         :parse-fn (or parse-fn identity)
+         :validate validate-pairs}))))
+
+(defn ^:private compile-position-specs
+  [command-name specs]
+  (let [compiled (map #(compile-positional-spec command-name %) specs)]
+    (loop [[this-spec & more-specs] compiled
+           optional-id nil
+           repeatable-id nil]
+      (cond-let
+       (nil? this-spec)
+       compiled
+
+       :let [this-id (:id this-spec)]
+
+       ;; Use the keyword ids, not the labels, since these are a programmer errors, not a runtime error
+
+       (and optional-id
+            (not (:optional this-spec)))
+       (throw (ex-info (str "Argument " this-id " of command " command-name " is not optional but follows optional argument " optional-id)
+                       {:command-name command-name
+                        :spec this-spec}))
+
+       (some? repeatable-id)
+       (throw (ex-info (str "Argument " this-id " of command " command-name " follows repeatable argument " repeatable-id ", but only the final argument may be repeatable")
+                       {:command-name command-name
+                        :spec this-spec}))
+
+       :else
+       (recur more-specs
+              (or (when (:optional this-spec)
+                    this-id)
+                  optional-id)
+              (or (when (:repeatable this-spec)
+                    this-id)
+                  repeatable-id))))))
+
+(defn ^:private validate-argument
+  [positional-spec value]
+  (keep (fn [[validation-fn validation-msg]]
+          (try
+            (when-not (try
+                        (validation-fn value)
+                        (catch Error _ false))
+              (str (:label positional-spec) ": " validation-msg))))
+        (:validate positional-spec)))
+
+(defn ^:private process-arguments
+  [positional-specs arguments]
+  (loop [state {:specs positional-specs
+                :remaining arguments
+                :argument-map {}
+                :errors []
+                :ignore-required false}]
+    (cond-let
+     :let [{:keys [specs remaining argument-map errors ignore-required]} state
+           [this-spec & more-specs] specs
+           {:keys [label repeatable optional parse-fn update-fn id]} this-spec
+           [this-argument & more-arguments] remaining]
+
+     ;; specs and arguments exhausted
+     (and (nil? this-spec)
+          (nil? this-argument))
+     [argument-map errors]
+
+     ;; Hit the first optional argument and out of command line arguments.
+     ;; Since all subsequent arguments must be optional (verified by compile), we can stop here.
+     (and (nil? this-argument)
+          ;; After the first argument is consumed by a repeatable, we treat the repeatable
+          ;; command as optional.
+          (or optional ignore-required))
+     [argument-map errors]
+
+     ;; Have a required argument and nothing to match it against.
+     (nil? this-argument)
+     [argument-map (conj errors (str "No value for required argument " label))]
+
+     ;; Ran out of specs before running out of arguments.
+     (nil? this-spec)
+     [argument-map (conj errors (format "Unexpected argument '%s'" this-argument))]
+
+     :let [[parsed error] (try
+                            [(parse-fn this-argument) nil]
+                            (catch Error t
+                              [nil (format "Error in %s: %s" label (ex-message t))]))]
+
+     error
+     [argument-map (conj errors error)]
+
+     :let [validation-errors (validate-argument this-spec parsed)]
+
+     (seq validation-errors)
+     [argument-map (into errors validation-errors)]
+
+     :else
+     (let [state' (-> state
+                      (update-in [:argument-map id] update-fn parsed)
+                      (assoc :remaining more-arguments))]
+       (recur (if repeatable
+                ;; leave the last, repeatable spec in place
+                (assoc state' :ignore-required true)
+                ;; Not repeatable; it has "consumed" an argument, so continue with
+                ;; next spec and next argument
+                (assoc state' :specs more-specs)))))))
+
+(defn dispatch
+  "Locates commands in namespaces, finds the command for the command 
+  (as identified by the first command line argument) and processes CLI options.
+
+  configuration keys:
+  :tool-name (required, string) - used in command summary and errors
+  :arguments - command line arguments to parse
+  :namespaces - symbols identifying namespaces to search for commands
+
+  dispatch will load any namespaces specified.
+
+  If option and argument parsing is unsuccesful, then
+  a command usage summary is printed, along with errors, and the program exits
+  with error code 1.
+
+  On success, the command function is invoked with a command map:
+
+  :tool-name - the name of the tool (useful for error messages)
+  :command-name - the name of the command
+  :options - map of command line options (via joker.tools.cli/parse-opts)
+  :arguments - map of processed command line arguments
+  :doc - the documentation (docstring) of the comamnd
+
+  Other keys may be present in the command map; these are internal to
+  joker.tools.multi and may change in the future." 
+  [configuration]
+  (try
+    (cond-let
+
+     :let [{:keys [tool-name]
+            namespace-symbols :namespaces
+            command-line-args :arguments} configuration
+           [command-name] command-line-args
+           command-map (extract-command-map namespace-symbols)
+           base-parsed-opts {:tool-name tool-name
+                             ::command-map command-map}]
+
+     (or (nil? command-name)
+         (str/starts-with? command-name "-"))
+     (do
+       (show-tool-help base-parsed-opts ["No command provided"])
+       (os/exit 1))
+
+     :let [command-var (get command-map command-name)]
+
+     (nil? command-var)
+     (show-tool-help base-parsed-opts
+                     [(format "'%s' is not a command" command-name)])
+
+     :let [var-meta (meta command-var)
+           positional-specs (compile-position-specs command-name (:command-args var-meta))
+           parsed-opts (merge base-parsed-opts
+                              (cli/parse-opts (rest command-line-args)
+                                              (conj (:command-opts var-meta)
+                                                    ["-h" "--help" "This command summary"]))
+                              {:command-name command-name
+                               ::positional-specs positional-specs
+                               :doc (:doc var-meta)})
+           {:keys [options arguments]
+            opt-errors :errors} parsed-opts
+           [processed-arguments arg-errors] (process-arguments positional-specs arguments)
+           errors (concat opt-errors arg-errors)]
+
+     (:help options)
+     (show-summary parsed-opts nil)
+
+     (seq errors)
+     (do
+       (show-summary parsed-opts errors)
+       (os/exit 1))
+
+     :else
+     (command-var (assoc parsed-opts :arguments processed-arguments)))
+    (catch Error t
+      (println-err "Command failed:" t)
+      (when-let [data (ex-data t)]
+        (binding [*out* *err*]
+          (pprint data)))
+      (os/exit 1))))

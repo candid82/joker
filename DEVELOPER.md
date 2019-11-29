@@ -58,6 +58,10 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` file has already been created)
 
+For example, `joker.tools.multi` depends of `joker.tools.cli` and `joker.os`; it's line in the `files` array must appear after `joker.tools.cli`,
+it it was necessary to add an import of `"github.com/candid82/joker/std/os"` to the `import` in `gen_data.go` (to make `joker.os` visible
+to `joker.tools.multi`).
+
 At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
 
 (To add the namespace to `*loaded-libs*`, edit its `defonce` definition in `core/data/core.joke` and rebuild.)
