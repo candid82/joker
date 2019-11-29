@@ -23,9 +23,9 @@
   The help command displays the first line of each command's docstring, as a summary
   of the command.
 
-  The command function is ultimately passed a map containing two sub maps:
+  The command function is ultimately passed a map containing two sub-maps:
   The :options map contains the command options, and the :arguments
-  map contains parsed and validated command line arguments.
+  map contains a map of processed command line arguments.
 
   Whereas command option parsing is driven by the option names, command argument
   parsing is positional. Each command option spec will consume one command line argument
@@ -37,7 +37,7 @@
 
   Following that are key/value pairs:
 
-  :id (keyword) - identifies which key is used in the :arguments map; by default,
+  :id (keyword) - identifies which key is used in the arguments map; by default,
     this is the label converted to a lower case keyword
   :doc (string) - documentation for the argument
   :optional (boolean) -- if true, the argument may be omitted if there isn't a
@@ -48,9 +48,12 @@
   :validate - a vector of function/message pairs
   :update-fn - function used to update the (initially nil) entry for the argument in the
    :arguments map
+  :assoc-fn - function used to update the arguments map; passed the map, the id, and the parsed value
+
+  :update-fn and :assoc-fn are mutually exclusive.
 
   For repeatable arguments, the default update function will construct a vector of values.
-  For normal arguments, the default update function simply sets the value.
+  For non-repeatable arguments, the default update function simply sets the value.
 
   An example command function:
 
@@ -123,10 +126,6 @@
         `(if ~test
            ~expr-or-binding-form
            (cond-let ~@more-clauses))))))
-
-(defn ^:private default-update-fn
-  [_ value]
-  value)
 
 (defn ^:private show-errors
   [errors]
@@ -232,19 +231,28 @@
             id (or (:id spec-map)
                    (-> label str/lower-case keyword))
             invalid-keys (-> spec-map
-                             (dissoc :id :doc :optional :repeatable :default :parse-fn :update-fn :validate)
+                             (dissoc :id :doc :optional :repeatable :default :parse-fn :update-fn :assoc-fn :validate)
                              keys
                              sort)
-            {:keys [validate update-fn repeatable doc optional parse-fn]} spec-map
-            update-fn' (cond
-                         update-fn
-                         update-fn
+            {:keys [validate update-fn repeatable doc optional parse-fn assoc-fn]} spec-map
+            _ (when (and update-fn assoc-fn)
+                (throw (ex-info "May only specify one of :update-fn and :assoc-fn"
+                                {:command-name command-name
+                                 :spec spec-map})))
+            assoc-fn' (cond
+                        assoc-fn
+                        assoc-fn
 
-                         repeatable
-                         (fnil conj [])
+                        update-fn
+                        (fn [m k v]
+                          (update m k update-fn v))
 
-                         :else
-                         default-update-fn)
+                        repeatable
+                        (fn [m k v]
+                          (update m k (fnil conj []) v))
+
+                        :else
+                        assoc)
             validate-pairs (when (seq validate)
                              (->> (partition 2 2 validate)
                                   (map vec)))]
@@ -258,7 +266,7 @@
          :doc doc
          :optional optional
          :repeatable repeatable
-         :update-fn update-fn'
+         :assoc-fn assoc-fn'
          :parse-fn (or parse-fn identity)
          :validate validate-pairs}))))
 
@@ -297,14 +305,18 @@
                   repeatable-id))))))
 
 (defn ^:private validate-argument
+  "Validates the value against the :validate vector of the spec, returning nil on
+   success, or the first error.  A validation fn that returns false or throws an exception
+   is a failure."
   [positional-spec value]
-  (keep (fn [[validation-fn validation-msg]]
-          (try
-            (when-not (try
-                        (validation-fn value)
-                        (catch Error _ false))
-              (str (:label positional-spec) ": " validation-msg))))
-        (:validate positional-spec)))
+  (loop [[tuple & more] (:validate positional-spec)]
+    (when tuple
+      (let [[validation-fn validation-msg] tuple]
+        (if-not (try
+                  (validation-fn value)
+                  (catch Error _ false))
+          validation-msg
+          (recur more))))))
 
 (defn ^:private process-arguments
   [positional-specs arguments]
@@ -316,7 +328,7 @@
     (cond-let
      :let [{:keys [specs remaining argument-map errors ignore-required]} state
            [this-spec & more-specs] specs
-           {:keys [label repeatable optional parse-fn update-fn id]} this-spec
+           {:keys [label repeatable optional parse-fn assoc-fn id]} this-spec
            [this-argument & more-arguments] remaining]
 
      ;; specs and arguments exhausted
@@ -354,9 +366,11 @@
      [argument-map (into errors validation-errors)]
 
      :else
-     (let [state' (-> state
-                      (update-in [:argument-map id] update-fn parsed)
-                      (assoc :remaining more-arguments))]
+     (let [state' (assoc state
+                         ;; Consume an argument
+                         :remaining more-arguments
+                         ;; Apply the argument
+                         :argument-map (assoc-fn argument-map id parsed))]
        (recur (if repeatable
                 ;; leave the last, repeatable spec in place
                 (assoc state' :ignore-required true)

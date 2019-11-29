@@ -230,3 +230,29 @@ Error:
                                  (multi/dispatch* "xxx" {"cmd" #'invalid-optional} ["cmd"])))]
     (is (= "Argument :key-values of command cmd is not optional but follows optional argument :host"
            (ex-message error)))))
+
+(defn ^{:command-opts [["-v" "--verbose" "Enable verbose logging"]]
+        :command-args [["HOST" "System configuration URL"
+                        :validate [#(re-matches #"https?://.+" %) "must be a URL"]]
+                       ["DATA" "Data to configure as KEY=VALUE"
+                        :id :key-values
+                        :parse-fn (fn [s]
+                                    (when-let [[_ k v] (re-matches #"(.+)=(.+)" s)]
+                                      [(keyword k) v]))
+                        :repeatable true]]}
+  default-update-fn
+  "Configures the system with keys and values"
+  [command]
+  (capture command))
+
+(deftest default-for-repeatable-update-fn
+  (multi/dispatch* "xxx" 
+                   {"capture" #'default-update-fn}
+                   ["capture" "http://localhost:9191" "foo=bar" "gnip=2"])
+  (is (= {:arguments
+          {:host "http://localhost:9191"
+                     ;; Default assoc for repeatable is to conj, in order, in a vector
+           :key-values [[:foo "bar"] 
+                        [:gnip "2"]]}
+          :options {}}
+         @*data)))
