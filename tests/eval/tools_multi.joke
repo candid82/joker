@@ -1,0 +1,167 @@
+(ns joker.test.tools-multi
+  (:require
+   [joker.tools.multi :as multi]
+   [joker.os :as os]
+   [joker.test :refer [deftest is use-fixtures]]))
+
+(def *data (atom nil))
+
+(use-fixtures :each
+  (fn [f]
+    (reset! *data nil)
+    (with-redefs
+     [os/exit (fn [x] [::exit x])]
+      (f))))
+
+(defn ^{:command true}
+  capture
+  "Captures options and arguments
+
+Additional docstring for capture.
+
+"
+  [command]
+  (reset! *data (select-keys command [:arguments :options])))
+
+(defn ^{:command true
+        :command-name "alias"}
+  __alias
+  "<alias docstring>"
+  [_])
+
+(defn ^{:command true
+        :command-opts [["-v" "--verbose" "Enable verbose logging"]]
+        :command-args [["HOST" "System configuration URL"
+                        :validate [#(re-matches #"https?://.+" %) "must be a URL"]]
+                       ["DATA" "Data to configure as KEY=VALUE"
+                        :id :key-values
+                        :parse-fn (fn [s]
+                                    (when-let [[_ k v] (re-matches #"(.+)=(.+)" s)]
+                                      [(keyword k) v]))
+                        :update-fn (fn [m [k v]]
+                                     (assoc m k v))
+                        :repeatable true]]}
+  configure
+  "Configures the system with keys and values"
+  [command]
+  (capture command))
+
+(deftest automatic-help-command
+  (let [output (with-out-str
+                 (is (= [::exit 1])
+                     (multi/dispatch {:tool-name "autohelp"
+                                      :namespaces ['joker.test.tools-multi]
+                                      :arguments ["help"]})))]
+    (is (= "Usage: autohelp COMMAND ...
+
+Commands:
+      alias: <alias docstring>
+    capture: Captures options and arguments
+  configure: Configures the system with keys and values
+       help: Lists available commands
+"
+           output))))
+
+(deftest command-line-arguments-disallowed-unless-speced
+  (let [output (with-out-str
+                 (is (= [::exit 1])
+                     (multi/dispatch {:tool-name "noargs"
+                                      :namespaces ['joker.test.tools-multi]
+                                      :arguments ["alias" "smith" "and" "jones"]})))]
+    (is (= "Usage: noargs alias [OPTIONS]
+<alias docstring>
+
+Options:
+  -h, --help  This command summary
+
+Error:
+  Unexpected argument 'smith'
+"
+           output))))
+
+(deftest automatic-help-for-command
+  (let [output (with-out-str
+                 (is (= [::exit 1])
+                     (multi/dispatch {:tool-name "helpopt"
+                                      :namespaces ['joker.test.tools-multi]
+                                      :arguments ["configure" "-h"]})))]
+    (is (= "Usage: helpopt configure [OPTIONS] HOST DATA+
+Configures the system with keys and values
+
+Options:
+  -v, --verbose  Enable verbose logging
+  -h, --help     This command summary
+
+Arguments:
+  HOST: System configuration URL
+  DATA: Data to configure as KEY=VALUE
+"
+           output))))
+
+(deftest first-argument-must-identify-command
+  (let [output (with-out-str
+                 (is (= [::exit 1]
+                        (multi/dispatch {:tool-name "test"}))))]
+    (is (= "Usage: test COMMAND ...
+
+Commands:
+  help: Lists available commands
+
+Error:
+  No command provided
+"
+           output))))
+
+(deftest capture-arguments-and-options
+  (multi/dispatch {:tool-name "cap"
+                   :namespaces ['joker.test.tools-multi]
+                   :arguments ["configure" "-v" "http://localhost:9989" "redux=true" "level=ultra"]})
+  (is (= {:arguments {:host "http://localhost:9989"
+                      :key-values {:redux "true"
+                                   :level "ultra"}}
+          :options {:verbose true}}
+         @*data)))
+
+(deftest invalid-positional-argument
+  (let [output (with-out-str
+                 (is (= [::exit 1]
+                        (multi/dispatch {:tool-name "invpos"
+                                         :namespaces ['joker.test.tools-multi]
+                                         :arguments ["configure" "localhost"]}))))]
+    (is (= "Usage: invpos configure [OPTIONS] HOST DATA+
+Configures the system with keys and values
+
+Options:
+  -v, --verbose  Enable verbose logging
+  -h, --help     This command summary
+
+Arguments:
+  HOST: System configuration URL
+  DATA: Data to configure as KEY=VALUE
+
+Error:
+  HOST: must be a URL
+"
+           output))))
+
+(deftest invalid-positional-argument
+  (let [output (with-out-str
+                 (is (= [::exit 1]
+                        (multi/dispatch {:tool-name "invpos"
+                                         :namespaces ['joker.test.tools-multi]
+                                         :arguments ["configure"]}))))]
+    (is (= "Usage: invpos configure [OPTIONS] HOST DATA+
+Configures the system with keys and values
+
+Options:
+  -v, --verbose  Enable verbose logging
+  -h, --help     This command summary
+
+Arguments:
+  HOST: System configuration URL
+  DATA: Data to configure as KEY=VALUE
+
+Error:
+  No value for required argument HOST
+"
+           output))))

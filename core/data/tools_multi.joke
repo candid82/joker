@@ -1,5 +1,7 @@
 (ns joker.tools.multi
-  "A complement to joker.tools.cli that allows a single tool, a Joker script, to 
+  "Support for multiple independant sub-commands within a single Joker script.
+
+  A complement to joker.tools.cli that allows a single tool, a Joker script, to 
   contain multiple commands, each with its own command line options and arguments.
 
   joker.tools.multi makes use of metadata on the vars of one or
@@ -88,6 +90,7 @@
                :key-values {:retries \"3\",
                             :alerts \"on\"}}}
 "
+  {:added "1.0.0"}
   (:require
    [joker.tools.cli :as cli]
    [joker.string :as str]
@@ -152,11 +155,13 @@
   [parsed-opts]
   (show-tool-help parsed-opts nil))
 
-(defn ^:private extract-command-map
-  "Returns map of command name (string) to var"
+(defn locate-commands
+  "Locates commands, function with the :command metadata.
+
+  Returns a map from string name to command Var."
   [namespace-symbols]
   (let [f (fn [m namespace-symbol]
-            ;; Ensure the namespace is loaded
+             ;; Ensure the namespace is loaded
             (require namespace-symbol)
             (->> (find-ns namespace-symbol)
                  ns-map
@@ -167,9 +172,7 @@
                                (assoc m command-name v))
                              m))
                          m)))]
-    (reduce f
-            {"help" #'help}
-            namespace-symbols)))
+    (reduce f {} namespace-symbols)))
 
 (defn ^:private arg-spec->str
   [arg-spec]
@@ -229,7 +232,7 @@
             id (or (:id spec-map)
                    (-> label str/lower-case keyword))
             invalid-keys (-> spec-map
-                             (dissoc :id :doc :optional :repeatable :default :parse-fn :update-fn)
+                             (dissoc :id :doc :optional :repeatable :default :parse-fn :update-fn :validate)
                              keys
                              sort)
             {:keys [validate update-fn repeatable doc optional parse-fn]} spec-map
@@ -246,7 +249,7 @@
                              (->> (partition 2 2 validate)
                                   (map vec)))]
         (when (seq invalid-keys)
-          (println-err (format "Warning: command %s, argument %s contains invalid keys: %s"
+          (println-err (format "Warning: command %s, argument %s contains invalid key(s): %s"
                                command-name
                                id
                                (str/join ", " invalid-keys))))
@@ -361,9 +364,57 @@
                 ;; next spec and next argument
                 (assoc state' :specs more-specs)))))))
 
+(defn ^:private dispatch*
+  "Executes a command from a multi-tool; this is normally invoked via dispatch, using
+   the commands map (map of command names to command Vars) and the command line arguments
+   (the first argument is used to select the command to execute.)"
+  [tool-name commands command-line-args]
+  (cond-let
+
+   :let [[command-name] command-line-args
+         base-parsed-opts {:tool-name tool-name
+                           ::command-map commands}]
+
+   (or (nil? command-name)
+       (str/starts-with? command-name "-"))
+   (do
+     (show-tool-help base-parsed-opts ["No command provided"])
+     (os/exit 1))
+
+   :let [command-var (get commands command-name)]
+
+   (nil? command-var)
+   (show-tool-help base-parsed-opts
+                   [(format "'%s' is not a command" command-name)])
+
+   :let [var-meta (meta command-var)
+         positional-specs (compile-position-specs command-name (:command-args var-meta))
+         parsed-opts (merge base-parsed-opts
+                            (cli/parse-opts (rest command-line-args)
+                                            (conj (:command-opts var-meta)
+                                                  ["-h" "--help" "This command summary"]))
+                            {:command-name command-name
+                             ::positional-specs positional-specs
+                             :doc (:doc var-meta)})
+         {:keys [options arguments]
+          opt-errors :errors} parsed-opts
+         [processed-arguments arg-errors] (process-arguments positional-specs arguments)
+         errors (concat opt-errors arg-errors)]
+
+   (:help options)
+   (show-summary parsed-opts nil)
+
+   (seq errors)
+   (do
+     (show-summary parsed-opts errors)
+     (os/exit 1))
+
+   :else
+   (command-var (assoc parsed-opts :arguments processed-arguments))))
+
 (defn dispatch
-  "Locates commands in namespaces, finds the command for the command 
-  (as identified by the first command line argument) and processes CLI options.
+  "Locates commands in namespaces, finds the current command
+  (as identified by the first command line argument) and processes CLI options and arguments.
 
   configuration keys:
   :tool-name (required, string) - used in command summary and errors
@@ -385,55 +436,16 @@
   :doc - the documentation (docstring) of the comamnd
 
   Other keys may be present in the command map; these are internal to
-  joker.tools.multi and may change in the future." 
+  joker.tools.multi and may change in the future."
   [configuration]
   (try
-    (cond-let
-
-     :let [{:keys [tool-name]
-            namespace-symbols :namespaces
-            command-line-args :arguments} configuration
-           [command-name] command-line-args
-           command-map (extract-command-map namespace-symbols)
-           base-parsed-opts {:tool-name tool-name
-                             ::command-map command-map}]
-
-     (or (nil? command-name)
-         (str/starts-with? command-name "-"))
-     (do
-       (show-tool-help base-parsed-opts ["No command provided"])
-       (os/exit 1))
-
-     :let [command-var (get command-map command-name)]
-
-     (nil? command-var)
-     (show-tool-help base-parsed-opts
-                     [(format "'%s' is not a command" command-name)])
-
-     :let [var-meta (meta command-var)
-           positional-specs (compile-position-specs command-name (:command-args var-meta))
-           parsed-opts (merge base-parsed-opts
-                              (cli/parse-opts (rest command-line-args)
-                                              (conj (:command-opts var-meta)
-                                                    ["-h" "--help" "This command summary"]))
-                              {:command-name command-name
-                               ::positional-specs positional-specs
-                               :doc (:doc var-meta)})
-           {:keys [options arguments]
-            opt-errors :errors} parsed-opts
-           [processed-arguments arg-errors] (process-arguments positional-specs arguments)
-           errors (concat opt-errors arg-errors)]
-
-     (:help options)
-     (show-summary parsed-opts nil)
-
-     (seq errors)
-     (do
-       (show-summary parsed-opts errors)
-       (os/exit 1))
-
-     :else
-     (command-var (assoc parsed-opts :arguments processed-arguments)))
+    (let [{:keys [tool-name]
+           namespace-symbols :namespaces
+           command-line-args :arguments} configuration
+          command-map (assoc
+                       (locate-commands namespace-symbols)
+                       "help" #'help)]
+      (dispatch* tool-name command-map command-line-args))
     (catch Error t
       (println-err "Command failed:" t)
       (when-let [data (ex-data t)]
