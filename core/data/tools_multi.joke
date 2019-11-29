@@ -364,7 +364,7 @@
                 ;; next spec and next argument
                 (assoc state' :specs more-specs)))))))
 
-(defn ^:private dispatch*
+(defn dispatch*
   "Executes a command from a multi-tool; this is normally invoked via dispatch, using
    the commands map (map of command names to command Vars) and the command line arguments
    (the first argument is used to select the command to execute.)"

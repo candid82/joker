@@ -6,6 +6,12 @@
 
 (def *data (atom nil))
 
+(defmacro with-err-str 
+  [& body]
+  `(binding [*err* (joker.core/buffer__)]
+     ~@body
+     (str *err*)))
+
 (use-fixtures :each
   (fn [f]
     (reset! *data nil)
@@ -165,3 +171,15 @@ Error:
   No value for required argument HOST
 "
            output))))
+
+(defn ^{:command-args [["HOST" "Name of host"
+                        :vladidate [#(re-matches #"https?://.+" %) "must be a URL"]]]}
+  bad-key
+  [_])
+
+(deftest invalid-pos-spec-key
+  (let [error (with-err-str
+                (with-out-str
+                  (multi/dispatch* "xxx" {"bad-key" #'bad-key} ["bad-key"])))]
+    (is (= "Warning: command bad-key, argument :host contains invalid key(s): :vladidate
+"))))
