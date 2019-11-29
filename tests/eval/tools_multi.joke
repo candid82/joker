@@ -6,7 +6,7 @@
 
 (def *data (atom nil))
 
-(defmacro with-err-str 
+(defmacro with-err-str
   [& body]
   `(binding [*err* (joker.core/buffer__)]
      ~@body
@@ -183,3 +183,50 @@ Error:
                   (multi/dispatch* "xxx" {"bad-key" #'bad-key} ["bad-key"])))]
     (is (= "Warning: command bad-key, argument :host contains invalid key(s): :vladidate
 "))))
+
+(defn ^{:command-opts [["-v" "--verbose" "Enable verbose logging"]]
+        :command-args [["HOST" "System configuration URL"
+                        :validate [#(re-matches #"https?://.+" %) "must be a URL"]
+                        :repeatable true]
+                       ["DATA" "Data to configure as KEY=VALUE"
+                        :id :key-values
+                        :parse-fn (fn [s]
+                                    (when-let [[_ k v] (re-matches #"(.+)=(.+)" s)]
+                                      [(keyword k) v]))
+                        :update-fn (fn [m [k v]]
+                                     (assoc m k v))
+                        :repeatable true]]}
+  too-many-repeatable
+  "Configures the system with keys and values"
+  [command]
+  (capture command))
+
+(deftest only-last-may-be-repeatable
+  (when-let [error  (is (thrown? Error
+                                 (multi/dispatch* "xxx" {"cmd" #'too-many-repeatable} ["cmd"])))]
+    (is (= "Argument :key-values of command cmd follows repeatable argument :host, but only the final argument may be repeatable"
+           (ex-message error)))))
+
+(defn ^{:command-opts [["-v" "--verbose" "Enable verbose logging"]]
+        :command-args [["HOST" "System configuration URL"
+                        :validate [#(re-matches #"https?://.+" %) "must be a URL"] 
+                        ;; Not valid because later argument is required
+                        :optional true]
+                       ["DATA" "Data to configure as KEY=VALUE"
+                        :id :key-values
+                        :parse-fn (fn [s]
+                                    (when-let [[_ k v] (re-matches #"(.+)=(.+)" s)]
+                                      [(keyword k) v]))
+                        :update-fn (fn [m [k v]]
+                                     (assoc m k v))
+                        :repeatable true]]}
+  invalid-optional
+  "Configures the system with keys and values"
+  [command]
+  (capture command))
+
+(deftest cant-have-optional-followed-by-required
+  (when-let [error  (is (thrown? Error
+                                 (multi/dispatch* "xxx" {"cmd" #'invalid-optional} ["cmd"])))]
+    (is (= "Argument :key-values of command cmd is not optional but follows optional argument :host"
+           (ex-message error)))))
