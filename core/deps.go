@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -21,12 +22,15 @@ func externalHttpSourceToPath(lib string, url string) (path string) {
 	}
 
 	if _, err := os.Stat(libPath); os.IsNotExist(err) {
-		resp, err := http.Get(url + libBase)
+		if !strings.HasSuffix(url, ".joke") {
+			url = url + libBase
+		}
+		resp, err := http.Get(url)
 		PanicOnErr(err)
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			panic(RT.NewError("Unable to retrieve: " + url))
+			panic(RT.NewError(fmt.Sprintf("Unable to retrieve: %s\nServer response: %d", url, resp.StatusCode)))
 		}
 
 		out, err := os.Create(libPath)
