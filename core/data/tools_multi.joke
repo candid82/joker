@@ -100,12 +100,9 @@
    [joker.os :as os]))
 
 ;; TODO:
-;; Make :update-fn simpler, add :assoc-fn
 ;; Add :default and maybe :default-fn
-;; Maybe invert :optional and :required to aligne with j.t.cli
-;; Pass thru options to j.t.cli
+;; Maybe invert :optional and :required to align with j.t.cli
 ;; Validate that argument ids are unique
-;; Should we continue to pass values through later validator fn's if earlier ones fail?
 
 (defmacro ^:private cond-let
   [& clauses]
@@ -274,6 +271,7 @@
   [command-name specs]
   (let [compiled (map #(compile-positional-spec command-name %) specs)]
     (loop [[this-spec & more-specs] compiled
+           ids #{}
            optional-id nil
            repeatable-id nil]
       (cond-let
@@ -282,8 +280,13 @@
 
        :let [this-id (:id this-spec)]
 
-       ;; Use the keyword ids, not the labels, since these are a programmer errors, not a runtime error
+       (contains? ids this-id)
+       (throw (ex-info (str "Argument " this-id " of command " command-name " is not unique")
+                       {:command-name command-name
+                        :spec this-spec}))
 
+       ;; Use the keyword ids, not the labels, since these are a programmer errors, not a runtime error
+       
        (and optional-id
             (not (:optional this-spec)))
        (throw (ex-info (str "Argument " this-id " of command " command-name " is not optional but follows optional argument " optional-id)
@@ -297,6 +300,7 @@
 
        :else
        (recur more-specs
+              (conj ids this-id)
               (or (when (:optional this-spec)
                     this-id)
                   optional-id)

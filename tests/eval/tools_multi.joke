@@ -256,3 +256,23 @@ Error:
                         [:gnip "2"]]}
           :options {}}
          @*data)))
+
+(defn ^{:command-opts [["-v" "--verbose" "Enable verbose logging"]]
+        :command-args [["HOST" "System configuration URL"
+                        :validate [#(re-matches #"https?://.+" %) "must be a URL"]]
+                       ["DATA" "Data to configure as KEY=VALUE"
+                        :id :host
+                        :parse-fn (fn [s]
+                                    (when-let [[_ k v] (re-matches #"(.+)=(.+)" s)]
+                                      [(keyword k) v]))
+                        :repeatable true]]}
+  duplicate-argument-ids
+  "Configures the system with keys and values"
+  [command]
+  (capture command))
+
+(deftest positional-arguments-must-have-unique-id
+  (when-let [error  (is (thrown? Error
+                                 (multi/dispatch* "xxx" {"cmd" #'duplicate-argument-ids} ["cmd"])))]
+    (is (= "Argument :host of command cmd is not unique"
+           (ex-message error)))))
