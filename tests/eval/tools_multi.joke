@@ -23,7 +23,13 @@
   capture
   "Captures options and arguments
 
-Additional docstring for capture.
+  Additional docstring for capture.
+
+  Note that consistent indents are trimmed.
+
+  An example:
+
+    Indented two spaces.
 
 "
   [command]
@@ -127,6 +133,29 @@ Error:
                                    :level "ultra"}}
           :options {:verbose true}}
          @*data)))
+
+(deftest indentation-of-docstring
+   (let [output (with-out-str
+                  (is (nil?
+                         (multi/dispatch {:tool-name "indent"
+                                          :namespaces ['joker.test.tools-multi]
+                                          :arguments ["capture" "-h"]}))))]
+     (is (= "Usage: indent capture [OPTIONS]
+Captures options and arguments
+
+Additional docstring for capture.
+
+Note that consistent indents are trimmed.
+
+An example:
+
+  Indented two spaces.
+
+Options:
+  -h, --help  This command summary
+"
+            output)))
+  )
 
 (deftest invalid-positional-argument
   (let [output (with-out-str
