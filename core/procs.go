@@ -1630,6 +1630,12 @@ var procGoSpew ProcFn = func(args []Object) (res Object) {
 		if yes, k := m.Get(MakeKeyword("SpewKeys")); yes {
 			scs.SpewKeys = k.(Native).Native().(bool)
 		}
+		if yes, k := m.Get(MakeKeyword("NoDuplicates")); yes {
+			scs.NoDuplicates = k.(Native).Native().(bool)
+		}
+		if yes, k := m.Get(MakeKeyword("UseOrdinals")); yes {
+			scs.UseOrdinals = k.(Native).Native().(bool)
+		}
 	}
 	scs.Fdump(Stderr, args[0])
 	return
