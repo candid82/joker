@@ -51,7 +51,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.13.0"
+const VERSION = "v0.14.0"
 
 var internalLibs map[string][]byte
 
