@@ -92,10 +92,10 @@
   "Ensure an element vector is of the form [tag-name attrs content]."
   [[tag & content]]
   (when (not (named? tag))
-    (throw (ex-info (str tag " is not a valid element name" {:tag tag}))))
+    (throw (ex-info (str tag " is not a valid element name") {:tag tag})))
   (let [[_ tag id class] (re-matches re-tag (as-str tag))
         tag-attrs        {:id id
-                          :class (if class (str/replace  class "." " "))}
+                          :class (when class (str/replace  class "." " "))}
         map-attrs        (first content)]
     (if (map? map-attrs)
       [tag (merge-attributes tag-attrs map-attrs) (next content)]
