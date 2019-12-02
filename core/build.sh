@@ -10,7 +10,7 @@ then
     cp -aiv code.go gen_code/gen_code.go "$NOW"
     [ -x ../joker ] && cp -aiv ../joker "$NOW"
     (git log -n 1; git status) > "$NOW/git.txt"
-    ln -sfTv "$(basename $NOW)" _test_AA/LATEST
+    gln -sfTv "$(basename $NOW)" _test_AA/LATEST
 fi
 
 time=$(which time)
@@ -31,4 +31,4 @@ JUSTVET=false
 
 $JUSTVET && (cd ..; $time go vet ./...)
 
-$JUSTVET || (cd ..; KEEP_A_FILES=true $time ./run.sh "$@")
+$JUSTVET || (cd ..; KEEP_A_CODE_FILES=true $time ./run.sh "$@")
