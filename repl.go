@@ -10,9 +10,24 @@ import (
 
 	. "github.com/candid82/joker/core"
 	"github.com/chzyer/readline"
+	"github.com/davecgh/go-spew/spew"
 )
 
+func Spew() {
+	cs := &spew.ConfigState{
+		Indent:       "    ",
+		MaxDepth:     20,
+		SortKeys:     true,
+		SpewKeys:     true,
+		NoDuplicates: true,
+		UseOrdinals:  true,
+	}
+
+	cs.Fdump(Stderr, GLOBAL_ENV)
+}
+
 func repl(phase Phase) {
+	Spew()
 	ProcessReplNamespaceInfo()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
 	fmt.Printf("Welcome to joker %s. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
