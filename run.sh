@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-[ -z "$KEEP_A_FILES" ] && KEEP_A_FILES=false
+[ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=false
+[ -z "$KEEP_A_DATA_FILES" ] && KEEP_A_DATA_FILES=false
 
 build() {
   go clean
@@ -17,7 +18,7 @@ set -e  # Exit on error.
 
 build
 
-$KEEP_A_FILES && exit 0  # Going further than this does not yet work
+$KEEP_A_CODE_FILES && exit 0  # Going further than this does not yet work
 
 if [ "$1" == "-v" ]; then
   ./joker -e '(print "\nLibraries available in this build:\n  ") (loaded-libs) (println)'
