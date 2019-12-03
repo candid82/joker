@@ -112,7 +112,7 @@ func {name}Init() {
 		name := f.filename[0 : len(f.filename)-5] // assumes .joke extension
 		newFile := "a_" + name + "_code.go"
 		if newFile <= masterFile {
-			panic(fmt.Sprintf("I think Go initializes things alphabetically, so %s must come after %s due to dependencies; rename accordingly",
+			panic(fmt.Sprintf("I think Go initializes file-scopes vars alphabetically by filename, so %s must come after %s due to dependencies; rename accordingly",
 				newFile, masterFile))
 		}
 		fileContent := strings.Replace(strings.Replace(strings.ReplaceAll(fileTemplate, "{name}", name), "{statics}", statics, 1), "{interns}", interns, 1)
