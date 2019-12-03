@@ -22,11 +22,8 @@ type (
 	}
 
 	CodeWriterEnv struct {
-		NeedSyms     map[*string]Symbol
-		NeedStrs     map[string]struct{}
-		NeedBindings map[string]*Binding
-		NeedKeywords map[uint32]Keyword
-		Generated    map[interface{}]interface{} // nil: being generated; else: fully generated (self)
+		Need      map[string]interface{}
+		Generated map[interface{}]interface{} // nil: being generated; else: fully generated (self)
 	}
 
 	EmitHeader struct {
@@ -145,7 +142,7 @@ func metaHolder(target string, m Map, env *CodeEnv) string {
 		res)
 }
 
-func metaHolderField(target string, m MetaHolder, fields []string, env *CodeEnv) []string {
+func MetaHolderField(target string, m MetaHolder, fields []string, env *CodeEnv) []string {
 	f := metaHolder(target, m.meta, env)
 	if IsGoExprEmpty(f) {
 		return fields
@@ -175,15 +172,9 @@ func emitString(target string, s *string, env *CodeEnv) string {
 	if s == nil {
 		return "nil"
 	}
-	env.CodeWriterEnv.NeedStrs[*s] = struct{}{}
 	name := "s_" + NameAsGo(*s)
-	env.Runtime = append(env.Runtime, func() string {
-		return fmt.Sprintf(`
-	%s = %s
-`[1:],
-			directAssign(target), name)
-	})
-	return "nil"
+	env.CodeWriterEnv.Need[name] = s
+	return "!&" + name
 }
 
 func directAssign(target string) string {
@@ -233,9 +224,9 @@ func (b *Binding) IsUsed() bool {
 }
 
 func (b *Binding) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	id := NameAsGo(b.UniqueId())
-	env.CodeWriterEnv.NeedBindings[id] = b
-	return fmt.Sprintf("&binding_%s", id)
+	name := NameAsGo(b.UniqueId())
+	env.CodeWriterEnv.Need[name] = b
+	return fmt.Sprintf("&binding_%s", name)
 }
 
 func (env *CodeEnv) AddForm(o Object) {
@@ -374,11 +365,12 @@ var p_v_%s = &v_%s
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
 
-		env.CodeWriterEnv.NeedSyms[s] = v.name
+		symName := "sym_" + name
+		env.CodeWriterEnv.Need[symName] = v.name
 		interns += fmt.Sprintf(`
-	_ns.InternExistingVar(sym_%s, &v_%s)
+	_ns.InternExistingVar(%s, &v_%s)
 `,
-			name, name)
+			symName, name)
 
 		statics += v_var
 	}
@@ -471,15 +463,15 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		return "Symbol{ABEND: No name!!}"
 	}
 
-	env.CodeWriterEnv.NeedSyms[s.name] = s
+	name := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 
-	sym := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
+	env.CodeWriterEnv.Need[name] = s
 
 	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
 	%s = %s
 `[1:],
-			directAssign(target), sym)
+			directAssign(target), name)
 	})
 	return "!Symbol{}"
 }
@@ -488,11 +480,11 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
-	name := NameAsGo(t.name)
-	env.CodeWriterEnv.NeedStrs[t.name] = struct{}{}
+	name := "s_" + NameAsGo(t.name)
+	env.CodeWriterEnv.Need[name] = t.name
 	typeFn := func() string {
 		return fmt.Sprintf(`
-	%s = TYPES[s_%s]
+	%s = TYPES[%s]
 `[1:],
 			directAssign(target), name)
 	}
@@ -546,7 +538,7 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 		env.CodeWriterEnv.Generated[name] = fn
 		fields := []string{}
 		fields = InfoHolderField(name, fn.InfoHolder, fields, env)
-		fields = metaHolderField(name, fn.MetaHolder, fields, env)
+		fields = MetaHolderField(name, fn.MetaHolder, fields, env)
 		if fn.isMacro {
 			fields = append(fields, "\tisMacro: true,")
 		}
@@ -851,25 +843,18 @@ func (k Keyword) UniqueId() string {
 }
 
 func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	if k.ns != nil {
-		env.CodeWriterEnv.NeedStrs[*k.ns] = struct{}{}
+	name := fmt.Sprintf("kw_%s", k.UniqueId())
+	env.CodeWriterEnv.Need[name] = k
 
-	}
-	env.CodeWriterEnv.NeedStrs[*k.name] = struct{}{}
-
-	kwId := fmt.Sprintf("kw_%s", k.UniqueId())
-
-	env.CodeWriterEnv.NeedKeywords[k.hash] = k
-
-	kwFn := func(innerKwId string) func() string {
+	fn := func(innerName string) func() string {
 		return func() string {
 			return fmt.Sprintf(`
 	%s = %s  // (Keyword)Emit()
 `[1:],
-				directAssign(target), innerKwId)
+				directAssign(target), innerName)
 		}
-	}(kwId)
-	env.Runtime = append(env.Runtime, kwFn)
+	}(name)
+	env.Runtime = append(env.Runtime, fn)
 
 	return "nil"
 }
@@ -1473,7 +1458,8 @@ var %s = RecurExpr{%s}
 func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	sym := *vr.name.name
 	g := NameAsGo(sym)
-	env.CodeWriterEnv.NeedStrs[sym] = struct{}{}
+	strName := "s_" + g
+	env.CodeWriterEnv.Need[strName] = sym
 
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
@@ -1490,9 +1476,9 @@ var p_v_%s *Var
 		env.Statics += decl
 
 		return fmt.Sprintf(`
-	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[s_%s]
+	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
 `,
-			g, g)
+			g, strName)
 	}
 	env.Runtime = append(env.Runtime, runtimeDefineVarFn)
 

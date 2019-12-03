@@ -149,7 +149,7 @@ var binding_%s = Binding{
 
 		fields := []string{}
 		fields = InfoHolderField(name, sym.InfoHolder, fields, codeEnv)
-		//		fields = MetaHolderField(kwId, s.InfoHolder, fields, codeEnv)
+		fields = MetaHolderField(name, sym.MetaHolder, fields, codeEnv)
 		meta := strings.Join(fields, "\n")
 		if !IsGoExprEmpty(meta) {
 			meta = "\n" + meta + "\n"
