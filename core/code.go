@@ -16,13 +16,13 @@ type (
 		Bindings         map[*Binding]int
 		nextStringIndex  uint16
 		nextBindingIndex int
-		statics          string
-		interns          string
-		runtime          []func() string
+		Statics          string
+		Interns          string
+		Runtime          []func() string
 	}
 
 	CodeWriterEnv struct {
-		NeedSyms     map[*string]struct{}
+		NeedSyms     map[*string]Symbol
 		NeedStrs     map[string]struct{}
 		NeedBindings map[string]*Binding
 		NeedKeywords map[uint32]Keyword
@@ -109,7 +109,7 @@ func assertType(e interface{}) string {
 	return ".(" + coreType(e) + ")"
 }
 
-func joinStringFns(fns []func() string) string {
+func JoinStringFns(fns []func() string) string {
 	strs := make([]string, len(fns))
 	for ix, fn := range fns {
 		strs[ix] = fn()
@@ -177,7 +177,7 @@ func emitString(target string, s *string, env *CodeEnv) string {
 	}
 	env.CodeWriterEnv.NeedStrs[*s] = struct{}{}
 	name := "s_" + NameAsGo(*s)
-	env.runtime = append(env.runtime, func() string {
+	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
 	%s = %s
 `[1:],
@@ -202,6 +202,10 @@ func directAssign(target string) string {
 		return strings.Join(cmp[:len(cmp)-1], ".")
 	}
 	return target
+}
+
+func (b *Binding) Symbol() Symbol {
+	return b.name
 }
 
 func (b *Binding) SymName() *string {
@@ -370,7 +374,7 @@ var p_v_%s = &v_%s
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
 
-		env.CodeWriterEnv.NeedSyms[s] = struct{}{}
+		env.CodeWriterEnv.NeedSyms[s] = v.name
 		interns += fmt.Sprintf(`
 	_ns.InternExistingVar(sym_%s, &v_%s)
 `,
@@ -379,8 +383,8 @@ var p_v_%s = &v_%s
 		statics += v_var
 	}
 
-	env.statics += statics
-	env.interns += interns + joinStringFns(env.runtime)
+	env.Statics += statics
+	env.Interns += interns + JoinStringFns(env.Runtime)
 }
 
 func (p Position) Hash() uint32 {
@@ -451,7 +455,7 @@ func (info *ObjectInfo) Emit(target string, actualPtr interface{}, env *CodeEnv)
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = ObjectInfo{%s}
 `,
 			name, f)
@@ -467,11 +471,11 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		return "Symbol{ABEND: No name!!}"
 	}
 
-	env.CodeWriterEnv.NeedSyms[s.name] = struct{}{}
+	env.CodeWriterEnv.NeedSyms[s.name] = s
 
 	sym := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 
-	env.runtime = append(env.runtime, func() string {
+	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
 	%s = %s
 `[1:],
@@ -492,7 +496,7 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 `[1:],
 			directAssign(target), name)
 	}
-	env.runtime = append(env.runtime, typeFn)
+	env.Runtime = append(env.Runtime, typeFn)
 	return "nil"
 }
 
@@ -528,7 +532,7 @@ func (le *LocalEnv) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = LocalEnv{%s}
 `,
 			name, f)
@@ -566,7 +570,7 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Fn{%s%s}
 `,
 			name, metaHolder(name, fn.meta, env), f)
@@ -592,7 +596,7 @@ func (m *MapSet) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = MapSet{%s}
 `,
 			name, f)
@@ -631,7 +635,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 `[1:],
 						directAssign(field), noBang(l.rest.Emit(field, nil, env)))
 				}
-				env.runtime = append(env.runtime, fieldFn)
+				env.Runtime = append(env.Runtime, fieldFn)
 			}
 		} else if l.rest != nil {
 			f := noBang(l.rest.Emit(field, nil, env))
@@ -646,7 +650,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = List{%s}
 `,
 			name, f)
@@ -672,7 +676,7 @@ func (v *Vector) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Vector{%s}
 `,
 			name, f)
@@ -696,7 +700,7 @@ func (v *VectorSeq) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = VectorSeq{%s%s}
 `,
 			name, metaHolder(name, v.meta, env), f)
@@ -715,7 +719,7 @@ func (m *ArrayMap) Emit(target string, actualPtr interface{}, env *CodeEnv) stri
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = ArrayMap{%s%s}
 `,
 			name, metaHolder(name, m.meta, env), f)
@@ -739,7 +743,7 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = HashMap{%s%s}
 `,
 			name, metaHolder(name, m.meta, env), f)
@@ -760,7 +764,7 @@ func (b *BitmapIndexedNode) Emit(target string, actualPtr interface{}, env *Code
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = BitmapIndexedNode{%s}
 `,
 			name, f)
@@ -782,7 +786,7 @@ func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = BufferedReader{%s}
 `,
 			name, f)
@@ -801,7 +805,7 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 	nsFn := func() string {
 		return fmt.Sprintf("\t%s = _ns\n", directAssign(target))
 	}
-	env.runtime = append(env.runtime, nsFn)
+	env.Runtime = append(env.Runtime, nsFn)
 	return "nil"
 }
 
@@ -818,7 +822,7 @@ func (s String) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = String{%s}
 `,
 			name, f)
@@ -865,7 +869,7 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 				directAssign(target), innerKwId)
 		}
 	}(kwId)
-	env.runtime = append(env.runtime, kwFn)
+	env.Runtime = append(env.Runtime, kwFn)
 
 	return "nil"
 }
@@ -883,7 +887,7 @@ func (i Int) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Int{%s}
 `,
 			name, f)
@@ -904,7 +908,7 @@ func (ch Char) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Char{%s}
 `,
 			name, f)
@@ -926,7 +930,7 @@ func (d Double) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Double{%s}
 `,
 			name, f)
@@ -948,7 +952,7 @@ func (n Nil) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = Nil{%s}
 `,
 			name, f)
@@ -1084,7 +1088,7 @@ func (expr *LiteralExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = LiteralExpr{%s}
 `,
 			name, f)
@@ -1150,7 +1154,7 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 					directAssign(el), noBang(emitObject(el, false, obj, env)), innerIx)
 			}
 		}(ix) // Need an inner binding to capture the current val of ix
-		env.runtime = append(env.runtime, objFn)
+		env.Runtime = append(env.Runtime, objFn)
 	}
 	ret := strings.Join(objae, "\n")
 	if !IsGoExprEmpty(ret) {
@@ -1222,7 +1226,7 @@ func (expr *VectorExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = VectorExpr{%s}
 `,
 			name, f)
@@ -1252,7 +1256,7 @@ func (expr *SetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = SetExpr{%s}
 `,
 			name, f)
@@ -1288,7 +1292,7 @@ func (expr *MapExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = MapExpr{%s}
 `,
 			name, f)
@@ -1330,7 +1334,7 @@ func (expr *IfExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = IfExpr{%s}
 `,
 			name, f)
@@ -1428,7 +1432,7 @@ func (expr *CallExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = CallExpr{%s}
 `,
 			name, f)
@@ -1458,7 +1462,7 @@ func (expr *RecurExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = RecurExpr{%s}
 `,
 			name, f)
@@ -1483,14 +1487,14 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 var p_v_%s *Var
 `[1:],
 			g)
-		env.statics += decl
+		env.Statics += decl
 
 		return fmt.Sprintf(`
 	p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[s_%s]
 `,
 			g, g)
 	}
-	env.runtime = append(env.runtime, runtimeDefineVarFn)
+	env.Runtime = append(env.Runtime, runtimeDefineVarFn)
 
 	runtimeAssignFn := func() string {
 		return fmt.Sprintf(`
@@ -1498,7 +1502,7 @@ var p_v_%s *Var
 `[1:],
 			directAssign(target), g)
 	}
-	env.runtime = append(env.runtime, runtimeAssignFn)
+	env.Runtime = append(env.Runtime, runtimeAssignFn)
 
 	return ""
 }
@@ -1522,7 +1526,7 @@ func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = VarRefExpr{%s}
 `,
 			name, f)
@@ -1568,7 +1572,7 @@ func (expr *BindingExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = BindingExpr{%s}
 `,
 			name, f)
@@ -1610,7 +1614,7 @@ func (expr *DoExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = DoExpr{%s}
 `,
 			name, f)
@@ -1652,7 +1656,7 @@ func (expr *FnArityExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = FnArityExpr{%s}
 `,
 			name, f)
@@ -1702,7 +1706,7 @@ func (expr *FnExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = FnExpr{%s}
 `,
 			name, f)
@@ -1744,7 +1748,7 @@ func (expr *LetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = LetExpr{%s}
 `,
 			name, f)
@@ -1786,7 +1790,7 @@ func (expr *LoopExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = LoopExpr{%s}
 `,
 			name, f)
@@ -1816,7 +1820,7 @@ func (expr *ThrowExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = ThrowExpr{%s}
 `,
 			name, f)
@@ -1858,7 +1862,7 @@ func (expr *CatchExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = CatchExpr{%s}
 `,
 			name, f)
@@ -1900,7 +1904,7 @@ func (expr *TryExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
-		env.statics += fmt.Sprintf(`
+		env.Statics += fmt.Sprintf(`
 var %s = TryExpr{%s}
 `,
 			name, f)
