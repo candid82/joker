@@ -76,8 +76,12 @@ const masterFile = "a_code.go"
 
 func main() {
 	codeWriterEnv := &CodeWriterEnv{
-		Need:      map[string]Finisher{},
-		Generated: map[interface{}]interface{}{},
+		BaseStrings: StringPool{},
+		Need:        map[string]Finisher{},
+		Generated:   map[interface{}]interface{}{},
+	}
+	for k, v := range STRINGS {
+		codeWriterEnv.BaseStrings[k] = v
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)

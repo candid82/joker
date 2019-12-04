@@ -21,14 +21,9 @@ type (
 	}
 
 	CodeWriterEnv struct {
-		Need      map[string]Finisher
-		Generated map[interface{}]interface{} // nil: being generated; else: fully generated (self)
-	}
-
-	EmitHeader struct {
-		GlobalEnv *Env
-		Strings   []*string
-		Bindings  []Binding
+		BaseStrings StringPool
+		Need        map[string]Finisher
+		Generated   map[interface{}]interface{} // nil: being generated; else: fully generated (self)
 	}
 
 	Finisher interface {
@@ -118,6 +113,9 @@ func ptrTo(s string) string {
 	if s[0] == '*' {
 		return s[1:]
 	}
+	if strings.HasPrefix(s, "STRINGS.Intern(") {
+		return s
+	}
 	return "&" + s
 }
 
@@ -201,6 +199,13 @@ func InfoHolderField(target string, m InfoHolder, fields []string, env *CodeEnv)
 
 func emitString(target string, s string, env *CodeEnv) string {
 	return NativeString{s}.Emit(target, nil, env)
+}
+
+func emitPtrToString(s string, env *CodeEnv) string {
+	if ps, ok := STRINGS[s]; ok {
+		return fmt.Sprintf("!STRINGS.Intern(%s)", strconv.Quote(*ps))
+	}
+	return "!" + ptrTo(noBang(emitString("", s, env)))
 }
 
 func directAssign(target string) string {
@@ -572,9 +577,7 @@ func (sym Symbol) Finish(name string, env *CodeEnv) string {
 	strNs := "nil"
 	if sym.ns != nil {
 		ns := *sym.ns
-		nsName := NameAsGo(ns)
-		strNs = "s_" + nsName
-		env.CodeWriterEnv.Need[strNs] = NativeString{ns}
+		strNs = noBang(emitPtrToString(ns, env))
 	}
 
 	initNs := ""
@@ -602,9 +605,9 @@ var %s = Symbol{
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(%s, &%s)
+%s	%s.hash = hashSymbol(%s, %s)
 `[1:],
-		initNs, name, ptrTo(strNs), strName)
+		initNs, name, ptrTo(strNs), ptrTo(strName))
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))
@@ -616,8 +619,7 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
-	name := "s_" + NameAsGo(t.name)
-	env.CodeWriterEnv.Need[name] = NativeString{t.name}
+	name := noBang(emitPtrToString(t.name, env))
 	typeFn := func() string {
 		return fmt.Sprintf(`
 	%s = TYPES[%s]
