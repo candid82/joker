@@ -76,11 +76,8 @@ const masterFile = "a_code.go"
 
 func main() {
 	codeWriterEnv := &CodeWriterEnv{
-		NeedSyms:     map[*string]Symbol{},
-		NeedStrs:     map[string]struct{}{},
-		NeedBindings: map[string]*Binding{},
-		NeedKeywords: map[uint32]Keyword{},
-		Generated:    map[interface{}]interface{}{},
+		Need:      map[string]Finisher{},
+		Generated: map[interface{}]interface{}{},
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
@@ -126,137 +123,129 @@ func {name}Init() {
 		Bindings:      make(map[*Binding]int),
 	}
 
-	bindingDefs := []string{}
-	for id, b := range codeWriterEnv.NeedBindings {
-		symName := NameAsGo(*b.SymName())
-		bindingDefs = append(bindingDefs, fmt.Sprintf(`
-var binding_%s = Binding{
-	name: sym_%s,
-	index: %d,
-	frame: %d,
-	isUsed: %v,
-}`[1:],
-			id, symName, b.Index(), b.Frame(), b.IsUsed()))
+	statics := []string{}
+	runtime := []func() string{}
 
-		codeWriterEnv.NeedSyms[b.SymName()] = b.Symbol()
-	}
-	sort.Strings(bindingDefs)
+	needed := codeWriterEnv.Need
 
-	symDefs := []string{}
-	symInterns := []string{}
-	for s, sym := range codeWriterEnv.NeedSyms {
-		name := NameAsGo(*s)
-
-		fields := []string{}
-		fields = InfoHolderField(name, sym.InfoHolder, fields, codeEnv)
-		fields = MetaHolderField(name, sym.MetaHolder, fields, codeEnv)
-		meta := strings.Join(fields, "\n")
-		if !IsGoExprEmpty(meta) {
-			meta = "\n" + meta + "\n"
+	for name, obj := range needed {
+		codeWriterEnv.Need = map[string]Finisher{}
+		s := obj.Finish(name, codeEnv)
+		if s != "" {
+			statics = append(statics, s)
 		}
-
-		symDefs = append(symDefs, fmt.Sprintf(`
-var sym_%s = Symbol{%s}`[1:],
-			name, meta))
-
-		codeWriterEnv.NeedStrs[*s] = struct{}{}
-		symInterns = append(symInterns, fmt.Sprintf(`
-	sym_%s.name = s_%s`[1:],
-			name, name))
 	}
-	sort.Strings(symDefs)
-	sort.Strings(symInterns)
 
-	kwDefs := []string{}
-	kwHashes := []string{}
-	for _, k := range codeWriterEnv.NeedKeywords {
-		strName := "s_" + NameAsGo(*k.NameField())
+	// 		bindingDefs = append(bindingDefs, fmt.Sprintf(`
+	// var binding_%s = Binding{
+	// 	name: sym_%s,
+	// 	index: %d,
+	// 	frame: %d,
+	// 	isUsed: %v,
+	// }`[1:],
+	// 			id, symName, b.Index(), b.Frame(), b.IsUsed()))
 
-		strNs := "nil"
-		if k.NsField() != nil {
-			ns := *k.NsField()
-			nsName := NameAsGo(ns)
-			strNs = "s_" + nsName
-		}
+	// 		codeWriterEnv.NeedSyms[b.SymName()] = b.Symbol()
+	// 	}
+	// 	sort.Strings(bindingDefs)
 
-		name := "kw_" + k.UniqueId()
+	// 	symDefs := []string{}
+	// 	symInterns := []string{}
+	// 	for s, sym := range codeWriterEnv.NeedSyms {
+	// 		name := NameAsGo(*s)
 
-		initNs := ""
-		if strNs != "nil" {
-			initNs = fmt.Sprintf(`
-	%s.ns = %s
-`[1:],
-				name, strNs)
-		}
+	// 		fields := []string{}
+	// 		fields = InfoHolderField(name, sym.InfoHolder, fields, codeEnv)
+	// 		fields = MetaHolderField(name, sym.MetaHolder, fields, codeEnv)
+	// 		meta := strings.Join(fields, "\n")
+	// 		if !IsGoExprEmpty(meta) {
+	// 			meta = "\n" + meta + "\n"
+	// 		}
 
-		fields := []string{}
-		fields = InfoHolderField(name, k.InfoHolder, fields, codeEnv)
-		meta := strings.Join(fields, "\n")
-		if !IsGoExprEmpty(meta) {
-			meta = "\n" + meta + "\n"
-		}
+	// 		symDefs = append(symDefs, fmt.Sprintf(`
+	// var sym_%s = Symbol{%s}`[1:],
+	// 			name, meta))
 
-		kwDefs = append(kwDefs, fmt.Sprintf(`
-var %s = Keyword{%s}`[1:],
-			name, meta))
+	// 		codeWriterEnv.NeedStrs[*s] = struct{}{}
+	// 		symInterns = append(symInterns, fmt.Sprintf(`
+	// 	sym_%s.name = s_%s`[1:],
+	// 			name, name))
+	// 	}
+	// 	sort.Strings(symDefs)
+	// 	sort.Strings(symInterns)
 
-		kwHashes = append(kwHashes, fmt.Sprintf(`
-%s	%s.name = %s
-	%s.hash = hashSymbol(%s, %s)`[1:],
-			initNs, name, strName, name, strNs, strName))
-	}
-	sort.Strings(kwDefs)
-	sort.Strings(kwHashes)
+	// 	kwDefs := []string{}
+	// 	kwHashes := []string{}
+	// 	for _, k := range codeWriterEnv.NeedKeywords {
+	// 		strName := "s_" + NameAsGo(*k.NameField())
 
-	strDefs := []string{}
-	strInterns := []string{}
-	for s, _ := range codeWriterEnv.NeedStrs {
-		name := NameAsGo(s)
-		strDefs = append(strDefs, fmt.Sprintf(`
-var s_%s *string`[1:],
-			name))
+	// 		strNs := "nil"
+	// 		if k.NsField() != nil {
+	// 			ns := *k.NsField()
+	// 			nsName := NameAsGo(ns)
+	// 			strNs = "s_" + nsName
+	// 		}
 
-		strInterns = append(strInterns, fmt.Sprintf(`
-	s_%s = STRINGS.Intern("%s")`[1:],
-			name, s))
-	}
-	sort.Strings(strDefs)
-	sort.Strings(strInterns)
+	// 		name := "kw_" + k.UniqueId()
+
+	// 		initNs := ""
+	// 		if strNs != "nil" {
+	// 			initNs = fmt.Sprintf(`
+	// 	%s.ns = %s
+	// `[1:],
+	// 				name, strNs)
+	// 		}
+
+	// 		fields := []string{}
+	// 		fields = InfoHolderField(name, k.InfoHolder, fields, codeEnv)
+	// 		meta := strings.Join(fields, "\n")
+	// 		if !IsGoExprEmpty(meta) {
+	// 			meta = "\n" + meta + "\n"
+	// 		}
+
+	// 		kwDefs = append(kwDefs, fmt.Sprintf(`
+	// var %s = Keyword{%s}`[1:],
+	// 			name, meta))
+
+	// 		kwHashes = append(kwHashes, fmt.Sprintf(`
+	// %s	%s.name = %s
+	// 	%s.hash = hashSymbol(%s, %s)`[1:],
+	// 			initNs, name, strName, name, strNs, strName))
+	// 	}
+	// 	sort.Strings(kwDefs)
+	// 	sort.Strings(kwHashes)
+
+	// 	strDefs := []string{}
+	// 	strInterns := []string{}
+	// 	for s, _ := range codeWriterEnv.NeedStrs {
+	// 		name := NameAsGo(s)
+	// 		strDefs = append(strDefs, fmt.Sprintf(`
+	// var s_%s *string`[1:],
+	// 			name))
+
+	// 		strInterns = append(strInterns, fmt.Sprintf(`
+	// 	s_%s = STRINGS.Intern("%s")`[1:],
+	// 			name, s))
+	// 	}
+
+	runtime = append(runtime, codeEnv.Runtime...)
+
+	sort.Strings(statics)
+	r := JoinStringFns(runtime)
 
 	var tr = [][2]string{
-		{"{strDefs}", strings.Join(strDefs, "\n")},
-		{"{symDefs}", strings.Join(symDefs, "\n")},
-		{"{kwDefs}", strings.Join(kwDefs, "\n")},
-		{"{statics}", codeEnv.Statics},
-		{"{bindingDefs}", strings.Join(bindingDefs, "\n\n")},
-		{"{strInterns}", strings.Join(strInterns, "\n")},
-		{"{symInterns}", strings.Join(symInterns, "\n")},
-		{"{kwHashes}", strings.Join(kwHashes, "\n")},
-		{"{interns}", codeEnv.Interns + JoinStringFns(codeEnv.Runtime)},
+		{"{statics}", strings.Join(statics, "\n")},
+		{"{runtime}", r},
 	}
 
 	fileContent := `// Generated by gen_code. Don't modify manually!
 
 package core
 
-{strDefs}
-
-{symDefs}
-
-{kwDefs}
-
 {statics}
 
-{bindingDefs}
-
 func init() {
-{strInterns}
-
-{symInterns}
-
-{kwHashes}
-
-{interns}
+{runtime}
 }
 `
 

@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/binary"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -22,7 +23,7 @@ type (
 	}
 
 	CodeWriterEnv struct {
-		Need      map[string]interface{}
+		Need      map[string]Finisher
 		Generated map[interface{}]interface{} // nil: being generated; else: fully generated (self)
 	}
 
@@ -31,7 +32,19 @@ type (
 		Strings   []*string
 		Bindings  []Binding
 	}
+
+	Finisher interface {
+		Finish(name string, codeEnv *CodeEnv) string
+	}
+
+	NativeString struct {
+		s string
+	}
 )
+
+func (ps NativeString) Finish(name string, env *CodeEnv) string {
+	return ""
+}
 
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
@@ -111,6 +124,7 @@ func JoinStringFns(fns []func() string) string {
 	for ix, fn := range fns {
 		strs[ix] = fn()
 	}
+	sort.Strings(strs)
 	return strings.Join(strs, "")
 }
 
@@ -168,12 +182,9 @@ func InfoHolderField(target string, m InfoHolder, fields []string, env *CodeEnv)
 	return append(fields, f)
 }
 
-func emitString(target string, s *string, env *CodeEnv) string {
-	if s == nil {
-		return "nil"
-	}
-	name := "s_" + NameAsGo(*s)
-	env.CodeWriterEnv.Need[name] = s
+func emitString(target string, s string, env *CodeEnv) string {
+	name := "s_" + NameAsGo(s)
+	env.CodeWriterEnv.Need[name] = NativeString{s}
 	return "!&" + name
 }
 
@@ -224,9 +235,13 @@ func (b *Binding) IsUsed() bool {
 }
 
 func (b *Binding) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := NameAsGo(b.UniqueId())
+	name := "b_" + NameAsGo(b.UniqueId())
 	env.CodeWriterEnv.Need[name] = b
-	return fmt.Sprintf("&binding_%s", name)
+	return fmt.Sprintf("&%s", name)
+}
+
+func (b *Binding) Finish(name string, env *CodeEnv) string {
+	return ""
 }
 
 func (env *CodeEnv) AddForm(o Object) {
@@ -418,13 +433,16 @@ func (p Position) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	startColumn: %d,`[1:],
 			p.startColumn))
 	}
-	f := noBang(emitString(target+".filename", p.filename, env))
-	if notNil(f) {
-		fields = append(fields, fmt.Sprintf(`
+	if p.filename != nil {
+		f := noBang(emitString(target+".filename", *p.filename, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
 	filename: %s,`[1:],
-			f))
+				f))
+		}
 	}
-	f = strings.Join(fields, "\n")
+
+	f := strings.Join(fields, "\n")
 	if f != "" {
 		f = "\n" + f + "\n"
 	}
@@ -476,12 +494,16 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 	return "!Symbol{}"
 }
 
+func (sym Symbol) Finish(name string, env *CodeEnv) string {
+	return ""
+}
+
 func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
 	name := "s_" + NameAsGo(t.name)
-	env.CodeWriterEnv.Need[name] = t.name
+	env.CodeWriterEnv.Need[name] = NativeString{t.name}
 	typeFn := func() string {
 		return fmt.Sprintf(`
 	%s = TYPES[%s]
@@ -857,6 +879,51 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 	env.Runtime = append(env.Runtime, fn)
 
 	return "nil"
+}
+
+func (k Keyword) Finish(name string, env *CodeEnv) string {
+	strName := "s_" + NameAsGo(*k.NameField())
+	env.CodeWriterEnv.Need[strName] = NativeString{*k.NameField()}
+
+	strNs := "nil"
+	if k.NsField() != nil {
+		ns := *k.NsField()
+		nsName := NameAsGo(ns)
+		strNs = "s_" + nsName
+		env.CodeWriterEnv.Need[strNs] = NativeString{ns}
+	}
+
+	initNs := ""
+	if strNs != "nil" {
+		initNs = fmt.Sprintf(`
+	%s.ns = %s
+`[1:],
+			name, strNs)
+	}
+
+	fields := []string{}
+	fields = InfoHolderField(name, k.InfoHolder, fields, env)
+
+	meta := strings.Join(fields, "\n")
+	if !IsGoExprEmpty(meta) {
+		meta = meta + "\n"
+	}
+
+	static := fmt.Sprintf(`
+var %s = Keyword{
+%s	name: &%s,
+}`[1:],
+		name, meta, strName)
+
+	runtime := fmt.Sprintf(`
+%s	%s.hash = hashSymbol(%s, %s)
+`[1:],
+		initNs, name, strNs, strName)
+	env.Runtime = append(env.Runtime, func(s string) func() string {
+		return func() string { return s }
+	}(runtime))
+
+	return static
 }
 
 func (i Int) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
@@ -1459,7 +1526,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	sym := *vr.name.name
 	g := NameAsGo(sym)
 	strName := "s_" + g
-	env.CodeWriterEnv.Need[strName] = sym
+	env.CodeWriterEnv.Need[strName] = NativeString{sym}
 
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
