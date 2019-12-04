@@ -469,24 +469,35 @@ func (info *ObjectInfo) Emit(target string, actualPtr interface{}, env *CodeEnv)
 	if info == nil {
 		return "nil"
 	}
+
 	name := uniqueName(target, "objectInfo_", "%p", info, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
-		env.CodeWriterEnv.Generated[name] = info
-		fields := []string{}
-		f := noBang(info.Position.Emit(name+".Position", nil, env))
-		if f != "" {
-			fields = append(fields, f+",")
-		}
-		f = strings.Join(fields, "\n")
-		if !IsGoExprEmpty(f) {
-			f = "\n" + f + "\n"
-		}
-		env.Statics += fmt.Sprintf(`
+
+	env.CodeWriterEnv.Need[name] = info
+
+	env.Runtime = append(env.Runtime, func() string {
+		return fmt.Sprintf(`
+	%s = %s
+`[1:],
+			directAssign(target), name)
+	})
+
+	return "!&" + name
+}
+
+func (obj *ObjectInfo) Finish(name string, env *CodeEnv) string {
+	f := noBang(obj.Position.Emit(name+".Position", nil, env))
+	if notNil(f) {
+		f += ","
+	}
+
+	if !IsGoExprEmpty(f) {
+		f = "\n" + f + "\n"
+	}
+
+	return fmt.Sprintf(`
 var %s = ObjectInfo{%s}
 `,
-			name, f)
-	}
-	return "!&" + name
+		name, f)
 }
 
 func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
@@ -511,7 +522,50 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 }
 
 func (sym Symbol) Finish(name string, env *CodeEnv) string {
-	return ""
+	strName := "s_" + NameAsGo(*sym.name)
+	env.CodeWriterEnv.Need[strName] = NativeString{*sym.name}
+
+	strNs := "nil"
+	if sym.ns != nil {
+		ns := *sym.ns
+		nsName := NameAsGo(ns)
+		strNs = "s_" + nsName
+		env.CodeWriterEnv.Need[strNs] = NativeString{ns}
+	}
+
+	initNs := ""
+	if strNs != "nil" {
+		initNs = fmt.Sprintf(`
+	%s.ns = %s
+`[1:],
+			name, strNs)
+	}
+
+	fields := []string{}
+	fields = InfoHolderField(name, sym.InfoHolder, fields, env)
+	fields = MetaHolderField(name, sym.MetaHolder, fields, env)
+
+	meta := strings.Join(fields, "\n")
+	if !IsGoExprEmpty(meta) {
+		meta = meta + "\n"
+	}
+
+	static := fmt.Sprintf(`
+var %s = Symbol{
+%s	name: &%s,
+}
+`[1:],
+		name, meta, strName)
+
+	runtime := fmt.Sprintf(`
+%s	%s.hash = hashSymbol(&%s, &%s)
+`[1:],
+		initNs, name, strNs, strName)
+	env.Runtime = append(env.Runtime, func(s string) func() string {
+		return func() string { return s }
+	}(runtime))
+
+	return static
 }
 
 func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {

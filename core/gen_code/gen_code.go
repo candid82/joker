@@ -152,6 +152,7 @@ func {name}Init() {
 		}
 
 		oldWriterEnv = newWriterEnv
+		fmt.Printf("ONE!! MORE!! TIME!!\n")
 	}
 
 	// 		bindingDefs = append(bindingDefs, fmt.Sprintf(`
