@@ -116,24 +116,42 @@ func {name}Init() {
 		ioutil.WriteFile(newFile, []byte(fileContent), 0666)
 	}
 
-	codeEnv := &CodeEnv{
-		CodeWriterEnv: codeWriterEnv,
-		Namespace:     GLOBAL_ENV.CoreNamespace,
-		Strings:       make(map[*string]uint16),
-		Bindings:      make(map[*Binding]int),
-	}
-
 	statics := []string{}
 	runtime := []func() string{}
 
-	needed := codeWriterEnv.Need
+	oldWriterEnv := codeWriterEnv
 
-	for name, obj := range needed {
-		codeWriterEnv.Need = map[string]Finisher{}
-		s := obj.Finish(name, codeEnv)
-		if s != "" {
-			statics = append(statics, s)
+	for {
+		newWriterEnv := &CodeWriterEnv{
+			Need:      map[string]Finisher{},
+			Generated: oldWriterEnv.Generated,
 		}
+
+		env := &CodeEnv{
+			CodeWriterEnv: newWriterEnv,
+			Namespace:     nil,
+		}
+
+		for name, obj := range oldWriterEnv.Need {
+			if _, ok := newWriterEnv.Generated[name]; ok {
+				continue
+			}
+			s := obj.Finish(name, env)
+			newWriterEnv.Generated[name] = struct{}{}
+			if env.Interns != "" {
+				panic("non-null interns for a_code.go")
+			}
+			if s != "" {
+				statics = append(statics, s)
+			}
+		}
+
+		runtime = append(runtime, env.Runtime...)
+		if len(env.Runtime) == 0 {
+			break
+		}
+
+		oldWriterEnv = newWriterEnv
 	}
 
 	// 		bindingDefs = append(bindingDefs, fmt.Sprintf(`
@@ -228,13 +246,11 @@ func {name}Init() {
 	// 			name, s))
 	// 	}
 
-	runtime = append(runtime, codeEnv.Runtime...)
-
 	sort.Strings(statics)
 	r := JoinStringFns(runtime)
 
 	var tr = [][2]string{
-		{"{statics}", strings.Join(statics, "\n")},
+		{"{statics}", strings.Join(statics, "")},
 		{"{runtime}", r},
 	}
 

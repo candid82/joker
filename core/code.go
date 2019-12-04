@@ -11,15 +11,11 @@ import (
 
 type (
 	CodeEnv struct {
-		CodeWriterEnv    *CodeWriterEnv
-		Namespace        *Namespace
-		Strings          map[*string]uint16
-		Bindings         map[*Binding]int
-		nextStringIndex  uint16
-		nextBindingIndex int
-		Statics          string
-		Interns          string
-		Runtime          []func() string
+		CodeWriterEnv *CodeWriterEnv
+		Namespace     *Namespace
+		Statics       string
+		Interns       string
+		Runtime       []func() string
 	}
 
 	CodeWriterEnv struct {
@@ -43,15 +39,16 @@ type (
 )
 
 func (ps NativeString) Finish(name string, env *CodeEnv) string {
-	return ""
+	return fmt.Sprintf(`
+var %s = %s
+`[1:],
+		name, strconv.Quote(ps.s))
 }
 
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
 		CodeWriterEnv: cwe,
 		Namespace:     GLOBAL_ENV.CoreNamespace,
-		Strings:       make(map[*string]uint16),
-		Bindings:      make(map[*Binding]int),
 	}
 }
 
@@ -912,7 +909,8 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 	static := fmt.Sprintf(`
 var %s = Keyword{
 %s	name: &%s,
-}`[1:],
+}
+`[1:],
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
