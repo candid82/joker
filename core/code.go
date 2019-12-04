@@ -238,7 +238,26 @@ func (b *Binding) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 }
 
 func (b *Binding) Finish(name string, env *CodeEnv) string {
-	return ""
+	nameSet := noBang(b.name.Emit(name+".name", nil, env))
+	if notNil(nameSet) {
+		nameSet = fmt.Sprintf(`
+	name: %s,
+`[1:],
+			nameSet)
+	} else {
+		nameSet = ""
+	}
+
+	static := fmt.Sprintf(`
+var %s = Binding{
+%s	index: %d,
+	frame: %d,
+	isUsed: %v,
+}
+`[1:],
+		name, nameSet, b.Index(), b.Frame(), b.IsUsed())
+
+	return static
 }
 
 func (env *CodeEnv) AddForm(o Object) {
@@ -914,7 +933,7 @@ var %s = Keyword{
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(%s, %s)
+%s	%s.hash = hashSymbol(&%s, &%s)
 `[1:],
 		initNs, name, strNs, strName)
 	env.Runtime = append(env.Runtime, func(s string) func() string {
