@@ -16,6 +16,8 @@ type (
 		Statics       string
 		Interns       string
 		Runtime       []func() string
+		Need          map[string]Finisher
+		Generated     map[interface{}]interface{} // nil: being generated; else: fully generated (self)
 	}
 
 	CodeWriterEnv struct {
@@ -38,17 +40,25 @@ type (
 	}
 )
 
-func (ps NativeString) Finish(name string, env *CodeEnv) string {
+func (s NativeString) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
+	name := "s_" + NameAsGo(s.s)
+	env.CodeWriterEnv.Need[name] = s
+	return "!" + name
+}
+
+func (s NativeString) Finish(name string, env *CodeEnv) string {
 	return fmt.Sprintf(`
 var %s = %s
 `[1:],
-		name, strconv.Quote(ps.s))
+		name, strconv.Quote(s.s))
 }
 
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
 		CodeWriterEnv: cwe,
 		Namespace:     GLOBAL_ENV.CoreNamespace,
+		Need:          map[string]Finisher{},
+		Generated:     map[interface{}]interface{}{},
 	}
 }
 
@@ -99,6 +109,16 @@ func indirect(s string) string {
 
 func notNil(s string) bool {
 	return s != "" && s != "nil" && !strings.HasSuffix(s, "{}")
+}
+
+func ptrTo(s string) string {
+	if !notNil(s) {
+		return "nil"
+	}
+	if s[0] == '*' {
+		return s[1:]
+	}
+	return "&" + s
 }
 
 func uniqueName(target, prefix, f string, id, actual interface{}) string {
@@ -180,9 +200,7 @@ func InfoHolderField(target string, m InfoHolder, fields []string, env *CodeEnv)
 }
 
 func emitString(target string, s string, env *CodeEnv) string {
-	name := "s_" + NameAsGo(s)
-	env.CodeWriterEnv.Need[name] = NativeString{s}
-	return "!&" + name
+	return NativeString{s}.Emit(target, nil, env)
 }
 
 func directAssign(target string) string {
@@ -233,7 +251,7 @@ func (b *Binding) IsUsed() bool {
 
 func (b *Binding) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := "b_" + NameAsGo(b.UniqueId())
-	env.CodeWriterEnv.Need[name] = b
+	env.Need[name] = b
 	return fmt.Sprintf("&%s", name)
 }
 
@@ -286,26 +304,30 @@ func (env *CodeEnv) AddForm(o Object) {
 }
 
 func (env *CodeEnv) Emit() {
-	statics := ""
-	interns := fmt.Sprintf(`
+	statics := []string{}
+	interns := []string{}
+
+	interns = append(interns, fmt.Sprintf(`
 	_ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
-	)
+	))
+
 	for s, v := range env.Namespace.mappings {
-		name := NameAsGo(*s)
+		varName := NameAsGo(*s)
+		name := "v_" + varName
 
 		v_var := ""
 
 		if v.Value != nil {
-			v_value := indirect(emitObject(fmt.Sprintf("v_%s.Value.(%s)", name, coreType(v.Value)), true, &v.Value, env))
+			v_value := indirect(emitObject(fmt.Sprintf("%s.Value.(%s)", name, coreType(v.Value)), true, &v.Value, env))
 			if notNil(v_value) {
 				intermediary := v_value[1:]
 				if v_value[0] != '!' {
-					intermediary = fmt.Sprintf("&value_%s", name)
-					statics += fmt.Sprintf(`
+					intermediary = fmt.Sprintf("&value_%s", varName)
+					statics = append(statics, fmt.Sprintf(`
 var value_%s = %s
 `[1:],
-						name, v_value)
+						varName, v_value))
 				}
 				v_var += fmt.Sprintf(`
 	Value: %s,
@@ -318,11 +340,11 @@ var value_%s = %s
 			v_expr := indirect(v.expr.Emit("expr_"+name, nil, env))
 			intermediary := v_expr[1:]
 			if v_expr[0] != '!' {
-				intermediary = fmt.Sprintf("&expr_%s", name)
-				statics += fmt.Sprintf(`
+				intermediary = fmt.Sprintf("&expr_%s", varName)
+				statics = append(statics, fmt.Sprintf(`
 var expr_%s = %s
 `[1:],
-					name, v_expr)
+					varName, v_expr))
 			}
 			v_var += fmt.Sprintf(`
 	expr: %s,
@@ -360,15 +382,15 @@ var expr_%s = %s
 `[1:])
 		}
 
-		v_tt := v.taggedType.Emit(fmt.Sprintf(`v_%s.taggedType`, name), nil, env)
+		v_tt := v.taggedType.Emit(name+".taggedType", nil, env)
 		if notNil(v_tt) {
 			intermediary := v_tt[1:]
 			if v_tt[0] != '!' {
-				intermediary = fmt.Sprintf("&taggedType_%s", name)
-				statics += fmt.Sprintf(`
+				intermediary = fmt.Sprintf("&taggedType_%s", varName)
+				statics = append(statics, fmt.Sprintf(`
 var taggedType_%s = %s
 `[1:],
-					v_tt)
+					v_tt))
 			}
 			v_var += fmt.Sprintf(`
 	%staggedType: %s,
@@ -381,33 +403,51 @@ var taggedType_%s = %s
 ` + v_var + `
 `
 		}
-		info := infoHolder("v_"+name, v.InfoHolder, env)
+		info := infoHolder(name, v.InfoHolder, env)
 		if info != "" {
 			info = "\n" + info
 		}
-		meta := metaHolder("v_"+name, v.meta, env)
+		meta := metaHolder(name, v.meta, env)
 		if meta != "" {
 			meta = "\n" + meta
 		}
 		v_var = fmt.Sprintf(`
-var v_%s = Var{%s%s%s}
-var p_v_%s = &v_%s
+var %s = Var{%s%s%s}
+var p_%s = &%s
 `[1:],
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
 
-		symName := "sym_" + name
-		env.CodeWriterEnv.Need[symName] = v.name
-		interns += fmt.Sprintf(`
-	_ns.InternExistingVar(%s, &v_%s)
-`,
-			symName, name)
+		symName := noBang(v.name.Emit("", nil, env))
 
-		statics += v_var
+		interns = append(interns, fmt.Sprintf(`
+	_ns.InternExistingVar(%s, &%s)
+`[1:],
+			symName, name))
+
+		statics = append(statics, v_var)
 	}
 
-	env.Statics += statics
-	env.Interns += interns + JoinStringFns(env.Runtime)
+	for {
+		needLen := len(env.Need)
+		for name, obj := range env.Need {
+			if _, ok := env.Generated[name]; ok {
+				continue
+			}
+			s := obj.Finish(name, env)
+			env.Generated[name] = struct{}{}
+			if s != "" {
+				statics = append(statics, s)
+			}
+		}
+		if len(env.Need) <= needLen {
+			break
+		}
+		fmt.Printf("ANOTHER!! TIME!! was %d now %d\n", needLen, len(env.Need))
+	}
+
+	env.Statics += strings.Join(statics, "")
+	env.Interns += strings.Join(interns, "") + JoinStringFns(env.Runtime)
 }
 
 func (p Position) Hash() uint32 {
@@ -453,7 +493,7 @@ func (p Position) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 		f := noBang(emitString(target+".filename", *p.filename, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
-	filename: %s,`[1:],
+	filename: &%s,`[1:],
 				f))
 		}
 	}
@@ -476,7 +516,7 @@ func (info *ObjectInfo) Emit(target string, actualPtr interface{}, env *CodeEnv)
 
 	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
-	%s = %s
+	%s = &%s
 `[1:],
 			directAssign(target), name)
 	})
@@ -505,12 +545,16 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		if s.ns == nil && s.hash == 0 {
 			return ""
 		}
-		return "Symbol{ABEND: No name!!}"
+		panic("Symbol{ABEND: No name!!}")
 	}
 
 	name := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
 
-	env.CodeWriterEnv.Need[name] = s
+	env.Need[name] = s
+
+	if target == "" {
+		return name
+	}
 
 	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
@@ -518,12 +562,12 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 `[1:],
 			directAssign(target), name)
 	})
+
 	return "!Symbol{}"
 }
 
 func (sym Symbol) Finish(name string, env *CodeEnv) string {
-	strName := "s_" + NameAsGo(*sym.name)
-	env.CodeWriterEnv.Need[strName] = NativeString{*sym.name}
+	strName := noBang(emitString(name+".name", *sym.name, env))
 
 	strNs := "nil"
 	if sym.ns != nil {
@@ -558,9 +602,9 @@ var %s = Symbol{
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(&%s, &%s)
+%s	%s.hash = hashSymbol(%s, &%s)
 `[1:],
-		initNs, name, strNs, strName)
+		initNs, name, ptrTo(strNs), strName)
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))
@@ -952,15 +996,12 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 }
 
 func (k Keyword) Finish(name string, env *CodeEnv) string {
-	strName := "s_" + NameAsGo(*k.NameField())
-	env.CodeWriterEnv.Need[strName] = NativeString{*k.NameField()}
+	strName := noBang(emitString("", *k.name, env))
 
 	strNs := "nil"
 	if k.NsField() != nil {
-		ns := *k.NsField()
-		nsName := NameAsGo(ns)
-		strNs = "s_" + nsName
-		env.CodeWriterEnv.Need[strNs] = NativeString{ns}
+		ns := *k.ns
+		strNs = noBang(emitString("", ns, env))
 	}
 
 	initNs := ""
@@ -987,9 +1028,9 @@ var %s = Keyword{
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(&%s, &%s)
+%s	%s.hash = hashSymbol(%s, &%s)
 `[1:],
-		initNs, name, strNs, strName)
+		initNs, name, ptrTo(strNs), strName)
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))

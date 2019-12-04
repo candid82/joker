@@ -130,6 +130,8 @@ func {name}Init() {
 		env := &CodeEnv{
 			CodeWriterEnv: newWriterEnv,
 			Namespace:     nil,
+			Need:          map[string]Finisher{},
+			Generated:     map[interface{}]interface{}{},
 		}
 
 		for name, obj := range oldWriterEnv.Need {
@@ -154,98 +156,6 @@ func {name}Init() {
 		oldWriterEnv = newWriterEnv
 		fmt.Printf("ONE!! MORE!! TIME!!\n")
 	}
-
-	// 		bindingDefs = append(bindingDefs, fmt.Sprintf(`
-	// var binding_%s = Binding{
-	// 	name: sym_%s,
-	// 	index: %d,
-	// 	frame: %d,
-	// 	isUsed: %v,
-	// }`[1:],
-	// 			id, symName, b.Index(), b.Frame(), b.IsUsed()))
-
-	// 		codeWriterEnv.NeedSyms[b.SymName()] = b.Symbol()
-	// 	}
-	// 	sort.Strings(bindingDefs)
-
-	// 	symDefs := []string{}
-	// 	symInterns := []string{}
-	// 	for s, sym := range codeWriterEnv.NeedSyms {
-	// 		name := NameAsGo(*s)
-
-	// 		fields := []string{}
-	// 		fields = InfoHolderField(name, sym.InfoHolder, fields, codeEnv)
-	// 		fields = MetaHolderField(name, sym.MetaHolder, fields, codeEnv)
-	// 		meta := strings.Join(fields, "\n")
-	// 		if !IsGoExprEmpty(meta) {
-	// 			meta = "\n" + meta + "\n"
-	// 		}
-
-	// 		symDefs = append(symDefs, fmt.Sprintf(`
-	// var sym_%s = Symbol{%s}`[1:],
-	// 			name, meta))
-
-	// 		codeWriterEnv.NeedStrs[*s] = struct{}{}
-	// 		symInterns = append(symInterns, fmt.Sprintf(`
-	// 	sym_%s.name = s_%s`[1:],
-	// 			name, name))
-	// 	}
-	// 	sort.Strings(symDefs)
-	// 	sort.Strings(symInterns)
-
-	// 	kwDefs := []string{}
-	// 	kwHashes := []string{}
-	// 	for _, k := range codeWriterEnv.NeedKeywords {
-	// 		strName := "s_" + NameAsGo(*k.NameField())
-
-	// 		strNs := "nil"
-	// 		if k.NsField() != nil {
-	// 			ns := *k.NsField()
-	// 			nsName := NameAsGo(ns)
-	// 			strNs = "s_" + nsName
-	// 		}
-
-	// 		name := "kw_" + k.UniqueId()
-
-	// 		initNs := ""
-	// 		if strNs != "nil" {
-	// 			initNs = fmt.Sprintf(`
-	// 	%s.ns = %s
-	// `[1:],
-	// 				name, strNs)
-	// 		}
-
-	// 		fields := []string{}
-	// 		fields = InfoHolderField(name, k.InfoHolder, fields, codeEnv)
-	// 		meta := strings.Join(fields, "\n")
-	// 		if !IsGoExprEmpty(meta) {
-	// 			meta = "\n" + meta + "\n"
-	// 		}
-
-	// 		kwDefs = append(kwDefs, fmt.Sprintf(`
-	// var %s = Keyword{%s}`[1:],
-	// 			name, meta))
-
-	// 		kwHashes = append(kwHashes, fmt.Sprintf(`
-	// %s	%s.name = %s
-	// 	%s.hash = hashSymbol(%s, %s)`[1:],
-	// 			initNs, name, strName, name, strNs, strName))
-	// 	}
-	// 	sort.Strings(kwDefs)
-	// 	sort.Strings(kwHashes)
-
-	// 	strDefs := []string{}
-	// 	strInterns := []string{}
-	// 	for s, _ := range codeWriterEnv.NeedStrs {
-	// 		name := NameAsGo(s)
-	// 		strDefs = append(strDefs, fmt.Sprintf(`
-	// var s_%s *string`[1:],
-	// 			name))
-
-	// 		strInterns = append(strInterns, fmt.Sprintf(`
-	// 	s_%s = STRINGS.Intern("%s")`[1:],
-	// 			name, s))
-	// 	}
 
 	sort.Strings(statics)
 	r := JoinStringFns(runtime)
