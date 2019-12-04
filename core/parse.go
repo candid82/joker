@@ -1656,7 +1656,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 					if !ctx.isUnknownCallableScope {
 						if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-							printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
+							printParseError(obj.GetInfo().Pos(), "parseList: Unable to resolve symbol: "+sym.ToString(false))
 						}
 					}
 					vr = InternFakeSymbol(symNs, sym)
@@ -1830,7 +1830,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 	}
 	if !LINTER_MODE {
-		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+		panic(&ParseError{obj: obj, msg: fmt.Sprintf("parseSymbol: Unable to resolve symbol: %s (%+v)", sym.ToString(false), sym)})
 	}
 	if DIALECT == CLJS && sym.ns == nil {
 		// Check if this is a "callable namespace"

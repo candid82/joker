@@ -33,15 +33,36 @@ type (
 	NativeString struct {
 		s string
 	}
+
+	InternedString struct {
+		s string
+	}
 )
 
 func (s NativeString) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := "s_" + NameAsGo(s.s)
-	env.CodeWriterEnv.Need[name] = s
+	if _, ok := env.CodeWriterEnv.Need[name]; !ok {
+		env.CodeWriterEnv.Need[name] = s // Don't overwrite an InternedString{}
+	}
 	return "!" + name
 }
 
 func (s NativeString) Finish(name string, env *CodeEnv) string {
+	return fmt.Sprintf(`
+var %s = %s
+`[1:],
+		name, strconv.Quote(s.s))
+}
+
+// TODO: For a BaseString, must intern (to get ptr) at runtime; else, can do &whatever immediately!
+func (s InternedString) Finish(name string, env *CodeEnv) string {
+	fn := func() string {
+		return fmt.Sprintf(`
+	STRINGS.InternExistingString(&%s)
+`[1:],
+			name)
+	}
+	env.Runtime = append(env.Runtime, fn)
 	return fmt.Sprintf(`
 var %s = %s
 `[1:],
@@ -92,6 +113,13 @@ func noBang(s string) string {
 	return s
 }
 
+func immediate(s string) (bool, string) {
+	if len(s) > 0 && s[0] == '!' {
+		return true, s[1:]
+	}
+	return false, s
+}
+
 func indirect(s string) string {
 	if s[0] == '&' {
 		return s[1:]
@@ -109,6 +137,9 @@ func notNil(s string) bool {
 func ptrTo(s string) string {
 	if !notNil(s) {
 		return "nil"
+	}
+	if s[0] == '!' {
+		s = s[1:]
 	}
 	if s[0] == '*' {
 		return s[1:]
@@ -202,10 +233,26 @@ func emitString(target string, s string, env *CodeEnv) string {
 }
 
 func emitPtrToString(s string, env *CodeEnv) string {
-	if ps, ok := STRINGS[s]; ok {
-		return fmt.Sprintf("!STRINGS.Intern(%s)", strconv.Quote(*ps))
-	}
 	return "!" + ptrTo(noBang(emitString("", s, env)))
+}
+
+func emitInternedString(target string, s string, env *CodeEnv) string {
+	internedStringVar := "s_" + NameAsGo(s)
+	if _, ok := env.CodeWriterEnv.BaseStrings[s]; !ok {
+		env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
+	}
+
+	if target != "" {
+		fn := func() string {
+			return fmt.Sprintf(`
+	%s = STRINGS.Intern(%s)
+`[1:],
+				target, strconv.Quote(s))
+		}
+		env.Runtime = append(env.Runtime, fn)
+	}
+
+	return "!" + internedStringVar
 }
 
 func directAssign(target string) string {
@@ -572,25 +619,37 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 }
 
 func (sym Symbol) Finish(name string, env *CodeEnv) string {
-	strName := noBang(emitString(name+".name", *sym.name, env))
+	strName := emitInternedString(name+".name", *sym.name, env)
 
 	strNs := "nil"
 	if sym.ns != nil {
 		ns := *sym.ns
-		strNs = noBang(emitPtrToString(ns, env))
-	}
-
-	initNs := ""
-	if strNs != "nil" {
-		initNs = fmt.Sprintf(`
-	%s.ns = %s
-`[1:],
-			name, strNs)
+		strNs = emitInternedString(name+".ns", ns, env)
 	}
 
 	fields := []string{}
 	fields = InfoHolderField(name, sym.InfoHolder, fields, env)
 	fields = MetaHolderField(name, sym.MetaHolder, fields, env)
+
+	staticInitName, initName := immediate(strName)
+	if staticInitName {
+		initName = fmt.Sprintf(`
+	name: &%s,
+`[1:],
+			initName)
+	} else {
+		initName = ""
+	}
+
+	staticInitNs, initNs := immediate(strNs)
+	if staticInitNs {
+		initNs = fmt.Sprintf(`
+	ns: &%s,
+`[1:],
+			initNs)
+	} else {
+		initNs = ""
+	}
 
 	meta := strings.Join(fields, "\n")
 	if !IsGoExprEmpty(meta) {
@@ -599,15 +658,15 @@ func (sym Symbol) Finish(name string, env *CodeEnv) string {
 
 	static := fmt.Sprintf(`
 var %s = Symbol{
-%s	name: &%s,
-}
+%s%s%s}
 `[1:],
-		name, meta, strName)
+		name, meta, initNs, initName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(%s, %s)
+	%s.hash = hashSymbol(%s, %s)
 `[1:],
-		initNs, name, ptrTo(strNs), ptrTo(strName))
+		name, ptrTo(strNs), ptrTo(strName))
+
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))
@@ -619,7 +678,7 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
-	name := noBang(emitPtrToString(t.name, env))
+	name := noBang(emitInternedString("", t.name, env))
 	typeFn := func() string {
 		return fmt.Sprintf(`
 	%s = TYPES[%s]
@@ -1030,9 +1089,9 @@ var %s = Keyword{
 		name, meta, strName)
 
 	runtime := fmt.Sprintf(`
-%s	%s.hash = hashSymbol(%s, &%s)
+%s	%s.hash = hashSymbol(%s, %s)
 `[1:],
-		initNs, name, ptrTo(strNs), strName)
+		initNs, name, ptrTo(strNs), ptrTo(strName))
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))
@@ -1639,8 +1698,7 @@ var %s = RecurExpr{%s}
 func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	sym := *vr.name.name
 	g := NameAsGo(sym)
-	strName := "s_" + g
-	env.CodeWriterEnv.Need[strName] = NativeString{sym}
+	strName := noBang(emitInternedString(target+".name", sym, env))
 
 	runtimeDefineVarFn := func() string {
 		/* Defer this logic until interns are generated during EOF handling. */
