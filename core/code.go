@@ -1085,41 +1085,53 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 }
 
 func (k Keyword) Finish(name string, env *CodeEnv) string {
-	strName := noBang(emitPtrToString("", *k.name, env))
+	strName := noBang(emitPtrToString(name+".name", *k.name, env))
+
+	initName := ""
+	if notNil(strName) {
+		initName = fmt.Sprintf(`
+	name: %s,
+`[1:],
+			strName)
+	}
 
 	strNs := "nil"
 	if k.NsField() != nil {
 		ns := *k.ns
-		strNs = noBang(emitPtrToString("", ns, env))
+		strNs = noBang(emitPtrToString(name+".ns", ns, env))
 	}
 
 	initNs := ""
-	if strNs != "nil" {
+	if notNil(strNs) {
 		initNs = fmt.Sprintf(`
-	%s.ns = %s
+	ns: %s,
 `[1:],
-			name, strNs)
+			strNs)
 	}
 
 	fields := []string{}
 	fields = InfoHolderField(name, k.InfoHolder, fields, env)
+	if initNs != "" {
+		fields = append(fields, initNs)
+	}
+	if initName != "" {
+		fields = append(fields, initName)
+	}
 
-	meta := strings.Join(fields, "\n")
-	if !IsGoExprEmpty(meta) {
-		meta = meta + "\n"
+	f := strings.Join(fields, "\n")
+	if !IsGoExprEmpty(f) {
+		f = "\n" + f + "\n"
 	}
 
 	static := fmt.Sprintf(`
-var %s = Keyword{
-%s	name: %s,
-}
+var %s = Keyword{%s}
 `[1:],
-		name, meta, strName)
+		name, f)
 
 	runtime := fmt.Sprintf(`
-%s	/* 01 */ %s.hash = hashSymbol(%s, %s)
+	/* 01 */ %s.hash = hashSymbol(%s, %s)
 `[1:],
-		initNs, name, ptrTo(strNs), ptrTo(strName))
+		name, ptrTo(strNs), ptrTo(strName))
 	env.Runtime = append(env.Runtime, func(s string) func() string {
 		return func() string { return s }
 	}(runtime))
@@ -1724,38 +1736,38 @@ var %s = RecurExpr{%s}
 }
 
 func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	sym := *vr.name.name
-	g := NameAsGo(sym)
-	strName := noBang(emitInternedString(target+".name.name", sym, env))
+	// sym := *vr.name.name
+	// g := NameAsGo(sym)
+	// strName := noBang(emitInternedString(target+".name.name", sym, env))
 
-	runtimeDefineVarFn := func() string {
-		/* Defer this logic until interns are generated during EOF handling. */
-		if _, ok := env.CodeWriterEnv.Generated[vr]; ok {
-			return "\n"
-		}
+	// 	runtimeDefineVarFn := func() string {
+	// 		/* Defer this logic until interns are generated during EOF handling. */
+	// 		if _, ok := env.CodeWriterEnv.Generated[vr]; ok {
+	// 			return "\n"
+	// 		}
 
-		env.CodeWriterEnv.Generated[vr] = vr
+	// 		env.CodeWriterEnv.Generated[vr] = vr
 
-		decl := fmt.Sprintf(`
-var p_v_%s *Var
-`[1:],
-			g)
-		env.Statics += decl
+	// 		decl := fmt.Sprintf(`
+	// var p_v_%s *Var
+	// `[1:],
+	// 			g)
+	// 		env.Statics += decl
 
-		return fmt.Sprintf(`
-	/* 01 */ p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
-`,
-			g, strName)
-	}
-	env.Runtime = append(env.Runtime, runtimeDefineVarFn)
+	// 		return fmt.Sprintf(`
+	// 	/* 01 */ p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
+	// `,
+	// 			g, strName)
+	// 	}
+	// 	env.Runtime = append(env.Runtime, runtimeDefineVarFn)
 
-	runtimeAssignFn := func() string {
-		return fmt.Sprintf(`
-	/* 02 */ %s = p_v_%s
-`[1:],
-			directAssign(target), g)
-	}
-	env.Runtime = append(env.Runtime, runtimeAssignFn)
+	// 	runtimeAssignFn := func() string {
+	// 		return fmt.Sprintf(`
+	// 	/* 02 */ %s = p_v_%s
+	// `[1:],
+	// 			directAssign(target), g)
+	// 	}
+	// 	env.Runtime = append(env.Runtime, runtimeAssignFn)
 
 	return ""
 }
