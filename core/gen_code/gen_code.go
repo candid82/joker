@@ -121,48 +121,42 @@ func {name}Init() {
 	}
 
 	statics := []string{}
-	runtime := []func() string{}
 
-	oldWriterEnv := codeWriterEnv
+	env := &CodeEnv{
+		CodeWriterEnv: codeWriterEnv,
+		Namespace:     nil,
+		Need:          map[string]Finisher{},
+		Generated:     map[interface{}]interface{}{},
+	}
 
 	for {
-		newWriterEnv := &CodeWriterEnv{
-			Need:      map[string]Finisher{},
-			Generated: oldWriterEnv.Generated,
-		}
+		needLen := len(codeWriterEnv.Need)
 
-		env := &CodeEnv{
-			CodeWriterEnv: newWriterEnv,
-			Namespace:     nil,
-			Need:          map[string]Finisher{},
-			Generated:     map[interface{}]interface{}{},
-		}
-
-		for name, obj := range oldWriterEnv.Need {
-			if _, ok := newWriterEnv.Generated[name]; ok {
+		for name, obj := range codeWriterEnv.Need {
+			if _, ok := codeWriterEnv.Generated[name]; ok {
 				continue
 			}
 			s := obj.Finish(name, env)
-			newWriterEnv.Generated[name] = struct{}{}
+			codeWriterEnv.Generated[name] = struct{}{}
 			if env.Interns != "" {
 				panic("non-null interns for a_code.go")
+			}
+			if len(env.Need) != 0 {
+				panic("non-null needs for a_code.go")
 			}
 			if s != "" {
 				statics = append(statics, s)
 			}
 		}
 
-		runtime = append(runtime, env.Runtime...)
-		if len(env.Runtime) == 0 {
+		if len(codeWriterEnv.Need) <= needLen {
 			break
 		}
-
-		oldWriterEnv = newWriterEnv
-		fmt.Printf("ONE!! MORE!! TIME!!\n")
+		fmt.Printf("ONE!! MORE!! TIME!! was %d now %d\n", needLen, len(env.Need))
 	}
 
 	sort.Strings(statics)
-	r := JoinStringFns(runtime)
+	r := JoinStringFns(env.Runtime)
 
 	var tr = [][2]string{
 		{"{statics}", strings.Join(statics, "")},
