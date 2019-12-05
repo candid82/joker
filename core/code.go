@@ -506,7 +506,7 @@ var p_%s = &%s
 		symName := noBang(v.name.Emit("", nil, env))
 
 		interns = append(interns, fmt.Sprintf(`
-	/* 04 */ _ns.InternExistingVar(%s, &%s)
+	/* 00 */ _ns.InternExistingVar(%s, &%s)
 `[1:],
 			symName, name))
 
@@ -598,13 +598,6 @@ func (info *ObjectInfo) Emit(target string, actualPtr interface{}, env *CodeEnv)
 	name := uniqueName(target, "objectInfo_", "%p", info, actualPtr)
 
 	env.CodeWriterEnv.Need[name] = info
-
-	env.Runtime = append(env.Runtime, func() string {
-		return fmt.Sprintf(`
-	/* 02 */ %s = &%s
-`[1:],
-			directAssign(target), name)
-	})
 
 	return "!&" + name
 }
