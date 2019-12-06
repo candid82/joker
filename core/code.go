@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"sort"
 	"strconv"
 	"strings"
@@ -174,6 +175,11 @@ func uniqueName(target, prefix, f string, id, actual interface{}) string {
 
 func coreType(e interface{}) string {
 	return strings.Replace(fmt.Sprintf("%T", e), "core.", "", 1)
+}
+
+func coreTypeAsGo(e interface{}) string {
+	s := strings.Replace(coreType(e), "*", "PtrTo", 1)
+	return strings.ToLower(s[0:1]) + s[1:]
 }
 
 func assertType(e interface{}) string {
@@ -831,8 +837,40 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 	return fmt.Sprintf("nil /*ABEND: %T*/", m)
 }
 
+// func uniqueIdForValue(v reflect.Value) string {
+// 	u := ""
+
+// 	kind := v.Kind()
+// 	switch kind {
+// 	case reflect.Invalid:
+// 		return "ABEND: INVALID!!"
+// 	case reflect.Ptr:
+// 		return "p_" + uniqueIdForPtrValue(v)
+// 	case reflect.Array, reflect.Slice, reflect.Chan:
+// 		u += fmt.Sprintf("[len=%d cap=%d]", v.Len(), v.Cap())
+// 	case reflect.Map, reflect.String:
+// 		u += fmt.Sprintf("[len=%d]", v.Len())
+// 	}
+// 	return "MAYBE LATER"
+// }
+
+var spewConfig = &spew.ConfigState{
+	Indent:       "",
+	MaxDepth:     10,
+	SortKeys:     true,
+	SpewKeys:     true,
+	NoDuplicates: true,
+	UseOrdinals:  true,
+}
+
+func UniqueId(obj interface{}) string {
+	h := getHash()
+	h.Write(([]byte)(spewConfig.Sdump(obj)))
+	return fmt.Sprintf("%s_%d", coreTypeAsGo(obj), h.Sum32())
+}
+
 func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "list_", "%d", l.Hash(), nil)
+	name := UniqueId(l)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = nil
 		fields := []string{}
@@ -842,8 +880,8 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		}
 		field := name + ".rest"
 		if l.rest != nil {
-			restName := uniqueName(target, "list_", "%d", l.rest.Hash(), nil)
-			if status, found := env.CodeWriterEnv.Generated[restName]; !found || status == nil {
+			restName := UniqueId(l.rest)
+			if status, found := env.CodeWriterEnv.Generated[restName]; found && status == nil {
 				fieldFn := func() string {
 					return fmt.Sprintf(`
 	/* 03 */ %s = %s

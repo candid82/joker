@@ -10,21 +10,7 @@ import (
 
 	. "github.com/candid82/joker/core"
 	"github.com/chzyer/readline"
-	"github.com/davecgh/go-spew/spew"
 )
-
-func Spew() {
-	cs := &spew.ConfigState{
-		Indent:       "    ",
-		MaxDepth:     20,
-		SortKeys:     true,
-		SpewKeys:     true,
-		NoDuplicates: true,
-		UseOrdinals:  true,
-	}
-
-	cs.Fdump(Stderr, GLOBAL_ENV)
-}
 
 func repl(phase Phase) {
 	Spew()
