@@ -10,4 +10,4 @@ require (
 
 go 1.13
 
-replace github.com/davecgh/go-spew => /home/craig/gohack/github.com/davecgh/go-spew
+replace github.com/davecgh/go-spew => /Users/craig/gohack/github.com/davecgh/go-spew
