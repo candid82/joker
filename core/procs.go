@@ -1680,11 +1680,26 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 }
 
 func CodeWriter(reader *Reader, cwe *CodeWriterEnv) (string, string, error) {
+	var p []byte
+	packEnv := NewPackEnv()
 	codeEnv := NewCodeEnv(cwe)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
+			var hp []byte
+			hp = packEnv.Pack(hp)
+			p = append(hp, p...)
+			header, newP := UnpackHeader(p, GLOBAL_ENV)
+			for len(newP) > 0 {
+				var expr Expr
+				expr, newP = UnpackExpr(newP, header)
+				_, err := TryEval(expr)
+				if err != nil {
+					fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
+				}
+				PanicOnErr(err)
+			}
 			codeEnv.Emit()
 			return codeEnv.Statics, codeEnv.Interns, nil
 		}
@@ -1698,6 +1713,7 @@ func CodeWriter(reader *Reader, cwe *CodeWriterEnv) (string, string, error) {
 			fmt.Fprintln(Stderr, err)
 			return "", "", err
 		}
+		p = expr.Pack(p, packEnv)
 		_, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
