@@ -851,11 +851,11 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 						directAssign(field), noBang(l.rest.Emit(field, nil, env)))
 				}
 				env.Runtime = append(env.Runtime, fieldFn)
-			}
-		} else if l.rest != nil {
-			f := noBang(l.rest.Emit(field, nil, env))
-			if f != "" {
-				fields = append(fields, fmt.Sprintf("\t%srest: %s,", maybeEmpty(f, l.rest), f))
+			} else {
+				f := noBang(l.rest.Emit(field, nil, env))
+				if f != "" {
+					fields = append(fields, fmt.Sprintf("\t%srest: %s,", maybeEmpty(f, l.rest), f))
+				}
 			}
 		}
 		if l.count != 0 {
