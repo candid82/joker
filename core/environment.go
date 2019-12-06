@@ -30,6 +30,8 @@ type (
 		classPath     *Var
 		verbose       *Var
 		ns            *Var
+		NS_VAR        *Var
+		IN_NS_VAR     *Var
 		version       *Var
 		Features      Set
 		Trace         bool
@@ -89,6 +91,8 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	}
 	res.CoreNamespace = res.EnsureNamespace(SYMBOLS.joker_core)
 	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
+	res.NS_VAR = res.CoreNamespace.Intern(MakeSymbol("ns"))
+	res.IN_NS_VAR = res.CoreNamespace.Intern(MakeSymbol("in-ns"))
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
@@ -172,8 +176,16 @@ func (env *Env) ResolveIn(n *Namespace, s Symbol) (*Var, bool) {
 	if ns == nil {
 		return nil, false
 	}
-	v, ok := ns.mappings[s.name]
-	return v, ok
+	if v, ok := ns.mappings[s.name]; ok {
+		return v, true
+	}
+	if s.Equals(env.IN_NS_VAR.name) {
+		return env.IN_NS_VAR, true
+	}
+	if s.Equals(env.NS_VAR.name) {
+		return env.NS_VAR, true
+	}
+	return nil, false
 }
 
 func (env *Env) Resolve(s Symbol) (*Var, bool) {

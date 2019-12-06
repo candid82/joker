@@ -805,23 +805,23 @@ func Ensureio_RuneReader(args []Object, index int) io.RuneReader {
 	}
 }
 
-func AssertFuture(obj Object, msg string) *Future {
+func AssertChannel(obj Object, msg string) *Channel {
 	switch c := obj.(type) {
-	case *Future:
+	case *Channel:
 		return c
 	default:
 		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "Future", obj.GetType().ToString(false))
+			msg = fmt.Sprintf("Expected %s, got %s", "Channel", obj.GetType().ToString(false))
 		}
 		panic(RT.NewError(msg))
 	}
 }
 
-func EnsureFuture(args []Object, index int) *Future {
+func EnsureChannel(args []Object, index int) *Channel {
 	switch c := args[index].(type) {
-	case *Future:
+	case *Channel:
 		return c
 	default:
-		panic(RT.NewArgTypeError(index, c, "Future"))
+		panic(RT.NewArgTypeError(index, c, "Channel"))
 	}
 }

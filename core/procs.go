@@ -59,7 +59,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.13.0"
+const VERSION = "v0.14.0"
 
 var internalLibs map[string]*internalNamespaceInfo
 
@@ -1592,17 +1592,69 @@ var procTypes ProcFn = func(args []Object) Object {
 	return res
 }
 
+var procCreateChan ProcFn = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	n := EnsureInt(args, 0)
+	ch := make(chan FutureResult, n.I)
+	return MakeChannel(ch)
+}
+
+var procCloseChan ProcFn = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	EnsureChannel(args, 0).Close()
+	return NIL
+}
+
+var procSend ProcFn = func(args []Object) (obj Object) {
+	CheckArity(args, 2, 2)
+	ch := EnsureChannel(args, 0)
+	v := args[1]
+	if v.Equals(NIL) {
+		panic(RT.NewError("Can't put nil on channel"))
+	}
+	if ch.isClosed {
+		return MakeBoolean(false)
+	}
+	obj = MakeBoolean(true)
+	defer func() {
+		if r := recover(); r != nil {
+			RT.GIL.Lock()
+			obj = MakeBoolean(false)
+		}
+	}()
+	RT.GIL.Unlock()
+	ch.ch <- MakeFutureResult(v, nil)
+	RT.GIL.Lock()
+	return
+}
+
+var procReceive ProcFn = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	ch := EnsureChannel(args, 0)
+	RT.GIL.Unlock()
+	res, ok := <-ch.ch
+	RT.GIL.Lock()
+	if !ok {
+		return NIL
+	}
+	if res.err != nil {
+		panic(res.err)
+	}
+	return res.value
+}
+
 var procGo ProcFn = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	f := EnsureCallable(args, 0)
-	ch := make(chan FutureResult, 1)
+	ch := MakeChannel(make(chan FutureResult, 1))
 	go func() {
 
 		defer func() {
 			if r := recover(); r != nil {
 				switch r := r.(type) {
 				case Error:
-					ch <- MakeFutureResult(NIL, r)
+					ch.ch <- MakeFutureResult(NIL, r)
+					ch.Close()
 				default:
 					RT.GIL.Unlock()
 					panic(r)
@@ -1613,9 +1665,10 @@ var procGo ProcFn = func(args []Object) Object {
 
 		RT.GIL.Lock()
 		res := f.Call([]Object{})
-		ch <- MakeFutureResult(res, nil)
+		ch.ch <- MakeFutureResult(res, nil)
+		ch.Close()
 	}()
-	return MakeFuture(ch)
+	return ch
 }
 
 var procGoSpew ProcFn = func(args []Object) (res Object) {
@@ -2306,6 +2359,10 @@ func init() {
 	intern("inc-problem-count__", procIncProblemCount, "procIncProblemCount")
 	intern("types__", procTypes, "procTypes")
 	intern("go__", procGo, "procGo")
+	intern("<!__", procReceive, "procReceive")
+	intern(">!__", procSend, "procSend")
+	intern("chan__", procCreateChan, "procCreateChan")
+	intern("close!__", procCloseChan, "procCloseChan")
 
 	intern("go-spew__", procGoSpew, "procGoSpew")
 }

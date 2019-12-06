@@ -141,12 +141,6 @@ func sendRequest(request Map) Map {
 	return respToMap(resp)
 }
 
-func sendRequestAsync(request Map) *Future {
-	return ExecFuture(func() Object {
-		return sendRequest(request)
-	})
-}
-
 func startServer(addr string, handler Callable) Object {
 	i := strings.LastIndexByte(addr, byte(':'))
 	host, port := MakeString(addr), MakeString("")

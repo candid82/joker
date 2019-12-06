@@ -21,12 +21,6 @@
   :go "sendRequest(request)"}
   [^Map request])
 
-(defn send-async
-  "Same as send, but sends the request asynchronously and returns a Future."
-  {:added "1.0"
-  :go "sendRequestAsync(request)"}
-  [^Map request])
-
 (defn start-server
   "Starts HTTP server on the TCP network address addr."
   {:added "1.0"

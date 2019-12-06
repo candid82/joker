@@ -9,7 +9,7 @@ import (
 func decodeString(s string) string {
 	decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		panic(RT.NewError("Invalid bas64 string: " + err.Error()))
+		panic(RT.NewError("Invalid base64 string: " + err.Error()))
 	}
 	return string(decoded)
 }
