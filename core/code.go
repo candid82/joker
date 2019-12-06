@@ -900,27 +900,12 @@ var %s = Vector{%s}
 }
 
 func (v *VectorSeq) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "vectorSeq_", "%p", v, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
-		env.CodeWriterEnv.Generated[name] = v
-		fields := []string{}
-		f := noBang(v.vector.Emit(name+".root", nil, env))
-		if f != "" {
-			fields = append(fields, fmt.Sprintf("\t%svector: %s,", maybeEmpty(f, v.vector), f))
-		}
-		if v.index != 0 {
-			fields = append(fields, fmt.Sprintf("\tindex: %d,", v.index))
-		}
-		f = strings.Join(fields, "\n")
-		if !IsGoExprEmpty(f) {
-			f = "\n" + f + "\n"
-		}
-		env.Statics += fmt.Sprintf(`
-var %s = VectorSeq{%s%s}
-`,
-			name, metaHolder(name, v.meta, env), f)
+	objs := []Object{}
+	for iter := iter(v); iter.HasNext(); {
+		objs = append(objs, iter.Next())
 	}
-	return "!&" + name
+	l := NewListFrom(objs...)
+	return l.Emit(target, nil, env)
 }
 
 func (m *ArrayMap) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
