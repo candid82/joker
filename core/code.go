@@ -632,7 +632,11 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		panic("Symbol{ABEND: No name!!}")
 	}
 
-	name := fmt.Sprintf("sym_%s", NameAsGo(*s.name))
+	nsName := ""
+	if s.ns != nil {
+		nsName = NameAsGo(*s.ns) + "_FW_"
+	}
+	name := fmt.Sprintf("sym_%s%s", nsName, NameAsGo(*s.name))
 
 	env.Need[name] = s
 
@@ -1344,14 +1348,13 @@ var %s = LiteralExpr{%s}
 	return "!&" + name
 }
 
-func emitInterfaceSeq(target string, thingies *[]interface{}, env *CodeEnv) string {
-	thingyae := []string{}
-	for ix, _ := range *thingies {
-		thingy := &((*thingies)[ix])
-		f := noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, thingy, env))
-		thingyae = append(thingyae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, thingy), f))
+func emitInterfaceSeq(target string, objects *[]interface{}, env *CodeEnv) string {
+	objae := []string{}
+	for ix, obj := range *objects {
+		f := noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, obj, env))
+		objae = append(objae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, obj), f))
 	}
-	ret := strings.Join(thingyae, "\n")
+	ret := strings.Join(objae, "\n")
 	if !IsGoExprEmpty(ret) {
 		ret = "\n" + ret + "\n"
 	}
