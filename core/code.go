@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/jcburley/go-spew/spew"
 	"reflect"
 	"sort"
 	"strconv"

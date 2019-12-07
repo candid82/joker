@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/jcburley/go-spew/spew"
 	"io"
 	"io/ioutil"
 	"math/big"
