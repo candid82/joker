@@ -1030,13 +1030,19 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
 		fields := []string{}
+
 		if m.count != 0 {
-			fields = append(fields, fmt.Sprintf("\tcount: %d,", m.count))
+			fields = append(fields, fmt.Sprintf(`
+	count: %d,`[1:],
+				m.count))
 		}
-		f := noBang(emitInterface(name+".root", false, &m.root, env))
+		f := noBang(emitInterface(name+".root", false, m.root, env))
 		if f != "" {
-			fields = append(fields, fmt.Sprintf("\t%sroot: %s,", maybeEmpty(f, m.root), f))
+			fields = append(fields, fmt.Sprintf(`
+	%sroot: %s,`[1:],
+				maybeEmpty(f, m.root), f))
 		}
+
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
@@ -1045,6 +1051,27 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 var %s = HashMap{%s%s}
 `,
 			name, metaHolder(name, m.meta, env), f)
+	}
+	return "!&" + name
+}
+
+func (b *BitmapIndexedNode) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
+	name := uniqueName(target, "bitmapIndexedNode_", "%p", b, actualPtr)
+	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
+		env.CodeWriterEnv.Generated[name] = b
+		fields := []string{}
+		if b.bitmap != 0 {
+			fields = append(fields, fmt.Sprintf("\tbitmap: %d,", b.bitmap))
+		}
+		fields = append(fields, fmt.Sprintf("\tarray: %s,", emitInterfaceSeq(name+".array", &b.array, env)))
+		f := strings.Join(fields, "\n")
+		if !IsGoExprEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.Statics += fmt.Sprintf(`
+var %s = BitmapIndexedNode{%s}
+`,
+			name, f)
 	}
 	return "!&" + name
 }
@@ -1318,6 +1345,8 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), nil, env)
 	case *Namespace:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), nil, env)
+	case *BitmapIndexedNode:
+		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BitmapIndexedNode)"), nil, env)
 	case *BufferedReader:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BufferedReader)"), nil, env)
 	case String:
