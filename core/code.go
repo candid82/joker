@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -166,11 +167,16 @@ func ptrTo(s string) string {
 	return "&" + s
 }
 
-func uniqueName(target, prefix, f string, id, actual interface{}) string {
-	if actual != nil {
-		id = actual
+func UniqueId(obj, actual interface{}) string {
+	h := getHash()
+	h.Write(([]byte)(spewConfig.Sdump(obj)))
+	if reflect.ValueOf(obj).Kind() == reflect.Ptr {
+		if actual == nil {
+			actual = obj
+		}
+		return fmt.Sprintf("%s_%p_%d", coreTypeAsGo(obj), actual, h.Sum32())
 	}
-	return fmt.Sprintf("%s"+f, prefix, id)
+	return fmt.Sprintf("%s_%d", coreTypeAsGo(obj), h.Sum32())
 }
 
 func coreType(e interface{}) string {
@@ -320,14 +326,6 @@ func (b *Binding) SymName() *string {
 	return b.name.name
 }
 
-func (b *Binding) UniqueId() string {
-	isUsed := ""
-	if b.IsUsed() {
-		isUsed = "_used"
-	}
-	return fmt.Sprintf("%s_%d_%d%s", *b.SymName(), b.Index(), b.Frame(), isUsed)
-}
-
 func (b *Binding) Index() int {
 	return b.index
 }
@@ -341,7 +339,7 @@ func (b *Binding) IsUsed() bool {
 }
 
 func (b *Binding) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := "b_" + NameAsGo(b.UniqueId())
+	name := UniqueId(b, actualPtr)
 	env.Need[name] = b
 	return fmt.Sprintf("&%s", name)
 }
@@ -601,7 +599,7 @@ func (info *ObjectInfo) Emit(target string, actualPtr interface{}, env *CodeEnv)
 		return "nil"
 	}
 
-	name := uniqueName(target, "objectInfo_", "%p", info, actualPtr)
+	name := UniqueId(info, actualPtr)
 
 	env.CodeWriterEnv.Need[name] = info
 
@@ -805,7 +803,7 @@ func (le *LocalEnv) Hash() uint32 {
 }
 
 func (le *LocalEnv) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "localEnv_", "%p", le, actualPtr)
+	name := UniqueId(le, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = le
 
@@ -837,7 +835,7 @@ var %s = LocalEnv{%s}
 }
 
 func emitFn(target string, fn *Fn, env *CodeEnv) string {
-	name := uniqueName(target, "fn_", "%p", fn, nil)
+	name := UniqueId(fn, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = fn
 		fields := []string{}
@@ -882,7 +880,7 @@ func (b Boolean) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 }
 
 func (m *MapSet) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "mapset_", "%p", m, actualPtr)
+	name := UniqueId(m, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
 		f := noBang(emitMap(name+".m", false, m.m, env))
@@ -921,14 +919,8 @@ var spewConfig = &spew.ConfigState{
 	UseOrdinals:  true,
 }
 
-func UniqueId(obj interface{}) string {
-	h := getHash()
-	h.Write(([]byte)(spewConfig.Sdump(obj)))
-	return fmt.Sprintf("%s_%d", coreTypeAsGo(obj), h.Sum32())
-}
-
 func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := UniqueId(l)
+	name := UniqueId(l, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = nil
 		fields := []string{}
@@ -939,7 +931,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		}
 		field := name + ".rest"
 		if l.rest != nil {
-			restName := UniqueId(l.rest)
+			restName := UniqueId(l.rest, nil)
 			if status, found := env.CodeWriterEnv.Generated[restName]; found && status == nil {
 				fieldFn := func() string {
 					return fmt.Sprintf(`
@@ -972,7 +964,7 @@ var %s = List{%s}
 }
 
 func (v *Vector) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := UniqueId(v)
+	name := UniqueId(v, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = v
 		fields := []string{}
@@ -1007,7 +999,7 @@ var %s = Vector{%s}
 }
 
 func (m *ArrayMap) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "arrayMap_", "%p", m, actualPtr)
+	name := UniqueId(m, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
 		f := emitObjectSeq(name+".arr", &m.arr, env)
@@ -1026,7 +1018,7 @@ var %s = ArrayMap{%s%s}
 }
 
 func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "hashMap_", "%p", m, actualPtr)
+	name := UniqueId(m, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
 		fields := []string{}
@@ -1056,7 +1048,7 @@ var %s = HashMap{%s%s}
 }
 
 func (b *BitmapIndexedNode) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "bitmapIndexedNode_", "%p", b, actualPtr)
+	name := UniqueId(b, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = b
 		fields := []string{}
@@ -1077,7 +1069,7 @@ var %s = BitmapIndexedNode{%s}
 }
 
 func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "bufferedReader_", "%p", b, actualPtr)
+	name := UniqueId(b, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = b
 		fields := []string{}
@@ -1116,7 +1108,7 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 }
 
 func (s String) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "string_", "%d", s.Hash(), nil)
+	name := UniqueId(s, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = s
 		fields := []string{}
@@ -1229,7 +1221,7 @@ var %s = Keyword{%s}
 }
 
 func (i Int) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "int_", "%d", i.I, nil)
+	name := UniqueId(i, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = i
 		fields := []string{}
@@ -1250,7 +1242,7 @@ var %s = Int{%s}
 }
 
 func (ch Char) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "char_", "%d", ch.Ch, nil)
+	name := UniqueId(ch, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = ch
 		fields := []string{}
@@ -1272,7 +1264,7 @@ var %s = Char{%s}
 
 func (d Double) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	dValue := strconv.FormatFloat(d.D, 'g', -1, 64)
-	name := uniqueName(target, "double_", "%s", NameAsGo(dValue), nil)
+	name := UniqueId(dValue, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = d
 		fields := []string{}
@@ -1293,11 +1285,7 @@ var %s = Double{%s}
 }
 
 func (n Nil) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	var hash uint32
-	if n.InfoHolder.info != nil {
-		hash = n.InfoHolder.info.Position.Hash()
-	}
-	name := uniqueName(target, "nil_", "%d", hash, nil)
+	name := UniqueId(n, nil)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = n
 		fields := []string{}
@@ -1413,7 +1401,7 @@ func emitObject(target string, typedTarget bool, objPtr *Object, env *CodeEnv) s
 }
 
 func (expr *LiteralExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "literalExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1550,7 +1538,7 @@ func emitCatchExprSeq(target string, ces []*CatchExpr, env *CodeEnv) string {
 }
 
 func (expr *VectorExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "vectorExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1580,7 +1568,7 @@ var %s = VectorExpr{%s}
 }
 
 func (expr *SetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "setExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1610,7 +1598,7 @@ var %s = SetExpr{%s}
 }
 
 func (expr *MapExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "mapExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1646,7 +1634,7 @@ var %s = MapExpr{%s}
 }
 
 func (expr *IfExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "ifExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1750,7 +1738,7 @@ var %s = IfExpr{%s}
 // }
 
 func (expr *CallExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "callExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1786,7 +1774,7 @@ var %s = CallExpr{%s}
 }
 
 func (expr *RecurExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "recurExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -1853,7 +1841,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 }
 
 func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "varRefExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
 		env.CodeWriterEnv.Generated[expr] = expr
 		fields := []string{}
@@ -1899,7 +1887,7 @@ var %s = VarRefExpr{%s}
 // }
 
 func (expr *BindingExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "bindingExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
 		env.CodeWriterEnv.Generated[expr] = expr
 		fields := []string{}
@@ -1935,7 +1923,7 @@ var %s = BindingExpr{%s}
 // }
 
 func (expr *DoExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "doExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
 		env.CodeWriterEnv.Generated[expr] = expr
 
@@ -1968,7 +1956,7 @@ var %s = DoExpr{%s}
 }
 
 func (expr *FnArityExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "fnArityExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -2010,7 +1998,7 @@ var %s = FnArityExpr{%s}
 }
 
 func (expr *FnExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "fnExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 
@@ -2060,7 +2048,7 @@ var %s = FnExpr{%s}
 }
 
 func (expr *LetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "letExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -2102,7 +2090,7 @@ var %s = LetExpr{%s}
 }
 
 func (expr *LoopExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "loopExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -2144,7 +2132,7 @@ var %s = LoopExpr{%s}
 }
 
 func (expr *ThrowExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "throwExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -2174,7 +2162,7 @@ var %s = ThrowExpr{%s}
 }
 
 func (expr *CatchExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "catchExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
@@ -2216,7 +2204,7 @@ var %s = CatchExpr{%s}
 }
 
 func (expr *TryExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "tryExpr_", "%p", expr, actualPtr)
+	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
