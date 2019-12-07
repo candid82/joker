@@ -625,6 +625,75 @@ var %s = ObjectInfo{%s}
 }
 
 func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
+	switch true {
+	case s.Equals(SYMBOLS.joker_core):
+		return "!SYMBOLS.joker_core"
+	case s.Equals(SYMBOLS.underscore):
+		return "!SYMBOLS.underscore"
+	case s.Equals(SYMBOLS.catch):
+		return "!SYMBOLS.catch"
+	case s.Equals(SYMBOLS.finally):
+		return "!SYMBOLS.finally"
+	case s.Equals(SYMBOLS.amp):
+		return "!SYMBOLS.amp"
+	case s.Equals(SYMBOLS._if):
+		return "!SYMBOLS._if"
+	case s.Equals(SYMBOLS.quote):
+		return "!SYMBOLS.quote"
+	case s.Equals(SYMBOLS.fn_):
+		return "!SYMBOLS.fn_"
+	case s.Equals(SYMBOLS.fn):
+		return "!SYMBOLS.fn"
+	case s.Equals(SYMBOLS.let_):
+		return "!SYMBOLS.let_"
+	case s.Equals(SYMBOLS.letfn_):
+		return "!SYMBOLS.letfn_"
+	case s.Equals(SYMBOLS.loop_):
+		return "!SYMBOLS.loop_"
+	case s.Equals(SYMBOLS.recur):
+		return "!SYMBOLS.recur"
+	case s.Equals(SYMBOLS.setMacro_):
+		return "!SYMBOLS.setMacro_"
+	case s.Equals(SYMBOLS.def):
+		return "!SYMBOLS.def"
+	case s.Equals(SYMBOLS.defLinter):
+		return "!SYMBOLS.defLinter"
+	case s.Equals(SYMBOLS._var):
+		return "!SYMBOLS._var"
+	case s.Equals(SYMBOLS.do):
+		return "!SYMBOLS.do"
+	case s.Equals(SYMBOLS.throw):
+		return "!SYMBOLS.throw"
+	case s.Equals(SYMBOLS.try):
+		return "!SYMBOLS.try"
+	case s.Equals(SYMBOLS.unquoteSplicing):
+		return "!SYMBOLS.unquoteSplicing"
+	case s.Equals(SYMBOLS.list):
+		return "!SYMBOLS.list"
+	case s.Equals(SYMBOLS.concat):
+		return "!SYMBOLS.concat"
+	case s.Equals(SYMBOLS.seq):
+		return "!SYMBOLS.seq"
+	case s.Equals(SYMBOLS.apply):
+		return "!SYMBOLS.apply"
+	case s.Equals(SYMBOLS.emptySymbol):
+		return "!SYMBOLS.emptySymbol"
+	case s.Equals(SYMBOLS.unquote):
+		return "!SYMBOLS.unquote"
+	case s.Equals(SYMBOLS.vector):
+		return "!SYMBOLS.vector"
+	case s.Equals(SYMBOLS.hashMap):
+		return "!SYMBOLS.hashMap"
+	case s.Equals(SYMBOLS.hashSet):
+		return "!SYMBOLS.hashSet"
+	case s.Equals(SYMBOLS.defaultDataReaders):
+		return "!SYMBOLS.defaultDataReaders"
+	case s.Equals(SYMBOLS.backslash):
+		return "!SYMBOLS.backslash"
+	case s.Equals(SYMBOLS.deref):
+		return "!SYMBOLS.deref"
+	}
+
 	if s.name == nil {
 		if s.ns == nil && s.hash == 0 {
 			return ""
