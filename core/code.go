@@ -859,6 +859,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = nil
 		fields := []string{}
+		fields = InfoHolderField(name, l.InfoHolder, fields, env)
 		f := noBang(emitObject(name+".first", false, &l.first, env))
 		if f != "" {
 			fields = append(fields, fmt.Sprintf("\t%sfirst: %s,", maybeEmpty(f, l.first), f))
@@ -902,6 +903,8 @@ func (v *Vector) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = v
 		fields := []string{}
+		fields = InfoHolderField(name, v.InfoHolder, fields, env)
+		fields = MetaHolderField(name, v.MetaHolder, fields, env)
 		fields = append(fields, fmt.Sprintf(`
 	root: %s,`[1:],
 			emitInterfaceSeq(name+".root", &v.root, env)))
