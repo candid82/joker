@@ -461,17 +461,17 @@ var expr_%s = %s
 `[1:])
 		}
 
-		if v.isUsed {
-			v_var += fmt.Sprintf(`
-	isUsed: true,
-`[1:])
-		}
+		// 		if v.isUsed {
+		// 			v_var += fmt.Sprintf(`
+		// 	isUsed: true,
+		// `[1:])
+		// 		}
 
-		if v.isGloballyUsed {
-			v_var += fmt.Sprintf(`
-	isGloballyUsed: true,
-`[1:])
-		}
+		// 		if v.isGloballyUsed {
+		// 			v_var += fmt.Sprintf(`
+		// 	isGloballyUsed: true,
+		// `[1:])
+		// 		}
 
 		v_tt := v.taggedType.Emit(name+".taggedType", nil, env)
 		if notNil(v_tt) {
