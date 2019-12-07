@@ -694,14 +694,16 @@ var %s = Symbol{
 `[1:],
 		name, meta, initNs, initName)
 
-	runtime := fmt.Sprintf(`
+	if sym.hash != 0 {
+		runtime := fmt.Sprintf(`
 	/* 01 */ %s.hash = hashSymbol(%s, %s)
 `[1:],
-		name, ptrTo(strNs), ptrTo(strName))
+			name, ptrTo(strNs), ptrTo(strName))
 
-	env.Runtime = append(env.Runtime, func(s string) func() string {
-		return func() string { return s }
-	}(runtime))
+		env.Runtime = append(env.Runtime, func(s string) func() string {
+			return func() string { return s }
+		}(runtime))
+	}
 
 	return static
 }
@@ -837,23 +839,6 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 	return fmt.Sprintf("nil /*ABEND: %T*/", m)
 }
 
-// func uniqueIdForValue(v reflect.Value) string {
-// 	u := ""
-
-// 	kind := v.Kind()
-// 	switch kind {
-// 	case reflect.Invalid:
-// 		return "ABEND: INVALID!!"
-// 	case reflect.Ptr:
-// 		return "p_" + uniqueIdForPtrValue(v)
-// 	case reflect.Array, reflect.Slice, reflect.Chan:
-// 		u += fmt.Sprintf("[len=%d cap=%d]", v.Len(), v.Cap())
-// 	case reflect.Map, reflect.String:
-// 		u += fmt.Sprintf("[len=%d]", v.Len())
-// 	}
-// 	return "MAYBE LATER"
-// }
-
 var spewConfig = &spew.ConfigState{
 	Indent:       "",
 	MaxDepth:     10,
@@ -913,17 +898,25 @@ var %s = List{%s}
 }
 
 func (v *Vector) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := uniqueName(target, "vector_", "%p", v, actualPtr)
+	name := UniqueId(v)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = v
 		fields := []string{}
-		fields = append(fields, fmt.Sprintf("\troot: %s,", emitInterfaceSeq(name+".root", &v.root, env)))
-		fields = append(fields, fmt.Sprintf("\ttail: %s,", emitInterfaceSeq(name+".tail", &v.tail, env)))
+		fields = append(fields, fmt.Sprintf(`
+	root: %s,`[1:],
+			emitInterfaceSeq(name+".root", &v.root, env)))
+		fields = append(fields, fmt.Sprintf(`
+	tail: %s,`[1:],
+			emitInterfaceSeq(name+".tail", &v.tail, env)))
 		if v.count != 0 {
-			fields = append(fields, fmt.Sprintf("\tcount: %d,", v.count))
+			fields = append(fields, fmt.Sprintf(`
+	count: %d,`[1:],
+				v.count))
 		}
 		if v.shift != 0 {
-			fields = append(fields, fmt.Sprintf("\tshift: %d,", v.shift))
+			fields = append(fields, fmt.Sprintf(`
+	shift: %d,`[1:],
+				v.shift))
 		}
 		f := strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1352,12 +1345,8 @@ func emitInterfaceSeq(target string, thingies *[]interface{}, env *CodeEnv) stri
 	thingyae := []string{}
 	for ix, _ := range *thingies {
 		thingy := &((*thingies)[ix])
-		if thingy == nil {
-			thingyae = append(thingyae, "\tnil, // Empty")
-		} else {
-			f := noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, thingy, env))
-			thingyae = append(thingyae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, thingy), f))
-		}
+		f := noBang(emitInterface(fmt.Sprintf("%s[%d]", target, ix), false, thingy, env))
+		thingyae = append(thingyae, fmt.Sprintf("\t%s%s,", maybeEmpty(f, thingy), f))
 	}
 	ret := strings.Join(thingyae, "\n")
 	if !IsGoExprEmpty(ret) {
