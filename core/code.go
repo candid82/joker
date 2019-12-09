@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 	"unsafe"
 )
 
@@ -279,25 +280,30 @@ func emitPtrToString(target string, s string, env *CodeEnv) string {
 	return "!" + ptrTo(noBang(emitString("", s, env)))
 }
 
-func emitInternedString(target string, s string, env *CodeEnv) string {
+func emitInternedString(target string, s string, env *CodeEnv) (res string) {
 	internedStringVar := "s_" + NameAsGo(s)
 	env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
 
 	if _, ok := env.CodeWriterEnv.BaseStrings[s]; ok {
-		return "!p_" + internedStringVar
+		res = "!p_" + internedStringVar
+	} else {
+		res = "!" + ptrTo(internedStringVar)
 	}
 
-	if target != "" {
+	if target != "" && !unicode.IsDigit(rune(target[0])) {
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 00 */ %s = STRINGS.Intern(%s)
+	/* 01 */ %s = STRINGS.Intern(%s)
 `[1:],
 				target, strconv.Quote(s))
 		}
 		env.Runtime = append(env.Runtime, fn)
+		res = ""
+	} else if target != "02" {
+		panic(fmt.Sprintf("no target for runtime string %s", strconv.Quote(s)))
 	}
 
-	return "!" + ptrTo(internedStringVar)
+	return
 }
 
 func directAssign(target string) string {
@@ -394,12 +400,13 @@ func (env *CodeEnv) AddForm(o Object) {
 
 func (env *CodeEnv) Emit() {
 	statics := []string{}
-	interns := []string{}
 
-	interns = append(interns, fmt.Sprintf(`
-	_ns := GLOBAL_ENV.CurrentNamespace()
+	env.Runtime = append(env.Runtime, func() string {
+		return fmt.Sprintf(`
+	/* 00 */ _ns := GLOBAL_ENV.CurrentNamespace()
 `[1:],
-	))
+		)
+	})
 
 	for s, v := range env.Namespace.mappings {
 		varName := NameAsGo(*s)
@@ -509,10 +516,12 @@ var p_%s = &%s
 
 		symName := noBang(v.name.Emit("", nil, env))
 
-		interns = append(interns, fmt.Sprintf(`
-	/* 00 */ _ns.InternExistingVar(%s, &%s)
+		env.Runtime = append(env.Runtime, func() string {
+			return fmt.Sprintf(`
+	/* 03 */ _ns.InternExistingVar(%s, &%s)
 `[1:],
-			symName, name))
+				symName, name)
+		})
 
 		statics = append(statics, v_var)
 	}
@@ -536,7 +545,7 @@ var p_%s = &%s
 	}
 
 	env.Statics += strings.Join(statics, "")
-	env.Interns += strings.Join(interns, "") + JoinStringFns(env.Runtime)
+	env.Interns += JoinStringFns(env.Runtime)
 }
 
 func (p Position) Hash() uint32 {
@@ -713,7 +722,7 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 
 	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
-	/* 02 */ %s = %s
+	/* 03 */ %s = %s
 `[1:],
 			directAssign(target), name)
 	})
@@ -767,7 +776,7 @@ var %s = Symbol{
 
 	if sym.hash != 0 {
 		runtime := fmt.Sprintf(`
-	/* 01 */ %s.hash = hashSymbol(%s, %s)
+	/* 02 */ %s.hash = hashSymbol(%s, %s)
 `[1:],
 			name, ptrTo(strNs), ptrTo(strName))
 
@@ -783,10 +792,10 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
-	name := noBang(emitInternedString("", t.name, env))
+	name := noBang(emitInternedString("02", t.name, env))
 	typeFn := func() string {
 		return fmt.Sprintf(`
-	/* 01 */ %s = TYPES[%s]
+	/* 03 */ %s = TYPES[%s]
 `[1:],
 			directAssign(target), name)
 	}
@@ -935,7 +944,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			if status, found := env.CodeWriterEnv.Generated[restName]; found && status == nil {
 				fieldFn := func() string {
 					return fmt.Sprintf(`
-	/* 03 */ %s = %s
+	/* 04 */ %s = %s
 `[1:],
 						directAssign(field), noBang(l.rest.Emit(field, nil, env)))
 				}
@@ -1100,7 +1109,7 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 	}
 	nsFn := func() string {
 		return fmt.Sprintf(`
-	/* 03 */ %s = _ns
+	/* 04 */ %s = _ns
 `[1:], directAssign(target))
 	}
 	env.Runtime = append(env.Runtime, nsFn)
@@ -1155,7 +1164,7 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 	fn := func(innerName string) func() string {
 		return func() string {
 			return fmt.Sprintf(`
-	/* 01 */ %s = %s  // (Keyword)Emit()
+	/* 02 */ %s = %s  // (Keyword)Emit()
 `[1:],
 				directAssign(target), innerName)
 		}
@@ -1210,7 +1219,7 @@ var %s = Keyword{%s}
 		name, f)
 
 	runtime := fmt.Sprintf(`
-	/* 01 */ %s.hash = hashSymbol(%s, %s)
+	/* 02 */ %s.hash = hashSymbol(%s, %s)
 `[1:],
 		name, ptrTo(strNs), ptrTo(strName))
 	env.Runtime = append(env.Runtime, func(s string) func() string {
@@ -1482,7 +1491,7 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 			return func() string {
 				el := fmt.Sprintf("%s[%d]", target, innerIx)
 				return fmt.Sprintf(`
-	/* 03 */ %s = %s  // deferObjectSeq[%d]
+	/* 04 */ %s = %s  // deferObjectSeq[%d]
 `[1:],
 					directAssign(el), noBang(emitObject(el, false, obj, env)), innerIx)
 			}
@@ -1823,7 +1832,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	// 		env.Statics += decl
 
 	// 		return fmt.Sprintf(`
-	// 	/* 01 */ p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
+	// 	/* 02 */ p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
 	// `,
 	// 			g, strName)
 	// 	}
@@ -1831,7 +1840,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 
 	// 	runtimeAssignFn := func() string {
 	// 		return fmt.Sprintf(`
-	// 	/* 02 */ %s = p_v_%s
+	// 	/* 03 */ %s = p_v_%s
 	// `[1:],
 	// 			directAssign(target), g)
 	// 	}
