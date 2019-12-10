@@ -81,6 +81,11 @@ func Spew() {
 		UseOrdinals:  true,
 	}
 
+	cs.Fprintln(Stderr, "STRINGS:")
+	cs.Fdump(Stderr, STRINGS)
+	cs.Fprintln(Stderr, "\nTYPES:")
+	cs.Fdump(Stderr, TYPES)
+	cs.Fprintln(Stderr, "\nGLOBAL_ENV:")
 	cs.Fdump(Stderr, GLOBAL_ENV)
 }
 
@@ -1829,6 +1834,8 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == READ {
 			continue
 		}
+		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYPARSE:")
+		SpewThis(obj)
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
@@ -1837,6 +1844,8 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
+		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYEVAL:")
+		SpewThis(expr)
 		obj, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
