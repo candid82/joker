@@ -150,6 +150,11 @@ func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
 	return vr
 }
 
+func (ns *Namespace) UpdateVarMeta(sym Symbol, meta Map) {
+	vr := ns.Intern(sym)
+	vr.meta = SafeMerge(vr.meta, meta)
+}
+
 func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
 	if sym.ns != nil {
 		panic(RT.NewError("Can't intern namespace-qualified symbol " + sym.ToString(false)))

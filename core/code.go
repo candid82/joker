@@ -16,11 +16,13 @@ type (
 	CodeEnv struct {
 		CodeWriterEnv *CodeWriterEnv
 		Namespace     *Namespace
+		BaseMappings  map[*string]*Var
 		Statics       string
 		Interns       string
 		Runtime       []func() string
 		Need          map[string]Finisher
 		Generated     map[interface{}]interface{} // nil: being generated; else: fully generated (self)
+		Captured      bool
 	}
 
 	CodeWriterEnv struct {
@@ -90,6 +92,7 @@ var %s = %s
 func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
 		CodeWriterEnv: cwe,
+		BaseMappings:  map[*string]*Var{},
 		Namespace:     GLOBAL_ENV.CoreNamespace,
 		Need:          map[string]Finisher{},
 		Generated:     map[interface{}]interface{}{},
@@ -394,8 +397,22 @@ func (env *CodeEnv) AddForm(o Object) {
 			} else {
 				env.Namespace = GLOBAL_ENV.EnsureNamespace(seq.First().(Symbol))
 			}
+			return
 		}
 	}
+	/* Any other form, assume it'll affect the current
+	/* namespace. The first time such a form is found within a
+	/* namespace, capture its existing mappings so they are
+	/* preserved with whatever values they have at runtime, while
+	/* generating code to update the meta information for those
+	/* mappings. */
+	if env.Captured {
+		return
+	}
+	for k, v := range env.Namespace.mappings {
+		env.BaseMappings[k] = v
+	}
+	env.Captured = true
 }
 
 func (env *CodeEnv) Emit() {
@@ -410,8 +427,21 @@ func (env *CodeEnv) Emit() {
 
 	for s, v := range env.Namespace.mappings {
 		varName := NameAsGo(*s)
-		name := "v_" + varName
+		symName := noBang(v.name.Emit("", nil, env))
 
+		if _, ok := env.BaseMappings[s]; ok {
+			meta := noBang(emitMap("m_"+varName, false, v.meta, env))
+			env.Runtime = append(env.Runtime, func() string {
+				return fmt.Sprintf(`
+	/* 05 */ _ns.UpdateVarMeta(%s, %s)
+`[1:],
+					symName, meta)
+			})
+
+			continue
+		}
+
+		name := "v_" + varName
 		v_var := ""
 
 		if v.Value != nil {
@@ -513,8 +543,6 @@ var p_%s = &%s
 `[1:],
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
-
-		symName := noBang(v.name.Emit("", nil, env))
 
 		env.Runtime = append(env.Runtime, func() string {
 			return fmt.Sprintf(`
