@@ -73,12 +73,13 @@ const (
 
 func Spew() {
 	cs := &spew.ConfigState{
-		Indent:       "    ",
-		MaxDepth:     20,
-		SortKeys:     true,
-		SpewKeys:     true,
-		NoDuplicates: true,
-		UseOrdinals:  true,
+		Indent:         "    ",
+		MaxDepth:       20,
+		SortKeys:       true,
+		SpewKeys:       true,
+		NoDuplicates:   true,
+		UseOrdinals:    true,
+		DisableMethods: true,
 	}
 
 	cs.Fprintln(Stderr, "STRINGS:")
@@ -91,23 +92,16 @@ func Spew() {
 
 func SpewThis(obj interface{}) {
 	cs := &spew.ConfigState{
-		Indent:       "    ",
-		MaxDepth:     20,
-		SortKeys:     true,
-		SpewKeys:     true,
-		NoDuplicates: true,
-		UseOrdinals:  true,
+		Indent:         "    ",
+		MaxDepth:       20,
+		SortKeys:       true,
+		SpewKeys:       true,
+		NoDuplicates:   true,
+		UseOrdinals:    true,
+		DisableMethods: true,
 	}
 
 	cs.Fdump(Stderr, obj)
-}
-
-func SpewThisPtr(obj interface{}) {
-	v := reflect.ValueOf(obj)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	SpewThis(v.Interface())
 }
 
 func InitInternalLibs() {
@@ -1933,7 +1927,9 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		for len(p) > 0 {
 			var expr Expr
 			expr, p = UnpackExpr(p, header)
-			SpewThisPtr(expr)
+			if Verbose && false {
+				SpewThis(expr)
+			}
 			_, err := TryEval(expr)
 			if err != nil {
 				fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
