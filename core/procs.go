@@ -102,6 +102,14 @@ func SpewThis(obj interface{}) {
 	cs.Fdump(Stderr, obj)
 }
 
+func SpewThisPtr(obj interface{}) {
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	SpewThis(v.Interface())
+}
+
 func InitInternalLibs() {
 	internalLibs = map[string]*internalNamespaceInfo{
 		"joker.core":      &coreNamespaceInfo,
@@ -1834,8 +1842,8 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == READ {
 			continue
 		}
-		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYPARSE:")
-		SpewThis(obj)
+		//		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYPARSE:")
+		//		SpewThis(obj)
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
@@ -1844,8 +1852,8 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
-		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYEVAL:")
-		SpewThis(expr)
+		//		fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYEVAL:")
+		//		SpewThis(expr)
 		obj, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
@@ -1925,6 +1933,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		for len(p) > 0 {
 			var expr Expr
 			expr, p = UnpackExpr(p, header)
+			SpewThisPtr(expr)
 			_, err := TryEval(expr)
 			if err != nil {
 				fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
