@@ -89,16 +89,6 @@ var %s = %s
 		name, strconv.Quote(s.s))
 }
 
-func NewCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
-	return &CodeEnv{
-		CodeWriterEnv: cwe,
-		BaseMappings:  map[*string]*Var{},
-		Namespace:     GLOBAL_ENV.CoreNamespace,
-		Need:          map[string]Finisher{},
-		Generated:     map[interface{}]interface{}{},
-	}
-}
-
 var tr = [][2]string{
 	{"_", "US"},
 	{"?", "Q"},

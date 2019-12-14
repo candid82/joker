@@ -44,6 +44,76 @@ var (
 	linter_cljsNamespaceInfo  internalNamespaceInfo
 )
 
+type FileInfo struct {
+	Name     string
+	Filename string
+}
+
+/* The entries must be ordered such that a given namespace depends
+/* only upon namespaces loaded above it. E.g. joker.template depends
+/* on joker.walk, so is listed afterwards, not in alphabetical
+/* order. */
+var CoreSourceFiles []FileInfo = []FileInfo{
+	{
+		Name:     "<joker.core>",
+		Filename: "core.joke",
+	},
+	{
+		Name:     "<joker.repl>",
+		Filename: "repl.joke",
+	},
+	{
+		Name:     "<joker.walk>",
+		Filename: "walk.joke",
+	},
+	{
+		Name:     "<joker.template>",
+		Filename: "template.joke",
+	},
+	{
+		Name:     "<joker.test>",
+		Filename: "test.joke",
+	},
+	{
+		Name:     "<joker.set>",
+		Filename: "set.joke",
+	},
+	{
+		Name:     "<joker.tools.cli>",
+		Filename: "tools_cli.joke",
+	},
+	{
+		Name:     "<joker.core>",
+		Filename: "linter_all.joke",
+	},
+	{
+		Name:     "<joker.core>",
+		Filename: "linter_joker.joke",
+	},
+	{
+		Name:     "<joker.core>",
+		Filename: "linter_cljx.joke",
+	},
+	{
+		Name:     "<joker.core>",
+		Filename: "linter_clj.joke",
+	},
+	{
+		Name:     "<joker.core>",
+		Filename: "linter_cljs.joke",
+	},
+	{
+		Name:     "<joker.hiccup>",
+		Filename: "hiccup.joke",
+	},
+}
+
+var CoreSourceFileInfo = map[string]*internalNamespaceInfo{}
+
+func ProcessCoreSourceFileFor(ns string) {
+	processNamespaceInfo(CoreSourceFileInfo[ns], ns)
+}
+
 type (
 	Phase        int
 	Dialect      int
@@ -114,6 +184,16 @@ func InitInternalLibs() {
 		"joker.set":       &setNamespaceInfo,
 		"joker.tools.cli": &tools_cliNamespaceInfo,
 		"joker.hiccup":    &hiccupNamespaceInfo,
+	}
+	for _, f := range CoreSourceFiles {
+		if f.Name[0] != '<' || f.Name[len(f.Name)-1] != '>' {
+			panic(fmt.Sprintf("Invalid syntax for core source file namespace id: `%s'", f.Name))
+		}
+		ns := f.Name[1 : len(f.Name)-1]
+		if _, found := CoreSourceFileInfo[ns]; found {
+			continue // Linter stuff, not yet supported by gen_code.go
+		}
+		CoreSourceFileInfo[f.Name] = internalLibs[ns]
 	}
 }
 
@@ -1761,49 +1841,6 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
 			return nil, err
-		}
-	}
-}
-
-func CodeWriter(reader *Reader, cwe *CodeWriterEnv) (string, string, error) {
-	var p []byte
-	packEnv := NewPackEnv()
-	codeEnv := NewCodeEnv(cwe)
-	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
-	for {
-		obj, err := TryRead(reader)
-		if err == io.EOF {
-			var hp []byte
-			hp = packEnv.Pack(hp)
-			p = append(hp, p...)
-			header, newP := UnpackHeader(p, GLOBAL_ENV)
-			for len(newP) > 0 {
-				var expr Expr
-				expr, newP = UnpackExpr(newP, header)
-				_, err := TryEval(expr)
-				if err != nil {
-					fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
-				}
-				PanicOnErr(err)
-			}
-			codeEnv.Emit()
-			return codeEnv.Statics, codeEnv.Interns, nil
-		}
-		if err != nil {
-			fmt.Fprintln(Stderr, err)
-			return "", "", err
-		}
-		codeEnv.AddForm(obj)
-		expr, err := TryParse(obj, parseContext)
-		if err != nil {
-			fmt.Fprintln(Stderr, err)
-			return "", "", err
-		}
-		p = expr.Pack(p, packEnv)
-		_, err = TryEval(expr)
-		if err != nil {
-			fmt.Fprintln(Stderr, err)
-			return "", "", err
 		}
 	}
 }
