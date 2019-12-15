@@ -22,7 +22,6 @@ type (
 		Runtime       []func() string
 		Need          map[string]Finisher
 		Generated     map[interface{}]interface{} // nil: being generated; else: fully generated (self)
-		Captured      bool
 	}
 
 	CodeWriterEnv struct {
@@ -366,44 +365,44 @@ var %s = Binding{
 	return static
 }
 
-func (env *CodeEnv) AddForm(o Object) {
-	seq, ok := o.(Seq)
-	if !ok {
-		fmt.Printf("code.go: Skipping %s\n", o.ToString(false))
-		return
-	}
-	first := seq.First()
-	if v, ok := first.(Symbol); ok {
-		switch v.ToString(false) {
-		case "ns", "in-ns":
-			fmt.Printf("core/code.go: Switching to namespace %s\n", o.ToString(false))
-			seq = seq.Rest()
-			if l, ok := seq.First().(*List); ok {
-				if q, ok := l.First().(Symbol); !ok || *q.name != "quote" {
-					fmt.Printf("code.go: unexpected form where namespace expected: %s\n", l.ToString(false))
-					return
-				}
-				env.Namespace = GLOBAL_ENV.EnsureNamespace(l.Second().(Symbol))
-			} else {
-				env.Namespace = GLOBAL_ENV.EnsureNamespace(seq.First().(Symbol))
-			}
-			return
-		}
-	}
-	/* Any other form, assume it'll affect the current
-	/* namespace. The first time such a form is found within a
-	/* namespace, capture its existing mappings so they are
-	/* preserved with whatever values they have at runtime, while
-	/* generating code to update the meta information for those
-	/* mappings. */
-	if env.Captured {
-		return
-	}
-	for k, v := range env.Namespace.mappings {
-		env.BaseMappings[k] = v
-	}
-	env.Captured = true
-}
+// func (env *CodeEnv) AddForm(o Object) {
+// 	seq, ok := o.(Seq)
+// 	if !ok {
+// 		fmt.Printf("code.go: Skipping %s\n", o.ToString(false))
+// 		return
+// 	}
+// 	first := seq.First()
+// 	if v, ok := first.(Symbol); ok {
+// 		switch v.ToString(false) {
+// 		case "ns", "in-ns":
+// 			fmt.Printf("core/code.go: Switching to namespace %s\n", o.ToString(false))
+// 			seq = seq.Rest()
+// 			if l, ok := seq.First().(*List); ok {
+// 				if q, ok := l.First().(Symbol); !ok || *q.name != "quote" {
+// 					fmt.Printf("code.go: unexpected form where namespace expected: %s\n", l.ToString(false))
+// 					return
+// 				}
+// 				env.Namespace = GLOBAL_ENV.EnsureNamespace(l.Second().(Symbol))
+// 			} else {
+// 				env.Namespace = GLOBAL_ENV.EnsureNamespace(seq.First().(Symbol))
+// 			}
+// 			return
+// 		}
+// 	}
+// 	/* Any other form, assume it'll affect the current
+// 	/* namespace. The first time such a form is found within a
+// 	/* namespace, capture its existing mappings so they are
+// 	/* preserved with whatever values they have at runtime, while
+// 	/* generating code to update the meta information for those
+// 	/* mappings. */
+// 	if env.Captured {
+// 		return
+// 	}
+// 	for k, v := range env.Namespace.mappings {
+// 		env.BaseMappings[k] = v
+// 	}
+// 	env.Captured = true
+// }
 
 func (env *CodeEnv) Emit() {
 	statics := []string{}

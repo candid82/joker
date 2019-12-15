@@ -112,7 +112,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 		}
 		ns.mappings[sym.name] = newVar
 		if Verbose {
-			fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s)\n", *ns.Name.name, *sym.name)
+			//			fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s)\n", *ns.Name.name, *sym.name)
 		}
 		return newVar
 	}
@@ -128,7 +128,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
 			}
 			if Verbose {
-				fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
+				//				fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
 			}
 			return newVar
 		}
@@ -168,7 +168,7 @@ func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
 		v.name = sym
 		ns.mappings[sym.name] = v
 		if Verbose {
-			fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s)\n", *ns.Name.name, *sym.name)
+			//			fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s)\n", *ns.Name.name, *sym.name)
 		}
 		return
 	}
@@ -185,7 +185,7 @@ func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), v.ToString(false)))
 			}
 			if Verbose {
-				fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
+				//				fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
 			}
 			return
 		}
@@ -215,4 +215,8 @@ func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 
 func (ns *Namespace) Resolve(name string) *Var {
 	return ns.mappings[STRINGS.Intern(name)]
+}
+
+func (ns *Namespace) Mappings() map[*string]*Var {
+	return ns.mappings
 }

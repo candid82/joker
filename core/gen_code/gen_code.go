@@ -57,6 +57,10 @@ func {name}Init() {
 
 		env := newCodeEnv(codeWriterEnv)
 
+		for k, v := range env.Namespace.Mappings() {
+			env.BaseMappings[k] = v
+		}
+
 		ProcessCoreSourceFileFor(f.Name)
 
 		env.Emit()
