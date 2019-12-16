@@ -177,7 +177,7 @@ func coreType(e interface{}) string {
 }
 
 func coreTypeAsGo(e interface{}) string {
-	s := strings.Replace(coreType(e), "*", "PtrTo", 1)
+	s := strings.Replace(coreType(e), "*", "", 1)
 	return strings.ToLower(s[0:1]) + s[1:]
 }
 
@@ -1830,40 +1830,79 @@ var %s = RecurExpr{%s}
 }
 
 func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	// sym := *vr.name.name
-	// g := NameAsGo(sym)
-	// strName := noBang(emitInternedString(target+".name.name", sym, env))
+	name := UniqueId(vr, actualPtr)
+	status, ok := env.CodeWriterEnv.Generated[vr]
+	if !ok {
+		env.CodeWriterEnv.Generated[vr] = nil
 
-	// 	runtimeDefineVarFn := func() string {
-	// 		/* Defer this logic until interns are generated during EOF handling. */
-	// 		if _, ok := env.CodeWriterEnv.Generated[vr]; ok {
-	// 			return "\n"
-	// 		}
+		fields := []string{}
+		fields = InfoHolderField(name, vr.InfoHolder, fields, env)
+		fields = MetaHolderField(name, vr.MetaHolder, fields, env)
+		f := noBang(vr.ns.Emit(name+".ns", nil, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	ns: %s,`[1:],
+				f))
+		}
+		f = noBang(vr.name.Emit(name+".name", nil, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	name: %s,`[1:],
+				f))
+		}
+		f = noBang(emitObject(name+".Value", false, &vr.Value, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	Value: %s,`[1:],
+				f))
+		}
+		if vr.expr != nil {
+			f = noBang(vr.expr.Emit(name+".expr", nil, env))
+			if notNil(f) {
+				fields = append(fields, fmt.Sprintf(`
+	expr: %s,`[1:],
+					f))
+			}
+		}
+		if vr.isMacro {
+			fields = append(fields, `
+	isMacro: true,`[1:])
+		}
+		if vr.isPrivate {
+			fields = append(fields, `
+	isPrivate: true,`[1:])
+		}
+		if vr.isDynamic {
+			fields = append(fields, `
+	isDynamic: true,`[1:])
+		}
+		f = noBang(vr.taggedType.Emit(name+".taggedType", nil, env))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	taggedType: %s,`[1:],
+				f))
+		}
 
-	// 		env.CodeWriterEnv.Generated[vr] = vr
+		f = strings.Join(fields, "\n")
+		if !IsGoExprEmpty(f) {
+			f = "\n" + f + "\n"
+		}
+		env.Statics += fmt.Sprintf(`
+var %s = Var{%s}
+`,
+			name, f)
+		env.CodeWriterEnv.Generated[vr] = vr
+	} else if status == nil {
+		fn := func() string {
+			return fmt.Sprintf(`
+	/* 01 */ %s = %s
+`[1:],
+				directAssign(target), "&"+name)
+		}
+		env.Runtime = append(env.Runtime, fn)
+	}
 
-	// 		decl := fmt.Sprintf(`
-	// var p_v_%s *Var
-	// `[1:],
-	// 			g)
-	// 		env.Statics += decl
-
-	// 		return fmt.Sprintf(`
-	// 	/* 02 */ p_v_%s = GLOBAL_ENV.CoreNamespace.mappings[%s]
-	// `,
-	// 			g, strName)
-	// 	}
-	// 	env.Runtime = append(env.Runtime, runtimeDefineVarFn)
-
-	// 	runtimeAssignFn := func() string {
-	// 		return fmt.Sprintf(`
-	// 	/* 03 */ %s = p_v_%s
-	// `[1:],
-	// 			directAssign(target), g)
-	// 	}
-	// 	env.Runtime = append(env.Runtime, runtimeAssignFn)
-
-	return ""
+	return "!&" + name
 }
 
 func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
