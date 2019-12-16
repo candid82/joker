@@ -6,7 +6,7 @@
 build() {
   go clean
   $KEEP_A_CODE_FILES || rm -fv core/a_*code.go
-  $KEEP_A_DATA_FILES || rm -fv core/a_core_data.go
+  $KEEP_A_DATA_FILES || rm -fv core/a_*data.go
   go generate ./...
   [ -f OPTIMIZE-STARTUP.flag ] && (cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
   (cd core; go run gen_data/gen_data.go)
