@@ -6,13 +6,13 @@ Joker is distributed with built-in namespaces. These include core namespaces (su
 
 Currently, Joker does not include any additional Joker namespaces (library code) that is *not* built into the Joker executable. That makes the Joker executable "stand-alone" with respect to deployment.
 
-However, Joker does provide support for deployment of additional namespaces via library code that is loaded during execution via `(require ...)` and similar library-loading mechanisms. Though in its early stages (Joker itself being _v0.N_ at this writing), locally-developed libraries (such as those containing business logic) as well as third-party libraries are thereby supported.
+However, Joker does provide support for deployment of additional namespaces via library code that is loaded during execution via `(ns ... :require ...)` and similar library-loading mechanisms. Though in its early stages (Joker itself being _v0.N_ at this writing), locally-developed libraries (such as those containing business logic) as well as third-party libraries are thereby supported.
 
 This document provides a brief overview of these mechanisms and recommendations as to how to organize code for such namespaces.
 
 ## Default Behavior
 
-Absent overriding behavior as controlled by `joker.core/*classpath*` and `joker.core/*ns-sources*`, Joker normally relies on the local filesystem to locate source files for namespaces.
+Absent overriding behavior as defined by `joker.core/*classpath*` and `joker.core/*ns-sources*`, Joker normally relies on the local filesystem to locate source files for namespaces.
 
 Generally, namespaces are converted to relative ("sub-") pathnames by treating each component as a directory, except for the last, to which `.joke` is appended.
 
@@ -20,13 +20,13 @@ For example, `a.b.c` becomes `a/b/c.joke`.
 
 Joker also keeps track of the pathname for the file currently being read and evaluated, and searches for namespaces it seeks to load relative to that pathname, taking into account the current namespace (`*ns*`).
 
-So, if `/Users/somebody/mylibs/a/b/c.joke` is currently running as namespace `a.b.c`, and seeks to load the namespace `d.e`, the last three components (corresponding to `a`, `b`, and `c` of the current namespace) are removed from the current pathname, and the new relative path (`d/e.joke`) appended, yielding `/Users/somebody/mylibs/d/e.joke`.
+So, if `/Users/somebody/mylibs/a/b/c.joke` is currently running as namespace `a.b.c`, and seeks to load the namespace `d.e`, the last three components (corresponding to `a`, `b`, and `c` of the current namespace) are removed from the current pathname, and the new relative path (`d/e.joke`) is appended, yielding `/Users/somebody/mylibs/d/e.joke`.
 
-## The *classpath* Variable
+## The \*classpath\* Variable
 
 Though `lib-path__` determines a potential pathname for a library's root file, `*classpath*` determines whether and when to use that pathname.
 
-The `joker.core/load-lib-from-path__` procedure is called with the target namespace name and the pathname determined by `lib-path__`, and uses `*classpath*` to search for the `.joke` file representing the root source file for that namespace.
+The `joker.core/load-lib-from-path__` procedure, used to actually load library files, is called with the target namespace name and the pathname previously determined by `lib-path__`. It uses `*classpath*` to search for the `.joke` file representing the root source file for that namespace.
 
 Each component of `*classpath*` (separated by colons on most OSes, semicolons on Windows) is consulted, in order, until the `.joke` file is found.
 
@@ -46,11 +46,11 @@ Thus, `*classpath*` provides a rudimentary mechanism for loading pre-existing (d
 
 * It's external to programs' source code. One cannot tell which external dependencies will be loaded at runtime just by looking at the code.
 
-## The *ns-sources* Variable
+## The \*ns-sources\* Variable
 
 To address the limitations of `*classpath*`, `joker.core/*ns-sources*` (and the related helper function, `joker.core/ns-sources`) is provided.
 
-`*ns-sources*` is intended as a next step in providing a top-flight dependency management system, which should be:
+`*ns-sources*` is intended as a next step in providing a best-in-class dependency management system, which should be:
 
 * Simple, both conceptually and implementation-wise
 
@@ -78,11 +78,11 @@ Currently, two forms for the value of `:url` (in the map that is the value, or s
 
 * Something else, which is treated as the base path for the namespace name
 
-In both cases, the namespace name is converted into a (sub-)path in the usual fashion, in the usual fashion as described above. E.g. the namespace `a.b.c` becomes `a/b/c.joke`.
+In both cases, the namespace name is converted into a (sub-)path in the usual fashion, as described above. E.g. the namespace `a.b.c` becomes `a/b/c.joke`.
 
 This subpath is appended to either the HTTP URL or "something else". In the latter case, that becomes the pathname.
 
-In the HTTP case, the subpath is appended to `$HOME/.jokerd/deps/<url>`, where `<url>` is the portion of the `:url` value following the `//` (and `$HOME` is the value of the `HOME` environment variable at the time of lookup).
+In the HTTP case, the subpath is appended to `$HOME/.jokerd/deps/<url>`, where `<url>` is the portion of the `:url` value following the `//` (and `$HOME` is the value of the `HOME` environment variable at the time of lookup). This pathname will be used for the locally cached version of the HTTP file.
 
 For example, given a namespace of `a.b.c` and a `:url` of `https://example.com/joker/libs`, this becomes the pathname of the root source file of the namespace:
 
@@ -102,17 +102,19 @@ https://example.com/joker/libs/a/b/c.joke
 
 Once retrieved, the contents are written to the (missing) file at the path shown above (in `$HOME/.jokerd`), so subsequent loads will use that cached file rather than repeatedly retrieving the contents via HTTP.
 
-Regardless of whether the locally cached file initially exists, it is neither *read* nor *evaluated* in the Joker sense. That is, it is not parsed nor validated in any way. Those actions are deferred until `*classpath*` is consulted to determine whether the (cached) file is to be used at all.
+Regardless of whether the locally cached file initially exists, it is neither *read* nor *evaluated* in the Joker sense. That is, it is not parsed nor validated in any way; its contents are simply copied over, without analysis. Joker-style reading and evaluation is deferred until after `*classpath*` is consulted to determine whether the (cached) file is to be used at all.
 
 ## Current Limitations
 
-An HTTP failure is treated as a failure to load the namespace (library) even if `*classpath*` would match a local file. A workaround for this is to "touch" the cache file that would have been created, or (probably better yet) populate with code that throws an error if it is actually invoked.
+* An HTTP failure is treated as a failure to load the namespace (library) even if `*classpath*` would match a local file. A workaround for this is to "touch" the cache file that would have been created, or (probably better yet) populate with code that throws an error if it is actually invoked.
 
-Also, there's currently no mechanism to determine whether the locally cached version of an HTTP resource is stale. This is related to the lack of versioning, modules, signatures, etc.
+* There's currently no mechanism to determine whether the locally cached version of an HTTP resource is stale. This is related to the lack of versioning, modules, signatures, etc.
 
-One might also expect `:reload` to ensure that the cached versions of relevant files are updated with the latest versions; that does not appear to be the case.
+* One might expect `:reload` to ensure that the cached versions of relevant files are updated with the latest versions; that does not appear to be the case.
 
-Finally, this document should be updated to explain how multiple files, defining a single namespace, should be handled. How would the root file load them? Does this interoperate with HTTP? Etc.
+* The `ns-sources` function does very little validation of the arguments. This can lead to `*ns-sources*` being malformed, causing panics when loading libraries.
+
+* This document should be updated to explain how multiple files, defining a single namespace, should be handled. How would the root file load them? Does this interoperate with HTTP? Etc.
 
 ## References
 
