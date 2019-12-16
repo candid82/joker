@@ -48,9 +48,9 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
-[Organizing Libraries (Namespaces)](https://github.com/candid82/joker/LIBRARIES.md)
+[Organizing Libraries (Namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
 
-[Developer notes](https://github.com/candid82/joker/DEVELOPER.md)
+[Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
 
 ## Project goals
 
@@ -276,7 +276,7 @@ $ GOOS=linux GOARCH=arm GOARM=6 go build
 
 ## Developer Notes
 
-See [`DEVELOPER.md`](https://github.com/candid82/joker/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
+See [`DEVELOPER.md`](https://github.com/candid82/joker/blob/master/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
 ## Contributors
 

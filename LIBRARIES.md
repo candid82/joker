@@ -116,7 +116,11 @@ Regardless of whether the locally cached file initially exists, it is neither *r
 
 * This document should be updated to explain how multiple files, defining a single namespace, should be handled. How would the root file load them? Does this interoperate with HTTP? Etc.
 
-## References
+# Recommended Approaches to Library Organization
+
+TBD.
+
+# References
 
 `(doc require)`
 
@@ -128,6 +132,6 @@ Regardless of whether the locally cached file initially exists, it is neither *r
 
 `(doc joker.core/*classpath*)`
 
-[Library Loader Behavior](https://github.com/candid82/joker/docs/misc/lib-loader.md)
+[Library Loader Behavior](https://github.com/candid82/joker/blob/master/docs/misc/lib-loader.md)
 
 [Dependency Management](https://github.com/candid82/joker/issues/208)
