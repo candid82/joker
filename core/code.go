@@ -160,23 +160,145 @@ func ptrTo(s string) string {
 	return "&" + s
 }
 
-func (sym Symbol) AsGo() string {
-	if sym.name != nil {
-		return "symbol_" + NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
-	}
-	return UniqueId(sym, nil)
+func symAsGo(sym Symbol) string {
+	return NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
 }
 
-func UniqueId(obj, actual interface{}) string {
-	h := getHash()
-	h.Write(([]byte)(spewConfig.Sdump(obj)))
-	if reflect.ValueOf(obj).Kind() == reflect.Ptr {
-		if actual == nil {
-			actual = obj
-		}
-		return fmt.Sprintf("%s_%p_%d", coreTypeAsGo(obj), actual, h.Sum32())
+func (sym Symbol) AsGo() string {
+	if sym.name != nil {
+		return "symbol_" + symAsGo(sym)
 	}
-	return fmt.Sprintf("%s_%d", coreTypeAsGo(obj), h.Sum32())
+	panic("empty symbol")
+}
+
+func (v Var) AsGo() string {
+	if v.ns != nil {
+		if v.name.ns != nil && *v.name.ns != *v.ns.Name.name {
+			panic(fmt.Sprintf("Symbol namespace discrepancy: Var has %s, its sym has %s", v.ns, v.name.ns))
+		}
+	}
+	return "var_" + symAsGo(v.name)
+}
+
+func (v VarRefExpr) AsGo() string {
+	s := v.vr.AsGo()
+	return fmt.Sprintf("%s_%d_%d", strings.Replace(s, "var_", "varRefExpr_", 1), v.startLine, v.startColumn)
+}
+
+// This comes from (davecgh|jcburley)/go-spew/bypass.go.
+const flagPrivate = 0x20
+
+// This comes from (davecgh|jcburley)/go-spew/bypass.go.
+var flagValOffset = func() uintptr {
+	field, ok := reflect.TypeOf(reflect.Value{}).FieldByName("flag")
+	if !ok {
+		panic("reflect.Value has no flag field")
+	}
+	return field.Offset
+}()
+
+// This comes from (davecgh|jcburley)/go-spew/bypass.go.
+type flag uintptr
+
+// This comes from (davecgh|jcburley)/go-spew/bypass.go.
+func flagField(v *reflect.Value) *flag {
+	return (*flag)(unsafe.Pointer(uintptr(unsafe.Pointer(v)) + flagValOffset))
+}
+
+// This comes from (davecgh|jcburley)/go-spew/bypass.go.
+func unsafeReflectValue(v reflect.Value) reflect.Value {
+	if !v.IsValid() || (v.CanInterface() && v.CanAddr()) {
+		return v
+	}
+	flagFieldPtr := flagField(&v)
+	*flagFieldPtr &^= flagPrivate
+	return v
+}
+
+func infoHolderNameAsGo(obj interface{}) (string, bool) {
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return "", false
+	}
+	vt := v.Type()
+	sf, yes := vt.FieldByName("InfoHolder")
+	if yes {
+		if !sf.Anonymous {
+			return "", false
+		}
+		v = v.FieldByName("InfoHolder")
+		vt = v.Type()
+		if vt.Kind() != reflect.Struct {
+			return "", false
+		}
+		sf, yes = vt.FieldByName("info")
+		if !yes || sf.Anonymous {
+			return "", false
+		}
+		v = v.FieldByName("info")
+		vt = v.Type()
+		if vt.Kind() != reflect.Ptr {
+			panic("'info' field not a pointer")
+		}
+		if v.IsNil() {
+			return "", false
+		}
+		v = v.Elem()
+		vt = v.Type()
+	}
+	sf, yes = vt.FieldByName("Position")
+	if !yes || !sf.Anonymous {
+		return "", false
+	}
+	v = v.FieldByName("Position")
+	vt = v.Type()
+	if vt.Kind() != reflect.Struct {
+		return "", false
+	}
+	sf, yes = vt.FieldByName("startLine")
+	if !yes || sf.Anonymous {
+		return "", false
+	}
+	filenamePtr := unsafeReflectValue(v.FieldByName("filename"))
+	if filenamePtr.IsZero() || filenamePtr.IsNil() {
+		return "", false
+	}
+	filename := filenamePtr.Elem().Interface().(string)
+	if filename != "<joker.core>" { // TODO: Support other namespaces
+		return "", false
+	}
+	startLine := unsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
+	startColumn := unsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
+	endLine := unsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
+	endColumn := unsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
+	return fmt.Sprintf("%d_%d__%d_%d", startLine, startColumn, endLine, endColumn), true
+}
+
+func UniqueId(obj, actual interface{}) (id string) {
+	defer func() {
+		if r := recover(); r != nil {
+			id = coreTypeAsGo(obj)
+			pos, havePos := infoHolderNameAsGo(obj)
+			if havePos {
+				id = id + "_" + pos
+			}
+			h := getHash()
+			h.Write(([]byte)(spewConfig.Sdump(obj)))
+			if reflect.ValueOf(obj).Kind() == reflect.Ptr {
+				if actual == nil {
+					actual = obj
+				}
+				id = fmt.Sprintf("%s_%p_%d", id, actual, h.Sum32())
+			} else {
+				id = fmt.Sprintf("%s_%d", id, h.Sum32())
+			}
+		}
+	}()
+	id = obj.(interface{ AsGo() string }).AsGo()
+	return
 }
 
 func coreType(e interface{}) string {
@@ -1911,8 +2033,8 @@ var %s Var = Var{%s}
 
 func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(expr, actualPtr)
-	if status, ok := env.CodeWriterEnv.Generated[expr]; !ok {
-		env.CodeWriterEnv.Generated[expr] = nil
+	if status, ok := env.CodeWriterEnv.Generated[name]; !ok {
+		env.CodeWriterEnv.Generated[name] = nil
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", nil, env)
 		if notNil(f) {
@@ -1929,10 +2051,10 @@ func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s VarRefExpr = VarRefExpr{%s}
+var %s VarRefExpr = VarRefExpr{%s}  // %p
 `,
-			name, f)
-		env.CodeWriterEnv.Generated[expr] = expr
+			name, f, expr)
+		env.CodeWriterEnv.Generated[name] = expr
 	} else if status == nil {
 		fn := func() string {
 			return fmt.Sprintf(`
@@ -1967,8 +2089,8 @@ var %s VarRefExpr = VarRefExpr{%s}
 
 func (expr *BindingExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(expr, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
-		env.CodeWriterEnv.Generated[expr] = expr
+	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
+		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", nil, env)
 		if notNil(f) {
@@ -2003,8 +2125,8 @@ var %s BindingExpr = BindingExpr{%s}
 
 func (expr *DoExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(expr, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
-		env.CodeWriterEnv.Generated[expr] = expr
+	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
+		env.CodeWriterEnv.Generated[name] = expr
 
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", nil, env)
