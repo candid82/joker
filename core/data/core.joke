@@ -3248,7 +3248,13 @@
 
 (defonce ^:dynamic
   ^{:private true
-    :doc "A map from namespace reg-exps to the source to load the external dependency from"}
+    :doc "A vector of mappings of namespaces to root files
+
+  Each such mapping is a two-element key/value vector. The key is a
+  regular expression, matched against the namespace name; the value is
+  a map specifying the source from which to load the external
+  dependency's root file (currently only the :url key is supported)."
+    }
   *ns-sources* [])
 
 (defn- throw-if
@@ -3278,8 +3284,17 @@
 (def ^:declared load)
 
 (defn ns-sources
-  "Adds to the built-in variable *ns-sources* which defines how to resolve
-  external dependencies."
+  "Adds namespace mappings to the built-in variable *ns-sources*
+
+  The key/value pairs in the map define how to resolve external
+  dependencies. They are appended to the *ns-sources* vector in
+  arbitrary order; so, use separate invocations of this function
+  to add narrower keys before wider.
+
+  Each value is itself a map containing (primarily) a :url key whose
+  value is the URL of the resource. Only http:// and https:// are
+  currently supported; everything else is treated as a local
+  pathname. HTTP URLs are cached in $HOME/.jokerd/deps/."
   {:added "1.0"}
   ^Nil [^Map sources]
   (let [existing-source-keys (set (map first *ns-sources*))
