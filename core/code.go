@@ -430,6 +430,11 @@ func (env *CodeEnv) Emit() {
 			continue
 		}
 
+		_, ok := env.CodeWriterEnv.Generated[v]
+		if ok {
+			continue
+		}
+
 		name := "v_" + varName
 		v_var := ""
 
@@ -1907,8 +1912,8 @@ var %s = Var{%s}
 
 func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(expr, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[expr]; !ok {
-		env.CodeWriterEnv.Generated[expr] = expr
+	if status, ok := env.CodeWriterEnv.Generated[expr]; !ok {
+		env.CodeWriterEnv.Generated[expr] = nil
 		fields := []string{}
 		f := expr.Position.Emit(name+".Position", nil, env)
 		if notNil(f) {
@@ -1928,7 +1933,17 @@ func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 var %s = VarRefExpr{%s}
 `,
 			name, f)
+		env.CodeWriterEnv.Generated[expr] = expr
+	} else if status == nil {
+		fn := func() string {
+			return fmt.Sprintf(`
+	/* 01 */ %s = %s
+`[1:],
+				directAssign(target), "&"+name)
+		}
+		env.Runtime = append(env.Runtime, fn)
 	}
+
 	return "!&" + name
 }
 
