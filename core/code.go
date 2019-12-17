@@ -160,6 +160,13 @@ func ptrTo(s string) string {
 	return "&" + s
 }
 
+func (sym Symbol) AsGo() string {
+	if sym.name != nil {
+		return "symbol_" + NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
+	}
+	return UniqueId(sym, nil)
+}
+
 func UniqueId(obj, actual interface{}) string {
 	h := getHash()
 	h.Write(([]byte)(spewConfig.Sdump(obj)))
@@ -415,11 +422,11 @@ func (env *CodeEnv) Emit() {
 	})
 
 	for s, v := range env.Namespace.mappings {
-		varName := NameAsGo(*s)
+		name := UniqueId(v, nil)
 		symName := noBang(v.name.Emit("", nil, env))
 
 		if _, ok := env.BaseMappings[s]; ok {
-			meta := noBang(emitMap("m_"+varName, false, v.meta, env))
+			meta := noBang(emitMap("", false, v.meta, env))
 			env.Runtime = append(env.Runtime, func() string {
 				return fmt.Sprintf(`
 	/* 05 */ _ns.UpdateVarMeta(%s, %s)
@@ -435,7 +442,6 @@ func (env *CodeEnv) Emit() {
 		}
 		env.CodeWriterEnv.Generated[v] = nil
 
-		name := "v_" + varName
 		v_var := ""
 
 		if v.Value != nil {
@@ -443,11 +449,11 @@ func (env *CodeEnv) Emit() {
 			if notNil(v_value) {
 				intermediary := v_value[1:]
 				if v_value[0] != '!' {
-					intermediary = fmt.Sprintf("&value_%s", varName)
+					intermediary = fmt.Sprintf("&value_%s", name)
 					statics = append(statics, fmt.Sprintf(`
 var value_%s = %s
 `[1:],
-						varName, v_value))
+						name, v_value))
 				}
 				v_var += fmt.Sprintf(`
 	Value: %s,
@@ -460,11 +466,11 @@ var value_%s = %s
 			v_expr := indirect(v.expr.Emit("expr_"+name, nil, env))
 			intermediary := v_expr[1:]
 			if v_expr[0] != '!' {
-				intermediary = fmt.Sprintf("&expr_%s", varName)
+				intermediary = fmt.Sprintf("&expr_%s", name)
 				statics = append(statics, fmt.Sprintf(`
 var expr_%s = %s
 `[1:],
-					varName, v_expr))
+					name, v_expr))
 			}
 			v_var += fmt.Sprintf(`
 	expr: %s,
@@ -506,7 +512,7 @@ var expr_%s = %s
 		if notNil(v_tt) {
 			intermediary := v_tt[1:]
 			if v_tt[0] != '!' {
-				intermediary = fmt.Sprintf("&taggedType_%s", varName)
+				intermediary = fmt.Sprintf("&taggedType_%s", name)
 				statics = append(statics, fmt.Sprintf(`
 var taggedType_%s = %s
 `[1:],
@@ -723,18 +729,11 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		return "!SYMBOLS.deref"
 	}
 
-	if s.name == nil {
-		if s.ns == nil && s.hash == 0 {
-			return ""
-		}
-		panic("Symbol{ABEND: No name!!}")
+	if s.name == nil && s.ns == nil && s.hash == 0 {
+		return ""
 	}
 
-	nsName := ""
-	if s.ns != nil {
-		nsName = NameAsGo(*s.ns) + "_FW_"
-	}
-	name := fmt.Sprintf("sym_%s%s", nsName, NameAsGo(*s.name))
+	name := s.AsGo()
 
 	env.Need[name] = s
 
@@ -1114,7 +1113,7 @@ func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s BufferdReader = BufferedReader{%s}
+var %s BufferedReader = BufferedReader{%s}
 `,
 			name, f)
 	}
