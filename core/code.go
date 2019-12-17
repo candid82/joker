@@ -53,7 +53,7 @@ func (s NativeString) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 
 func (s NativeString) Finish(name string, env *CodeEnv) string {
 	return fmt.Sprintf(`
-var %s = %s
+var %s string = %s
 `[1:],
 		name, strconv.Quote(s.s))
 }
@@ -83,7 +83,7 @@ var p_%s *string
 	env.Runtime = append(env.Runtime, fn)
 
 	return fmt.Sprintf(`
-var %s = %s
+var %s string = %s
 `[1:],
 		name, strconv.Quote(s.s))
 }
@@ -354,7 +354,7 @@ func (b *Binding) Finish(name string, env *CodeEnv) string {
 	}
 
 	static := fmt.Sprintf(`
-var %s = Binding{
+var %s Binding = Binding{
 %s	index: %d,
 	frame: %d,
 	isUsed: %v,
@@ -430,10 +430,10 @@ func (env *CodeEnv) Emit() {
 			continue
 		}
 
-		_, ok := env.CodeWriterEnv.Generated[v]
-		if ok {
+		if _, ok := env.CodeWriterEnv.Generated[v]; ok {
 			continue
 		}
+		env.CodeWriterEnv.Generated[v] = nil
 
 		name := "v_" + varName
 		v_var := ""
@@ -532,8 +532,8 @@ var taggedType_%s = %s
 			meta = "\n" + meta
 		}
 		v_var = fmt.Sprintf(`
-var %s = Var{%s%s%s}
-var p_%s = &%s
+var %s Var = Var{%s%s%s}
+var p_%s *Var = &%s
 `[1:],
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
@@ -648,7 +648,7 @@ func (obj *ObjectInfo) Finish(name string, env *CodeEnv) string {
 	}
 
 	return fmt.Sprintf(`
-var %s = ObjectInfo{%s}
+var %s ObjectInfo = ObjectInfo{%s}
 `,
 		name, f)
 }
@@ -791,7 +791,7 @@ func (sym Symbol) Finish(name string, env *CodeEnv) string {
 	}
 
 	static := fmt.Sprintf(`
-var %s = Symbol{
+var %s Symbol = Symbol{
 %s%s%s}
 `[1:],
 		name, meta, initNs, initName)
@@ -858,7 +858,7 @@ func (le *LocalEnv) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = LocalEnv{%s}
+var %s LocalEnv = LocalEnv{%s}
 `,
 			name, f)
 	}
@@ -896,7 +896,7 @@ func emitFn(target string, fn *Fn, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Fn{%s%s}
+var %s Fn = Fn{%s%s}
 `,
 			name, metaHolder(name, fn.meta, env), f)
 	}
@@ -922,7 +922,7 @@ func (m *MapSet) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = MapSet{%s}
+var %s MapSet = MapSet{%s}
 `,
 			name, f)
 	}
@@ -986,7 +986,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = List{%s}
+var %s List = List{%s}
 `,
 			name, f)
 		env.CodeWriterEnv.Generated[name] = l
@@ -1022,7 +1022,7 @@ func (v *Vector) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Vector{%s}
+var %s Vector = Vector{%s}
 `,
 			name, f)
 	}
@@ -1041,7 +1041,7 @@ func (m *ArrayMap) Emit(target string, actualPtr interface{}, env *CodeEnv) stri
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = ArrayMap{%s%s}
+var %s ArrayMap = ArrayMap{%s%s}
 `,
 			name, metaHolder(name, m.meta, env), f)
 	}
@@ -1071,7 +1071,7 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = HashMap{%s%s}
+var %s HashMap = HashMap{%s%s}
 `,
 			name, metaHolder(name, m.meta, env), f)
 	}
@@ -1092,7 +1092,7 @@ func (b *BitmapIndexedNode) Emit(target string, actualPtr interface{}, env *Code
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = BitmapIndexedNode{%s}
+var %s BitmapIndexedNode = BitmapIndexedNode{%s}
 `,
 			name, f)
 	}
@@ -1114,7 +1114,7 @@ func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = BufferedReader{%s}
+var %s BufferdReader = BufferedReader{%s}
 `,
 			name, f)
 	}
@@ -1152,7 +1152,7 @@ func (s String) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = String{%s}
+var %s String = String{%s}
 `,
 			name, f)
 	}
@@ -1236,7 +1236,7 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 	}
 
 	static := fmt.Sprintf(`
-var %s = Keyword{%s}
+var %s Keyword = Keyword{%s}
 `[1:],
 		name, f)
 
@@ -1265,7 +1265,7 @@ func (i Int) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Int{%s}
+var %s Int = Int{%s}
 `,
 			name, f)
 	}
@@ -1286,7 +1286,7 @@ func (ch Char) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Char{%s}
+var %s Char = Char{%s}
 `,
 			name, f)
 	}
@@ -1308,7 +1308,7 @@ func (d Double) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Double{%s}
+var %s Double = Double{%s}
 `,
 			name, f)
 	}
@@ -1326,7 +1326,7 @@ func (n Nil) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Nil{%s}
+var %s Nil = Nil{%s}
 `,
 			name, f)
 	}
@@ -1458,7 +1458,7 @@ func (expr *LiteralExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = LiteralExpr{%s}
+var %s LiteralExpr = LiteralExpr{%s}
 `,
 			name, f)
 	}
@@ -1591,7 +1591,7 @@ func (expr *VectorExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = VectorExpr{%s}
+var %s VectorExpr = VectorExpr{%s}
 `,
 			name, f)
 	}
@@ -1621,7 +1621,7 @@ func (expr *SetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = SetExpr{%s}
+var %s SetExpr = SetExpr{%s}
 `,
 			name, f)
 	}
@@ -1657,7 +1657,7 @@ func (expr *MapExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = MapExpr{%s}
+var %s MapExpr = MapExpr{%s}
 `,
 			name, f)
 	}
@@ -1699,7 +1699,7 @@ func (expr *IfExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = IfExpr{%s}
+var %s IfExpr = IfExpr{%s}
 `,
 			name, f)
 	}
@@ -1797,7 +1797,7 @@ func (expr *CallExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = CallExpr{%s}
+var %s CallExpr = CallExpr{%s}
 `,
 			name, f)
 	}
@@ -1827,7 +1827,7 @@ func (expr *RecurExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = RecurExpr{%s}
+var %s RecurExpr = RecurExpr{%s}
 `,
 			name, f)
 	}
@@ -1893,7 +1893,7 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = Var{%s}
+var %s Var = Var{%s}
 `,
 			name, f)
 		env.CodeWriterEnv.Generated[vr] = vr
@@ -1930,7 +1930,7 @@ func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = VarRefExpr{%s}
+var %s VarRefExpr = VarRefExpr{%s}
 `,
 			name, f)
 		env.CodeWriterEnv.Generated[expr] = expr
@@ -1986,7 +1986,7 @@ func (expr *BindingExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = BindingExpr{%s}
+var %s BindingExpr = BindingExpr{%s}
 `,
 			name, f)
 	}
@@ -2028,7 +2028,7 @@ func (expr *DoExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = DoExpr{%s}
+var %s DoExpr = DoExpr{%s}
 `,
 			name, f)
 	}
@@ -2070,7 +2070,7 @@ func (expr *FnArityExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = FnArityExpr{%s}
+var %s FnArityExpr = FnArityExpr{%s}
 `,
 			name, f)
 	}
@@ -2120,7 +2120,7 @@ func (expr *FnExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = FnExpr{%s}
+var %s FnExpr = FnExpr{%s}
 `,
 			name, f)
 	}
@@ -2162,7 +2162,7 @@ func (expr *LetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = LetExpr{%s}
+var %s LetExpr = LetExpr{%s}
 `,
 			name, f)
 	}
@@ -2204,7 +2204,7 @@ func (expr *LoopExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = LoopExpr{%s}
+var %s LoopExpr = LoopExpr{%s}
 `,
 			name, f)
 	}
@@ -2234,7 +2234,7 @@ func (expr *ThrowExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = ThrowExpr{%s}
+var %s ThrowExpr = ThrowExpr{%s}
 `,
 			name, f)
 	}
@@ -2276,7 +2276,7 @@ func (expr *CatchExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = CatchExpr{%s}
+var %s CatchExpr = CatchExpr{%s}
 `,
 			name, f)
 	}
@@ -2318,7 +2318,7 @@ func (expr *TryExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s = TryExpr{%s}
+var %s TryExpr = TryExpr{%s}
 `,
 			name, f)
 	}
