@@ -172,12 +172,13 @@ func (sym Symbol) AsGo() string {
 }
 
 func (v Var) AsGo() string {
+	name := symAsGo(v.name)
 	if v.ns != nil {
 		if v.name.ns != nil && *v.name.ns != *v.ns.Name.name {
-			panic(fmt.Sprintf("Symbol namespace discrepancy: Var has %s, its sym has %s", v.ns, v.name.ns))
+			panic(fmt.Sprintf("Symbol namespace discrepancy: Var %s has %s, its sym has %s", name, *v.ns.Name.name, *v.name.ns))
 		}
 	}
-	return "var_" + symAsGo(v.name)
+	return "var_" + name
 }
 
 func (v VarRefExpr) AsGo() string {
@@ -559,6 +560,13 @@ func (env *CodeEnv) Emit() {
 			continue
 		}
 
+		env.Runtime = append(env.Runtime, func() string {
+			return fmt.Sprintf(`
+	/* 03 */ _ns.InternExistingVar(%s, &%s)
+`[1:],
+				symName, name)
+		})
+
 		if _, ok := env.CodeWriterEnv.Generated[v]; ok {
 			continue
 		}
@@ -665,13 +673,6 @@ var p_%s *Var = &%s
 `[1:],
 			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[v] = v
-
-		env.Runtime = append(env.Runtime, func() string {
-			return fmt.Sprintf(`
-	/* 03 */ _ns.InternExistingVar(%s, &%s)
-`[1:],
-				symName, name)
-		})
 
 		statics = append(statics, v_var)
 	}
@@ -2026,6 +2027,7 @@ var %s Var = Var{%s}
 				directAssign(target), "&"+name)
 		}
 		env.Runtime = append(env.Runtime, fn)
+		return ""
 	}
 
 	return "!&" + name
@@ -2063,6 +2065,7 @@ var %s VarRefExpr = VarRefExpr{%s}  // %p
 				directAssign(target), "&"+name)
 		}
 		env.Runtime = append(env.Runtime, fn)
+		return ""
 	}
 
 	return "!&" + name
