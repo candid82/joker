@@ -32,7 +32,7 @@ $time go run gen_code/gen_code.go
 
 $time go fmt a_*.go
 
-JUSTVET=false
+JUSTVET=true
 
 $JUSTVET && (cd ..; $time go vet ./...)
 

@@ -567,10 +567,18 @@ func (env *CodeEnv) Emit() {
 				symName, name)
 		})
 
-		if _, ok := env.CodeWriterEnv.Generated[v]; ok {
+		if _, ok := env.CodeWriterEnv.Generated[name]; ok {
 			continue
 		}
-		env.CodeWriterEnv.Generated[v] = nil
+		env.CodeWriterEnv.Generated[name] = nil
+
+		res := v.Emit("", nil, env)
+		if res == "" || res[0] == '!' {
+			env.CodeWriterEnv.Generated[name] = v
+			continue
+		} else if res != "" {
+			panic(fmt.Sprintf("(Var)Emit() returned: %s", res))
+		}
 
 		v_var := ""
 
@@ -672,7 +680,7 @@ var %s Var = Var{%s%s%s}
 var p_%s *Var = &%s
 `[1:],
 			name, info, meta, v_var, name, name)
-		env.CodeWriterEnv.Generated[v] = v
+		env.CodeWriterEnv.Generated[name] = v
 
 		statics = append(statics, v_var)
 	}
@@ -1507,7 +1515,13 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 }
 
 func emitObject(target string, typedTarget bool, objPtr *Object, env *CodeEnv) string {
+	if objPtr == nil {
+		return ""
+	}
 	obj := *objPtr
+	if obj == nil {
+		return ""
+	}
 	switch obj := obj.(type) {
 	case Symbol:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(Symbol)"), nil, env)
