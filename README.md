@@ -48,6 +48,10 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
+[Organizing Libraries (Namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
+
+[Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
+
 ## Project goals
 
 These are high level goals of the project that guide design and implementation decisions.
@@ -63,7 +67,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
  There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
-## Project non-goals
+## Project Non-goals
 
 - Performance. If you need it, use Clojure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
 - Have all Clojure features. Some features are impossible to implement due to a different host language (Go vs Java), others I don't find that important for the use cases I have in mind for Joker. But generally Clojure is a pretty large language at this point and it is simply unfeasible to reach feature parity with it, even with naive implementation.
@@ -272,7 +276,7 @@ $ GOOS=linux GOARCH=arm GOARM=6 go build
 
 ## Developer Notes
 
-See [`DEVELOPER.md`](https://github.com/candid82/joker/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
+See [`DEVELOPER.md`](https://github.com/candid82/joker/blob/master/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
 ## Contributors
 

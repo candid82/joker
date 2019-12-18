@@ -1,3 +1,5 @@
+<img src="https://user-images.githubusercontent.com/882970/48048842-a0224080-e151-11e8-8855-642cf5ef3fdd.png" width="117px"/>
+
 # Developer Notes
 
 These notes are intended for developers working on the internals of Joker itself. They are not comprehensive.
