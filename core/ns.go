@@ -154,8 +154,12 @@ func (ns *Namespace) UpdateVar(sym Symbol, vSource Var) {
 	vDest := ns.Intern(sym)
 	vDest.info = vSource.info
 	vDest.meta = SafeMerge(vDest.meta, vSource.meta)
-	vDest.Value = vSource.Value
-	vDest.expr = vSource.expr
+	if vDest.Value == nil {
+		vDest.Value = vSource.Value
+	}
+	if vDest.expr == nil {
+		vDest.expr = vSource.expr
+	}
 	vDest.isMacro = vSource.isMacro
 	vDest.isPrivate = vSource.isPrivate
 	vDest.isDynamic = vSource.isDynamic
