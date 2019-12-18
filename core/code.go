@@ -1083,34 +1083,30 @@ var spewConfig = &spew.ConfigState{
 
 func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(l, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
+	status, ok := env.CodeWriterEnv.Generated[name]
+	if !ok {
 		env.CodeWriterEnv.Generated[name] = nil
 		fields := []string{}
+
 		fields = InfoHolderField(name, l.InfoHolder, fields, env)
 		f := noBang(emitObject(name+".first", false, &l.first, env))
-		if f != "" {
-			fields = append(fields, fmt.Sprintf("\t%sfirst: %s,", maybeEmpty(f, l.first), f))
+		if notNil(f) {
+			fields = append(fields, fmt.Sprintf(`
+	first: %s,`[1:],
+				f))
 		}
-		field := name + ".rest"
 		if l.rest != nil {
-			restName := UniqueId(l.rest, nil)
-			if status, found := env.CodeWriterEnv.Generated[restName]; found && status == nil {
-				fieldFn := func() string {
-					return fmt.Sprintf(`
-	/* 04 */ %s = %s
-`[1:],
-						directAssign(field), noBang(l.rest.Emit(field, nil, env)))
-				}
-				env.Runtime = append(env.Runtime, fieldFn)
-			} else {
-				f := noBang(l.rest.Emit(field, nil, env))
-				if f != "" {
-					fields = append(fields, fmt.Sprintf("\t%srest: %s,", maybeEmpty(f, l.rest), f))
-				}
+			f := noBang(l.rest.Emit(name+".rest", nil, env))
+			if notNil(f) {
+				fields = append(fields, fmt.Sprintf(`
+	rest: %s,`[1:],
+					f))
 			}
 		}
 		if l.count != 0 {
-			fields = append(fields, fmt.Sprintf("\tcount: %d,", l.count))
+			fields = append(fields, fmt.Sprintf(`
+	count: %d,`[1:],
+				l.count))
 		}
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1121,6 +1117,15 @@ var %s List = List{%s}
 `,
 			name, f)
 		env.CodeWriterEnv.Generated[name] = l
+	} else if status == nil {
+		fn := func() string {
+			return fmt.Sprintf(`
+	/* 04 */ %s = %s
+`[1:],
+				directAssign(target), "&"+name)
+		}
+		env.Runtime = append(env.Runtime, fn)
+		return ""
 	}
 	return "!&" + name
 }
