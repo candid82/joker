@@ -150,9 +150,16 @@ func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
 	return vr
 }
 
-func (ns *Namespace) UpdateVarMeta(sym Symbol, meta Map) {
-	vr := ns.Intern(sym)
-	vr.meta = SafeMerge(vr.meta, meta)
+func (ns *Namespace) UpdateVar(sym Symbol, vSource Var) {
+	vDest := ns.Intern(sym)
+	vDest.info = vSource.info
+	vDest.meta = SafeMerge(vDest.meta, vSource.meta)
+	vDest.Value = vSource.Value
+	vDest.expr = vSource.expr
+	vDest.isMacro = vSource.isMacro
+	vDest.isPrivate = vSource.isPrivate
+	vDest.isDynamic = vSource.isDynamic
+	vDest.taggedType = vSource.taggedType
 }
 
 func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {

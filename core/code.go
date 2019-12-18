@@ -550,23 +550,20 @@ func (env *CodeEnv) Emit() {
 		symName := noBang(v.name.Emit("", nil, env))
 
 		if _, ok := env.BaseMappings[s]; ok {
-			meta := noBang(emitMap("", false, v.meta, env))
 			env.Runtime = append(env.Runtime, func() string {
 				return fmt.Sprintf(`
-	/* 05 */ _ns.UpdateVarMeta(%s, %s)
+	/* 05 */ _ns.UpdateVar(%s, %s)
 `[1:],
-					symName, meta)
+					symName, name)
 			})
-
-			continue
-		}
-
-		env.Runtime = append(env.Runtime, func() string {
-			return fmt.Sprintf(`
+		} else {
+			env.Runtime = append(env.Runtime, func() string {
+				return fmt.Sprintf(`
 	/* 03 */ _ns.InternExistingVar(%s, &%s)
 `[1:],
-				symName, name)
-		})
+					symName, name)
+			})
+		}
 
 		if _, ok := env.CodeWriterEnv.Generated[name]; ok {
 			continue
