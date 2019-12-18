@@ -161,7 +161,8 @@ func ptrTo(s string) string {
 }
 
 func symAsGo(sym Symbol) string {
-	return NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
+	name := NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
+	return fmt.Sprintf("%s_%d_%d__%d_%d", name, sym.info.startLine, sym.info.startColumn, sym.info.endLine, sym.info.endColumn)
 }
 
 func (sym Symbol) AsGo() string {
@@ -864,7 +865,7 @@ func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string 
 		return ""
 	}
 
-	name := s.AsGo()
+	name := UniqueId(s, nil)
 
 	env.Need[name] = s
 
@@ -1683,7 +1684,8 @@ func emitFnArityExprSeq(target string, fns *[]FnArityExpr, env *CodeEnv) string 
 		if fn.Position.startLine/10 == 73 {
 			fmt.Printf("FnArityExprSeq([%d]@%p %s)\n", ix, fn, fn.Position)
 		}
-		fnae = append(fnae, "\t"+indirect(noBang(fn.Emit(fmt.Sprintf("%s[%d]", target, ix), nil, env)))+",")
+		// "*" prefix for target indicates the value, not a reference to the value, is needed
+		fnae = append(fnae, "\t"+indirect(noBang(fn.Emit(fmt.Sprintf("*%s[%d]", target, ix), nil, env)))+",")
 	}
 	ret := strings.Join(fnae, "\n")
 	if !IsGoExprEmpty(ret) {
@@ -2176,27 +2178,32 @@ var %s DoExpr = DoExpr{%s}
 func (expr *FnArityExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(expr, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
+		if target[0] == '*' {
+			target = target[1:]
+		} else {
+			target = name
+		}
 		env.CodeWriterEnv.Generated[name] = expr
 		fields := []string{}
-		f := expr.Position.Emit(name+".Position", nil, env)
+		f := expr.Position.Emit(target+".Position", nil, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	Position: %s,`[1:],
 				f))
 		}
-		f = emitSymbolSeq(name+".args", &expr.args, env)
+		f = emitSymbolSeq(target+".args", &expr.args, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
 				f))
 		}
-		f = emitSeq(name+".body", &expr.body, env)
+		f = emitSeq(target+".body", &expr.body, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
 				f))
 		}
-		f = noBang(expr.taggedType.Emit(name+".taggedType", nil, env))
+		f = noBang(expr.taggedType.Emit(target+".taggedType", nil, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	%staggedType: %s,`[1:],
