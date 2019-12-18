@@ -174,6 +174,20 @@ func SpewThis(obj interface{}) {
 	cs.Fdump(Stderr, obj)
 }
 
+func SpewObj(obj interface{}) string {
+	cs := &spew.ConfigState{
+		Indent:         "    ",
+		MaxDepth:       30,
+		SortKeys:       true,
+		SpewKeys:       true,
+		NoDuplicates:   true,
+		UseOrdinals:    true,
+		DisableMethods: true,
+	}
+
+	return cs.Sdump(obj)
+}
+
 func InitInternalLibs() {
 	internalLibs = map[string]*internalNamespaceInfo{
 		"joker.core":      &coreNamespaceInfo,

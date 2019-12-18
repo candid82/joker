@@ -1591,8 +1591,14 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 }
 
 func parseList(obj Object, ctx *ParseContext) Expr {
+	if GLOBAL_ENV.Trace {
+		fmt.Printf("[TRACE] parseList obj=%s\n", SpewObj(obj))
+	}
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
+		if GLOBAL_ENV.Trace {
+			fmt.Printf("[TRACE] parseList expanded=%s\n", SpewObj(expanded))
+		}
 		return Parse(expanded, ctx)
 	}
 	seq := obj.(Seq)
@@ -1883,6 +1889,9 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	pos := GetPosition(obj)
 	var res Expr
 	canHaveMeta := false
+	if GLOBAL_ENV.Trace {
+		fmt.Printf("[TRACE] Parse type %T\n", obj)
+	}
 	switch v := obj.(type) {
 	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, Regex, *Type:
 		res = NewLiteralExpr(obj)
