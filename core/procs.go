@@ -144,7 +144,7 @@ const (
 func Spew() {
 	cs := &spew.ConfigState{
 		Indent:         "    ",
-		MaxDepth:       20,
+		MaxDepth:       30,
 		SortKeys:       true,
 		SpewKeys:       true,
 		NoDuplicates:   true,
@@ -163,7 +163,7 @@ func Spew() {
 func SpewThis(obj interface{}) {
 	cs := &spew.ConfigState{
 		Indent:         "    ",
-		MaxDepth:       20,
+		MaxDepth:       30,
 		SortKeys:       true,
 		SpewKeys:       true,
 		NoDuplicates:   true,
