@@ -571,119 +571,15 @@ func (env *CodeEnv) Emit() {
 		if _, ok := env.CodeWriterEnv.Generated[name]; ok {
 			continue
 		}
+
 		env.CodeWriterEnv.Generated[name] = nil
 
 		res := v.Emit("", nil, env)
-		if res == "" || res[0] == '!' {
-			env.CodeWriterEnv.Generated[name] = v
-			continue
-		} else if res != "" {
+		if res != "" && res[0] != '!' {
 			panic(fmt.Sprintf("(Var)Emit() returned: %s", res))
 		}
 
-		v_var := ""
-
-		if v.Value != nil {
-			v_value := indirect(emitObject(fmt.Sprintf("%s.Value.(%s)", name, coreType(v.Value)), true, &v.Value, env))
-			if notNil(v_value) {
-				intermediary := v_value[1:]
-				if v_value[0] != '!' {
-					intermediary = fmt.Sprintf("&value_%s", name)
-					statics = append(statics, fmt.Sprintf(`
-var value_%s = %s
-`[1:],
-						name, v_value))
-				}
-				v_var += fmt.Sprintf(`
-	Value: %s,
-`[1:],
-					intermediary)
-			}
-		}
-
-		if v.expr != nil {
-			v_expr := indirect(v.expr.Emit("expr_"+name, nil, env))
-			intermediary := v_expr[1:]
-			if v_expr[0] != '!' {
-				intermediary = fmt.Sprintf("&expr_%s", name)
-				statics = append(statics, fmt.Sprintf(`
-var expr_%s = %s
-`[1:],
-					name, v_expr))
-			}
-			v_var += fmt.Sprintf(`
-	expr: %s,
-`[1:],
-				intermediary)
-		}
-
-		if v.isMacro {
-			v_var += fmt.Sprintf(`
-	isMacro: true,
-`[1:])
-		}
-
-		if v.isPrivate {
-			v_var += fmt.Sprintf(`
-	isPrivate: true,
-`[1:])
-		}
-
-		if v.isDynamic {
-			v_var += fmt.Sprintf(`
-	isDynamic: true,
-`[1:])
-		}
-
-		// 		if v.isUsed {
-		// 			v_var += fmt.Sprintf(`
-		// 	isUsed: true,
-		// `[1:])
-		// 		}
-
-		// 		if v.isGloballyUsed {
-		// 			v_var += fmt.Sprintf(`
-		// 	isGloballyUsed: true,
-		// `[1:])
-		// 		}
-
-		v_tt := v.taggedType.Emit(name+".taggedType", nil, env)
-		if notNil(v_tt) {
-			intermediary := v_tt[1:]
-			if v_tt[0] != '!' {
-				intermediary = fmt.Sprintf("&taggedType_%s", name)
-				statics = append(statics, fmt.Sprintf(`
-var taggedType_%s = %s
-`[1:],
-					v_tt))
-			}
-			v_var += fmt.Sprintf(`
-	%staggedType: %s,
-`[1:],
-				maybeEmpty(v_tt, v.taggedType), intermediary)
-		}
-
-		if !IsGoExprEmpty(v_var) {
-			v_var = `
-` + v_var + `
-`
-		}
-		info := infoHolder(name, v.InfoHolder, env)
-		if info != "" {
-			info = "\n" + info
-		}
-		meta := metaHolder(name, v.meta, env)
-		if meta != "" {
-			meta = "\n" + meta
-		}
-		v_var = fmt.Sprintf(`
-var %s Var = Var{%s%s%s}
-var p_%s *Var = &%s
-`[1:],
-			name, info, meta, v_var, name, name)
 		env.CodeWriterEnv.Generated[name] = v
-
-		statics = append(statics, v_var)
 	}
 
 	for {
@@ -1045,10 +941,17 @@ func (m *MapSet) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 	name := UniqueId(m, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
+		fields := []string{}
+		fields = InfoHolderField(name, m.InfoHolder, fields, env)
+		fields = MetaHolderField(name, m.MetaHolder, fields, env)
 		f := noBang(emitMap(name+".m", false, m.m, env))
 		if f != "" {
-			f = fmt.Sprintf("\t%sm: %s,", maybeEmpty(f, m.m), f)
+			fields = append(fields, fmt.Sprintf(`
+	m: %s,`[1:],
+				f))
 		}
+
+		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
@@ -1089,6 +992,7 @@ func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 		fields := []string{}
 
 		fields = InfoHolderField(name, l.InfoHolder, fields, env)
+		fields = MetaHolderField(name, l.MetaHolder, fields, env)
 		f := noBang(emitObject(name+".first", false, &l.first, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
@@ -1169,17 +1073,25 @@ func (m *ArrayMap) Emit(target string, actualPtr interface{}, env *CodeEnv) stri
 	name := UniqueId(m, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
 		env.CodeWriterEnv.Generated[name] = m
+		fields := []string{}
+
+		fields = InfoHolderField(name, m.InfoHolder, fields, env)
+		fields = MetaHolderField(name, m.MetaHolder, fields, env)
 		f := emitObjectSeq(name+".arr", &m.arr, env)
 		if f != "" {
-			f = fmt.Sprintf("\t%sarr: %s,", maybeEmpty(f, m.arr), f)
+			fields = append(fields, fmt.Sprintf(`
+	arr: %s,`[1:],
+				f))
 		}
+
+		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s ArrayMap = ArrayMap{%s%s}
+var %s ArrayMap = ArrayMap{%s}
 `,
-			name, metaHolder(name, m.meta, env), f)
+			name, f)
 	}
 	return "!&" + name
 }
@@ -1190,6 +1102,8 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 		env.CodeWriterEnv.Generated[name] = m
 		fields := []string{}
 
+		fields = InfoHolderField(name, m.InfoHolder, fields, env)
+		fields = MetaHolderField(name, m.MetaHolder, fields, env)
 		if m.count != 0 {
 			fields = append(fields, fmt.Sprintf(`
 	count: %d,`[1:],
@@ -1198,8 +1112,8 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 		f := noBang(emitInterface(name+".root", false, m.root, env))
 		if f != "" {
 			fields = append(fields, fmt.Sprintf(`
-	%sroot: %s,`[1:],
-				maybeEmpty(f, m.root), f))
+	root: %s,`[1:],
+				f))
 		}
 
 		f = strings.Join(fields, "\n")
@@ -1207,9 +1121,9 @@ func (m *HashMap) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 			f = "\n" + f + "\n"
 		}
 		env.Statics += fmt.Sprintf(`
-var %s HashMap = HashMap{%s%s}
+var %s HashMap = HashMap{%s}
 `,
-			name, metaHolder(name, m.meta, env), f)
+			name, f)
 	}
 	return "!&" + name
 }
@@ -1268,7 +1182,8 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 	nsFn := func() string {
 		return fmt.Sprintf(`
 	/* 04 */ %s = _ns
-`[1:], directAssign(target))
+`[1:],
+			directAssign(target))
 	}
 	env.Runtime = append(env.Runtime, nsFn)
 	return "nil"
