@@ -3228,10 +3228,10 @@
   ^Namespace [^Symbol name]
   (let [new-ns (joker.core/create-ns name)]
     (when *verbose*
-      (println "in-ns: changing " joker.core/*ns* " to " new-ns))
+      (println "in-ns: changing" joker.core/*ns* "to" new-ns) (flush))
     (var-set #'joker.core/*ns* new-ns)
     (when *verbose*
-      (println "  ...it is now " joker.core/*ns*))))
+      (println "  ...it is now" joker.core/*ns*) (flush))))
 
 (defonce ^:dynamic
   ^{:private true

@@ -1610,6 +1610,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	pos := GetPosition(obj)
 	first := seq.First()
 	if v, ok := first.(Symbol); ok && v.ns == nil {
+		if GLOBAL_ENV.Trace {
+			fmt.Printf("[TRACE] parseList checking for special %s\n", *v.name)
+		}
 		switch v.name {
 		case STR.quote:
 			return NewLiteralExpr(Second(seq))
@@ -1693,6 +1696,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}
 		case STR.try:
 			return parseTry(obj, ctx)
+		}
+		if GLOBAL_ENV.Trace {
+			fmt.Printf("[TRACE] parseList %s\n", *v.name)
 		}
 	}
 
@@ -1812,6 +1818,9 @@ func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
+	if GLOBAL_ENV.Trace {
+		fmt.Printf("[TRACE] parseSymbol %s\n", *sym.name)
+	}
 	b := ctx.GetLocalBinding(sym)
 	if b != nil {
 		b.isUsed = true
@@ -1830,7 +1839,8 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 	}
 	if !LINTER_MODE {
-		panic(&ParseError{obj: obj, msg: fmt.Sprintf("parseSymbol: Unable to resolve symbol: %s (%+v)", sym.ToString(false), sym)})
+		msg := fmt.Sprintf("parseSymbol: Unable to resolve symbol: %s (%+v)", sym.ToString(false), sym)
+		panic(&ParseError{obj: obj, msg: msg})
 	}
 	if DIALECT == CLJS && sym.ns == nil {
 		// Check if this is a "callable namespace"
