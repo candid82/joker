@@ -2175,11 +2175,9 @@ func (expr *FnExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			fmt.Printf("FnExpr@%p is %s\n", expr, name)
 		}
 		f = emitFnArityExprSeq(name+".arities", &expr.arities, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	arities: %s,`[1:],
-				f))
-		}
+			f))
 		if expr.variadic != nil {
 			f = noBang(expr.variadic.Emit(name+".variadic", nil, env))
 			if notNil(f) {
