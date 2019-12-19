@@ -552,9 +552,9 @@ func (env *CodeEnv) Emit() {
 		if _, ok := env.BaseMappings[s]; ok {
 			env.Runtime = append(env.Runtime, func() string {
 				return fmt.Sprintf(`
-	/* 05 */ _ns.UpdateVar(%s, %s)
+	/* 05 */ p_%s = _ns.UpdateVar(%s, %s)
 `[1:],
-					symName, name)
+					name, symName, name)
 			})
 		} else {
 			env.Runtime = append(env.Runtime, func() string {
@@ -1178,7 +1178,7 @@ func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 	}
 	nsFn := func() string {
 		return fmt.Sprintf(`
-	/* 04 */ %s = _ns
+	/* 01 */ %s = _ns
 `[1:],
 			directAssign(target))
 	}
@@ -1892,25 +1892,34 @@ var %s RecurExpr = RecurExpr{%s}
 func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(vr, actualPtr)
 	status, ok := env.CodeWriterEnv.Generated[vr]
+
+	ptrToName := "&" + name
+	_, isBase := env.BaseMappings[vr.name.name]
+	if isBase {
+		ptrToName = "p_" + name
+	}
+
 	if !ok {
 		env.CodeWriterEnv.Generated[vr] = nil
 
 		fields := []string{}
 		fields = InfoHolderField(name, vr.InfoHolder, fields, env)
 		fields = MetaHolderField(name, vr.MetaHolder, fields, env)
-		f := noBang(vr.ns.Emit(name+".ns", nil, env))
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		if !isBase {
+			f := noBang(vr.ns.Emit(name+".ns", nil, env))
+			if notNil(f) {
+				fields = append(fields, fmt.Sprintf(`
 	ns: %s,`[1:],
-				f))
-		}
-		f = noBang(vr.name.Emit(name+".name", nil, env))
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+					f))
+			}
+			f = noBang(vr.name.Emit(name+".name", nil, env))
+			if notNil(f) {
+				fields = append(fields, fmt.Sprintf(`
 	name: %s,`[1:],
-				f))
+					f))
+			}
 		}
-		f = noBang(emitObject(name+".Value", false, &vr.Value, env))
+		f := noBang(emitObject(name+".Value", false, &vr.Value, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	Value: %s,`[1:],
@@ -1951,19 +1960,30 @@ func (vr *Var) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 var %s Var = Var{%s}
 `,
 			name, f)
+		if isBase {
+			env.Statics += fmt.Sprintf(`
+var %s *Var
+`,
+				ptrToName)
+		}
 		env.CodeWriterEnv.Generated[vr] = vr
-	} else if status == nil {
+	}
+
+	if isBase || (ok && status == nil) {
+		if target == "" {
+			return ""
+		}
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 01 */ %s = %s
+	/* 06 */ %s = %s
 `[1:],
-				directAssign(target), "&"+name)
+				directAssign(target), ptrToName)
 		}
 		env.Runtime = append(env.Runtime, fn)
 		return ""
 	}
 
-	return "!&" + name
+	return "!" + ptrToName
 }
 
 func (expr *VarRefExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
