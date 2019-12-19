@@ -130,6 +130,14 @@ func immediate(s string) (bool, string) {
 	return false, s
 }
 
+func joinStatics(fields []string) string {
+	f := strings.Join(fields, "\n")
+	if f != "" {
+		f = "\n" + f + "\n"
+	}
+	return f
+}
+
 func indirect(s string) string {
 	if s[0] == '&' {
 		return s[1:]
@@ -408,7 +416,7 @@ func emitInternedString(target string, s string, env *CodeEnv) (res string) {
 	env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
 
 	if _, ok := env.CodeWriterEnv.BaseStrings[s]; ok {
-		res = "!p_" + internedStringVar
+		res = "p_" + internedStringVar
 	} else {
 		res = "!" + ptrTo(internedStringVar)
 	}
@@ -684,154 +692,73 @@ var %s ObjectInfo = ObjectInfo{%s}
 		name, f)
 }
 
-func (s Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	switch true {
-	case s.Equals(SYMBOLS.joker_core):
-		return "!SYMBOLS.joker_core"
-	case s.Equals(SYMBOLS.underscore):
-		return "!SYMBOLS.underscore"
-	case s.Equals(SYMBOLS.catch):
-		return "!SYMBOLS.catch"
-	case s.Equals(SYMBOLS.finally):
-		return "!SYMBOLS.finally"
-	case s.Equals(SYMBOLS.amp):
-		return "!SYMBOLS.amp"
-	case s.Equals(SYMBOLS._if):
-		return "!SYMBOLS._if"
-	case s.Equals(SYMBOLS.quote):
-		return "!SYMBOLS.quote"
-	case s.Equals(SYMBOLS.fn_):
-		return "!SYMBOLS.fn_"
-	case s.Equals(SYMBOLS.fn):
-		return "!SYMBOLS.fn"
-	case s.Equals(SYMBOLS.let_):
-		return "!SYMBOLS.let_"
-	case s.Equals(SYMBOLS.letfn_):
-		return "!SYMBOLS.letfn_"
-	case s.Equals(SYMBOLS.loop_):
-		return "!SYMBOLS.loop_"
-	case s.Equals(SYMBOLS.recur):
-		return "!SYMBOLS.recur"
-	case s.Equals(SYMBOLS.setMacro_):
-		return "!SYMBOLS.setMacro_"
-	case s.Equals(SYMBOLS.def):
-		return "!SYMBOLS.def"
-	case s.Equals(SYMBOLS.defLinter):
-		return "!SYMBOLS.defLinter"
-	case s.Equals(SYMBOLS._var):
-		return "!SYMBOLS._var"
-	case s.Equals(SYMBOLS.do):
-		return "!SYMBOLS.do"
-	case s.Equals(SYMBOLS.throw):
-		return "!SYMBOLS.throw"
-	case s.Equals(SYMBOLS.try):
-		return "!SYMBOLS.try"
-	case s.Equals(SYMBOLS.unquoteSplicing):
-		return "!SYMBOLS.unquoteSplicing"
-	case s.Equals(SYMBOLS.list):
-		return "!SYMBOLS.list"
-	case s.Equals(SYMBOLS.concat):
-		return "!SYMBOLS.concat"
-	case s.Equals(SYMBOLS.seq):
-		return "!SYMBOLS.seq"
-	case s.Equals(SYMBOLS.apply):
-		return "!SYMBOLS.apply"
-	case s.Equals(SYMBOLS.emptySymbol):
-		return "!SYMBOLS.emptySymbol"
-	case s.Equals(SYMBOLS.unquote):
-		return "!SYMBOLS.unquote"
-	case s.Equals(SYMBOLS.vector):
-		return "!SYMBOLS.vector"
-	case s.Equals(SYMBOLS.hashMap):
-		return "!SYMBOLS.hashMap"
-	case s.Equals(SYMBOLS.hashSet):
-		return "!SYMBOLS.hashSet"
-	case s.Equals(SYMBOLS.defaultDataReaders):
-		return "!SYMBOLS.defaultDataReaders"
-	case s.Equals(SYMBOLS.backslash):
-		return "!SYMBOLS.backslash"
-	case s.Equals(SYMBOLS.deref):
-		return "!SYMBOLS.deref"
-	}
-
-	if s.name == nil && s.ns == nil && s.hash == 0 {
-		return ""
-	}
-
-	name := UniqueId(s, nil)
-
-	env.Need[name] = s
-
-	if target == "" {
-		return name
-	}
-
-	env.Runtime = append(env.Runtime, func() string {
-		return fmt.Sprintf(`
-	/* 03 */ %s = %s
-`[1:],
-			directAssign(target), name)
-	})
-
-	return "!Symbol{}"
-}
-
-func (sym Symbol) Finish(name string, env *CodeEnv) string {
-	strName := emitInternedString(name+".name", *sym.name, env)
-
-	strNs := "nil"
-	if sym.ns != nil {
-		ns := *sym.ns
-		strNs = emitInternedString(name+".ns", ns, env)
-	}
+func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
+	name := UniqueId(sym, nil)
 
 	fields := []string{}
 	fields = InfoHolderField(name, sym.InfoHolder, fields, env)
 	fields = MetaHolderField(name, sym.MetaHolder, fields, env)
 
-	staticInitName, initName := immediate(strName)
-	if staticInitName {
-		initName = fmt.Sprintf(`
-	name: %s,
-`[1:],
-			initName)
-	} else {
-		initName = ""
+	f := ""
+	strNs := ""
+	imm := true
+	if sym.ns != nil {
+		var immNs bool
+		immNs, strNs = immediate(emitInternedString("02", *sym.ns, env))
+		f = strNs
+		if !immNs {
+			imm = false
+		}
 	}
-
-	staticInitNs, initNs := immediate(strNs)
-	if staticInitNs {
-		initNs = fmt.Sprintf(`
+	if notNil(f) {
+		fields = append(fields, fmt.Sprintf(`
 	ns: %s,
 `[1:],
-			initNs)
-	} else {
-		initNs = ""
+			f))
 	}
 
-	meta := strings.Join(fields, "\n")
-	if !IsGoExprEmpty(meta) {
-		meta = meta + "\n"
+	strName := ""
+	f = strName
+	if sym.name != nil {
+		var immName bool
+		immName, strName = immediate(emitInternedString("02", *sym.name, env))
+		f = strName
+		if !immName {
+			imm = false
+		}
 	}
-
-	static := fmt.Sprintf(`
-var %s Symbol = Symbol{
-%s%s%s}
+	if notNil(f) {
+		fields = append(fields, fmt.Sprintf(`
+	name: %s,
 `[1:],
-		name, meta, initNs, initName)
-
-	if sym.hash != 0 {
-		runtime := fmt.Sprintf(`
-	/* 02 */ %s.hash = hashSymbol(%s, %s)
-`[1:],
-			name, ptrTo(strNs), ptrTo(strName))
-
-		env.Runtime = append(env.Runtime, func(s string) func() string {
-			return func() string { return s }
-		}(runtime))
+			f))
 	}
 
-	return static
+	if sym.hash != 0 && (notNil(strNs) || notNil(strName)) {
+		f = fmt.Sprintf(`
+	hash: hashSymbol(%s, %s)
+`[1:],
+			ptrTo(strNs), ptrTo(strName))
+		fields = append(fields, f)
+	}
+
+	f = joinStatics(fields)
+
+	if !imm {
+		if target == "" {
+			return fmt.Sprintf(`!Symbol{%s}`, f)
+		}
+		fn := func() string {
+			return fmt.Sprintf(`
+	/* 02 */ %s = Symbol{%s}
+`[1:],
+				directAssign(target), f)
+		}
+		env.Runtime = append(env.Runtime, fn)
+		return "Symbol{}"
+	}
+
+	return fmt.Sprintf("!Symbol{%s}", f)
 }
 
 func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {

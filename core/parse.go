@@ -1682,6 +1682,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
 			}
 		case STR.do:
+			if GLOBAL_ENV.Trace {
+				fmt.Printf("[TRACE] parseList STR.do=%s\n", SpewObj(seq))
+			}
 			res := &DoExpr{
 				body:             parseBody(seq.Rest(), ctx),
 				Position:         pos,
