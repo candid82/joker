@@ -1,8 +1,6 @@
 (ns joker.better-cond
-  "A collection of variations on Clojure's core macros. Let's see which features
-   end up being useful."
+  "A collection of variations on Clojure's core macros."
   {:author "Christophe Grand and Mark Engelberg"}
-  ;; Based on better-cond 1.0.1 and 2.0.1
   (:refer-clojure :exclude [cond when-let if-let when-some if-some]))
 
 (defmacro if-let
