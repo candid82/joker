@@ -141,15 +141,19 @@ const (
 	UNKNOWN
 )
 
+var mySpewState spew.SpewState
+
 func Spew() {
 	cs := &spew.ConfigState{
-		Indent:         "    ",
-		MaxDepth:       30,
-		SortKeys:       true,
-		SpewKeys:       true,
-		NoDuplicates:   true,
-		UseOrdinals:    true,
-		DisableMethods: true,
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
 	}
 
 	cs.Fprintln(Stderr, "STRINGS:")
@@ -158,34 +162,42 @@ func Spew() {
 	cs.Fdump(Stderr, TYPES)
 	cs.Fprintln(Stderr, "\nGLOBAL_ENV:")
 	cs.Fdump(Stderr, GLOBAL_ENV)
+	mySpewState = cs.SpewState
 }
 
 func SpewThis(obj interface{}) {
 	cs := &spew.ConfigState{
-		Indent:         "    ",
-		MaxDepth:       30,
-		SortKeys:       true,
-		SpewKeys:       true,
-		NoDuplicates:   true,
-		UseOrdinals:    true,
-		DisableMethods: true,
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
 	}
 
 	cs.Fdump(Stderr, obj)
+	mySpewState = cs.SpewState
 }
 
 func SpewObj(obj interface{}) string {
 	cs := &spew.ConfigState{
-		Indent:         "    ",
-		MaxDepth:       30,
-		SortKeys:       true,
-		SpewKeys:       true,
-		NoDuplicates:   true,
-		UseOrdinals:    true,
-		DisableMethods: true,
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
 	}
 
-	return cs.Sdump(obj)
+	res := cs.Sdump(obj)
+	mySpewState = cs.SpewState
+	return res
 }
 
 func InitInternalLibs() {

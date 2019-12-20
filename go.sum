@@ -1,7 +1,7 @@
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e h1:fY5BOSpyZCqRo5OhCuC+XN+r/bBCmeuuJtjz+bCNIf8=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
-github.com/jcburley/go-spew v1.2.0 h1:lrhWF1iMhcIfmDkUEKmBEGmls5/Yj/Oy+ynI7Pa/veA=
-github.com/jcburley/go-spew v1.2.0/go.mod h1:IgTbFHsV1GytTFzdY5NkZP/M5Wq4bBWghboOjtbUCKM=
+github.com/jcburley/go-spew v1.3.0 h1:BEDwhba3G98zXLFjN4fIWaIQVhUr0Yb6fxJPtXP02yY=
+github.com/jcburley/go-spew v1.3.0/go.mod h1:IgTbFHsV1GytTFzdY5NkZP/M5Wq4bBWghboOjtbUCKM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
