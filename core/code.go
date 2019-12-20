@@ -1562,11 +1562,9 @@ func (expr *VectorExpr) Emit(target string, actualPtr interface{}, env *CodeEnv)
 				f))
 		}
 		f = emitSeq(name+".v", &expr.v, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	v: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1592,11 +1590,9 @@ func (expr *SetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 				f))
 		}
 		f = emitSeq(name+".elements", &expr.elements, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	elements: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1622,17 +1618,13 @@ func (expr *MapExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 				f))
 		}
 		f = emitSeq(name+".keys", &expr.keys, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	keys: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitSeq(name+".values", &expr.values, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1768,11 +1760,9 @@ func (expr *CallExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 				f))
 		}
 		f = emitSeq(name+".args", &expr.args, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1798,11 +1788,9 @@ func (expr *RecurExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 				f))
 		}
 		f = emitSeq(name+".args", &expr.args, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -2018,10 +2006,8 @@ func (expr *DoExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 	Position: %s,`[1:], f))
 		}
 		f = emitSeq(name+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	%sbody: %s,`[1:], maybeEmpty(f, expr.body), f))
-		}
 		if expr.isCreatedByMacro {
 			fields = append(fields, fmt.Sprintf(`
 	isCreatedByMacro: true,`))
@@ -2056,17 +2042,13 @@ func (expr *FnArityExpr) Emit(target string, actualPtr interface{}, env *CodeEnv
 				f))
 		}
 		f = emitSymbolSeq(target+".args", &expr.args, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	args: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitSeq(target+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
-				f))
-		}
+			f))
 		f = noBang(expr.taggedType.Emit(target+".taggedType", nil, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
@@ -2146,23 +2128,17 @@ func (expr *LetExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 				f))
 		}
 		f = emitSymbolSeq(name+".names", &expr.names, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	names: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitSeq(name+".values", &expr.values, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitSeq(name+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -2194,17 +2170,13 @@ func (expr *LoopExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 				f))
 		}
 		f = emitSeq(name+".values", &expr.values, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	values: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitSeq(name+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -2272,11 +2244,9 @@ func (expr *CatchExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) 
 				f))
 		}
 		f = emitSeq(name+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -2302,11 +2272,9 @@ func (expr *TryExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 				f))
 		}
 		f = emitSeq(name+".body", &expr.body, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	body: %s,`[1:],
-				f))
-		}
+			f))
 		f = emitCatchExprSeq(name+".catches", expr.catches, env)
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
@@ -2314,11 +2282,9 @@ func (expr *TryExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) st
 				f))
 		}
 		f = emitSeq(name+".finallyExpr", &expr.finallyExpr, env)
-		if notNil(f) {
-			fields = append(fields, fmt.Sprintf(`
+		fields = append(fields, fmt.Sprintf(`
 	finallyExpr: %s,`[1:],
-				f))
-		}
+			f))
 
 		f = strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
