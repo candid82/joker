@@ -3,8 +3,7 @@
             [joker.string :as str]))
 
 (def lib-dir
-  (-> (os/args)
-       (second)
+  (-> *main-file*
        (str/split #"/")
        (butlast)
        (concat ["lib"])
