@@ -406,7 +406,7 @@ func emitPtrToString(target string, s string, env *CodeEnv) string {
 			env.Runtime = append(env.Runtime, fn)
 		}
 
-		return "nil"
+		return "p_" + name
 	}
 	return "!" + ptrTo(noBang(emitString("", s, env)))
 }
@@ -649,8 +649,8 @@ func (p Position) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 			p.startColumn))
 	}
 	if p.filename != nil {
-		f := noBang(emitPtrToString(target+".filename", *p.filename, env))
-		if notNil(f) {
+		imm, f := immediate(emitPtrToString(target+".filename", *p.filename, env))
+		if imm && notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
 	filename: %s,`[1:],
 				f))
@@ -1151,24 +1151,25 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 }
 
 func (k Keyword) Finish(name string, env *CodeEnv) string {
-	strName := noBang(emitPtrToString(name+".name", *k.name, env))
+	immName, strName := immediate(emitInternedString(name+".name", *k.name, env))
 
 	initName := ""
-	if notNil(strName) {
+	if immName && notNil(strName) {
 		initName = fmt.Sprintf(`
 	name: %s,
 `[1:],
 			strName)
 	}
 
+	immNs := true
 	strNs := "nil"
 	if k.NsField() != nil {
 		ns := *k.ns
-		strNs = noBang(emitPtrToString(name+".ns", ns, env))
+		immNs, strNs = immediate(emitInternedString(name+".ns", ns, env))
 	}
 
 	initNs := ""
-	if notNil(strNs) {
+	if immNs && notNil(strNs) {
 		initNs = fmt.Sprintf(`
 	ns: %s,
 `[1:],
