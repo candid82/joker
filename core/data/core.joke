@@ -3546,7 +3546,7 @@
   (doseq [^Symbol lib libs]
     (let [^String path (lib-path__ lib)]
       (when *loading-verbosely*
-        (printf "(joker.core/load \"%s\")\n" path))
+        (printf "(joker.core/load %s from \"%s\")\n" lib path))
       (check-cyclic-dependency path lib)
       (when-not (= path (first *pending-paths*))
         (binding [*pending-paths* (conj *pending-paths* path)
