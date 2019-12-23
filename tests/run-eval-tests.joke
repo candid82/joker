@@ -1,5 +1,10 @@
 (ns joker.test.run-eval-tests
-  (require [joker.test :refer [run-tests]]))
+  (require [joker.test :refer [run-tests]]
+           [joker.os :as os]))
+
+(let [res (os/exec "/usr/bin/env" {:stdin *in* :args ["test" "-t" "0"]})]
+  (when (:success res)
+    (os/set-env "TTY_TESTS" "1")))
 
 (defn- slurp-or
   [path alt]
