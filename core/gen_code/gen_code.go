@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"sort"
 	"strings"
@@ -27,6 +28,13 @@ func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 }
 
 func main() {
+	// Hashmaps depend on the hashes of objects to find keys;
+	// whereas this code (code.go, mainly) depends on stability of
+	// data. Since object hashes depend (in some cases) on their
+	// pointers, they're not always stable. So don't generate
+	// hashmaps!
+	HASHMAP_THRESHOLD = math.MaxInt64
+
 	codeWriterEnv := &CodeWriterEnv{
 		BaseStrings: StringPool{},
 		Need:        map[string]Finisher{},

@@ -1052,27 +1052,6 @@ var %s HashMap = HashMap{%s}
 	return "!&" + name
 }
 
-func (b *BitmapIndexedNode) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	name := UniqueId(b, actualPtr)
-	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
-		env.CodeWriterEnv.Generated[name] = b
-		fields := []string{}
-		if b.bitmap != 0 {
-			fields = append(fields, fmt.Sprintf("\tbitmap: %d,", b.bitmap))
-		}
-		fields = append(fields, fmt.Sprintf("\tarray: %s,", emitInterfaceSeq(name+".array", &b.array, env)))
-		f := strings.Join(fields, "\n")
-		if !IsGoExprEmpty(f) {
-			f = "\n" + f + "\n"
-		}
-		env.Statics += fmt.Sprintf(`
-var %s BitmapIndexedNode = BitmapIndexedNode{%s}
-`,
-			name, f)
-	}
-	return "!&" + name
-}
-
 func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	name := UniqueId(b, actualPtr)
 	if _, ok := env.CodeWriterEnv.Generated[name]; !ok {
@@ -1339,8 +1318,6 @@ func emitInterface(target string, typedTarget bool, obj interface{}, env *CodeEn
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*IOWriter)"), nil, env)
 	case *Namespace:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*Namespace)"), nil, env)
-	case *BitmapIndexedNode:
-		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BitmapIndexedNode)"), nil, env)
 	case *BufferedReader:
 		return obj.Emit(makeTypedTarget(target, typedTarget, ".(*BufferedReader)"), nil, env)
 	case String:
