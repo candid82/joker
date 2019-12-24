@@ -415,21 +415,21 @@ func emitInternedString(target string, s string, env *CodeEnv) (res string) {
 	internedStringVar := "s_" + NameAsGo(s)
 	env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
 
-	if _, ok := env.CodeWriterEnv.BaseStrings[s]; ok {
-		res = "p_" + internedStringVar
-	} else {
+	if _, base := env.CodeWriterEnv.BaseStrings[s]; !base {
 		res = "!" + ptrTo(internedStringVar)
+		return
 	}
+
+	res = "p_" + internedStringVar
 
 	if target != "" && !unicode.IsDigit(rune(target[0])) {
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 01 */ %s = STRINGS.Intern(%s)
+	/* 01 */ %s = %s
 `[1:],
-				target, strconv.Quote(s))
+				target, noBang(res))
 		}
 		env.Runtime = append(env.Runtime, fn)
-		res = ""
 	} else if target != "02" {
 		panic(fmt.Sprintf("no target for runtime string %s", strconv.Quote(s)))
 	}
