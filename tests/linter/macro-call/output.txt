@@ -6,4 +6,4 @@ tests/linter/macro-call/input.clj:5:1: Parse warning: Wrong number of args (0) p
 tests/linter/macro-call/input.clj:6:1: Parse warning: Wrong number of args (0) passed to core/definterface
 tests/linter/macro-call/input.clj:7:1: Parse warning: Wrong number of args (0) passed to core/proxy-super
 tests/linter/macro-call/input.clj:8:1: Parse warning: Wrong number of args (0) passed to core/with-open
-tests/linter/macro-call/input.clj:9:1: Eval error: Wrong number of args (0) passed to core/defrecord
+tests/linter/macro-call/input.clj:9:1: Eval error: Wrong number of args (0) passed to core/defrecord; expects at least 3

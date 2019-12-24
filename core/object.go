@@ -775,20 +775,37 @@ func (fn *Fn) Hash() uint32 {
 }
 
 func (fn *Fn) Call(args []Object) Object {
+	min := math.MaxInt32
+	max := -1
 	for _, arity := range fn.fnExpr.arities {
-		if len(arity.args) == len(args) {
+		a := len(arity.args)
+		if a == len(args) {
 			RT.pushFrame()
 			defer RT.popFrame()
 			return evalLoop(arity.body, fn.env.addFrame(args))
 		}
+		if min > a {
+			min = a
+		}
+		if max < a {
+			max = a
+		}
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
+		if v != nil {
+			min = len(v.args)
+			max = math.MaxInt32
+		}
 		c := len(args)
 		if fn.isMacro {
 			c -= 2
+			min -= 2
+			if max != math.MaxInt32 {
+				max -= 2
+			}
 		}
-		PanicArity(c)
+		PanicArityMinMax(c, min, max)
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {
