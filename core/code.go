@@ -12,6 +12,70 @@ import (
 	"unsafe"
 )
 
+// Order of runtime initialization:
+//
+// 1. All "static" initializers ("var ..." at file level). In Go, this
+// can include (essentially) full-blown function calls.
+//
+// 2. init() functions, evidently in alphabetical order by filename
+// (unsure of what happens when different directories are involved).
+//
+// 3. *Init() functions, in the order they're called (by procs.go).
+//
+// #2, above, is implemented by ensuring the "master code file",
+// a_code.go, is named such that it comes before any other a_*_code.go
+// file currently being generated. (gen_code.go should catch if this
+// changes.)
+//
+// a_code.go initializes things that are not tied to namespaces,
+// including strings and keywords (though the latter could be tied to
+// namespaces, they aren't in current data/*.joke files).
+//
+// Within a_code.go's init() function:
+//
+// /* 00 */ interns existing (constant pointers to) strings and
+// initializes (runtime pointers to) strings from the values as
+// interned during initialization of mainline Joker code (via static
+// initializers). Strings interned via init() routines likely won't
+// work properly, as they'll be seen as "base" strings when
+// gen_code.go runs, but might not be interned when a_code.go init()
+// runs; currently, there don't seem to be any such strings.
+//
+// /* 01 */ initializes fields that need pointers to strings. This
+// includes Keyword .name and .hash fields.
+//
+// Within an a_*_code.go's *Init() function:
+//
+// /* 00 */ initializes the local _ns variable to point to the current
+// namespace.
+//
+// /* 01 */ initializes fields that need the value of _ns or any
+// (runtime pointers to) strings that a_code.go's init() function
+// initializes. (Constant pointers to strings are initialized via
+// static fields.) It also initializes fields that need fully
+// initialized keywords (handled by a_code.go's init() function) and
+// Symbols (instantiated inline). Finally, it initializes fields that
+// need TYPES[] of (pointers to) strings; this must wait until runtime
+// so TYPES[] itself is fully initialized, so it might as well wait
+// until all the (pointers to) strings have been initialized.
+//
+// /* 02 */ interns existing variables (which must, of course, be
+// sufficiently populated at this point).
+//
+// /* 03 */ is where circular references (such as List .rest fields
+// pointing back to a parent List) are initialized, and where deferred
+// Object sequence members are initialized.
+//
+// /* 04 */ updates base variables with fully-initialized
+// information. E.g. var_foo is used as a complete template for the
+// base variable 'foo'; _ns.UpdateVar(..., var_foo) is called at this
+// level, with the resulting pointer stored in p_var_foo (which does
+// not point to var_foo, as that was just a template).  This
+// implements (mainly) the (add-doc-and-meta ...) calls in core.joke.
+//
+// /* 05 */ Copies the p_var_* values updated in 04 into appropriate
+// fields.
+
 type (
 	CodeEnv struct {
 		CodeWriterEnv *CodeWriterEnv
@@ -430,7 +494,7 @@ func emitInternedString(target string, s string, env *CodeEnv) (res string) {
 				target, noBang(res))
 		}
 		env.Runtime = append(env.Runtime, fn)
-	} else if target != "02" {
+	} else if target != "01" {
 		panic(fmt.Sprintf("no target for runtime string %s", strconv.Quote(s)))
 	}
 
@@ -560,14 +624,14 @@ func (env *CodeEnv) Emit() {
 		if _, ok := env.BaseMappings[s]; ok {
 			env.Runtime = append(env.Runtime, func() string {
 				return fmt.Sprintf(`
-	/* 05 */ p_%s = _ns.UpdateVar(%s, %s)
+	/* 04 */ p_%s = _ns.UpdateVar(%s, %s)
 `[1:],
 					name, symName, name)
 			})
 		} else {
 			env.Runtime = append(env.Runtime, func() string {
 				return fmt.Sprintf(`
-	/* 03 */ _ns.InternExistingVar(%s, &%s)
+	/* 02 */ _ns.InternExistingVar(%s, &%s)
 `[1:],
 					symName, name)
 			})
@@ -704,7 +768,7 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	imm := true
 	if sym.ns != nil {
 		var immNs bool
-		immNs, strNs = immediate(emitInternedString("02", *sym.ns, env))
+		immNs, strNs = immediate(emitInternedString("01", *sym.ns, env))
 		f = strNs
 		if !immNs {
 			imm = false
@@ -721,7 +785,7 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	f = strName
 	if sym.name != nil {
 		var immName bool
-		immName, strName = immediate(emitInternedString("02", *sym.name, env))
+		immName, strName = immediate(emitInternedString("01", *sym.name, env))
 		f = strName
 		if !immName {
 			imm = false
@@ -750,7 +814,7 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 		}
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 02 */ %s = Symbol{%s}
+	/* 01 */ %s = Symbol{%s}
 `[1:],
 				directAssign(target), f)
 		}
@@ -765,10 +829,10 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 	if t == nil {
 		return "nil"
 	}
-	name := noBang(emitInternedString("02", t.name, env))
+	name := noBang(emitInternedString("01", t.name, env))
 	typeFn := func() string {
 		return fmt.Sprintf(`
-	/* 03 */ %s = TYPES[%s]
+	/* 01 */ %s = TYPES[%s]
 `[1:],
 			directAssign(target), name)
 	}
@@ -948,7 +1012,7 @@ var %s List = List{%s}
 	} else if status == nil {
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 04 */ %s = %s
+	/* 03 */ %s = %s
 `[1:],
 				directAssign(target), "&"+name)
 		}
@@ -1140,7 +1204,7 @@ func (k Keyword) Emit(target string, actualPtr interface{}, env *CodeEnv) string
 	fn := func(innerName string) func() string {
 		return func() string {
 			return fmt.Sprintf(`
-	/* 02 */ %s = %s  // (Keyword)Emit()
+	/* 01 */ %s = %s  // (Keyword)Emit()
 `[1:],
 				directAssign(target), innerName)
 		}
@@ -1196,7 +1260,7 @@ var %s Keyword = Keyword{%s}
 		name, f)
 
 	runtime := fmt.Sprintf(`
-	/* 02 */ %s.hash = hashSymbol(%s, %s)
+	/* 01 */ %s.hash = hashSymbol(%s, %s)
 `[1:],
 		name, ptrTo(strNs), ptrTo(strName))
 	env.Runtime = append(env.Runtime, func(s string) func() string {
@@ -1472,7 +1536,7 @@ func deferObjectSeq(target string, objs *[]Object, env *CodeEnv) string {
 			return func() string {
 				el := fmt.Sprintf("%s[%d]", target, innerIx)
 				return fmt.Sprintf(`
-	/* 04 */ %s = %s  // deferObjectSeq[%d]
+	/* 03 */ %s = %s  // deferObjectSeq[%d]
 `[1:],
 					directAssign(el), noBang(emitObject(el, false, obj, env)), innerIx)
 			}
@@ -1868,7 +1932,7 @@ var %s *Var
 		}
 		fn := func() string {
 			return fmt.Sprintf(`
-	/* 06 */ %s = %s
+	/* 05 */ %s = %s
 `[1:],
 				directAssign(target), ptrToName)
 		}
