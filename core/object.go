@@ -814,6 +814,10 @@ func (fn *Fn) Call(args []Object) Object {
 		c := len(args)
 		if fn.isMacro {
 			c -= 2
+			min -= 2
+			if max != math.MaxInt32 {
+				max -= 2
+			}
 		}
 		PanicArityMinMax(c, min, max)
 	}
