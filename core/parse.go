@@ -1665,7 +1665,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 					if !ctx.isUnknownCallableScope {
 						if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-							printParseError(obj.GetInfo().Pos(), "parseList: Unable to resolve symbol: "+sym.ToString(false))
+							printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
 						}
 					}
 					vr = InternFakeSymbol(symNs, sym)
