@@ -776,8 +776,7 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	}
 	if notNil(f) {
 		fields = append(fields, fmt.Sprintf(`
-	ns: %s,
-`[1:],
+	ns: %s,`[1:],
 			f))
 	}
 
@@ -793,15 +792,13 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 	}
 	if notNil(f) {
 		fields = append(fields, fmt.Sprintf(`
-	name: %s,
-`[1:],
+	name: %s,`[1:],
 			f))
 	}
 
 	if sym.hash != 0 && (notNil(strNs) || notNil(strName)) {
 		f = fmt.Sprintf(`
-	hash: hashSymbol(%s, %s)
-`[1:],
+	hash: hashSymbol(%s, %s)`[1:],
 			ptrTo(strNs), ptrTo(strName))
 		fields = append(fields, f)
 	}
@@ -1220,8 +1217,7 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 	initName := ""
 	if immName && notNil(strName) {
 		initName = fmt.Sprintf(`
-	name: %s,
-`[1:],
+	name: %s,`[1:],
 			strName)
 	}
 
@@ -1235,8 +1231,7 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 	initNs := ""
 	if immNs && notNil(strNs) {
 		initNs = fmt.Sprintf(`
-	ns: %s,
-`[1:],
+	ns: %s,`[1:],
 			strNs)
 	}
 
@@ -2133,16 +2128,14 @@ func (expr *FnExpr) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 			f = noBang(expr.variadic.Emit(name+".variadic", nil, env))
 			if notNil(f) {
 				fields = append(fields, fmt.Sprintf(`
-	variadic: %s,
-`[1:],
+	variadic: %s,`[1:],
 					f))
 			}
 		}
 		f = noBang(expr.self.Emit(name+".self", nil, env))
 		if notNil(f) {
 			fields = append(fields, fmt.Sprintf(`
-	self: %s,
-`[1:],
+	self: %s,`[1:],
 				f))
 		}
 
