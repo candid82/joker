@@ -1,3 +1,3 @@
 tests/linter/defmethod/input.clj:6:3: Parse error: Unable to resolve symbol: b
 tests/linter/defmethod/input.clj:8:12: Parse error: Unable to resolve symbol: m2
-tests/linter/defmethod/input.clj:10:1: Eval error: Wrong number of args (1) passed to core/defmethod
+tests/linter/defmethod/input.clj:10:1: Eval error: Wrong number of args (1) passed to core/defmethod; expects at least 3
