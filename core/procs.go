@@ -42,7 +42,7 @@ var (
 	linter_cljxNamespaceInfo  internalNamespaceInfo
 	linter_cljNamespaceInfo   internalNamespaceInfo
 	linter_cljsNamespaceInfo  internalNamespaceInfo
-	better_condData           internalNamespaceInfo
+	better_condNamespaceInfo  internalNamespaceInfo
 )
 
 type FileInfo struct {
@@ -108,8 +108,8 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 		Filename: "hiccup.joke",
 	},
 	{
-		name:     "<joker.better-cond>",
-		filename: "better_cond.joke",
+		Name:     "<joker.better-cond>",
+		Filename: "better_cond.joke",
 	},
 }
 
