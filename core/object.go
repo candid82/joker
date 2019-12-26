@@ -435,10 +435,10 @@ func getHash() hash.Hash32 {
 
 func hashSymbol(ns, name *string) uint32 {
 	h := getHash()
-	h.Write([]byte(*name))
 	if ns != nil {
 		h.Write([]byte(*ns))
 	}
+	h.Write([]byte("/" + *name))
 	return h.Sum32()
 }
 
@@ -468,7 +468,7 @@ func (s BySymbolName) Less(i, j int) bool {
 	return s[i].ToString(false) < s[j].ToString(false)
 }
 
-const keywordHashMask uint32 = 0x7334c790
+const KeywordHashMask uint32 = 0x7334c790
 
 func MakeKeyword(nsname string) Keyword {
 	index := strings.IndexRune(nsname, '/')
@@ -477,7 +477,7 @@ func MakeKeyword(nsname string) Keyword {
 		return Keyword{
 			ns:   nil,
 			name: name,
-			hash: hashSymbol(nil, name) ^ keywordHashMask,
+			hash: hashSymbol(nil, name) ^ KeywordHashMask,
 		}
 	}
 	ns := STRINGS.Intern(nsname[0:index])
@@ -485,7 +485,7 @@ func MakeKeyword(nsname string) Keyword {
 	return Keyword{
 		ns:   ns,
 		name: name,
-		hash: hashSymbol(ns, name) ^ keywordHashMask,
+		hash: hashSymbol(ns, name) ^ KeywordHashMask,
 	}
 }
 

@@ -705,7 +705,7 @@ var procKeyword Proc = func(args []Object) Object {
 			return Keyword{
 				ns:   obj.ns,
 				name: obj.name,
-				hash: hashSymbol(obj.ns, obj.name),
+				hash: hashSymbol(obj.ns, obj.name) ^ KeywordHashMask,
 			}
 		default:
 			return NIL
@@ -719,7 +719,7 @@ var procKeyword Proc = func(args []Object) Object {
 	return Keyword{
 		ns:   ns,
 		name: name,
-		hash: hashSymbol(ns, name),
+		hash: hashSymbol(ns, name) ^ KeywordHashMask,
 	}
 }
 
