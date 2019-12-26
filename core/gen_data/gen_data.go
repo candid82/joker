@@ -81,6 +81,10 @@ var files []FileInfo = []FileInfo{
 		name:     "<joker.hiccup>",
 		filename: "hiccup.joke",
 	},
+	{
+		name:     "<joker.better-cond>",
+		filename: "better_cond.joke",
+	},
 }
 
 const hextable = "0123456789abcdef"
