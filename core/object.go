@@ -524,7 +524,7 @@ func rangeString(min, max int) string {
 
 func PanicArityMinMax(n, min, max int) {
 	name := RT.currentExpr.(Traceable).Name()
-	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s", n, name)))
+	panic(RT.NewError(fmt.Sprintf("Wrong number of args (%d) passed to %s; expects %s", n, name, rangeString(min, max))))
 }
 
 func CheckArity(args []Object, min int, max int) {
