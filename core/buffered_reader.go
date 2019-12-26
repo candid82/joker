@@ -2,14 +2,24 @@ package core
 
 import (
 	"bufio"
+	"io"
 	"unsafe"
 )
 
 type (
 	BufferedReader struct {
 		*bufio.Reader
+		hash uint32
 	}
 )
+
+func MakeBufferedReader(rd io.Reader, hash uint32) *BufferedReader {
+	res := &BufferedReader{bufio.NewReader(rd), hash}
+	if hash == 0 {
+		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	}
+	return res
+}
 
 func (br *BufferedReader) ToString(escape bool) string {
 	return "#object[BufferedReader]"
@@ -28,7 +38,7 @@ func (br *BufferedReader) GetType() *Type {
 }
 
 func (br *BufferedReader) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(br)))
+	return br.hash
 }
 
 func (br *BufferedReader) WithInfo(info *ObjectInfo) Object {

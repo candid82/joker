@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -73,6 +72,10 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
+const stdinHashValue uint32 = 0x1fc542bb
+const stdoutHashValue uint32 = 0xef3ebf05
+const stderrHashValue uint32 = 0xbfa32704
+
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -88,11 +91,11 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
+	res.stdin.Value = MakeBufferedReader(stdin, stdinHashValue)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &IOWriter{stdout}
+	res.stdout.Value = MakeIOWriter(stdout, stdoutHashValue)
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = &IOWriter{stderr}
+	res.stderr.Value = MakeIOWriter(stderr, stderrHashValue)
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.MainFile = res.CoreNamespace.Intern(MakeSymbol("*main-file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
@@ -114,9 +117,9 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 }
 
 func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
-	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
-	env.stdout.Value = &IOWriter{stdout}
-	env.stderr.Value = &IOWriter{stderr}
+	env.stdin.Value = MakeBufferedReader(stdin, stdinHashValue)
+	env.stdout.Value = MakeIOWriter(stdout, stdoutHashValue)
+	env.stderr.Value = MakeIOWriter(stderr, stderrHashValue)
 }
 
 func (env *Env) IsStdIn(obj Object) bool {
