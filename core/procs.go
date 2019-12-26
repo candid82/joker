@@ -42,6 +42,7 @@ var (
 	linter_cljxNamespaceInfo  internalNamespaceInfo
 	linter_cljNamespaceInfo   internalNamespaceInfo
 	linter_cljsNamespaceInfo  internalNamespaceInfo
+	better_condData           internalNamespaceInfo
 )
 
 type FileInfo struct {
@@ -105,6 +106,10 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 	{
 		Name:     "<joker.hiccup>",
 		Filename: "hiccup.joke",
+	},
+	{
+		name:     "<joker.better-cond>",
+		filename: "better_cond.joke",
 	},
 }
 
@@ -202,14 +207,15 @@ func SpewObj(obj interface{}) string {
 
 func InitInternalLibs() {
 	internalLibs = map[string]*internalNamespaceInfo{
-		"joker.core":      &coreNamespaceInfo,
-		"joker.walk":      &walkNamespaceInfo,
-		"joker.template":  &templateNamespaceInfo,
-		"joker.repl":      &replNamespaceInfo,
-		"joker.test":      &testNamespaceInfo,
-		"joker.set":       &setNamespaceInfo,
-		"joker.tools.cli": &tools_cliNamespaceInfo,
-		"joker.hiccup":    &hiccupNamespaceInfo,
+		"joker.core":        &coreNamespaceInfo,
+		"joker.walk":        &walkNamespaceInfo,
+		"joker.template":    &templateNamespaceInfo,
+		"joker.repl":        &replNamespaceInfo,
+		"joker.test":        &testNamespaceInfo,
+		"joker.set":         &setNamespaceInfo,
+		"joker.tools.cli":   &tools_cliNamespaceInfo,
+		"joker.hiccup":      &hiccupNamespaceInfo,
+		"joker.better-cond": &better_condNamespaceInfo,
 	}
 	for _, f := range CoreSourceFiles {
 		if f.Name[0] != '<' || f.Name[len(f.Name)-1] != '>' {
