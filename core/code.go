@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"unicode"
 	"unsafe"
 )
 
@@ -116,40 +115,42 @@ func (s NativeString) Emit(target string, actualPtr interface{}, env *CodeEnv) s
 }
 
 func (s NativeString) Finish(name string, env *CodeEnv) string {
-	return fmt.Sprintf(`
-var %s string = %s
-`[1:],
-		name, strconv.Quote(s.s))
+	// 	return fmt.Sprintf(`
+	// var %s string = %s
+	// `[1:],
+	// 		name, strconv.Quote(s.s))
+	return ""
 }
 
 func (s InternedString) Finish(name string, env *CodeEnv) string {
-	if _, ok := env.CodeWriterEnv.BaseStrings[s.s]; ok {
-		fn := func() string {
-			return fmt.Sprintf(`
-	/* 00 */ p_%s = STRINGS.Intern(%s)
-`[1:],
-				name, strconv.Quote(s.s))
-		}
-		env.Runtime = append(env.Runtime, fn)
+	// 	if _, ok := env.CodeWriterEnv.BaseStrings[s.s]; ok {
+	// 		fn := func() string {
+	// 			return fmt.Sprintf(`
+	// 	/* 00 */ p_%s = STRINGS.Intern(%s)
+	// `[1:],
+	// 				name, strconv.Quote(s.s))
+	// 		}
+	// 		env.Runtime = append(env.Runtime, fn)
 
-		return fmt.Sprintf(`
-var p_%s *string
-`[1:],
-			name)
-	}
+	// 		return fmt.Sprintf(`
+	// var p_%s *string
+	// `[1:],
+	// 			name)
+	// 	}
 
-	fn := func() string {
-		return fmt.Sprintf(`
-	/* 00 */ STRINGS.InternExistingString(&%s)
-`[1:],
-			name)
-	}
-	env.Runtime = append(env.Runtime, fn)
+	// 	fn := func() string {
+	// 		return fmt.Sprintf(`
+	// 	/* 00 */ STRINGS.InternExistingString(&%s)
+	// `[1:],
+	// 			name)
+	// 	}
+	// 	env.Runtime = append(env.Runtime, fn)
 
-	return fmt.Sprintf(`
-var %s string = %s
-`[1:],
-		name, strconv.Quote(s.s))
+	// 	return fmt.Sprintf(`
+	// var %s string = %s
+	// `[1:],
+	// 		name, strconv.Quote(s.s))
+	return ""
 }
 
 var tr = [][2]string{
@@ -461,49 +462,50 @@ func emitString(target string, s string, env *CodeEnv) string {
 }
 
 func emitPtrToString(target string, s string, env *CodeEnv) string {
-	if _, ok := env.CodeWriterEnv.BaseStrings[s]; ok {
-		name := "s_" + NameAsGo(s)
-		env.CodeWriterEnv.Need[name] = InternedString{s}
+	return emitInternedString(target, s, env)
+	// 	if _, ok := env.CodeWriterEnv.BaseStrings[s]; ok {
+	// 		name := "s_" + NameAsGo(s)
+	// 		env.CodeWriterEnv.Need[name] = InternedString{s}
 
-		if target != "" {
-			fn := func() string {
-				return fmt.Sprintf(`
-	/* 01 */ %s = p_%s
-`[1:],
-					target, name)
-			}
-			env.Runtime = append(env.Runtime, fn)
-		}
+	// 		if target != "" {
+	// 			fn := func() string {
+	// 				return fmt.Sprintf(`
+	// 	/* 01 */ %s = p_%s
+	// `[1:],
+	// 					target, name)
+	// 			}
+	// 			env.Runtime = append(env.Runtime, fn)
+	// 		}
 
-		return "p_" + name
-	}
-	return "!" + ptrTo(noBang(emitString("", s, env)))
+	// 		return "p_" + name
+	// 	}
+	// 	return "!" + ptrTo(noBang(emitString("", s, env)))
 }
 
 func emitInternedString(target string, s string, env *CodeEnv) (res string) {
-	internedStringVar := "s_" + NameAsGo(s)
-	env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
+	return "!&s_" + NameAsGo(s)
+	// 	env.CodeWriterEnv.Need[internedStringVar] = InternedString{s}
 
-	if _, base := env.CodeWriterEnv.BaseStrings[s]; !base {
-		res = "!" + ptrTo(internedStringVar)
-		return
-	}
+	// 	if _, base := env.CodeWriterEnv.BaseStrings[s]; !base {
+	// 		res = "!" + ptrTo(internedStringVar)
+	// 		return
+	// 	}
 
-	res = "p_" + internedStringVar
+	// 	res = "p_" + internedStringVar
 
-	if target != "" && !unicode.IsDigit(rune(target[0])) {
-		fn := func() string {
-			return fmt.Sprintf(`
-	/* 01 */ %s = %s
-`[1:],
-				target, noBang(res))
-		}
-		env.Runtime = append(env.Runtime, fn)
-	} else if target != "01" {
-		panic(fmt.Sprintf("no target for runtime string %s", strconv.Quote(s)))
-	}
+	// 	if target != "" && !unicode.IsDigit(rune(target[0])) {
+	// 		fn := func() string {
+	// 			return fmt.Sprintf(`
+	// 	/* 01 */ %s = %s
+	// `[1:],
+	// 				target, noBang(res))
+	// 		}
+	// 		env.Runtime = append(env.Runtime, fn)
+	// 	} else if target != "01" {
+	// 		panic(fmt.Sprintf("no target for runtime string %s", strconv.Quote(s)))
+	// 	}
 
-	return
+	// 	return
 }
 
 func directAssign(target string) string {
