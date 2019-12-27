@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,6 +17,11 @@ const hextable = "0123456789abcdef"
 const masterFile = "a_code.go"
 const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
+
+type GenEnv struct {
+	Statics   *[]string // For reflect-based code in gen_code
+	Generated map[interface{}]struct{}
+}
 
 func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
@@ -100,6 +106,11 @@ func {name}Init() {
 		Generated:     map[interface{}]interface{}{},
 	}
 
+	genEnv := &GenEnv{
+		Statics:   &statics,
+		Generated: map[interface{}]struct{}{},
+	}
+
 	for {
 		needLen := len(codeWriterEnv.Need)
 
@@ -134,13 +145,25 @@ func {name}Init() {
 	%s: &%s,`[1:],
 			q, name))
 		statics = append(statics, fmt.Sprintf(`
-var %s string = %s
-`[1:],
+var %s string = %s`[1:],
 			name, q))
 	}
 	sort.Strings(stringMappings)
 
+	symbolFields := genEnv.emitMembers("SYMBOLS", SYMBOLS)
+	sort.Strings(symbolFields)
+
+	specialSymbolMappings := genEnv.emitMembers("SPECIAL_SYMBOLS", SPECIAL_SYMBOLS)
+	sort.Strings(specialSymbolMappings)
+
+	keywordFields := genEnv.emitMembers("KEYWORDS", KEYWORDS)
+	sort.Strings(keywordFields)
+
+	strFields := genEnv.emitMembers("STR", STR)
+	sort.Strings(strFields)
+
 	typeMappings := []string{}
+	typeFields := []string{}
 	for s, _ := range TYPES {
 		name := NameAsGo(*s)
 		strName := "s_" + name
@@ -148,20 +171,28 @@ var %s string = %s
 		typeMappings = append(typeMappings, fmt.Sprintf(`
 	&%s: &%s,`[1:],
 			strName, typeName))
+		typeFields = append(typeFields, fmt.Sprintf(`
+	%s: &%s,`[1:],
+			name, typeName))
 		statics = append(statics, fmt.Sprintf(`
-var %s Type = %s
-`[1:],
+var %s Type = %s`[1:],
 			typeName, "Type{}"))
 	}
 	sort.Strings(typeMappings)
+	sort.Strings(typeFields)
 
 	sort.Strings(statics)
 	r := JoinStringFns(env.Runtime)
 
 	var tr = [][2]string{
+		{"{keywordFields}", strings.Join(keywordFields, "\n")},
+		{"{specialSymbolMappings}", strings.Join(specialSymbolMappings, "\n")},
+		{"{strFields}", strings.Join(strFields, "\n")},
 		{"{stringMappings}", strings.Join(stringMappings, "\n")},
+		{"{symbolFields}", strings.Join(symbolFields, "\n")},
+		{"{typeFields}", strings.Join(typeFields, "\n")},
 		{"{typeMappings}", strings.Join(typeMappings, "\n")},
-		{"{statics}", strings.Join(statics, "")},
+		{"{statics}", strings.Join(statics, "\n")},
 		{"{runtime}", r},
 	}
 
@@ -172,8 +203,28 @@ var %s Type = %s
 
 package core
 
+var KEYWORDS Keywords = Keywords{
+{keywordFields}
+}
+
+var SPECIAL_SYMBOLS map[*string]bool = map[*string]bool{
+{specialSymbolMappings}
+}
+
+var STR Str = Str{
+{strFields}
+}
+
 var STRINGS StringPool = StringPool{
 {stringMappings}
+}
+
+var SYMBOLS Symbols = Symbols{
+{symbolFields}
+}
+
+var TYPE Types = Types{
+{typeFields}
 }
 
 var TYPES map[*string]*Type = map[*string]*Type{
@@ -192,4 +243,97 @@ func init() {
 	}
 
 	ioutil.WriteFile(masterFile, []byte(fileContent), 0666)
+}
+
+func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (fields []string) {
+	v := reflect.ValueOf(obj)
+	kind := v.Kind()
+	switch kind {
+	case reflect.Map:
+		if v.IsNil() {
+			return
+		}
+		keys := v.MapKeys()
+		for _, key := range keys {
+			k := genEnv.emitValue(key)
+			v := genEnv.emitValue(v.MapIndex(key))
+			if v == "" {
+				continue
+			}
+			fields = append(fields, fmt.Sprintf(`
+	%s: %s,`[1:],
+				k, v))
+		}
+	case reflect.Struct:
+		vt := v.Type()
+		numFields := v.NumField()
+		for i := 0; i < numFields; i++ {
+			vtf := vt.Field(i)
+			val := genEnv.emitValue(UnsafeReflectValue(v.Field(i)))
+			if val == "" {
+				continue
+			}
+			fields = append(fields, fmt.Sprintf(`
+	%s: %s,`[1:],
+				vtf.Name, val))
+		}
+	default:
+		panic(fmt.Sprintf("unsupported type %T for %s", obj, name))
+	}
+	return
+}
+
+func (genEnv *GenEnv) emitValue(v reflect.Value) string {
+	v = UnsafeReflectValue(v)
+	switch v.Kind() {
+	case reflect.Bool:
+		if v.Bool() {
+			return "true"
+		}
+		return "false"
+	case reflect.String:
+		return "s_" + NameAsGo(v.String())
+	case reflect.Ptr:
+		res := genEnv.emitValue(v.Elem())
+		if res == "" {
+			return ""
+		}
+		return "&" + res
+	case reflect.Struct:
+		typeName := coreTypeName(v)
+		obj := v.Interface()
+		name := uniqueId(obj)
+		if _, yes := genEnv.Generated[name]; !yes {
+			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+var %s %s = %s{
+	%s
+}`[1:],
+				name, typeName, typeName, strings.Join(genEnv.emitMembers(typeName, obj), "\n")))
+			genEnv.Generated[name] = struct{}{}
+		}
+		return name
+	default:
+		return fmt.Sprintf("nil /* UNKNOWN TYPE %s */", v)
+	}
+}
+
+func coreTypeName(v reflect.Value) string {
+	return strings.Replace(v.Type().String(), "core.", "", 1)
+}
+
+func uniqueId(obj interface{}) string {
+	ty := coreTypeName(reflect.ValueOf(obj))
+	switch ty {
+	case "Symbol":
+		return UniqueId(obj.(Symbol), nil)
+	case "Keyword":
+		return UniqueId(obj.(Keyword), nil)
+	case "Var":
+		return UniqueId(obj.(Var), nil)
+	case "VarRefExpr":
+		return UniqueId(obj.(VarRefExpr), nil)
+	default:
+		fmt.Printf("uniqueId(%s)\n", ty)
+	}
+	return UniqueId(obj, nil)
 }

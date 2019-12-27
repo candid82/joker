@@ -250,7 +250,7 @@ func flagField(v *reflect.Value) *flag {
 }
 
 // This comes from (davecgh|jcburley)/go-spew/bypass.go.
-func unsafeReflectValue(v reflect.Value) reflect.Value {
+func UnsafeReflectValue(v reflect.Value) reflect.Value {
 	if !v.IsValid() || (v.CanInterface() && v.CanAddr()) {
 		return v
 	}
@@ -306,7 +306,7 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	if !yes || sf.Anonymous {
 		return "", false
 	}
-	filenamePtr := unsafeReflectValue(v.FieldByName("filename"))
+	filenamePtr := UnsafeReflectValue(v.FieldByName("filename"))
 	if filenamePtr.IsZero() || filenamePtr.IsNil() {
 		return "", false
 	}
@@ -314,10 +314,10 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	if filename != "<joker.core>" { // TODO: Support other namespaces
 		return "", false
 	}
-	startLine := unsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
-	startColumn := unsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
-	endLine := unsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
-	endColumn := unsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
+	startLine := UnsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
+	startColumn := UnsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
+	endLine := UnsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
+	endColumn := UnsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
 	return fmt.Sprintf("%d_%d__%d_%d", startLine, startColumn, endLine, endColumn), true
 }
 
