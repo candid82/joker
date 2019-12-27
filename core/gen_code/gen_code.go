@@ -135,8 +135,7 @@ func {name}Init() {
 		q := strconv.Quote(s)
 		name := "s_" + NameAsGo(s)
 		stringMappings = append(stringMappings, fmt.Sprintf(`
-	%s: &%s,
-`[1:],
+	%s: &%s,`[1:],
 			q, name))
 		statics = append(statics, fmt.Sprintf(`
 var %s string = %s
@@ -145,11 +144,27 @@ var %s string = %s
 	}
 	sort.Strings(stringMappings)
 
+	typeMappings := []string{}
+	for s, _ := range TYPES {
+		name := NameAsGo(*s)
+		strName := "s_" + name
+		typeName := "type_" + name
+		typeMappings = append(typeMappings, fmt.Sprintf(`
+	&%s: &%s,`[1:],
+			strName, typeName))
+		statics = append(statics, fmt.Sprintf(`
+var %s Type = %s
+`[1:],
+			typeName, "Type{}"))
+	}
+	sort.Strings(typeMappings)
+
 	sort.Strings(statics)
 	r := JoinStringFns(env.Runtime)
 
 	var tr = [][2]string{
-		{"{stringMappings}", strings.Join(stringMappings, "")},
+		{"{stringMappings}", strings.Join(stringMappings, "\n")},
+		{"{typeMappings}", strings.Join(typeMappings, "\n")},
 		{"{statics}", strings.Join(statics, "")},
 		{"{runtime}", r},
 	}
@@ -163,6 +178,10 @@ package core
 
 var STRINGS StringPool = StringPool{
 {stringMappings}
+}
+
+var TYPES map[*string]*Type = map[*string]*Type{
+{typeMappings}
 }
 
 {statics}
