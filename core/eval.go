@@ -14,9 +14,10 @@ type (
 		Pos() Position
 	}
 	EvalError struct {
-		msg string
-		pos Position
-		rt  *Runtime
+		msg  string
+		pos  Position
+		rt   *Runtime
+		hash uint32
 	}
 	Frame struct {
 		traceable Traceable
@@ -135,6 +136,14 @@ func (s *Callstack) String() string {
 	return b.String()
 }
 
+func MakeEvalError(msg string, pos Position, rt *Runtime, hash uint32) *EvalError {
+	res := &EvalError{msg, pos, rt, hash}
+	if hash == 0 {
+		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	}
+	return res
+}
+
 func (err *EvalError) ToString(escape bool) string {
 	return err.Error()
 }
@@ -152,7 +161,7 @@ func (err *EvalError) GetType() *Type {
 }
 
 func (err *EvalError) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(err)))
+	return err.hash
 }
 
 func (err *EvalError) WithInfo(info *ObjectInfo) Object {

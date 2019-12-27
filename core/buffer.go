@@ -8,8 +8,17 @@ import (
 type (
 	Buffer struct {
 		*bytes.Buffer
+		hash uint32
 	}
 )
+
+func MakeBuffer(b *bytes.Buffer, hash uint32) *Buffer {
+	res := &Buffer{b, hash}
+	if hash == 0 {
+		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	}
+	return res
+}
 
 func (b *Buffer) ToString(escape bool) string {
 	return b.String()
@@ -28,7 +37,7 @@ func (b *Buffer) GetType() *Type {
 }
 
 func (b *Buffer) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(b)))
+	return b.hash
 }
 
 func (b *Buffer) WithInfo(info *ObjectInfo) Object {

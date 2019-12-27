@@ -8,8 +8,17 @@ import (
 type (
 	IOWriter struct {
 		io.Writer
+		hash uint32
 	}
 )
+
+func MakeIOWriter(w io.Writer, hash uint32) *IOWriter {
+	res := &IOWriter{w, hash}
+	if hash == 0 {
+		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	}
+	return res
+}
 
 func (iow *IOWriter) ToString(escape bool) string {
 	return "#object[IOWriter]"
@@ -28,7 +37,7 @@ func (iow *IOWriter) GetType() *Type {
 }
 
 func (iow *IOWriter) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(iow)))
+	return iow.hash
 }
 
 func (iow *IOWriter) WithInfo(info *ObjectInfo) Object {

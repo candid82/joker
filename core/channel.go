@@ -12,6 +12,7 @@ type (
 	Channel struct {
 		ch       chan FutureResult
 		isClosed bool
+		hash     uint32
 	}
 )
 
@@ -36,15 +37,19 @@ func (ch *Channel) GetType() *Type {
 }
 
 func (ch *Channel) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(ch)))
+	return ch.hash
 }
 
 func (ch *Channel) WithInfo(info *ObjectInfo) Object {
 	return ch
 }
 
-func MakeChannel(ch chan FutureResult) *Channel {
-	return &Channel{ch: ch}
+func MakeChannel(ch chan FutureResult, hash uint32) *Channel {
+	res := &Channel{ch: ch, hash: hash}
+	if hash == 0 {
+		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	}
+	return res
 }
 
 func ExtractChannel(args []Object, index int) *Channel {
