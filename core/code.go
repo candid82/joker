@@ -233,6 +233,13 @@ func (kw Keyword) AsGo() string {
 	panic("empty keyword")
 }
 
+func (oi ObjectInfo) AsGo() string {
+	if res, ok := infoHolderNameAsGo(oi); ok {
+		return "objectInfo_" + res
+	}
+	panic("could not make useful name out of ObjectInfo")
+}
+
 func (v Var) AsGo() string {
 	name := symAsGo(v.name)
 	if v.ns != nil {
@@ -325,19 +332,16 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	if !yes || sf.Anonymous {
 		return "", false
 	}
+	filename := ""
 	filenamePtr := UnsafeReflectValue(v.FieldByName("filename"))
-	if filenamePtr.IsZero() || filenamePtr.IsNil() {
-		return "", false
-	}
-	filename := filenamePtr.Elem().Interface().(string)
-	if filename != "<joker.core>" { // TODO: Support other namespaces
-		return "", false
+	if !(filenamePtr.IsZero() || filenamePtr.IsNil()) {
+		filename = "_" + NameAsGo(filenamePtr.Elem().Interface().(string))
 	}
 	startLine := UnsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
 	startColumn := UnsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
 	endLine := UnsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
 	endColumn := UnsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
-	return fmt.Sprintf("%d_%d__%d_%d", startLine, startColumn, endLine, endColumn), true
+	return fmt.Sprintf("%d_%d__%d_%d%s", startLine, startColumn, endLine, endColumn, filename), true
 }
 
 func UniqueId(obj, actual interface{}) (id string) {
@@ -920,12 +924,13 @@ func emitMap(target string, typedTarget bool, m Map, env *CodeEnv) string {
 }
 
 var spewConfig = &spew.ConfigState{
-	Indent:       "",
-	MaxDepth:     10,
-	SortKeys:     true,
-	SpewKeys:     true,
-	NoDuplicates: true,
-	UseOrdinals:  true,
+	Indent:         "",
+	MaxDepth:       10,
+	SortKeys:       true,
+	SpewKeys:       true,
+	NoDuplicates:   true,
+	UseOrdinals:    true,
+	DisableMethods: true,
 }
 
 func (l *List) Emit(target string, actualPtr interface{}, env *CodeEnv) string {

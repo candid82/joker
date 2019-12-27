@@ -164,7 +164,7 @@ var %s string = %s`[1:],
 
 	typeMappings := []string{}
 	typeFields := []string{}
-	for s, _ := range TYPES {
+	for s, ty := range TYPES {
 		name := NameAsGo(*s)
 		strName := "s_" + name
 		typeName := "type_" + name
@@ -175,8 +175,8 @@ var %s string = %s`[1:],
 	%s: &%s,`[1:],
 			name, typeName))
 		statics = append(statics, fmt.Sprintf(`
-var %s Type = %s`[1:],
-			typeName, "Type{}"))
+var %s Type = Type{%s}`[1:],
+			typeName, genEnv.emitMembers(name, *ty)))
 	}
 	sort.Strings(typeMappings)
 	sort.Strings(typeFields)
@@ -289,21 +289,28 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		return ""
 	}
 	switch v.Kind() {
-	case reflect.Bool:
-		if v.Bool() {
-			return "true"
+	case reflect.Interface:
+		if v.IsNil() {
+			return ""
 		}
-		return "false"
-	case reflect.Uint32:
-		return fmt.Sprintf("%d", v.Uint())
-	case reflect.String:
-		return "s_" + NameAsGo(v.String())
+		return genEnv.emitValue(v.Elem())
 	case reflect.Ptr:
 		res := genEnv.emitValue(v.Elem())
 		if res == "" {
 			return ""
 		}
 		return "&" + res
+	case reflect.Bool:
+		if v.Bool() {
+			return "true"
+		}
+		return "false"
+	case reflect.Slice, reflect.Array:
+		return "{\n" + genEnv.emitSlice(v) + "\n}"
+	case reflect.Uint32:
+		return fmt.Sprintf("%d", v.Uint())
+	case reflect.String:
+		return "s_" + NameAsGo(v.String())
 	case reflect.Struct:
 		typeName := coreTypeName(v)
 		obj := v.Interface()
@@ -320,9 +327,39 @@ var %s %s = %s{
 			genEnv.Generated[name] = struct{}{}
 		}
 		return name
+	case reflect.Map:
+		typeName := coreTypeName(v)
+		obj := v.Interface()
+		if obj == nil {
+			return ""
+		}
+		name := uniqueId(obj)
+		if _, yes := genEnv.Generated[name]; !yes {
+			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+var %s %s = %s{
+	%s
+}`[1:],
+				name, typeName, typeName, strings.Join(genEnv.emitMembers(typeName, obj), "\n")))
+			genEnv.Generated[name] = struct{}{}
+		}
+		return name
 	default:
-		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s vt=%s */", v.Interface(), v, v.Type())
+		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
+}
+
+func (genEnv *GenEnv) emitSlice(v reflect.Value) string {
+	numEntries := v.Len()
+	el := []string{}
+	for i := 0; i < numEntries; i++ {
+		res := genEnv.emitValue(v.Index(i))
+		if res == "" {
+			res = "\tnil,"
+		} else {
+			res = "\t" + res + ","
+		}
+	}
+	return strings.Join(el, "\n")
 }
 
 func coreTypeName(v reflect.Value) string {
