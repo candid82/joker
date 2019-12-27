@@ -92,6 +92,7 @@ var (
 		try:          STRINGS.Intern("try"),
 		coreFilename: STRINGS.Intern("<joker.core>"),
 	}
+	SPECIAL_SYMBOLS = make(map[*string]bool)
 )
 
 func init() {

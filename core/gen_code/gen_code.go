@@ -285,12 +285,17 @@ func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (fields []string
 
 func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 	v = UnsafeReflectValue(v)
+	if v.IsZero() {
+		return ""
+	}
 	switch v.Kind() {
 	case reflect.Bool:
 		if v.Bool() {
 			return "true"
 		}
 		return "false"
+	case reflect.Uint32:
+		return fmt.Sprintf("%d", v.Uint())
 	case reflect.String:
 		return "s_" + NameAsGo(v.String())
 	case reflect.Ptr:
@@ -302,6 +307,9 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 	case reflect.Struct:
 		typeName := coreTypeName(v)
 		obj := v.Interface()
+		if obj == nil {
+			return ""
+		}
 		name := uniqueId(obj)
 		if _, yes := genEnv.Generated[name]; !yes {
 			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
@@ -313,7 +321,7 @@ var %s %s = %s{
 		}
 		return name
 	default:
-		return fmt.Sprintf("nil /* UNKNOWN TYPE %s */", v)
+		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s vt=%s */", v.Interface(), v, v.Type())
 	}
 }
 
@@ -322,18 +330,5 @@ func coreTypeName(v reflect.Value) string {
 }
 
 func uniqueId(obj interface{}) string {
-	ty := coreTypeName(reflect.ValueOf(obj))
-	switch ty {
-	case "Symbol":
-		return UniqueId(obj.(Symbol), nil)
-	case "Keyword":
-		return UniqueId(obj.(Keyword), nil)
-	case "Var":
-		return UniqueId(obj.(Var), nil)
-	case "VarRefExpr":
-		return UniqueId(obj.(VarRefExpr), nil)
-	default:
-		fmt.Printf("uniqueId(%s)\n", ty)
-	}
 	return UniqueId(obj, nil)
 }

@@ -141,6 +141,7 @@ var tr = [][2]string{
 	{".", "DOT"},
 	{"%", "PCT"},
 	{".", "DOT"},
+	{":", "COLON"},
 }
 
 func NameAsGo(name string) string {
@@ -203,15 +204,33 @@ func ptrTo(s string) string {
 }
 
 func symAsGo(sym Symbol) string {
-	name := NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
+	name := "_EMPTY_"
+	if sym.name != nil {
+		name = NameAsGo(strings.ReplaceAll(sym.ToString(false), "/", "_FW_"))
+	}
+	if sym.info == nil {
+		return name
+	}
 	return fmt.Sprintf("%s_%d_%d__%d_%d", name, sym.info.startLine, sym.info.startColumn, sym.info.endLine, sym.info.endColumn)
 }
 
 func (sym Symbol) AsGo() string {
-	if sym.name != nil {
-		return "symbol_" + symAsGo(sym)
+	return "symbol_" + symAsGo(sym)
+}
+
+func kwAsGo(kw Keyword) string {
+	name := NameAsGo(strings.ReplaceAll(strings.ReplaceAll(kw.ToString(false), "/", "_FW_"), ":", ""))
+	if kw.info == nil {
+		return name
 	}
-	panic("empty symbol")
+	return fmt.Sprintf("%s_%d_%d__%d_%d", name, kw.info.startLine, kw.info.startColumn, kw.info.endLine, kw.info.endColumn)
+}
+
+func (kw Keyword) AsGo() string {
+	if kw.name != nil {
+		return "keyword_" + kwAsGo(kw)
+	}
+	panic("empty keyword")
 }
 
 func (v Var) AsGo() string {
@@ -338,6 +357,10 @@ func UniqueId(obj, actual interface{}) (id string) {
 				id = fmt.Sprintf("%s_%p_%d", id, actual, h.Sum32())
 			} else {
 				id = fmt.Sprintf("%s_%d", id, h.Sum32())
+			}
+			origType := reflect.TypeOf(obj).String()
+			if origType == "core.Keyword" || origType == "core.Symbol" {
+				fmt.Printf("UniqueId: Using %s for %s due to %s\n", id, origType, r)
 			}
 		}
 	}()

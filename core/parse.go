@@ -254,16 +254,15 @@ type (
 )
 
 var (
-	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
-	LOCAL_BINDINGS  *Bindings = nil
-	SPECIAL_SYMBOLS           = make(map[*string]bool)
-	KNOWN_MACROS    *Var
-	REQUIRE_VAR     *Var
-	ALIAS_VAR       *Var
-	REFER_VAR       *Var
-	CREATE_NS_VAR   *Var
-	IN_NS_VAR       *Var
-	WARNINGS        = Warnings{
+	GLOBAL_ENV               = NewEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
+	LOCAL_BINDINGS *Bindings = nil
+	KNOWN_MACROS   *Var
+	REQUIRE_VAR    *Var
+	ALIAS_VAR      *Var
+	REFER_VAR      *Var
+	CREATE_NS_VAR  *Var
+	IN_NS_VAR      *Var
+	WARNINGS       = Warnings{
 		fnWithEmptyBody: true,
 		entryPoints:     EmptySet(),
 	}
