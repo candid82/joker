@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -81,7 +80,6 @@ func {name}Init() {
 
 		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
 		codeFile := fmt.Sprintf(codePattern, name)
-		dataFile := fmt.Sprintf(dataPattern, name)
 
 		if codeFile <= masterFile {
 			panic(fmt.Sprintf("I think Go initializes file-scopes vars alphabetically by filename, so %s must come after %s due to dependencies; rename accordingly",
@@ -89,8 +87,6 @@ func {name}Init() {
 		}
 		fileContent := strings.Replace(strings.Replace(strings.ReplaceAll(fileTemplate, "{name}", name), "{statics}", statics, 1), "{interns}", interns, 1)
 		ioutil.WriteFile(codeFile, []byte(fileContent), 0666)
-
-		os.Remove(dataFile)
 
 		break // TODO: Process more than just core.joke
 	}
