@@ -796,11 +796,10 @@ func (sym Symbol) Emit(target string, actualPtr interface{}, env *CodeEnv) strin
 			f))
 	}
 
-	if sym.hash != 0 && (notNil(strNs) || notNil(strName)) {
-		f = fmt.Sprintf(`
-	hash: hashSymbol(%s, %s)`[1:],
-			ptrTo(strNs), ptrTo(strName))
-		fields = append(fields, f)
+	if sym.hash != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	hash: %d,`[1:],
+			sym.hash))
 	}
 
 	f = joinStatics(fields)
@@ -1119,9 +1118,12 @@ func (b *BufferedReader) Emit(target string, actualPtr interface{}, env *CodeEnv
 		env.CodeWriterEnv.Generated[name] = b
 		fields := []string{}
 
-		// if b != nil && b.Reader != nil && b.Reader.Fd() != os.Stdin {
-		// 	panic(fmt.Sprintf("hey that is not right, it is %v", *b))
-		// }
+		if b.hash != 0 {
+			fields = append(fields, fmt.Sprintf(`
+	hash: %d,`[1:],
+				b.hash))
+
+		}
 
 		f := strings.Join(fields, "\n")
 		if !IsGoExprEmpty(f) {
@@ -1243,6 +1245,11 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 	if initName != "" {
 		fields = append(fields, initName)
 	}
+	if k.hash != 0 {
+		fields = append(fields, fmt.Sprintf(`
+	hash: %d,`[1:],
+			k.hash))
+	}
 
 	f := strings.Join(fields, "\n")
 	if !IsGoExprEmpty(f) {
@@ -1253,14 +1260,6 @@ func (k Keyword) Finish(name string, env *CodeEnv) string {
 var %s Keyword = Keyword{%s}
 `[1:],
 		name, f)
-
-	runtime := fmt.Sprintf(`
-	/* 01 */ %s.hash = hashSymbol(%s, %s)
-`[1:],
-		name, ptrTo(strNs), ptrTo(strName))
-	env.Runtime = append(env.Runtime, func(s string) func() string {
-		return func() string { return s }
-	}(runtime))
 
 	return static
 }
