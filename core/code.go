@@ -438,8 +438,13 @@ func infoHolder(target string, i InfoHolder, env *CodeEnv) string {
 	if IsGoExprEmpty(res) {
 		return res
 	}
+	if !notNil(res) {
+		return ""
+	}
 	return fmt.Sprintf(`
-	InfoHolder: InfoHolder{info: %s},`[1:],
+	InfoHolder: InfoHolder{
+	%s,
+},`[1:],
 		res)
 }
 
