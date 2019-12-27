@@ -2,23 +2,24 @@
 
 [ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=false
 [ -z "$KEEP_A_DATA_FILES" ] && KEEP_A_DATA_FILES=false
+[ -z "$OPTIMIZE_STARTUP" ] && OPTIMIZE_STARTUP=$([ -f OPTIMIZE-STARTUP.flag ] && echo true || echo false)
 
 build() {
   go clean
   $KEEP_A_CODE_FILES || rm -fv core/a_*code.go
   $KEEP_A_DATA_FILES || rm -fv core/a_*data.go
   go generate ./...
-  [ -f OPTIMIZE-STARTUP.flag ] && (cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
   (cd core; go run gen_data/gen_data.go)
+  $OPTIMIZE_STARTUP && ("Optimizing startup time..."; cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
   go vet ./...
-  go build
+  go build $BUILD_ARGS
 }
 
 set -e  # Exit on error.
 
 build
 
-#$KEEP_A_CODE_FILES && exit 0  # Going further than this does not yet work
+$KEEP_A_CODE_FILES && exit 0  # Going further than this does not yet work
 
 if [ "$1" == "-v" ]; then
   ./joker -e '(print "\nLibraries available in this build:\n  ") (loaded-libs) (println)'
