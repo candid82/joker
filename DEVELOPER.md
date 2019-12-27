@@ -143,3 +143,9 @@ This circular dependency is avoided, in practice, by ensuring that any `std/*/a_
 However, a `std/*.joke` file therefore cannot depend on any `core/data/*.joke`-defined namespace that, in turn, requires `gen_data.go` to import its `std/*/a_*.go` file.
 
 So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`, `std/string.joke` does not depend on them, and preexisted their being added to the core namespaces.
+
+## Faster Startup
+
+```
+grep --color -nH --null -E -e '^(func init\(|var )' *.go ../*.go ../std/*/*.go | grep -v ' ProcFn = '
+```

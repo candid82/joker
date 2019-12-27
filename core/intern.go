@@ -9,8 +9,6 @@ type (
 	StringPool map[string]*string
 )
 
-var STRINGS StringPool = StringPool{}
-
 func (p StringPool) Intern(s string) *string {
 	ss, exists := p[s]
 	if exists {
