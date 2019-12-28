@@ -64,7 +64,7 @@ func main() {
 			if _, exists := envForNs[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
-			fmt.Printf("FOUND ns=%s file=%s\n", nsName, f.Filename)
+			fmt.Printf("FOUND ns=%s file=%s mappings=%d\n", nsName, f.Filename, len(ns.Mappings()))
 			for k, v := range ns.Mappings() {
 				env.BaseMappings[k] = v
 			}
@@ -75,6 +75,9 @@ func main() {
 		envForNs[nsName] = env
 
 		ProcessCoreSourceFileFor(f.Name)
+
+		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
+		fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 
 		if false {
 			break // TODO: Handle this differently, or at least later than a_code.go generation
@@ -105,11 +108,11 @@ func {name}Init() {
 
 		env := envForNs[nsName]
 		if env == nil {
-			fmt.Printf("SKIPPING ns=%s\n", nsName)
+			fmt.Printf("SKIPPING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			continue
 		}
 
-		fmt.Printf("EMITTING ns=%s\n", nsName)
+		fmt.Printf("EMITTING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		env.Emit()
 
 		statics, interns := env.Statics, env.Interns
