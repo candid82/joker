@@ -235,3 +235,11 @@ func (ns *Namespace) Resolve(name string) *Var {
 func (ns *Namespace) Mappings() map[*string]*Var {
 	return ns.mappings
 }
+
+// Convert e.g. "<joker.core>" to "joker.core". Panic if not "<*>".
+func CoreNameAsNamespaceName(s string) string {
+	if s[0] != '<' || s[len(s)-1] != '>' {
+		panic(fmt.Sprintf("Invalid syntax for core source file namespace id: `%s'", s))
+	}
+	return s[1 : len(s)-1]
+}

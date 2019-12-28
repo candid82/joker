@@ -1107,9 +1107,6 @@ func (io *IOWriter) Emit(target string, actualPtr interface{}, env *CodeEnv) str
 }
 
 func (ns *Namespace) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
-	if *ns.Name.name != "joker.core" {
-		panic(fmt.Sprintf("code.go: (*Namespace)Emit() supports only ns=joker.core, not =%s\n", *ns.Name.name))
-	}
 	nsFn := func() string {
 		return fmt.Sprintf(`
 	/* 01 */ %s = _ns

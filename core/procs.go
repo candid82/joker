@@ -114,6 +114,7 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 }
 
 var CoreSourceFileInfo = map[string]*internalNamespaceInfo{}
+var CoreSourceFilename = map[string]string{}
 
 func ProcessCoreSourceFileFor(ns string) {
 	processNamespaceInfo(CoreSourceFileInfo[ns], ns)
@@ -218,14 +219,12 @@ func InitInternalLibs() {
 		"joker.better-cond": &better_condNamespaceInfo,
 	}
 	for _, f := range CoreSourceFiles {
-		if f.Name[0] != '<' || f.Name[len(f.Name)-1] != '>' {
-			panic(fmt.Sprintf("Invalid syntax for core source file namespace id: `%s'", f.Name))
-		}
-		ns := f.Name[1 : len(f.Name)-1]
+		ns := CoreNameAsNamespaceName(f.Name)
 		if _, found := CoreSourceFileInfo[ns]; found {
 			continue // Linter stuff, not yet supported by gen_code.go
 		}
 		CoreSourceFileInfo[f.Name] = internalLibs[ns]
+		CoreSourceFilename[f.Name] = f.Filename
 	}
 }
 
@@ -2004,11 +2003,11 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 }
 
 func ProcessCoreNamespaceInfo() {
-	processNamespaceInfo(&coreNamespaceInfo, "joker.core")
+	processNamespaceInfo(&coreNamespaceInfo, "<joker.core>")
 }
 
 func ProcessReplNamespaceInfo() {
-	processNamespaceInfo(&replNamespaceInfo, "joker.repl")
+	processNamespaceInfo(&replNamespaceInfo, "<joker.repl>")
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
