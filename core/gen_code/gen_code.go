@@ -317,7 +317,7 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		}
 		return "false"
 	case reflect.Slice, reflect.Array:
-		return "{\n" + genEnv.emitSlice(v) + "\n}"
+		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), genEnv.emitSlice(v))
 	case reflect.Uint32:
 		return fmt.Sprintf("%d", v.Uint())
 	case reflect.String:
@@ -346,7 +346,7 @@ var %s %s = %s{%s}`[1:],
 		if _, yes := genEnv.Generated[name]; !yes {
 			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s{%s}`[1:],
-				name, typeName, typeName, joinMembers(genEnv.emitMembers(typeName, obj))))
+				name, typeName, typeName, genEnv.emitMembers(typeName, obj)))
 			genEnv.Generated[name] = struct{}{}
 		}
 		return name
@@ -392,7 +392,7 @@ func (genEnv *GenEnv) emitSlice(v reflect.Value) string {
 			res = "\t" + res + ","
 		}
 	}
-	return strings.Join(el, "\n")
+	return joinMembers(el)
 }
 
 func coreTypeName(v reflect.Value) string {
