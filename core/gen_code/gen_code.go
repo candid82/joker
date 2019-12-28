@@ -387,9 +387,9 @@ func (genEnv *GenEnv) emitSlice(v reflect.Value) string {
 	for i := 0; i < numEntries; i++ {
 		res := genEnv.emitValue(v.Index(i))
 		if res == "" {
-			res = "\tnil,"
+			el = append(el, "\tnil,")
 		} else {
-			res = "\t" + res + ","
+			el = append(el, "\t"+res+",")
 		}
 	}
 	return joinMembers(el)
