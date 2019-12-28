@@ -219,12 +219,12 @@ func InitInternalLibs() {
 		"joker.better-cond": &better_condNamespaceInfo,
 	}
 	for _, f := range CoreSourceFiles {
-		ns := CoreNameAsNamespaceName(f.Name)
-		if _, found := CoreSourceFileInfo[ns]; found {
+		if _, found := CoreSourceFileInfo[f.Name]; found {
 			continue // Linter stuff, not yet supported by gen_code.go
 		}
+		ns := CoreNameAsNamespaceName(f.Name)
 		CoreSourceFileInfo[f.Name] = internalLibs[ns]
-		CoreSourceFilename[f.Name] = f.Filename
+		CoreSourceFilename[ns] = f.Filename
 	}
 }
 

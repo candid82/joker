@@ -64,17 +64,15 @@ func main() {
 			if _, exists := envForNs[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
-			fmt.Printf("FOUND ns=%s\n", nsName)
+			fmt.Printf("FOUND ns=%s file=%s\n", nsName, f.Filename)
 			for k, v := range ns.Mappings() {
 				env.BaseMappings[k] = v
 			}
 		} else {
-			fmt.Printf("READING ns=%s\n", nsName)
+			fmt.Printf("READING ns=%s file=%s\n", nsName, f.Filename)
 		}
 
 		envForNs[nsName] = env
-
-		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 
 		ProcessCoreSourceFileFor(f.Name)
 
@@ -116,7 +114,7 @@ func {name}Init() {
 
 		statics, interns := env.Statics, env.Interns
 
-		filename := CoreSourceFilename["<"+nsName+">"]
+		filename := CoreSourceFilename[nsName]
 		name := filename[0 : len(filename)-5] // assumes .joke extension
 		codeFile := fmt.Sprintf(codePattern, name)
 

@@ -576,9 +576,9 @@ func (env *CodeEnv) Emit() {
 
 	env.Runtime = append(env.Runtime, func() string {
 		return fmt.Sprintf(`
-	/* 00 */ _ns := GLOBAL_ENV.CurrentNamespace()
+	/* 00 */ _ns := GLOBAL_ENV.Namespaces[STRINGS.Intern(%s)]
 `[1:],
-		)
+			strconv.Quote(*GLOBAL_ENV.CurrentNamespace().Name.name))
 	})
 
 	for s, v := range env.Namespace.mappings {
