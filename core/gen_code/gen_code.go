@@ -281,7 +281,7 @@ func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (members []strin
 		numMembers := v.NumField()
 		for i := 0; i < numMembers; i++ {
 			vtf := vt.Field(i)
-			val := genEnv.emitValue(UnsafeReflectValue(v.Field(i)))
+			val := genEnv.emitValue(v.Field(i))
 			if val == "" {
 				continue
 			}
@@ -301,7 +301,7 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		return ""
 	}
 	if v.Type().PkgPath() == "reflect" {
-		return "nil"
+		return "nil" // TODO: Insert correct reflection info here
 	}
 	switch v.Kind() {
 	case reflect.Interface:
