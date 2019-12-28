@@ -80,7 +80,7 @@ func {name}Init() {
 
 		ProcessCoreSourceFileFor(f.Name)
 
-		if true {
+		if false {
 			break // TODO: Handle this differently, or at least later than a_code.go generation
 		}
 
@@ -218,6 +218,11 @@ func init() {
 
 package core
 
+import (
+	"io"
+	"reflect"
+)
+
 var KEYWORDS Keywords = Keywords{
 {keywordMembers}
 }
@@ -301,7 +306,13 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		return ""
 	}
 	if v.Type().PkgPath() == "reflect" {
-		return "nil" // TODO: Insert correct reflection info here
+		t := coreTypeString(fmt.Sprintf("%s", v))
+		el := ""
+		if t[0] != '*' {
+			t = "*" + t
+			el = ".Elem()"
+		}
+		return fmt.Sprintf("reflect.TypeOf((%s)(nil))%s", t, el) // TODO: Insert correct reflection info here
 	}
 	switch v.Kind() {
 	case reflect.Interface:
@@ -395,12 +406,16 @@ func (genEnv *GenEnv) emitSlice(v reflect.Value) string {
 	return joinMembers(el)
 }
 
+func coreTypeString(s string) string {
+	return strings.Replace(s, "core.", "", 1)
+}
+
 func coreTypeName(v reflect.Value) string {
-	return strings.Replace(v.Type().String(), "core.", "", 1)
+	return coreTypeString(v.Type().String())
 }
 
 func uniqueId(obj interface{}) string {
-	return UniqueId(obj, nil)
+	return "g_" + UniqueId(obj, nil) // TODO: Remove "g_" prefix when no more collisions (with e.g. a_core_code.go) are expected
 }
 
 func joinMembers(members []string) string {
