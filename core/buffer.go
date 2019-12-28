@@ -12,11 +12,9 @@ type (
 	}
 )
 
-func MakeBuffer(b *bytes.Buffer, hash uint32) *Buffer {
-	res := &Buffer{b, hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeBuffer(b *bytes.Buffer) *Buffer {
+	res := &Buffer{b, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 
