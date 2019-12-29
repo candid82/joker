@@ -28,7 +28,7 @@ set -x  # Echo commands
 
 $time go run gen_data/gen_data.go
 
-$time go run gen_code/gen_code.go
+$time go run gen_code/gen_code.go --verbose
 
 $time go fmt a_*.go
 

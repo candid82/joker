@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -33,6 +34,36 @@ func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	}
 }
 
+func parseArgs(args []string) {
+	length := len(args)
+	stop := false
+	missing := false
+	var i int
+	for i = 1; i < length; i++ { // shift
+		switch args[i] {
+		case "--verbose":
+			Verbose++
+		default:
+			if strings.HasPrefix(args[i], "-") {
+				fmt.Fprintf(Stderr, "Error: Unrecognized option '%s'\n", args[i])
+				os.Exit(2)
+			}
+			stop = true
+		}
+		if stop || missing {
+			break
+		}
+	}
+	if missing {
+		fmt.Fprintf(Stderr, "Error: Missing argument for '%s' option\n", args[i])
+		os.Exit(3)
+	}
+	if i < length {
+		fmt.Fprintf(Stderr, "Error: Extranous command-line argument '%s'\n", args[i])
+		os.Exit(4)
+	}
+}
+
 func main() {
 	// Hashmaps depend on the hashes of objects to find keys;
 	// whereas this code (code.go, mainly) depends on stability of
@@ -40,6 +71,8 @@ func main() {
 	// pointers, they're not always stable. So don't generate
 	// hashmaps! TODO: Try removing this after other stuff done.
 	HASHMAP_THRESHOLD = math.MaxInt64
+
+	parseArgs(os.Args)
 
 	codeWriterEnv := &CodeWriterEnv{
 		BaseStrings: StringPool{},

@@ -439,9 +439,9 @@ func notOption(arg string) bool {
 }
 
 func parseArgs(args []string) {
-	if len(os.Args) > 1 {
+	if len(args) > 1 {
 		// peek to see if the first arg is "--debug*"
-		switch os.Args[1] {
+		switch args[1] {
 		case "--debug", "--debug=stderr":
 			debugOut = Stderr
 		case "--debug=stdout":
@@ -477,7 +477,7 @@ func parseArgs(args []string) {
 		case "--debug=stdout":
 			debugOut = Stdout
 		case "--verbose":
-			Verbose = true
+			Verbose++
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else
@@ -695,7 +695,7 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
-	if Verbose {
+	if Verbose > 0 {
 		GLOBAL_ENV.SetVerbose(Verbose)
 	}
 	GLOBAL_ENV.Trace = trace

@@ -12,7 +12,7 @@ var (
 	Stdin   io.Reader = os.Stdin
 	Stdout  io.Writer = os.Stdout
 	Stderr  io.Writer = os.Stderr
-	Verbose           = false
+	Verbose           = 0
 )
 
 type (
@@ -75,8 +75,8 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
-func (env *Env) SetVerbose(verbose bool) {
-	env.verbose.Value = Boolean{B: verbose}
+func (env *Env) SetVerbose(verbose int) {
+	env.verbose.Value = Int{I: verbose}
 }
 
 const stdinHashValue uint32 = 0x1fc542bb
@@ -122,7 +122,7 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
 	res.verbose = res.CoreNamespace.Intern(MakeSymbol("*verbose*"))
-	res.verbose.Value = Boolean{B: false}
+	res.verbose.Value = Int{I: 0}
 	res.verbose.isPrivate = true
 	return res
 }
