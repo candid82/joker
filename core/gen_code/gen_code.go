@@ -28,7 +28,6 @@ func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
 		CodeWriterEnv: cwe,
 		BaseMappings:  map[*string]*Var{},
-		Namespace:     GLOBAL_ENV.CoreNamespace,
 		Need:          map[string]Finisher{},
 		Generated:     map[interface{}]interface{}{},
 	}
@@ -78,6 +77,7 @@ func main() {
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 		fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+		env.Namespace = ns
 
 		if false {
 			break // TODO: Handle this differently, or at least later than a_code.go generation
