@@ -1853,6 +1853,7 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.file.Value = String{S: s}
 	}
+	defer func() { finalizeNamespace() }()
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
@@ -1960,20 +1961,18 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 	}
 }
 
-func finalizeNamespace(name string) {
+func finalizeNamespace() {
 	if Verbose < 1 {
 		return
 	}
-	name = CoreNameAsNamespaceName(name)
-	namePtr := STRINGS.Intern(name)
-	ns := GLOBAL_ENV.Namespaces[namePtr]
-	fmt.Printf("PROCESSED ns=%s mappings=%d\n", name, len(ns.Mappings()))
+	ns := GLOBAL_ENV.CurrentNamespace()
+	fmt.Printf("PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.Mappings()))
 }
 
 func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
-	defer func() { finalizeNamespace(name); GLOBAL_ENV.SetCurrentNamespace(ns) }()
+	defer func() { finalizeNamespace(); GLOBAL_ENV.SetCurrentNamespace(ns) }()
 	if !info.available {
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
 	}

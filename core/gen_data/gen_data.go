@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -37,7 +38,39 @@ func {name}Init() {
 
 const hextable = "0123456789abcdef"
 
+func parseArgs(args []string) {
+	length := len(args)
+	stop := false
+	missing := false
+	var i int
+	for i = 1; i < length; i++ { // shift
+		switch args[i] {
+		case "--verbose":
+			Verbose++
+		default:
+			if strings.HasPrefix(args[i], "-") {
+				fmt.Fprintf(Stderr, "Error: Unrecognized option '%s'\n", args[i])
+				os.Exit(2)
+			}
+			stop = true
+		}
+		if stop || missing {
+			break
+		}
+	}
+	if missing {
+		fmt.Fprintf(Stderr, "Error: Missing argument for '%s' option\n", args[i])
+		os.Exit(3)
+	}
+	if i < length {
+		fmt.Fprintf(Stderr, "Error: Extranous command-line argument '%s'\n", args[i])
+		os.Exit(4)
+	}
+}
+
 func main() {
+	parseArgs(os.Args)
+
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	for _, f := range CoreSourceFiles {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
