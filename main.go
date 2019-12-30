@@ -189,15 +189,6 @@ func srepl(port string, phase Phase) {
 		ExitJoker(13)
 	}
 
-	// *in* is a different object than *out* and *err*, though the
-	// latter two are the same and have the same underlying
-	// connection. So this replicates what Clojure itself does,
-	// for the case of a single sRepl during the lifetime of the
-	// process. But if Joker ever supports more than one sRepl, it
-	// should use a different set of values for each.
-	const sreplInHash uint32 = 0x9bdec07f
-	const sreplOutHash uint32 = 0x72274f55
-
 	oldStdIn := Stdin
 	oldStdOut := Stdout
 	oldStdErr := Stderr
@@ -205,8 +196,9 @@ func srepl(port string, phase Phase) {
 	Stdin = conn
 	Stdout = conn
 	Stderr = conn
-	newOut := MakeIOWriter(conn, sreplOutHash)
-	GLOBAL_ENV.SetStdIO(MakeBufferedReader(conn, sreplInHash), newOut, newOut)
+	newIn := MakeBufferedReader(conn, 0)
+	newOut := MakeIOWriter(conn, 0)
+	GLOBAL_ENV.SetStdIO(newIn, newOut, newOut)
 	defer func() {
 		conn.Close()
 		Stdin = oldStdIn
