@@ -189,19 +189,24 @@ func srepl(port string, phase Phase) {
 		ExitJoker(13)
 	}
 
+	const sreplInHash uint32 = 0x9bdec07f
+	const sreplOutHash uint32 = 0x72274f55
+
 	oldStdIn := Stdin
 	oldStdOut := Stdout
 	oldStdErr := Stderr
+	oldStdinValue, oldStdoutValue, oldStderrValue := GLOBAL_ENV.StdIO()
 	Stdin = conn
 	Stdout = conn
 	Stderr = conn
-	GLOBAL_ENV.SetStdIO(Stdin, Stdout, Stderr)
+	newOut := MakeIOWriter(conn, sreplOutHash)
+	GLOBAL_ENV.SetStdIO(MakeBufferedReader(conn, sreplInHash), newOut, newOut)
 	defer func() {
 		conn.Close()
 		Stdin = oldStdIn
 		Stdout = oldStdOut
 		Stderr = oldStdErr
-		GLOBAL_ENV.SetStdIO(Stdin, Stdout, Stderr)
+		GLOBAL_ENV.SetStdIO(oldStdinValue, oldStdoutValue, oldStderrValue)
 	}()
 
 	fmt.Printf("Joker repl accepting client at %s...\n", conn.RemoteAddr())
