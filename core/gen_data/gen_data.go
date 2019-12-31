@@ -69,6 +69,8 @@ func parseArgs(args []string) {
 }
 
 func main() {
+	GLOBAL_ENV.InitEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
+
 	parseArgs(os.Args)
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)

@@ -686,6 +686,8 @@ func main() {
 		os.Exit(code)
 	})
 
+	GLOBAL_ENV.InitEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
+
 	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
 
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl

@@ -254,7 +254,6 @@ type (
 )
 
 var (
-	GLOBAL_ENV               = NewEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
 	LOCAL_BINDINGS *Bindings = nil
 	KNOWN_MACROS   *Var
 	REQUIRE_VAR    *Var

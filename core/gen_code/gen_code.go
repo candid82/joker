@@ -72,6 +72,8 @@ func main() {
 	// hashmaps! TODO: Try removing this after other stuff done.
 	HASHMAP_THRESHOLD = math.MaxInt64
 
+	GLOBAL_ENV.InitEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
+
 	parseArgs(os.Args)
 
 	codeWriterEnv := &CodeWriterEnv{

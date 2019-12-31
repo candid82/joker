@@ -3,7 +3,8 @@
 package core
 
 var (
-	KEYWORDS = Keywords{
+	GLOBAL_ENV = NewEnv()
+	KEYWORDS   = Keywords{
 		tag:                MakeKeyword("tag"),
 		skipUnused:         MakeKeyword("skip-unused"),
 		private:            MakeKeyword("private"),
