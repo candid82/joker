@@ -582,6 +582,9 @@ func (env *CodeEnv) Emit() {
 	})
 
 	for s, v := range env.Namespace.mappings {
+		if v.ns != env.Namespace {
+			continue
+		}
 		name := UniqueId(v, nil)
 		symName := noBang(v.name.Emit("", nil, env))
 
