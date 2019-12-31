@@ -79,10 +79,6 @@ func (env *Env) SetVerbose(verbose int) {
 	env.verbose.Value = Int{I: verbose}
 }
 
-const stdinHashValue uint32 = 0x1fc542bb
-const stdoutHashValue uint32 = 0xef3ebf05
-const stderrHashValue uint32 = 0xbfa32704
-
 /* Called by parse.go in an outer var block, this runs before func main(). */
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
@@ -99,11 +95,11 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = MakeBufferedReader(stdin, stdinHashValue)
+	res.stdin.Value = MakeBufferedReader(stdin)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = MakeIOWriter(stdout, stdoutHashValue)
+	res.stdout.Value = MakeIOWriter(stdout)
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = MakeIOWriter(stderr, stderrHashValue)
+	res.stderr.Value = MakeIOWriter(stderr)
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.MainFile = res.CoreNamespace.Intern(MakeSymbol("*main-file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
@@ -127,10 +123,14 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	return res
 }
 
-func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
-	env.stdin.Value = MakeBufferedReader(stdin, stdinHashValue)
-	env.stdout.Value = MakeIOWriter(stdout, stdoutHashValue)
-	env.stderr.Value = MakeIOWriter(stderr, stderrHashValue)
+func (env *Env) SetStdIO(stdin, stdout, stderr Object) {
+	env.stdin.Value = stdin
+	env.stdout.Value = stdout
+	env.stderr.Value = stderr
+}
+
+func (env *Env) StdIO() (stdin, stdout, stderr Object) {
+	return env.stdin.Value, env.stdout.Value, env.stderr.Value
 }
 
 func (env *Env) IsStdIn(obj Object) bool {

@@ -1489,15 +1489,15 @@ const bufferHashMask uint32 = 0x5ed19e84
 var procBuffer ProcFn = func(args []Object) Object {
 	if len(args) > 0 {
 		s := EnsureString(args, 0)
-		return MakeBuffer(bytes.NewBufferString(s.S), s.Hash()^bufferHashMask)
+		return MakeBuffer(bytes.NewBufferString(s.S))
 	}
-	return MakeBuffer(&bytes.Buffer{}, 0)
+	return MakeBuffer(&bytes.Buffer{})
 }
 
 var procBufferedReader ProcFn = func(args []Object) Object {
 	switch rdr := args[0].(type) {
 	case io.Reader:
-		return MakeBufferedReader(rdr, 0)
+		return MakeBufferedReader(rdr)
 	default:
 		panic(RT.NewArgTypeError(0, args[0], "IOReader"))
 	}
@@ -1716,7 +1716,7 @@ var procCreateChan ProcFn = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	n := EnsureInt(args, 0)
 	ch := make(chan FutureResult, n.I)
-	return MakeChannel(ch, 0)
+	return MakeChannel(ch)
 }
 
 var procCloseChan ProcFn = func(args []Object) Object {
@@ -1766,7 +1766,7 @@ var procReceive ProcFn = func(args []Object) Object {
 var procGo ProcFn = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	f := EnsureCallable(args, 0)
-	ch := MakeChannel(make(chan FutureResult, 1), 0)
+	ch := MakeChannel(make(chan FutureResult, 1))
 	go func() {
 
 		defer func() {

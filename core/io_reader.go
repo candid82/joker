@@ -12,11 +12,9 @@ type (
 	}
 )
 
-func MakeIOReader(r io.Reader, hash uint32) *IOReader {
-	res := &IOReader{r, hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeIOReader(r io.Reader) *IOReader {
+	res := &IOReader{r, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 

@@ -13,11 +13,9 @@ type (
 	}
 )
 
-func MakeBufferedReader(rd io.Reader, hash uint32) *BufferedReader {
-	res := &BufferedReader{bufio.NewReader(rd), hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeBufferedReader(rd io.Reader) *BufferedReader {
+	res := &BufferedReader{bufio.NewReader(rd), 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 

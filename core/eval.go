@@ -136,11 +136,9 @@ func (s *Callstack) String() string {
 	return b.String()
 }
 
-func MakeEvalError(msg string, pos Position, rt *Runtime, hash uint32) *EvalError {
-	res := &EvalError{msg, pos, rt, hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeEvalError(msg string, pos Position, rt *Runtime) *EvalError {
+	res := &EvalError{msg, pos, rt, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 

@@ -16,8 +16,4 @@
     (is (= (hash :hey) 819820356))
     (is (= (hash :there) 1648208352))
     (is (= (hash ::you) 3944753178))
-    (is (= (hash :user/foo) 1616868817)))
-  (testing "stable stdio hashes"
-    (is (= (hash *in*) 533021371))
-    (is (= (hash *out*) 4013866757))
-    (is (= (hash *err*) 3215140612))))
+    (is (= (hash :user/foo) 1616868817))))

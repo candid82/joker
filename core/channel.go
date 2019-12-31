@@ -44,11 +44,9 @@ func (ch *Channel) WithInfo(info *ObjectInfo) Object {
 	return ch
 }
 
-func MakeChannel(ch chan FutureResult, hash uint32) *Channel {
-	res := &Channel{ch: ch, hash: hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeChannel(ch chan FutureResult) *Channel {
+	res := &Channel{ch: ch, hash: 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 
