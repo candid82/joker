@@ -435,10 +435,10 @@ func getHash() hash.Hash32 {
 
 func hashSymbol(ns, name *string) uint32 {
 	h := getHash()
-	b := make([]byte, 16)
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(name))))
-	binary.LittleEndian.PutUint64(b[8:], uint64(uintptr(unsafe.Pointer(ns))))
-	h.Write(b)
+	if ns != nil {
+		h.Write([]byte(*ns))
+	}
+	h.Write([]byte("/" + *name))
 	return h.Sum32()
 }
 
@@ -468,6 +468,8 @@ func (s BySymbolName) Less(i, j int) bool {
 	return s[i].ToString(false) < s[j].ToString(false)
 }
 
+const KeywordHashMask uint32 = 0x7334c790
+
 func MakeKeyword(nsname string) Keyword {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -475,7 +477,7 @@ func MakeKeyword(nsname string) Keyword {
 		return Keyword{
 			ns:   nil,
 			name: name,
-			hash: hashSymbol(nil, name),
+			hash: hashSymbol(nil, name) ^ KeywordHashMask,
 		}
 	}
 	ns := STRINGS.Intern(nsname[0:index])
@@ -483,7 +485,7 @@ func MakeKeyword(nsname string) Keyword {
 	return Keyword{
 		ns:   ns,
 		name: name,
-		hash: hashSymbol(ns, name),
+		hash: hashSymbol(ns, name) ^ KeywordHashMask,
 	}
 }
 

@@ -707,7 +707,7 @@ var procKeyword Proc = func(args []Object) Object {
 			return Keyword{
 				ns:   obj.ns,
 				name: obj.name,
-				hash: hashSymbol(obj.ns, obj.name),
+				hash: hashSymbol(obj.ns, obj.name) ^ KeywordHashMask,
 			}
 		default:
 			return NIL
@@ -721,7 +721,7 @@ var procKeyword Proc = func(args []Object) Object {
 	return Keyword{
 		ns:   ns,
 		name: name,
-		hash: hashSymbol(ns, name),
+		hash: hashSymbol(ns, name) ^ KeywordHashMask,
 	}
 }
 
@@ -1333,18 +1333,20 @@ var procArrayMap Proc = func(args []Object) Object {
 	return res
 }
 
+const bufferHashMask uint32 = 0x5ed19e84
+
 var procBuffer Proc = func(args []Object) Object {
 	if len(args) > 0 {
 		s := EnsureString(args, 0)
-		return &Buffer{bytes.NewBufferString(s.S)}
+		return MakeBuffer(bytes.NewBufferString(s.S))
 	}
-	return &Buffer{&bytes.Buffer{}}
+	return MakeBuffer(&bytes.Buffer{})
 }
 
 var procBufferedReader Proc = func(args []Object) Object {
 	switch rdr := args[0].(type) {
 	case io.Reader:
-		return &BufferedReader{bufio.NewReader(rdr)}
+		return MakeBufferedReader(rdr)
 	default:
 		panic(RT.NewArgTypeError(0, args[0], "IOReader"))
 	}

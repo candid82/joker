@@ -8,8 +8,15 @@ import (
 type (
 	IOReader struct {
 		io.Reader
+		hash uint32
 	}
 )
+
+func MakeIOReader(r io.Reader) *IOReader {
+	res := &IOReader{r, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	return res
+}
 
 func (ior *IOReader) ToString(escape bool) string {
 	return "#object[IOReader]"
@@ -28,7 +35,7 @@ func (ior *IOReader) GetType() *Type {
 }
 
 func (ior *IOReader) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(ior)))
+	return ior.hash
 }
 
 func (ior *IOReader) WithInfo(info *ObjectInfo) Object {

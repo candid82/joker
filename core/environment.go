@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -88,11 +87,11 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
 	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
+	res.stdin.Value = MakeBufferedReader(stdin)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &IOWriter{stdout}
+	res.stdout.Value = MakeIOWriter(stdout)
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = &IOWriter{stderr}
+	res.stderr.Value = MakeIOWriter(stderr)
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.MainFile = res.CoreNamespace.Intern(MakeSymbol("*main-file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
@@ -113,10 +112,14 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	return res
 }
 
-func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
-	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
-	env.stdout.Value = &IOWriter{stdout}
-	env.stderr.Value = &IOWriter{stderr}
+func (env *Env) SetStdIO(stdin, stdout, stderr Object) {
+	env.stdin.Value = stdin
+	env.stdout.Value = stdout
+	env.stderr.Value = stderr
+}
+
+func (env *Env) StdIO() (stdin, stdout, stderr Object) {
+	return env.stdin.Value, env.stdout.Value, env.stderr.Value
 }
 
 func (env *Env) IsStdIn(obj Object) bool {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unsafe"
 )
 
 type (
@@ -16,6 +15,7 @@ type (
 		aliases        map[*string]*Namespace
 		isUsed         bool
 		isGloballyUsed bool
+		hash           uint32
 	}
 )
 
@@ -59,14 +59,17 @@ func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
 }
 
 func (ns *Namespace) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(ns)))
+	return ns.hash
 }
+
+const nsHashMask uint32 = 0x90569f6f
 
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		Name:     sym,
 		mappings: make(map[*string]*Var),
 		aliases:  make(map[*string]*Namespace),
+		hash:     sym.Hash() ^ nsHashMask,
 	}
 }
 
