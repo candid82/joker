@@ -80,12 +80,11 @@ func (env *Env) SetVerbose(verbose int) {
 }
 
 /* This runs after invariant initialization, which includes calling NewEnv(). */
-func (env *Env) InitEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) {
-	env.ns.Value = env.EnsureNamespace(currentNs)
+func (env *Env) InitEnv(stdin io.Reader, stdout, stderr io.Writer, args []string) {
 	env.stdin.Value = MakeBufferedReader(stdin)
 	env.stdout.Value = MakeIOWriter(stdout)
 	env.stderr.Value = MakeIOWriter(stderr)
-	env.SetEnvArgs(os.Args[1:])
+	env.SetEnvArgs(args)
 }
 
 func (env *Env) SetStdIO(stdin, stdout, stderr Object) {

@@ -686,7 +686,7 @@ func main() {
 		os.Exit(code)
 	})
 
-	GLOBAL_ENV.InitEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
+	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 
 	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
 
