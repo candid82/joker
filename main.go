@@ -196,8 +196,8 @@ func srepl(port string, phase Phase) {
 	Stdin = conn
 	Stdout = conn
 	Stderr = conn
-	newIn := MakeBufferedReader(conn, 0)
-	newOut := MakeIOWriter(conn, 0)
+	newIn := MakeBufferedReader(conn)
+	newOut := MakeIOWriter(conn)
 	GLOBAL_ENV.SetStdIO(newIn, newOut, newOut)
 	defer func() {
 		conn.Close()

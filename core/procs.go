@@ -1344,7 +1344,7 @@ var procBuffer Proc = func(args []Object) Object {
 var procBufferedReader Proc = func(args []Object) Object {
 	switch rdr := args[0].(type) {
 	case io.Reader:
-		return MakeBufferedReader(rdr, 0)
+		return MakeBufferedReader(rdr)
 	default:
 		panic(RT.NewArgTypeError(0, args[0], "IOReader"))
 	}

@@ -12,11 +12,9 @@ type (
 	}
 )
 
-func MakeIOWriter(w io.Writer, hash uint32) *IOWriter {
-	res := &IOWriter{w, hash}
-	if hash == 0 {
-		res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
-	}
+func MakeIOWriter(w io.Writer) *IOWriter {
+	res := &IOWriter{w, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
 	return res
 }
 
