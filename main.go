@@ -804,7 +804,7 @@ func main() {
 		if saveForRepl {
 			reader = NewReader(&replayable{reader}, "<replay>")
 		}
-		if Verbose {
+		if Verbose > 1 {
 			Spew()
 		}
 		if err := ProcessReader(reader, "", phase); err != nil {

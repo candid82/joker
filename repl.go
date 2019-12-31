@@ -13,7 +13,7 @@ import (
 )
 
 func repl(phase Phase) {
-	if Verbose {
+	if Verbose > 1 {
 		Spew()
 	}
 	ProcessReplNamespaceInfo()
