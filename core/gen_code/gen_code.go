@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -177,80 +178,14 @@ func main() {
 		Generated: map[interface{}]interface{}{},
 	}
 
-	// for {
-	// 	needLen := len(codeWriterEnv.Need)
-
-	// 	for name, obj := range codeWriterEnv.Need {
-	// 		if _, ok := codeWriterEnv.Generated[name]; ok {
-	// 			continue
-	// 		}
-	// 		s := obj.Finish(name, env)
-	// 		codeWriterEnv.Generated[name] = struct{}{}
-	// 		if env.Interns != "" {
-	// 			panic(fmt.Sprintf("non-null interns for %s", masterFile))
-	// 		}
-	// 		if len(env.Need) != 0 {
-	// 			panic(fmt.Sprintf("non-null needs for %s", masterFile))
-	// 		}
-	// 		if s != "" {
-	// 			statics = append(statics, s)
-	// 		}
-	// 	}
-
-	// 	if len(codeWriterEnv.Need) <= needLen {
-	// 		break
-	// 	}
-	// 	fmt.Printf("ONE!! MORE!! TIME!! was %d now %d\n", needLen, len(env.Need))
-	// }
-
+	genEnv.emitVar("STR", STR)
 	genEnv.emitVar("STRINGS", STRINGS)
+	genEnv.emitVar("SYMBOLS", SYMBOLS)
+	genEnv.emitVar("SPECIAL_SYMBOLS", SPECIAL_SYMBOLS)
+	genEnv.emitVar("KEYWORDS", KEYWORDS)
+	genEnv.emitVar("TYPE", TYPE)
+	genEnv.emitVar("TYPES", TYPES)
 	genEnv.emitVar("GLOBAL_ENV", GLOBAL_ENV)
-
-	stringMappings := []string{}
-	for s, _ := range STRINGS {
-		q := strconv.Quote(s)
-		name := "s_" + NameAsGo(s)
-		stringMappings = append(stringMappings, fmt.Sprintf(`
-	%s: &%s,`[1:],
-			q, name))
-		statics = append(statics, fmt.Sprintf(`
-var %s string = %s`[1:],
-			name, q))
-	}
-	sort.Strings(stringMappings)
-
-	symbolMembers := genEnv.emitMembers("SYMBOLS", SYMBOLS)
-	sort.Strings(symbolMembers)
-
-	specialSymbolMappings := genEnv.emitMembers("SPECIAL_SYMBOLS", SPECIAL_SYMBOLS)
-	sort.Strings(specialSymbolMappings)
-
-	keywordMembers := genEnv.emitMembers("KEYWORDS", KEYWORDS)
-	sort.Strings(keywordMembers)
-
-	strMembers := genEnv.emitMembers("STR", STR)
-	sort.Strings(strMembers)
-
-	typeMappings := []string{}
-	typeMembers := []string{}
-	for s, ty := range TYPES {
-		name := NameAsGo(*s)
-		strName := "s_" + name
-		typeName := "type_" + name
-		typeMappings = append(typeMappings, fmt.Sprintf(`
-	&%s: &%s,`[1:],
-			strName, typeName))
-		typeMembers = append(typeMembers, fmt.Sprintf(`
-	%s: &%s,`[1:],
-			name, typeName))
-		members := joinMembers(genEnv.emitMembers(name, *ty))
-
-		statics = append(statics, fmt.Sprintf(`
-var %s Type = Type{%s}`[1:],
-			typeName, members))
-	}
-	sort.Strings(typeMappings)
-	sort.Strings(typeMembers)
 
 	sort.Strings(statics)
 	// 	r := JoinStringFns(env.Runtime)
@@ -264,16 +199,11 @@ var %s Type = Type{%s}`[1:],
 
 	// 	}
 
+	r := ""
+
 	var tr = [][2]string{
-		{"{keywordMembers}", strings.Join(keywordMembers, "\n")},
-		{"{specialSymbolMappings}", strings.Join(specialSymbolMappings, "\n")},
-		{"{strMembers}", strings.Join(strMembers, "\n")},
-		{"{stringMappings}", strings.Join(stringMappings, "\n")},
-		{"{symbolMembers}", strings.Join(symbolMembers, "\n")},
-		{"{typeMembers}", strings.Join(typeMembers, "\n")},
-		{"{typeMappings}", strings.Join(typeMappings, "\n")},
-		// {"{statics}", strings.Join(statics, "\n")},
-		// {"{runtime}", r},
+		{"{statics}", strings.Join(statics, "\n")},
+		{"{runtime}", r},
 	}
 
 	fileContent := `
@@ -286,34 +216,13 @@ package core
 import (
 	"io"
 	"reflect"
+	"regexp"
 )
 
-var KEYWORDS Keywords = Keywords{
-{keywordMembers}
-}
+{statics}
 
-var SPECIAL_SYMBOLS map[*string]bool = map[*string]bool{
-{specialSymbolMappings}
-}
-
-var STR Str = Str{
-{strMembers}
-}
-
-var STRINGS StringPool = StringPool{
-{stringMappings}
-}
-
-var SYMBOLS Symbols = Symbols{
-{symbolMembers}
-}
-
-var TYPE Types = Types{
-{typeMembers}
-}
-
-var TYPES map[*string]*Type = map[*string]*Type{
-{typeMappings}
+func init() {
+{runtime}
 }
 `[1:]
 
@@ -326,7 +235,7 @@ var TYPES map[*string]*Type = map[*string]*Type{
 
 func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	if _, found := genEnv.Generated[name]; found {
-		panic(fmt.Sprintf("already generated %s", name))
+		return // panic(fmt.Sprintf("already generated %s", name))
 	}
 	genEnv.Generated[name] = nil
 	v := reflect.ValueOf(obj)
@@ -392,7 +301,7 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 	case "core":
 	case ".":
 	default:
-		panic(fmt.Sprintf("unexpected PkgPath `%s'", pkg))
+		panic(fmt.Sprintf("unexpected PkgPath `%s' for %+v", pkg, v.Interface()))
 	}
 
 	switch v.Kind() {
@@ -417,6 +326,9 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint:
 		return fmt.Sprintf("%d", v.Uint())
 
+	case reflect.Float64:
+		return strconv.FormatFloat(v.Float(), 'x', -1, 64)
+
 	case reflect.String:
 		return strconv.Quote(v.String())
 
@@ -429,14 +341,9 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		if obj == nil {
 			return ""
 		}
-		name := uniqueId(obj)
-		if _, yes := genEnv.Generated[name]; !yes {
-			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+		return fmt.Sprintf(`
 %s{%s}`[1:],
-				typeName, joinMembers(genEnv.emitMembers(typeName, obj))))
-			genEnv.Generated[name] = obj
-		}
-		return name
+			typeName, joinMembers(genEnv.emitMembers(typeName, obj)))
 
 	case reflect.Map:
 		typeName := coreTypeName(v)
@@ -444,18 +351,17 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		if obj == nil {
 			return ""
 		}
-		name := uniqueId(obj)
-		if _, yes := genEnv.Generated[name]; !yes {
-			*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+		return fmt.Sprintf(`
 %s{%s}`[1:],
-				typeName, genEnv.emitMembers(typeName, obj)))
-			genEnv.Generated[name] = obj
-		}
-		return name
+			typeName, joinMembers(genEnv.emitMembers(typeName, obj)))
 
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
+}
+
+func emitPtrToRegexp(v reflect.Value) string {
+	return fmt.Sprintf("regexp.MustCompile(%s)", strconv.Quote(v.Interface().(*regexp.Regexp).String()))
 }
 
 func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
@@ -471,10 +377,12 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 	}
 
 	switch pkg := path.Base(v.Type().PkgPath()); pkg {
+	case "regexp":
+		return emitPtrToRegexp(ptr)
 	case "core":
 	case ".":
 	default:
-		panic(fmt.Sprintf("unexpected PkgPath `%s'", pkg))
+		panic(fmt.Sprintf("unexpected PkgPath `%s' for &%+v", pkg, v.Interface()))
 	}
 
 	switch v.Kind() {
@@ -492,6 +400,9 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 			genEnv.Generated[v] = nil
 			genEnv.emitVar(name, obj)
 			genEnv.Generated[v] = name
+		}
+		if name == nil {
+			return "nil"
 		}
 		return "&" + name.(string)
 	}
