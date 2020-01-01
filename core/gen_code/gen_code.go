@@ -397,12 +397,9 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 		if !found {
 			obj := v.Interface()
 			name := uniqueId(obj)
-			genEnv.Generated[v] = nil
-			genEnv.emitVar(name, obj)
 			genEnv.Generated[v] = name
-		}
-		if name == nil {
-			return "nil"
+			genEnv.emitVar(name, obj)
+			return "&" + name
 		}
 		return "&" + name.(string)
 	}
