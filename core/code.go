@@ -808,7 +808,7 @@ func (t *Type) Emit(target string, actualPtr interface{}, env *CodeEnv) string {
 }
 
 func emitProc(target string, p Proc, env *CodeEnv) string {
-	return fmt.Sprintf("!Proc{fn: %s, name: %s}", p.name, strconv.Quote(p.name))
+	return fmt.Sprintf("!Proc{fn: %s, name: %s}", p.Name, strconv.Quote(p.Name))
 }
 
 func (le *LocalEnv) Hash() uint32 {

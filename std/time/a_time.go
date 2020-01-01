@@ -31,7 +31,8 @@ var stamp_milli_ String
 var stamp_nano_ String
 var unix_date_ String
 
-var add_ ProcFn
+var __add__P ProcFn = __add_
+var add_ Proc = Proc{Fn: __add__P, Name: "add_"}
 
 func __add_(_args []Object) Object {
 	_c := len(_args)
@@ -48,7 +49,8 @@ func __add_(_args []Object) Object {
 	return NIL
 }
 
-var add_date_ ProcFn
+var __add_date__P ProcFn = __add_date_
+var add_date_ Proc = Proc{Fn: __add_date__P, Name: "add_date_"}
 
 func __add_date_(_args []Object) Object {
 	_c := len(_args)
@@ -67,7 +69,8 @@ func __add_date_(_args []Object) Object {
 	return NIL
 }
 
-var format_ ProcFn
+var __format__P ProcFn = __format_
+var format_ Proc = Proc{Fn: __format__P, Name: "format_"}
 
 func __format_(_args []Object) Object {
 	_c := len(_args)
@@ -84,7 +87,8 @@ func __format_(_args []Object) Object {
 	return NIL
 }
 
-var from_unix_ ProcFn
+var __from_unix__P ProcFn = __from_unix_
+var from_unix_ Proc = Proc{Fn: __from_unix__P, Name: "from_unix_"}
 
 func __from_unix_(_args []Object) Object {
 	_c := len(_args)
@@ -101,7 +105,8 @@ func __from_unix_(_args []Object) Object {
 	return NIL
 }
 
-var hours_ ProcFn
+var __hours__P ProcFn = __hours_
+var hours_ Proc = Proc{Fn: __hours__P, Name: "hours_"}
 
 func __hours_(_args []Object) Object {
 	_c := len(_args)
@@ -117,7 +122,8 @@ func __hours_(_args []Object) Object {
 	return NIL
 }
 
-var minutes_ ProcFn
+var __minutes__P ProcFn = __minutes_
+var minutes_ Proc = Proc{Fn: __minutes__P, Name: "minutes_"}
 
 func __minutes_(_args []Object) Object {
 	_c := len(_args)
@@ -133,7 +139,8 @@ func __minutes_(_args []Object) Object {
 	return NIL
 }
 
-var now_ ProcFn
+var __now__P ProcFn = __now_
+var now_ Proc = Proc{Fn: __now__P, Name: "now_"}
 
 func __now_(_args []Object) Object {
 	_c := len(_args)
@@ -148,7 +155,8 @@ func __now_(_args []Object) Object {
 	return NIL
 }
 
-var parse_ ProcFn
+var __parse__P ProcFn = __parse_
+var parse_ Proc = Proc{Fn: __parse__P, Name: "parse_"}
 
 func __parse_(_args []Object) Object {
 	_c := len(_args)
@@ -166,7 +174,8 @@ func __parse_(_args []Object) Object {
 	return NIL
 }
 
-var parse_duration_ ProcFn
+var __parse_duration__P ProcFn = __parse_duration_
+var parse_duration_ Proc = Proc{Fn: __parse_duration__P, Name: "parse_duration_"}
 
 func __parse_duration_(_args []Object) Object {
 	_c := len(_args)
@@ -184,7 +193,8 @@ func __parse_duration_(_args []Object) Object {
 	return NIL
 }
 
-var round_ ProcFn
+var __round__P ProcFn = __round_
+var round_ Proc = Proc{Fn: __round__P, Name: "round_"}
 
 func __round_(_args []Object) Object {
 	_c := len(_args)
@@ -201,7 +211,8 @@ func __round_(_args []Object) Object {
 	return NIL
 }
 
-var seconds_ ProcFn
+var __seconds__P ProcFn = __seconds_
+var seconds_ Proc = Proc{Fn: __seconds__P, Name: "seconds_"}
 
 func __seconds_(_args []Object) Object {
 	_c := len(_args)
@@ -217,7 +228,8 @@ func __seconds_(_args []Object) Object {
 	return NIL
 }
 
-var since_ ProcFn
+var __since__P ProcFn = __since_
+var since_ Proc = Proc{Fn: __since__P, Name: "since_"}
 
 func __since_(_args []Object) Object {
 	_c := len(_args)
@@ -233,7 +245,8 @@ func __since_(_args []Object) Object {
 	return NIL
 }
 
-var sleep_ ProcFn
+var __sleep__P ProcFn = __sleep_
+var sleep_ Proc = Proc{Fn: __sleep__P, Name: "sleep_"}
 
 func __sleep_(_args []Object) Object {
 	_c := len(_args)
@@ -252,7 +265,8 @@ func __sleep_(_args []Object) Object {
 	return NIL
 }
 
-var string_ ProcFn
+var __string__P ProcFn = __string_
+var string_ Proc = Proc{Fn: __string__P, Name: "string_"}
 
 func __string_(_args []Object) Object {
 	_c := len(_args)
@@ -268,7 +282,8 @@ func __string_(_args []Object) Object {
 	return NIL
 }
 
-var sub_ ProcFn
+var __sub__P ProcFn = __sub_
+var sub_ Proc = Proc{Fn: __sub__P, Name: "sub_"}
 
 func __sub_(_args []Object) Object {
 	_c := len(_args)
@@ -285,7 +300,8 @@ func __sub_(_args []Object) Object {
 	return NIL
 }
 
-var truncate_ ProcFn
+var __truncate__P ProcFn = __truncate_
+var truncate_ Proc = Proc{Fn: __truncate__P, Name: "truncate_"}
 
 func __truncate_(_args []Object) Object {
 	_c := len(_args)
@@ -302,7 +318,8 @@ func __truncate_(_args []Object) Object {
 	return NIL
 }
 
-var unix_ ProcFn
+var __unix__P ProcFn = __unix_
+var unix_ Proc = Proc{Fn: __unix__P, Name: "unix_"}
 
 func __unix_(_args []Object) Object {
 	_c := len(_args)
@@ -318,7 +335,8 @@ func __unix_(_args []Object) Object {
 	return NIL
 }
 
-var until_ ProcFn
+var __until__P ProcFn = __until_
+var until_ Proc = Proc{Fn: __until__P, Name: "until_"}
 
 func __until_(_args []Object) Object {
 	_c := len(_args)
@@ -356,24 +374,6 @@ func Init() {
 	stamp_milli_ = MakeString(time.StampMilli)
 	stamp_nano_ = MakeString(time.StampNano)
 	unix_date_ = MakeString(time.UnixDate)
-	add_ = __add_
-	add_date_ = __add_date_
-	format_ = __format_
-	from_unix_ = __from_unix_
-	hours_ = __hours_
-	minutes_ = __minutes_
-	now_ = __now_
-	parse_ = __parse_
-	parse_duration_ = __parse_duration_
-	round_ = __round_
-	seconds_ = __seconds_
-	since_ = __since_
-	sleep_ = __sleep_
-	string_ = __string_
-	sub_ = __sub_
-	truncate_ = __truncate_
-	unix_ = __unix_
-	until_ = __until_
 
 	timeNamespace.ResetMeta(MakeMeta(nil, `Provides functionality for measuring and displaying time.`, "1.0"))
 

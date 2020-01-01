@@ -148,8 +148,8 @@ type (
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {
-		fn   ProcFn
-		name string
+		Fn   ProcFn
+		Name string
 	}
 	Fn struct {
 		InfoHolder
@@ -747,7 +747,7 @@ func (fn *Fn) Compare(a, b Object) int {
 }
 
 func (p Proc) Call(args []Object) Object {
-	return p.fn(args)
+	return p.Fn(args)
 }
 
 func (p Proc) Compare(a, b Object) int {
@@ -755,13 +755,13 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return fmt.Sprintf("#object[Proc:%s]", p.name)
+	return fmt.Sprintf("#object[Proc:%s]", p.Name)
 }
 
 func (p Proc) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Proc:
-		return p.fn.Equals(other.fn)
+		return p.Fn.Equals(other.Fn)
 	}
 	return false
 }
@@ -779,11 +779,7 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
-	return p.fn.Hash()
-}
-
-func (p Proc) Name() string {
-	return p.name
+	return p.Fn.Hash()
 }
 
 func (p ProcFn) Call(args []Object) Object {

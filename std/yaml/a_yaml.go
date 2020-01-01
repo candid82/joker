@@ -8,7 +8,8 @@ import (
 
 var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
-var read_string_ ProcFn
+var __read_string__P ProcFn = __read_string_
+var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_"}
 
 func __read_string_(_args []Object) Object {
 	_c := len(_args)
@@ -24,7 +25,8 @@ func __read_string_(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ ProcFn
+var __write_string__P ProcFn = __write_string_
+var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_"}
 
 func __write_string_(_args []Object) Object {
 	_c := len(_args)
@@ -41,9 +43,6 @@ func __write_string_(_args []Object) Object {
 }
 
 func Init() {
-
-	read_string_ = __read_string_
-	write_string_ = __write_string_
 
 	yamlNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of YAML.`, "1.0"))
 
