@@ -24,6 +24,7 @@ const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
 	Statics   *[]string
+	Runtime   *[]string
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 }
 
@@ -172,9 +173,11 @@ func main() {
 	// }
 
 	statics := []string{}
+	runtime := []string{}
 
 	genEnv := &GenEnv{
 		Statics:   &statics,
+		Runtime:   &runtime,
 		Generated: map[interface{}]interface{}{},
 	}
 
@@ -188,18 +191,17 @@ func main() {
 	genEnv.emitVar("GLOBAL_ENV", GLOBAL_ENV)
 
 	sort.Strings(statics)
-	// 	r := JoinStringFns(env.Runtime)
-	// 	if r != "" {
-	// 		r = fmt.Sprintf(`
 
-	// func init() {
-	// %s
-	// }`,
-	// 			r)
+	r := strings.Join(runtime, "\n")
+	if r != "" {
+		r = fmt.Sprintf(`
 
-	// 	}
+func init() {
+%s
+}`,
+			r)
 
-	r := ""
+	}
 
 	var tr = [][2]string{
 		{"{statics}", strings.Join(statics, "\n")},
@@ -220,10 +222,7 @@ import (
 )
 
 {statics}
-
-func init() {
 {runtime}
-}
 `[1:]
 
 	for _, t := range tr {
@@ -241,11 +240,11 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	v := reflect.ValueOf(obj)
 	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-		name, coreTypeName(v), genEnv.emitValue(v)))
+		name, coreTypeName(v), genEnv.emitValue(name, v)))
 	genEnv.Generated[name] = obj
 }
 
-func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (members []string) {
+func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (members []string) {
 	v := reflect.ValueOf(obj)
 	kind := v.Kind()
 	switch kind {
@@ -254,10 +253,12 @@ func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (members []strin
 			return
 		}
 		keys := v.MapKeys()
+		elemType := v.Type().Elem()
 		for _, key := range keys {
-			k := genEnv.emitValue(key)
-			v := genEnv.emitValue(v.MapIndex(key))
-			if v == "" {
+			k := genEnv.emitValue("", key)
+			vi := v.MapIndex(key)
+			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(elemType, vi)), vi)
+			if isNil(v) {
 				continue
 			}
 			members = append(members, fmt.Sprintf(`
@@ -269,7 +270,8 @@ func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (members []strin
 		numMembers := v.NumField()
 		for i := 0; i < numMembers; i++ {
 			vtf := vt.Field(i)
-			val := genEnv.emitValue(v.Field(i))
+			vf := v.Field(i)
+			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(vtf.Type, vf)), vf)
 			if val == "" {
 				continue
 			}
@@ -280,10 +282,11 @@ func (genEnv *GenEnv) emitMembers(name string, obj interface{}) (members []strin
 	default:
 		panic(fmt.Sprintf("unsupported type %T for %s", obj, name))
 	}
+	sort.Strings(members)
 	return
 }
 
-func (genEnv *GenEnv) emitValue(v reflect.Value) string {
+func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() {
 		return ""
@@ -309,10 +312,10 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		if v.IsNil() {
 			return ""
 		}
-		return genEnv.emitValue(v.Elem())
+		return genEnv.emitValue(target, v.Elem())
 
 	case reflect.Ptr:
-		return genEnv.emitPtrTo(v)
+		return genEnv.emitPtrTo(target, v)
 
 	case reflect.Bool:
 		if v.Bool() {
@@ -333,7 +336,7 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		return strconv.Quote(v.String())
 
 	case reflect.Slice, reflect.Array:
-		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), genEnv.emitSlice(v))
+		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), genEnv.emitSlice(target, v))
 
 	case reflect.Struct:
 		typeName := coreTypeName(v)
@@ -343,7 +346,7 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		}
 		return fmt.Sprintf(`
 %s{%s}`[1:],
-			typeName, joinMembers(genEnv.emitMembers(typeName, obj)))
+			typeName, joinMembers(genEnv.emitMembers(target, typeName, obj)))
 
 	case reflect.Map:
 		typeName := coreTypeName(v)
@@ -353,18 +356,18 @@ func (genEnv *GenEnv) emitValue(v reflect.Value) string {
 		}
 		return fmt.Sprintf(`
 %s{%s}`[1:],
-			typeName, joinMembers(genEnv.emitMembers(typeName, obj)))
+			typeName, joinMembers(genEnv.emitMembers(target, typeName, obj)))
 
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
 }
 
-func emitPtrToRegexp(v reflect.Value) string {
-	return fmt.Sprintf("regexp.MustCompile(%s)", strconv.Quote(v.Interface().(*regexp.Regexp).String()))
+func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
+	return fmt.Sprintf(`regexp.MustCompile(%s)`, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
 }
 
-func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
+func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 	if ptr.IsNil() {
 		return "nil"
 	}
@@ -378,7 +381,7 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 
 	switch pkg := path.Base(v.Type().PkgPath()); pkg {
 	case "regexp":
-		return emitPtrToRegexp(ptr)
+		return genEnv.emitPtrToRegexp(target, ptr)
 	case "core":
 	case ".":
 	default:
@@ -390,10 +393,10 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 		if v.IsNil() {
 			return "nil"
 		}
-		return genEnv.emitPtrTo(v.Elem())
+		return genEnv.emitPtrTo(target, v.Elem())
 
 	default:
-		name, found := genEnv.Generated[v]
+		thing, found := genEnv.Generated[v]
 		if !found {
 			obj := v.Interface()
 			name := uniqueId(obj)
@@ -401,15 +404,26 @@ func (genEnv *GenEnv) emitPtrTo(ptr reflect.Value) string {
 			genEnv.emitVar(name, obj)
 			return "&" + name
 		}
-		return "&" + name.(string)
+		name := thing.(string)
+		status, found := genEnv.Generated[name]
+		if !found {
+			panic(fmt.Sprintf("cannot find generated thing %s: %+v", name, v.Interface()))
+		}
+		if status == nil {
+			*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
+	%s = &%s`[1:],
+				target, name))
+			return "nil"
+		}
+		return "&" + name
 	}
 }
 
-func (genEnv *GenEnv) emitSlice(v reflect.Value) string {
+func (genEnv *GenEnv) emitSlice(target string, v reflect.Value) string {
 	numEntries := v.Len()
 	el := []string{}
 	for i := 0; i < numEntries; i++ {
-		res := genEnv.emitValue(v.Index(i))
+		res := genEnv.emitValue(fmt.Sprintf("%s[%d]", target, i), v.Index(i))
 		if res == "" {
 			el = append(el, "\tnil,")
 		} else {
@@ -440,10 +454,21 @@ func uniqueId(obj interface{}) string {
 	return UniqueId(obj, nil)
 }
 
+func assertValueType(elemType reflect.Type, r reflect.Value) string {
+	if elemType == r.Type() {
+		return ""
+	}
+	return ".(" + coreTypeName(r) + ")"
+}
+
 func joinMembers(members []string) string {
 	f := strings.Join(members, "\n")
 	if f != "" {
 		f = "\n" + f + "\n"
 	}
 	return f
+}
+
+func isNil(s string) bool {
+	return s == "" || s == "nil"
 }

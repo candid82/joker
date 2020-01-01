@@ -218,6 +218,10 @@ func (sym Symbol) AsGo() string {
 	return "symbol_" + symAsGo(sym)
 }
 
+func (ns Namespace) AsGo() string {
+	return "ns_" + symAsGo(ns.Name)
+}
+
 func kwAsGo(kw Keyword) string {
 	name := NameAsGo(strings.ReplaceAll(strings.ReplaceAll(kw.ToString(false), "/", "_FW_"), ":", ""))
 	if kw.info == nil {
