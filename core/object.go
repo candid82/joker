@@ -782,6 +782,10 @@ func (p Proc) Hash() uint32 {
 	return p.fn.Hash()
 }
 
+func (p Proc) Name() string {
+	return p.name
+}
+
 func (p ProcFn) Call(args []Object) Object {
 	return p(args)
 }
