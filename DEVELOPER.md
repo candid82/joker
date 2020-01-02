@@ -52,13 +52,15 @@ Assuming one has determined it appropriate to add a new core namespace to the Jo
 
 Then, besides putting that source code in `core/data/*.joke`, modify these to pick it up during the build:
 
-* **core/gen\_data/gen\_data.go** `files` array (after any core namespaces upon which it depends)
+* **core/procs.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
 * **core/procs.go** `InitInternalLibs()` array
 
 Further, if the new namespace depends on any standard-library-wrapping namespaces:
 
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
-* Ensure that code has already been generated (that library's `std/*/a_*.go` file has already been created)
+* Do the same for **core/gen\_code/gen\_code.go**
+* Create a nearly-empty stub file, `std/*/a_*_fast_init*.go`, that builds only in the presence of the `fast_init` build tag; this will cause `generate-std.joke` (when it sees that such a file exists) to specify `!fast_init` as the build tag for `std/*/a_*.go`, so exactly one of them will be built at a time
+* Ensure that `std/*/a_*.go` has already been generated for that library, using an earlier version of Joker if necessary
 
 At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
 
