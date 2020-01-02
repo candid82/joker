@@ -289,7 +289,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		components := strings.Split(t, ".")
 		if len(components) == 2 {
 			// not handling more than one component yet!
-			importedAs := AddImport(genEnv.Imports, "", components[0], "", true)
+			importedAs := AddImport(genEnv.Imports, "", components[0], true)
 			t = fmt.Sprintf("%s.%s", importedAs, components[1])
 		}
 		el := ""
@@ -297,7 +297,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 			t = "*" + t
 			el = ".Elem()"
 		}
-		importedAs := AddImport(genEnv.Imports, "", "reflect", "", true)
+		importedAs := AddImport(genEnv.Imports, "", "reflect", true)
 		return fmt.Sprintf("%s.TypeOf((%s)(nil))%s", importedAs, t, el)
 	case "core":
 	case ".":
@@ -343,7 +343,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 			importedAs := ""
 			newPackage := ""
 			if p.Package != "" {
-				importedAs = AddImport(genEnv.Imports, "", p.Package, "github.com/candid82/joker", true) + "."
+				importedAs = AddImport(genEnv.Imports, "", path.Join("github.com/candid82/joker", p.Package), true) + "."
 				newPackage = fmt.Sprintf(`
 	Package: %s,
 `[1:],
@@ -379,7 +379,7 @@ Proc{
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
-	importedAs := AddImport(genEnv.Imports, "", "regexp", "", true)
+	importedAs := AddImport(genEnv.Imports, "", "regexp", true)
 	return fmt.Sprintf(`%s.MustCompile(%s)`, importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
 }
 
@@ -494,7 +494,6 @@ type Import struct {
 	Local       string // "foo", "_", ".", or empty
 	LocalRef    string // local unless empty, in which case final component of full (e.g. "foo")
 	Full        string // "bar/bletch/foo"
-	PathPrefix  string // E.g. "" (for Go std) or "github.com/candid82/" (for other namespaces)
 	substituted bool   // Had to substitute a different local name
 }
 
@@ -513,7 +512,7 @@ func NewImports() *Imports {
 /* and isn't already used (picking an alternate local name if
 /* necessary), add the mapping if necessary, and return the (possibly
 /* alternate) local name. */
-func AddImport(imports *Imports, local, full, pathPrefix string, okToSubstitute bool) string {
+func AddImport(imports *Imports, local, full string, okToSubstitute bool) string {
 	components := strings.Split(full, "/")
 	if imports == nil {
 		panic(fmt.Sprintf("imports is nil for %s", full))
@@ -560,7 +559,7 @@ func AddImport(imports *Imports, local, full, pathPrefix string, okToSubstitute 
 	if imports.FullNames == nil {
 		imports.FullNames = map[string]*Import{}
 	}
-	imports.FullNames[full] = &Import{local, localRef, full, pathPrefix, substituted}
+	imports.FullNames[full] = &Import{local, localRef, full, substituted}
 	return localRef
 }
 
