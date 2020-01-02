@@ -340,21 +340,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		typeName := coreTypeName(v)
 		obj := v.Interface()
 		if p, yes := obj.(Proc); yes {
-			importedAs := ""
-			newPackage := ""
-			if p.Package != "" {
-				importedAs = AddImport(genEnv.Imports, "", path.Join("github.com/candid82/joker", p.Package), true) + "."
-				newPackage = fmt.Sprintf(`
-	Package: %s,
-`[1:],
-					strconv.Quote(p.Package))
-			}
-			return fmt.Sprintf(`
-Proc{
-	Fn: %s%s,
-	Name: %s,
-%s}`[1:],
-				importedAs, p.Name, strconv.Quote(p.Name), newPackage)
+			return genEnv.emitProc(target, p)
 		}
 		if obj == nil {
 			return ""
@@ -376,6 +362,27 @@ Proc{
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
+}
+
+func (genEnv *GenEnv) emitProc(target string, p Proc) string {
+	fn := ""
+	newPackage := ""
+	if p.Package != "" {
+		newPackage = fmt.Sprintf(`
+	Package: %s,
+`[1:],
+			strconv.Quote(p.Package))
+	} else {
+		fn = fmt.Sprintf(`
+	Fn: %s,
+`[1:],
+			p.Name)
+	}
+	return fmt.Sprintf(`
+Proc{
+%s	Name: %s,
+%s}`[1:],
+		fn, strconv.Quote(p.Name), newPackage)
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
