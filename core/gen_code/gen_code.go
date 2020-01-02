@@ -350,17 +350,6 @@ Proc{
 %s{%s}`[1:],
 			typeName, joinMembers(genEnv.emitMembers(target, typeName, obj)))
 
-	// case reflect.Func:
-	// 	p := v.Interface()
-	// 	switch p := p.(type) {
-	// 	case Proc:
-	// 		return fmt.Sprintf("Proc{fn: %s, name: %s}", p.Name(), strconv.Quote(p.Name()))
-	// 	case ProcFn:
-	// 		return fmt.Sprintf("// ProcFn: %+v", p)
-	// 	default:
-	// 		panic(fmt.Sprintf("unknown Func type %T", p))
-	// 	}
-
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
