@@ -367,22 +367,30 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	fn := ""
 	newPackage := ""
+	cycles := ""
 	if p.Package != "" {
 		newPackage = fmt.Sprintf(`
 	Package: %s,
 `[1:],
 			strconv.Quote(p.Package))
 	} else {
-		fn = fmt.Sprintf(`
+		if !p.Cycles {
+			fn = fmt.Sprintf(`
 	Fn: %s,
 `[1:],
-			p.Name)
+				p.Name)
+		}
+	}
+	if p.Cycles {
+		cycles = `
+	Cycles: true,
+`[1:]
 	}
 	return fmt.Sprintf(`
 Proc{
 %s	Name: %s,
-%s}`[1:],
-		fn, strconv.Quote(p.Name), newPackage)
+%s%s}`[1:],
+		fn, strconv.Quote(p.Name), newPackage, cycles)
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
