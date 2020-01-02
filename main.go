@@ -700,9 +700,7 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
-	if Verbose > 0 {
-		GLOBAL_ENV.SetVerbose(Verbose)
-	}
+	GLOBAL_ENV.SetVerbose(Verbose)
 	GLOBAL_ENV.Trace = trace
 	GLOBAL_ENV.MaxDepth = maxDepth
 
