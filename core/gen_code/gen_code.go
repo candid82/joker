@@ -25,6 +25,7 @@ const dataPattern = "a_%s_data.go"
 type GenEnv struct {
 	Statics   *[]string
 	Runtime   *[]string
+	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 }
 
@@ -158,10 +159,12 @@ func init() {
 
 	statics := []string{}
 	runtime := []string{}
+	imports := NewImports()
 
 	genEnv := &GenEnv{
 		Statics:   &statics,
 		Runtime:   &runtime,
+		Imports:   imports,
 		Generated: map[interface{}]interface{}{},
 	}
 
@@ -187,7 +190,13 @@ func init() {
 
 	}
 
+	imp := QuotedImportList(imports, "\n")
+	if imp[0] == '\n' {
+		imp = imp[1:]
+	}
+
 	var tr = [][2]string{
+		{"{imports}", imp},
 		{"{statics}", strings.Join(statics, "\n")},
 		{"{runtime}", r},
 	}
@@ -200,9 +209,7 @@ func init() {
 package core
 
 import (
-	"io"
-	"reflect"
-	"regexp"
+{imports}
 )
 
 {statics}
@@ -279,12 +286,19 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 	switch pkg := path.Base(v.Type().PkgPath()); pkg {
 	case "reflect":
 		t := coreTypeString(fmt.Sprintf("%s", v))
+		components := strings.Split(t, ".")
+		if len(components) == 2 {
+			// not handling more than one component yet!
+			importedAs := AddImport(genEnv.Imports, "", components[0], "", true)
+			t = fmt.Sprintf("%s.%s", importedAs, components[1])
+		}
 		el := ""
 		if t[0] != '*' {
 			t = "*" + t
 			el = ".Elem()"
 		}
-		return fmt.Sprintf("reflect.TypeOf((%s)(nil))%s", t, el) // TODO: Insert correct reflection info here
+		importedAs := AddImport(genEnv.Imports, "", "reflect", "", true)
+		return fmt.Sprintf("%s.TypeOf((%s)(nil))%s", importedAs, t, el)
 	case "core":
 	case ".":
 	default:
@@ -326,12 +340,21 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		typeName := coreTypeName(v)
 		obj := v.Interface()
 		if p, yes := obj.(Proc); yes {
+			importedAs := ""
+			newPackage := ""
+			if p.Package != "" {
+				importedAs = AddImport(genEnv.Imports, "", p.Package, "github.com/candid82/joker", true) + "."
+				newPackage = fmt.Sprintf(`
+	Package: %s,
+`[1:],
+					strconv.Quote(p.Package))
+			}
 			return fmt.Sprintf(`
 Proc{
-	Fn: %s,
+	Fn: %s%s,
 	Name: %s,
-}`[1:],
-				p.Name, strconv.Quote(p.Name))
+%s}`[1:],
+				importedAs, p.Name, strconv.Quote(p.Name), newPackage)
 		}
 		if obj == nil {
 			return ""
@@ -356,7 +379,8 @@ Proc{
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
-	return fmt.Sprintf(`regexp.MustCompile(%s)`, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
+	importedAs := AddImport(genEnv.Imports, "", "regexp", "", true)
+	return fmt.Sprintf(`%s.MustCompile(%s)`, importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
 }
 
 func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
@@ -463,4 +487,104 @@ func joinMembers(members []string) string {
 
 func isNil(s string) bool {
 	return s == "" || s == "nil"
+}
+
+/* Represents an 'import ( foo "bar/bletch/foo" )' line to be produced. */
+type Import struct {
+	Local       string // "foo", "_", ".", or empty
+	LocalRef    string // local unless empty, in which case final component of full (e.g. "foo")
+	Full        string // "bar/bletch/foo"
+	PathPrefix  string // E.g. "" (for Go std) or "github.com/candid82/" (for other namespaces)
+	substituted bool   // Had to substitute a different local name
+}
+
+/* Maps relative package (unix-style) names to their imports, non-emptiness, etc. */
+type Imports struct {
+	LocalNames map[string]string  // "foo" -> "bar/bletch/foo"; no "_" nor "." entries here
+	FullNames  map[string]*Import // "bar/bletch/foo" -> ["foo", "bar/bletch/foo"]
+}
+
+func NewImports() *Imports {
+	return &Imports{map[string]string{}, map[string]*Import{}}
+}
+
+/* Given desired local and the full (though relative) name of the
+/* package, make sure the local name agrees with any existing entry
+/* and isn't already used (picking an alternate local name if
+/* necessary), add the mapping if necessary, and return the (possibly
+/* alternate) local name. */
+func AddImport(imports *Imports, local, full, pathPrefix string, okToSubstitute bool) string {
+	components := strings.Split(full, "/")
+	if imports == nil {
+		panic(fmt.Sprintf("imports is nil for %s", full))
+	}
+	if e, found := imports.FullNames[full]; found {
+		if e.Local == local {
+			return e.LocalRef
+		}
+		if okToSubstitute {
+			return e.LocalRef
+		}
+		panic(fmt.Sprintf("addImport(%s,%s) told to to replace (%s,%s)", local, full, e.Local, e.Full))
+	}
+
+	substituted := false
+	localRef := local
+	if local == "" {
+		localRef = components[len(components)-1]
+	}
+	if localRef != "." {
+		prevComponentIndex := len(components) - 1
+		for {
+			origLocalRef := localRef
+			curFull, found := imports.LocalNames[localRef]
+			if !found {
+				break
+			}
+			substituted = true
+			prevComponentIndex--
+			if prevComponentIndex >= 0 {
+				localRef = components[prevComponentIndex] + "_" + localRef
+				continue
+			} else if prevComponentIndex > -99 /* avoid infinite loop */ {
+				localRef = fmt.Sprintf("%s_%d", origLocalRef, -prevComponentIndex)
+				continue
+			}
+			panic(fmt.Sprintf("addImport(%s,%s) trying to replace (%s,%s)", localRef, full, imports.FullNames[curFull].LocalRef, curFull))
+		}
+		if imports.LocalNames == nil {
+			imports.LocalNames = map[string]string{}
+		}
+		imports.LocalNames[localRef] = full
+	}
+	if imports.FullNames == nil {
+		imports.FullNames = map[string]*Import{}
+	}
+	imports.FullNames[full] = &Import{local, localRef, full, pathPrefix, substituted}
+	return localRef
+}
+
+func sortedImports(pi *Imports, f func(k string, v *Import)) {
+	var keys []string
+	for k, _ := range pi.FullNames {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		v := pi.FullNames[k]
+		f(k, v)
+	}
+}
+
+func QuotedImportList(pi *Imports, prefix string) string {
+	imports := ""
+	sortedImports(pi,
+		func(k string, v *Import) {
+			if (v.Local == "" && !v.substituted) || v.Local == path.Base(k) {
+				imports += prefix + `"` + k + `"`
+			} else {
+				imports += prefix + v.LocalRef + ` "` + k + `"`
+			}
+		})
+	return imports
 }
