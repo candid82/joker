@@ -151,7 +151,6 @@ type (
 		Fn      ProcFn
 		Name    string
 		Package string // "" for core (this package), else e.g. "std/string"
-		Cycles  bool   // whether Fn, or anything it calls, refers to an invariant var (mainly, GLOBAL_ENV)
 	}
 	Fn struct {
 		InfoHolder

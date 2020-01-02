@@ -2278,6 +2278,132 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 	}
 }
 
+var procAllNamespaces_thunk ProcFn = func(args []Object) Object {
+	return procAllNamespaces_thunk_var(args)
+}
+var procAllNamespaces_thunk_var ProcFn
+
+var procCreateNamespace_thunk ProcFn = func(args []Object) Object {
+	return procCreateNamespace_thunk_var(args)
+}
+var procCreateNamespace_thunk_var ProcFn
+
+var procEval_thunk ProcFn = func(args []Object) Object {
+	return procEval_thunk_var(args)
+}
+var procEval_thunk_var ProcFn
+
+var procFindNamespace_thunk ProcFn = func(args []Object) Object {
+	return procFindNamespace_thunk_var(args)
+}
+var procFindNamespace_thunk_var ProcFn
+
+var procFindVar_thunk ProcFn = func(args []Object) Object {
+	return procFindVar_thunk_var(args)
+}
+var procFindVar_thunk_var ProcFn
+
+var procInjectNamespace_thunk ProcFn = func(args []Object) Object {
+	return procInjectNamespace_thunk_var(args)
+}
+var procInjectNamespace_thunk_var ProcFn
+
+var procInternFakeVar_thunk ProcFn = func(args []Object) Object {
+	return procInternFakeVar_thunk_var(args)
+}
+var procInternFakeVar_thunk_var ProcFn
+
+var procLibPath_thunk ProcFn = func(args []Object) Object {
+	return procLibPath_thunk_var(args)
+}
+var procLibPath_thunk_var ProcFn
+
+var procLoadFile_thunk ProcFn = func(args []Object) Object {
+	return procLoadFile_thunk_var(args)
+}
+var procLoadFile_thunk_var ProcFn
+
+var procLoadLibFromPath_thunk ProcFn = func(args []Object) Object {
+	return procLoadLibFromPath_thunk_var(args)
+}
+var procLoadLibFromPath_thunk_var ProcFn
+
+var procLoadString_thunk ProcFn = func(args []Object) Object {
+	return procLoadString_thunk_var(args)
+}
+var procLoadString_thunk_var ProcFn
+
+var procMacroexpand1_thunk ProcFn = func(args []Object) Object {
+	return procMacroexpand1_thunk_var(args)
+}
+var procMacroexpand1_thunk_var ProcFn
+
+var procNewline_thunk ProcFn = func(args []Object) Object {
+	return procNewline_thunk_var(args)
+}
+var procNewline_thunk_var ProcFn
+
+var procNsResolve_thunk ProcFn = func(args []Object) Object {
+	return procNsResolve_thunk_var(args)
+}
+var procNsResolve_thunk_var ProcFn
+
+var procParse_thunk ProcFn = func(args []Object) Object {
+	return procParse_thunk_var(args)
+}
+var procParse_thunk_var ProcFn
+
+var procPprint_thunk ProcFn = func(args []Object) Object {
+	return procPprint_thunk_var(args)
+}
+var procPprint_thunk_var ProcFn
+
+var procPr_thunk ProcFn = func(args []Object) Object {
+	return procPr_thunk_var(args)
+}
+var procPr_thunk_var ProcFn
+
+var procReadLine_thunk ProcFn = func(args []Object) Object {
+	return procReadLine_thunk_var(args)
+}
+var procReadLine_thunk_var ProcFn
+
+var procReadString_thunk ProcFn = func(args []Object) Object {
+	return procReadString_thunk_var(args)
+}
+var procReadString_thunk_var ProcFn
+
+var procRead_thunk ProcFn = func(args []Object) Object {
+	return procRead_thunk_var(args)
+}
+var procRead_thunk_var ProcFn
+
+var procRemoveNamespace_thunk ProcFn = func(args []Object) Object {
+	return procRemoveNamespace_thunk_var(args)
+}
+var procRemoveNamespace_thunk_var ProcFn
+
 func init() {
+	procAllNamespaces_thunk_var = procAllNamespaces
+	procCreateNamespace_thunk_var = procCreateNamespace
+	procEval_thunk_var = procEval
+	procFindNamespace_thunk_var = procFindNamespace
+	procFindVar_thunk_var = procFindVar
+	procInjectNamespace_thunk_var = procInjectNamespace
+	procInternFakeVar_thunk_var = procInternFakeVar
+	procLibPath_thunk_var = procLibPath
+	procLoadFile_thunk_var = procLoadFile
+	procLoadLibFromPath_thunk_var = procLoadLibFromPath
+	procLoadString_thunk_var = procLoadString
+	procMacroexpand1_thunk_var = procMacroexpand1
+	procNewline_thunk_var = procNewline
+	procNsResolve_thunk_var = procNsResolve
+	procParse_thunk_var = procParse
+	procPprint_thunk_var = procPprint
+	procPr_thunk_var = procPr
+	procReadLine_thunk_var = procReadLine
+	procReadString_thunk_var = procReadString
+	procRead_thunk_var = procRead
+	procRemoveNamespace_thunk_var = procRemoveNamespace
 	rand.Seed(time.Now().UnixNano())
 }
