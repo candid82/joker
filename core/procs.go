@@ -2278,6 +2278,15 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 	}
 }
 
+// Thunks are needed for ProcFn's that refer, directly or indirectly,
+// to any invariant initializer, mainly GLOBAL_ENV, when building for
+// fast initialization. If their (Proc).Fn fields are statically
+// (invariantly) initialized directly to the ProcFn implementations,
+// the Go compiler (as of 1.13) will complain about a cycle. Instead,
+// the (Proc).Fn fields (for just these cycle-causing ProcFn's) are
+// initialized to thunks, which then call through function pointers
+// that are initialized below, in the init() function.
+
 var procAllNamespaces_thunk ProcFn = func(args []Object) Object {
 	return procAllNamespaces_thunk_var(args)
 }
