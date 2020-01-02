@@ -97,4 +97,9 @@ func main() {
 		fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
 		ioutil.WriteFile("a_"+name+"_data.go", []byte(fileContent), 0666)
 	}
+
+	if Verbose > 1 {
+		fmt.Fprintln(os.Stderr, "gen_data:main(): After loading source files:")
+		Spew()
+	}
 }

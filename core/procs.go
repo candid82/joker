@@ -162,8 +162,18 @@ func Spew() {
 		SpewState:         mySpewState,
 	}
 
+	cs.Fprintln(Stderr, "STR:")
+	cs.Fdump(Stderr, STR)
 	cs.Fprintln(Stderr, "STRINGS:")
 	cs.Fdump(Stderr, STRINGS)
+	cs.Fprintln(Stderr, "\nSYMBOLS:")
+	cs.Fdump(Stderr, SYMBOLS)
+	cs.Fprintln(Stderr, "\nSPECIAL_SYMBOLS:")
+	cs.Fdump(Stderr, SPECIAL_SYMBOLS)
+	cs.Fprintln(Stderr, "\nKEYWORDS:")
+	cs.Fdump(Stderr, KEYWORDS)
+	cs.Fprintln(Stderr, "\nTYPE:")
+	cs.Fdump(Stderr, TYPE)
 	cs.Fprintln(Stderr, "\nTYPES:")
 	cs.Fdump(Stderr, TYPES)
 	cs.Fprintln(Stderr, "\nGLOBAL_ENV:")
@@ -1966,7 +1976,7 @@ func finalizeNamespace() {
 		return
 	}
 	ns := GLOBAL_ENV.CurrentNamespace()
-	fmt.Printf("PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.Mappings()))
+	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.Mappings()))
 }
 
 func processNamespaceInfo(info *internalNamespaceInfo, name string) {

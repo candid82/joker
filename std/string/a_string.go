@@ -462,6 +462,8 @@ func __upper_case_(_args []Object) Object {
 
 func Init() {
 
+	SpewThis(stringNamespace)
+
 	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))
 
 	stringNamespace.InternVar("blank?", isblank_,
