@@ -9,7 +9,7 @@ import (
 var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
 
 var __send__P ProcFn = __send_
-var send_ Proc = Proc{Fn: __send__P, Name: "send_"}
+var send_ Proc = Proc{Fn: __send__P, Name: "send_", Package: "std/http"}
 
 func __send_(_args []Object) Object {
 	_c := len(_args)
@@ -26,7 +26,7 @@ func __send_(_args []Object) Object {
 }
 
 var __start_file_server__P ProcFn = __start_file_server_
-var start_file_server_ Proc = Proc{Fn: __start_file_server__P, Name: "start_file_server_"}
+var start_file_server_ Proc = Proc{Fn: __start_file_server__P, Name: "start_file_server_", Package: "std/http"}
 
 func __start_file_server_(_args []Object) Object {
 	_c := len(_args)
@@ -44,7 +44,7 @@ func __start_file_server_(_args []Object) Object {
 }
 
 var __start_server__P ProcFn = __start_server_
-var start_server_ Proc = Proc{Fn: __start_server__P, Name: "start_server_"}
+var start_server_ Proc = Proc{Fn: __start_server__P, Name: "start_server_", Package: "std/http"}
 
 func __start_server_(_args []Object) Object {
 	_c := len(_args)

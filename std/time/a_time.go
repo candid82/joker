@@ -32,7 +32,7 @@ var stamp_nano_ String
 var unix_date_ String
 
 var __add__P ProcFn = __add_
-var add_ Proc = Proc{Fn: __add__P, Name: "add_"}
+var add_ Proc = Proc{Fn: __add__P, Name: "add_", Package: "std/time"}
 
 func __add_(_args []Object) Object {
 	_c := len(_args)
@@ -50,7 +50,7 @@ func __add_(_args []Object) Object {
 }
 
 var __add_date__P ProcFn = __add_date_
-var add_date_ Proc = Proc{Fn: __add_date__P, Name: "add_date_"}
+var add_date_ Proc = Proc{Fn: __add_date__P, Name: "add_date_", Package: "std/time"}
 
 func __add_date_(_args []Object) Object {
 	_c := len(_args)
@@ -70,7 +70,7 @@ func __add_date_(_args []Object) Object {
 }
 
 var __format__P ProcFn = __format_
-var format_ Proc = Proc{Fn: __format__P, Name: "format_"}
+var format_ Proc = Proc{Fn: __format__P, Name: "format_", Package: "std/time"}
 
 func __format_(_args []Object) Object {
 	_c := len(_args)
@@ -88,7 +88,7 @@ func __format_(_args []Object) Object {
 }
 
 var __from_unix__P ProcFn = __from_unix_
-var from_unix_ Proc = Proc{Fn: __from_unix__P, Name: "from_unix_"}
+var from_unix_ Proc = Proc{Fn: __from_unix__P, Name: "from_unix_", Package: "std/time"}
 
 func __from_unix_(_args []Object) Object {
 	_c := len(_args)
@@ -106,7 +106,7 @@ func __from_unix_(_args []Object) Object {
 }
 
 var __hours__P ProcFn = __hours_
-var hours_ Proc = Proc{Fn: __hours__P, Name: "hours_"}
+var hours_ Proc = Proc{Fn: __hours__P, Name: "hours_", Package: "std/time"}
 
 func __hours_(_args []Object) Object {
 	_c := len(_args)
@@ -123,7 +123,7 @@ func __hours_(_args []Object) Object {
 }
 
 var __minutes__P ProcFn = __minutes_
-var minutes_ Proc = Proc{Fn: __minutes__P, Name: "minutes_"}
+var minutes_ Proc = Proc{Fn: __minutes__P, Name: "minutes_", Package: "std/time"}
 
 func __minutes_(_args []Object) Object {
 	_c := len(_args)
@@ -140,7 +140,7 @@ func __minutes_(_args []Object) Object {
 }
 
 var __now__P ProcFn = __now_
-var now_ Proc = Proc{Fn: __now__P, Name: "now_"}
+var now_ Proc = Proc{Fn: __now__P, Name: "now_", Package: "std/time"}
 
 func __now_(_args []Object) Object {
 	_c := len(_args)
@@ -156,7 +156,7 @@ func __now_(_args []Object) Object {
 }
 
 var __parse__P ProcFn = __parse_
-var parse_ Proc = Proc{Fn: __parse__P, Name: "parse_"}
+var parse_ Proc = Proc{Fn: __parse__P, Name: "parse_", Package: "std/time"}
 
 func __parse_(_args []Object) Object {
 	_c := len(_args)
@@ -175,7 +175,7 @@ func __parse_(_args []Object) Object {
 }
 
 var __parse_duration__P ProcFn = __parse_duration_
-var parse_duration_ Proc = Proc{Fn: __parse_duration__P, Name: "parse_duration_"}
+var parse_duration_ Proc = Proc{Fn: __parse_duration__P, Name: "parse_duration_", Package: "std/time"}
 
 func __parse_duration_(_args []Object) Object {
 	_c := len(_args)
@@ -194,7 +194,7 @@ func __parse_duration_(_args []Object) Object {
 }
 
 var __round__P ProcFn = __round_
-var round_ Proc = Proc{Fn: __round__P, Name: "round_"}
+var round_ Proc = Proc{Fn: __round__P, Name: "round_", Package: "std/time"}
 
 func __round_(_args []Object) Object {
 	_c := len(_args)
@@ -212,7 +212,7 @@ func __round_(_args []Object) Object {
 }
 
 var __seconds__P ProcFn = __seconds_
-var seconds_ Proc = Proc{Fn: __seconds__P, Name: "seconds_"}
+var seconds_ Proc = Proc{Fn: __seconds__P, Name: "seconds_", Package: "std/time"}
 
 func __seconds_(_args []Object) Object {
 	_c := len(_args)
@@ -229,7 +229,7 @@ func __seconds_(_args []Object) Object {
 }
 
 var __since__P ProcFn = __since_
-var since_ Proc = Proc{Fn: __since__P, Name: "since_"}
+var since_ Proc = Proc{Fn: __since__P, Name: "since_", Package: "std/time"}
 
 func __since_(_args []Object) Object {
 	_c := len(_args)
@@ -246,7 +246,7 @@ func __since_(_args []Object) Object {
 }
 
 var __sleep__P ProcFn = __sleep_
-var sleep_ Proc = Proc{Fn: __sleep__P, Name: "sleep_"}
+var sleep_ Proc = Proc{Fn: __sleep__P, Name: "sleep_", Package: "std/time"}
 
 func __sleep_(_args []Object) Object {
 	_c := len(_args)
@@ -266,7 +266,7 @@ func __sleep_(_args []Object) Object {
 }
 
 var __string__P ProcFn = __string_
-var string_ Proc = Proc{Fn: __string__P, Name: "string_"}
+var string_ Proc = Proc{Fn: __string__P, Name: "string_", Package: "std/time"}
 
 func __string_(_args []Object) Object {
 	_c := len(_args)
@@ -283,7 +283,7 @@ func __string_(_args []Object) Object {
 }
 
 var __sub__P ProcFn = __sub_
-var sub_ Proc = Proc{Fn: __sub__P, Name: "sub_"}
+var sub_ Proc = Proc{Fn: __sub__P, Name: "sub_", Package: "std/time"}
 
 func __sub_(_args []Object) Object {
 	_c := len(_args)
@@ -301,7 +301,7 @@ func __sub_(_args []Object) Object {
 }
 
 var __truncate__P ProcFn = __truncate_
-var truncate_ Proc = Proc{Fn: __truncate__P, Name: "truncate_"}
+var truncate_ Proc = Proc{Fn: __truncate__P, Name: "truncate_", Package: "std/time"}
 
 func __truncate_(_args []Object) Object {
 	_c := len(_args)
@@ -319,7 +319,7 @@ func __truncate_(_args []Object) Object {
 }
 
 var __unix__P ProcFn = __unix_
-var unix_ Proc = Proc{Fn: __unix__P, Name: "unix_"}
+var unix_ Proc = Proc{Fn: __unix__P, Name: "unix_", Package: "std/time"}
 
 func __unix_(_args []Object) Object {
 	_c := len(_args)
@@ -336,7 +336,7 @@ func __unix_(_args []Object) Object {
 }
 
 var __until__P ProcFn = __until_
-var until_ Proc = Proc{Fn: __until__P, Name: "until_"}
+var until_ Proc = Proc{Fn: __until__P, Name: "until_", Package: "std/time"}
 
 func __until_(_args []Object) Object {
 	_c := len(_args)

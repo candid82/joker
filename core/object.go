@@ -148,8 +148,9 @@ type (
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {
-		Fn   ProcFn
-		Name string
+		Fn      ProcFn
+		Name    string
+		Package string // "' for core (this package), else e.g. "std/string"
 	}
 	Fn struct {
 		InfoHolder
