@@ -18,7 +18,6 @@ func NewEnv() (env *Env) {
 	env.NS_VAR = env.CoreNamespace.Intern(MakeSymbol("ns"))
 	env.IN_NS_VAR = env.CoreNamespace.Intern(MakeSymbol("in-ns"))
 	env.ns = env.CoreNamespace.Intern(MakeSymbol("*ns*"))
-	env.ns.Value = env.EnsureNamespace(MakeSymbol("user"))
 	env.stdin = env.CoreNamespace.Intern(MakeSymbol("*in*"))
 	env.stdout = env.CoreNamespace.Intern(MakeSymbol("*out*"))
 	env.stderr = env.CoreNamespace.Intern(MakeSymbol("*err*"))

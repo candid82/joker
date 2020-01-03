@@ -81,6 +81,7 @@ func (env *Env) SetVerbose(verbose int) {
 
 /* This runs after invariant initialization, which includes calling NewEnv(). */
 func (env *Env) InitEnv(stdin io.Reader, stdout, stderr io.Writer, args []string) {
+	env.ns.Value = env.EnsureNamespace(MakeSymbol("user"))
 	env.stdin.Value = MakeBufferedReader(stdin)
 	env.stdout.Value = MakeIOWriter(stdout)
 	env.stderr.Value = MakeIOWriter(stderr)
