@@ -123,7 +123,6 @@ func (s InternedString) Finish(name string, env *CodeEnv) string {
 }
 
 var tr = [][2]string{
-	{"_", "US"},
 	{"?", "Q"},
 	{"!", "BANG"},
 	{"<=", "LE"},
