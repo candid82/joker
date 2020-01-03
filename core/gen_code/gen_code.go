@@ -78,7 +78,7 @@ func main() {
 
 	parseArgs(os.Args)
 
-	//	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	codeWriterEnv := &CodeWriterEnv{
 		BaseStrings: StringPool{},
@@ -93,7 +93,7 @@ func main() {
 	envForNs := map[string]*CodeEnv{}
 
 	for _, f := range CoreSourceFiles {
-		//		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
+		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 		nsName := CoreNameAsNamespaceName(f.Name)
 		nsNamePtr := STRINGS.Intern(nsName)
 
