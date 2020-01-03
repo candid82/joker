@@ -268,12 +268,14 @@ func (oi *ObjectInfo) AsGo() string {
 
 func (v *Var) AsGo() string {
 	name := symAsGo(v.name)
+	ns := ""
 	if v.ns != nil {
 		if v.name.ns != nil && *v.name.ns != *v.ns.Name.name {
 			panic(fmt.Sprintf("Symbol namespace discrepancy: Var %s has %s, its sym has %s", name, *v.ns.Name.name, *v.name.ns))
 		}
+		ns = symAsGo(v.ns.Name)
 	}
-	return "var_" + name
+	return "var_" + ns + "_" + name
 }
 
 func (v *VarRefExpr) AsGo() string {
