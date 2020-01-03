@@ -185,7 +185,7 @@ func init() {
 	genEnv.emitVar("TYPES", TYPES)
 	genEnv.emitVar("GLOBAL_ENV", GLOBAL_ENV)
 
-	sort.Strings(statics)
+	//	sort.Strings(statics)
 
 	r := strings.Join(runtime, "\n")
 	if r != "" {
@@ -372,25 +372,38 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 	}
 }
 
+func stdPackageName(pkg string) string {
+	if strings.HasPrefix(pkg, "std/") {
+		pkg = pkg[4:]
+	}
+	return pkg
+}
+
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
-	fn := ""
+	fnName := NameAsGo(p.Name)
 	newPackage := ""
 	if p.Package != "" {
+		pkgName := stdPackageName(p.Package)
+		thunkName := fmt.Sprintf("STD_thunk_%s_%s", NameAsGo(pkgName), fnName)
+		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+// std/%s/a_%s_fast_init.go's init() function should set this to the same as its local var %s on the !fast_init side:
+var %s_var ProcFn
+func %s(a []Object) Object {
+	return %s_var(a)
+}`[1:],
+			pkgName, pkgName, fnName, thunkName, thunkName, thunkName))
 		newPackage = fmt.Sprintf(`
 	Package: %s,
 `[1:],
 			strconv.Quote(p.Package))
-	} else {
-		fn = fmt.Sprintf(`
-	Fn: %s,
-`[1:],
-			p.Name)
+		fnName = thunkName
 	}
 	return fmt.Sprintf(`
 Proc{
-%s	Name: %s,
+	Fn: %s,
+	Name: %s,
 %s}`[1:],
-		fn, strconv.Quote(p.Name), newPackage)
+		fnName, strconv.Quote(fnName), newPackage)
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
