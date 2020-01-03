@@ -385,7 +385,7 @@ func UniqueId(obj, actual interface{}) (id string) {
 			}
 			h := getHash()
 			h.Write(([]byte)(spewConfig.Sdump(obj)))
-			if reflect.ValueOf(obj).Kind() == reflect.Ptr {
+			if false && reflect.ValueOf(obj).Kind() == reflect.Ptr { // TODO: Maybe delete this whole clause?
 				if actual == nil {
 					actual = obj
 				}
