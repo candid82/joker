@@ -78,6 +78,8 @@ func main() {
 
 	parseArgs(os.Args)
 
+	//	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
+
 	codeWriterEnv := &CodeWriterEnv{
 		BaseStrings: StringPool{},
 		Need:        map[string]Finisher{},
@@ -91,6 +93,7 @@ func main() {
 	envForNs := map[string]*CodeEnv{}
 
 	for _, f := range CoreSourceFiles {
+		//		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 		nsName := CoreNameAsNamespaceName(f.Name)
 		nsNamePtr := STRINGS.Intern(nsName)
 
@@ -427,7 +430,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 		thing, found := genEnv.Generated[v]
 		if !found {
 			obj := v.Interface()
-			name := uniqueId(obj)
+			name := uniqueId(ptr.Interface())
 			genEnv.Generated[v] = name
 			genEnv.emitVar(name, obj)
 			return "&" + name
@@ -475,8 +478,8 @@ func coreTypeOf(obj interface{}) string {
 
 func uniqueId(obj interface{}) string {
 	switch obj := obj.(type) {
-	case string:
-		return "s_" + NameAsGo(obj)
+	case *string:
+		return "s_" + NameAsGo(*obj)
 	default:
 	}
 	return UniqueId(obj, nil)

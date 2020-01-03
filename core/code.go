@@ -151,6 +151,13 @@ func NameAsGo(name string) string {
 	return name
 }
 
+func FilenameAsGo(name string) string {
+	if name[0] == '<' && name[len(name)-1] == '>' {
+		name = name[1 : len(name)-1]
+	}
+	return NameAsGo(name)
+}
+
 func noBang(s string) string {
 	if len(s) > 0 && s[0] == '!' {
 		return s[1:]
@@ -211,15 +218,31 @@ func symAsGo(sym Symbol) string {
 	if sym.info == nil {
 		return name
 	}
-	return fmt.Sprintf("%s_%d_%d__%d_%d", name, sym.info.startLine, sym.info.startColumn, sym.info.endLine, sym.info.endColumn)
+	filename := ""
+	if sym.info.filename != nil {
+		filename = *sym.info.filename
+		filename = "_" + FilenameAsGo(filename)
+	}
+	return fmt.Sprintf("%s_%d_%d__%d_%d%s", name, sym.info.startLine, sym.info.startColumn, sym.info.endLine, sym.info.endColumn, filename)
 }
 
 func (sym Symbol) AsGo() string {
 	return "symbol_" + symAsGo(sym)
 }
 
-func (ns Namespace) AsGo() string {
+func (ns *Namespace) AsGo() string {
 	return "ns_" + symAsGo(ns.Name)
+}
+
+func (e *Env) AsGo() string {
+	if e == GLOBAL_ENV {
+		return "global_env"
+	}
+	panic("not GLOBAL_ENV")
+}
+
+func (t *Type) AsGo() string {
+	return "ty_" + NameAsGo(t.name)
 }
 
 func kwAsGo(kw Keyword) string {
@@ -237,14 +260,14 @@ func (kw Keyword) AsGo() string {
 	panic("empty keyword")
 }
 
-func (oi ObjectInfo) AsGo() string {
-	if res, ok := infoHolderNameAsGo(oi); ok {
+func (oi *ObjectInfo) AsGo() string {
+	if res, ok := infoHolderNameAsGo(*oi); ok {
 		return "objectInfo_" + res
 	}
 	panic("could not make useful name out of ObjectInfo")
 }
 
-func (v Var) AsGo() string {
+func (v *Var) AsGo() string {
 	name := symAsGo(v.name)
 	if v.ns != nil {
 		if v.name.ns != nil && *v.name.ns != *v.ns.Name.name {
@@ -254,8 +277,11 @@ func (v Var) AsGo() string {
 	return "var_" + name
 }
 
-func (v VarRefExpr) AsGo() string {
-	s := v.vr.AsGo()
+func (v *VarRefExpr) AsGo() string {
+	s := *v.vr.name.name
+	if res, ok := infoHolderNameAsGo(*v); ok {
+		return "varref_" + NameAsGo(s) + "_" + res
+	}
 	return fmt.Sprintf("%s_%d_%d", strings.Replace(s, "var_", "varRefExpr_", 1), v.startLine, v.startColumn)
 }
 
@@ -339,7 +365,8 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	filename := ""
 	filenamePtr := UnsafeReflectValue(v.FieldByName("filename"))
 	if !(filenamePtr.IsZero() || filenamePtr.IsNil()) {
-		filename = "_" + NameAsGo(filenamePtr.Elem().Interface().(string))
+		filename = filenamePtr.Elem().Interface().(string)
+		filename = "_" + FilenameAsGo(filename)
 	}
 	startLine := UnsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
 	startColumn := UnsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
