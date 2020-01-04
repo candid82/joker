@@ -29,6 +29,7 @@ type internalNamespaceInfo struct {
 }
 
 var (
+	coreNamespaces            []string
 	coreNamespaceInfo         internalNamespaceInfo
 	replNamespaceInfo         internalNamespaceInfo
 	walkNamespaceInfo         internalNamespaceInfo
@@ -2021,8 +2022,18 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 	}
 }
 
+func setCoreNamespaces() {
+	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*core-namespaces*"))
+	set := vr.Value.(*MapSet)
+	for _, ns := range coreNamespaces {
+		set = set.Conj(MakeSymbol(ns)).(*MapSet)
+	}
+	vr.Value = set
+}
+
 func ProcessCoreNamespaceInfo() {
 	processNamespaceInfo(&coreNamespaceInfo, "<joker.core>")
+	setCoreNamespaces()
 }
 
 func ProcessReplNamespaceInfo() {

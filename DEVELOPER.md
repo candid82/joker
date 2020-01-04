@@ -62,15 +62,13 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Create a nearly-empty stub file, `std/*/a_*_fast_init*.go`, that builds only in the presence of the `fast_init` build tag; this will cause `generate-std.joke` (when it sees that such a file exists) to specify `!fast_init` as the build tag for `std/*/a_*.go`, so exactly one of them will be built at a time
 * Ensure that `std/*/a_*.go` has already been generated for that library, using an earlier version of Joker if necessary
 
-At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
+(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries. It will be automatically added to `*core-namespaces*`.)
 
-(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries.)
+Create suitable tests, e.g. in `tests/eval/`.
 
-Create suitable tests, e.g. in `tests/eval/`. Consider adding it to the list in `tests/eval/corelib/input.joke` (via either `use` or `require`).
+Finally, it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
 
-Finally, add the corresponding `(require 'joker.x)` line to `generate-docs.joke`, to get documentation generated automatically.
-
-Now it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
+Note that core libraries (other than `joker.core` and, when running the Repl, `joker.repl`) do not show up in `(all-ns)` until after they've been loaded via `:require` or similar.
 
 ### Standard-library-wrapping Namespaces
 
