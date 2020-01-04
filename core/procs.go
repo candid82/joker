@@ -1977,7 +1977,7 @@ func finalizeNamespace() {
 		return
 	}
 	ns := GLOBAL_ENV.CurrentNamespace()
-	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.Mappings()))
+	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.mappings))
 }
 
 func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed bool) {
@@ -2032,6 +2032,22 @@ func setCoreNamespaces() {
 		set = set.Conj(MakeSymbol(ns)).(*MapSet)
 	}
 	vr.Value = set
+}
+
+var procIsNamespaceInitialized ProcFn = func(args []Object) Object {
+	sym := EnsureSymbol(args, 0)
+	if sym.ns != nil {
+		panic(RT.NewError("Can't ask for namespace info on namespace-qualified symbol"))
+	}
+	// First look for registered (e.g. std) libs
+	ns, found := GLOBAL_ENV.Namespaces[sym.name]
+	if found {
+		return MakeBoolean(ns.Lazy == nil)
+	}
+	// Then check core libs, which (generally) start out as unregistered
+	libname := sym.Name()
+	info, found := internalLibs[libname]
+	return MakeBoolean(found && info.generated == nil && info.init == nil && info.data == nil)
 }
 
 func ProcessCoreNamespaceInfo() {
