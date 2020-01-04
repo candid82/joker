@@ -66,6 +66,13 @@
 ;;;; GOFN for "bar") with the array of Object's comprising the
 ;;;; arguments in "...".
 
+;;; Load all core namespaces. This pulls in any std namespaces upon which
+;;; they depend. Then, set 'preloaded' to those std namespaces, forcing
+;;; complete evaluation so lazy evaluation wouldn't find joker.os due to
+;;; the subsequent require.
+(doseq [ns (remove #(= % 'user) joker.core/*core-namespaces*)] (require ns))
+(def preloaded (doall (remove joker.core/*core-namespaces* (filter #(joker.core/ns-init-p %) (map #(symbol (str %)) (all-ns))))))
+
 (require '[joker.string :as s]
          '[joker.os :as os])
 
@@ -75,6 +82,8 @@
   [& args]
   (when ((os/env) "JOKER_DEBUG_STD")
     (apply println args)))
+
+(debug "Preloaded:" preloaded)
 
 ;;; Discover namespaces dynamically by finding *.joke files.
 (def namespaces
