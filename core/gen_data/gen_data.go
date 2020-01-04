@@ -81,11 +81,6 @@ func main() {
 		content, err = PackReader(NewReader(bytes.NewReader(content), f.Name), "")
 		PanicOnErr(err)
 
-		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
-		if _, err := os.Stat("a_" + name + "_code.go"); err == nil {
-			continue // already have generated-code version
-		}
-
 		dst := make([]byte, len(content)*4)
 		for i, v := range content {
 			dst[i*4] = '\\'
@@ -93,6 +88,7 @@ func main() {
 			dst[i*4+2] = hextable[v>>4]
 			dst[i*4+3] = hextable[v&0x0f]
 		}
+		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
 		fileContent := strings.ReplaceAll(template, "{name}", name)
 		fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
 		ioutil.WriteFile("a_"+name+"_data.go", []byte(fileContent), 0666)
