@@ -1,11 +1,13 @@
 (ns joker.better-cond
   "A collection of variations on Clojure's core macros."
-  {:author "Christophe Grand and Mark Engelberg"}
+  {:author "Christophe Grand and Mark Engelberg"
+   :added "1.0"}
   (:refer-clojure :exclude [cond when-let if-let when-some if-some]))
 
 (defmacro if-let
   "A variation on if-let where all the exprs in the bindings vector must be true.
    Also supports :let."
+  {:added "1.0"}
   ([bindings then]
    `(if-let ~bindings ~then nil))
   ([bindings then else]
@@ -23,12 +25,14 @@
 (defmacro when-let
   "A variation on when-let where all the exprs in the bindings vector must be true.
    Also supports :let."
+  {:added "1.0"}
   [bindings & body]
   `(if-let ~bindings (do ~@body)))
 
 (defmacro if-some
   "A variation on if-some where all the exprs in the bindings vector must be non-nil.
    Also supports :let."
+  {:added "1.0"}
   ([bindings then]
    `(if-some ~bindings ~then nil))
   ([bindings then else]
@@ -46,6 +50,7 @@
 (defmacro when-some
   "A variation on when-some where all the exprs in the bindings vector must be non-nil.
    Also supports :let."
+  {:added "1.0"}
   [bindings & body]
   `(if-some ~bindings (do ~@body)))
 
@@ -59,6 +64,7 @@
        3).
    Also supports :when-let and :when-some. 
    :let, :when-let, :when-some and :do do not need to be written as keywords."
+  {:added "1.0"}
   [& clauses]
   (when-let [[test expr & more-clauses] (seq clauses)]
     (if (next clauses)

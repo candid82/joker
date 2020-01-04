@@ -62,9 +62,9 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 
 At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
 
-(To add the namespace to `*loaded-libs*`, edit its `defonce` definition in `core/data/core.joke` and rebuild.)
+(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries.)
 
-Create suitable tests, e.g. in `tests/eval/`.
+Create suitable tests, e.g. in `tests/eval/`. Consider adding it to the list in `tests/eval/corelib/input.joke` (via either `use` or `require`).
 
 Finally, add the corresponding `(require 'joker.x)` line to `generate-docs.joke`, to get documentation generated automatically.
 
@@ -119,13 +119,14 @@ If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.
 Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for each public member (in `joker.foo`), one must:
 
 * Add `'foo` to the definition of `namespaces` in **std/generate-std.joke**
+* Add the namespace to `*loaded-libs*` by editing its `defonce` definition in `core/data/core.joke`
 * `mkdir -p std/foo`
 * `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo.go`
 * If necessary, write supporting Go code, which goes in `std/foo/foo_native.go` and other Go files in `std/foo/*.go`
 * Add the resulting set of Go files, as well as `std/foo.joke`, to the repository
 * Add tests to `tests/eval/`
 * Rebuild the Joker executable (via `run.sh` or equivalent)
-* Run the tests (via `./all-tests.sh` or just `eval-tests.sh`)
+* Run the tests (via `./all-tests.sh` or just `./eval-tests.sh`)
 
 While some might object to the inclusion of generated files (`std/*/a_*.joke`) in the repository, Joker currently depends on their presence in order to build, due to circular dependencies (related to the bootstrapping of Joker) as described below.
 
