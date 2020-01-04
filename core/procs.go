@@ -1980,7 +1980,7 @@ func finalizeNamespace() {
 	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.Mappings()))
 }
 
-func processNamespaceInfo(info *internalNamespaceInfo, name string) {
+func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed bool) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { finalizeNamespace(); GLOBAL_ENV.SetCurrentNamespace(ns) }()
@@ -1995,7 +1995,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		info.generated = nil
 		info.init = nil
 		info.data = nil
-		return
+		return true
 	}
 	if info.init != nil {
 		if Verbose > 0 {
@@ -2003,6 +2003,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 		}
 		info.init()
 		info.init = nil
+		processed = true
 	}
 	if info.data != nil {
 		if Verbose > 0 {
@@ -2019,7 +2020,9 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) {
 			PanicOnErr(err)
 		}
 		info.data = nil
+		processed = true
 	}
+	return
 }
 
 func setCoreNamespaces() {
@@ -2032,8 +2035,9 @@ func setCoreNamespaces() {
 }
 
 func ProcessCoreNamespaceInfo() {
-	processNamespaceInfo(&coreNamespaceInfo, "<joker.core>")
-	setCoreNamespaces()
+	if processNamespaceInfo(&coreNamespaceInfo, "<joker.core>") {
+		setCoreNamespaces()
+	}
 }
 
 func ProcessReplNamespaceInfo() {
