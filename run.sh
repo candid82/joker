@@ -19,8 +19,6 @@ set -e  # Exit on error.
 
 build
 
-$KEEP_A_CODE_FILES && exit 0  # Going further than this does not yet work
-
 if [ "$1" == "-v" ]; then
   ./joker -e '(print "\nLibraries available in this build:\n  ") (loaded-libs) (println)'
 fi
