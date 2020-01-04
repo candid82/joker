@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=false
+[ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=true
 [ -z "$KEEP_A_DATA_FILES" ] && KEEP_A_DATA_FILES=true
 [ -z "$OPTIMIZE_STARTUP" ] && OPTIMIZE_STARTUP=$([ -f OPTIMIZE-STARTUP.flag ] && echo true || echo false)
 
