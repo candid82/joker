@@ -3,3 +3,16 @@
 // +build fast_init
 
 package string
+
+import (
+	"fmt"
+	. "github.com/candid82/joker/core"
+	"os"
+)
+
+func InternsOrThunks() {
+	if Verbose > 0 {
+		fmt.Fprintln(os.Stderr, "Lazily running fast version of string.InternsOrThunks().")
+	}
+
+}

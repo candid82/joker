@@ -2363,6 +2363,11 @@ var procInternFakeVar_thunk ProcFn = func(args []Object) Object {
 }
 var procInternFakeVar_thunk_var ProcFn
 
+var procIsNamespaceInitialized_thunk ProcFn = func(args []Object) Object {
+	return procIsNamespaceInitialized_thunk_var(args)
+}
+var procIsNamespaceInitialized_thunk_var ProcFn
+
 var procLibPath_thunk ProcFn = func(args []Object) Object {
 	return procLibPath_thunk_var(args)
 }
@@ -2441,6 +2446,7 @@ func init() {
 	procFindVar_thunk_var = procFindVar
 	procInjectNamespace_thunk_var = procInjectNamespace
 	procInternFakeVar_thunk_var = procInternFakeVar
+	procIsNamespaceInitialized_thunk_var = procIsNamespaceInitialized
 	procLibPath_thunk_var = procLibPath
 	procLoadFile_thunk_var = procLoadFile
 	procLoadLibFromPath_thunk_var = procLoadLibFromPath

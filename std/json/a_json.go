@@ -6,8 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
-
 var __read_string__P ProcFn = __read_string_
 var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/json"}
 
@@ -50,21 +48,10 @@ func __write_string_(_args []Object) Object {
 
 func Init() {
 
-	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
-
-	jsonNamespace.InternVar("read-string", read_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Parses the JSON-encoded data and return the result as a Joker value.
-  Optional opts map may have the following keys:
-  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
-
-	jsonNamespace.InternVar("write-string", write_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-			`Returns the JSON encoding of v.`, "1.0"))
-
+	InternsOrThunks()
 }
+
+var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
 
 func init() {
 	jsonNamespace.Lazy = Init

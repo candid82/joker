@@ -6,8 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
-
 var __decode_string__P ProcFn = __decode_string_
 var decode_string_ Proc = Proc{Fn: __decode_string__P, Name: "decode_string_", Package: "std/base64"}
 
@@ -44,19 +42,10 @@ func __encode_string_(_args []Object) Object {
 
 func Init() {
 
-	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
-
-	base64Namespace.InternVar("decode-string", decode_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the bytes represented by the base64 string s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
-
-	base64Namespace.InternVar("encode-string", encode_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the base64 encoding of s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
-
+	InternsOrThunks()
 }
+
+var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
 func init() {
 	base64Namespace.Lazy = Init

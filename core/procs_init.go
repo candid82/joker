@@ -130,7 +130,7 @@ func init() {
 	intern("ns-map__", procNamespaceMap, "procNamespaceMap")
 	intern("ns-unmap__", procNamespaceUnmap, "procNamespaceUnmap")
 	intern("var-ns__", procVarNamespace, "procVarNamespace")
-	intern("ns-init-p__", procIsNamespaceInitialized, "procIsNamespaceInitialized")
+	intern("ns-init-p__", procIsNamespaceInitialized_thunk, "procIsNamespaceInitialized_thunk")
 	intern("refer__", procRefer, "procRefer")
 	intern("alias__", procAlias, "procAlias")
 	intern("ns-aliases__", procNamespaceAliases, "procNamespaceAliases")
