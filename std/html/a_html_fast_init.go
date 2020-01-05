@@ -14,5 +14,6 @@ func InternsOrThunks() {
 	if Verbose > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running fast version of html.InternsOrThunks().")
 	}
-
+	STD_thunk_html_escape__var = __escape_
+	STD_thunk_html_unescape__var = __unescape_
 }

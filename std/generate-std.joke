@@ -403,15 +403,21 @@
               res)]
     res))
 
+(defn generate-thunk
+  [ns-name ns-name-final k v]
+  (let [fn (go-name (str k))]
+    (format "STD_thunk_%s_%s_var = __%s" ns-name fn fn)))
+
 (defn generate-ns-fast-init
   [ns-sym ns-name ns-name-final]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        thunks ""
+        thunks (for [[k v] (sort-by first (ns-public-go-fns ns))]
+                 (generate-thunk ns-name ns-name-final k v))
         res (-> package-fast-template
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}" ". \"github.com/candid82/joker/core\"")
-                (rpl "{thunks}" thunks))
+                (rpl "{thunks}" (s/join "\n\t" thunks)))
         res (if (:empty m)
               (comment-out res)
               res)]
