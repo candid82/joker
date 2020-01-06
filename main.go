@@ -221,6 +221,7 @@ func srepl(port string, phase Phase) {
 	fmt.Fprintf(Stdout, "Welcome to joker %s, client at %s. Use '(joker.os/exit 0)', or close the connection, to exit.\n",
 		VERSION, conn.RemoteAddr())
 
+	GLOBAL_ENV.Ready()
 	for {
 		fmt.Fprint(Stdout, GLOBAL_ENV.CurrentNamespace().Name.ToString(false)+"=> ")
 		if processReplCommand(reader, phase, parseContext, replContext) {

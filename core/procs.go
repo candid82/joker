@@ -1896,6 +1896,7 @@ var procIncProblemCount ProcFn = func(args []Object) Object {
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
+	GLOBAL_ENV.Ready()
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
