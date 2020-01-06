@@ -3244,7 +3244,7 @@
 (defonce ^:dynamic
   ^{:private true
     :doc "A set of symbols representing loaded core (not std) namespaces"}
-  *core-namespaces* #{})
+  *core-namespaces* #{'joker.core})  ; At least one symbol so gen_code.go doesn't emit just Mapset{}
 
 (defonce ^:dynamic
   ^{:private true
