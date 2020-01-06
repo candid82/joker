@@ -2029,8 +2029,19 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 func setCoreNamespaces() {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*core-namespaces*"))
 	set := vr.Value.(*MapSet)
+	if Verbose > 0 {
+		fmt.Fprintln(Stderr, "setCoreNamespaces() of:\n")
+		SpewThis(vr)
+	}
 	for _, ns := range coreNamespaces {
-		set = set.Conj(MakeSymbol(ns)).(*MapSet)
+		if Verbose > 0 {
+			fmt.Fprintf(Stderr, "ns: %+v\n", ns)
+		}
+		sym := MakeSymbol(ns)
+		if Verbose > 0 {
+			fmt.Fprintf(Stderr, "\tsym: %s\n", sym.Name())
+		}
+		set = set.Conj(sym).(*MapSet)
 	}
 	vr.Value = set
 }
@@ -2051,9 +2062,12 @@ var procIsNamespaceInitialized ProcFn = func(args []Object) Object {
 	return MakeBoolean(found && info.generated == nil && info.init == nil && info.data == nil)
 }
 
+var haveSetCoreNamespaces bool
+
 func ProcessCoreNamespaceInfo() {
-	if processNamespaceInfo(&coreNamespaceInfo, "<joker.core>") {
+	if processNamespaceInfo(&coreNamespaceInfo, "<joker.core>") || !haveSetCoreNamespaces {
 		setCoreNamespaces()
+		haveSetCoreNamespaces = true
 	}
 }
 
