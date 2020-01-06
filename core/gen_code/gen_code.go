@@ -27,7 +27,45 @@ type GenEnv struct {
 	Runtime   *[]string
 	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	LateInit  bool                        // Whether emitting a namespace other than joker.core
 }
+
+var (
+	/* NewEnv() statically declares numerous variables and sets
+	/* some of them to initial values before any func init()'s
+	/* run. Later, func main() calls (*Env)InitEnv() and other
+	/* receivers, as appropriate, to set per-invocation
+	/* values. Normally, by this point in time, core.joke (in
+	/* digested form) has already been "run", so it cannot
+	/* directly use such values; but the other *.joke files won't
+	/* have been run yet, so can use those values. However, that
+	/* won't work here (in gen_code), since there's no
+	/* corresponding main.go and (of course) the
+	/* per-invocation-of-Joker values won't be known. So
+	/* e.g. `(def *foo* *out*)`, while it'd work normally, will
+	/* end up setting `*foo*` to nil; and (*Env)InitEnv() won't
+	/* know to fix that up after setting `*out*` to a non-nil
+	/* value. This map lists these "late-initialization" variables
+	/* so code to set them is emitted in the respective
+	/* namespace's func *Init() code. Any variable defined in
+	/* terms of one of these variables is thus handled and, in
+	/* turn, added to this map. Currently, only direct assignment
+	/* is handled; something like `(def *n* (count
+	/* *command-line-args*))` would thus not work without special
+	/* handling, which does not yet appear to be necessary. */
+
+	lateInits = map[string]struct{}{
+		"joker.core/*in*":                struct{}{},
+		"joker.core/*out*":               struct{}{},
+		"joker.core/*err*":               struct{}{},
+		"joker.core/*command-line-args*": struct{}{},
+		"joker.core/*classpath*":         struct{}{},
+		"joker.core/*core-namespaces*":   struct{}{},
+		"joker.core/*verbose*":           struct{}{},
+		"joker.core/*file*":              struct{}{},
+		"joker.core/*main-file*":         struct{}{},
+	}
+)
 
 func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
 	return &CodeEnv{
@@ -155,7 +193,7 @@ func init() {
 		}
 
 		if Verbose > 0 {
-			fmt.Printf("EMITTING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+			fmt.Printf("PROCESSING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
 
 		filename := CoreSourceFilename[nsName]
@@ -174,6 +212,7 @@ func init() {
 		Runtime:   &runtime,
 		Imports:   imports,
 		Generated: map[interface{}]interface{}{},
+		LateInit:  false,
 	}
 
 	genEnv.emitVar("STR", STR)
@@ -347,8 +386,23 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 	case reflect.Struct:
 		typeName := coreTypeName(v)
 		obj := v.Interface()
-		if p, yes := obj.(Proc); yes {
-			return genEnv.emitProc(target, p)
+		switch obj := obj.(type) {
+		case Proc:
+			return genEnv.emitProc(target, obj)
+		case Namespace:
+			if obj.Name.Name() != "joker.core" {
+				lateInit := genEnv.LateInit
+				fmt.Printf("Emitting late-init %s\n", obj.Name.Name())
+				defer func() { genEnv.LateInit = lateInit }()
+				genEnv.LateInit = true
+			}
+		case VarRefExpr:
+			if genEnv.LateInit {
+				varName := obj.Var().Name()
+				if _, found := lateInits[varName]; found {
+					fmt.Printf("VarRef of lateInit %s\n", varName)
+				}
+			}
 		}
 		if obj == nil {
 			return ""

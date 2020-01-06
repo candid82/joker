@@ -103,7 +103,7 @@ func processFile(filename string, phase Phase) error {
 	if filename != "" {
 		f, err := filepath.Abs(filename)
 		PanicOnErr(err)
-		GLOBAL_ENV.MainFile.Value = MakeString(f)
+		GLOBAL_ENV.SetMainFilename(f)
 	}
 	if saveForRepl {
 		reader = NewReader(&replayable{reader}, "<replay>")

@@ -4,7 +4,8 @@ package core
 
 import ()
 
-/* Called by parse_init.go in an outer var block, this runs before func main(). */
+/* Called by parse_init.go in an outer var block, this runs before any
+/* func init() as well as before func main(). */
 func NewEnv() (env *Env) {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -15,6 +16,13 @@ func NewEnv() (env *Env) {
 	}
 	env.CoreNamespace = env.EnsureNamespace(SYMBOLS.joker_core)
 	env.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
+
+	/* This runs during invariant initialization.  InitEnv() and
+	/* others are called at runtime to set some of these Values
+	/* based on the current invocation. NOTE: Any changes to the
+	/* list of run-time initializations must be reflected in
+	/* gen_code/gen_code.go.  */
+
 	env.NS_VAR = env.CoreNamespace.Intern(MakeSymbol("ns"))
 	env.IN_NS_VAR = env.CoreNamespace.Intern(MakeSymbol("in-ns"))
 	env.ns = env.CoreNamespace.Intern(MakeSymbol("*ns*"))
