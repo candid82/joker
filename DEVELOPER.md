@@ -59,7 +59,6 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
 * Do the same for **core/gen\_code/gen\_code.go**
-* Create a nearly-empty stub file, `std/*/a_*_fast_init*.go`, that builds only in the presence of the `fast_init` build tag; this will cause `generate-std.joke` (when it sees that such a file exists) to specify `!fast_init` as the build tag for `std/*/a_*.go`, so exactly one of them will be built at a time
 * Ensure that `std/*/a_*.go` has already been generated for that library, using an earlier version of Joker if necessary
 
 (Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries. It will be automatically added to `*core-namespaces*`.)
@@ -98,7 +97,7 @@ Whether they call Go code directly, or call support code written in Go (typicall
 
 #### Advantages and Disadvantages vis-a-vis Core Namespaces
 
-As standard-library-wrapping namespaces are lazily loaded (i.e. on-demand), and needn't build up the ASTs that the core namespaces build up, they can be expected to offer lower overhead at startup and/or first-use time. That is, only namespace generation, interning of symbols, and metadata is built up; other logic is "baked in" via compilation of the Go code accompanying these namespaces.
+As standard-library-wrapping namespaces are lazily loaded (i.e. on-demand), and needn't build up the ASTs that the core namespaces build up, they can be expected (in the standard, not fast-startup, build of Joker) to offer lower overhead at startup and/or first-use time. That is, only namespace generation, interning of symbols, and metadata is built up; other logic is "baked in" via compilation of the Go code accompanying these namespaces.
 
 However, any logic (such as conditionals, loops, and so on) to be performed by them must be expressed in Go, rather than Joker, code; this mechanism is designed for easier creation of "thin" wrappers between Joker and Go code, not as a general mechanism for embedding Joker code in the Joker executable.
 
