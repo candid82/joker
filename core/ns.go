@@ -66,7 +66,7 @@ func (ns *Namespace) MaybeLazy(doc string) {
 	if ns.Lazy != nil {
 		ns.Lazy()
 		if Verbose > 0 {
-			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s\n", *ns.Name.name)
+			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s for %s\n", *ns.Name.name, doc)
 		}
 		ns.Lazy = nil
 	}
