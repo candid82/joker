@@ -146,6 +146,16 @@ So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`,
 
 ## Faster Startup
 
+Unless the file **NO-OPTIMIZE-STARTUP.flag** exists in the top-level Joker directory, or **OPTIMIZE_STARTUP=false** is set in the environment, **run.sh** builds an extra set of Go source files that, when enabled via a build tag, statically initialize most of the core namespace info (some runtime initialization must stil be performed, due mainly to limitations in the Go compiler).
+
+It then builds both the normal and fast-startup versions of Joker. The normal version is built via `go build` (no build tag specified) and is renamed **joker.slow**. Then the fast-startup version is built via `go build -tags fast_init` and hardlinked to **joker.fast**, leaving **joker** as the fast-startup version.
+
+This fast-startup version is then used to generate the **std** libraries, as is normal. It can also be used to regenerate the documentation, and (ideally) for any other purpose. It should run about as fast as Joker after starting up; very little is overtly added to the runtime cost (a few "thunks" are introduced for some routines, but that should end up in the noise, performance-wise).
+
+### Developer Notes
+
+TBD, but something like this was done to search for Joker code that runs before `main()` and determine how best to handle it in a slow-vs-fast split build:
+
 ```
 grep --color -nH --null -E -e '^(func init\(|var )' *.go ../*.go ../std/*/*.go | grep -v ' ProcFn = '
 ```
