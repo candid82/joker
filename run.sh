@@ -2,7 +2,7 @@
 
 [ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=true
 [ -z "$KEEP_A_DATA_FILES" ] && KEEP_A_DATA_FILES=true
-[ -z "$OPTIMIZE_STARTUP" ] && OPTIMIZE_STARTUP=$([ -f OPTIMIZE-STARTUP.flag ] && echo true || echo false)
+[ -z "$OPTIMIZE_STARTUP" ] && OPTIMIZE_STARTUP=$([ -f NO-OPTIMIZE-STARTUP.flag ] && echo false || echo true)
 
 build() {
   go clean
@@ -10,9 +10,16 @@ build() {
   $KEEP_A_DATA_FILES || rm -fv core/a_*data.go
   go generate ./...
   (cd core; go run gen_data/gen_data.go)
-  $OPTIMIZE_STARTUP && ("Optimizing startup time..."; cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
+  $OPTIMIZE_STARTUP && (echo "Optimizing startup time..."; cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
   go vet ./...
-  go build $BUILD_ARGS
+  go build
+  if $OPTIMIZE_STARTUP; then
+      mv -f joker joker.slow
+      go build -tags fast_init
+      ln -f joker joker.fast
+  else
+      ln -f joker joker.slow
+  fi
 }
 
 set -e  # Exit on error.
