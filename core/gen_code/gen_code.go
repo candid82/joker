@@ -188,6 +188,9 @@ func init() {
 	lateInits := []string{}
 	imports := NewImports()
 
+	// Mark "everything" as used.
+	ResetUsage()
+
 	for nsNamePtr, ns := range GLOBAL_ENV.Namespaces {
 		nsName := *nsNamePtr
 
