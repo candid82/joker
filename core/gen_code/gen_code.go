@@ -28,6 +28,7 @@ type GenEnv struct {
 	Statics   *[]string
 	Runtime   *[]string
 	LateInits *[]string
+	Namespace *Namespace
 	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 	LateInit  bool                        // Whether emitting a namespace other than joker.core
@@ -182,6 +183,11 @@ func init() {
 }
 `
 
+	statics := []string{}
+	runtime := []string{}
+	lateInits := []string{}
+	imports := NewImports()
+
 	for nsNamePtr, ns := range GLOBAL_ENV.Namespaces {
 		nsName := *nsNamePtr
 
@@ -190,8 +196,11 @@ func init() {
 		env := envForNs[nsName]
 		if env == nil {
 			if Verbose > 0 {
-				fmt.Printf("SKIPPING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
+			lateInits = append(lateInits, fmt.Sprintf(`
+	GLOBAL_ENV.FindNamespace(MakeSymbol("%s"))`[1:],
+				nsName))
 			continue
 		}
 
@@ -205,11 +214,6 @@ func init() {
 		fileContent := strings.ReplaceAll(fileTemplate[1:], "{name}", name)
 		ioutil.WriteFile(codeFile, []byte(fileContent), 0666)
 	}
-
-	statics := []string{}
-	runtime := []string{}
-	lateInits := []string{}
-	imports := NewImports()
 
 	genEnv := &GenEnv{
 		Statics:   &statics,
@@ -411,7 +415,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		case Namespace:
 			nsName := obj.Name.Name()
 			if Verbose > 0 {
-				fmt.Printf("Emitting %s\n", nsName)
+				fmt.Printf("EMITTING %s\n", nsName)
 			}
 			if nsName != "joker.core" {
 				lateInit := genEnv.LateInit
@@ -511,8 +515,8 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 	default:
 		thing, found := genEnv.Generated[v]
 		if !found {
-			obj := v.Interface()
 			ptrToObj := ptr.Interface()
+			obj := v.Interface()
 			name := uniqueId(ptrToObj)
 			if genEnv.LateInit {
 				if destVar, yes := ptrToObj.(*Var); yes /* && destVar.Value == nil */ {
