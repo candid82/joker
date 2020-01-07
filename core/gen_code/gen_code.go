@@ -31,7 +31,6 @@ type GenEnv struct {
 	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 	LateInit  bool                        // Whether emitting a namespace other than joker.core
-	destVarId *string                     // Target of an assignment for a source that is a lateInits var
 }
 
 var (
@@ -419,17 +418,6 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 				defer func() { genEnv.LateInit = lateInit }()
 				genEnv.LateInit = true
 			}
-		case VarRefExpr:
-			if genEnv.LateInit && Verbose > 0 {
-				varName := obj.Var().Name()
-				if _, found := lateInits[varName]; found {
-					if genEnv.destVarId == nil {
-						fmt.Fprintf(os.Stderr, "Invalid VarRef of lateInit %s\n", varName)
-					} else {
-						fmt.Printf("VarRef of lateInit: %s = %s\n", *genEnv.destVarId, uniqueId(obj.Var()))
-					}
-				}
-			}
 		}
 		if obj == nil {
 			return ""
@@ -526,18 +514,15 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 			obj := v.Interface()
 			ptrToObj := ptr.Interface()
 			name := uniqueId(ptrToObj)
-			if genEnv.LateInit && genEnv.destVarId == nil {
+			if genEnv.LateInit {
 				if destVar, yes := ptrToObj.(*Var); yes /* && destVar.Value == nil */ {
 					if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
 						sourceVarName := e.Var().Name()
 						if _, found := lateInits[sourceVarName]; found {
-							defer func() { genEnv.destVarId = nil }()
-							genEnv.destVarId = func() *string { s := uniqueId(destVar); return &s }()
+							destVarId := uniqueId(destVar)
 							*genEnv.LateInits = append(*genEnv.LateInits, fmt.Sprintf(`
 	%s = %s`[1:],
-								*genEnv.destVarId, uniqueId(e.Var())))
-						} else if false {
-							fmt.Printf("Not registering var %s = %s\n", destVar.Name(), sourceVarName)
+								destVarId, uniqueId(e.Var())))
 						}
 					}
 				}
