@@ -27,9 +27,11 @@ const dataPattern = "a_%s_data.go"
 type GenEnv struct {
 	Statics   *[]string
 	Runtime   *[]string
+	LateInits *[]string
 	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 	LateInit  bool                        // Whether emitting a namespace other than joker.core
+	destVarId *string                     // Target of an assignment for a source that is a lateInits var
 }
 
 var (
@@ -207,11 +209,13 @@ func init() {
 
 	statics := []string{}
 	runtime := []string{}
+	lateInits := []string{}
 	imports := NewImports()
 
 	genEnv := &GenEnv{
 		Statics:   &statics,
 		Runtime:   &runtime,
+		LateInits: &lateInits,
 		Imports:   imports,
 		Generated: map[interface{}]interface{}{},
 		LateInit:  false,
@@ -239,6 +243,17 @@ func init() {
 
 	}
 
+	lates := strings.Join(lateInits, "\n")
+	if lates != "" {
+		lates = fmt.Sprintf(`
+
+func lateInit() {
+%s
+}`,
+			lates)
+
+	}
+
 	imp := QuotedImportList(imports, "\n")
 	if imp[0] == '\n' {
 		imp = imp[1:]
@@ -248,6 +263,7 @@ func init() {
 		{"{imports}", imp},
 		{"{statics}", strings.Join(statics, "\n")},
 		{"{runtime}", r},
+		{"{lates}", lates},
 	}
 
 	fileContent := `
@@ -263,6 +279,7 @@ import (
 
 {statics}
 {runtime}
+{lates}
 `[1:]
 
 	for _, t := range tr {
@@ -393,17 +410,24 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		case Proc:
 			return genEnv.emitProc(target, obj)
 		case Namespace:
-			if obj.Name.Name() != "joker.core" {
+			nsName := obj.Name.Name()
+			if Verbose > 0 {
+				fmt.Printf("Emitting %s\n", nsName)
+			}
+			if nsName != "joker.core" {
 				lateInit := genEnv.LateInit
-				fmt.Printf("Emitting late-init %s\n", obj.Name.Name())
 				defer func() { genEnv.LateInit = lateInit }()
 				genEnv.LateInit = true
 			}
 		case VarRefExpr:
-			if genEnv.LateInit {
+			if genEnv.LateInit && Verbose > 0 {
 				varName := obj.Var().Name()
 				if _, found := lateInits[varName]; found {
-					fmt.Printf("VarRef of lateInit %s\n", varName)
+					if genEnv.destVarId == nil {
+						fmt.Fprintf(os.Stderr, "Invalid VarRef of lateInit %s\n", varName)
+					} else {
+						fmt.Printf("VarRef of lateInit: %s = %s\n", *genEnv.destVarId, uniqueId(obj.Var()))
+					}
 				}
 			}
 		}
@@ -500,7 +524,24 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 		thing, found := genEnv.Generated[v]
 		if !found {
 			obj := v.Interface()
-			name := uniqueId(ptr.Interface())
+			ptrToObj := ptr.Interface()
+			name := uniqueId(ptrToObj)
+			if genEnv.LateInit && genEnv.destVarId == nil {
+				if destVar, yes := ptrToObj.(*Var); yes /* && destVar.Value == nil */ {
+					if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
+						sourceVarName := e.Var().Name()
+						if _, found := lateInits[sourceVarName]; found {
+							defer func() { genEnv.destVarId = nil }()
+							genEnv.destVarId = func() *string { s := uniqueId(destVar); return &s }()
+							*genEnv.LateInits = append(*genEnv.LateInits, fmt.Sprintf(`
+	%s = %s`[1:],
+								*genEnv.destVarId, uniqueId(e.Var())))
+						} else if false {
+							fmt.Printf("Not registering var %s = %s\n", destVar.Name(), sourceVarName)
+						}
+					}
+				}
+			}
 			genEnv.Generated[v] = name
 			genEnv.emitVar(name, obj)
 			return "&" + name

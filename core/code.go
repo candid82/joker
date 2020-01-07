@@ -286,6 +286,10 @@ func (v *VarRefExpr) AsGo() string {
 	return fmt.Sprintf("%s_%d_%d", strings.Replace(s, "var_", "varRefExpr_", 1), v.startLine, v.startColumn)
 }
 
+func (v *Var) Expr() Expr {
+	return v.expr
+}
+
 // This comes from (davecgh|jcburley)/go-spew/bypass.go.
 const flagPrivate = 0x20
 
