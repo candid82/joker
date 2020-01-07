@@ -145,12 +145,16 @@ func main() {
 			if _, exists := envForNs[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
-			fmt.Printf("FOUND ns=%s file=%s mappings=%d\n", nsName, f.Filename, len(ns.Mappings()))
+			if Verbose > 0 {
+				fmt.Printf("FOUND ns=%s file=%s mappings=%d\n", nsName, f.Filename, len(ns.Mappings()))
+			}
 			for k, v := range ns.Mappings() {
 				env.BaseMappings[k] = v
 			}
 		} else {
-			fmt.Printf("READING ns=%s file=%s\n", nsName, f.Filename)
+			if Verbose > 0 {
+				fmt.Printf("READING ns=%s file=%s\n", nsName, f.Filename)
+			}
 		}
 
 		envForNs[nsName] = env
@@ -158,7 +162,9 @@ func main() {
 		ProcessCoreSourceFileFor(f.Name)
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
-		fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+		if Verbose > 0 {
+			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+		}
 		env.Namespace = ns
 
 		if false {
