@@ -1,12 +1,15 @@
 (alias 'string 'joker.string)
-(require 'joker.walk)
-(require 'joker.tools.cli)
-(require 'joker.test)
-(require 'joker.template)
-(require 'joker.set)
-(require 'joker.repl)
-(require 'joker.html)
+(require 'joker.better-cond)
 (require 'joker.hiccup)
+(require 'joker.html)
+(require 'joker.repl)
+(require 'joker.set)
+(require 'joker.template)
+(require 'joker.test)
+(require '[joker.tools.cli :as cli])
+(require '[joker.os :as os])
+(require '[joker.string :as str])
+(require 'joker.walk)
 
 (def index-template
   (slurp "templates/index.html"))
@@ -64,16 +67,16 @@
   (let [m (meta v)
         ns (get m :ns "<internal>")
         full-name (str ns "/" (str k))]
-    (when-not (:added m)
+    (when-not (or (:added m) (:private m))
       (println "WARNING: public var without added meta key: " full-name))
-    (when-not (:doc m)
+    (when-not (or (:doc m) (:private m))
       (println "WARNING: public var without doc meta key: " full-name))
     (-> var-template
         (string/replace "{id}" (str k))
         (string/replace "{name}" (str k))
         (string/replace "{type}" (type-name v))
         (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
+        (string/replace "{docstring}" (string/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m)))
         (string/replace
          "{source}"
@@ -115,17 +118,19 @@
         (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
+(declare ns-vars)
+
 (defn ns-doc
   [ns-sym]
   (let [ns (find-ns ns-sym)
         m (meta ns)
         vars-doc (string/join
                   ""
-                  (for [[k v] (sort (ns-publics ns-sym))]
+                  (for [[k v] (sort (ns-vars ns-sym))]
                     (var-doc k v)))
         var-links-doc (string/join
                        ""
-                       (for [k (sort (keys (ns-publics ns-sym)))]
+                       (for [k (sort (keys (ns-vars ns-sym)))]
                          (link-item-doc (str k))))]
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
@@ -170,5 +175,19 @@
     (spit "index.html" (index-doc namespaces types))
     (doseq [ns namespaces]
       (spit (str ns ".html") (ns-doc ns)))))
+
+(let [opts (cli/parse-opts *command-line-args*
+                           [
+                            [nil "--all" "Include private as well as public members in documentation"]
+                            ["-h" "--help"]
+                            ])]
+  (when-let [err (or (when (:help (:options opts)) "") (:errors opts))]
+    (println (str/join "\n" err))
+    (println "Usage:")
+    (println (:summary opts))
+    (os/exit 1))
+  (if (:all (:options opts))
+    (defn ns-vars [ns] (ns-interns ns))
+    (defn ns-vars [ns] (ns-publics ns))))
 
 (full-doc)
