@@ -534,7 +534,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 						if _, found := lateInits[sourceVarName]; found {
 							destVarId := uniqueId(destVar)
 							*genEnv.LateInits = append(*genEnv.LateInits, fmt.Sprintf(`
-	%s = %s`[1:],
+	%s.Value = %s.Value`[1:],
 								destVarId, uniqueId(e.Var())))
 						}
 					}
