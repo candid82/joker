@@ -8,37 +8,6 @@ import (
 	"unsafe"
 )
 
-type (
-	CodeEnv struct {
-		CodeWriterEnv *CodeWriterEnv
-		Namespace     *Namespace
-		BaseMappings  map[*string]*Var
-		Statics       string
-		Interns       string
-		Runtime       []func() string
-		Need          map[string]Finisher
-		Generated     map[interface{}]interface{} // nil: being generated; else: fully generated (self)
-	}
-
-	CodeWriterEnv struct {
-		BaseStrings StringPool
-		Need        map[string]Finisher
-		Generated   map[interface{}]interface{} // nil: being generated; else: fully generated (self)
-	}
-
-	Finisher interface {
-		Finish(name string, codeEnv *CodeEnv) string
-	}
-
-	NativeString struct {
-		s string
-	}
-
-	InternedString struct {
-		s string
-	}
-)
-
 var spewConfig = &spew.ConfigState{
 	Indent:         "",
 	MaxDepth:       10,

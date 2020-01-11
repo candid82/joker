@@ -71,15 +71,6 @@ var (
 	}
 )
 
-func newCodeEnv(cwe *CodeWriterEnv) *CodeEnv {
-	return &CodeEnv{
-		CodeWriterEnv: cwe,
-		BaseMappings:  map[*string]*Var{},
-		Need:          map[string]Finisher{},
-		Generated:     map[interface{}]interface{}{},
-	}
-}
-
 func parseArgs(args []string) {
 	length := len(args)
 	stop := false
@@ -121,25 +112,14 @@ func main() {
 	parseArgs(os.Args)
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-
-	codeWriterEnv := &CodeWriterEnv{
-		BaseStrings: StringPool{},
-		Need:        map[string]Finisher{},
-		Generated:   map[interface{}]interface{}{},
-	}
-	for k, v := range STRINGS {
-		codeWriterEnv.BaseStrings[k] = v
-	}
 	InitInternalLibs()
 
-	envForNs := map[string]*CodeEnv{}
+	envForNs := map[string]struct{}{}
 
 	for _, f := range CoreSourceFiles {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 		nsName := CoreNameAsNamespaceName(f.Name)
 		nsNamePtr := STRINGS.Intern(nsName)
-
-		env := newCodeEnv(codeWriterEnv)
 
 		if ns, found := GLOBAL_ENV.Namespaces[nsNamePtr]; found {
 			if _, exists := envForNs[nsName]; exists {
@@ -148,16 +128,13 @@ func main() {
 			if Verbose > 0 {
 				fmt.Printf("FOUND ns=%s file=%s mappings=%d\n", nsName, f.Filename, len(ns.Mappings()))
 			}
-			for k, v := range ns.Mappings() {
-				env.BaseMappings[k] = v
-			}
 		} else {
 			if Verbose > 0 {
 				fmt.Printf("READING ns=%s file=%s\n", nsName, f.Filename)
 			}
 		}
 
-		envForNs[nsName] = env
+		envForNs[nsName] = struct{}{}
 
 		ProcessCoreSourceFileFor(f.Name)
 
@@ -165,7 +142,6 @@ func main() {
 		if Verbose > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
-		env.Namespace = ns
 
 		if false {
 			break // TODO: Handle this differently, or at least later than a_code.go generation
@@ -202,8 +178,7 @@ func init() {
 
 		GLOBAL_ENV.SetCurrentNamespace(ns)
 
-		env := envForNs[nsName]
-		if env == nil {
+		if _, found := envForNs[nsName]; !found {
 			if Verbose > 0 {
 				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
