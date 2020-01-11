@@ -309,7 +309,7 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	v := reflect.ValueOf(obj)
 	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-		name, coreTypeName(v), genEnv.emitValue(name, v.Type(), v)))
+		name, coreTypeName(v), genEnv.emitValue(name, reflect.TypeOf(nil), v)))
 	genEnv.Generated[name] = obj
 }
 
@@ -322,11 +322,10 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 			return
 		}
 		keys := v.MapKeys()
-		keyType := v.Type().Key()
 		valueType := v.Type().Elem()
 		sortValues(keys)
 		for _, key := range keys {
-			k := genEnv.emitValue("", keyType, key)
+			k := genEnv.emitValue("", reflect.TypeOf(nil), key)
 			vi := v.MapIndex(key)
 			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(valueType, vi)), valueType, vi)
 			if isNil(v) {
@@ -359,7 +358,8 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 
 func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
-	if v.IsZero() {
+	if v.IsZero() && t == v.Type() {
+		// Empty value and the target (destination) is of the same concrete type, so no need to emit anything.
 		return ""
 	}
 
@@ -387,9 +387,6 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 
 	switch v.Kind() {
 	case reflect.Interface:
-		if v.IsNil() {
-			return ""
-		}
 		return genEnv.emitValue(target, t, v.Elem())
 
 	case reflect.Ptr:
@@ -501,10 +498,6 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 
 	v := ptr.Elem()
 	v = UnsafeReflectValue(v)
-
-	if v.IsZero() {
-		return ""
-	}
 
 	switch pkg := path.Base(v.Type().PkgPath()); pkg {
 	case "regexp":
