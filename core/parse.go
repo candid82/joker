@@ -16,7 +16,6 @@ type (
 		Pos() Position
 		Dump(includePosition bool) Map
 		Pack(p []byte, env *PackEnv) []byte
-		Emit(target string, id interface{}, env *CodeEnv) string
 	}
 	LiteralExpr struct {
 		Position
