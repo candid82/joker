@@ -1788,7 +1788,7 @@ func isRecordConstructor(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
 }
 
-var fullClassNameRe = regexp.MustCompile(`.+\..+\..+`)
+var fullClassNameRe = regexp.MustCompile(`.+\..+\.[A-Z].+`)
 
 func isJavaSymbol(sym Symbol) bool {
 	s := *sym.name
