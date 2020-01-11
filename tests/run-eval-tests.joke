@@ -2,7 +2,7 @@
   (require [joker.test :refer [run-tests]]
            [joker.os :as os]))
 
-(let [res (os/exec "/usr/bin/env" {:stdin *in* :args ["test" "-t" "0"]})]
+(let [res (os/exec "test" {:stdin *in* :args ["-t" "0"]})]
   (when (:success res)
     (os/set-env "TTY_TESTS" "1")))
 

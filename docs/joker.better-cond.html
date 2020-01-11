@@ -1,0 +1,93 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.better-cond</h1>
+    <span class="var-added">v1.0</span>
+    <p class="var-docstr">A collection of variations on Clojure&#39;s core macros.</p>
+    <h2>Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#cond">cond</a>
+</li>
+<li>
+  <a href="#if-let">if-let</a>
+</li>
+<li>
+  <a href="#if-some">if-some</a>
+</li>
+<li>
+  <a href="#when-let">when-let</a>
+</li>
+<li>
+  <a href="#when-some">when-some</a>
+</li>
+
+    </ul>
+    <ul>
+      <li>
+  <h3 id="cond">cond</h3>
+  <span class="var-type Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(cond & clauses)</code></div>
+</pre>
+  <p class="var-docstr">A variation on cond which sports let bindings, do and implicit else:<br>
+     (cond <br>
+       (odd? a) 1<br>
+       :do (println a)<br>
+       :let [a (quot a 2)]<br>
+       (odd? a) 2<br>
+       3).<br>
+   Also supports :when-let and :when-some. <br>
+   :let, :when-let, :when-some and :do do not need to be written as keywords.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L57">source</a>
+</li>
+<li>
+  <h3 id="if-let">if-let</h3>
+  <span class="var-type Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(if-let bindings then)</code></div>
+<div><code>(if-let bindings then else)</code></div>
+</pre>
+  <p class="var-docstr">A variation on if-let where all the exprs in the bindings vector must be true.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L7">source</a>
+</li>
+<li>
+  <h3 id="if-some">if-some</h3>
+  <span class="var-type Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(if-some bindings then)</code></div>
+<div><code>(if-some bindings then else)</code></div>
+</pre>
+  <p class="var-docstr">A variation on if-some where all the exprs in the bindings vector must be non-nil.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L32">source</a>
+</li>
+<li>
+  <h3 id="when-let">when-let</h3>
+  <span class="var-type Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(when-let bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">A variation on when-let where all the exprs in the bindings vector must be true.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L25">source</a>
+</li>
+<li>
+  <h3 id="when-some">when-some</h3>
+  <span class="var-type Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(when-some bindings & body)</code></div>
+</pre>
+  <p class="var-docstr">A variation on when-some where all the exprs in the bindings vector must be non-nil.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L50">source</a>
+</li>
+
+    </ul>
+  </div>
+</body>
+</html>
