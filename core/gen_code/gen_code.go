@@ -309,7 +309,7 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	v := reflect.ValueOf(obj)
 	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-		name, coreTypeName(v), genEnv.emitValue(name, v)))
+		name, coreTypeName(v), genEnv.emitValue(name, v.Type(), v)))
 	genEnv.Generated[name] = obj
 }
 
@@ -322,12 +322,13 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 			return
 		}
 		keys := v.MapKeys()
-		elemType := v.Type().Elem()
+		keyType := v.Type().Key()
+		valueType := v.Type().Elem()
 		sortValues(keys)
 		for _, key := range keys {
-			k := genEnv.emitValue("", key)
+			k := genEnv.emitValue("", keyType, key)
 			vi := v.MapIndex(key)
-			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(elemType, vi)), vi)
+			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(valueType, vi)), valueType, vi)
 			if isNil(v) {
 				continue
 			}
@@ -341,7 +342,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 		for i := 0; i < numMembers; i++ {
 			vtf := vt.Field(i)
 			vf := v.Field(i)
-			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(vtf.Type, vf)), vf)
+			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(vtf.Type, vf)), vtf.Type, vf)
 			if val == "" {
 				continue
 			}
@@ -356,7 +357,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 	return
 }
 
-func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
+func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() {
 		return ""
@@ -389,7 +390,7 @@ func (genEnv *GenEnv) emitValue(target string, v reflect.Value) string {
 		if v.IsNil() {
 			return ""
 		}
-		return genEnv.emitValue(target, v.Elem())
+		return genEnv.emitValue(target, t, v.Elem())
 
 	case reflect.Ptr:
 		return genEnv.emitPtrTo(target, v)
@@ -561,9 +562,10 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 
 func (genEnv *GenEnv) emitSlice(target string, v reflect.Value) string {
 	numEntries := v.Len()
+	elemType := v.Type().Elem()
 	el := []string{}
 	for i := 0; i < numEntries; i++ {
-		res := genEnv.emitValue(fmt.Sprintf("%s[%d]", target, i), v.Index(i))
+		res := genEnv.emitValue(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
 		if res == "" {
 			el = append(el, "\tnil,")
 		} else {
@@ -594,8 +596,8 @@ func uniqueId(obj interface{}) string {
 	return UniqueId(obj, nil)
 }
 
-func assertValueType(elemType reflect.Type, r reflect.Value) string {
-	if elemType == r.Type() {
+func assertValueType(valueType reflect.Type, r reflect.Value) string {
+	if valueType == r.Type() {
 		return ""
 	}
 	return ".(" + coreTypeName(r) + ")"
