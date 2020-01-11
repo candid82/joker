@@ -149,7 +149,7 @@ func main() {
 	}
 
 	if Verbose > 1 {
-		fmt.Fprintln(os.Stderr, "gen_code:main(): After loading source files:")
+		fmt.Fprintln(Stderr, "gen_code:main(): After loading source files:")
 		Spew()
 	}
 
@@ -522,7 +522,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 			*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
 	%s = &%s`[1:],
 				target, name))
-			return "nil"
+			return fmt.Sprintf("nil /* &%s */", name)
 		}
 		return "&" + name
 	}
@@ -561,7 +561,7 @@ func uniqueId(obj interface{}) string {
 		return "s_" + NameAsGo(*obj)
 	default:
 	}
-	return UniqueId(obj, nil)
+	return UniqueId(obj)
 }
 
 func assertValueType(valueType reflect.Type, r reflect.Value) string {
@@ -580,7 +580,7 @@ func joinMembers(members []string) string {
 }
 
 func isNil(s string) bool {
-	return s == "" || s == "nil"
+	return s == "" || s == "nil" || strings.HasPrefix(s, "nil /*")
 }
 
 /* Represents an 'import ( foo "bar/bletch/foo" )' line to be produced. */
