@@ -157,65 +157,6 @@ func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
 	return vr
 }
 
-func (ns *Namespace) UpdateVar(sym Symbol, vSource Var) *Var {
-	vDest := ns.Intern(sym)
-	vDest.info = vSource.info
-	vDest.meta = SafeMerge(vDest.meta, vSource.meta)
-	if vDest.Value == nil {
-		vDest.Value = vSource.Value
-	}
-	if vDest.expr == nil {
-		vDest.expr = vSource.expr
-	}
-	vDest.isMacro = vSource.isMacro
-	vDest.isPrivate = vSource.isPrivate
-	vDest.isDynamic = vSource.isDynamic
-	vDest.taggedType = vSource.taggedType
-	return vDest
-}
-
-func (ns *Namespace) InternExistingVar(sym Symbol, v *Var) {
-	if sym.ns != nil {
-		panic(RT.NewError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
-	}
-	if sym.name == nil {
-		panic(RT.NewError(fmt.Sprintf("Can't intern symbol with empty name: %+v", sym)))
-	}
-	existingVar, ok := ns.mappings[sym.name]
-	if !ok {
-		v.ns = ns
-		v.name = sym
-		ns.mappings[sym.name] = v
-		if Verbose > 1 {
-			fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s)\n", *ns.Name.name, *sym.name)
-		}
-		return
-	}
-	if existingVar == v {
-		return
-	}
-	if existingVar.ns != ns {
-		if existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
-			v.ns = ns
-			v.name = sym
-			ns.mappings[sym.name] = v
-			if !strings.HasPrefix(ns.Name.Name(), "joker.") {
-				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
-					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), v.ToString(false)))
-			}
-			if Verbose > 1 {
-				fmt.Fprintf(Stderr, "ns.go:InternExistingVar(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
-			}
-			return
-		}
-		panic(RT.NewErrorWithPos(fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s",
-			sym.ToString(false), existingVar.ToString(false), ns.ToString(false)), sym.GetInfo().Pos()))
-	}
-	if LINTER_MODE && existingVar.expr != nil && !existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
-		printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
-	}
-}
-
 func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 	if alias.ns != nil {
 		panic(RT.NewError("Alias can't be namespace-qualified"))
