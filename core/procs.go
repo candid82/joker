@@ -1777,11 +1777,18 @@ func processData(data []byte) {
 }
 
 func setCoreNamespaces() {
-	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*core-namespaces*"))
+	ns := GLOBAL_ENV.CoreNamespace
+
+	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
 	for _, ns := range coreNamespaces {
 		set = set.Conj(MakeSymbol(ns)).(*MapSet)
 	}
+	vr.Value = set
+
+	// Add 'joker.core to *loaded-libs*, now that it's loaded.
+	vr = ns.Resolve("*loaded-libs*")
+	set = vr.Value.(*MapSet).Conj(ns.Name).(*MapSet)
 	vr.Value = set
 }
 
