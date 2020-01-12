@@ -60,15 +60,13 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` file has already been created)
 
-At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
+(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries. It will be automatically added to `*core-namespaces*`.)
 
-(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries.)
+Create suitable tests, e.g. in `tests/eval/`.
 
-Create suitable tests, e.g. in `tests/eval/`. Consider adding it to the list in `tests/eval/corelib/input.joke` (via either `use` or `require`).
+Finally, it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
 
-Finally, add the corresponding `(require 'joker.x)` line to `generate-docs.joke`, to get documentation generated automatically.
-
-Now it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
+Note that core libraries (other than `joker.core` and, when running the Repl, `joker.repl`) do not show up in `(all-ns)` until after they've been loaded via `:require` or similar.
 
 ### Standard-library-wrapping Namespaces
 

@@ -20,6 +20,8 @@ import (
 	"unicode/utf8"
 )
 
+var coreNamespaces []string
+
 var (
 	coreData         []byte
 	replData         []byte
@@ -1774,8 +1776,23 @@ func processData(data []byte) {
 	}
 }
 
+func setCoreNamespaces() {
+	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*core-namespaces*"))
+	set := vr.Value.(*MapSet)
+	for _, ns := range coreNamespaces {
+		set = set.Conj(MakeSymbol(ns)).(*MapSet)
+	}
+	vr.Value = set
+}
+
+var haveSetCoreNamespaces bool
+
 func ProcessCoreData() {
 	processData(coreData)
+	if !haveSetCoreNamespaces {
+		setCoreNamespaces()
+		haveSetCoreNamespaces = true
+	}
 }
 
 func ProcessReplData() {
