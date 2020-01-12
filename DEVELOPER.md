@@ -60,7 +60,7 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` file has already been created)
 
-(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries. It will be automatically added to `*core-namespaces*`.)
+(Do not add the namespace to `*loaded-libs*`; that's for only libraries that have already been loaded. It will be automatically added to `*core-namespaces*` as an "available" library; and, upon being loaded, it will be added to `*loaded-libs*`.)
 
 Create suitable tests, e.g. in `tests/eval/`.
 
