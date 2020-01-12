@@ -106,7 +106,8 @@ func main() {
 	// whereas this code (code.go, mainly) depends on stability of
 	// data. Since object hashes depend (in some cases) on their
 	// pointers, they're not always stable. So don't generate
-	// hashmaps! TODO: Try removing this after other stuff done.
+	// hashmaps! TODO: Try removing this after other stuff done,
+	// now that most (all pertinent?) objects have stable hashes.
 	HASHMAP_THRESHOLD = math.MaxInt64
 
 	parseArgs(os.Args)
@@ -141,10 +142,6 @@ func main() {
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 		if Verbose > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
-		}
-
-		if false {
-			break // TODO: Handle this differently, or at least later than a_code.go generation
 		}
 	}
 
