@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"os"
 	"path"
 	"reflect"
@@ -102,14 +101,6 @@ func parseArgs(args []string) {
 }
 
 func main() {
-	// Hashmaps depend on the hashes of objects to find keys;
-	// whereas this code (code.go, mainly) depends on stability of
-	// data. Since object hashes depend (in some cases) on their
-	// pointers, they're not always stable. So don't generate
-	// hashmaps! TODO: Try removing this after other stuff done,
-	// now that most (all pertinent?) objects have stable hashes.
-	HASHMAP_THRESHOLD = math.MaxInt64
-
 	parseArgs(os.Args)
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
