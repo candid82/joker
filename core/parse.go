@@ -1804,7 +1804,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 		fmt.Printf("[TRACE] Parse type %T\n", obj)
 	}
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, Regex, *Type:
+	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, *Regex, *Type:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true

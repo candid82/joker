@@ -1,5 +1,5 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 
 package core
 
@@ -1283,31 +1283,31 @@ func (k Keyword) Call(args []Object) Object {
 	return getMap(k, args)
 }
 
-func (rx Regex) ToString(escape bool) string {
+func (rx *Regex) ToString(escape bool) string {
 	if escape {
 		return "#\"" + rx.R.String() + "\""
 	}
 	return rx.R.String()
 }
 
-func (rx Regex) Print(w io.Writer, printReadably bool) {
+func (rx *Regex) Print(w io.Writer, printReadably bool) {
 	fmt.Fprint(w, rx.ToString(true))
 }
 
-func (rx Regex) Equals(other interface{}) bool {
+func (rx *Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case Regex:
+	case *Regex:
 		return rx.R == other.R
 	default:
 		return false
 	}
 }
 
-func (rx Regex) GetType() *Type {
+func (rx *Regex) GetType() *Type {
 	return TYPE.Regex
 }
 
-func (rx Regex) Hash() uint32 {
+func (rx *Regex) Hash() uint32 {
 	return HashPtr(uintptr(unsafe.Pointer(rx.R)))
 }
 

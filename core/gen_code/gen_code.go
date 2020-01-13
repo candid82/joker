@@ -290,7 +290,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 		for _, key := range keys {
 			k := genEnv.emitValue("", reflect.TypeOf(nil), key)
 			vi := v.MapIndex(key)
-			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(valueType, vi)), valueType, vi)
+			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(target, k, valueType, vi)), valueType, vi)
 			if isNil(v) {
 				continue
 			}
@@ -304,7 +304,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 		for i := 0; i < numMembers; i++ {
 			vtf := vt.Field(i)
 			vf := v.Field(i)
-			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(vtf.Type, vf)), vtf.Type, vf)
+			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
 			if val == "" {
 				continue
 			}
@@ -429,7 +429,7 @@ func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 		pkgName := stdPackageName(p.Package)
 		thunkName := fmt.Sprintf("STD_thunk_%s_%s", NameAsGo(pkgName), fnName)
 		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
-// std/%s/a_%s_fast_init.go's init() function should set this to the same as its local var %s on the !fast_init side:
+// std/%s/a_%s_fast_init.go's init() function sets this to the same as its local var %s on the !fast_init side:
 var %s_var ProcFn
 func %s(a []Object) Object {
 	return %s_var(a)
@@ -451,7 +451,11 @@ Proc{
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
 	importedAs := AddImport(genEnv.Imports, "", "regexp", true)
-	return fmt.Sprintf(`%s.MustCompile(%s)`, importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
+	source := fmt.Sprintf("%s.MustCompile(%s)", importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
+	*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
+	%s = %s`[1:],
+		asTarget(target), source))
+	return fmt.Sprintf("nil /* &%s */", source)
 }
 
 func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
@@ -509,7 +513,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 		if status == nil {
 			*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
 	%s = &%s`[1:],
-				target, name))
+				asTarget(target), name))
 			return fmt.Sprintf("nil /* &%s */", name)
 		}
 		return "&" + name
@@ -552,7 +556,13 @@ func uniqueId(obj interface{}) string {
 	return UniqueId(obj)
 }
 
-func assertValueType(valueType reflect.Type, r reflect.Value) string {
+func assertValueType(target, name string, valueType reflect.Type, r reflect.Value) string {
+	if r.IsZero() {
+		return ""
+	}
+	if r.Kind() == reflect.Interface {
+		r = r.Elem()
+	}
 	if valueType == r.Type() {
 		return ""
 	}
@@ -569,6 +579,17 @@ func joinMembers(members []string) string {
 
 func isNil(s string) bool {
 	return s == "" || s == "nil" || strings.HasPrefix(s, "nil /*")
+}
+
+func asTarget(s string) string {
+	if s == "" || s[len(s)-1] != ')' {
+		return s
+	}
+	ix := strings.LastIndex(s, ".(")
+	if ix < 0 {
+		return s
+	}
+	return s[0:ix]
 }
 
 /* Represents an 'import ( foo "bar/bletch/foo" )' line to be produced. */

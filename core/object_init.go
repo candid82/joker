@@ -106,7 +106,7 @@ func init() {
 		ProcFn:        RegRefType("ProcFn", (*ProcFn)(nil), ""),
 		Ratio:         RegRefType("Ratio", (*Ratio)(nil), ""),
 		RecurBindings: RegRefType("RecurBindings", (*RecurBindings)(nil), ""),
-		Regex:         regType("Regex", (*Regex)(nil), ""),
+		Regex:         RegRefType("Regex", (*Regex)(nil), ""),
 		String:        regType("String", (*String)(nil), ""),
 		Symbol:        regType("Symbol", (*Symbol)(nil), ""),
 		Type:          RegRefType("Type", (*Type)(nil), ""),

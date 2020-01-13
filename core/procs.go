@@ -531,7 +531,7 @@ var procRegex ProcFn = func(args []Object) Object {
 	if err != nil {
 		panic(RT.NewError("Invalid regex: " + err.Error()))
 	}
-	return Regex{R: r}
+	return &Regex{R: r}
 }
 
 func reGroups(s string, indexes []int) Object {
@@ -2189,7 +2189,7 @@ func ReadConfig(filename string, workingDir string) {
 		if ok1 {
 			s := seq.Seq()
 			for !s.IsEmpty() {
-				regex, ok2 := s.First().(Regex)
+				regex, ok2 := s.First().(*Regex)
 				if !ok2 {
 					printConfigError(configFileName, ":ignored-file-regexes elements must be regexes, got "+s.First().GetType().ToString(false))
 					return

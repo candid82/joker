@@ -145,7 +145,7 @@ func replace(s string, match Object, repl string) string {
 	switch match := match.(type) {
 	case String:
 		return strings.Replace(s, match.S, repl, -1)
-	case Regex:
+	case *Regex:
 		return match.R.ReplaceAllString(s, repl)
 	default:
 		panic(RT.NewArgTypeError(1, match, "String or Regex"))
@@ -156,7 +156,7 @@ func replaceFirst(s string, match Object, repl string) string {
 	switch match := match.(type) {
 	case String:
 		return strings.Replace(s, match.S, repl, 1)
-	case Regex:
+	case *Regex:
 		m := match.R.FindStringIndex(s)
 		if m == nil {
 			return s
