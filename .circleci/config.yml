@@ -13,6 +13,9 @@ jobs:
           name: go get profile
           command: go get -d -v github.com/pkg/profile
       - run:
+          name: go get go-spew
+          command: go get -d -v github.com/jcburley/go-spew
+      - run:
           name: go get yaml
           command: go get -d -v gopkg.in/yaml.v2
       - run:
