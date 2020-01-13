@@ -2966,6 +2966,18 @@
     s
     (regex__ s)))
 
+(defn re-quoted
+  "Returns an instance of Regex that matches the string exactly"
+  {:added "1.0"}
+  ^Regex [^String s]
+  (regex-quoted__ s))
+
+(defn re-string
+  "Returns the string used to compile into the Regex"
+  {:added "1.0"}
+  ^String [^Regex r]
+  (regex-string__ r))
+
 (defn re-seq
   "Returns a sequence of successive matches of pattern in string"
   {:added "1.0"}
