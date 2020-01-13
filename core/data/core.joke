@@ -4547,7 +4547,9 @@
 
   Use the optional (map) argument to specify ConfigState
   settings. E.g. {:MaxDepth 10} specifies a maximum depth of 10
-  levels. Defaults are per the default config state."
+  levels. Defaults are per the default config state.
+
+  For more info, see: https://github.com/jcburley/go-spew/blob/master/spew/config.go"
   {:added "1.0"}
   (^Nil [o]
    (go-spew__ o))
