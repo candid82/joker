@@ -97,6 +97,7 @@ func main() {
 
 `
 		}
+
 		namespaces[nsName] = struct{}{}
 
 		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension

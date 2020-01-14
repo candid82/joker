@@ -28,8 +28,9 @@ type internalNamespaceInfo struct {
 	available bool
 }
 
+var coreNamespaces []string
+
 var (
-	coreNamespaces            []string
 	coreNamespaceInfo         internalNamespaceInfo
 	replNamespaceInfo         internalNamespaceInfo
 	walkNamespaceInfo         internalNamespaceInfo
@@ -2027,7 +2028,9 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 }
 
 func setCoreNamespaces() {
-	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*core-namespaces*"))
+	ns := GLOBAL_ENV.CoreNamespace
+
+	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
 	if Verbose > 1 {
 		fmt.Fprintln(Stderr, "setCoreNamespaces() of:")
@@ -2043,6 +2046,11 @@ func setCoreNamespaces() {
 		}
 		set = set.Conj(sym).(*MapSet)
 	}
+	vr.Value = set
+
+	// Add 'joker.core to *loaded-libs*, now that it's loaded.
+	vr = ns.Resolve("*loaded-libs*")
+	set = vr.Value.(*MapSet).Conj(ns.Name).(*MapSet)
 	vr.Value = set
 }
 

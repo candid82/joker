@@ -61,7 +61,7 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Do the same for **core/gen\_code/gen\_code.go**
 * Ensure that `std/*/a_*.go` has already been generated for that library, using an earlier version of Joker if necessary
 
-(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries. It will be automatically added to `*core-namespaces*`.)
+(Do not add the namespace to `*loaded-libs*`; that's for only libraries that have already been loaded. It will be automatically added to `*core-namespaces*` as an "available" library; and, upon being loaded, it will be added to `*loaded-libs*`.)
 
 Create suitable tests, e.g. in `tests/eval/`.
 
