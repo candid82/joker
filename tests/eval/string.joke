@@ -1,0 +1,12 @@
+(ns joker.test-joker.string
+  (:require [joker.string :as str]
+            [joker.test :refer [deftest is]]))
+
+(deftest quoted
+  (is (= #"a\.\(b\.c\)" (str/re-quoted "a.(b.c)"))))
+
+(deftest string
+  (is (= "a.(b.c)" (str/re-string #"a.(b.c)"))))
+
+(deftest regex
+  (is (= #"a.b.c" #"a.b.c")))

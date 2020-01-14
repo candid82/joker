@@ -1342,6 +1342,10 @@ func (k Keyword) Call(args []Object) Object {
 	return getMap(k, args)
 }
 
+func MakeRegex(r *regexp.Regexp) Regex {
+	return Regex{R: r}
+}
+
 func (rx Regex) ToString(escape bool) string {
 	if escape {
 		return "#\"" + rx.R.String() + "\""
@@ -1356,7 +1360,7 @@ func (rx Regex) Print(w io.Writer, printReadably bool) {
 func (rx Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Regex:
-		return rx.R == other.R
+		return rx.R == other.R || rx.R.String() == other.R.String()
 	default:
 		return false
 	}
