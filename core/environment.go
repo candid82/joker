@@ -156,10 +156,13 @@ func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 	} else {
 		res = ns.aliases[s.ns]
 		if res == nil {
-			if info := internalLibs[*s.ns]; info != nil {
-				processNamespaceInfo(info, *s.ns)
-			}
 			res = env.Namespaces[s.ns]
+			if res == nil {
+				if info := internalLibs[*s.ns]; info != nil {
+					processNamespaceInfo(info, *s.ns)
+				}
+				res = env.Namespaces[s.ns]
+			}
 		}
 	}
 	if res != nil {
