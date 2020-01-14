@@ -3242,11 +3242,16 @@
 
 (defonce ^:dynamic
   ^{:private true
-    :doc "A set of symbols representing loaded std (not core) libs"}
+    :doc "A set of symbols representing currently loaded libs"}
   *loaded-libs* #{'joker.base64 'joker.html 'joker.http 'joker.json 'joker.io
                   'joker.math 'joker.os 'joker.string 'joker.time 'joker.url
                   'joker.yaml 'joker.strconv 'joker.crypto 'joker.hex 'joker.filepath
                   'joker.csv})
+
+(defonce ^:dynamic
+  ^{:private true
+    :doc "A set of symbols representing available core (not std) namespaces"}
+  *core-namespaces* #{})
 
 (defonce ^:dynamic
   ^{:private true
