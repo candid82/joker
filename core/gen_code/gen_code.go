@@ -460,11 +460,10 @@ Proc{
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
 	importedAs := AddImport(genEnv.Imports, "", "regexp", true)
 	source := fmt.Sprintf("%s.MustCompile(%s)", importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
-	return source
-	// *genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
-	// %s = %s`[1:],
-	// 	asTarget(target), source))
-	// return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), source)
+	*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
+	%s = %s`[1:],
+		asTarget(target), source))
+	return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), source)
 }
 
 func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
