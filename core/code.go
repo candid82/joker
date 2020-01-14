@@ -164,6 +164,10 @@ func (v *Var) Expr() Expr {
 	return v.expr
 }
 
+func (v Var) Namespace() *Namespace {
+	return v.ns
+}
+
 // This comes from (davecgh|jcburley)/go-spew/bypass.go.
 const flagPrivate = 0x20
 

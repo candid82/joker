@@ -27,7 +27,7 @@ type GenEnv struct {
 	Statics   *[]string
 	Runtime   *[]string
 	LateInits *[]string
-	Namespace *Namespace
+	Namespace *Namespace // In which the core.Var currently being emitted is said to reside
 	Imports   *Imports
 	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 	LateInit  bool                        // Whether emitting a namespace other than joker.core
@@ -191,6 +191,7 @@ func init() {
 		Statics:   &statics,
 		Runtime:   &runtime,
 		LateInits: &lateInits,
+		Namespace: GLOBAL_ENV.CoreNamespace,
 		Imports:   imports,
 		Generated: map[interface{}]interface{}{},
 		LateInit:  false,
@@ -270,6 +271,13 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	}
 	genEnv.Generated[name] = nil
 	v := reflect.ValueOf(obj)
+
+	if strings.HasPrefix(name, "var_") {
+		oldNamespace := genEnv.Namespace
+		defer func() { genEnv.Namespace = oldNamespace }()
+		genEnv.Namespace = v.Interface().(Var).Namespace()
+	}
+
 	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
 		name, coreTypeName(v), genEnv.emitValue(name, reflect.TypeOf(nil), v)))
@@ -455,7 +463,7 @@ func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
 	*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
 	%s = %s`[1:],
 		asTarget(target), source))
-	return fmt.Sprintf("nil /* &%s */", source)
+	return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), source)
 }
 
 func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
@@ -514,7 +522,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 			*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
 	%s = &%s`[1:],
 				asTarget(target), name))
-			return fmt.Sprintf("nil /* &%s */", name)
+			return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), name)
 		}
 		return "&" + name
 	}
