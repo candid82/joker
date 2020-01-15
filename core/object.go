@@ -1360,7 +1360,7 @@ func (rx Regex) Print(w io.Writer, printReadably bool) {
 func (rx Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Regex:
-		return rx.R == other.R || rx.R.String() == other.R.String()
+		return rx.R == other.R
 	default:
 		return false
 	}
