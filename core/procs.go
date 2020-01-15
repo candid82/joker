@@ -2235,4 +2235,6 @@ func init() {
 	intern(">!__", procSend)
 	intern("chan__", procCreateChan)
 	intern("close!__", procCloseChan)
+
+	intern("go-spew__", procGoSpew)
 }

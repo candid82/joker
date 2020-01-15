@@ -142,3 +142,39 @@ This circular dependency is avoided, in practice, by ensuring that any `std/*/a_
 However, a `std/*.joke` file therefore cannot depend on any `core/data/*.joke`-defined namespace that, in turn, requires `gen_data.go` to import its `std/*/a_*.go` file.
 
 So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`, `std/string.joke` does not depend on them, and preexisted their being added to the core namespaces.
+
+## Debugging Tools
+
+### go-spew
+
+When built via e.g. `go builds -tags go_spew`, the private `joker.core/go-spew` function is enabled. (Otherwise it does nothing and returns `false`.)
+
+This function dumps, to `stderr`, the internal structure of the argument passed to it (i.e. a Joker object), and returns `true`.
+
+Optionally, a second argument may be specified that is a map with configuration options as described in [the `go-spew` documentation](https://github.com/jcburley/go-spew), though not all such operations are yet supported by Joker's `go-spew` function.
+
+For example, the internals of the keyword `:hey` can be output in this fashion:
+
+```
+user=> (joker.core/go-spew :hey {:MaxDepth 5 :Indent "    " :UseOrdinals true})
+(core.Keyword) {
+    InfoHolder: (core.InfoHolder) {
+        info: (*core.ObjectInfo)(#1)({
+            Position: (core.Position) {
+                endLine: (int) 1,
+                endColumn: (int) 24,
+                startLine: (int) 1,
+                startColumn: (int) 21,
+                filename: (*string)(#2)((len=6) "<repl>")
+            }
+        })
+    },
+    ns: (*string)(<nil>),
+    name: (*string)(#3)((len=3) "hey"),
+    hash: (uint32) 819820356
+}
+true
+user=>
+```
+
+*Note:* The `SpewState` configuration option is not currently supported; each distinct call to `go-spew` thus starts with a "fresh" state.
