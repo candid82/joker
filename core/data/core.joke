@@ -4546,3 +4546,21 @@
   {:added "1.0"}
   [^Channel ch]
   (close!__ ch))
+
+(defn- go-spew
+  "Dump ('spew') internal Go structures for object to stderr.
+
+  Returns true if enabled due to building Joker with the 'go_spew' build tag,
+  false otherwise or if some other error occurred (which will be printed to
+  stderr).
+
+  Use the optional (map) argument to specify ConfigState
+  settings. E.g. {:MaxDepth 10} specifies a maximum depth of 10
+  levels. Defaults are per the default config state.
+
+  For more info, see: https://github.com/jcburley/go-spew"
+  {:added "1.0"}
+  (^Boolean [o]
+   (go-spew__ o))
+  (^Boolean [o ^Map cfg]
+   (go-spew__ o cfg)))
