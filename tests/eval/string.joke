@@ -1,0 +1,10 @@
+(ns joker.test-joker.string
+  (:require [joker.string :as str]
+            [joker.test :refer [deftest is]]))
+
+(deftest split-of-regex
+  (is (= ["a" "c" "ef"] (str/split "abcdef" #"(b|d)"))))
+
+(deftest split-of-string
+  (is (= ["ab" "def"] (str/split "abcdef" "c")))
+  (is (= ["abcdef"] (str/split "abcdef" "(b|d)"))))

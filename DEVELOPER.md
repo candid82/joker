@@ -4,7 +4,85 @@
 
 These notes are intended for developers working on the internals of Joker itself. They are not comprehensive.
 
-## Namespaces
+## Library Code (Namespaces)
+
+As with Clojure, Joker supports "libraries" of code organized into _namespaces_. It offers a number of namespaces that are built-in to the Joker executable itself, as well as the ability to dynamically (at run time and on-demand) extend these namespaces via external Joker source files typically organized into directory trees and deployed alongside the Joker executable. (Currently, Joker does not support dynamic extension via non-Joker code, such as Go plugins.)
+
+Whether built-in (as described below) or separately deployed via source files written in Joker (as described in [Organizing Libraries (Namespaces)](https://github.com/candid82/joker/LIBRARIES.md), developers should be aware of the progression of any given namespace.
+
+## Namespace States
+
+The states through which a given namespaces transitions are:
+
+1. Available
+2. Mapped
+3. Loaded
+
+### Available Namespaces
+
+A namespace is _available_ if its source code is either:
+
+* compiled (in some form) directly into the Joker executable
+* deployed as Joker code such that a running Joker executable can locate and load it
+
+The _compiled_ namespaces are also the _built-in_ namespaces, and are described below. These are _not_ necessarily "mapped"; the _core_ namespaces are mapped on-demand when first referenced. (`joker.core` is referenced immediately upon startup of the Joker executable; `joker.repl` is as well, when running Joker as a REPL.)
+
+A namespace that is available, but not mapped, is not found via e.g. `(the-ns 'joker.hiccup)`. The set of _core_ namespaces is hardcoded (in any given Joker executable) in `joker.core/*core-namespaces*`.
+
+Other built-in namespaces, the so-called _std_ namespaces, start out as both available _and_ mapped.
+
+### Mapped Namespaces
+
+A namespace is _mapped_ if it is present in `(all-ns)`, which enumerates all the namespaces mapped into the current (global) environment.
+
+In this state, the namespace is "registered" (to coin a synonym) with the canonical Clojure namespace mechanism as implemented by Joker.
+
+But the namespace itself hasn't yet necessarily been initialized. Only when that happens (potentially "lazily") is the namespace said to be _loaded_.
+
+### Loaded Namespaces
+
+When actually needed, via a `:require` clause in an `(ns ...)` specification, due to `(require ...)`, or (for an already-mapped namespace) directly as a symbol qualifier via e.g. `joker.some.namespace/somevar`, a namespace is _loaded_, meaning its internal code and data structures are fully initialized.
+
+For example, running Joker with the `--verbose` option to observe some of the pertinent transitions:
+
+```
+$ ./joker --verbose
+FindNameSpace: Lazily initialized joker.string
+Welcome to joker v0.14.1. Use EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.
+user=> (all-ns)
+(joker.core joker.math joker.http joker.io joker.url user joker.crypto joker.filepath joker.os joker.string joker.yaml joker.repl joker.base64 joker.csv joker.hex joker.html joker.json joker.strconv joker.time)
+user=> joker.core/*core-namespaces*
+#{joker.tools.cli joker.test user joker.template joker.core joker.walk joker.set joker.repl joker.hiccup joker.better-cond}
+user=> (the-ns 'joker.hiccup)
+<repl>:2:10: Exception: No namespace: joker.hiccup found
+Stacktrace:
+  global <repl>:2:1
+  core/the-ns <joker.core>:2316:18
+user=> (use 'joker.hiccup)
+FindNameSpace: Lazily initialized joker.html
+nil
+user=> (the-ns 'joker.hiccup)
+#object[Namespace "joker.hiccup"]
+user=> (all-ns)
+(joker.core joker.math joker.http joker.io joker.url joker.hiccup joker.yaml joker.repl user joker.crypto joker.filepath joker.os joker.string joker.strconv joker.time joker.base64 joker.csv joker.hex joker.html joker.json)
+user=>
+```
+
+First, note that `joker.string` is lazily initialized. This is due to running Joker as a REPL, because that automatically loads `joker.repl`, which in turn requires `joker.string`.
+
+Continuing to the interactive portion of the session, note that `joker.hiccup` is not present in the output of the first `(all-ns)` invocation. That's because it is only _available_ (as confirmed by its presence, as a _core_ namespace, in `joker.core/*core-namespace*`), but it is not yet _mapped_ (as confirmed by its absence when trying `(the-ns 'joker.hiccup)`).
+
+Then, `(use 'joker.hiccup)` explicitly loads that namespace, meaning that it is _located_ (in this case, being a _core_ namespace, it is located "internally"), _mapped_, and _loaded_ (initialized).
+
+Further, because `joker.hiccup` requires `joker.html` (an already-mapped namespace), the latter is _loaded_ (lazily initialized).
+
+`(all-ns)` then confirms that `joker.hiccup` has become _mapped_.
+
+Note that, at present, there are no explicit tests for whether a namespace is _available_ (in the general sense, beyond what `joker.core/*core-namespaces*` shows regarding available _core_ namespaces), nor for whether one is _loaded_ (initialized).
+
+These distinctions should be of little, if any, important to developers of Joker code, since these transitions are (largely) managed automatically on behalf of canonical Joker code. But such distinctions are potentially of interest to developers working on Joker internals, including _core_ or _std_ namespaces.
+
+## Built-in Namespaces
 
 As explained in [the `README.md file`](https://github.com/candid82/joker/README.md), Joker provides several built-in namespaces, such as `joker.core`, `joker.math`, `joker.string`, and so on.
 
@@ -14,7 +92,7 @@ The built-in namespaces are organized into two sets:
 
 * Core namespaces, which provide functions, macros, and so on necessary for rudimentary functioning of Joker
 
-* Standard-library-wrapping namespaces, which provide Clojure-like interfaces to various Go standard libraries' public APIs
+* Standard-library-wrapping ("_std_") namespaces, which provide Clojure-like interfaces to various Go standard libraries' public APIs
 
 The mechanisms used to incorporate these namespaces into the Joker executable differ substantially, so it is important to understand them when considering adding (or changing) a namespace to the Joker executable.
 
@@ -40,9 +118,9 @@ Processing a `.joke` file consists of reading the file via Joker's (Clojure-like
 
 As this all occurs before the `go build` step performed by `run.sh`, the result is that that step includes those `core/a_*_data.go` source files. The binary data contained therein is, when needed, unpacked and the results used to construct the data structures into which Joker (Clojure) expressions are converted when read (aka the Abstract Syntax Tree, or "AST").
 
-(Note that "when needed", as used above is immediately upon startup for `joker.core`; also for `joker.repl` when the REPL is to be immediately entered; otherwise, when the namespace is referenced such as via a `require` or `use` invocation.)
+(Note that "when needed", as used above, is immediately upon startup for `joker.core`; it also applies to `joker.repl` when the REPL is to be immediately entered; otherwise, it applies when the namespace is referenced such as via a `require` or `use` invocation.)
 
-As this approach does *not* involve the normal Read phase at Joker startup time, the overhead involved in parsing Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms.
+As this approach does *not* involve the normal Read phase at Joker startup time, the overhead involved in parsing Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. Even _mapping_ of a core namespace does not occur until it is needed.
 
 A disadvantage of this approach is that it requires changes to `core/pack.go` when changes are made to the AST.
 
@@ -60,21 +138,19 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Edit the **core/gen\_data/gen\_data.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` file has already been created)
 
-At this point, building Joker would make the new namespace available at run time via e.g. `:require` in an `ns`, but not preloaded nor shown in `*loaded-libs*`.
+(Do not add the namespace to `*loaded-libs*`; that's for only libraries that have already been loaded. It will be automatically added to `*core-namespaces*` as an "available" library; and, upon being loaded, it will be added to `*loaded-libs*`.)
 
-(Do not add the namespace to `*loaded-libs*`; that's currently for only **std** libraries.)
+Create suitable tests, e.g. in `tests/eval/`.
 
-Create suitable tests, e.g. in `tests/eval/`. Consider adding it to the list in `tests/eval/corelib/input.joke` (via either `use` or `require`).
+Finally, it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
 
-Finally, add the corresponding `(require 'joker.x)` line to `generate-docs.joke`, to get documentation generated automatically.
+Note that core libraries (other than `joker.core` and, when running the Repl, `joker.repl`) do not show up in `(all-ns)` until after they've been loaded via `:require` or similar.
 
-Now it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
-
-### Standard-library-wrapping Namespaces
+### Standard-library-wrapping (std) Namespaces
 
 These namespaces are also defined by Joker code, which resides in `std/*.joke` files.
 
-(Note that, unlike with core namespaces, multi-level namespaces here would have pathnames reflecting multiple levels. E.g. a `joker.a.b` namespace would be defined by `std/a/b.joke`. However, such namespaces do not exist in Joker as of `v0.13.0`.)
+(Note that, unlike with core namespaces, multi-level namespaces here would have pathnames reflecting multiple levels. E.g. a `joker.a.b` namespace would be defined by `std/a/b.joke`. However, such namespaces do not exist in Joker as of `v0.14.0`.)
 
 These `*.joke` files, however, have code of a particular form that is processed by the `std/generate-std.joke` script (after an initial version of Joker is built). They cannot, as explained below, define arbitrary macros and functions for use by normal Joker code.
 
@@ -96,6 +172,8 @@ Those stubs handle arity, types, and results.
 
 Whether they call Go code directly, or call support code written in Go (typically included in a file named `std/*/*_native.go`, e.g. `std/math/math_native.go`) -- and the specific Go-code invocation used -- is determined via the `:go` metadata and return-type tags for the public member, as defined in the original `std/*.joke` file.
 
+The `a_*.go` files generated for _std_ namespaces cause the namespaces to be _mapped_ by the time the Joker executable has finished starting up. That's why they appear in `(all-ns)`, even when they haven't actually been loaded (lazily initialized).
+
 #### Advantages and Disadvantages vis-a-vis Core Namespaces
 
 As standard-library-wrapping namespaces are lazily loaded (i.e. on-demand), and needn't build up the ASTs that the core namespaces build up, they can be expected to offer lower overhead at startup and/or first-use time. That is, only namespace generation, interning of symbols, and metadata is built up; other logic is "baked in" via compilation of the Go code accompanying these namespaces.
@@ -113,6 +191,8 @@ The `run.sh` script includes an optimization that avoids building Joker a second
 That optimization starts by computing a hash of the contents of the `std/` directory *before* running the script, and another one *afterwards*.
 
 If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.joke` files with respect to the `std/*/a_*.joke` files present prior to running the script, and thus there's no need to rebuild the Joker executable.
+
+(Of course, even if a `std/*.joke` file hasn't changed, any changes to `std/generate-std.joke` or any of the `std/*/*.go` files, handwritten or autogenerated, will result in a different hash being computed and thus a rebuild.)
 
 #### Adding a New Standard-library-wrapping Namespace
 
@@ -144,3 +224,39 @@ This circular dependency is avoided, in practice, by ensuring that any `std/*/a_
 However, a `std/*.joke` file therefore cannot depend on any `core/data/*.joke`-defined namespace that, in turn, requires `gen_data.go` to import its `std/*/a_*.go` file.
 
 So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`, `std/string.joke` does not depend on them, and preexisted their being added to the core namespaces.
+
+## Debugging Tools
+
+### go-spew
+
+When built via e.g. `go builds -tags go_spew`, the private `joker.core/go-spew` function is enabled. (Otherwise it does nothing and returns `false`.)
+
+This function dumps, to `stderr`, the internal structure of the argument passed to it (i.e. a Joker object), and returns `true`.
+
+Optionally, a second argument may be specified that is a map with configuration options as described in [the `go-spew` documentation](https://github.com/jcburley/go-spew), though not all such operations are yet supported by Joker's `go-spew` function.
+
+For example, the internals of the keyword `:hey` can be output in this fashion:
+
+```
+user=> (joker.core/go-spew :hey {:MaxDepth 5 :Indent "    " :UseOrdinals true})
+(core.Keyword) {
+    InfoHolder: (core.InfoHolder) {
+        info: (*core.ObjectInfo)(#1)({
+            Position: (core.Position) {
+                endLine: (int) 1,
+                endColumn: (int) 24,
+                startLine: (int) 1,
+                startColumn: (int) 21,
+                filename: (*string)(#2)((len=6) "<repl>")
+            }
+        })
+    },
+    ns: (*string)(<nil>),
+    name: (*string)(#3)((len=3) "hey"),
+    hash: (uint32) 819820356
+}
+true
+user=>
+```
+
+*Note:* The `SpewState` configuration option is not currently supported; each distinct call to `go-spew` thus starts with a "fresh" state.
