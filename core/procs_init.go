@@ -187,8 +187,6 @@ func init() {
 	intern(">!__", procSend, "procSend")
 	intern("chan__", procCreateChan, "procCreateChan")
 	intern("close!__", procCloseChan, "procCloseChan")
-
-	intern("go-spew__", procGoSpew, "procGoSpew")
 }
 
 func lateInitializations() {
