@@ -213,9 +213,6 @@ func {name}Init() {
 			if Verbose > 0 {
 				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
-			lateInits = append(lateInits, fmt.Sprintf(`
-	GLOBAL_ENV.FindNamespace(MakeSymbol("%s"))`[1:],
-				nsName))
 			continue
 		}
 
@@ -226,18 +223,17 @@ func {name}Init() {
 		runtime := *genEnv.Runtimes[ns]
 		if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
 			for r, _ := range *requireds {
-				nsName := r.ToString(false)
-				filename := CoreSourceFilename[nsName]
+				rqNsName := r.ToString(false)
+				filename := CoreSourceFilename[rqNsName]
 				if filename == "" {
-					continue
+					filename = "<std>"
 				}
 				if Verbose > 0 {
-					fmt.Printf("  REQUIRES: %s from %s\n", nsName, filename)
+					fmt.Printf("  REQUIRES: %s from %s\n", rqNsName, filename)
 				}
 				runtime = append(runtime, fmt.Sprintf(`
-	ns_%s.MaybeLazy("%s")
-`[1:],
-					NameAsGo(nsName), nsName))
+	ns_%s.MaybeLazy("%s")`[1:],
+					NameAsGo(rqNsName), nsName))
 			}
 		}
 		r := strings.Join(runtime, "\n")
