@@ -5,7 +5,7 @@
 
 (def lib-dir
   (-> *main-file*
-       (str/split (re-quoted fp/separator))
+       (str/split fp/separator)
        (butlast)
        (concat ["lib"])
        ((fn [x] (apply str (interpose fp/separator x))))))
