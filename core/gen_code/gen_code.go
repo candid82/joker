@@ -33,7 +33,7 @@ type GenEnv struct {
 	Runtimes       map[*Namespace]*[]string
 	Imports        map[*Namespace]*Imports
 	Generated      map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	CoreNamespaces map[string]struct{}         // Set of the core namespaces (this excludes dependent std namespaces such as joker.string and joker.http)
+	CoreNamespaces map[string]struct{}         // Set of the core namespaces (this excludes user and dependent std namespaces such as joker.string and joker.http)
 	LateInit       bool                        // Whether emitting a namespace other than joker.core
 }
 
@@ -192,6 +192,9 @@ import (
 
 func init() {
 	{name}NamespaceInfo = internalNamespaceInfo{generated: {name}NamespaceInfo.generated, available: true}
+}
+
+func {name}Init() {
 {runtime}
 }
 `
@@ -257,7 +260,7 @@ func init() {
 	if lates != "" {
 		lates = fmt.Sprintf(`
 
-func lateInit() {
+func lateInitializations() {
 %s
 }`,
 			lates)
@@ -448,6 +451,7 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 	case reflect.Struct:
 		typeName := coreTypeName(v)
 		obj := v.Interface()
+		lazy := ""
 		switch obj := obj.(type) {
 		case Proc:
 			return genEnv.emitProc(target, obj)
@@ -461,13 +465,24 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 				defer func() { genEnv.LateInit = lateInit }()
 				genEnv.LateInit = true
 			}
+			if _, found := genEnv.CoreNamespaces[nsName]; found {
+				name := CoreSourceFilename[nsName]
+				name = name[0 : len(name)-5] // assumes .joke extension
+				lazy = fmt.Sprintf(`
+	Lazy: %sInit,`[1:],
+					name)
+			}
 		}
 		if obj == nil {
 			return ""
 		}
+		members := genEnv.emitMembers(target, typeName, obj)
+		if lazy != "" {
+			members = append(members, lazy)
+		}
 		return fmt.Sprintf(`
 %s{%s}`[1:],
-			typeName, joinMembers(genEnv.emitMembers(target, typeName, obj)))
+			typeName, joinMembers(members))
 
 	case reflect.Map:
 		typeName := coreTypeName(v)

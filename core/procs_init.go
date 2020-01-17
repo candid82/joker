@@ -191,6 +191,6 @@ func init() {
 	intern("go-spew__", procGoSpew, "procGoSpew")
 }
 
-func lateInit() {
+func lateInitializations() {
 	// none needed for !fast_init
 }

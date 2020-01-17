@@ -124,7 +124,7 @@ func (env *Env) SetFilename(obj Object) {
    initializations must be reflected in gen_code/gen_code.go.  */
 func (env *Env) Ready() {
 	// Perform any post-variant-initialization fixups needed.
-	lateInit()
+	lateInitializations()
 }
 
 func (env *Env) IsStdIn(obj Object) bool {
