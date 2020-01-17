@@ -24,16 +24,17 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	Statics      *[]string
-	StaticImport *Imports
-	Runtime      *[]string
-	LateInits    *[]string
-	Import       *Imports
-	Namespace    *Namespace // In which the core.Var currently being emitted is said to reside
-	Runtimes     map[*Namespace]*[]string
-	Imports      map[*Namespace]*Imports
-	Generated    map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	LateInit     bool                        // Whether emitting a namespace other than joker.core
+	Statics        *[]string
+	StaticImport   *Imports
+	Runtime        *[]string
+	LateInits      *[]string
+	Import         *Imports
+	Namespace      *Namespace // In which the core.Var currently being emitted is said to reside
+	Runtimes       map[*Namespace]*[]string
+	Imports        map[*Namespace]*Imports
+	Generated      map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	CoreNamespaces map[string]struct{}         // Set of the core namespaces (this excludes dependent std namespaces such as joker.string and joker.http)
+	LateInit       bool                        // Whether emitting a namespace other than joker.core
 }
 
 var (
@@ -153,16 +154,17 @@ func main() {
 	ResetUsage()
 
 	genEnv := &GenEnv{
-		Statics:      &statics,
-		StaticImport: imports,
-		Runtime:      &runtime,
-		LateInits:    &lateInits,
-		Import:       imports,
-		Namespace:    GLOBAL_ENV.CoreNamespace,
-		Runtimes:     map[*Namespace]*[]string{},
-		Imports:      map[*Namespace]*Imports{},
-		Generated:    map[interface{}]interface{}{},
-		LateInit:     false,
+		Statics:        &statics,
+		StaticImport:   imports,
+		Runtime:        &runtime,
+		LateInits:      &lateInits,
+		Import:         imports,
+		Namespace:      GLOBAL_ENV.CoreNamespace,
+		Runtimes:       map[*Namespace]*[]string{},
+		Imports:        map[*Namespace]*Imports{},
+		Generated:      map[interface{}]interface{}{},
+		CoreNamespaces: envForNs,
+		LateInit:       false,
 	}
 
 	genEnv.emitVar("STR", STR)
@@ -306,33 +308,35 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 	v := reflect.ValueOf(obj)
 
 	if strings.HasPrefix(name, "var_") {
-		oldNamespace := genEnv.Namespace
-		oldRuntime := genEnv.Runtime
-		oldImports := genEnv.Import
-		defer func() {
-			genEnv.Namespace = oldNamespace
-			genEnv.Runtime = oldRuntime
-			genEnv.Import = oldImports
-		}()
-
 		ns := v.Interface().(Var).Namespace()
-		genEnv.Namespace = ns
+		if _, found := genEnv.CoreNamespaces[ns.ToString(false)]; found {
+			oldNamespace := genEnv.Namespace
+			oldRuntime := genEnv.Runtime
+			oldImports := genEnv.Import
+			defer func() {
+				genEnv.Namespace = oldNamespace
+				genEnv.Runtime = oldRuntime
+				genEnv.Import = oldImports
+			}()
 
-		rt, found := genEnv.Runtimes[ns]
-		if !found {
-			newRuntime := []string{}
-			rt = &newRuntime
-			genEnv.Runtimes[ns] = rt
-		}
-		genEnv.Runtime = rt
+			genEnv.Namespace = ns
 
-		imp, found := genEnv.Imports[ns]
-		if !found {
-			newImport := Imports{}
-			imp = &newImport
-			genEnv.Imports[ns] = imp
+			rt, found := genEnv.Runtimes[ns]
+			if !found {
+				newRuntime := []string{}
+				rt = &newRuntime
+				genEnv.Runtimes[ns] = rt
+			}
+			genEnv.Runtime = rt
+
+			imp, found := genEnv.Imports[ns]
+			if !found {
+				newImport := Imports{}
+				imp = &newImport
+				genEnv.Imports[ns] = imp
+			}
+			genEnv.Import = imp
 		}
-		genEnv.Import = imp
 	}
 
 	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
