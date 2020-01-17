@@ -28,13 +28,15 @@ type GenEnv struct {
 	StaticImport   *Imports
 	Runtime        *[]string
 	LateInits      *[]string
+	Required       *map[*Namespace]struct{} // Namespaces referenced by current one
 	Import         *Imports
 	Namespace      *Namespace // In which the core.Var currently being emitted is said to reside
 	Runtimes       map[*Namespace]*[]string
 	Imports        map[*Namespace]*Imports
-	Generated      map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	CoreNamespaces map[string]struct{}         // Set of the core namespaces (this excludes user and dependent std namespaces such as joker.string and joker.http)
-	LateInit       bool                        // Whether emitting a namespace other than joker.core
+	Generated      map[interface{}]interface{}             // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	CoreNamespaces map[string]struct{}                     // Set of the core namespaces (this excludes user and dependent std namespaces such as joker.string and joker.http)
+	Requireds      map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInit       bool                                    // Whether emitting a namespace other than joker.core
 }
 
 var (
@@ -158,10 +160,12 @@ func main() {
 		StaticImport:   imports,
 		Runtime:        &runtime,
 		LateInits:      &lateInits,
+		Required:       nil,
 		Import:         imports,
 		Namespace:      GLOBAL_ENV.CoreNamespace,
 		Runtimes:       map[*Namespace]*[]string{},
 		Imports:        map[*Namespace]*Imports{},
+		Requireds:      map[*Namespace]*map[*Namespace]struct{}{},
 		Generated:      map[interface{}]interface{}{},
 		CoreNamespaces: envForNs,
 		LateInit:       false,
@@ -192,6 +196,8 @@ import (
 
 func init() {
 	{name}NamespaceInfo = internalNamespaceInfo{generated: {name}NamespaceInfo.generated, available: true}
+{lazy}
+{static}
 }
 
 func {name}Init() {
@@ -214,10 +220,26 @@ func {name}Init() {
 		}
 
 		if Verbose > 0 {
-			fmt.Printf("PROCESSING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+			fmt.Printf("OUTPUTTING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
 
 		runtime := *genEnv.Runtimes[ns]
+		if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
+			for r, _ := range *requireds {
+				nsName := r.ToString(false)
+				filename := CoreSourceFilename[nsName]
+				if filename == "" {
+					continue
+				}
+				if Verbose > 0 {
+					fmt.Printf("  REQUIRES: %s from %s\n", nsName, filename)
+				}
+				runtime = append(runtime, fmt.Sprintf(`
+	ns_%s.MaybeLazy("%s")
+`[1:],
+					NameAsGo(nsName), nsName))
+			}
+		}
 		r := strings.Join(runtime, "\n")
 
 		imports := genEnv.Imports[ns]
@@ -228,12 +250,26 @@ func {name}Init() {
 
 		filename := CoreSourceFilename[nsName]
 		name := filename[0 : len(filename)-5] // assumes .joke extension
+		goname := NameAsGo(nsName)
 		codeFile := fmt.Sprintf(codePattern, name)
 		fileContent := fileTemplate[1:]
-
+		lazy := ""
+		statics := ""
+		if nsName != "joker.core" {
+			lazy = fmt.Sprintf(`
+	ns_{goname}.Lazy = %sInit
+`[1:],
+				name)
+		} else {
+			statics = r
+			r = ""
+		}
 		var trPerNs = [][2]string{
 			{"{name}", name},
+			{"{lazy}", lazy},
+			{"{goname}", goname},
 			{"{imports}", imp},
+			{"{static}", statics},
 			{"{runtime}", r},
 		}
 
@@ -316,10 +352,12 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 			oldNamespace := genEnv.Namespace
 			oldRuntime := genEnv.Runtime
 			oldImports := genEnv.Import
+			oldRequired := genEnv.Required
 			defer func() {
 				genEnv.Namespace = oldNamespace
 				genEnv.Runtime = oldRuntime
 				genEnv.Import = oldImports
+				genEnv.Required = oldRequired
 			}()
 
 			genEnv.Namespace = ns
@@ -339,6 +377,14 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 				genEnv.Imports[ns] = imp
 			}
 			genEnv.Import = imp
+
+			rq, found := genEnv.Requireds[ns]
+			if !found {
+				newRequired := map[*Namespace]struct{}{}
+				rq = &newRequired
+				genEnv.Requireds[ns] = rq
+			}
+			genEnv.Required = rq
 		}
 	}
 
@@ -458,19 +504,20 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 		case Namespace:
 			nsName := obj.Name.Name()
 			if Verbose > 0 {
-				fmt.Printf("EMITTING %s\n", nsName)
+				fmt.Printf("COMPILING %s\n", nsName)
 			}
 			if nsName != "joker.core" {
 				lateInit := genEnv.LateInit
 				defer func() { genEnv.LateInit = lateInit }()
 				genEnv.LateInit = true
 			}
-			if _, found := genEnv.CoreNamespaces[nsName]; found {
-				name := CoreSourceFilename[nsName]
-				name = name[0 : len(name)-5] // assumes .joke extension
-				lazy = fmt.Sprintf(`
-	Lazy: %sInit,`[1:],
-					name)
+		case VarRefExpr:
+			if curRequired := genEnv.Required; curRequired != nil {
+				if vr := obj.Var(); vr != nil {
+					if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
+						(*curRequired)[ns] = struct{}{}
+					}
+				}
 			}
 		}
 		if obj == nil {

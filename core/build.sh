@@ -36,4 +36,4 @@ JUSTVET=false
 
 $JUSTVET && (cd ..; $time go vet ./...)
 
-$JUSTVET || (cd ..; KEEP_A_CODE_FILES=true KEEP_A_DATA_FILES=true $time ./run.sh -e '(loaded-libs)')
+$JUSTVET || (cd ..; RUN_GEN_CODE=false KEEP_A_CODE_FILES=true KEEP_A_DATA_FILES=true $time ./run.sh -e '(loaded-libs)')
