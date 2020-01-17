@@ -43,7 +43,6 @@ func repl(phase Phase) {
 
 	reader := NewReader(runeReader, "<repl>")
 
-	GLOBAL_ENV.Ready()
 	for {
 		if noReadline {
 			print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")

@@ -119,14 +119,6 @@ func (env *Env) SetFilename(obj Object) {
 	env.file.Value = obj
 }
 
-/* This runs after invariant initialization, which includes calling
-   NewEnv().  NOTE: Any changes to the list of run-time
-   initializations must be reflected in gen_code/gen_code.go.  */
-func (env *Env) Ready() {
-	// Perform any post-variant-initialization fixups needed.
-	lateInitializations()
-}
-
 func (env *Env) IsStdIn(obj Object) bool {
 	return env.stdin.Value == obj
 }

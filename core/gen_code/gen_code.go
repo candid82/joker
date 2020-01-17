@@ -27,7 +27,6 @@ type GenEnv struct {
 	Statics        *[]string
 	StaticImport   *Imports
 	Runtime        *[]string
-	LateInits      *[]string
 	Required       *map[*Namespace]struct{} // Namespaces referenced by current one
 	Import         *Imports
 	Namespace      *Namespace // In which the core.Var currently being emitted is said to reside
@@ -63,7 +62,7 @@ var (
 	/* *command-line-args*))` would thus not work without special
 	/* handling, which does not yet appear to be necessary. */
 
-	lateInits = map[string]struct{}{
+	knownLateInits = map[string]struct{}{
 		"joker.core/*in*":                struct{}{},
 		"joker.core/*out*":               struct{}{},
 		"joker.core/*err*":               struct{}{},
@@ -149,7 +148,6 @@ func main() {
 
 	statics := []string{}
 	runtime := []string{}
-	lateInits := []string{}
 	imports := NewImports()
 
 	// Mark "everything" as used.
@@ -159,7 +157,6 @@ func main() {
 		Statics:        &statics,
 		StaticImport:   imports,
 		Runtime:        &runtime,
-		LateInits:      &lateInits,
 		Required:       nil,
 		Import:         imports,
 		Namespace:      GLOBAL_ENV.CoreNamespace,
@@ -275,7 +272,11 @@ func {name}Init() {
 		ioutil.WriteFile(codeFile, []byte(fileContent), 0666)
 	}
 
-	/* Now that lateInits has been established, emit the master file (a_code.go). */
+	/* Output the master file (a_code.go). */
+
+	if Verbose > 0 {
+		fmt.Printf("OUTPUTTING %s\n", masterFile)
+	}
 
 	r := strings.Join(runtime, "\n")
 	if r != "" {
@@ -288,17 +289,6 @@ func init() {
 
 	}
 
-	lates := strings.Join(lateInits, "\n")
-	if lates != "" {
-		lates = fmt.Sprintf(`
-
-func lateInitializations() {
-%s
-}`,
-			lates)
-
-	}
-
 	imp := QuotedImportList(genEnv.StaticImport, "\n")
 	if len(imp) > 0 && imp[0] == '\n' {
 		imp = imp[1:]
@@ -308,7 +298,6 @@ func lateInitializations() {
 		{"{imports}", imp},
 		{"{statics}", strings.Join(statics, "\n")},
 		{"{runtime}", r},
-		{"{lates}", lates},
 	}
 
 	fileContent := `
@@ -324,7 +313,6 @@ import (
 
 {statics}
 {runtime}
-{lates}
 `[1:]
 
 	for _, t := range tr {
@@ -616,12 +604,12 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 			obj := v.Interface()
 			name := uniqueId(ptrToObj)
 			if genEnv.LateInit {
-				if destVar, yes := ptrToObj.(*Var); yes /* && destVar.Value == nil */ {
+				if destVar, yes := ptrToObj.(*Var); yes {
 					if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
 						sourceVarName := e.Var().Name()
-						if _, found := lateInits[sourceVarName]; found {
+						if _, found := knownLateInits[sourceVarName]; found {
 							destVarId := uniqueId(destVar)
-							*genEnv.LateInits = append(*genEnv.LateInits, fmt.Sprintf(`
+							*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
 	%s.Value = %s.Value`[1:],
 								destVarId, uniqueId(e.Var())))
 						}
