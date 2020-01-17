@@ -24,7 +24,6 @@ import (
 type internalNamespaceInfo struct {
 	data      []byte
 	init      func()
-	generated func()
 	available bool
 }
 
@@ -1940,16 +1939,6 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 	if !info.available {
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
 	}
-	if info.generated != nil {
-		if Verbose > 0 {
-			fmt.Fprintf(Stderr, "processNamespaceinfo: Running generated code for %s\n", name)
-		}
-		info.generated()
-		info.generated = nil
-		info.init = nil
-		info.data = nil
-		return true
-	}
 	if info.init != nil {
 		if Verbose > 0 {
 			fmt.Fprintf(Stderr, "processNamespaceinfo: Running init() for %s\n", name)
@@ -2018,7 +2007,7 @@ var procIsNamespaceInitialized ProcFn = func(args []Object) Object {
 	// Then check core libs, which (generally) start out as unregistered
 	libname := sym.Name()
 	info, found := internalLibs[libname]
-	return MakeBoolean(found && info.generated == nil && info.init == nil && info.data == nil)
+	return MakeBoolean(found && info.init == nil && info.data == nil)
 }
 
 var haveSetCoreNamespaces bool
