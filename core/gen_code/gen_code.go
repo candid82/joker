@@ -196,10 +196,7 @@ func init() {
 {lazy}
 {static}
 }
-
-func {name}Init() {
 {runtime}
-}
 `
 
 		nsName := *nsNamePtr
@@ -213,8 +210,13 @@ func {name}Init() {
 			continue
 		}
 
+		filename := CoreSourceFilename[nsName]
+		name := filename[0 : len(filename)-5] // assumes .joke extension
+		goname := NameAsGo(nsName)
+		codeFile := fmt.Sprintf(codePattern, name)
+
 		if Verbose > 0 {
-			fmt.Printf("OUTPUTTING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+			fmt.Printf("OUTPUTTING %s as %s (mappings=%d)\n", nsName, codeFile, len(ns.Mappings()))
 		}
 
 		runtime := *genEnv.Runtimes[ns]
@@ -241,21 +243,25 @@ func {name}Init() {
 			imp = imp[1:]
 		}
 
-		filename := CoreSourceFilename[nsName]
-		name := filename[0 : len(filename)-5] // assumes .joke extension
-		goname := NameAsGo(nsName)
-		codeFile := fmt.Sprintf(codePattern, name)
 		fileContent := fileTemplate[1:]
+
 		lazy := ""
 		statics := ""
-		if nsName != "joker.core" {
+		if nsName == "joker.core" {
+			statics = r
+			r = ""
+		} else {
 			lazy = fmt.Sprintf(`
 	ns_{goname}.Lazy = %sInit
 `[1:],
 				name)
-		} else {
-			statics = r
-			r = ""
+			r = fmt.Sprintf(`
+
+func %sInit() {
+%s
+}
+`[1:],
+				name, r)
 		}
 		var trPerNs = [][2]string{
 			{"{name}", name},
