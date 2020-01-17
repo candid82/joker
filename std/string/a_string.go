@@ -276,15 +276,15 @@ func __split_(_args []Object) Object {
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-		re := ExtractRegex(_args, 1)
-		_res := split(s, re, 0)
+		sep := ExtractObject(_args, 1)
+		_res := splitOnStringOrRegex(s, sep, 0)
 		return _res
 
 	case _c == 3:
 		s := ExtractString(_args, 0)
-		re := ExtractRegex(_args, 1)
+		sep := ExtractObject(_args, 1)
 		n := ExtractInt(_args, 2)
-		_res := split(s, re, n)
+		_res := splitOnStringOrRegex(s, sep, n)
 		return _res
 
 	default:
@@ -557,8 +557,8 @@ func Init() {
 
 	stringNamespace.InternVar("split", split_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("re")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("re"), MakeSymbol("n"))),
-			`Splits string on a regular expression. Returns vector of the splits.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep"), MakeSymbol("n"))),
+			`Splits string on a string or regular expression. Returns vector of the splits.`, "1.0"))
 
 	stringNamespace.InternVar("split-lines", split_lines_,
 		MakeMeta(
