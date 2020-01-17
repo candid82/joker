@@ -1,15 +1,9 @@
+(doseq [ns (remove #(= % 'user) joker.core/*core-namespaces*)] (require ns))
+
 (alias 'string 'joker.string)
-(require 'joker.better-cond)
-(require 'joker.hiccup)
-(require 'joker.html)
-(require 'joker.repl)
-(require 'joker.set)
-(require 'joker.template)
-(require 'joker.test)
-(require '[joker.tools.cli :as cli])
-(require '[joker.os :as os])
-(require '[joker.string :as str])
-(require 'joker.walk)
+(alias 'cli 'joker.tools.cli)
+(alias 'os 'joker.os)
+(alias 'str 'joker.string)
 
 (def index-template
   (slurp "templates/index.html"))

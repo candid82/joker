@@ -58,6 +58,22 @@ func split(s string, r *regexp.Regexp, n int) Object {
 	return result
 }
 
+func splitOnStringOrRegex(s string, sep Object, n int) Object {
+	switch sep := sep.(type) {
+	case String:
+		v := strings.Split(s, sep.S)
+		result := EmptyVector()
+		for _, el := range v {
+			result = result.Conjoin(String{S: el})
+		}
+		return result
+	case Regex:
+		return split(s, sep.R, n)
+	default:
+		panic(RT.NewArgTypeError(1, sep, "String or Regex"))
+	}
+}
+
 func join(sep string, seqable Seqable) string {
 	seq := seqable.Seq()
 	var b bytes.Buffer

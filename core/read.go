@@ -247,7 +247,7 @@ func readCharacter(reader *Reader) Object {
 		}
 	case 'o':
 		if !isDelimiter(reader.Peek()) {
-			readUnicodeCharacter(reader, 3, 8)
+			return readUnicodeCharacter(reader, 3, 8)
 		}
 	}
 	peekExpectedDelimiter(reader)
