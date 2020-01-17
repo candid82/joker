@@ -27,7 +27,7 @@ A namespace is _available_ if its source code is either:
 
 The _compiled_ namespaces are also the _built-in_ namespaces, and are described below. These are _not_ necessarily "mapped"; in the standard build of Joker, the _core_ namespaces are mapped on-demand when first referenced. (`joker.core` is referenced immediately upon startup of the Joker executable; `joker.repl` is as well, when running Joker as a REPL.)
 
-Note that the `-tags fast_init` (fast-startup) build of Joker maps all the namespaces at build time.
+Note that the `-tags fast_init` (fast-startup) build of Joker maps all the core namespaces at build time; all compiled-in namespaces therefore start out mapped, not merely available.
 
 A namespace that is available, but not mapped, is not found via e.g. `(the-ns 'joker.hiccup)`. The set of _core_ namespaces is hardcoded (in any given Joker executable) in `joker.core/*core-namespaces*`.
 
