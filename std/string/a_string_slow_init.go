@@ -105,8 +105,8 @@ func InternsOrThunks() {
 
 	stringNamespace.InternVar("split", split_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("re")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("re"), MakeSymbol("n"))),
-			`Splits string on a regular expression. Returns vector of the splits.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep"), MakeSymbol("n"))),
+			`Splits string on a string or regular expression. Returns vector of the splits.`, "1.0"))
 
 	stringNamespace.InternVar("split-lines", split_lines_,
 		MakeMeta(
