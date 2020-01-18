@@ -25,6 +25,7 @@ func InternsOrThunks() {
 	STD_thunk_string_lower_case__var = __lower_case_
 	STD_thunk_string_pad_left__var = __pad_left_
 	STD_thunk_string_pad_right__var = __pad_right_
+	STD_thunk_string_re_quote__var = __re_quote_
 	STD_thunk_string_replace__var = __replace_
 	STD_thunk_string_replace_first__var = __replace_first_
 	STD_thunk_string_reverse__var = __reverse_

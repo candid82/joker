@@ -78,6 +78,11 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
 			`Returns s padded with pad at the end to length n.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
+	stringNamespace.InternVar("re-quote", re_quote_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Returns an instance of Regex that matches the string exactly`, "1.0").Plus(MakeKeyword("tag"), String{S: "Regex"}))
+
 	stringNamespace.InternVar("replace", replace_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),

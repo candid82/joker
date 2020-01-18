@@ -4,6 +4,7 @@ package string
 
 import (
 	. "github.com/candid82/joker/core"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -217,6 +218,23 @@ func __pad_right_(_args []Object) Object {
 		n := ExtractInt(_args, 2)
 		_res := padRight(s, pad, n)
 		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __re_quote__P ProcFn = __re_quote_
+var re_quote_ Proc = Proc{Fn: __re_quote__P, Name: "re_quote_", Package: "std/string"}
+
+func __re_quote_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := regexp.MustCompile(regexp.QuoteMeta(s))
+		return MakeRegex(_res)
 
 	default:
 		PanicArity(_c)

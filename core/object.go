@@ -1283,6 +1283,10 @@ func (k Keyword) Call(args []Object) Object {
 	return getMap(k, args)
 }
 
+func MakeRegex(r *regexp.Regexp) *Regex {
+	return &Regex{R: r}
+}
+
 func (rx *Regex) ToString(escape bool) string {
 	if escape {
 		return "#\"" + rx.R.String() + "\""
