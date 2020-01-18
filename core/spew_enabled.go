@@ -7,6 +7,75 @@ import (
 	"github.com/jcburley/go-spew/spew"
 )
 
+var mySpewState spew.SpewState
+
+func Spew() {
+	cs := &spew.ConfigState{
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
+	}
+
+	cs.Fprintln(Stderr, "STR:")
+	cs.Fdump(Stderr, STR)
+	cs.Fprintln(Stderr, "STRINGS:")
+	cs.Fdump(Stderr, STRINGS)
+	cs.Fprintln(Stderr, "\nSYMBOLS:")
+	cs.Fdump(Stderr, SYMBOLS)
+	cs.Fprintln(Stderr, "\nSPECIAL_SYMBOLS:")
+	cs.Fdump(Stderr, SPECIAL_SYMBOLS)
+	cs.Fprintln(Stderr, "\nKEYWORDS:")
+	cs.Fdump(Stderr, KEYWORDS)
+	cs.Fprintln(Stderr, "\nTYPE:")
+	cs.Fdump(Stderr, TYPE)
+	cs.Fprintln(Stderr, "\nTYPES:")
+	cs.Fdump(Stderr, TYPES)
+	cs.Fprintln(Stderr, "\nGLOBAL_ENV:")
+	cs.Fdump(Stderr, GLOBAL_ENV)
+	mySpewState = cs.SpewState
+}
+
+func SpewThis(obj interface{}) {
+	cs := &spew.ConfigState{
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
+	}
+
+	cs.Fdump(Stderr, obj)
+	mySpewState = cs.SpewState
+}
+
+func SpewObj(obj interface{}) string {
+	cs := &spew.ConfigState{
+		Indent:            "    ",
+		MaxDepth:          30,
+		SortKeys:          true,
+		SpewKeys:          true,
+		NoDuplicates:      true,
+		UseOrdinals:       true,
+		DisableMethods:    true,
+		PreserveSpewState: true,
+		SpewState:         mySpewState,
+	}
+
+	res := cs.Sdump(obj)
+	mySpewState = cs.SpewState
+	return res
+}
+
 var procGoSpew ProcFn = func(args []Object) (res Object) {
 	res = MakeBoolean(false)
 	CheckArity(args, 1, 2)

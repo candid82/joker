@@ -2,21 +2,10 @@ package core
 
 import (
 	"fmt"
-	"github.com/jcburley/go-spew/spew"
 	"reflect"
 	"strings"
 	"unsafe"
 )
-
-var spewConfig = &spew.ConfigState{
-	Indent:         "",
-	MaxDepth:       10,
-	SortKeys:       true,
-	SpewKeys:       true,
-	NoDuplicates:   true,
-	UseOrdinals:    true,
-	DisableMethods: true,
-}
 
 var tr = [][2]string{
 	{"?", "Q"},
@@ -266,12 +255,10 @@ func UniqueId(obj interface{}) (id string) {
 			if havePos {
 				id = fmt.Sprintf("%s_%s_%p", id, pos, obj)
 			} else {
-				h := getHash()
-				h.Write(([]byte)(spewConfig.Sdump(obj)))
-				id = fmt.Sprintf("%s_%d", id, h.Sum32())
+				id = fmt.Sprintf("%s_%p", id, obj)
 				origType := reflect.TypeOf(obj).String()
 				if origType == "core.Keyword" || origType == "core.Symbol" {
-					fmt.Printf("UniqueId: Using %s for %s due to %s\n", id, origType, r)
+					fmt.Fprintf(Stderr, "UniqueId: Using %s for %s due to %s\n", id, origType, r)
 				}
 			}
 		}
