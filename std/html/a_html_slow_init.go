@@ -11,7 +11,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of html.InternsOrThunks().")
 	}
 	htmlNamespace.ResetMeta(MakeMeta(nil, `Provides functions for escaping and unescaping HTML text.`, "1.0"))

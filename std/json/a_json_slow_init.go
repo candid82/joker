@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of json.InternsOrThunks().")
 	}
 	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))

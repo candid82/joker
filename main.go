@@ -480,7 +480,23 @@ func parseArgs(args []string) {
 		case "--debug=stdout":
 			debugOut = Stdout
 		case "--verbose":
-			Verbose++
+			Verbose = true
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				verbosity, err := strconv.ParseInt(args[i], 10, 64)
+				if err != nil {
+					fmt.Fprintln(Stderr, "Error: ", err)
+					return
+				}
+				if verbosity <= 0 {
+					Verbose = false
+					VerbosityLevel = 0
+				} else {
+					VerbosityLevel = int(verbosity)
+				}
+			} else {
+				VerbosityLevel++
+			}
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else
@@ -700,7 +716,7 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
-	GLOBAL_ENV.SetVerbose(Verbose)
+	GLOBAL_ENV.SetVerbosity()
 	GLOBAL_ENV.Trace = trace
 	GLOBAL_ENV.MaxDepth = maxDepth
 
@@ -804,7 +820,7 @@ func main() {
 		if saveForRepl {
 			reader = NewReader(&replayable{reader}, "<replay>")
 		}
-		if Verbose > 1 {
+		if Verbosity() > 1 {
 			Spew()
 		}
 		if err := ProcessReader(reader, "", phase); err != nil {

@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of csv.InternsOrThunks().")
 	}
 	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) files as defined in RFC 4180.`, "1.0"))

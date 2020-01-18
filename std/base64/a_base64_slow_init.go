@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of base64.InternsOrThunks().")
 	}
 	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))

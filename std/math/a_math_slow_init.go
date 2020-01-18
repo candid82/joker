@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of math.InternsOrThunks().")
 	}
 	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))

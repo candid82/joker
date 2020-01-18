@@ -44,7 +44,8 @@ func parseArgs(args []string) {
 	for i = 1; i < length; i++ { // shift
 		switch args[i] {
 		case "--verbose":
-			Verbose++
+			Verbose = true
+			VerbosityLevel++
 		default:
 			if strings.HasPrefix(args[i], "-") {
 				fmt.Fprintf(Stderr, "Error: Unrecognized option '%s'\n", args[i])
@@ -127,10 +128,10 @@ func init() {
 	dataContent := strings.Replace(dataTemplate, "{coreNamespaces}", strings.Join(coreNamespaces, "\n"), 1)
 	ioutil.WriteFile("a_data.go", []byte(dataContent), 0666)
 
-	if Verbose > 0 {
+	if Verbosity() > 0 {
 		fmt.Fprintln(os.Stderr, "gen_data:main(): After loading source files:")
 		fmt.Fprintf(os.Stderr, "Namespaces=%s\n", namespaces)
-		if Verbose > 1 {
+		if Verbosity() > 1 {
 			Spew()
 		}
 	}

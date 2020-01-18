@@ -65,7 +65,7 @@ func (ns *Namespace) Hash() uint32 {
 func (ns *Namespace) MaybeLazy(doc string) {
 	if ns.Lazy != nil {
 		ns.Lazy()
-		if Verbose > 0 {
+		if Verbosity() > 0 {
 			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s for %s\n", *ns.Name.name, doc)
 		}
 		ns.Lazy = nil
@@ -114,7 +114,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			name: sym,
 		}
 		ns.mappings[sym.name] = newVar
-		if Verbose > 1 {
+		if Verbosity() > 1 {
 			fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s)\n", *ns.Name.name, *sym.name)
 		}
 		return newVar
@@ -130,7 +130,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
 			}
-			if Verbose > 1 {
+			if Verbosity() > 1 {
 				fmt.Fprintf(Stderr, "ns.go:Intern(%s/%s) (EXISTING)\n", *ns.Name.name, *sym.name)
 			}
 			return newVar

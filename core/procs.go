@@ -1799,7 +1799,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == READ {
 			continue
 		}
-		if Verbose > 2 {
+		if Verbosity() > 2 {
 			fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYPARSE:")
 			SpewThis(obj)
 		}
@@ -1811,7 +1811,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
-		if Verbose > 2 {
+		if Verbosity() > 2 {
 			fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYEVAL:")
 			SpewThis(expr)
 		}
@@ -1854,7 +1854,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 }
 
 func finalizeNamespace() {
-	if Verbose < 1 {
+	if Verbosity() < 1 {
 		return
 	}
 	ns := GLOBAL_ENV.CurrentNamespace()
@@ -1869,7 +1869,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
 	}
 	if info.init != nil {
-		if Verbose > 0 {
+		if Verbosity() > 0 {
 			fmt.Fprintf(Stderr, "processNamespaceinfo: Running init() for %s\n", name)
 		}
 		info.init()
@@ -1877,7 +1877,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 		processed = true
 	}
 	if info.data != nil {
-		if Verbose > 0 {
+		if Verbosity() > 0 {
 			fmt.Fprintf(Stderr, "processNamespaceinfo: Evaluating code for %s\n", name)
 		}
 		header, p := UnpackHeader(info.data, GLOBAL_ENV)
@@ -1901,16 +1901,16 @@ func setCoreNamespaces() {
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
-	if Verbose > 1 {
+	if Verbosity() > 1 {
 		fmt.Fprintln(Stderr, "setCoreNamespaces() of:")
 		SpewThis(vr)
 	}
 	for _, ns := range coreNamespaces {
-		if Verbose > 1 {
+		if Verbosity() > 1 {
 			fmt.Fprintf(Stderr, "ns: %+v\n", ns)
 		}
 		sym := MakeSymbol(ns)
-		if Verbose > 1 {
+		if Verbosity() > 1 {
 			fmt.Fprintf(Stderr, "\tsym: %s\n", sym.Name())
 		}
 		set = set.Conj(sym).(*MapSet)
