@@ -4556,11 +4556,11 @@
   [^Channel ch]
   (close!__ ch))
 
-(defn- ns-init-p
+(defn- ns-initialized?
   "Returns whether the namespace, denoted by the symbol, has been initialized."
   {:added "1.0"}
   ^Boolean [^Symbol s]
-  (ns-init-p__ s))
+  (ns-initialized?__ s))
 
 (defn- go-spew
   "Dump ('spew') internal Go structures for object to stderr.

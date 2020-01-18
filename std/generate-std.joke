@@ -71,7 +71,7 @@
 ;;; complete evaluation so lazy evaluation wouldn't find joker.os due to
 ;;; the subsequent require.
 (doseq [ns (remove #(= % 'user) joker.core/*core-namespaces*)] (require ns))
-(def preloaded (set (remove joker.core/*core-namespaces* (filter #(joker.core/ns-init-p %) (map #(symbol (str %)) (all-ns))))))
+(def preloaded (set (remove joker.core/*core-namespaces* (filter #(joker.core/ns-initialized? %) (map #(symbol (str %)) (all-ns))))))
 
 (require '[joker.string :as s]
          '[joker.os :as os])
