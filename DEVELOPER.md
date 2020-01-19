@@ -244,6 +244,28 @@ TBD, but something like this was done to search for Joker code that runs before 
 grep --color -nH --null -E -e '^(func init\(|var )' *.go ../*.go ../std/*/*.go | grep -v ' ProcFn = '
 ```
 
+### Overview of Changes Made to Joker
+
+The fast-startup version necessitated (as of this writing) these changes:
+
+* `Regex` is now `*Regex` (a reference type), mainly so runtime initialization (from a `regexp.MustCompile()` call) can be assigned into the `.Value` or equivalent member of a static structure.
+* `internalNamespaceInfo` is a new struct type that wraps `[]byte` for the core namespace, adding `init func()` (the slow version uses this for lazy-loading of core namespaces; might be replaceable via the `.Lazy` mechanism if we always map all core namespaces) and `available bool` (which aids detecting missing `a_*.go` files more elegantly).
+* Many (larger/complicated) static vars' definitions and initializations have been separated out into `_init.go` files (e.g. `procs_init.go`, `environment_init.go`, etc.), which are `// +build !fast_init`, in that they aren't built into the fast-startup version of Joker.
+* `Proc` now wraps the former `Proc` (renamed `ProcFn`) and adds self-identifying info (the name of the procedure and its package), to help code generation when it encounters them.
+* Thunks are (unfortunately) necessary for `ProcFn`’s that, directly or indirectly (but statically), reference static variables such as `GLOBAL_ENV`, else the Go compiler refuses to compile the fast code due to cycles (!!).
+* A new `core/gen_code/gen_code.go` program parallels (and is run after the running of) `gen_data.go`. It generates `a_*code.go` files that mostly define static variables representing the structures resulting when loading `joker.core` and the like; these are `// +build fast_init`, so they are compiled only when building the fast-startup version of Joker.
+* `gen_data.go` changes include:
+    - The list of files (`FileInfo`) has been moved into `procs.go` (might not be the best place, maybe `common.go` or a new file?) as `CoreSourceFiles` so `gen_code.go` can share it.
+    - `// +build !fast_init` is emitted in pertinent files (mainly the `a_*_data.go` files, but not `a_data.go` itself).
+    - Support for a `--verbose` option.
+* The new `run.sh` defaults to running `gen_code.go`, which takes about only a few seconds on my Ryzen 3, and which generates these static-initializing files, built only when `-tags fast_init` is specified.
+* `run.sh` continues on to building both the “normal” (slower) Joker, renamed to `joker.slow`, and the fast-startup version, hardlinked to `joker.fast`, which thus becomes the default for subsequent use (such as running `std/generate-std.joke` and then running the executable itself with whatever arguments were provided to `run.sh`).
+* A new `core/code.go` module is (now) mainly a helper for `gen_code.go`, since the latter isn’t part of `package core`.
+* A rudimentary tracing facility is enabled via `--trace`, mainly useful for my debugging this work, but not particularly elegant as-is; it is accompanied by a `--max-depth N` option.
+* `*verbosity-level*` and related stuff was introduced, also for debugging.
+* Beyond verbosity level 1 (sometimes 2), various things are “spewed” (via go-spew) at appropriate times. (Of course, this works only if Joker was built with `-tags go_spew`.)
+* The new private function `joker.core/ns-init?` tells whether a namespace has been initialized (fully, including potentially lazily, loaded), useful as a debugging tool.
+
 ## Debugging Tools
 
 ### go-spew
