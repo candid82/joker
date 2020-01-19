@@ -3855,11 +3855,22 @@
   {:added "1.0"})
 
 (add-doc-and-meta *verbose*
-  "Whether --verbose (or equivalent) was specified by the Joker invocation."
+  "Whether --verbose (or equivalent) was specified by the Joker invocation.
+
+  Note: changing this (via e.g. var-set) affects only running Joker code; it
+  does not change the value used by the Go code that implements Joker. If
+  needed, it's probably better to add a set-verbose function that changes
+  both, rather than changing Joker's internals so this variable is always checked."
   {:added "1.0"})
 
 (add-doc-and-meta *verbosity-level*
-  "Verbosity level as (initially) specified by the Joker invocation."
+  "Verbosity level as (initially) specified by the Joker invocation.
+
+  Note: changing this (via e.g. var-set) affects only running Joker code; it
+  does not change the value used by the Go code that implements Joker. If
+  needed, it's probably better to add a set-verbosity-level function that
+  changes both, rather than changing Joker's internals so this variable is
+  always checked."
   {:added "1.0"})
 
 (defn- verbosity
