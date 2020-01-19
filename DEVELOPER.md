@@ -112,7 +112,7 @@ When Joker is built (via the `run.sh` script), `go generate ./...` is first run.
 //go:generate go run gen_data/gen_data.go
 ```
 
-That builds and runs `core/gen_data/gen_data.go`, which finds, in the `CoreSourceFiles` array defined in `procs.go`, a list of files (in `core/data/`) to be processed.
+That builds and runs `core/gen_data/gen_data.go`, which finds, in the `CoreSourceFiles` array defined in `core/procs.go`, a list of files (in `core/data/`) to be processed.
 
 As explained in the block comment just above the `var CoreSourceFiles []...` definition, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
 
