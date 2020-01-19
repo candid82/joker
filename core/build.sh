@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This is purely a helper script for developing the fast-startup version of Joker. It is not intended to be incorporated into official Joker.
+
 set -e  # Exit on error.
 
 if $(which gln >/dev/null 2>&1)
