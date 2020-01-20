@@ -112,25 +112,23 @@
         (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (string/replace "{added}" (str (:added m))))))
 
-(declare ns-vars)
-
 (defn ns-doc
-  [ns-sym]
+  [ns-sym ns-vars-fn]
   (let [ns (find-ns ns-sym)
         m (meta ns)
         vars-doc (string/join
                   ""
-                  (for [[k v] (sort (ns-vars ns-sym))]
+                  (for [[k v] (sort (ns-vars-fn ns-sym))]
                     (var-doc k v)))
         var-links-doc (string/join
                        ""
-                       (for [k (sort (keys (ns-vars ns-sym)))]
+                       (for [k (sort (keys (ns-vars-fn ns-sym)))]
                          (link-item-doc (str k))))]
     (-> ns-template
         (string/replace "{name}" (name ns-sym))
         (string/replace "{added}" (str (:added m)))
         (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
-        (string/replace  "{vars}" vars-doc)
+        (string/replace "{vars}" vars-doc)
         (string/replace "{index}" var-links-doc))))
 
 (defn index-doc
@@ -158,7 +156,7 @@
         (string/replace "{types}" types-docs))))
 
 (defn full-doc
-  []
+  [ns-vars-fn]
   (let [namespaces (->> (all-ns)
                         (map ns-name)
                         (remove #(= 'user %))
@@ -168,7 +166,7 @@
                    (sort))]
     (spit "index.html" (index-doc namespaces types))
     (doseq [ns namespaces]
-      (spit (str ns ".html") (ns-doc ns)))))
+      (spit (str ns ".html") (ns-doc ns ns-vars-fn)))))
 
 (let [opts (cli/parse-opts *command-line-args*
                            [
@@ -180,8 +178,7 @@
     (println "Usage:")
     (println (:summary opts))
     (os/exit 1))
-  (if (:all (:options opts))
-    (defn ns-vars [ns] (ns-interns ns))
-    (defn ns-vars [ns] (ns-publics ns))))
-
-(full-doc)
+  (let [ns-vars-fn (if (:all (:options opts))
+                     ns-interns
+                     ns-publics)]
+    (full-doc ns-vars-fn)))
