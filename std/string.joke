@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["strings" "unicode"]
+  ^{:go-imports ["regexp" "strings" "unicode"]
     :doc "Implements simple functions to manipulate strings."}
   string)
 
@@ -171,4 +171,10 @@
   "Returns s with its characters reversed."
   {:added "1.0"
   :go "reverse(s)"}
+  [^String s])
+
+(defn ^Regex re-quote
+  "Returns an instance of Regex that matches the string exactly"
+  {:added "1.0"
+   :go "regexp.MustCompile(regexp.QuoteMeta(s))"}
   [^String s])

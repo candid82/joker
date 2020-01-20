@@ -374,14 +374,6 @@ var procRegex Proc = func(args []Object) Object {
 	return Regex{R: r}
 }
 
-var procRegexQuoted Proc = func(args []Object) Object {
-	return Regex{R: regexp.MustCompile(regexp.QuoteMeta(EnsureString(args, 0).S))}
-}
-
-var procRegexString Proc = func(args []Object) Object {
-	return String{S: EnsureRegex(args, 0).R.String()}
-}
-
 func reGroups(s string, indexes []int) Object {
 	if indexes == nil {
 		return NIL
@@ -2202,8 +2194,6 @@ func init() {
 	intern("ex-cause__", procExCause)
 	intern("ex-message__", procExMessage)
 	intern("regex__", procRegex)
-	intern("regex-quoted__", procRegexQuoted)
-	intern("regex-string__", procRegexString)
 	intern("re-seq__", procReSeq)
 	intern("re-find__", procReFind)
 	intern("rand__", procRand)
