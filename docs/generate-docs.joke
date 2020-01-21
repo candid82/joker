@@ -1,9 +1,10 @@
 (doseq [ns (remove #(= % 'user) joker.core/*core-namespaces*)] (require ns))
 
-(alias 'string 'joker.string)
 (alias 'cli 'joker.tools.cli)
 (alias 'os 'joker.os)
-(alias 'str 'joker.string)
+(alias 's 'joker.string)
+
+(def rpl s/replace)
 
 (def index-template
   (slurp "templates/index.html"))
@@ -40,21 +41,21 @@
 
 (defn link-item-doc
   [k]
-  (string/replace link-item-template "{name}" k))
+  (s/replace link-item-template "{name}" k))
 
 (defn usage
   [k m]
   (if (:special-form m)
     (let [examples (for [form (:forms m)]
-                     (string/replace usage-template "{usage}" (str form)))]
-      (string/join "" examples))
+                     (s/replace usage-template "{usage}" (str form)))]
+      (s/join "" examples))
     (let [examples (for [arglist (:arglists m)]
-                     (string/replace usage-template "{usage}" (str (apply list k arglist))))]
-      (string/join "" examples))))
+                     (s/replace usage-template "{usage}" (str (apply list k arglist))))]
+      (s/join "" examples))))
 
 (defn- source-file
   [ns]
-  (string/join "_" (rest (string/split (str ns) #"\."))))
+  (s/join "_" (rest (s/split (str ns) #"\."))))
 
 (defn var-doc
   [k v]
@@ -66,13 +67,13 @@
     (when-not (or (:doc m) (:private m))
       (println "WARNING: public var without doc meta key: " full-name))
     (-> var-template
-        (string/replace "{id}" (str k))
-        (string/replace "{name}" (str k))
-        (string/replace "{type}" (type-name v))
-        (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
-        (string/replace "{added}" (str (:added m)))
-        (string/replace
+        (s/replace "{id}" (str k))
+        (s/replace "{name}" (str k))
+        (s/replace "{type}" (type-name v))
+        (s/replace "{usage}" (usage k m))
+        (s/replace "{docstring}" (s/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m)))
+        (s/replace
          "{source}"
          (if (:line m)
            (format "<a href=\"https://github.com/candid82/joker/blob/master/core/data/%s.joke#L%s\">source</a>"
@@ -82,7 +83,7 @@
 
 (defn- first-line
   [s]
-  (first (string/split s #"\n")))
+  (first (s/split s #"\n")))
 
 (defn namespace-doc
   [ns-sym]
@@ -94,10 +95,10 @@
     (when-not (:doc m)
       (println "WARNING: namespace without doc meta key: " k))
     (-> namespace-template
-        (string/replace "{id}" k)
-        (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (joker.html/escape (first-line (:doc m))) "\n" "<br>\n"))
-        (string/replace "{added}" (str (:added m))))))
+        (s/replace "{id}" k)
+        (s/replace "{name}" k)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (first-line (:doc m))) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m))))))
 
 (defn type-doc
   [k]
@@ -107,53 +108,53 @@
     (when-not (:doc m)
       (println "WARNING: type without doc meta key: " k))
     (-> type-template
-        (string/replace "{id}" k)
-        (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
-        (string/replace "{added}" (str (:added m))))))
+        (s/replace "{id}" k)
+        (s/replace "{name}" k)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m))))))
 
 (defn ns-doc
   [ns-sym ns-vars-fn]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        vars-doc (string/join
+        vars-doc (s/join
                   ""
                   (for [[k v] (sort (ns-vars-fn ns-sym))]
                     (var-doc k v)))
-        var-links-doc (string/join
+        var-links-doc (s/join
                        ""
                        (for [k (sort (keys (ns-vars-fn ns-sym)))]
                          (link-item-doc (str k))))]
     (-> ns-template
-        (string/replace "{name}" (name ns-sym))
-        (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (string/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
-        (string/replace "{vars}" vars-doc)
-        (string/replace "{index}" var-links-doc))))
+        (s/replace "{name}" (name ns-sym))
+        (s/replace "{added}" (str (:added m)))
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
+        (s/replace "{vars}" vars-doc)
+        (s/replace "{index}" var-links-doc))))
 
 (defn index-doc
   [namespaces types]
-  (let [namespaces-docs (string/join
+  (let [namespaces-docs (s/join
                          ""
                          (for [ns-sym namespaces]
                            (namespace-doc ns-sym)))
-        ns-links-doc (string/join
+        ns-links-doc (s/join
                       ""
                       (->> namespaces
                            (map #(link-item-doc (str %)))))
-        types-docs (string/join
+        types-docs (s/join
                     ""
                     (for [t types]
                       (type-doc t)))
-        type-links-doc (string/join
+        type-links-doc (s/join
                         ""
                         (->> types
                              (map #(link-item-doc (str %)))))]
     (-> index-template
-        (string/replace "{index-of-namespaces}" ns-links-doc)
-        (string/replace "{namespaces}" namespaces-docs)
-        (string/replace "{index-of-types}" type-links-doc)
-        (string/replace "{types}" types-docs))))
+        (s/replace "{index-of-namespaces}" ns-links-doc)
+        (s/replace "{namespaces}" namespaces-docs)
+        (s/replace "{index-of-types}" type-links-doc)
+        (s/replace "{types}" types-docs))))
 
 (defn full-doc
   [ns-vars-fn]
@@ -174,7 +175,7 @@
                             ["-h" "--help"]
                             ])]
   (when-let [err (or (when (:help (:options opts)) "") (:errors opts))]
-    (println (str/join "\n" err))
+    (println (s/join "\n" err))
     (println "Usage:")
     (println (:summary opts))
     (os/exit 1))
