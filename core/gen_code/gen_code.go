@@ -112,7 +112,7 @@ func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 	InitInternalLibs()
 
-	envForNs := map[string]struct{}{}
+	coreNamespaces := map[string]struct{}{}
 
 	for _, f := range CoreSourceFiles {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
@@ -120,7 +120,7 @@ func main() {
 		nsNamePtr := STRINGS.Intern(nsName)
 
 		if ns, found := GLOBAL_ENV.Namespaces[nsNamePtr]; found {
-			if _, exists := envForNs[nsName]; exists {
+			if _, exists := coreNamespaces[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
 			if Verbosity() > 0 {
@@ -132,7 +132,7 @@ func main() {
 			}
 		}
 
-		envForNs[nsName] = struct{}{}
+		coreNamespaces[nsName] = struct{}{}
 
 		ProcessCoreSourceFileFor(f.Name)
 
@@ -165,7 +165,7 @@ func main() {
 		Imports:        map[*Namespace]*Imports{},
 		Requireds:      map[*Namespace]*map[*Namespace]struct{}{},
 		Generated:      map[interface{}]interface{}{},
-		CoreNamespaces: envForNs,
+		CoreNamespaces: coreNamespaces,
 		LateInit:       false,
 	}
 
@@ -204,7 +204,7 @@ func init() {
 
 		GLOBAL_ENV.SetCurrentNamespace(ns)
 
-		if _, found := envForNs[nsName]; !found {
+		if _, found := coreNamespaces[nsName]; !found {
 			if Verbosity() > 0 {
 				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
