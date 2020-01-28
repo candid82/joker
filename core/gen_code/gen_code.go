@@ -237,7 +237,7 @@ func init() {
 			fmt.Printf("OUTPUTTING %s as %s (mappings=%d)\n", nsName, codeFile, len(ns.Mappings()))
 		}
 
-		runtime := *genEnv.Runtimes[ns]
+		runtime := *genEnv.Runtimes[ns] // TODO: Sort on split of ' = ' 2nd before 1st
 		if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
 			for r, _ := range *requireds {
 				rqNsName := r.ToString(false)
@@ -412,7 +412,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 		}
 		keys := v.MapKeys()
 		valueType := v.Type().Elem()
-		sortValues(keys)
+		sortValues(keys) // TODO: Sort Namespace *string keys via coreNamespaceArray
 		for _, key := range keys {
 			k := genEnv.emitValue("", reflect.TypeOf(nil), key)
 			vi := v.MapIndex(key)
