@@ -514,11 +514,14 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 			if Verbosity() > 0 {
 				fmt.Printf("COMPILING %s\n", nsName)
 			}
-			if nsName != "joker.core" {
-				lateInit := genEnv.LateInit
-				defer func() { genEnv.LateInit = lateInit }()
-				genEnv.LateInit = true
-			}
+			lateInit := genEnv.LateInit
+			genEnv.LateInit = nsName != "joker.core"
+			defer func() {
+				genEnv.LateInit = lateInit
+				if Verbosity() > 0 {
+					fmt.Printf("FINISHED %s\n", nsName)
+				}
+			}()
 		case VarRefExpr:
 			if curRequired := genEnv.Required; curRequired != nil {
 				if vr := obj.Var(); vr != nil {
