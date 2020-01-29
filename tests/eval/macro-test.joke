@@ -1,0 +1,10 @@
+(ns joker.macro-test
+  (:require [joker.test :refer [deftest is]]))
+
+(defmacro try-macro [ & body ] `(try ~@body (catch Error)))
+(def try-macro-expand (macroexpand '(try-macro)))
+
+(deftest try-log-test
+  (is (= '(try (catch Error))
+          try-macro-expand)
+      "should properly syntax-quote types"))
