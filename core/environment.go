@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,10 +9,11 @@ import (
 )
 
 var (
-	Stdin   io.Reader = os.Stdin
-	Stdout  io.Writer = os.Stdout
-	Stderr  io.Writer = os.Stderr
-	Verbose           = false
+	Stdin          io.Reader = os.Stdin
+	Stdout         io.Writer = os.Stdout
+	Stderr         io.Writer = os.Stderr
+	Verbose                  = false
+	VerbosityLevel           = 0
 )
 
 type (
@@ -28,6 +28,8 @@ type (
 		MainFile      *Var
 		args          *Var
 		classPath     *Var
+		verbose       *Var
+		verbosity     *Var
 		ns            *Var
 		NS_VAR        *Var
 		IN_NS_VAR     *Var
@@ -72,6 +74,19 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
+func (env *Env) SetVerbosity() {
+	env.verbose.Value = Boolean{B: Verbose}
+	env.verbosity.Value = Int{I: VerbosityLevel}
+}
+
+func Verbosity() int {
+	if Verbose {
+		return VerbosityLevel
+	}
+	return 0
+}
+
+/* Called by parse.go in an outer var block, this runs before func main(). */
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -109,6 +124,12 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
+	res.verbose = res.CoreNamespace.Intern(MakeSymbol("*verbose*"))
+	res.verbose.Value = Boolean{B: false}
+	res.verbose.isPrivate = true
+	res.verbosity = res.CoreNamespace.Intern(MakeSymbol("*verbosity-level*"))
+	res.verbosity.Value = Int{I: 0}
+	res.verbosity.isPrivate = true
 	return res
 }
 
@@ -154,12 +175,8 @@ func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 			res = env.Namespaces[s.ns]
 		}
 	}
-	if res != nil && res.Lazy != nil {
-		res.Lazy()
-		if Verbose {
-			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s\n", *res.Name.name)
-		}
-		res.Lazy = nil
+	if res != nil {
+		res.MaybeLazy("NamespaceFor")
 	}
 	return res
 }
@@ -190,12 +207,8 @@ func (env *Env) FindNamespace(s Symbol) *Namespace {
 		return nil
 	}
 	ns := env.Namespaces[s.name]
-	if ns != nil && ns.Lazy != nil {
-		ns.Lazy()
-		if Verbose {
-			fmt.Fprintf(Stderr, "FindNameSpace: Lazily initialized %s\n", *ns.Name.name)
-		}
-		ns.Lazy = nil
+	if ns != nil {
+		ns.MaybeLazy("FindNameSpace")
 	}
 	return ns
 }
