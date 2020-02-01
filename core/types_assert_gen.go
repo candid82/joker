@@ -133,9 +133,9 @@ func EnsureKeyword(args []Object, index int) Keyword {
 	}
 }
 
-func AssertRegex(obj Object, msg string) Regex {
+func AssertRegex(obj Object, msg string) *Regex {
 	switch c := obj.(type) {
-	case Regex:
+	case *Regex:
 		return c
 	default:
 		if msg == "" {
@@ -145,9 +145,9 @@ func AssertRegex(obj Object, msg string) Regex {
 	}
 }
 
-func EnsureRegex(args []Object, index int) Regex {
+func EnsureRegex(args []Object, index int) *Regex {
 	switch c := args[index].(type) {
-	case Regex:
+	case *Regex:
 		return c
 	default:
 		panic(RT.NewArgTypeError(index, c, "Regex"))

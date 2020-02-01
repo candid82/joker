@@ -450,11 +450,11 @@ func readRegex(reader *Reader) Object {
 	regex, err := regexp.Compile(b.String())
 	if err != nil {
 		if LINTER_MODE {
-			return MakeReadObject(reader, Regex{})
+			return MakeReadObject(reader, &Regex{})
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
 	}
-	return MakeReadObject(reader, Regex{R: regex})
+	return MakeReadObject(reader, &Regex{R: regex})
 }
 
 func readUnicodeCharacterInString(reader *Reader, initial rune, length, base int, exactLength bool) rune {

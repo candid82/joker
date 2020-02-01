@@ -1,5 +1,5 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 //go:generate go run gen_data/gen_data.go
 
 package core
@@ -398,7 +398,7 @@ func init() {
 		Proc:          RegRefType("Proc", (*Proc)(nil), "A callable function implemented via Go code"),
 		Ratio:         RegRefType("Ratio", (*Ratio)(nil), "Wraps the Go 'math.big/Rat' type"),
 		RecurBindings: RegRefType("RecurBindings", (*RecurBindings)(nil), ""),
-		Regex:         regType("Regex", (*Regex)(nil), "Wraps the Go 'regexp.Regexp' type"),
+		Regex:         RegRefType("Regex", (*Regex)(nil), "Wraps the Go 'regexp.Regexp' type"),
 		String:        regType("String", (*String)(nil), "Wraps the Go 'string' type"),
 		Symbol:        regType("Symbol", (*Symbol)(nil), ""),
 		Type:          RegRefType("Type", (*Type)(nil), ""),
@@ -1342,35 +1342,35 @@ func (k Keyword) Call(args []Object) Object {
 	return getMap(k, args)
 }
 
-func MakeRegex(r *regexp.Regexp) Regex {
-	return Regex{R: r}
+func MakeRegex(r *regexp.Regexp) *Regex {
+	return &Regex{R: r}
 }
 
-func (rx Regex) ToString(escape bool) string {
+func (rx *Regex) ToString(escape bool) string {
 	if escape {
 		return "#\"" + rx.R.String() + "\""
 	}
 	return rx.R.String()
 }
 
-func (rx Regex) Print(w io.Writer, printReadably bool) {
+func (rx *Regex) Print(w io.Writer, printReadably bool) {
 	fmt.Fprint(w, rx.ToString(true))
 }
 
-func (rx Regex) Equals(other interface{}) bool {
+func (rx *Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case Regex:
+	case *Regex:
 		return rx.R == other.R
 	default:
 		return false
 	}
 }
 
-func (rx Regex) GetType() *Type {
+func (rx *Regex) GetType() *Type {
 	return TYPE.Regex
 }
 
-func (rx Regex) Hash() uint32 {
+func (rx *Regex) Hash() uint32 {
 	return HashPtr(uintptr(unsafe.Pointer(rx.R)))
 }
 
