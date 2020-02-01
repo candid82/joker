@@ -250,7 +250,7 @@ Note that `unused binding` and `unused parameter` warnings are suppressed for na
 
 ## Building
 
-Joker requires Go v1.12 or later.
+Joker requires Go v1.13 or later.
 Below commands should get you up and running.
 
 ```
