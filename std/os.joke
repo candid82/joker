@@ -15,6 +15,12 @@
    :go "setEnv(key, value)"}
   [^String key ^String value])
 
+(defn get-env
+  "Returns the value of the environment variable named by the key or nil if the variable is not present in the environment."
+  {:added "1.0"
+   :go "getEnv(key)"}
+  [^String key])
+
 (defn args
   "Returns a sequence of the command line arguments, starting with the program name (normally, joker)."
   {:added "1.0"

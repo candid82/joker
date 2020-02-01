@@ -157,6 +157,22 @@ func __exit_(_args []Object) Object {
 	return NIL
 }
 
+var get_env_ Proc
+
+func __get_env_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		key := ExtractString(_args, 0)
+		_res := getEnv(key)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var ls_ Proc
 
 func __ls_(_args []Object) Object {
@@ -324,6 +340,7 @@ func Init() {
 	exec_ = __exec_
 	isexists_ = __isexists_
 	exit_ = __exit_
+	get_env_ = __get_env_
 	ls_ = __ls_
 	mkdir_ = __mkdir_
 	open_ = __open_
@@ -396,6 +413,11 @@ func Init() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
 			`Causes the current program to exit with the given status code.`, "1.0"))
+
+	osNamespace.InternVar("get-env", get_env_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
+			`Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.`, "1.0"))
 
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(

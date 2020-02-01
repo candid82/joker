@@ -24,6 +24,13 @@ func setEnv(key string, value string) Object {
 	return NIL
 }
 
+func getEnv(key string) Object {
+	if v, ok := os.LookupEnv(key); ok {
+		return MakeString(v)
+	}
+	return NIL
+}
+
 func commandArgs() Object {
 	res := EmptyVector()
 	for _, arg := range os.Args {
