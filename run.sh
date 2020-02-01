@@ -2,6 +2,7 @@
 
 build() {
   go clean
+  rm -f core/a_*.go  # In case switching from a gen-code branch or similar (any existing files might break the build here)
   go generate ./...
   go vet ./...
   go build
