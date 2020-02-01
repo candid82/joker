@@ -74,6 +74,11 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
 			`Causes the current program to exit with the given status code.`, "1.0"))
 
+	osNamespace.InternVar("get-env", get_env_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
+			`Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.`, "1.0"))
+
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),

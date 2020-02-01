@@ -221,6 +221,9 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 	if strings.ContainsRune(*s.name, '.') {
 		return s
 	}
+	if s.ns == nil && TYPES[s.name] != nil {
+		return s
+	}
 	currentNs := env.CurrentNamespace()
 	if s.ns != nil {
 		ns := env.NamespaceFor(currentNs, s)

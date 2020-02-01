@@ -162,6 +162,23 @@ func __exit_(_args []Object) Object {
 	return NIL
 }
 
+var __get_env__P ProcFn = __get_env_
+var get_env_ Proc = Proc{Fn: __get_env__P, Name: "get_env_", Package: "std/os"}
+
+func __get_env_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		key := ExtractString(_args, 0)
+		_res := getEnv(key)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __ls__P ProcFn = __ls_
 var ls_ Proc = Proc{Fn: __ls__P, Name: "ls_", Package: "std/os"}
 
