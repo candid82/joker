@@ -52,11 +52,13 @@ var (
 	testNamespaceInfo         internalNamespaceInfo
 	setNamespaceInfo          internalNamespaceInfo
 	tools_cliNamespaceInfo    internalNamespaceInfo
+	hiccupNamespaceInfo       internalNamespaceInfo
 	linter_allNamespaceInfo   internalNamespaceInfo
 	linter_jokerNamespaceInfo internalNamespaceInfo
 	linter_cljxNamespaceInfo  internalNamespaceInfo
 	linter_cljNamespaceInfo   internalNamespaceInfo
 	linter_cljsNamespaceInfo  internalNamespaceInfo
+	better_condNamespaceInfo  internalNamespaceInfo
 )
 
 type (
@@ -1819,6 +1821,10 @@ var haveSetCoreNamespaces bool
 
 func ProcessCoreNamespaceInfo() {
 	processNamespaceInfo(&coreNamespaceInfo)
+	if !haveSetCoreNamespaces {
+		setCoreNamespaces()
+		haveSetCoreNamespaces = true
+	}
 }
 
 func ProcessReplNamespaceInfo() {
