@@ -478,7 +478,6 @@ func parseArgs(args []string) {
 		case "--debug=stdout":
 			debugOut = Stdout
 		case "--verbose":
-			Verbose = true
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				verbosity, err := strconv.ParseInt(args[i], 10, 64)
@@ -487,7 +486,6 @@ func parseArgs(args []string) {
 					return
 				}
 				if verbosity <= 0 {
-					Verbose = false
 					VerbosityLevel = 0
 				} else {
 					VerbosityLevel = int(verbosity)
@@ -694,7 +692,6 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
-	GLOBAL_ENV.SetVerbosity()
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)

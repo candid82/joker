@@ -65,7 +65,7 @@ func (ns *Namespace) Hash() uint32 {
 func (ns *Namespace) MaybeLazy(doc string) {
 	if ns.Lazy != nil {
 		ns.Lazy()
-		if Verbosity() > 0 {
+		if VerbosityLevel > 0 {
 			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s for %s\n", *ns.Name.name, doc)
 		}
 		ns.Lazy = nil

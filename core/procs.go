@@ -1642,6 +1642,11 @@ var procGo Proc = func(args []Object) Object {
 	return ch
 }
 
+var procVerbosityLevel Proc = func(args []Object) Object {
+	CheckArity(args, 0, 0)
+	return MakeInt(VerbosityLevel)
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
@@ -2237,4 +2242,5 @@ func init() {
 	intern("close!__", procCloseChan)
 
 	intern("go-spew__", procGoSpew)
+	intern("verbosity-level__", procVerbosityLevel)
 }

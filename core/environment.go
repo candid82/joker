@@ -12,7 +12,6 @@ var (
 	Stdin          io.Reader = os.Stdin
 	Stdout         io.Writer = os.Stdout
 	Stderr         io.Writer = os.Stderr
-	Verbose                  = false
 	VerbosityLevel           = 0
 )
 
@@ -72,18 +71,6 @@ func (env *Env) SetClassPath(cp string) {
 		cpVec = cpVec.Conjoin(MakeString(""))
 	}
 	env.classPath.Value = cpVec
-}
-
-func (env *Env) SetVerbosity() {
-	env.verbose.Value = Boolean{B: Verbose}
-	env.verbosity.Value = Int{I: VerbosityLevel}
-}
-
-func Verbosity() int {
-	if Verbose {
-		return VerbosityLevel
-	}
-	return 0
 }
 
 /* Called by parse.go in an outer var block, this runs before func main(). */
