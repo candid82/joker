@@ -27,8 +27,6 @@ type (
 		MainFile      *Var
 		args          *Var
 		classPath     *Var
-		verbose       *Var
-		verbosity     *Var
 		ns            *Var
 		NS_VAR        *Var
 		IN_NS_VAR     *Var
@@ -111,12 +109,6 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
-	res.verbose = res.CoreNamespace.Intern(MakeSymbol("*verbose*"))
-	res.verbose.Value = Boolean{B: false}
-	res.verbose.isPrivate = true
-	res.verbosity = res.CoreNamespace.Intern(MakeSymbol("*verbosity-level*"))
-	res.verbosity.Value = Int{I: 0}
-	res.verbosity.isPrivate = true
 	return res
 }
 
