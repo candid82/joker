@@ -186,14 +186,14 @@ func main() {
 
 	// Emit the "global" (static) Joker variables.
 
-	genEnv.emitVar("STR", STR)
-	genEnv.emitVar("STRINGS", STRINGS)
-	genEnv.emitVar("SYMBOLS", SYMBOLS)
-	genEnv.emitVar("SPECIAL_SYMBOLS", SPECIAL_SYMBOLS)
-	genEnv.emitVar("KEYWORDS", KEYWORDS)
-	genEnv.emitVar("TYPE", TYPE)
-	genEnv.emitVar("TYPES", TYPES)
-	genEnv.emitVar("GLOBAL_ENV", GLOBAL_ENV)
+	genEnv.emitVar("STR", false, STR)
+	genEnv.emitVar("STRINGS", false, STRINGS)
+	genEnv.emitVar("SYMBOLS", false, SYMBOLS)
+	genEnv.emitVar("SPECIAL_SYMBOLS", false, SPECIAL_SYMBOLS)
+	genEnv.emitVar("KEYWORDS", false, KEYWORDS)
+	genEnv.emitVar("TYPE", false, TYPE)
+	genEnv.emitVar("TYPES", false, TYPES)
+	genEnv.emitVar("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
 
 	// Emit the per-namespace files (a_*_code.go).
 
@@ -347,7 +347,7 @@ import (
 
 }
 
-func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
+func (genEnv *GenEnv) emitVar(name string, atRuntime bool, obj interface{}) {
 	if _, found := genEnv.Generated[name]; found {
 		return // panic(fmt.Sprintf("already generated %s", name))
 	}
@@ -396,9 +396,18 @@ func (genEnv *GenEnv) emitVar(name string, obj interface{}) {
 		}
 	}
 
-	*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+	if atRuntime {
+		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+var %s %s`[1:],
+			name, coreTypeName(v)))
+		*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
+	%s = %s`[1:],
+			name, genEnv.emitValue(name, reflect.TypeOf(nil), v)))
+	} else {
+		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-		name, coreTypeName(v), genEnv.emitValue(name, reflect.TypeOf(nil), v)))
+			name, coreTypeName(v), genEnv.emitValue(name, reflect.TypeOf(nil), v)))
+	}
 	genEnv.Generated[name] = obj
 }
 
@@ -644,7 +653,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 				}
 			}
 			genEnv.Generated[v] = name
-			genEnv.emitVar(name, obj)
+			genEnv.emitVar(name, false, obj)
 			return "&" + name
 		}
 		name := thing.(string)
