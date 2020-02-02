@@ -83,6 +83,10 @@ var files []FileInfo = []FileInfo{
 		filename: "hiccup.joke",
 	},
 	{
+		name:     "<joker.pprint>",
+		filename: "pprint.joke",
+	},
+	{
 		name:     "<joker.better-cond>",
 		filename: "better_cond.joke",
 	},

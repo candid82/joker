@@ -36,6 +36,7 @@ var (
 	linter_cljData   []byte
 	linter_cljsData  []byte
 	hiccupData       []byte
+	pprintData       []byte
 	better_condData  []byte
 )
 
@@ -75,6 +76,7 @@ func InitInternalLibs() {
 		"joker.set":         setData,
 		"joker.tools.cli":   tools_cliData,
 		"joker.hiccup":      hiccupData,
+		"joker.pprint":      pprintData,
 		"joker.better-cond": better_condData,
 	}
 }
