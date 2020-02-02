@@ -3222,11 +3222,19 @@
      (when-not (bound? v#)
        (def ~name ~expr))))
 
+(defonce ^:dynamic
+  ^{:private true
+    :doc "True while a verbose load is pending"}
+  *loading-verbosely* false)
+
 (defn in-ns
   "Sets *ns* to the namespace named by the symbol, creating it if needed."
   {:added "1.0"}
   ^Namespace [^Symbol name]
-  (var-set #'joker.core/*ns* (joker.core/create-ns name)))
+  (let [new-ns (joker.core/create-ns name)]
+    (when *loading-verbosely*
+      (printf "joker.core/in-ns: changing from %s to %s\n" joker.core/*ns* new-ns) (flush))
+    (var-set #'joker.core/*ns* new-ns)))
 
 (defonce ^:dynamic
   ^{:private true
@@ -3245,11 +3253,6 @@
   ^{:private true
     :doc "A stack of paths currently being loaded"}
   *pending-paths* ())
-
-(defonce ^:dynamic
-  ^{:private true
-    :doc "True while a verbose load is pending"}
-  *loading-verbosely* false)
 
 (defonce ^:dynamic
   ^{:private true
@@ -3546,7 +3549,7 @@
   (doseq [^Symbol lib libs]
     (let [^String path (lib-path__ lib)]
       (when *loading-verbosely*
-        (printf "(joker.core/load \"%s\")\n" path))
+        (printf "(joker.core/load %s from \"%s\")\n" lib path))
       (check-cyclic-dependency path lib)
       (when-not (= path (first *pending-paths*))
         (binding [*pending-paths* (conj *pending-paths* path)
@@ -4564,3 +4567,9 @@
    (go-spew__ o))
   (^Boolean [o ^Map cfg]
    (go-spew__ o cfg)))
+
+(defn- verbosity-level
+  "Verbosity level as specified via the --verbose option to Joker."
+  {:added "1.0"}
+  []
+  (verbosity-level__))

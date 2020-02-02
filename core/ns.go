@@ -62,6 +62,16 @@ func (ns *Namespace) Hash() uint32 {
 	return ns.hash
 }
 
+func (ns *Namespace) MaybeLazy(doc string) {
+	if ns.Lazy != nil {
+		ns.Lazy()
+		if VerbosityLevel > 0 {
+			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s for %s\n", *ns.Name.name, doc)
+		}
+		ns.Lazy = nil
+	}
+}
+
 const nsHashMask uint32 = 0x90569f6f
 
 func NewNamespace(sym Symbol) *Namespace {

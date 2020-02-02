@@ -440,6 +440,16 @@ func notOption(arg string) bool {
 }
 
 func parseArgs(args []string) {
+	if len(args) > 1 {
+		// peek to see if the first arg is "--debug*"
+		switch args[1] {
+		case "--debug", "--debug=stderr":
+			debugOut = Stderr
+		case "--debug=stdout":
+			debugOut = Stdout
+		}
+	}
+
 	length := len(args)
 	stop := false
 	missing := false
@@ -468,7 +478,21 @@ func parseArgs(args []string) {
 		case "--debug=stdout":
 			debugOut = Stdout
 		case "--verbose":
-			Verbose = true
+			if i < length-1 && notOption(args[i+1]) {
+				i += 1 // shift
+				verbosity, err := strconv.ParseInt(args[i], 10, 64)
+				if err != nil {
+					fmt.Fprintln(Stderr, "Error: ", err)
+					return
+				}
+				if verbosity <= 0 {
+					VerbosityLevel = 0
+				} else {
+					VerbosityLevel = int(verbosity)
+				}
+			} else {
+				VerbosityLevel++
+			}
 		case "--help", "-h":
 			helpFlag = true
 			return // don't bother parsing anything else
@@ -651,28 +675,20 @@ var runningProfile interface {
 }
 
 func main() {
-	RT.GIL.Lock()
-	InitInternalLibs()
-	ProcessCoreData()
-
 	SetExitJoker(func(code int) {
 		finish()
 		os.Exit(code)
 	})
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
-	if len(os.Args) > 1 {
-		// peek to see if the first arg is "--debug*"
-		switch os.Args[1] {
-		case "--debug", "--debug=stderr":
-			debugOut = Stderr
-		case "--debug=stdout":
-			debugOut = Stdout
-		}
-	}
+	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
 
-	parseArgs(os.Args)
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
+
+	RT.GIL.Lock()
+	InitInternalLibs()
+	ProcessCoreData()
+
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)

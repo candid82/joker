@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,10 +9,10 @@ import (
 )
 
 var (
-	Stdin   io.Reader = os.Stdin
-	Stdout  io.Writer = os.Stdout
-	Stderr  io.Writer = os.Stderr
-	Verbose           = false
+	Stdin          io.Reader = os.Stdin
+	Stdout         io.Writer = os.Stdout
+	Stderr         io.Writer = os.Stderr
+	VerbosityLevel           = 0
 )
 
 type (
@@ -72,6 +71,7 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
+/* Called by parse.go in an outer var block, this runs before func main(). */
 func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -154,12 +154,8 @@ func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 			res = env.Namespaces[s.ns]
 		}
 	}
-	if res != nil && res.Lazy != nil {
-		res.Lazy()
-		if Verbose {
-			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s\n", *res.Name.name)
-		}
-		res.Lazy = nil
+	if res != nil {
+		res.MaybeLazy("NamespaceFor")
 	}
 	return res
 }
@@ -190,12 +186,8 @@ func (env *Env) FindNamespace(s Symbol) *Namespace {
 		return nil
 	}
 	ns := env.Namespaces[s.name]
-	if ns != nil && ns.Lazy != nil {
-		ns.Lazy()
-		if Verbose {
-			fmt.Fprintf(Stderr, "FindNameSpace: Lazily initialized %s\n", *ns.Name.name)
-		}
-		ns.Lazy = nil
+	if ns != nil {
+		ns.MaybeLazy("FindNameSpace")
 	}
 	return ns
 }
