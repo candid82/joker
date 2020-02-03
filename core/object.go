@@ -858,9 +858,9 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	pkg := ""
-	if p.Package != "" {
-		pkg = p.Package + "."
+	pkg := p.Package
+	if pkg != "" {
+		pkg += "."
 	}
 	return fmt.Sprintf("#object[Proc:%s%s]", pkg, p.Name)
 }
