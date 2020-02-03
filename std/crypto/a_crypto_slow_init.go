@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of crypto.InternsOrThunks().")
 	}
 	cryptoNamespace.ResetMeta(MakeMeta(nil, `Implements common cryptographic and hash functions.`, "1.0"))

@@ -11,7 +11,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running fast version of html.InternsOrThunks().")
 	}
 	STD_thunk_html_escape__var = __escape_

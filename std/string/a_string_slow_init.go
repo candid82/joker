@@ -11,7 +11,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of string.InternsOrThunks().")
 	}
 	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))

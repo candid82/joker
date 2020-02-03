@@ -3854,33 +3854,6 @@
   Defaults to true"
   {:added "1.0"})
 
-(add-doc-and-meta *verbose*
-  "Whether --verbose (or equivalent) was specified by the Joker invocation.
-
-  Note: changing this (via e.g. var-set) affects only running Joker code; it
-  does not change the value used by the Go code that implements Joker. If
-  needed, it's probably better to add a set-verbose function that changes
-  both, rather than changing Joker's internals so this variable is always checked."
-  {:added "1.0"})
-
-(add-doc-and-meta *verbosity-level*
-  "Verbosity level as (initially) specified by the Joker invocation.
-
-  Note: changing this (via e.g. var-set) affects only running Joker code; it
-  does not change the value used by the Go code that implements Joker. If
-  needed, it's probably better to add a set-verbosity-level function that
-  changes both, rather than changing Joker's internals so this variable is
-  always checked."
-  {:added "1.0"})
-
-(defn- verbosity
-  "Verbosity level in effect; 0 if verbosity disabled."
-  {:added "1.0"}
-  []
-  (if *verbose*
-    *verbosity-level*
-    0))
-
 (defmacro letfn
   "fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)
 
@@ -4600,3 +4573,9 @@
    (go-spew__ o))
   (^Boolean [o ^Map cfg]
    (go-spew__ o cfg)))
+
+(defn- verbosity-level
+  "Verbosity level as specified via the --verbose option to Joker."
+  {:added "1.0"}
+  []
+  (verbosity-level__))

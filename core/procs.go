@@ -36,12 +36,13 @@ var (
 	testNamespaceInfo         internalNamespaceInfo
 	setNamespaceInfo          internalNamespaceInfo
 	tools_cliNamespaceInfo    internalNamespaceInfo
-	hiccupNamespaceInfo       internalNamespaceInfo
 	linter_allNamespaceInfo   internalNamespaceInfo
 	linter_jokerNamespaceInfo internalNamespaceInfo
 	linter_cljxNamespaceInfo  internalNamespaceInfo
 	linter_cljNamespaceInfo   internalNamespaceInfo
 	linter_cljsNamespaceInfo  internalNamespaceInfo
+	hiccupNamespaceInfo       internalNamespaceInfo
+	pprintNamespaceInfo       internalNamespaceInfo
 	better_condNamespaceInfo  internalNamespaceInfo
 )
 
@@ -108,6 +109,10 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 		Filename: "hiccup.joke",
 	},
 	{
+		Name:     "<joker.pprint>",
+		Filename: "pprint.joke",
+	},
+	{
 		Name:     "<joker.better-cond>",
 		Filename: "better_cond.joke",
 	},
@@ -157,6 +162,7 @@ func InitInternalLibs() {
 		"joker.set":         &setNamespaceInfo,
 		"joker.tools.cli":   &tools_cliNamespaceInfo,
 		"joker.hiccup":      &hiccupNamespaceInfo,
+		"joker.pprint":      &pprintNamespaceInfo,
 		"joker.better-cond": &better_condNamespaceInfo,
 	}
 	for _, f := range CoreSourceFiles {
@@ -1732,6 +1738,11 @@ var procGo ProcFn = func(args []Object) Object {
 	return ch
 }
 
+var procVerbosityLevel = func(args []Object) Object {
+	CheckArity(args, 0, 0)
+	return MakeInt(VerbosityLevel)
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
@@ -1799,7 +1810,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == READ {
 			continue
 		}
-		if Verbosity() > 2 {
+		if VerbosityLevel > 2 {
 			fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYPARSE:")
 			SpewThis(obj)
 		}
@@ -1811,7 +1822,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if phase == PARSE {
 			continue
 		}
-		if Verbosity() > 2 {
+		if VerbosityLevel > 2 {
 			fmt.Fprintln(Stderr, "\nprocs.go/ProcessReader: TRYEVAL:")
 			SpewThis(expr)
 		}
@@ -1854,7 +1865,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 }
 
 func finalizeNamespace() {
-	if Verbosity() < 1 {
+	if VerbosityLevel < 1 {
 		return
 	}
 	ns := GLOBAL_ENV.CurrentNamespace()
@@ -1869,7 +1880,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
 	}
 	if info.init != nil {
-		if Verbosity() > 0 {
+		if VerbosityLevel > 0 {
 			fmt.Fprintf(Stderr, "processNamespaceinfo: Running init() for %s\n", name)
 		}
 		info.init()
@@ -1877,7 +1888,7 @@ func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed b
 		processed = true
 	}
 	if info.data != nil {
-		if Verbosity() > 0 {
+		if VerbosityLevel > 0 {
 			fmt.Fprintf(Stderr, "processNamespaceinfo: Evaluating code for %s\n", name)
 		}
 		header, p := UnpackHeader(info.data, GLOBAL_ENV)
@@ -1901,16 +1912,16 @@ func setCoreNamespaces() {
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
-	if Verbosity() > 1 {
+	if VerbosityLevel > 1 {
 		fmt.Fprintln(Stderr, "setCoreNamespaces() of:")
 		SpewThis(vr)
 	}
 	for _, ns := range coreNamespaces {
-		if Verbosity() > 1 {
+		if VerbosityLevel > 1 {
 			fmt.Fprintf(Stderr, "ns: %+v\n", ns)
 		}
 		sym := MakeSymbol(ns)
-		if Verbosity() > 1 {
+		if VerbosityLevel > 1 {
 			fmt.Fprintf(Stderr, "\tsym: %s\n", sym.Name())
 		}
 		set = set.Conj(sym).(*MapSet)

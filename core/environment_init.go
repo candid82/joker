@@ -45,11 +45,5 @@ func NewEnv() (env *Env) {
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	env.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
-	env.verbose = env.CoreNamespace.Intern(MakeSymbol("*verbose*"))
-	env.verbose.Value = Boolean{B: false}
-	env.verbose.isPrivate = true
-	env.verbosity = env.CoreNamespace.Intern(MakeSymbol("*verbosity-level*"))
-	env.verbosity.Value = Int{I: 0}
-	env.verbosity.isPrivate = true
 	return
 }

@@ -44,7 +44,6 @@ func parseArgs(args []string) {
 	for i = 1; i < length; i++ { // shift
 		switch args[i] {
 		case "--verbose":
-			Verbose = true
 			VerbosityLevel++
 		default:
 			if strings.HasPrefix(args[i], "-") {
@@ -128,10 +127,10 @@ func init() {
 	dataContent := strings.Replace(dataTemplate, "{coreNamespaces}", strings.Join(coreNamespaces, "\n"), 1)
 	ioutil.WriteFile("a_data.go", []byte(dataContent), 0666)
 
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "gen_data:main(): After loading source files:")
 		fmt.Fprintf(os.Stderr, "Namespaces=%s\n", namespaces)
-		if Verbosity() > 1 {
+		if VerbosityLevel > 1 {
 			Spew()
 		}
 	}

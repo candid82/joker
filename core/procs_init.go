@@ -189,6 +189,7 @@ func init() {
 	intern("close!__", procCloseChan, "procCloseChan")
 
 	intern("go-spew__", procGoSpew, "procGoSpew")
+	intern("verbosity-level__", procVerbosityLevel, "procVerbosityLevel")
 }
 
 func lateInitializations() {

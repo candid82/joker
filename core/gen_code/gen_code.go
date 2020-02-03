@@ -83,7 +83,6 @@ func parseArgs(args []string) {
 	for i = 1; i < length; i++ { // shift
 		switch args[i] {
 		case "--verbose":
-			Verbose = true
 			VerbosityLevel++
 		default:
 			if strings.HasPrefix(args[i], "-") {
@@ -124,11 +123,11 @@ func main() {
 			if _, exists := coreNamespaces[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
-			if Verbosity() > 0 {
+			if VerbosityLevel > 0 {
 				fmt.Printf("FOUND ns=%s file=%s mappings=%d\n", nsName, f.Filename, len(ns.Mappings()))
 			}
 		} else {
-			if Verbosity() > 0 {
+			if VerbosityLevel > 0 {
 				fmt.Printf("READING ns=%s file=%s\n", nsName, f.Filename)
 			}
 		}
@@ -139,12 +138,12 @@ func main() {
 		ProcessCoreSourceFileFor(f.Name)
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
-		if Verbosity() > 0 {
+		if VerbosityLevel > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
 	}
 
-	if Verbosity() > 1 {
+	if VerbosityLevel > 1 {
 		fmt.Fprintln(Stderr, "gen_code:main(): After loading source files:")
 		Spew()
 	}
@@ -222,7 +221,7 @@ func init() {
 		GLOBAL_ENV.SetCurrentNamespace(ns)
 
 		if _, found := coreNamespaces[nsName]; !found {
-			if Verbosity() > 0 {
+			if VerbosityLevel > 0 {
 				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
 			continue
@@ -233,7 +232,7 @@ func init() {
 		goname := NameAsGo(nsName)
 		codeFile := fmt.Sprintf(codePattern, name)
 
-		if Verbosity() > 0 {
+		if VerbosityLevel > 0 {
 			fmt.Printf("OUTPUTTING %s as %s (mappings=%d)\n", nsName, codeFile, len(ns.Mappings()))
 		}
 
@@ -245,7 +244,7 @@ func init() {
 				if filename == "" {
 					filename = "<std>"
 				}
-				if Verbosity() > 0 {
+				if VerbosityLevel > 0 {
 					fmt.Printf("  REQUIRES: %s from %s\n", rqNsName, filename)
 				}
 				runtime = append(runtime, fmt.Sprintf(`
@@ -298,7 +297,7 @@ func %sInit() {
 
 	/* Output the master file (a_code.go). */
 
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Printf("OUTPUTTING %s\n", masterFile)
 	}
 
@@ -520,14 +519,14 @@ func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) 
 			return genEnv.emitProc(target, obj)
 		case Namespace:
 			nsName := obj.Name.Name()
-			if Verbosity() > 0 {
+			if VerbosityLevel > 0 {
 				fmt.Printf("COMPILING %s\n", nsName)
 			}
 			lateInit := genEnv.LateInit
 			genEnv.LateInit = nsName != "joker.core"
 			defer func() {
 				genEnv.LateInit = lateInit
-				if Verbosity() > 0 {
+				if VerbosityLevel > 0 {
 					fmt.Printf("FINISHED %s\n", nsName)
 				}
 			}()

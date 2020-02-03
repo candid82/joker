@@ -9,7 +9,7 @@ import (
 )
 
 func InternsOrThunks() {
-	if Verbosity() > 0 {
+	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of strconv.InternsOrThunks().")
 	}
 	strconvNamespace.ResetMeta(MakeMeta(nil, `Implements conversions to and from string representations of basic data types.`, "1.0"))

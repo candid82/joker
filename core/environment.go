@@ -12,7 +12,6 @@ var (
 	Stdin          io.Reader = os.Stdin
 	Stdout         io.Writer = os.Stdout
 	Stderr         io.Writer = os.Stderr
-	Verbose                  = false
 	VerbosityLevel           = 0
 )
 
@@ -28,8 +27,6 @@ type (
 		MainFile      *Var
 		args          *Var
 		classPath     *Var
-		verbose       *Var
-		verbosity     *Var
 		ns            *Var
 		NS_VAR        *Var
 		IN_NS_VAR     *Var
@@ -78,21 +75,6 @@ func (env *Env) SetClassPath(cp string) {
 		cpVec = cpVec.Conjoin(MakeString(""))
 	}
 	env.classPath.Value = cpVec
-}
-
-/* This runs after invariant initialization, which includes calling
-   NewEnv().  NOTE: Any changes to the list of run-time
-   initializations must be reflected in gen_code/gen_code.go.  */
-func (env *Env) SetVerbosity() {
-	env.verbose.Value = Boolean{B: Verbose}
-	env.verbosity.Value = Int{I: VerbosityLevel}
-}
-
-func Verbosity() int {
-	if Verbose {
-		return VerbosityLevel
-	}
-	return 0
 }
 
 /* This runs after invariant initialization, which includes calling

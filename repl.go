@@ -13,7 +13,7 @@ import (
 )
 
 func repl(phase Phase) {
-	if Verbosity() > 1 {
+	if VerbosityLevel > 1 {
 		Spew()
 	}
 	ProcessReplNamespaceInfo()
