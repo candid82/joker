@@ -6,19 +6,14 @@ import (
 	{imports}
 )
 
-var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.{nsFullName}"))
-
 {non-fn-decls}
-
 {fn-decls}
 func Init() {
 {non-fn-inits}
-
-	{nsName}Namespace.ResetMeta(MakeMeta(nil, {nsDocstring}, "1.0"))
-
-	{non-fn-interns}
-	{fn-interns}
+	InternsOrThunks()
 }
+
+var {nsName}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.{nsFullName}"))
 
 func init() {
 	{nsName}Namespace.Lazy = Init
