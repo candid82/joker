@@ -17,7 +17,6 @@ func intern(name string, proc ProcFn, procName string) {
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 	GLOBAL_ENV.CoreNamespace.InternVar("*assert*", Boolean{B: true},
 		MakeMeta(nil, "When set to logical false, assert is a noop. Defaults to true.", "1.0"))
 

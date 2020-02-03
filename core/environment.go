@@ -241,5 +241,5 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 }
 
 func init() {
-	GLOBAL_ENV.ns.Value = GLOBAL_ENV.EnsureNamespace(MakeSymbol("user"))
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.EnsureNamespace(MakeSymbol("user")))
 }
