@@ -127,6 +127,7 @@
         arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
                    (rpl "{goName}" go-fn-name)
+                   (rpl "{pkg}" ns-name)
                    (rpl "{fnName}" (str k))
                    (rpl "{arities}" arities))
         intern-str (-> intern-template

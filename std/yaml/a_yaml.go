@@ -11,7 +11,7 @@ var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
 
 
 var __read_string__P ProcFn = __read_string_
-var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_"}
+var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/yaml"}
 
 func __read_string_(_args []Object) Object {
 	_c := len(_args)
@@ -28,7 +28,7 @@ func __read_string_(_args []Object) Object {
 }
 
 var __write_string__P ProcFn = __write_string_
-var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_"}
+var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_", Package: "std/yaml"}
 
 func __write_string_(_args []Object) Object {
 	_c := len(_args)

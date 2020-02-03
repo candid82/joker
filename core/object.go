@@ -149,8 +149,9 @@ type (
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {
-		Fn   ProcFn
-		Name string
+		Fn      ProcFn
+		Name    string
+		Package string // "' for core (this package), else e.g. "std/string"
 	}
 	Fn struct {
 		InfoHolder
@@ -857,7 +858,11 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return fmt.Sprintf("#object[Proc:%s]", p.Name)
+	pkg := ""
+	if p.Package != "" {
+		pkg = p.Package + "."
+	}
+	return fmt.Sprintf("#object[Proc:%s%s]", pkg, p.Name)
 }
 
 func (p Proc) Equals(other interface{}) bool {
