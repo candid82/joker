@@ -314,7 +314,6 @@ func Init() {
 	list_separator_ = MakeString(string(filepath.ListSeparator))
 	separator_ = MakeString(string(filepath.Separator))
 
-
 	filepathNamespace.ResetMeta(MakeMeta(nil, `Implements utility routines for manipulating filename paths.`, "1.0"))
 
 	filepathNamespace.InternVar("list-separator", list_separator_,

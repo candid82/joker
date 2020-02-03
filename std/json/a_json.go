@@ -53,7 +53,6 @@ func __write_string_(_args []Object) Object {
 func Init() {
 
 
-
 	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
 
 	

@@ -50,7 +50,6 @@ func __encode_string_(_args []Object) Object {
 func Init() {
 
 
-
 	hexNamespace.ResetMeta(MakeMeta(nil, `Implements hexadecimal encoding and decoding.`, "1.0"))
 
 	

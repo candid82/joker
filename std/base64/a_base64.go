@@ -47,7 +47,6 @@ func __encode_string_(_args []Object) Object {
 func Init() {
 
 
-
 	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
 
 	

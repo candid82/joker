@@ -48,7 +48,6 @@ func __unescape_(_args []Object) Object {
 func Init() {
 
 
-
 	htmlNamespace.ResetMeta(MakeMeta(nil, `Provides functions for escaping and unescaping HTML text.`, "1.0"))
 
 	

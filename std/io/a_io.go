@@ -34,7 +34,6 @@ func __copy_(_args []Object) Object {
 func Init() {
 
 
-
 	ioNamespace.ResetMeta(MakeMeta(nil, `Provides basic interfaces to I/O primitives.`, "1.0"))
 
 	

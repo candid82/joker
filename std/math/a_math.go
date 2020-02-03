@@ -553,7 +553,6 @@ func Init() {
 	sqrt_of_phi_ = MakeDouble(math.SqrtPhi)
 	sqrt_of_pi_ = MakeDouble(math.SqrtPi)
 
-
 	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))
 
 	mathNamespace.InternVar("e", e_,

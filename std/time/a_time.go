@@ -375,7 +375,6 @@ func Init() {
 	stamp_nano_ = MakeString(time.StampNano)
 	unix_date_ = MakeString(time.UnixDate)
 
-
 	timeNamespace.ResetMeta(MakeMeta(nil, `Provides functionality for measuring and displaying time.`, "1.0"))
 
 	timeNamespace.InternVar("ansi-c", ansi_c_,

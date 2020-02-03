@@ -483,7 +483,6 @@ func __upper_case_(_args []Object) Object {
 func Init() {
 
 
-
 	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))
 
 	

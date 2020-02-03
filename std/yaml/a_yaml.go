@@ -47,7 +47,6 @@ func __write_string_(_args []Object) Object {
 func Init() {
 
 
-
 	yamlNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of YAML.`, "1.0"))
 
 	
