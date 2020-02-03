@@ -13,7 +13,8 @@ var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
 
 
 
-var isblank_ Proc
+var __isblank__P ProcFn = __isblank_
+var isblank_ Proc = Proc{Fn: __isblank__P, Name: "isblank_"}
 
 func __isblank_(_args []Object) Object {
 	_c := len(_args)
@@ -29,7 +30,8 @@ func __isblank_(_args []Object) Object {
 	return NIL
 }
 
-var capitalize_ Proc
+var __capitalize__P ProcFn = __capitalize_
+var capitalize_ Proc = Proc{Fn: __capitalize__P, Name: "capitalize_"}
 
 func __capitalize_(_args []Object) Object {
 	_c := len(_args)
@@ -45,7 +47,8 @@ func __capitalize_(_args []Object) Object {
 	return NIL
 }
 
-var isends_with_ Proc
+var __isends_with__P ProcFn = __isends_with_
+var isends_with_ Proc = Proc{Fn: __isends_with__P, Name: "isends_with_"}
 
 func __isends_with_(_args []Object) Object {
 	_c := len(_args)
@@ -62,7 +65,8 @@ func __isends_with_(_args []Object) Object {
 	return NIL
 }
 
-var escape_ Proc
+var __escape__P ProcFn = __escape_
+var escape_ Proc = Proc{Fn: __escape__P, Name: "escape_"}
 
 func __escape_(_args []Object) Object {
 	_c := len(_args)
@@ -79,7 +83,8 @@ func __escape_(_args []Object) Object {
 	return NIL
 }
 
-var isincludes_ Proc
+var __isincludes__P ProcFn = __isincludes_
+var isincludes_ Proc = Proc{Fn: __isincludes__P, Name: "isincludes_"}
 
 func __isincludes_(_args []Object) Object {
 	_c := len(_args)
@@ -96,7 +101,8 @@ func __isincludes_(_args []Object) Object {
 	return NIL
 }
 
-var index_of_ Proc
+var __index_of__P ProcFn = __index_of_
+var index_of_ Proc = Proc{Fn: __index_of__P, Name: "index_of_"}
 
 func __index_of_(_args []Object) Object {
 	_c := len(_args)
@@ -120,7 +126,8 @@ func __index_of_(_args []Object) Object {
 	return NIL
 }
 
-var join_ Proc
+var __join__P ProcFn = __join_
+var join_ Proc = Proc{Fn: __join__P, Name: "join_"}
 
 func __join_(_args []Object) Object {
 	_c := len(_args)
@@ -142,7 +149,8 @@ func __join_(_args []Object) Object {
 	return NIL
 }
 
-var last_index_of_ Proc
+var __last_index_of__P ProcFn = __last_index_of_
+var last_index_of_ Proc = Proc{Fn: __last_index_of__P, Name: "last_index_of_"}
 
 func __last_index_of_(_args []Object) Object {
 	_c := len(_args)
@@ -166,7 +174,8 @@ func __last_index_of_(_args []Object) Object {
 	return NIL
 }
 
-var lower_case_ Proc
+var __lower_case__P ProcFn = __lower_case_
+var lower_case_ Proc = Proc{Fn: __lower_case__P, Name: "lower_case_"}
 
 func __lower_case_(_args []Object) Object {
 	_c := len(_args)
@@ -182,7 +191,8 @@ func __lower_case_(_args []Object) Object {
 	return NIL
 }
 
-var pad_left_ Proc
+var __pad_left__P ProcFn = __pad_left_
+var pad_left_ Proc = Proc{Fn: __pad_left__P, Name: "pad_left_"}
 
 func __pad_left_(_args []Object) Object {
 	_c := len(_args)
@@ -200,7 +210,8 @@ func __pad_left_(_args []Object) Object {
 	return NIL
 }
 
-var pad_right_ Proc
+var __pad_right__P ProcFn = __pad_right_
+var pad_right_ Proc = Proc{Fn: __pad_right__P, Name: "pad_right_"}
 
 func __pad_right_(_args []Object) Object {
 	_c := len(_args)
@@ -218,7 +229,8 @@ func __pad_right_(_args []Object) Object {
 	return NIL
 }
 
-var re_quote_ Proc
+var __re_quote__P ProcFn = __re_quote_
+var re_quote_ Proc = Proc{Fn: __re_quote__P, Name: "re_quote_"}
 
 func __re_quote_(_args []Object) Object {
 	_c := len(_args)
@@ -234,7 +246,8 @@ func __re_quote_(_args []Object) Object {
 	return NIL
 }
 
-var replace_ Proc
+var __replace__P ProcFn = __replace_
+var replace_ Proc = Proc{Fn: __replace__P, Name: "replace_"}
 
 func __replace_(_args []Object) Object {
 	_c := len(_args)
@@ -252,7 +265,8 @@ func __replace_(_args []Object) Object {
 	return NIL
 }
 
-var replace_first_ Proc
+var __replace_first__P ProcFn = __replace_first_
+var replace_first_ Proc = Proc{Fn: __replace_first__P, Name: "replace_first_"}
 
 func __replace_first_(_args []Object) Object {
 	_c := len(_args)
@@ -270,7 +284,8 @@ func __replace_first_(_args []Object) Object {
 	return NIL
 }
 
-var reverse_ Proc
+var __reverse__P ProcFn = __reverse_
+var reverse_ Proc = Proc{Fn: __reverse__P, Name: "reverse_"}
 
 func __reverse_(_args []Object) Object {
 	_c := len(_args)
@@ -286,7 +301,8 @@ func __reverse_(_args []Object) Object {
 	return NIL
 }
 
-var split_ Proc
+var __split__P ProcFn = __split_
+var split_ Proc = Proc{Fn: __split__P, Name: "split_"}
 
 func __split_(_args []Object) Object {
 	_c := len(_args)
@@ -310,7 +326,8 @@ func __split_(_args []Object) Object {
 	return NIL
 }
 
-var split_lines_ Proc
+var __split_lines__P ProcFn = __split_lines_
+var split_lines_ Proc = Proc{Fn: __split_lines__P, Name: "split_lines_"}
 
 func __split_lines_(_args []Object) Object {
 	_c := len(_args)
@@ -326,7 +343,8 @@ func __split_lines_(_args []Object) Object {
 	return NIL
 }
 
-var isstarts_with_ Proc
+var __isstarts_with__P ProcFn = __isstarts_with_
+var isstarts_with_ Proc = Proc{Fn: __isstarts_with__P, Name: "isstarts_with_"}
 
 func __isstarts_with_(_args []Object) Object {
 	_c := len(_args)
@@ -343,7 +361,8 @@ func __isstarts_with_(_args []Object) Object {
 	return NIL
 }
 
-var trim_ Proc
+var __trim__P ProcFn = __trim_
+var trim_ Proc = Proc{Fn: __trim__P, Name: "trim_"}
 
 func __trim_(_args []Object) Object {
 	_c := len(_args)
@@ -359,7 +378,8 @@ func __trim_(_args []Object) Object {
 	return NIL
 }
 
-var trim_left_ Proc
+var __trim_left__P ProcFn = __trim_left_
+var trim_left_ Proc = Proc{Fn: __trim_left__P, Name: "trim_left_"}
 
 func __trim_left_(_args []Object) Object {
 	_c := len(_args)
@@ -375,7 +395,8 @@ func __trim_left_(_args []Object) Object {
 	return NIL
 }
 
-var trim_newline_ Proc
+var __trim_newline__P ProcFn = __trim_newline_
+var trim_newline_ Proc = Proc{Fn: __trim_newline__P, Name: "trim_newline_"}
 
 func __trim_newline_(_args []Object) Object {
 	_c := len(_args)
@@ -391,7 +412,8 @@ func __trim_newline_(_args []Object) Object {
 	return NIL
 }
 
-var trim_right_ Proc
+var __trim_right__P ProcFn = __trim_right_
+var trim_right_ Proc = Proc{Fn: __trim_right__P, Name: "trim_right_"}
 
 func __trim_right_(_args []Object) Object {
 	_c := len(_args)
@@ -407,7 +429,8 @@ func __trim_right_(_args []Object) Object {
 	return NIL
 }
 
-var triml_ Proc
+var __triml__P ProcFn = __triml_
+var triml_ Proc = Proc{Fn: __triml__P, Name: "triml_"}
 
 func __triml_(_args []Object) Object {
 	_c := len(_args)
@@ -423,7 +446,8 @@ func __triml_(_args []Object) Object {
 	return NIL
 }
 
-var trimr_ Proc
+var __trimr__P ProcFn = __trimr_
+var trimr_ Proc = Proc{Fn: __trimr__P, Name: "trimr_"}
 
 func __trimr_(_args []Object) Object {
 	_c := len(_args)
@@ -439,7 +463,8 @@ func __trimr_(_args []Object) Object {
 	return NIL
 }
 
-var upper_case_ Proc
+var __upper_case__P ProcFn = __upper_case_
+var upper_case_ Proc = Proc{Fn: __upper_case__P, Name: "upper_case_"}
 
 func __upper_case_(_args []Object) Object {
 	_c := len(_args)
@@ -457,31 +482,7 @@ func __upper_case_(_args []Object) Object {
 
 func Init() {
 
-	isblank_ = __isblank_
-	capitalize_ = __capitalize_
-	isends_with_ = __isends_with_
-	escape_ = __escape_
-	isincludes_ = __isincludes_
-	index_of_ = __index_of_
-	join_ = __join_
-	last_index_of_ = __last_index_of_
-	lower_case_ = __lower_case_
-	pad_left_ = __pad_left_
-	pad_right_ = __pad_right_
-	re_quote_ = __re_quote_
-	replace_ = __replace_
-	replace_first_ = __replace_first_
-	reverse_ = __reverse_
-	split_ = __split_
-	split_lines_ = __split_lines_
-	isstarts_with_ = __isstarts_with_
-	trim_ = __trim_
-	trim_left_ = __trim_left_
-	trim_newline_ = __trim_newline_
-	trim_right_ = __trim_right_
-	triml_ = __triml_
-	trimr_ = __trimr_
-	upper_case_ = __upper_case_
+
 
 	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))
 
