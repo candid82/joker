@@ -9,7 +9,6 @@ import (
 
 var list_separator_ String
 var separator_ String
-
 var __abs__P ProcFn = __abs_
 var abs_ Proc = Proc{Fn: __abs__P, Name: "abs_", Package: "std/filepath"}
 
@@ -311,7 +310,6 @@ func __volume_name_(_args []Object) Object {
 func Init() {
 	list_separator_ = MakeString(string(filepath.ListSeparator))
 	separator_ = MakeString(string(filepath.Separator))
-
 	InternsOrThunks()
 }
 

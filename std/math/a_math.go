@@ -20,7 +20,6 @@ var sqrt_of_2_ Double
 var sqrt_of_e_ Double
 var sqrt_of_phi_ Double
 var sqrt_of_pi_ Double
-
 var __abs__P ProcFn = __abs_
 var abs_ Proc = Proc{Fn: __abs__P, Name: "abs_", Package: "std/math"}
 
@@ -550,7 +549,6 @@ func Init() {
 	sqrt_of_e_ = MakeDouble(math.SqrtE)
 	sqrt_of_phi_ = MakeDouble(math.SqrtPhi)
 	sqrt_of_pi_ = MakeDouble(math.SqrtPi)
-
 	InternsOrThunks()
 }
 

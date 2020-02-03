@@ -28,7 +28,6 @@ var stamp_micro_ String
 var stamp_milli_ String
 var stamp_nano_ String
 var unix_date_ String
-
 var __add__P ProcFn = __add_
 var add_ Proc = Proc{Fn: __add__P, Name: "add_", Package: "std/time"}
 
@@ -372,7 +371,6 @@ func Init() {
 	stamp_milli_ = MakeString(time.StampMilli)
 	stamp_nano_ = MakeString(time.StampNano)
 	unix_date_ = MakeString(time.UnixDate)
-
 	InternsOrThunks()
 }
 

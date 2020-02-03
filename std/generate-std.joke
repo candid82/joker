@@ -244,11 +244,6 @@
                                  ")")))]
     [fn-str intern-str]))
 
-(defn generate-fn-init
-  [v]
-  (let [g (go-name (str v))]
-    (format "\t%s = __%s" g g)))
-
 (defn go-return-type
   "Returns the return type of the Make<t>() function. Would be unnecessary if Go code could declare a var as having 'the type returned by <func>'."
   [t]

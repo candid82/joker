@@ -2,11 +2,6 @@
 
 package core
 
-import (
-	"math/rand"
-	"time"
-)
-
 var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Boolean{B: true}).(Map)
 
 func intern(name string, proc ProcFn, procName string) {
