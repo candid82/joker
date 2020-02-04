@@ -892,32 +892,12 @@ func (p ProcFn) Call(args []Object) Object {
 	return p(args)
 }
 
-func (p ProcFn) Compare(a, b Object) int {
-	return compare(p, a, b)
-}
-
-func (p ProcFn) ToString(escape bool) string {
-	return "#object[ProcFn]"
-}
-
 func (p ProcFn) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case ProcFn:
 		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
 	}
 	return false
-}
-
-func (p ProcFn) GetInfo() *ObjectInfo {
-	return nil
-}
-
-func (p ProcFn) WithInfo(*ObjectInfo) Object {
-	return p
-}
-
-func (p ProcFn) GetType() *Type {
-	return TYPE.ProcFn
 }
 
 func (p ProcFn) Hash() uint32 {
