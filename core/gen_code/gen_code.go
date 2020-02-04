@@ -211,7 +211,7 @@ import (
 )
 
 func init() {
-	{name}NamespaceInfo = internalNamespaceInfo{available: true}
+	{name}Data = internalData{available: true}
 {lazy}
 {static}
 }

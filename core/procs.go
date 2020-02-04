@@ -20,7 +20,7 @@ import (
 	"unicode/utf8"
 )
 
-type internalNamespaceInfo struct {
+type internalData struct {
 	data      []byte
 	init      func()
 	available bool
@@ -29,21 +29,21 @@ type internalNamespaceInfo struct {
 var coreNamespaces []string
 
 var (
-	coreNamespaceInfo         internalNamespaceInfo
-	replNamespaceInfo         internalNamespaceInfo
-	walkNamespaceInfo         internalNamespaceInfo
-	templateNamespaceInfo     internalNamespaceInfo
-	testNamespaceInfo         internalNamespaceInfo
-	setNamespaceInfo          internalNamespaceInfo
-	tools_cliNamespaceInfo    internalNamespaceInfo
-	linter_allNamespaceInfo   internalNamespaceInfo
-	linter_jokerNamespaceInfo internalNamespaceInfo
-	linter_cljxNamespaceInfo  internalNamespaceInfo
-	linter_cljNamespaceInfo   internalNamespaceInfo
-	linter_cljsNamespaceInfo  internalNamespaceInfo
-	hiccupNamespaceInfo       internalNamespaceInfo
-	pprintNamespaceInfo       internalNamespaceInfo
-	better_condNamespaceInfo  internalNamespaceInfo
+	coreData         internalData
+	replData         internalData
+	walkData         internalData
+	templateData     internalData
+	testData         internalData
+	setData          internalData
+	tools_cliData    internalData
+	linter_allData   internalData
+	linter_jokerData internalData
+	linter_cljxData  internalData
+	linter_cljData   internalData
+	linter_cljsData  internalData
+	hiccupData       internalData
+	pprintData       internalData
+	better_condData  internalData
 )
 
 type FileInfo struct {
@@ -118,11 +118,11 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 	},
 }
 
-var CoreSourceFileInfo = map[string]*internalNamespaceInfo{}
+var CoreSourceFileInfo = map[string]*internalData{}
 var CoreSourceFilename = map[string]string{}
 
 func ProcessCoreSourceFileFor(ns string) {
-	processNamespaceInfo(CoreSourceFileInfo[ns], ns)
+	processData(CoreSourceFileInfo[ns], ns)
 }
 
 type (
@@ -142,7 +142,7 @@ const (
 
 const VERSION = "v0.14.1"
 
-var internalLibs map[string]*internalNamespaceInfo
+var internalLibs map[string]*internalData
 
 const (
 	CLJ Dialect = iota
@@ -153,17 +153,17 @@ const (
 )
 
 func InitInternalLibs() {
-	internalLibs = map[string]*internalNamespaceInfo{
-		"joker.core":        &coreNamespaceInfo,
-		"joker.walk":        &walkNamespaceInfo,
-		"joker.template":    &templateNamespaceInfo,
-		"joker.repl":        &replNamespaceInfo,
-		"joker.test":        &testNamespaceInfo,
-		"joker.set":         &setNamespaceInfo,
-		"joker.tools.cli":   &tools_cliNamespaceInfo,
-		"joker.hiccup":      &hiccupNamespaceInfo,
-		"joker.pprint":      &pprintNamespaceInfo,
-		"joker.better-cond": &better_condNamespaceInfo,
+	internalLibs = map[string]*internalData{
+		"joker.core":        &coreData,
+		"joker.walk":        &walkData,
+		"joker.template":    &templateData,
+		"joker.repl":        &replData,
+		"joker.test":        &testData,
+		"joker.set":         &setData,
+		"joker.tools.cli":   &tools_cliData,
+		"joker.hiccup":      &hiccupData,
+		"joker.pprint":      &pprintData,
+		"joker.better-cond": &better_condData,
 	}
 	for _, f := range CoreSourceFiles {
 		if _, found := CoreSourceFileInfo[f.Name]; found {
@@ -1523,7 +1523,7 @@ var procLoadLibFromPath = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
 	if info := internalLibs[libname]; info != nil {
-		processNamespaceInfo(info, libname)
+		processData(info, libname)
 		return NIL
 	}
 	cp := GLOBAL_ENV.classPath.Value
@@ -1872,7 +1872,7 @@ func finalizeNamespace() {
 	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.mappings))
 }
 
-func processNamespaceInfo(info *internalNamespaceInfo, name string) (processed bool) {
+func processData(info *internalData, name string) (processed bool) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { finalizeNamespace(); GLOBAL_ENV.SetCurrentNamespace(ns) }()
@@ -1952,15 +1952,15 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 
 var haveSetCoreNamespaces bool
 
-func ProcessCoreNamespaceInfo() {
-	if processNamespaceInfo(&coreNamespaceInfo, "<joker.core>") || !haveSetCoreNamespaces {
+func ProcessCoreData() {
+	if processData(&coreData, "<joker.core>") || !haveSetCoreNamespaces {
 		setCoreNamespaces()
 		haveSetCoreNamespaces = true
 	}
 }
 
-func ProcessReplNamespaceInfo() {
-	processNamespaceInfo(&replNamespaceInfo, "<joker.repl>")
+func ProcessReplData() {
+	processData(&replData, "<joker.repl>")
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -2165,24 +2165,24 @@ func markJokerNamespacesAsUsed() {
 	}
 }
 
-func ProcessLinterNamespaceInfo(dialect Dialect) {
+func ProcessLinterData(dialect Dialect) {
 	if dialect == EDN {
 		markJokerNamespacesAsUsed()
 		return
 	}
-	processNamespaceInfo(&linter_allNamespaceInfo, "linter_all")
+	processData(&linter_allData, "linter_all")
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		markJokerNamespacesAsUsed()
-		processNamespaceInfo(&linter_jokerNamespaceInfo, "linter_joker")
+		processData(&linter_jokerData, "linter_joker")
 		return
 	}
-	processNamespaceInfo(&linter_cljxNamespaceInfo, "linter_cljx")
+	processData(&linter_cljxData, "linter_cljx")
 	switch dialect {
 	case CLJ:
-		processNamespaceInfo(&linter_cljNamespaceInfo, "linter_clj")
+		processData(&linter_cljData, "linter_clj")
 	case CLJS:
-		processNamespaceInfo(&linter_cljsNamespaceInfo, "linter_cljs")
+		processData(&linter_cljsData, "linter_cljs")
 	}
 	removeJokerNamespaces()
 }
