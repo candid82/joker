@@ -402,7 +402,6 @@ func init() {
 		NodeSeq:       RegRefType("NodeSeq", (*NodeSeq)(nil), ""),
 		ParseError:    RegRefType("ParseError", (*ParseError)(nil), ""),
 		Proc:          RegRefType("Proc", (*Proc)(nil), "A self-identifying callable function implemented via Go code"),
-		ProcFn:        RegRefType("ProcFn", (*ProcFn)(nil), "A callable function implemented via Go code"),
 		Ratio:         RegRefType("Ratio", (*Ratio)(nil), "Wraps the Go 'math.big/Rat' type"),
 		RecurBindings: RegRefType("RecurBindings", (*RecurBindings)(nil), ""),
 		Regex:         RegRefType("Regex", (*Regex)(nil), "Wraps the Go 'regexp.Regexp' type"),
