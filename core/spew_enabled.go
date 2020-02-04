@@ -76,7 +76,7 @@ func SpewObj(obj interface{}) string {
 	return res
 }
 
-var procGoSpew ProcFn = func(args []Object) (res Object) {
+var procGoSpew = func(args []Object) (res Object) {
 	res = MakeBoolean(false)
 	CheckArity(args, 1, 2)
 	defer func() {

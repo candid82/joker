@@ -12,6 +12,6 @@ func SpewObj(obj interface{}) string {
 	return ""
 }
 
-var procGoSpew ProcFn = func(args []Object) (res Object) {
+var procGoSpew = func(args []Object) (res Object) {
 	return MakeBoolean(false)
 }
