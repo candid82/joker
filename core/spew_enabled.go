@@ -7,7 +7,7 @@ import (
 	"github.com/jcburley/go-spew/spew"
 )
 
-var procGoSpew Proc = func(args []Object) (res Object) {
+var procGoSpew = func(args []Object) (res Object) {
 	res = MakeBoolean(false)
 	CheckArity(args, 1, 2)
 	defer func() {

@@ -10,7 +10,8 @@ var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
 
 
 
-var decode_string_ Proc
+var __decode_string__P ProcFn = __decode_string_
+var decode_string_ Proc = Proc{Fn: __decode_string__P, Name: "decode_string_", Package: "std/base64"}
 
 func __decode_string_(_args []Object) Object {
 	_c := len(_args)
@@ -26,7 +27,8 @@ func __decode_string_(_args []Object) Object {
 	return NIL
 }
 
-var encode_string_ Proc
+var __encode_string__P ProcFn = __encode_string_
+var encode_string_ Proc = Proc{Fn: __encode_string__P, Name: "encode_string_", Package: "std/base64"}
 
 func __encode_string_(_args []Object) Object {
 	_c := len(_args)
@@ -44,8 +46,6 @@ func __encode_string_(_args []Object) Object {
 
 func Init() {
 
-	decode_string_ = __decode_string_
-	encode_string_ = __encode_string_
 
 	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
 

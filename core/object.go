@@ -147,8 +147,13 @@ type (
 		isGloballyUsed bool
 		taggedType     *Type
 	}
-	Proc func([]Object) Object
-	Fn   struct {
+	ProcFn func([]Object) Object
+	Proc   struct {
+		Fn      ProcFn
+		Name    string
+		Package string // "" for core (this package), else e.g. "std/string"
+	}
+	Fn struct {
 		InfoHolder
 		MetaHolder
 		isMacro bool
@@ -287,6 +292,7 @@ type (
 		NodeSeq        *Type
 		ParseError     *Type
 		Proc           *Type
+		ProcFn         *Type
 		Ratio          *Type
 		RecurBindings  *Type
 		Regex          *Type
@@ -395,7 +401,8 @@ func init() {
 		Nil:           regType("Nil", (*Nil)(nil), "The 'nil' value"),
 		NodeSeq:       RegRefType("NodeSeq", (*NodeSeq)(nil), ""),
 		ParseError:    RegRefType("ParseError", (*ParseError)(nil), ""),
-		Proc:          RegRefType("Proc", (*Proc)(nil), "A callable function implemented via Go code"),
+		Proc:          RegRefType("Proc", (*Proc)(nil), "A self-identifying callable function implemented via Go code"),
+		ProcFn:        RegRefType("ProcFn", (*ProcFn)(nil), "A callable function implemented via Go code"),
 		Ratio:         RegRefType("Ratio", (*Ratio)(nil), "Wraps the Go 'math.big/Rat' type"),
 		RecurBindings: RegRefType("RecurBindings", (*RecurBindings)(nil), ""),
 		Regex:         RegRefType("Regex", (*Regex)(nil), "Wraps the Go 'regexp.Regexp' type"),
@@ -843,7 +850,7 @@ func (fn *Fn) Compare(a, b Object) int {
 }
 
 func (p Proc) Call(args []Object) Object {
-	return p(args)
+	return p.Fn(args)
 }
 
 func (p Proc) Compare(a, b Object) int {
@@ -851,13 +858,17 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return "#object[Proc]"
+	pkg := p.Package
+	if pkg != "" {
+		pkg += "."
+	}
+	return fmt.Sprintf("#object[Proc:%s%s]", pkg, p.Name)
 }
 
 func (p Proc) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Proc:
-		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+		return p.Fn.Equals(other.Fn)
 	}
 	return false
 }
@@ -875,6 +886,42 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
+	return p.Fn.Hash()
+}
+
+func (p ProcFn) Call(args []Object) Object {
+	return p(args)
+}
+
+func (p ProcFn) Compare(a, b Object) int {
+	return compare(p, a, b)
+}
+
+func (p ProcFn) ToString(escape bool) string {
+	return "#object[ProcFn]"
+}
+
+func (p ProcFn) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case ProcFn:
+		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+	}
+	return false
+}
+
+func (p ProcFn) GetInfo() *ObjectInfo {
+	return nil
+}
+
+func (p ProcFn) WithInfo(*ObjectInfo) Object {
+	return p
+}
+
+func (p ProcFn) GetType() *Type {
+	return TYPE.ProcFn
+}
+
+func (p ProcFn) Hash() uint32 {
 	return HashPtr(reflect.ValueOf(p).Pointer())
 }
 

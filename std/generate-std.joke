@@ -126,7 +126,9 @@
         go-fn-name (go-name (str k))
         arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
         fn-str (-> fn-template
-                   (rpl "{fnName}" go-fn-name)
+                   (rpl "{goName}" go-fn-name)
+                   (rpl "{pkg}" ns-name)
+                   (rpl "{fnName}" (str k))
                    (rpl "{arities}" arities))
         intern-str (-> intern-template
                        (rpl "{nsFullName}" ns-name)
@@ -142,11 +144,6 @@
                                                 (generate-arglist args)))
                                  ")")))]
     [fn-str intern-str]))
-
-(defn generate-fn-init
-  [v]
-  (let [g (go-name (str v))]
-    (format "\t%s = __%s" g g)))
 
 (defn go-return-type
   "Returns the return type of the Make<t>() function. Would be unnecessary if Go code could declare a var as having 'the type returned by <func>'."
@@ -252,8 +249,6 @@
         go-fns (sort-by first (ns-public-go-fns ns))
         fn-decls (for [[k v] go-fns]
               (generate-fn-decl ns-name ns-name-final k v))
-        fn-inits (for [[k _] go-fns]
-                    (generate-fn-init k))
         non-fn-decls (for [[k v] go-non-fns]
                        (generate-non-fn-decl ns-name ns-name-final k v))
         non-fn-inits (for [[k v] go-non-fns]
@@ -268,7 +263,6 @@
                 (rpl "{non-fn-decls}" (s/join "\n" (map first non-fn-decls)))
                 (rpl "{non-fn-inits}" (s/join "\n" non-fn-inits))
                 (rpl "{fn-decls}" (s/join "\n" (map first fn-decls)))
-                (rpl "{fn-inits}" (s/join "\n" fn-inits))
                 (rpl "{nsDocstring}" (raw-quoted-string (:doc m)))
                 (rpl "{non-fn-interns}" (s/join "\n\t" (map second non-fn-decls)))
                 (rpl "{fn-interns}" (s/join "\n\t" (map second fn-decls))))

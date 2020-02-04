@@ -10,7 +10,8 @@ var csvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.csv"))
 
 
 
-var csv_seq_ Proc
+var __csv_seq__P ProcFn = __csv_seq_
+var csv_seq_ Proc = Proc{Fn: __csv_seq__P, Name: "csv_seq_", Package: "std/csv"}
 
 func __csv_seq_(_args []Object) Object {
 	_c := len(_args)
@@ -32,7 +33,8 @@ func __csv_seq_(_args []Object) Object {
 	return NIL
 }
 
-var write_ Proc
+var __write__P ProcFn = __write_
+var write_ Proc = Proc{Fn: __write__P, Name: "write_", Package: "std/csv"}
 
 func __write_(_args []Object) Object {
 	_c := len(_args)
@@ -56,7 +58,8 @@ func __write_(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc
+var __write_string__P ProcFn = __write_string_
+var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_", Package: "std/csv"}
 
 func __write_string_(_args []Object) Object {
 	_c := len(_args)
@@ -80,9 +83,6 @@ func __write_string_(_args []Object) Object {
 
 func Init() {
 
-	csv_seq_ = __csv_seq_
-	write_ = __write_
-	write_string_ = __write_string_
 
 	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) files as defined in RFC 4180.`, "1.0"))
 
