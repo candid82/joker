@@ -7,9 +7,6 @@ import (
 	"html"
 )
 
-var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
-
-
 
 var __escape__P ProcFn = __escape_
 var escape_ Proc = Proc{Fn: __escape__P, Name: "escape_", Package: "std/html"}
@@ -47,21 +44,10 @@ func __unescape_(_args []Object) Object {
 
 func Init() {
 
-
-	htmlNamespace.ResetMeta(MakeMeta(nil, `Provides functions for escaping and unescaping HTML text.`, "1.0"))
-
-	
-	htmlNamespace.InternVar("escape", escape_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and ".`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
-
-	htmlNamespace.InternVar("unescape", unescape_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Unescapes entities like &lt; to become <.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
-
+	InternsOrThunks()
 }
+
+var htmlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.html"))
 
 func init() {
 	htmlNamespace.Lazy = Init
