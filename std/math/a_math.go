@@ -23,7 +23,8 @@ var sqrt_of_e_ Double
 var sqrt_of_phi_ Double
 var sqrt_of_pi_ Double
 
-var abs_ Proc
+var __abs__P ProcFn = __abs_
+var abs_ Proc = Proc{Fn: __abs__P, Name: "abs_", Package: "std/math"}
 
 func __abs_(_args []Object) Object {
 	_c := len(_args)
@@ -39,7 +40,8 @@ func __abs_(_args []Object) Object {
 	return NIL
 }
 
-var ceil_ Proc
+var __ceil__P ProcFn = __ceil_
+var ceil_ Proc = Proc{Fn: __ceil__P, Name: "ceil_", Package: "std/math"}
 
 func __ceil_(_args []Object) Object {
 	_c := len(_args)
@@ -55,7 +57,8 @@ func __ceil_(_args []Object) Object {
 	return NIL
 }
 
-var copy_sign_ Proc
+var __copy_sign__P ProcFn = __copy_sign_
+var copy_sign_ Proc = Proc{Fn: __copy_sign__P, Name: "copy_sign_", Package: "std/math"}
 
 func __copy_sign_(_args []Object) Object {
 	_c := len(_args)
@@ -72,7 +75,8 @@ func __copy_sign_(_args []Object) Object {
 	return NIL
 }
 
-var cos_ Proc
+var __cos__P ProcFn = __cos_
+var cos_ Proc = Proc{Fn: __cos__P, Name: "cos_", Package: "std/math"}
 
 func __cos_(_args []Object) Object {
 	_c := len(_args)
@@ -88,7 +92,8 @@ func __cos_(_args []Object) Object {
 	return NIL
 }
 
-var cube_root_ Proc
+var __cube_root__P ProcFn = __cube_root_
+var cube_root_ Proc = Proc{Fn: __cube_root__P, Name: "cube_root_", Package: "std/math"}
 
 func __cube_root_(_args []Object) Object {
 	_c := len(_args)
@@ -104,7 +109,8 @@ func __cube_root_(_args []Object) Object {
 	return NIL
 }
 
-var dim_ Proc
+var __dim__P ProcFn = __dim_
+var dim_ Proc = Proc{Fn: __dim__P, Name: "dim_", Package: "std/math"}
 
 func __dim_(_args []Object) Object {
 	_c := len(_args)
@@ -121,7 +127,8 @@ func __dim_(_args []Object) Object {
 	return NIL
 }
 
-var exp_ Proc
+var __exp__P ProcFn = __exp_
+var exp_ Proc = Proc{Fn: __exp__P, Name: "exp_", Package: "std/math"}
 
 func __exp_(_args []Object) Object {
 	_c := len(_args)
@@ -137,7 +144,8 @@ func __exp_(_args []Object) Object {
 	return NIL
 }
 
-var exp_2_ Proc
+var __exp_2__P ProcFn = __exp_2_
+var exp_2_ Proc = Proc{Fn: __exp_2__P, Name: "exp_2_", Package: "std/math"}
 
 func __exp_2_(_args []Object) Object {
 	_c := len(_args)
@@ -153,7 +161,8 @@ func __exp_2_(_args []Object) Object {
 	return NIL
 }
 
-var exp_minus_1_ Proc
+var __exp_minus_1__P ProcFn = __exp_minus_1_
+var exp_minus_1_ Proc = Proc{Fn: __exp_minus_1__P, Name: "exp_minus_1_", Package: "std/math"}
 
 func __exp_minus_1_(_args []Object) Object {
 	_c := len(_args)
@@ -169,7 +178,8 @@ func __exp_minus_1_(_args []Object) Object {
 	return NIL
 }
 
-var floor_ Proc
+var __floor__P ProcFn = __floor_
+var floor_ Proc = Proc{Fn: __floor__P, Name: "floor_", Package: "std/math"}
 
 func __floor_(_args []Object) Object {
 	_c := len(_args)
@@ -185,7 +195,8 @@ func __floor_(_args []Object) Object {
 	return NIL
 }
 
-var hypot_ Proc
+var __hypot__P ProcFn = __hypot_
+var hypot_ Proc = Proc{Fn: __hypot__P, Name: "hypot_", Package: "std/math"}
 
 func __hypot_(_args []Object) Object {
 	_c := len(_args)
@@ -202,7 +213,8 @@ func __hypot_(_args []Object) Object {
 	return NIL
 }
 
-var inf_ Proc
+var __inf__P ProcFn = __inf_
+var inf_ Proc = Proc{Fn: __inf__P, Name: "inf_", Package: "std/math"}
 
 func __inf_(_args []Object) Object {
 	_c := len(_args)
@@ -218,7 +230,8 @@ func __inf_(_args []Object) Object {
 	return NIL
 }
 
-var isinf_ Proc
+var __isinf__P ProcFn = __isinf_
+var isinf_ Proc = Proc{Fn: __isinf__P, Name: "isinf_", Package: "std/math"}
 
 func __isinf_(_args []Object) Object {
 	_c := len(_args)
@@ -235,7 +248,8 @@ func __isinf_(_args []Object) Object {
 	return NIL
 }
 
-var log_ Proc
+var __log__P ProcFn = __log_
+var log_ Proc = Proc{Fn: __log__P, Name: "log_", Package: "std/math"}
 
 func __log_(_args []Object) Object {
 	_c := len(_args)
@@ -251,7 +265,8 @@ func __log_(_args []Object) Object {
 	return NIL
 }
 
-var log_10_ Proc
+var __log_10__P ProcFn = __log_10_
+var log_10_ Proc = Proc{Fn: __log_10__P, Name: "log_10_", Package: "std/math"}
 
 func __log_10_(_args []Object) Object {
 	_c := len(_args)
@@ -267,7 +282,8 @@ func __log_10_(_args []Object) Object {
 	return NIL
 }
 
-var log_2_ Proc
+var __log_2__P ProcFn = __log_2_
+var log_2_ Proc = Proc{Fn: __log_2__P, Name: "log_2_", Package: "std/math"}
 
 func __log_2_(_args []Object) Object {
 	_c := len(_args)
@@ -283,7 +299,8 @@ func __log_2_(_args []Object) Object {
 	return NIL
 }
 
-var log_binary_ Proc
+var __log_binary__P ProcFn = __log_binary_
+var log_binary_ Proc = Proc{Fn: __log_binary__P, Name: "log_binary_", Package: "std/math"}
 
 func __log_binary_(_args []Object) Object {
 	_c := len(_args)
@@ -299,7 +316,8 @@ func __log_binary_(_args []Object) Object {
 	return NIL
 }
 
-var log_plus_1_ Proc
+var __log_plus_1__P ProcFn = __log_plus_1_
+var log_plus_1_ Proc = Proc{Fn: __log_plus_1__P, Name: "log_plus_1_", Package: "std/math"}
 
 func __log_plus_1_(_args []Object) Object {
 	_c := len(_args)
@@ -315,7 +333,8 @@ func __log_plus_1_(_args []Object) Object {
 	return NIL
 }
 
-var modf_ Proc
+var __modf__P ProcFn = __modf_
+var modf_ Proc = Proc{Fn: __modf__P, Name: "modf_", Package: "std/math"}
 
 func __modf_(_args []Object) Object {
 	_c := len(_args)
@@ -331,7 +350,8 @@ func __modf_(_args []Object) Object {
 	return NIL
 }
 
-var nan_ Proc
+var __nan__P ProcFn = __nan_
+var nan_ Proc = Proc{Fn: __nan__P, Name: "nan_", Package: "std/math"}
 
 func __nan_(_args []Object) Object {
 	_c := len(_args)
@@ -346,7 +366,8 @@ func __nan_(_args []Object) Object {
 	return NIL
 }
 
-var isnan_ Proc
+var __isnan__P ProcFn = __isnan_
+var isnan_ Proc = Proc{Fn: __isnan__P, Name: "isnan_", Package: "std/math"}
 
 func __isnan_(_args []Object) Object {
 	_c := len(_args)
@@ -362,7 +383,8 @@ func __isnan_(_args []Object) Object {
 	return NIL
 }
 
-var next_after_ Proc
+var __next_after__P ProcFn = __next_after_
+var next_after_ Proc = Proc{Fn: __next_after__P, Name: "next_after_", Package: "std/math"}
 
 func __next_after_(_args []Object) Object {
 	_c := len(_args)
@@ -379,7 +401,8 @@ func __next_after_(_args []Object) Object {
 	return NIL
 }
 
-var pow_ Proc
+var __pow__P ProcFn = __pow_
+var pow_ Proc = Proc{Fn: __pow__P, Name: "pow_", Package: "std/math"}
 
 func __pow_(_args []Object) Object {
 	_c := len(_args)
@@ -396,7 +419,8 @@ func __pow_(_args []Object) Object {
 	return NIL
 }
 
-var pow_10_ Proc
+var __pow_10__P ProcFn = __pow_10_
+var pow_10_ Proc = Proc{Fn: __pow_10__P, Name: "pow_10_", Package: "std/math"}
 
 func __pow_10_(_args []Object) Object {
 	_c := len(_args)
@@ -412,7 +436,8 @@ func __pow_10_(_args []Object) Object {
 	return NIL
 }
 
-var round_ Proc
+var __round__P ProcFn = __round_
+var round_ Proc = Proc{Fn: __round__P, Name: "round_", Package: "std/math"}
 
 func __round_(_args []Object) Object {
 	_c := len(_args)
@@ -428,7 +453,8 @@ func __round_(_args []Object) Object {
 	return NIL
 }
 
-var round_to_even_ Proc
+var __round_to_even__P ProcFn = __round_to_even_
+var round_to_even_ Proc = Proc{Fn: __round_to_even__P, Name: "round_to_even_", Package: "std/math"}
 
 func __round_to_even_(_args []Object) Object {
 	_c := len(_args)
@@ -444,7 +470,8 @@ func __round_to_even_(_args []Object) Object {
 	return NIL
 }
 
-var sign_bit_ Proc
+var __sign_bit__P ProcFn = __sign_bit_
+var sign_bit_ Proc = Proc{Fn: __sign_bit__P, Name: "sign_bit_", Package: "std/math"}
 
 func __sign_bit_(_args []Object) Object {
 	_c := len(_args)
@@ -460,7 +487,8 @@ func __sign_bit_(_args []Object) Object {
 	return NIL
 }
 
-var sin_ Proc
+var __sin__P ProcFn = __sin_
+var sin_ Proc = Proc{Fn: __sin__P, Name: "sin_", Package: "std/math"}
 
 func __sin_(_args []Object) Object {
 	_c := len(_args)
@@ -476,7 +504,8 @@ func __sin_(_args []Object) Object {
 	return NIL
 }
 
-var sqrt_ Proc
+var __sqrt__P ProcFn = __sqrt_
+var sqrt_ Proc = Proc{Fn: __sqrt__P, Name: "sqrt_", Package: "std/math"}
 
 func __sqrt_(_args []Object) Object {
 	_c := len(_args)
@@ -492,7 +521,8 @@ func __sqrt_(_args []Object) Object {
 	return NIL
 }
 
-var trunc_ Proc
+var __trunc__P ProcFn = __trunc_
+var trunc_ Proc = Proc{Fn: __trunc__P, Name: "trunc_", Package: "std/math"}
 
 func __trunc_(_args []Object) Object {
 	_c := len(_args)
@@ -522,36 +552,6 @@ func Init() {
 	sqrt_of_e_ = MakeDouble(math.SqrtE)
 	sqrt_of_phi_ = MakeDouble(math.SqrtPhi)
 	sqrt_of_pi_ = MakeDouble(math.SqrtPi)
-	abs_ = __abs_
-	ceil_ = __ceil_
-	copy_sign_ = __copy_sign_
-	cos_ = __cos_
-	cube_root_ = __cube_root_
-	dim_ = __dim_
-	exp_ = __exp_
-	exp_2_ = __exp_2_
-	exp_minus_1_ = __exp_minus_1_
-	floor_ = __floor_
-	hypot_ = __hypot_
-	inf_ = __inf_
-	isinf_ = __isinf_
-	log_ = __log_
-	log_10_ = __log_10_
-	log_2_ = __log_2_
-	log_binary_ = __log_binary_
-	log_plus_1_ = __log_plus_1_
-	modf_ = __modf_
-	nan_ = __nan_
-	isnan_ = __isnan_
-	next_after_ = __next_after_
-	pow_ = __pow_
-	pow_10_ = __pow_10_
-	round_ = __round_
-	round_to_even_ = __round_to_even_
-	sign_bit_ = __sign_bit_
-	sin_ = __sin_
-	sqrt_ = __sqrt_
-	trunc_ = __trunc_
 
 	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))
 

@@ -11,7 +11,8 @@ var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
 
 
 
-var path_escape_ Proc
+var __path_escape__P ProcFn = __path_escape_
+var path_escape_ Proc = Proc{Fn: __path_escape__P, Name: "path_escape_", Package: "std/url"}
 
 func __path_escape_(_args []Object) Object {
 	_c := len(_args)
@@ -27,7 +28,8 @@ func __path_escape_(_args []Object) Object {
 	return NIL
 }
 
-var path_unescape_ Proc
+var __path_unescape__P ProcFn = __path_unescape_
+var path_unescape_ Proc = Proc{Fn: __path_unescape__P, Name: "path_unescape_", Package: "std/url"}
 
 func __path_unescape_(_args []Object) Object {
 	_c := len(_args)
@@ -43,7 +45,8 @@ func __path_unescape_(_args []Object) Object {
 	return NIL
 }
 
-var query_escape_ Proc
+var __query_escape__P ProcFn = __query_escape_
+var query_escape_ Proc = Proc{Fn: __query_escape__P, Name: "query_escape_", Package: "std/url"}
 
 func __query_escape_(_args []Object) Object {
 	_c := len(_args)
@@ -59,7 +62,8 @@ func __query_escape_(_args []Object) Object {
 	return NIL
 }
 
-var query_unescape_ Proc
+var __query_unescape__P ProcFn = __query_unescape_
+var query_unescape_ Proc = Proc{Fn: __query_unescape__P, Name: "query_unescape_", Package: "std/url"}
 
 func __query_unescape_(_args []Object) Object {
 	_c := len(_args)
@@ -77,10 +81,6 @@ func __query_unescape_(_args []Object) Object {
 
 func Init() {
 
-	path_escape_ = __path_escape_
-	path_unescape_ = __path_unescape_
-	query_escape_ = __query_escape_
-	query_unescape_ = __query_unescape_
 
 	urlNamespace.ResetMeta(MakeMeta(nil, `Parses URLs and implements query escaping.`, "1.0"))
 
