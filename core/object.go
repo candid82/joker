@@ -888,10 +888,6 @@ func (p Proc) Hash() uint32 {
 	return HashPtr(reflect.ValueOf(p.Fn).Pointer())
 }
 
-func (p ProcFn) Call(args []Object) Object {
-	return p(args)
-}
-
 func (i InfoHolder) GetInfo() *ObjectInfo {
 	return i.info
 }
