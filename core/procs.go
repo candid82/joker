@@ -1656,11 +1656,11 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
 		defer func() {
-			parseContext.GlobalEnv.file.Value = currentFilename
+			parseContext.GlobalEnv.SetFilename(currentFilename)
 		}()
 		s, err := filepath.Abs(filename)
 		PanicOnErr(err)
-		parseContext.GlobalEnv.file.Value = String{S: s}
+		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
 	for {
 		obj, err := TryRead(reader)
@@ -1697,11 +1697,11 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
 		defer func() {
-			parseContext.GlobalEnv.file.Value = currentFilename
+			parseContext.GlobalEnv.SetFilename(currentFilename)
 		}()
 		s, err := filepath.Abs(filename)
 		PanicOnErr(err)
-		parseContext.GlobalEnv.file.Value = String{S: s}
+		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
 	for {
 		obj, err := TryRead(reader)
@@ -1742,11 +1742,11 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
 		defer func() {
-			parseContext.GlobalEnv.file.Value = currentFilename
+			parseContext.GlobalEnv.SetFilename(currentFilename)
 		}()
 		s, err := filepath.Abs(filename)
 		PanicOnErr(err)
-		parseContext.GlobalEnv.file.Value = String{S: s}
+		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
 	for {
 		obj, err := TryRead(reader)

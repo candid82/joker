@@ -59,6 +59,8 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  */
 func (env *Env) SetClassPath(cp string) {
 	cpArray := filepath.SplitList(cp)
 	cpVec := EmptyVector()
@@ -71,8 +73,11 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
-/* Called by parse.go in an outer var block, this runs before func main(). */
-func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
+/* Called by parse.go in an outer var block, this runs before any
+   func init() as well as before func main(). InitEnv() and others are
+   called at runtime to set some of these Values based on the current
+   invocation. */
+func NewEnv() *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
 	features.Add(MakeKeyword("joker"))
@@ -85,13 +90,9 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	res.NS_VAR = res.CoreNamespace.Intern(MakeSymbol("ns"))
 	res.IN_NS_VAR = res.CoreNamespace.Intern(MakeSymbol("in-ns"))
 	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
-	res.ns.Value = res.EnsureNamespace(currentNs)
 	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = MakeBufferedReader(stdin)
 	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = MakeIOWriter(stdout)
 	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = MakeIOWriter(stderr)
 	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
 	res.MainFile = res.CoreNamespace.Intern(MakeSymbol("*main-file*"))
 	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
@@ -99,7 +100,6 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 			:incremental and :qualifier keys. Feature releases may increment
 			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
 	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
-	res.SetEnvArgs(os.Args[1:])
 	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
 	res.classPath.Value = NIL
 	res.classPath.isPrivate = true
@@ -112,6 +112,15 @@ func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Write
 	return res
 }
 
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  */
+func (env *Env) InitEnv(stdin io.Reader, stdout, stderr io.Writer, args []string) {
+	env.stdin.Value = MakeBufferedReader(stdin)
+	env.stdout.Value = MakeIOWriter(stdout)
+	env.stderr.Value = MakeIOWriter(stderr)
+	env.SetEnvArgs(args)
+}
+
 func (env *Env) SetStdIO(stdin, stdout, stderr Object) {
 	env.stdin.Value = stdin
 	env.stdout.Value = stdout
@@ -120,6 +129,18 @@ func (env *Env) SetStdIO(stdin, stdout, stderr Object) {
 
 func (env *Env) StdIO() (stdin, stdout, stderr Object) {
 	return env.stdin.Value, env.stdout.Value, env.stderr.Value
+}
+
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  */
+func (env *Env) SetMainFilename(filename string) {
+	env.MainFile.Value = MakeString(filename)
+}
+
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  */
+func (env *Env) SetFilename(obj Object) {
+	env.file.Value = obj
 }
 
 func (env *Env) IsStdIn(obj Object) bool {
@@ -243,4 +264,8 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 		name: vr.name.name,
 		ns:   vr.ns.Name.name,
 	}
+}
+
+func init() {
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.EnsureNamespace(MakeSymbol("user")))
 }
