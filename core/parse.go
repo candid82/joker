@@ -1499,12 +1499,12 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 }
 
 func parseList(obj Object, ctx *ParseContext) Expr {
-	if GLOBAL_ENV.Trace {
+	if Trace {
 		fmt.Printf("[TRACE] parseList obj=%s\n", SpewObj(obj))
 	}
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
-		if GLOBAL_ENV.Trace {
+		if Trace {
 			fmt.Printf("[TRACE] parseList expanded=%s\n", SpewObj(expanded))
 		}
 		return Parse(expanded, ctx)
@@ -1524,7 +1524,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 	pos := GetPosition(obj)
 	first := seq.First()
 	if v, ok := first.(Symbol); ok && v.ns == nil {
-		if GLOBAL_ENV.Trace {
+		if Trace {
 			fmt.Printf("[TRACE] parseList checking for special %s\n", *v.name)
 		}
 		switch v.name {
@@ -1590,7 +1590,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
 			}
 		case STR.do:
-			if GLOBAL_ENV.Trace {
+			if Trace {
 				fmt.Printf("[TRACE] parseList STR.do=%s\n", SpewObj(seq))
 			}
 			res := &DoExpr{
@@ -1614,7 +1614,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		case STR.try:
 			return parseTry(obj, ctx)
 		}
-		if GLOBAL_ENV.Trace {
+		if Trace {
 			fmt.Printf("[TRACE] parseList %s\n", *v.name)
 		}
 	}
@@ -1735,7 +1735,7 @@ func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
 	sym := obj.(Symbol)
-	if GLOBAL_ENV.Trace {
+	if Trace {
 		fmt.Printf("[TRACE] parseSymbol %s\n", *sym.name)
 	}
 	b := ctx.GetLocalBinding(sym)
@@ -1800,7 +1800,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	pos := GetPosition(obj)
 	var res Expr
 	canHaveMeta := false
-	if GLOBAL_ENV.Trace {
+	if Trace {
 		fmt.Printf("[TRACE] Parse type %T\n", obj)
 	}
 	switch v := obj.(type) {

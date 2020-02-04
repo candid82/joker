@@ -428,8 +428,6 @@ var (
 	noReadline               bool
 	exitToRepl               bool
 	errorToRepl              bool
-	trace                    bool
-	maxDepth                 uint
 )
 
 func isNumber(s string) bool {
@@ -593,7 +591,7 @@ func parseArgs(args []string) {
 				filename = args[i]
 			}
 		case "--trace":
-			trace = true
+			Trace = true
 		case "--max-depth":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
@@ -606,7 +604,7 @@ func parseArgs(args []string) {
 					fmt.Fprintf(Stderr, "Out of range: --max-depth %s\n", args[i])
 					return
 				}
-				maxDepth = uint(m)
+				MaxDepth = uint(m)
 			} else {
 				missing = true
 			}
@@ -714,8 +712,6 @@ func main() {
 
 	GLOBAL_ENV.SetEnvArgs(remainingArgs)
 	GLOBAL_ENV.SetClassPath(classPath)
-	GLOBAL_ENV.Trace = trace
-	GLOBAL_ENV.MaxDepth = maxDepth
 
 	if debugOut != nil {
 		fmt.Fprintf(debugOut, "debugOut=%v\n", debugOut)
