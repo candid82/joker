@@ -102,7 +102,7 @@ var {name}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("{ns}"))
 
 func {name}LazyInit() {
 	{name}Namespace.Lazy = nil
-	processData({name}Data)
+	processData({name}Data, "{ns}")
 }
 
 `[1:]

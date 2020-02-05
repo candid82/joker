@@ -135,9 +135,8 @@ func main() {
 		coreNamespaces[nsName] = coreNamespaceIndex
 		coreNamespaceIndex++
 
-		ns.MaybeLazy()
-
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
+		ns.MaybeLazy("gen_code")
 		if VerbosityLevel > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
@@ -211,7 +210,6 @@ import (
 )
 
 func init() {
-	{name}Data = internalData{available: true}
 {lazy}
 {static}
 }

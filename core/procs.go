@@ -1895,18 +1895,6 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 
 var haveSetCoreNamespaces bool
 
-func ProcessCoreData() {
-	// Let MaybeLazy() handle initialization.
-	if !haveSetCoreNamespaces {
-		setCoreNamespaces()
-		haveSetCoreNamespaces = true
-	}
-}
-
-func ProcessReplData() {
-	// Let MaybeLazy() handle initialization.
-}
-
 func findConfigFile(filename string, workingDir string, findDir bool) string {
 	var err error
 	configName := ".joker"
@@ -2107,28 +2095,6 @@ func markJokerNamespacesAsUsed() {
 			ns.isGloballyUsed = true
 		}
 	}
-}
-
-func ProcessLinterData(dialect Dialect) {
-	if dialect == EDN {
-		markJokerNamespacesAsUsed()
-		return
-	}
-	processData(linter_allData, "linter_all")
-	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
-	if dialect == JOKER {
-		markJokerNamespacesAsUsed()
-		processData(linter_jokerData, "linter_joker")
-		return
-	}
-	processData(linter_cljxData, "linter_cljx")
-	switch dialect {
-	case CLJ:
-		processData(linter_cljData, "linter_clj")
-	case CLJS:
-		processData(linter_cljsData, "linter_cljs")
-	}
-	removeJokerNamespaces()
 }
 
 func NewReaderFromFile(filename string) (*Reader, error) {
