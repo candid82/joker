@@ -110,9 +110,9 @@ When Joker is built (via the `run.sh` script), `go generate ./...` is first run.
 //go:generate go run gen_data/gen_data.go
 ```
 
-That builds and runs `core/gen_data/gen_data.go`, which defines, in the `files` array, a list of files (in `core/data/`) to be processed.
+That builds and runs `core/gen_data/gen_data.go`, which finds, in the `CoreSourceFiles` array defined by the `core/gen_common` package, a list of files (in `core/data/`) to be processed.
 
-As explained in the block comment just above the `var files []...` definition, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
+As explained in the block comment just above the `var CoreSourceFiles []...` definition in `core/gen_common/gen_common.go`, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
 
 Processing a `.joke` file consists of reading the file via Joker's (Clojure-like) Reader, "packing" the results into a portable binary format, and encoding the resulting binary data as a Go source file named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
 
@@ -130,7 +130,7 @@ Assuming one has determined it appropriate to add a new core namespace to the Jo
 
 Then, besides putting that source code in `core/data/*.joke`, modify these to pick it up during the build:
 
-* **core/gen\_data/gen\_data.go** `files` array (after any core namespaces upon which it depends)
+* **core/gen\_common/gen\_common.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
 * **core/procs.go** `InitInternalLibs()` array
 
 Further, if the new namespace depends on any standard-library-wrapping namespaces:
