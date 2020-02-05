@@ -20,25 +20,9 @@ import (
 	"unicode/utf8"
 )
 
-var coreNamespaces []string
+var internalLibs map[string][]byte
 
-var (
-	coreData         []byte
-	replData         []byte
-	walkData         []byte
-	templateData     []byte
-	testData         []byte
-	setData          []byte
-	tools_cliData    []byte
-	linter_allData   []byte
-	linter_jokerData []byte
-	linter_cljxData  []byte
-	linter_cljData   []byte
-	linter_cljsData  []byte
-	hiccupData       []byte
-	pprintData       []byte
-	better_condData  []byte
-)
+var coreNamespaces []string
 
 type FileInfo struct {
 	Name     string
@@ -129,8 +113,6 @@ const (
 
 const VERSION = "v0.14.1"
 
-var internalLibs map[string][]byte
-
 const (
 	CLJ Dialect = iota
 	CLJS
@@ -138,20 +120,6 @@ const (
 	EDN
 	UNKNOWN
 )
-
-func InitInternalLibs() {
-	internalLibs = map[string][]byte{
-		"joker.walk":        walkData,
-		"joker.template":    templateData,
-		"joker.repl":        replData,
-		"joker.test":        testData,
-		"joker.set":         setData,
-		"joker.tools.cli":   tools_cliData,
-		"joker.hiccup":      hiccupData,
-		"joker.pprint":      pprintData,
-		"joker.better-cond": better_condData,
-	}
-}
 
 func ExtractCallable(args []Object, index int) Callable {
 	return EnsureCallable(args, index)
@@ -1880,18 +1848,6 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 
 var haveSetCoreNamespaces bool
 
-func ProcessCoreData() {
-	processData(coreData)
-	if !haveSetCoreNamespaces {
-		setCoreNamespaces()
-		haveSetCoreNamespaces = true
-	}
-}
-
-func ProcessReplData() {
-	processData(replData)
-}
-
 func findConfigFile(filename string, workingDir string, findDir bool) string {
 	var err error
 	configName := ".joker"
@@ -2092,28 +2048,6 @@ func markJokerNamespacesAsUsed() {
 			ns.isGloballyUsed = true
 		}
 	}
-}
-
-func ProcessLinterData(dialect Dialect) {
-	if dialect == EDN {
-		markJokerNamespacesAsUsed()
-		return
-	}
-	processData(linter_allData)
-	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
-	if dialect == JOKER {
-		markJokerNamespacesAsUsed()
-		processData(linter_jokerData)
-		return
-	}
-	processData(linter_cljxData)
-	switch dialect {
-	case CLJ:
-		processData(linter_cljData)
-	case CLJS:
-		processData(linter_cljsData)
-	}
-	removeJokerNamespaces()
 }
 
 func NewReaderFromFile(filename string) (*Reader, error) {
