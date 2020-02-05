@@ -156,9 +156,7 @@ These `*.joke` files, however, have code of a particular form that is processed 
 
 #### The Joker Script That Writes Go Code
 
-The `std/generate-std.joke` script, which is run after the Joker executable is first built (by `run.sh`), reads in the pertinent namespaces, currently defined via `(def namespaces ...)` at the top of the script.
-
-(This should probably be changed to dynamically discover all the `*.joke` files in `std/`. See [the `gostd` fork's version](https://github.com/jcburley/joker/blob/gostd/std/generate-std.joke) for a sample implementation.)
+The `std/generate-std.joke` script, which is run after the Joker executable is first built (by `run.sh`), reads in the pertinent namespaces, currently defined via `(def namespaces ...)` at the top of the script. This definition dynamically discovers all the `*.joke` files in `std/`.
 
 `(apply require namespaces)` loads the target namespaces, then the script processes each namespace in `namespaces` by examining its public members and "compiling" them into Go code, which it stores in `std/*/a_*.go`, where `*` is the same name.
 
@@ -198,7 +196,6 @@ If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.
 
 Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for each public member (in `joker.foo`), one must:
 
-* Add `'foo` to the definition of `namespaces` in **std/generate-std.joke**
 * Add the namespace to `*loaded-libs*` by editing its `defonce` definition in `core/data/core.joke`
 * `mkdir -p std/foo`
 * `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo.go`
