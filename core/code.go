@@ -1,3 +1,5 @@
+// +build gen_code
+
 package core
 
 import (

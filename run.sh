@@ -7,8 +7,8 @@ build() {
   go clean
   rm -f core/a_*.go  # In case switching from a gen-code branch or similar (any existing files might break the build here)
   go generate ./...
-  $RUN_GEN_CODE && (echo "Optimizing startup time..."; cd core; go run gen_code/gen_code.go && go fmt a_*.go > /dev/null)
-  go vet ./...
+  $RUN_GEN_CODE && (echo "Optimizing startup time..."; cd core; go run -tags gen_code gen_code/gen_code.go && (go fmt a_*.go > /dev/null))
+  go vet -tags gen_code ./...
   go build
   if $OPTIMIZE_STARTUP; then
       mv -f joker joker.slow
