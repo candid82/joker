@@ -590,24 +590,6 @@ func parseArgs(args []string) {
 				i += 1 // shift
 				filename = args[i]
 			}
-		case "--trace":
-			Trace = true
-		case "--max-depth":
-			if i < length-1 && notOption(args[i+1]) {
-				i += 1 // shift
-				m, err := strconv.ParseInt(args[i], 10, 64)
-				if err != nil {
-					fmt.Fprintln(Stderr, "Error: ", err)
-					return
-				}
-				if m < 0 || m > math.MaxUint32 {
-					fmt.Fprintf(Stderr, "Out of range: --max-depth %s\n", args[i])
-					return
-				}
-				MaxDepth = uint(m)
-			} else {
-				missing = true
-			}
 		case "--profiler":
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift

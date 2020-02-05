@@ -284,23 +284,11 @@ func evalSeq(exprs []Expr, env *LocalEnv) []Object {
 }
 
 func (expr *CallExpr) Eval(env *LocalEnv) Object {
-	if Trace {
-		fmt.Printf("[TRACE] CallExpr depth=%d of %+v at %s\n", CurDepth, expr.callable, expr.Position.Pos().String())
-		CurDepth++
-		if MaxDepth != 0 && CurDepth > MaxDepth {
-			panic(fmt.Sprintf("MaxDepth=%d surpassed\n", MaxDepth))
-		}
-	}
 	callable := Eval(expr.callable, env)
 	switch callable := callable.(type) {
 	case Callable:
 		args := evalSeq(expr.args, env)
-		if Trace {
-			obj := callable.Call(args)
-			CurDepth--
-			return obj
-		}
-		return callable.Call(args) // Optimize tail call?
+		return callable.Call(args)
 	default:
 		panic(RT.NewErrorWithPos(callable.ToString(false)+" is not a Fn", expr.callable.Pos()))
 	}
@@ -433,17 +421,7 @@ func (expr *RecurExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *MacroCallExpr) Eval(env *LocalEnv) Object {
-	if Trace {
-		fmt.Printf("[TRACE] MacroCallExpr depth=%d at %s\n", CurDepth, expr.Position.Pos().String())
-		CurDepth++
-		if MaxDepth != 0 && CurDepth > MaxDepth {
-			panic(fmt.Sprintf("MaxDepth=%d surpassed\n", MaxDepth))
-		}
-		obj := expr.macro.Call(expr.args)
-		CurDepth--
-		return obj
-	}
-	return expr.macro.Call(expr.args) // Optimize tail call?
+	return expr.macro.Call(expr.args)
 }
 
 func (expr *MacroCallExpr) Name() string {

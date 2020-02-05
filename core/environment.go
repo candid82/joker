@@ -13,9 +13,6 @@ var (
 	Stdout         io.Writer = os.Stdout
 	Stderr         io.Writer = os.Stderr
 	VerbosityLevel           = 0
-	Trace                    = false
-	CurDepth       uint      = 0
-	MaxDepth       uint      = 0
 )
 
 type (
