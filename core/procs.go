@@ -28,24 +28,6 @@ type internalData struct {
 
 var coreNamespaces []string
 
-var (
-	coreData         internalData
-	replData         internalData
-	walkData         internalData
-	templateData     internalData
-	testData         internalData
-	setData          internalData
-	tools_cliData    internalData
-	linter_allData   internalData
-	linter_jokerData internalData
-	linter_cljxData  internalData
-	linter_cljData   internalData
-	linter_cljsData  internalData
-	hiccupData       internalData
-	pprintData       internalData
-	better_condData  internalData
-)
-
 type FileInfo struct {
 	Name     string
 	Filename string
@@ -118,12 +100,12 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 	},
 }
 
-var CoreSourceFileInfo = map[string]*internalData{}
+// var CoreSourceFileInfo = map[string]*[]byte{}
 var CoreSourceFilename = map[string]string{}
 
-func ProcessCoreSourceFileFor(ns string) {
-	processData(CoreSourceFileInfo[ns], ns)
-}
+// func ProcessCoreSourceFileFor(ns string) {
+// 	processData(CoreSourceFileInfo[ns], ns)
+// }
 
 type (
 	Phase        int
@@ -142,8 +124,6 @@ const (
 
 const VERSION = "v0.14.1"
 
-var internalLibs map[string]*internalData
-
 const (
 	CLJ Dialect = iota
 	CLJS
@@ -153,24 +133,12 @@ const (
 )
 
 func InitInternalLibs() {
-	internalLibs = map[string]*internalData{
-		"joker.core":        &coreData,
-		"joker.walk":        &walkData,
-		"joker.template":    &templateData,
-		"joker.repl":        &replData,
-		"joker.test":        &testData,
-		"joker.set":         &setData,
-		"joker.tools.cli":   &tools_cliData,
-		"joker.hiccup":      &hiccupData,
-		"joker.pprint":      &pprintData,
-		"joker.better-cond": &better_condData,
-	}
 	for _, f := range CoreSourceFiles {
-		if _, found := CoreSourceFileInfo[f.Name]; found {
-			continue // Linter stuff, not yet supported by gen_code.go
-		}
+		// if _, found := CoreSourceFileInfo[f.Name]; found {
+		// 	continue // Linter stuff, not yet supported by gen_code.go
+		// }
 		ns := CoreNameAsNamespaceName(f.Name)
-		CoreSourceFileInfo[f.Name] = internalLibs[ns]
+		// CoreSourceFileInfo[f.Name] = internalLibs[ns]
 		CoreSourceFilename[ns] = f.Filename
 	}
 }
@@ -1522,10 +1490,6 @@ var procLoadFile = func(args []Object) Object {
 var procLoadLibFromPath = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
-	if d := internalLibs[libname]; d != nil {
-		processData(d, libname)
-		return NIL
-	}
 	cp := GLOBAL_ENV.classPath.Value
 	cpvec := AssertVector(cp, "*classpath* must be a Vector, not a "+cp.GetType().ToString(false))
 	count := cpvec.Count()
@@ -1872,43 +1836,28 @@ func finalizeNamespace() {
 	fmt.Fprintf(Stderr, "PROCESSED ns=%s mappings=%d\n", *ns.Name.name, len(ns.mappings))
 }
 
-func processData(info *internalData, name string) (processed bool) {
+func processData(data []byte, name string) {
 	ns := GLOBAL_ENV.CurrentNamespace()
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { finalizeNamespace(); GLOBAL_ENV.SetCurrentNamespace(ns) }()
-	if !info.available {
-		panic(fmt.Sprintf("Unable to load internal data %s -- core/a_*_{core,data}.go both missing?", name))
-	}
-	if info.init != nil {
-		if VerbosityLevel > 0 {
-			fmt.Fprintf(Stderr, "processNamespaceinfo: Running init() for %s\n", name)
+	header, p := UnpackHeader(data, GLOBAL_ENV)
+	for len(p) > 0 {
+		var expr Expr
+		expr, p = UnpackExpr(p, header)
+		_, err := TryEval(expr)
+		if err != nil {
+			fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
 		}
-		info.init()
-		info.init = nil
-		processed = true
+		PanicOnErr(err)
 	}
-	if info.data != nil {
-		if VerbosityLevel > 0 {
-			fmt.Fprintf(Stderr, "processNamespaceinfo: Evaluating code for %s\n", name)
-		}
-		header, p := UnpackHeader(info.data, GLOBAL_ENV)
-		for len(p) > 0 {
-			var expr Expr
-			expr, p = UnpackExpr(p, header)
-			_, err := TryEval(expr)
-			if err != nil {
-				fmt.Fprintf(Stderr, "About to panic evaluating: %v (%T)\n", expr, expr)
-			}
-			PanicOnErr(err)
-		}
-		info.data = nil
-		processed = true
+	if VerbosityLevel > 0 {
+		fmt.Fprintf(Stderr, "processData: Evaluated code for %s\n", GLOBAL_ENV.CurrentNamespace().ToString(false))
 	}
-	return
 }
 
 func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
+	ns.MaybeLazy("joker.core")
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
@@ -1941,26 +1890,21 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	}
 	// First look for registered (e.g. std) libs
 	ns, found := GLOBAL_ENV.Namespaces[sym.name]
-	if found {
-		return MakeBoolean(ns.Lazy == nil)
-	}
-	// Then check core libs, which (generally) start out as unregistered
-	libname := sym.Name()
-	info, found := internalLibs[libname]
-	return MakeBoolean(found && info.init == nil && info.data == nil)
+	return MakeBoolean(found && ns.Lazy == nil)
 }
 
 var haveSetCoreNamespaces bool
 
 func ProcessCoreData() {
-	if processData(&coreData, "<joker.core>") || !haveSetCoreNamespaces {
+	// Let MaybeLazy() handle initialization.
+	if !haveSetCoreNamespaces {
 		setCoreNamespaces()
 		haveSetCoreNamespaces = true
 	}
 }
 
 func ProcessReplData() {
-	processData(&replData, "<joker.repl>")
+	// Let MaybeLazy() handle initialization.
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
@@ -2170,19 +2114,19 @@ func ProcessLinterData(dialect Dialect) {
 		markJokerNamespacesAsUsed()
 		return
 	}
-	processData(&linter_allData, "linter_all")
+	processData(linter_allData, "linter_all")
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	if dialect == JOKER {
 		markJokerNamespacesAsUsed()
-		processData(&linter_jokerData, "linter_joker")
+		processData(linter_jokerData, "linter_joker")
 		return
 	}
-	processData(&linter_cljxData, "linter_cljx")
+	processData(linter_cljxData, "linter_cljx")
 	switch dialect {
 	case CLJ:
-		processData(&linter_cljData, "linter_clj")
+		processData(linter_cljData, "linter_clj")
 	case CLJS:
-		processData(&linter_cljsData, "linter_cljs")
+		processData(linter_cljsData, "linter_cljs")
 	}
 	removeJokerNamespaces()
 }

@@ -135,7 +135,7 @@ func main() {
 		coreNamespaces[nsName] = coreNamespaceIndex
 		coreNamespaceIndex++
 
-		ProcessCoreSourceFileFor(f.Name)
+		ns.MaybeLazy()
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 		if VerbosityLevel > 0 {
