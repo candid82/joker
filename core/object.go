@@ -758,7 +758,7 @@ func (p Proc) ToString(escape bool) string {
 func (p Proc) Equals(other interface{}) bool {
 	switch other := other.(type) {
 	case Proc:
-		return p.Fn.Equals(other.Fn)
+		return reflect.ValueOf(p.Fn).Pointer() == reflect.ValueOf(other.Fn).Pointer()
 	}
 	return false
 }
@@ -776,43 +776,7 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
-	return p.Fn.Hash()
-}
-
-func (p ProcFn) Call(args []Object) Object {
-	return p(args)
-}
-
-func (p ProcFn) Compare(a, b Object) int {
-	return compare(p, a, b)
-}
-
-func (p ProcFn) ToString(escape bool) string {
-	return "#object[ProcFn]"
-}
-
-func (p ProcFn) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case ProcFn:
-		return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
-	}
-	return false
-}
-
-func (p ProcFn) GetInfo() *ObjectInfo {
-	return nil
-}
-
-func (p ProcFn) WithInfo(*ObjectInfo) Object {
-	return p
-}
-
-func (p ProcFn) GetType() *Type {
-	return TYPE.ProcFn
-}
-
-func (p ProcFn) Hash() uint32 {
-	return HashPtr(reflect.ValueOf(p).Pointer())
+	return HashPtr(reflect.ValueOf(p.Fn).Pointer())
 }
 
 func (i InfoHolder) GetInfo() *ObjectInfo {
