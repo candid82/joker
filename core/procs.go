@@ -1522,8 +1522,8 @@ var procLoadFile = func(args []Object) Object {
 var procLoadLibFromPath = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
-	if info := internalLibs[libname]; info != nil {
-		processData(info, libname)
+	if d := internalLibs[libname]; d != nil {
+		processData(d, libname)
 		return NIL
 	}
 	cp := GLOBAL_ENV.classPath.Value
