@@ -1853,7 +1853,3 @@ func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 	}()
 	return Parse(obj, ctx), nil
 }
-
-func (v *VarRefExpr) Var() *Var {
-	return v.vr
-}

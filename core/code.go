@@ -277,3 +277,7 @@ func coreTypeAsGo(e interface{}) string {
 	s := strings.Replace(coreType(e), "*", "", 1)
 	return strings.ToLower(s[0:1]) + s[1:]
 }
+
+func (v *VarRefExpr) Var() *Var {
+	return v.vr
+}
