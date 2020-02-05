@@ -1812,6 +1812,9 @@ func processData(data []byte) {
 		_, err := TryEval(expr)
 		PanicOnErr(err)
 	}
+	if VerbosityLevel > 0 {
+		fmt.Fprintf(Stderr, "processData: Evaluated code for %s\n", GLOBAL_ENV.CurrentNamespace().ToString(false))
+	}
 }
 
 func setCoreNamespaces() {
