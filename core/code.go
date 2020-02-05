@@ -281,3 +281,16 @@ func coreTypeAsGo(e interface{}) string {
 func (v *VarRefExpr) Var() *Var {
 	return v.vr
 }
+
+func (ns *Namespace) Mappings() map[*string]*Var {
+	return ns.mappings
+}
+
+func (pos Position) String() string {
+	return fmt.Sprintf("%s:[%d:%d-%d:%d]",
+		pos.Filename(),
+		pos.startLine,
+		pos.startColumn,
+		pos.endLine,
+		pos.endColumn)
+}

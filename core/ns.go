@@ -177,10 +177,6 @@ func (ns *Namespace) Resolve(name string) *Var {
 	return ns.mappings[STRINGS.Intern(name)]
 }
 
-func (ns *Namespace) Mappings() map[*string]*Var {
-	return ns.mappings
-}
-
 // Convert e.g. "<joker.core>" to "joker.core". Panic if not "<*>".
 func CoreNameAsNamespaceName(s string) string {
 	if s[0] != '<' || s[len(s)-1] != '>' {

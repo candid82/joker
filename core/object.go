@@ -313,15 +313,6 @@ func (pos Position) Filename() string {
 	return *pos.filename
 }
 
-func (pos Position) String() string {
-	return fmt.Sprintf("%s:[%d:%d-%d:%d]",
-		pos.Filename(),
-		pos.startLine,
-		pos.startColumn,
-		pos.endLine,
-		pos.endColumn)
-}
-
 var hasher hash.Hash32 = fnv.New32a()
 
 func newIteratorError() error {
