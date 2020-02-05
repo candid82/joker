@@ -41,10 +41,15 @@ func main() {
 			dst[i*4+3] = hextable[v&0x0f]
 		}
 
+		dataTemplate := template
+
 		nsName := GLOBAL_ENV.CurrentNamespace().Name.Name()
 
 		slowInit := ""
 		if _, found := namespaces[nsName]; !found && nsName != "user" {
+			dataTemplate += `
+var {name}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("{ns}"))
+`
 			slowInit = `// +build !fast_init
 
 `
@@ -53,7 +58,8 @@ func main() {
 		namespaces[nsName] = struct{}{}
 
 		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
-		fileContent := strings.ReplaceAll(template, "{name}", name)
+		fileContent := strings.ReplaceAll(dataTemplate, "{name}", name)
+		fileContent = strings.ReplaceAll(fileContent, "{ns}", nsName)
 		fileContent = strings.ReplaceAll(fileContent, "{slowInit}", slowInit)
 		fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
 		ioutil.WriteFile("a_"+name+"_data.go", []byte(fileContent), 0666)
