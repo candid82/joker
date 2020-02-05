@@ -1,4 +1,4 @@
-;;;; Generate foo/a_foo.go files based on foo.joke files.
+;;;; Generate foo/a_foo*.go files based on foo.joke files.
 ;;;;
 ;;;; Given:
 ;;;;
@@ -10,15 +10,20 @@
 ;;;;
 ;;;; This results in the following code in a_foo.go:
 ;;;;
-;;;;   var GOFN Proc = Proc{fn: func(_args []Object) Object { BODY }; name: "FN"}
+;;;;   var __GOFN__P ProcFn = __GOFN
+;;;;   var GOFN Proc = Proc{Fn: __GOFN__P, Name: "GOFN", Package: "std/foo"}
 ;;;;
-;;;; GOFN is a slightly mangled form of FN (it's capitalized to be a
-;;;; public method, an underscore is appended, etc.; see "go-name",
-;;;; below) and BODY chooses an implementation based on the # of
-;;;; elements in _args. (So "[ARGSPEC...]" could actually be
-;;;; "([ARGSPEC1...])  ([ARGSPEC2...]...)", each with a unique # of
-;;;; arguments, in which case GOCODE is not just a string, but a map
-;;;; of the # of arguments to the corresponding string.)
+;;;;   func __GOFN(_args []Object) Object { BODY }
+;;;;
+;;;; That is, GOFN is a Proc that wraps a ProcFn var (__GOFN__P) to
+;;;; which the implementation itself, named __GOFN, is assigned.
+;;;;
+;;;; GOFN is a slightly mangled form of FN (an underscore is appended,
+;;;; etc.; see "go-name", below) and BODY chooses an implementation
+;;;; based on the # of elements in _args. (So "[ARGSPEC...]" could
+;;;; actually be "([ARGSPEC1...])  ([ARGSPEC2...]...)", each with a
+;;;; unique # of arguments, in which case GOCODE is not just a string,
+;;;; but a map of the # of arguments to the corresponding string.)
 ;;;; "PanicArity()" is called if the # of arguments does not match.
 ;;;;
 ;;;; Each such implementation extracts the arguments based on their
@@ -33,33 +38,57 @@
 ;;;; "nil", aka NIL in Joker's Go code); otherwise, "Make<RTN-TYPE>"
 ;;;; is called to wrap the result in the desired type.
 ;;;;
-;;;; At the package NSNAME level ("foo" in foo/a_foo.go),
-;;;; "<NSNAME>Namespace" is defined as a global variable initialized
-;;;; to a global Clojure environment with NSFULLNAME (e.g. "a.b.foo")
-;;;; as a symbol.
-;;;;
 ;;;; Non-functions (such as constants and variables) and functions
 ;;;; (see above) follow.
 ;;;;
-;;;; Finally, "func Init() {...}" is generated, including:
+;;;; Next, this follows all those vars (functions and non-functions):
 ;;;;
-;;;;   <NSNAME>Namespace.ResetMeta(MakeMeta(nil, "{NSDOCSTRING}", "VERSION"))
+;;;;   func Init() {
+;;;;   {non-fn-inits}
+;;;;           InternsOrThunks()
+;;;;   }
 ;;;;
-;;;; (NSDOCSTRING comes from the ":doc" metadata in the "ns"
-;;;; invocation at the top of foo.joke; VERSION is currently hardcoded
-;;;; to "1.0". That's also where imports are specified; they're
-;;;; generated near the top of foo/a_foo.go, just after the "package"
-;;;; definition.)
+;;;; Any non-function runtime initializations are performed in
+;;;; {non-fn-inits}.
+;;;;
+;;;; "<NSNAME>Namespace" is then defined as a global variable
+;;;; initialized to a global Clojure namespace with NSFULLNAME
+;;;; (e.g. "joker.foo") as a symbol:
+;;;;
+;;;;   var fooNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.foo"))
+;;;;
+;;;; a_foo.go finishes with:
+;;;;
+;;;;   func init() {
+;;;;           fooNamespace.Lazy = Init
+;;;;   }
+;;;;
+;;;; That is, upon Joker startup, the namespace is first registered (mapped),
+;;;; then its lazy-initialization function (Init()) is registered for it.
+;;;;
+;;;; a_os_slow_init.go defines (the "slow" version of) InternsOrThunks():
+;;;;
+;;;;   func InternsOrThunks() {
+;;;;           <NSNAME>Namespace.ResetMeta(MakeMeta(nil, "{NSDOCSTRING}", "VERSION"))
+;;;;           {interns}
+;;;;   }
+;;;;
+;;;; NSDOCSTRING comes from the ":doc" metadata in the "ns" invocation
+;;;; at the top of foo.joke; VERSION is currently hardcoded to
+;;;; "1.0". That's also where imports are specified; they're generated
+;;;; near the top of foo/a_foo_slow_init.go, just after the "package"
+;;;; definition.
 ;;;;
 ;;;; Then the non-function and function names are interned in that
-;;;; same namespace, with each such intern looking like:
+;;;; same namespace (where "{interns}" appears, above), with each such
+;;;; intern looking like:
 ;;;;
 ;;;;   <NSNAME>Namespace.InternVar("FN", GOFN,
 ;;;;     MakeMeta(NewListFrom(NewVectorFrom(MakeSymbol("ARG1"), ...)),
 ;;;;              DOCSTRING)
 ;;;;
 ;;;; ARGn is basically each ARGSPEC, including "&" where applicable,
-;;;; but without the tags (so, the type info is lost here).
+;;;; but without the tags (i.e. the type info is lost here).
 ;;;;
 ;;;; This is where Joker looks up "bar" in "(bar ...)", using the
 ;;;; applicable namespace in effect, and knows to call "bar_" (the
