@@ -145,9 +145,9 @@ When Joker is built (via the `run.sh` script), `go generate ./...` is first run.
 //go:generate go run gen_data/gen_data.go
 ```
 
-That builds and runs `core/gen_data/gen_data.go`, which defines, in the `files` array, a list of files (in `core/data/`) to be processed.
+That builds and runs `core/gen_data/gen_data.go`, which finds, in the `CoreSourceFiles` array defined by the `core/gen_common` package, a list of files (in `core/data/`) to be processed.
 
-As explained in the block comment just above the `var files []...` definition, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
+As explained in the block comment just above the `var CoreSourceFiles []...` definition in `core/gen_common/gen_common.go`, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
 
 Processing a `.joke` file consists of reading the file via Joker's (Clojure-like) Reader, "packing" the results into a portable binary format, and encoding the resulting binary data as a Go source file named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
 
@@ -155,7 +155,7 @@ As this all occurs before the `go build` step performed by `run.sh`, the result 
 
 (Note that "when needed", as used above, is immediately upon startup for `joker.core`; it also applies to `joker.repl` when the REPL is to be immediately entered; otherwise, it applies when the namespace is referenced such as via a `require` or `use` invocation.)
 
-As this approach does *not* involve the normal Read phase at Joker startup time, the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data string, and parsed back out at load time; so not all parsing overhead is avoided.
+As this approach does *not* involve the normal Read phase at Joker startup time, the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data stream, and parsed back out at load time; so not all parsing overhead is avoided.
 
 A disadvantage of this approach is that it requires changes to `core/pack.go` when changes are made to certain aspects of the AST.
 
@@ -167,7 +167,7 @@ Assuming one has determined it appropriate to add a new core namespace to the Jo
 
 Then, besides putting that source code in `core/data/*.joke`, one must:
 
-* Modify the **core/gen\_data/gen\_data.go** `files` array (after any core namespaces upon which it depends)
+* Add it to the**core/gen\_common/gen\_common.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
 
 Further, if the new namespace depends on any standard-library-wrapping namespaces:
 
