@@ -1,3 +1,5 @@
+;;;; See DEVELOPER.md for information on this script.
+
 ;;; Load all core namespaces. This pulls in any std namespaces upon which
 ;;; they depend. Then, set 'preloaded' to those std namespaces, forcing
 ;;; complete evaluation so lazy evaluation wouldn't find joker.os due to
