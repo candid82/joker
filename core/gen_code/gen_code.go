@@ -447,10 +447,10 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 	%s: %s,`[1:],
 				vtf.Name, val))
 		}
+		sort.Strings(members)
 	default:
 		panic(fmt.Sprintf("unsupported type %T for %s", obj, name))
 	}
-	sort.Strings(members)
 	return
 }
 
