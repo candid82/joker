@@ -14,7 +14,7 @@ build() {
       mv -f joker joker.slow
       go build -tags fast_init
       ln -f joker joker.fast
-      echo "...built both joker.slow and (also named joker) joker.fast."
+      echo "...built both joker.slow and joker.fast (aka joker)."
   else
       ln -f joker joker.slow
   fi
