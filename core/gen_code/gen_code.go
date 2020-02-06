@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
+	. "github.com/candid82/joker/core/gen_common"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 )
@@ -109,8 +110,8 @@ func main() {
 	parseArgs(os.Args)
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-	InitInternalLibs()
 
+	coreSourceFilename := map[string]string{}
 	coreNamespaces := map[string]uint{}
 	coreNamespaceIndex := uint(0)
 
@@ -132,6 +133,7 @@ func main() {
 			}
 		}
 
+		coreSourceFilename[nsName] = f.Filename
 		coreNamespaces[nsName] = coreNamespaceIndex
 		coreNamespaceIndex++
 
@@ -226,7 +228,7 @@ func init() {
 			continue
 		}
 
-		filename := CoreSourceFilename[nsName]
+		filename := coreSourceFilename[nsName]
 		name := filename[0 : len(filename)-5] // assumes .joke extension
 		goname := NameAsGo(nsName)
 		codeFile := fmt.Sprintf(codePattern, name)
@@ -239,7 +241,7 @@ func init() {
 		if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
 			for r, _ := range *requireds {
 				rqNsName := r.ToString(false)
-				filename := CoreSourceFilename[rqNsName]
+				filename := coreSourceFilename[rqNsName]
 				if filename == "" {
 					filename = "<std>"
 				}

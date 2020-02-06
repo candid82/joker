@@ -28,85 +28,6 @@ type internalData struct {
 
 var coreNamespaces []string
 
-type FileInfo struct {
-	Name     string
-	Filename string
-}
-
-/* The entries must be ordered such that a given namespace depends
-/* only upon namespaces loaded above it. E.g. joker.template depends
-/* on joker.walk, so is listed afterwards, not in alphabetical
-/* order. */
-var CoreSourceFiles []FileInfo = []FileInfo{
-	{
-		Name:     "<joker.core>",
-		Filename: "core.joke",
-	},
-	{
-		Name:     "<joker.repl>",
-		Filename: "repl.joke",
-	},
-	{
-		Name:     "<joker.walk>",
-		Filename: "walk.joke",
-	},
-	{
-		Name:     "<joker.template>",
-		Filename: "template.joke",
-	},
-	{
-		Name:     "<joker.test>",
-		Filename: "test.joke",
-	},
-	{
-		Name:     "<joker.set>",
-		Filename: "set.joke",
-	},
-	{
-		Name:     "<joker.tools.cli>",
-		Filename: "tools_cli.joke",
-	},
-	{
-		Name:     "<joker.core>",
-		Filename: "linter_all.joke",
-	},
-	{
-		Name:     "<joker.core>",
-		Filename: "linter_joker.joke",
-	},
-	{
-		Name:     "<joker.core>",
-		Filename: "linter_cljx.joke",
-	},
-	{
-		Name:     "<joker.core>",
-		Filename: "linter_clj.joke",
-	},
-	{
-		Name:     "<joker.core>",
-		Filename: "linter_cljs.joke",
-	},
-	{
-		Name:     "<joker.hiccup>",
-		Filename: "hiccup.joke",
-	},
-	{
-		Name:     "<joker.pprint>",
-		Filename: "pprint.joke",
-	},
-	{
-		Name:     "<joker.better-cond>",
-		Filename: "better_cond.joke",
-	},
-}
-
-// var CoreSourceFileInfo = map[string]*[]byte{}
-var CoreSourceFilename = map[string]string{}
-
-// func ProcessCoreSourceFileFor(ns string) {
-// 	processData(CoreSourceFileInfo[ns], ns)
-// }
-
 type (
 	Phase        int
 	Dialect      int
@@ -131,17 +52,6 @@ const (
 	EDN
 	UNKNOWN
 )
-
-func InitInternalLibs() {
-	for _, f := range CoreSourceFiles {
-		// if _, found := CoreSourceFileInfo[f.Name]; found {
-		// 	continue // Linter stuff, not yet supported by gen_code.go
-		// }
-		ns := CoreNameAsNamespaceName(f.Name)
-		// CoreSourceFileInfo[f.Name] = internalLibs[ns]
-		CoreSourceFilename[ns] = f.Filename
-	}
-}
 
 func ExtractCallable(args []Object, index int) Callable {
 	return EnsureCallable(args, index)

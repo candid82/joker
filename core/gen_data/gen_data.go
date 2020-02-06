@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
+	. "github.com/candid82/joker/core/gen_common"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 )
