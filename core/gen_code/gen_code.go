@@ -55,18 +55,18 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	Statics        *[]string
-	StaticImport   *Imports
-	Runtime        *[]string
-	Required       *map[*Namespace]struct{} // Namespaces referenced by current one
-	Import         *Imports
-	Namespace      *Namespace // In which the core.Var currently being emitted is said to reside
-	Runtimes       map[*Namespace]*[]string
-	Imports        map[*Namespace]*Imports
-	Generated      map[interface{}]interface{}             // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	CoreNamespaces map[string]uint                         // Set of the core namespaces (this excludes user and dependent std namespaces such as joker.string and joker.http)
-	Requireds      map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
-	LateInit       bool                                    // Whether emitting a namespace other than joker.core
+	Statics      *[]string
+	StaticImport *Imports
+	Runtime      *[]string
+	Required     *map[*Namespace]struct{} // Namespaces referenced by current one
+	Import       *Imports
+	Namespace    *Namespace // In which the core.Var currently being emitted is said to reside
+	Runtimes     map[*Namespace]*[]string
+	Imports      map[*Namespace]*Imports
+	Generated    map[interface{}]interface{}             // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	Namespaces   map[string]uint                         // Set of the known namespaces (core, user, required stds)
+	Requireds    map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInit     bool                                    // Whether emitting a namespace other than joker.core
 }
 
 var (
@@ -106,14 +106,16 @@ var (
 	}
 )
 
+var namespaceIndices = map[string]uint{}
+
 func main() {
 	parseArgs(os.Args)
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	coreSourceFilename := map[string]string{}
-	coreNamespaces := map[string]uint{}
-	coreNamespaceIndex := uint(0)
+	namespaces := map[string]uint{}
+	namespaceIndex := uint(0)
 
 	for _, f := range CoreSourceFiles {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
@@ -121,7 +123,7 @@ func main() {
 		nsNamePtr := STRINGS.Intern(nsName)
 
 		if ns, found := GLOBAL_ENV.Namespaces[nsNamePtr]; found {
-			if _, exists := coreNamespaces[nsName]; exists {
+			if _, exists := namespaces[nsName]; exists {
 				continue // Already processed; this is probably a linter*.joke file
 			}
 			if VerbosityLevel > 0 {
@@ -134,8 +136,8 @@ func main() {
 		}
 
 		coreSourceFilename[nsName] = f.Filename
-		coreNamespaces[nsName] = coreNamespaceIndex
-		coreNamespaceIndex++
+		namespaces[nsName] = namespaceIndex
+		namespaceIndex++
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 		ns.MaybeLazy("gen_code")
@@ -157,31 +159,32 @@ func main() {
 	ResetUsage()
 
 	genEnv := &GenEnv{
-		Statics:        &statics,
-		StaticImport:   imports,
-		Runtime:        &runtime,
-		Required:       nil,
-		Import:         imports,
-		Namespace:      GLOBAL_ENV.CoreNamespace,
-		Runtimes:       map[*Namespace]*[]string{},
-		Imports:        map[*Namespace]*Imports{},
-		Requireds:      map[*Namespace]*map[*Namespace]struct{}{},
-		Generated:      map[interface{}]interface{}{},
-		CoreNamespaces: coreNamespaces,
-		LateInit:       false,
+		Statics:      &statics,
+		StaticImport: imports,
+		Runtime:      &runtime,
+		Required:     nil,
+		Import:       imports,
+		Namespace:    GLOBAL_ENV.CoreNamespace,
+		Runtimes:     map[*Namespace]*[]string{},
+		Imports:      map[*Namespace]*Imports{},
+		Requireds:    map[*Namespace]*map[*Namespace]struct{}{},
+		Generated:    map[interface{}]interface{}{},
+		Namespaces:   namespaces,
+		LateInit:     false,
 	}
 
 	// Order namespaces by when "discovered" for stability compiling and outputting.
 
-	coreNamespaceArray := make([]string, len(GLOBAL_ENV.Namespaces))
+	namespaceArray := make([]string, len(GLOBAL_ENV.Namespaces))
 	for nsNamePtr, _ := range GLOBAL_ENV.Namespaces {
 		nsName := *nsNamePtr
-		index, found := coreNamespaces[nsName]
+		index, found := namespaces[nsName]
 		if !found {
-			index = coreNamespaceIndex
-			coreNamespaceIndex++
+			index = namespaceIndex
+			namespaceIndex++
 		}
-		coreNamespaceArray[index] = nsName
+		namespaceArray[index] = nsName
+		namespaceIndices[nsName] = index
 	}
 
 	// Emit the "global" (static) Joker variables.
@@ -197,7 +200,7 @@ func main() {
 
 	// Emit the per-namespace files (a_*_code.go).
 
-	for _, nsName := range coreNamespaceArray {
+	for _, nsName := range namespaceArray {
 		ns := GLOBAL_ENV.Namespaces[STRINGS.Intern(nsName)]
 
 		const fileTemplate = `
@@ -221,7 +224,7 @@ func init() {
 
 		GLOBAL_ENV.SetCurrentNamespace(ns)
 
-		if _, found := coreNamespaces[nsName]; !found {
+		if _, found := namespaces[nsName]; !found {
 			if VerbosityLevel > 0 {
 				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 			}
@@ -356,7 +359,7 @@ func (genEnv *GenEnv) emitVar(name string, atRuntime bool, obj interface{}) {
 
 	if strings.HasPrefix(name, "var_") {
 		ns := v.Interface().(Var).Namespace()
-		if _, found := genEnv.CoreNamespaces[ns.ToString(false)]; found {
+		if _, found := genEnv.Namespaces[ns.ToString(false)]; found {
 			oldNamespace := genEnv.Namespace
 			oldRuntime := genEnv.Runtime
 			oldImports := genEnv.Import
@@ -421,7 +424,7 @@ func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (
 		}
 		keys := v.MapKeys()
 		valueType := v.Type().Elem()
-		sortValues(keys) // TODO: Sort Namespace *string keys via coreNamespaceArray
+		sortValues(keys)
 		for _, key := range keys {
 			k := genEnv.emitValue("", reflect.TypeOf(nil), key)
 			vi := v.MapIndex(key)
@@ -910,7 +913,7 @@ type valuesSorter struct {
 // ConfigState to decide if and how to populate those surrogate keys.
 func newValuesSorter(values []reflect.Value) sort.Interface {
 	vs := &valuesSorter{values: values}
-	if canSortSimply(vs.values[0].Kind()) {
+	if canSortSimply(vs.values[0]) {
 		return vs
 	}
 	vs.strings = make([]string, len(values))
@@ -935,9 +938,9 @@ func newValuesSorter(values []reflect.Value) sort.Interface {
 // canSortSimply tests whether a reflect.Kind is a primitive that can be sorted
 // directly, or whether it should be considered for sorting by surrogate keys
 // (if the ConfigState allows it).
-func canSortSimply(kind reflect.Kind) bool {
+func canSortSimply(value reflect.Value) bool {
 	// This switch parallels valueSortLess, except for the default case.
-	switch kind {
+	switch value.Kind() {
 	case reflect.Bool:
 		return true
 	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
@@ -952,6 +955,8 @@ func canSortSimply(kind reflect.Kind) bool {
 		return true
 	case reflect.Array:
 		return true
+	case reflect.Ptr:
+		return canSortSimply(value.Elem())
 	}
 	return false
 }
@@ -985,6 +990,13 @@ func valueSortLess(a, b reflect.Value) bool {
 	case reflect.Float32, reflect.Float64:
 		return a.Float() < b.Float()
 	case reflect.String:
+		aStr := a.String()
+		bStr := b.String()
+		if aIndex, found := namespaceIndices[aStr]; found {
+			if bIndex, found := namespaceIndices[bStr]; found {
+				return aIndex < bIndex
+			}
+		}
 		return a.String() < b.String()
 	case reflect.Uintptr:
 		return a.Uint() < b.Uint()
