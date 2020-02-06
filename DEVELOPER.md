@@ -167,7 +167,7 @@ Assuming one has determined it appropriate to add a new core namespace to the Jo
 
 Then, besides putting that source code in `core/data/*.joke`, one must:
 
-* Add it to the**core/gen\_common/gen\_common.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
+* Add it to the **core/gen\_common/gen\_common.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
 
 Further, if the new namespace depends on any standard-library-wrapping namespaces:
 
