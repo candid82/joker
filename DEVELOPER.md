@@ -192,9 +192,7 @@ These `*.joke` files, however, have code of a particular form that is processed 
 
 #### The Joker Script That Writes Go Code
 
-The `std/generate-std.joke` script, which is run after the Joker executable is first built (by `run.sh`), reads in the pertinent namespaces, currently defined via `(def namespaces ...)` at the top of the script.
-
-(This should probably be changed to dynamically discover all the `*.joke` files in `std/`. See [the `gostd` fork's version](https://github.com/jcburley/joker/blob/gostd/std/generate-std.joke) for a sample implementation.)
+The `std/generate-std.joke` script, which is run after the Joker executable is first built (by `run.sh`), reads in the pertinent namespaces, currently defined via `(def namespaces ...)` at the top of the script. This definition dynamically discovers all the `*.joke` files in `std/`.
 
 `(apply require namespaces)` loads the target namespaces, then the script processes each namespace in `namespaces` by examining its public members and "compiling" them into Go code, which it stores in `std/*/a_*.go`, where `*` is the same name.
 
@@ -234,7 +232,6 @@ If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.
 
 Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for each public member (in `joker.foo`), one must:
 
-* Add `'foo` to the definition of `namespaces` in **std/generate-std.joke**
 * Add the namespace to `*loaded-libs*` by editing its `defonce` definition in `core/data/core.joke`
 * `mkdir -p std/foo`
 * `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo.go`
@@ -245,6 +242,119 @@ Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for ea
 * Run the tests (via `./all-tests.sh` or just `./eval-tests.sh`)
 
 While some might object to the inclusion of generated files (`std/*/a_*.joke`) in the repository, Joker currently depends on their presence in order to build, due to circular dependencies (related to the bootstrapping of Joker) as described below.
+
+#### Understanding the generate-std.joke Script
+
+This script generates `foo/a_foo*.go` files based on foo.joke files.
+
+Given:
+
+```
+(defn <RTN-TYPE> FN
+  DOCSTRING
+  {:added VERSION
+   :go GOCODE}
+  [ARGSPEC...])
+```
+
+This results in the following code in `a_foo.go`:
+
+```
+var __GOFN__P ProcFn = __GOFN
+var GOFN Proc = Proc{Fn: __GOFN__P, Name: "GOFN", Package: "std/foo"}
+
+func __GOFN(_args []Object) Object { BODY }
+```
+
+That is, `GOFN` is a `Proc` that wraps a `ProcFn` var (`__GOFN__P`) to
+which the implementation itself, named `__GOFN`, is assigned.
+
+`GOFN` is a slightly mangled form of `FN` (an underscore is appended,
+etc.; see the `go-name` function in the script) and `BODY` chooses an implementation
+based on the number of elements in _args. (So `[ARGSPEC...]` could
+actually be `([ARGSPEC1...]) ([ARGSPEC2...]...)`, each with a
+unique number of arguments, in which case `GOCODE` is not just a string,
+but a map of the number of arguments to the corresponding string.)
+`PanicArity()` is called if the number of arguments does not match.
+
+Each such implementation extracts the arguments based on their
+`ARGSPEC`-declared types (`ARGSPEC` typically being `^ARGTYPE
+ARGNAME`), via `ExtractARGTYPE(_args, N)` (where `N` is the
+argument index), then calls the corresponding `GOCODE`, saving the
+result in `_res`, which is then returned.
+
+If `RTN-TYPE` is omitted, `GOCODE`'s result is returned as-is (which
+typically requires `GOCODE` to refer to a custom implementation in
+`foo/foo_native.go`, as in the case of a function that returns
+`nil`, aka `NIL` in Joker's Go code); otherwise, `Make<RTN-TYPE>`
+is called to wrap the result in the desired type.
+
+Non-functions (such as constants and variables) and functions
+(see above) follow.
+
+Next, this follows all those vars (functions and non-functions):
+
+```
+func Init() {
+{non-fn-inits}
+        InternsOrThunks()
+}
+```
+
+Any non-function runtime initializations are performed in
+`{non-fn-inits}`.
+
+`<NSNAME>Namespace` is then defined as a global variable
+initialized to a global Clojure namespace with `NSFULLNAME`
+(e.g. `"joker.foo"`) as a symbol:
+
+```
+var fooNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.foo"))
+```
+
+`a_foo.go` finishes with:
+
+```
+func init() {
+        fooNamespace.Lazy = Init
+}
+```
+
+That is, upon Joker startup, the namespace is first registered (mapped),
+then its lazy-initialization function (`Init()`) is registered for it.
+
+`a_os_slow_init.go` defines (the "slow" version of) `InternsOrThunks()`:
+
+```
+func InternsOrThunks() {
+        <NSNAME>Namespace.ResetMeta(MakeMeta(nil, "{NSDOCSTRING}", "VERSION"))
+        {interns}
+}
+```
+
+`NSDOCSTRING` comes from the `:doc` metadata in the `ns` invocation
+at the top of `foo.joke`; `VERSION` is currently hardcoded to
+`"1.0"`. That's also where imports are specified; they're generated
+near the top of `foo/a_foo_slow_init.go`, just after the `package`
+specification.
+
+Then the non-function and function names are interned in that
+same namespace (where `{interns}` appears, above), with each such
+intern looking like:
+
+```
+<NSNAME>Namespace.InternVar("FN", GOFN,
+  MakeMeta(NewListFrom(NewVectorFrom(MakeSymbol("ARG1"), ...)),
+           DOCSTRING)
+```
+
+`ARGn` is basically each `ARGSPEC`, including `&` where applicable,
+but without the tags (i.e. the type info is lost here).
+
+This is where Joker looks up `bar` in `(bar ...)`, using the
+applicable namespace in effect, and knows to call `bar_` (the
+`GOFN` for `bar`) with the array of `Object`'s comprising the
+arguments in `...`.
 
 ### Beware Circular Dependencies
 
