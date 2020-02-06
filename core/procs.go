@@ -20,12 +20,6 @@ import (
 	"unicode/utf8"
 )
 
-type internalData struct {
-	data      []byte
-	init      func()
-	available bool
-}
-
 var coreNamespaces []string
 
 type (
