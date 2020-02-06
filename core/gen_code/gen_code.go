@@ -999,6 +999,8 @@ func valueSortLess(a, b reflect.Value) bool {
 			}
 			return valueSortLess(av, bv)
 		}
+	case reflect.Ptr:
+		return valueSortLess(a.Elem(), b.Elem())
 	}
 	return a.String() < b.String()
 }
