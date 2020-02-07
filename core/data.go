@@ -2,22 +2,8 @@
 
 package core
 
-func InitInternalLibs() {
-	internalLibs = map[string][]byte{
-		"joker.walk":        walkData,
-		"joker.template":    templateData,
-		"joker.repl":        replData,
-		"joker.test":        testData,
-		"joker.set":         setData,
-		"joker.tools.cli":   tools_cliData,
-		"joker.hiccup":      hiccupData,
-		"joker.pprint":      pprintData,
-		"joker.better-cond": better_condData,
-	}
-}
-
 func ProcessCoreData() {
-	processData(coreData)
+	// Let MaybeLazy() handle initialization.
 	if !haveSetCoreNamespaces {
 		setCoreNamespaces()
 		haveSetCoreNamespaces = true
@@ -25,7 +11,7 @@ func ProcessCoreData() {
 }
 
 func ProcessReplData() {
-	processData(replData)
+	// Let MaybeLazy() handle initialization.
 }
 
 func ProcessLinterData(dialect Dialect) {

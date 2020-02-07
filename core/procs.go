@@ -20,8 +20,6 @@ import (
 	"unicode/utf8"
 )
 
-var internalLibs map[string][]byte
-
 var coreNamespaces []string
 
 type (
@@ -1396,10 +1394,6 @@ var procLoadFile = func(args []Object) Object {
 var procLoadLibFromPath = func(args []Object) Object {
 	libname := EnsureSymbol(args, 0).Name()
 	pathname := EnsureString(args, 1).S
-	if d := internalLibs[libname]; d != nil {
-		processData(d)
-		return NIL
-	}
 	cp := GLOBAL_ENV.classPath.Value
 	cpvec := AssertVector(cp, "*classpath* must be a Vector, not a "+cp.GetType().ToString(false))
 	count := cpvec.Count()
@@ -1747,6 +1741,7 @@ func processData(data []byte) {
 
 func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
+	ns.MaybeLazy("joker.core")
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
@@ -1768,13 +1763,7 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	}
 	// First look for registered (e.g. std) libs
 	ns, found := GLOBAL_ENV.Namespaces[sym.name]
-	if found {
-		return MakeBoolean(ns.Lazy == nil)
-	}
-	// Then check core libs, which (generally) start out as unregistered
-	libname := sym.Name()
-	_, found = internalLibs[libname]
-	return MakeBoolean(found)
+	return MakeBoolean(found && ns.Lazy == nil)
 }
 
 var haveSetCoreNamespaces bool
