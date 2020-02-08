@@ -1797,8 +1797,6 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	return MakeBoolean(found && ns.Lazy == nil)
 }
 
-var haveSetCoreNamespaces bool
-
 func findConfigFile(filename string, workingDir string, findDir bool) string {
 	var err error
 	configName := ".joker"

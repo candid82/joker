@@ -2,6 +2,8 @@
 
 package core
 
+var haveSetCoreNamespaces bool
+
 func ProcessCoreData() {
 	// Let MaybeLazy() handle initialization.
 	if !haveSetCoreNamespaces {
