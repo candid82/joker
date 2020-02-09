@@ -29,6 +29,7 @@ import (
 	_ "github.com/candid82/joker/std/string"
 	_ "github.com/candid82/joker/std/time"
 	_ "github.com/candid82/joker/std/url"
+	_ "github.com/candid82/joker/std/uuid"
 	_ "github.com/candid82/joker/std/yaml"
 	"github.com/pkg/profile"
 )
