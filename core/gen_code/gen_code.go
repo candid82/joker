@@ -64,7 +64,7 @@ type GenEnv struct {
 	Runtimes     map[*Namespace]*[]string
 	Imports      map[*Namespace]*Imports
 	Generated    map[interface{}]interface{}             // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	Namespaces   map[string]uint                         // Set of the known namespaces (core, user, required stds)
+	Namespaces   map[string]int                          // Set of the known namespaces (core, user, required stds)
 	Requireds    map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
 	LateInit     bool                                    // Whether emitting a namespace other than joker.core
 }
@@ -106,7 +106,8 @@ var (
 	}
 )
 
-var namespaceIndices = map[string]uint{}
+var namespaces = map[string]int{}
+var namespaceIndices = map[string]int{}
 
 func main() {
 	parseArgs(os.Args)
@@ -114,8 +115,7 @@ func main() {
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
 
 	coreSourceFilename := map[string]string{}
-	namespaces := map[string]uint{}
-	namespaceIndex := uint(0)
+	namespaceIndex := 0
 
 	for _, f := range CoreSourceFiles {
 		GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
@@ -175,17 +175,27 @@ func main() {
 		LateInit:     false,
 	}
 
-	// Order namespaces by when "discovered" for stability compiling and outputting.
+	// Order namespaces by when "discovered" for stability
+	// compiling and outputting.  Put the non-core namespaces
+	// (user and std namespaces required by core) in front, so
+	// they are emitted first.
 
-	namespaceArray := make([]string, len(GLOBAL_ENV.Namespaces))
+	totalNs := len(GLOBAL_ENV.Namespaces)
+	coreNs := namespaceIndex
+	coreBaseIndex := totalNs - coreNs
+
+	namespaceArray := make([]string, totalNs)
+	namespaceIndex = -1
+
 	for nsNamePtr, _ := range GLOBAL_ENV.Namespaces {
 		nsName := *nsNamePtr
 		index, found := namespaces[nsName]
 		if !found {
+			// An std lib or user
 			index = namespaceIndex
-			namespaceIndex++
+			namespaceIndex--
 		}
-		namespaceArray[index] = nsName
+		namespaceArray[coreBaseIndex+index] = nsName
 		namespaceIndices[nsName] = index
 	}
 
@@ -228,13 +238,23 @@ func init() {
 
 		if _, found := namespaces[nsName]; !found {
 			if VerbosityLevel > 0 {
-				fmt.Printf("LAZILY INITIALIZING ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
+				fmt.Printf("DIRECTLY INITIALIZING ns=%s mappings=%d in %s\n", nsName, len(ns.Mappings()), masterFile)
+			}
+			if _, found := genEnv.Runtimes[ns]; found {
+				msg := fmt.Sprintf("ERROR: found runtime info for ns=%s", nsName)
+				panic(msg)
 			}
 			continue
 		}
 
-		filename := coreSourceFilename[nsName]
-		name := filename[0 : len(filename)-5] // assumes .joke extension
+		var name string
+		if filename, found := coreSourceFilename[nsName]; found {
+			name = filename[0 : len(filename)-5] // assumes .joke extension
+		} else {
+			// This shouldn't happen, but pick reasonable names in case it's enabled for some reason.
+			filename = name + ".joke"
+			name = strings.ReplaceAll(nsName, "joker.", "")
+		}
 		goname := NameAsGo(nsName)
 		codeFile := fmt.Sprintf(codePattern, name)
 
@@ -242,28 +262,33 @@ func init() {
 			fmt.Printf("OUTPUTTING %s as %s (mappings=%d)\n", nsName, codeFile, len(ns.Mappings()))
 		}
 
-		runtime := *genEnv.Runtimes[ns] // TODO: Sort on split of ' = ' 2nd before 1st
-		if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
-			for r, _ := range *requireds {
-				rqNsName := r.ToString(false)
-				filename := coreSourceFilename[rqNsName]
-				if filename == "" {
-					filename = "<std>"
-				}
-				if VerbosityLevel > 0 {
-					fmt.Printf("  REQUIRES: %s from %s\n", rqNsName, filename)
-				}
-				runtime = append(runtime, fmt.Sprintf(`
+		var r string
+		if runtimePtr, found := genEnv.Runtimes[ns]; found { // TODO: Sort on split of ' = ' 2nd before 1st
+			runtime := *runtimePtr
+			if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
+				for r, _ := range *requireds {
+					rqNsName := r.ToString(false)
+					filename := coreSourceFilename[rqNsName]
+					if filename == "" {
+						filename = "<std>"
+					}
+					if VerbosityLevel > 0 {
+						fmt.Printf("  REQUIRES: %s from %s\n", rqNsName, filename)
+					}
+					runtime = append(runtime, fmt.Sprintf(`
 	ns_%s.MaybeLazy("%s")`[1:],
-					NameAsGo(rqNsName), nsName))
+						NameAsGo(rqNsName), nsName))
+				}
 			}
+			r = strings.Join(runtime, "\n")
 		}
-		r := strings.Join(runtime, "\n")
 
-		imports := genEnv.Imports[ns]
-		imp := QuotedImportList(imports, "\n")
-		if len(imp) > 0 && imp[0] == '\n' {
-			imp = imp[1:]
+		var imp string
+		if imports, found := genEnv.Imports[ns]; found {
+			imp = QuotedImportList(imports, "\n")
+			if len(imp) > 0 && imp[0] == '\n' {
+				imp = imp[1:]
+			}
 		}
 
 		fileContent := fileTemplate[1:]
@@ -618,7 +643,7 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 			genEnv.Generated[v] = name
 
 			if ns, yes := ptrToObj.(*Namespace); yes {
-				if _, found := genEnv.Namespaces[ns.ToString(false)]; found {
+				if _, found := namespaces[ns.ToString(false)]; found {
 					oldNamespace := genEnv.Namespace
 					oldRuntime := genEnv.Runtime
 					oldImports := genEnv.Import
