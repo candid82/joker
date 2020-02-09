@@ -294,3 +294,11 @@ func (pos Position) String() string {
 		pos.endLine,
 		pos.endColumn)
 }
+
+// Convert e.g. "<joker.core>" to "joker.core". Panic if not "<*>".
+func CoreNameAsNamespaceName(s string) string {
+	if s[0] != '<' || s[len(s)-1] != '>' {
+		panic(fmt.Sprintf("Invalid syntax for core source file namespace id: `%s'", s))
+	}
+	return s[1 : len(s)-1]
+}

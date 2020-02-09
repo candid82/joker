@@ -177,11 +177,3 @@ func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 func (ns *Namespace) Resolve(name string) *Var {
 	return ns.mappings[STRINGS.Intern(name)]
 }
-
-// Convert e.g. "<joker.core>" to "joker.core". Panic if not "<*>".
-func CoreNameAsNamespaceName(s string) string {
-	if s[0] != '<' || s[len(s)-1] != '>' {
-		panic(fmt.Sprintf("Invalid syntax for core source file namespace id: `%s'", s))
-	}
-	return s[1 : len(s)-1]
-}
