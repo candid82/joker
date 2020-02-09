@@ -140,7 +140,9 @@ func main() {
 		namespaceIndex++
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
-		ns.MaybeLazy("gen_code")
+
+		ns.MaybeLazy("gen_code") // Process the namespace (read the digested data for e.g. joker.core)
+
 		if VerbosityLevel > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
@@ -352,52 +354,10 @@ import (
 
 func (genEnv *GenEnv) emitVar(name string, atRuntime bool, obj interface{}) {
 	if _, found := genEnv.Generated[name]; found {
-		return // panic(fmt.Sprintf("already generated %s", name))
+		return // Already generated.
 	}
 	genEnv.Generated[name] = nil
 	v := reflect.ValueOf(obj)
-
-	if strings.HasPrefix(name, "var_") {
-		ns := v.Interface().(Var).Namespace()
-		if _, found := genEnv.Namespaces[ns.ToString(false)]; found {
-			oldNamespace := genEnv.Namespace
-			oldRuntime := genEnv.Runtime
-			oldImports := genEnv.Import
-			oldRequired := genEnv.Required
-			defer func() {
-				genEnv.Namespace = oldNamespace
-				genEnv.Runtime = oldRuntime
-				genEnv.Import = oldImports
-				genEnv.Required = oldRequired
-			}()
-
-			genEnv.Namespace = ns
-
-			rt, found := genEnv.Runtimes[ns]
-			if !found {
-				newRuntime := []string{}
-				rt = &newRuntime
-				genEnv.Runtimes[ns] = rt
-			}
-			genEnv.Runtime = rt
-
-			imp, found := genEnv.Imports[ns]
-			if !found {
-				newImport := Imports{}
-				imp = &newImport
-				genEnv.Imports[ns] = imp
-			}
-			genEnv.Import = imp
-
-			rq, found := genEnv.Requireds[ns]
-			if !found {
-				newRequired := map[*Namespace]struct{}{}
-				rq = &newRequired
-				genEnv.Requireds[ns] = rq
-			}
-			genEnv.Required = rq
-		}
-	}
 
 	if atRuntime {
 		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
@@ -656,6 +616,48 @@ func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
 				}
 			}
 			genEnv.Generated[v] = name
+
+			if ns, yes := ptrToObj.(*Namespace); yes {
+				if _, found := genEnv.Namespaces[ns.ToString(false)]; found {
+					oldNamespace := genEnv.Namespace
+					oldRuntime := genEnv.Runtime
+					oldImports := genEnv.Import
+					oldRequired := genEnv.Required
+					defer func() {
+						genEnv.Namespace = oldNamespace
+						genEnv.Runtime = oldRuntime
+						genEnv.Import = oldImports
+						genEnv.Required = oldRequired
+					}()
+
+					genEnv.Namespace = ns
+
+					rt, found := genEnv.Runtimes[ns]
+					if !found {
+						newRuntime := []string{}
+						rt = &newRuntime
+						genEnv.Runtimes[ns] = rt
+					}
+					genEnv.Runtime = rt
+
+					imp, found := genEnv.Imports[ns]
+					if !found {
+						newImport := Imports{}
+						imp = &newImport
+						genEnv.Imports[ns] = imp
+					}
+					genEnv.Import = imp
+
+					rq, found := genEnv.Requireds[ns]
+					if !found {
+						newRequired := map[*Namespace]struct{}{}
+						rq = &newRequired
+						genEnv.Requireds[ns] = rq
+					}
+					genEnv.Required = rq
+				}
+			}
+
 			genEnv.emitVar(name, false, obj)
 			return "&" + name
 		}
