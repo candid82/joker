@@ -124,8 +124,6 @@ func runtimeSortFunc(runtime []string, i, j int) bool {
 func main() {
 	parseArgs(os.Args)
 
-	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
-
 	coreSourceFilename := map[string]string{}
 	namespaceIndex := 0
 
