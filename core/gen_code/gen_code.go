@@ -109,6 +109,18 @@ var (
 var namespaces = map[string]int{}
 var namespaceIndices = map[string]int{}
 
+func runtimeSortFunc(runtime []string, i, j int) bool {
+	iStrings := strings.SplitN(runtime[i], " = ", 2)
+	jStrings := strings.SplitN(runtime[j], " = ", 2)
+	if len(iStrings) != len(jStrings) {
+		return len(iStrings) > len(jStrings)
+	}
+	if len(iStrings) == 1 || iStrings[1] == jStrings[1] {
+		return iStrings[0] < jStrings[0]
+	}
+	return iStrings[1] < jStrings[1]
+}
+
 func main() {
 	parseArgs(os.Args)
 
@@ -263,7 +275,7 @@ func init() {
 		}
 
 		var r string
-		if runtimePtr, found := genEnv.Runtimes[ns]; found { // TODO: Sort on split of ' = ' 2nd before 1st
+		if runtimePtr, found := genEnv.Runtimes[ns]; found {
 			runtime := *runtimePtr
 			if requireds, yes := genEnv.Requireds[ns]; yes && requireds != nil {
 				for r, _ := range *requireds {
@@ -280,6 +292,9 @@ func init() {
 						NameAsGo(rqNsName), nsName))
 				}
 			}
+			sort.SliceStable(runtime, func(i, j int) bool {
+				return runtimeSortFunc(runtime, i, j)
+			})
 			r = strings.Join(runtime, "\n")
 		}
 
@@ -332,6 +347,9 @@ func %sLazyInit() {
 		fmt.Printf("OUTPUTTING %s\n", masterFile)
 	}
 
+	sort.SliceStable(runtime, func(i, j int) bool {
+		return runtimeSortFunc(runtime, i, j)
+	})
 	r := strings.Join(runtime, "\n")
 	if r != "" {
 		r = fmt.Sprintf(`
