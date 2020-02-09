@@ -209,6 +209,8 @@ func main() {
 		namespaceIndices[nsName] = index
 	}
 
+	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
+
 	// Emit the "global" (static) Joker variables.
 
 	genEnv.emitVar("STR", false, STR)
@@ -383,6 +385,10 @@ import (
 
 {statics}
 {runtime}
+
+func (env *Env) ReferCoreToUser() {
+	// Nothing need be done; it's already "baked in" in the fast-startup version.
+}
 `[1:]
 
 	for _, t := range tr {

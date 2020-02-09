@@ -40,3 +40,7 @@ func NewEnv() *Env {
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
 	return res
 }
+
+func (env *Env) ReferCoreToUser() {
+	env.FindNamespace(MakeSymbol("user")).ReferAll(env.CoreNamespace)
+}
