@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
+[ -z "$KEEP_A_CODE_FILES" ] && KEEP_A_CODE_FILES=false
+[ -z "$KEEP_A_DATA_FILES" ] && KEEP_A_DATA_FILES=false
 [ -z "$OPTIMIZE_STARTUP" ] && OPTIMIZE_STARTUP=$([ -f NO-OPTIMIZE-STARTUP.flag ] && echo false || echo true)
 [ -z "$RUN_GEN_CODE" ] && RUN_GEN_CODE=$OPTIMIZE_STARTUP
 
 build() {
   go clean
-  rm -f core/a_*.go  # In case switching from a gen-code branch or similar (any existing files might break the build here)
+  $KEEP_A_CODE_FILES || rm -f core/a_*code.go  # In case switching from a gen-code branch or similar (any existing files might break the build here)
+  $KEEP_A_DATA_FILES || rm -f core/a_*data.go  # In case switching from a gen-code branch or similar (any existing files might break the build here)
   go generate ./...
   $RUN_GEN_CODE && (echo "Optimizing startup time..."; cd core; go run -tags gen_code gen_code/gen_code.go && (go fmt a_*.go > /dev/null))
   go vet -tags gen_code ./...
