@@ -1710,6 +1710,10 @@ func isJavaSymbol(sym Symbol) bool {
 func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
 	vr.isUsed = true
 	vr.isGloballyUsed = true
+	if vr.ns == nil {
+		msg := fmt.Sprintf("No namespace for var %s", vr.name.ToString(false))
+		panic(msg)
+	}
 	vr.ns.isUsed = true
 	vr.ns.isGloballyUsed = true
 	return &VarRefExpr{
