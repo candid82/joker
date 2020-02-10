@@ -70,12 +70,12 @@ func symAsGo(sym Symbol) string {
 }
 
 func (f *FnExpr) AsGo() string {
-	return fmt.Sprintf("fnExpr_%s_%p", PositionAsGo(f.endLine, f.endColumn, f.startLine, f.startColumn, f.filename), f)
+	return fmt.Sprintf("fnExpr_%s_%d", PositionAsGo(f.endLine, f.endColumn, f.startLine, f.startColumn, f.filename), ordinalForObj("fnExpr", f))
 }
 
 func (fn *Fn) AsGo() string {
 	if f := fn.fnExpr; f != nil {
-		return fmt.Sprintf("fn_%s_%p", PositionAsGo(f.endLine, f.endColumn, f.startLine, f.startColumn, f.filename), fn)
+		return fmt.Sprintf("fn_%s_%d", PositionAsGo(f.endLine, f.endColumn, f.startLine, f.startColumn, f.filename), ordinalForObj("fn", fn))
 	}
 	panic("(*Fn)Asgo(): fn.fnExpr == nil")
 }
@@ -256,21 +256,26 @@ type gIdInfo struct {
 	nextId uint
 }
 
+func ordinalForObj(id string, obj interface{}) uint {
+	info, found := generatedIds[id]
+	if !found {
+		info = &gIdInfo{map[interface{}]uint{}, 0}
+		generatedIds[id] = info
+	}
+	n, found := info.gIds[obj]
+	if !found {
+		info.nextId++
+		n = info.nextId
+		info.gIds[obj] = n
+	}
+	return n
+}
+
 func UniqueId(obj interface{}) (id string) {
 	defer func() {
 		if r := recover(); r != nil {
 			id = coreTypeAsGo(obj)
-			info, found := generatedIds[id]
-			if !found {
-				info = &gIdInfo{map[interface{}]uint{}, 0}
-				generatedIds[id] = info
-			}
-			n, found := info.gIds[obj]
-			if !found {
-				info.nextId++
-				n = info.nextId
-				info.gIds[obj] = n
-			}
+			n := ordinalForObj(id, obj)
 			pos, havePos := infoHolderNameAsGo(obj)
 			if havePos {
 				id = fmt.Sprintf("%s_%s__%d", id, pos, n)
