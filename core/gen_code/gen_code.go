@@ -15,6 +15,7 @@ import (
 
 	. "github.com/candid82/joker/core"
 	. "github.com/candid82/joker/core/gen_common"
+	"github.com/candid82/joker/core/gen_go"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 )
@@ -55,18 +56,13 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	Statics      *[]string
-	StaticImport *Imports
-	Runtime      *[]string
-	Required     *map[*Namespace]struct{} // Namespaces referenced by current one
-	Import       *Imports
-	Namespace    *Namespace // In which the core.Var currently being emitted is said to reside
-	Runtimes     map[*Namespace]*[]string
-	Imports      map[*Namespace]*Imports
-	Generated    map[interface{}]interface{}             // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
-	Namespaces   map[string]int                          // Set of the known namespaces (core, user, required stds)
-	Requireds    map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
-	LateInit     bool                                    // Whether emitting a namespace other than joker.core
+	GenGo      gen_go.GoGen
+	Required   *map[*Namespace]struct{} // Namespaces referenced by current one
+	Runtimes   map[*Namespace]*[]string
+	Imports    map[*Namespace]*Imports
+	Namespaces map[string]int                          // Set of the known namespaces (core, user, required stds)
+	Requireds  map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInit   bool                                    // Whether emitting a namespace other than joker.core
 }
 
 var (
@@ -170,19 +166,22 @@ func main() {
 	// Mark "everything" as used.
 	ResetUsage()
 
-	genEnv := &GenEnv{
+	goGen := &gen_go.GoGen{
 		Statics:      &statics,
 		StaticImport: imports,
 		Runtime:      &runtime,
-		Required:     nil,
 		Import:       imports,
-		Namespace:    GLOBAL_ENV.CoreNamespace,
-		Runtimes:     map[*Namespace]*[]string{},
-		Imports:      map[*Namespace]*Imports{},
-		Requireds:    map[*Namespace]*map[*Namespace]struct{}{},
 		Generated:    map[interface{}]interface{}{},
-		Namespaces:   namespaces,
-		LateInit:     false,
+	}
+	genEnv := &GenEnv{
+		GoGen:      &goGen,
+		Required:   nil,
+		Namespace:  GLOBAL_ENV.CoreNamespace,
+		Runtimes:   map[*Namespace]*[]string{},
+		Imports:    map[*Namespace]*Imports{},
+		Requireds:  map[*Namespace]*map[*Namespace]struct{}{},
+		Namespaces: namespaces,
+		LateInit:   false,
 	}
 
 	// Order namespaces by when "discovered" for stability
@@ -399,183 +398,6 @@ func (env *Env) ReferCoreToUser() {
 
 }
 
-func (genEnv *GenEnv) emitVar(name string, atRuntime bool, obj interface{}) {
-	if _, found := genEnv.Generated[name]; found {
-		return // Already generated.
-	}
-	genEnv.Generated[name] = nil
-	v := reflect.ValueOf(obj)
-
-	if atRuntime {
-		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
-var %s %s`[1:],
-			name, coreTypeName(v)))
-		*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
-	%s = %s`[1:],
-			name, genEnv.emitValue(name, reflect.TypeOf(nil), v)))
-	} else {
-		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
-var %s %s = %s`[1:],
-			name, coreTypeName(v), genEnv.emitValue(name, reflect.TypeOf(nil), v)))
-	}
-	genEnv.Generated[name] = obj
-}
-
-func (genEnv *GenEnv) emitMembers(target string, name string, obj interface{}) (members []string) {
-	v := reflect.ValueOf(obj)
-	kind := v.Kind()
-	switch kind {
-	case reflect.Map:
-		if v.IsNil() {
-			return
-		}
-		keys := v.MapKeys()
-		valueType := v.Type().Elem()
-		sortValues(keys)
-		for _, key := range keys {
-			k := genEnv.emitValue("", reflect.TypeOf(nil), key)
-			vi := v.MapIndex(key)
-			v := genEnv.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(target, k, valueType, vi)), valueType, vi)
-			if isNil(v) {
-				continue
-			}
-			members = append(members, fmt.Sprintf(`
-	%s: %s,`[1:],
-				k, v))
-		}
-	case reflect.Struct:
-		vt := v.Type()
-		numMembers := v.NumField()
-		for i := 0; i < numMembers; i++ {
-			vtf := vt.Field(i)
-			vf := v.Field(i)
-			val := genEnv.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
-			if val == "" {
-				continue
-			}
-			members = append(members, fmt.Sprintf(`
-	%s: %s,`[1:],
-				vtf.Name, val))
-		}
-		sort.Strings(members)
-	default:
-		panic(fmt.Sprintf("unsupported type %T for %s", obj, name))
-	}
-	return
-}
-
-func (genEnv *GenEnv) emitValue(target string, t reflect.Type, v reflect.Value) string {
-	v = UnsafeReflectValue(v)
-	if v.IsZero() && t == v.Type() {
-		// Empty value and the target (destination) is of the same concrete type, so no need to emit anything.
-		return ""
-	}
-
-	switch pkg := path.Base(v.Type().PkgPath()); pkg {
-	case "reflect":
-		t := coreTypeString(fmt.Sprintf("%s", v))
-		components := strings.Split(t, ".")
-		if len(components) == 2 {
-			// not handling more than one component yet!
-			importedAs := AddImport(genEnv.StaticImport, "", components[0], true)
-			t = fmt.Sprintf("%s.%s", importedAs, components[1])
-		}
-		el := ""
-		if t[0] != '*' {
-			t = "*" + t
-			el = ".Elem()"
-		}
-		importedAs := AddImport(genEnv.StaticImport, "", "reflect", true)
-		return fmt.Sprintf("%s.TypeOf((%s)(nil))%s", importedAs, t, el)
-	case "core":
-	case ".":
-	default:
-		panic(fmt.Sprintf("unexpected PkgPath `%s' for %+v", pkg, v.Interface()))
-	}
-
-	switch v.Kind() {
-	case reflect.Interface:
-		return genEnv.emitValue(target, t, v.Elem())
-
-	case reflect.Ptr:
-		return genEnv.emitPtrTo(target, v)
-
-	case reflect.Bool:
-		if v.Bool() {
-			return "true"
-		}
-		return "false"
-
-	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-		return fmt.Sprintf("%d", v.Int())
-
-	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint:
-		return fmt.Sprintf("%d", v.Uint())
-
-	case reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'x', -1, 64)
-
-	case reflect.String:
-		return strconv.Quote(v.String())
-
-	case reflect.Slice, reflect.Array:
-		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), genEnv.emitSlice(target, v))
-
-	case reflect.Struct:
-		typeName := coreTypeName(v)
-		obj := v.Interface()
-		lazy := ""
-		switch obj := obj.(type) {
-		case Proc:
-			return genEnv.emitProc(target, obj)
-		case Namespace:
-			nsName := obj.Name.Name()
-			if VerbosityLevel > 0 {
-				fmt.Printf("COMPILING %s\n", nsName)
-			}
-			lateInit := genEnv.LateInit
-			genEnv.LateInit = nsName != "joker.core"
-			defer func() {
-				genEnv.LateInit = lateInit
-				if VerbosityLevel > 0 {
-					fmt.Printf("FINISHED %s\n", nsName)
-				}
-			}()
-		case VarRefExpr:
-			if curRequired := genEnv.Required; curRequired != nil {
-				if vr := obj.Var(); vr != nil {
-					if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
-						(*curRequired)[ns] = struct{}{}
-					}
-				}
-			}
-		}
-		if obj == nil {
-			return ""
-		}
-		members := genEnv.emitMembers(target, typeName, obj)
-		if lazy != "" {
-			members = append(members, lazy)
-		}
-		return fmt.Sprintf(`
-%s{%s}`[1:],
-			typeName, joinMembers(members))
-
-	case reflect.Map:
-		typeName := coreTypeName(v)
-		obj := v.Interface()
-		if obj == nil {
-			return ""
-		}
-		return fmt.Sprintf(`
-%s{%s}`[1:],
-			typeName, joinMembers(genEnv.emitMembers(target, typeName, obj)))
-
-	default:
-		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
-	}
-}
-
 func stdPackageName(pkg string) string {
 	if strings.HasPrefix(pkg, "std/") {
 		pkg = pkg[4:]
@@ -617,125 +439,6 @@ func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
 	%s = %s`[1:],
 		asTarget(target), source))
 	return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), source)
-}
-
-func (genEnv *GenEnv) emitPtrTo(target string, ptr reflect.Value) string {
-	if ptr.IsNil() {
-		return "nil"
-	}
-
-	v := ptr.Elem()
-	v = UnsafeReflectValue(v)
-
-	switch pkg := path.Base(v.Type().PkgPath()); pkg {
-	case "regexp":
-		return genEnv.emitPtrToRegexp(target, ptr)
-	case "core":
-	case ".":
-	default:
-		panic(fmt.Sprintf("unexpected PkgPath `%s' for &%+v", pkg, v.Interface()))
-	}
-
-	switch v.Kind() {
-	case reflect.Interface:
-		if v.IsNil() {
-			return "nil"
-		}
-		return genEnv.emitPtrTo(target, v.Elem())
-
-	default:
-		thing, found := genEnv.Generated[v]
-		if !found {
-			ptrToObj := ptr.Interface()
-			obj := v.Interface()
-			name := uniqueId(ptrToObj)
-			if genEnv.LateInit {
-				if destVar, yes := ptrToObj.(*Var); yes {
-					if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
-						sourceVarName := e.Var().Name()
-						if _, found := knownLateInits[sourceVarName]; found {
-							destVarId := uniqueId(destVar)
-							*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
-	%s.Value = %s.Value`[1:],
-								destVarId, uniqueId(e.Var())))
-						}
-					}
-				}
-			}
-			genEnv.Generated[v] = name
-
-			if ns, yes := ptrToObj.(*Namespace); yes {
-				if _, found := namespaces[ns.ToString(false)]; found {
-					oldNamespace := genEnv.Namespace
-					oldRuntime := genEnv.Runtime
-					oldImports := genEnv.Import
-					oldRequired := genEnv.Required
-					defer func() {
-						genEnv.Namespace = oldNamespace
-						genEnv.Runtime = oldRuntime
-						genEnv.Import = oldImports
-						genEnv.Required = oldRequired
-					}()
-
-					genEnv.Namespace = ns
-
-					rt, found := genEnv.Runtimes[ns]
-					if !found {
-						newRuntime := []string{}
-						rt = &newRuntime
-						genEnv.Runtimes[ns] = rt
-					}
-					genEnv.Runtime = rt
-
-					imp, found := genEnv.Imports[ns]
-					if !found {
-						newImport := Imports{}
-						imp = &newImport
-						genEnv.Imports[ns] = imp
-					}
-					genEnv.Import = imp
-
-					rq, found := genEnv.Requireds[ns]
-					if !found {
-						newRequired := map[*Namespace]struct{}{}
-						rq = &newRequired
-						genEnv.Requireds[ns] = rq
-					}
-					genEnv.Required = rq
-				}
-			}
-
-			genEnv.emitVar(name, false, obj)
-			return "&" + name
-		}
-		name := thing.(string)
-		status, found := genEnv.Generated[name]
-		if !found {
-			panic(fmt.Sprintf("cannot find generated thing %s: %+v", name, v.Interface()))
-		}
-		if status == nil {
-			*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
-	%s = &%s`[1:],
-				asTarget(target), name))
-			return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), name)
-		}
-		return "&" + name
-	}
-}
-
-func (genEnv *GenEnv) emitSlice(target string, v reflect.Value) string {
-	numEntries := v.Len()
-	elemType := v.Type().Elem()
-	el := []string{}
-	for i := 0; i < numEntries; i++ {
-		res := genEnv.emitValue(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
-		if res == "" {
-			el = append(el, "\tnil,")
-		} else {
-			el = append(el, "\t"+res+",")
-		}
-	}
-	return joinMembers(el)
 }
 
 func coreTypeString(s string) string {
