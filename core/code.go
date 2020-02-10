@@ -249,15 +249,33 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	return fmt.Sprintf("%d_%d__%d_%d%s", startLine, startColumn, endLine, endColumn, filename), true
 }
 
+var generatedIds = map[string]*gIdInfo{}
+
+type gIdInfo struct {
+	gIds   map[interface{}]uint
+	nextId uint
+}
+
 func UniqueId(obj interface{}) (id string) {
 	defer func() {
 		if r := recover(); r != nil {
 			id = coreTypeAsGo(obj)
+			info, found := generatedIds[id]
+			if !found {
+				info = &gIdInfo{map[interface{}]uint{}, 0}
+				generatedIds[id] = info
+			}
+			n, found := info.gIds[obj]
+			if !found {
+				info.nextId++
+				n = info.nextId
+				info.gIds[obj] = n
+			}
 			pos, havePos := infoHolderNameAsGo(obj)
 			if havePos {
-				id = fmt.Sprintf("%s_%s_%p", id, pos, obj)
+				id = fmt.Sprintf("%s_%s__%d", id, pos, n)
 			} else {
-				id = fmt.Sprintf("%s_%p", id, obj)
+				id = fmt.Sprintf("%s__%d", id, n)
 				origType := reflect.TypeOf(obj).String()
 				if origType == "core.Keyword" || origType == "core.Symbol" {
 					fmt.Fprintf(Stderr, "UniqueId: Using %s for %s due to %s\n", id, origType, r)
