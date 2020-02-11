@@ -5,79 +5,38 @@ import (
 )
 
 type GoGen struct {
-	Statics      *[]string
-	StaticImport *Imports
-	Runtime      *[]string
-	Import       *Imports
-	Generated    map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	Statics   *[]string
+	Runtime   *[]string
+	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 }
 
-func (goGen *GoGen) Var(name string, atRuntime bool, obj interface{}) {
-	if _, found := goGen.Generated[name]; found {
+// Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
+func (g *GoGen) Var(name string, atRuntime bool, obj interface{}) {
+	if _, found := g.Generated[name]; found {
 		return // Already generated.
 	}
-	goGen.Generated[name] = nil
+
+	g.Generated[name] = nil // Generation is in-progress.
 	v := reflect.ValueOf(obj)
 
 	if atRuntime {
-		*goGen.Statics = append(*goGen.Statics, fmt.Sprintf(`
+		*g.Statics = append(*g.Statics, fmt.Sprintf(`
 var %s %s`[1:],
 			name, coreTypeName(v)))
-		*goGen.Runtime = append(*goGen.Runtime, fmt.Sprintf(`
+		*g.Runtime = append(*g.Runtime, fmt.Sprintf(`
 	%s = %s`[1:],
-			name, goGen.emitValue(name, reflect.TypeOf(nil), v)))
+			name, g.value(name, reflect.TypeOf(nil), v)))
 	} else {
-		*goGen.Statics = append(*goGen.Statics, fmt.Sprintf(`
+		*g.Statics = append(*g.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-			name, coreTypeName(v), goGen.emitValue(name, reflect.TypeOf(nil), v)))
+			name, coreTypeName(v), g.value(name, reflect.TypeOf(nil), v)))
 	}
-	goGen.Generated[name] = obj
+
+	g.Generated[name] = obj // Generation is complete.
 }
 
-func (goGen *GoGen) emitMembers(target string, name string, obj interface{}) (members []string) {
-	v := reflect.ValueOf(obj)
-	kind := v.Kind()
-	switch kind {
-	case reflect.Map:
-		if v.IsNil() {
-			return
-		}
-		keys := v.MapKeys()
-		valueType := v.Type().Elem()
-		sortValues(keys)
-		for _, key := range keys {
-			k := goGen.emitValue("", reflect.TypeOf(nil), key)
-			vi := v.MapIndex(key)
-			v := goGen.emitValue(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(target, k, valueType, vi)), valueType, vi)
-			if isNil(v) {
-				continue
-			}
-			members = append(members, fmt.Sprintf(`
-	%s: %s,`[1:],
-				k, v))
-		}
-	case reflect.Struct:
-		vt := v.Type()
-		numMembers := v.NumField()
-		for i := 0; i < numMembers; i++ {
-			vtf := vt.Field(i)
-			vf := v.Field(i)
-			val := goGen.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
-			if val == "" {
-				continue
-			}
-			members = append(members, fmt.Sprintf(`
-	%s: %s,`[1:],
-				vtf.Name, val))
-		}
-		sort.Strings(members)
-	default:
-		panic(fmt.Sprintf("unsupported type %T for %s", obj, name))
-	}
-	return
-}
-
-func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) string {
+// Generate
+func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() && t == v.Type() {
 		// Empty value and the target (destination) is of the same concrete type, so no need to emit anything.
@@ -90,7 +49,7 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 		components := strings.Split(t, ".")
 		if len(components) == 2 {
 			// not handling more than one component yet!
-			importedAs := AddImport(goGen.StaticImport, "", components[0], true)
+			importedAs := AddImport(g.StaticImport, "", components[0], true)
 			t = fmt.Sprintf("%s.%s", importedAs, components[1])
 		}
 		el := ""
@@ -98,7 +57,7 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 			t = "*" + t
 			el = ".Elem()"
 		}
-		importedAs := AddImport(goGen.StaticImport, "", "reflect", true)
+		importedAs := AddImport(g.StaticImport, "", "reflect", true)
 		return fmt.Sprintf("%s.TypeOf((%s)(nil))%s", importedAs, t, el)
 	case "core":
 	case ".":
@@ -108,10 +67,10 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 
 	switch v.Kind() {
 	case reflect.Interface:
-		return goGen.emitValue(target, t, v.Elem())
+		return g.value(target, t, v.Elem())
 
 	case reflect.Ptr:
-		return goGen.emitPtrTo(target, v)
+		return g.pointer(target, v)
 
 	case reflect.Bool:
 		if v.Bool() {
@@ -132,7 +91,7 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 		return strconv.Quote(v.String())
 
 	case reflect.Slice, reflect.Array:
-		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), goGen.emitSlice(target, v))
+		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), g.slice(target, v))
 
 	case reflect.Struct:
 		typeName := coreTypeName(v)
@@ -140,24 +99,24 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 		lazy := ""
 		switch obj := obj.(type) {
 		case Proc:
-			return goGen.emitProc(target, obj)
+			return g.emitProc(target, obj)
 		case Namespace:
 			nsName := obj.Name.Name()
 			if VerbosityLevel > 0 {
 				fmt.Printf("COMPILING %s\n", nsName)
 			}
-			lateInit := goGen.LateInit
-			goGen.LateInit = nsName != "joker.core"
+			lateInit := g.LateInit
+			g.LateInit = nsName != "joker.core"
 			defer func() {
-				goGen.LateInit = lateInit
+				g.LateInit = lateInit
 				if VerbosityLevel > 0 {
 					fmt.Printf("FINISHED %s\n", nsName)
 				}
 			}()
 		case VarRefExpr:
-			if curRequired := goGen.Required; curRequired != nil {
+			if curRequired := g.Required; curRequired != nil {
 				if vr := obj.Var(); vr != nil {
-					if ns := vr.Namespace(); ns != nil && ns != goGen.Namespace && ns != GLOBAL_ENV.CoreNamespace {
+					if ns := vr.Namespace(); ns != nil && ns != g.Namespace && ns != GLOBAL_ENV.CoreNamespace {
 						(*curRequired)[ns] = struct{}{}
 					}
 				}
@@ -166,7 +125,7 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 		if obj == nil {
 			return ""
 		}
-		members := goGen.emitMembers(target, typeName, obj)
+		members := g.fields(target, typeName, obj)
 		if lazy != "" {
 			members = append(members, lazy)
 		}
@@ -182,14 +141,71 @@ func (goGen *GoGen) emitValue(target string, t reflect.Type, v reflect.Value) st
 		}
 		return fmt.Sprintf(`
 %s{%s}`[1:],
-			typeName, joinMembers(goGen.emitMembers(target, typeName, obj)))
+			typeName, joinMembers(g.keysAndValues(target, typeName, obj)))
 
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
 	}
 }
 
-func (goGen *GoGen) emitPtrTo(target string, ptr reflect.Value) string {
+// Generate key/value assignments for a map.
+func (g *GoGen) keysAndValues(target string, name string, obj interface{}) (members []string) {
+	v := reflect.ValueOf(obj)
+	if v.IsNil() {
+		return
+	}
+	keys := v.MapKeys()
+	valueType := v.Type().Elem()
+	sortValues(keys) // TODO
+	for _, key := range keys {
+		k := g.value("", reflect.TypeOf(nil), key)
+		vi := v.MapIndex(key)
+		v := g.value(fmt.Sprintf("%s[%s]%s", target, k, assertValueType(target, k, valueType, vi)), valueType, vi)
+		if isNil(v) {
+			continue
+		}
+		members = append(members, fmt.Sprintf(`
+	%s: %s,`[1:],
+			k, v))
+	}
+}
+
+// Generate key/value assignments for fields of a structure.
+func (g *GoGen) fields(target string, name string, obj interface{}) (members []string) {
+	v := reflect.ValueOf(obj)
+	vt := v.Type()
+	numMembers := v.NumField()
+	for i := 0; i < numMembers; i++ {
+		vtf := vt.Field(i)
+		vf := v.Field(i)
+		val := g.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
+		if val == "" {
+			continue
+		}
+		members = append(members, fmt.Sprintf(`
+	%s: %s,`[1:],
+			vtf.Name, val))
+	}
+	sort.Strings(members) // TODO
+}
+
+func (g *GoGen) slice(target string, v reflect.Value) string {
+	numEntries := v.Len()
+	elemType := v.Type().Elem()
+	el := []string{}
+	for i := 0; i < numEntries; i++ {
+		res := g.value(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
+		if res == "" {
+			el = append(el, "\tnil,")
+		} else {
+			el = append(el, "\t"+res+",")
+		}
+	}
+	return joinMembers(el)
+}
+
+// Generate initial value for a pointer.
+func (g *GoGen) pointer(target string, ptr reflect.Value) string {
 	if ptr.IsNil() {
 		return "nil"
 	}
@@ -197,9 +213,10 @@ func (goGen *GoGen) emitPtrTo(target string, ptr reflect.Value) string {
 	v := ptr.Elem()
 	v = UnsafeReflectValue(v)
 
+	// TODO:
 	switch pkg := path.Base(v.Type().PkgPath()); pkg {
 	case "regexp":
-		return goGen.emitPtrToRegexp(target, ptr)
+		return g.emitPtrToRegexp(target, ptr)
 	case "core":
 	case ".":
 	default:
@@ -211,99 +228,84 @@ func (goGen *GoGen) emitPtrTo(target string, ptr reflect.Value) string {
 		if v.IsNil() {
 			return "nil"
 		}
-		return goGen.emitPtrTo(target, v.Elem())
+		return g.pointer(target, v.Elem())
 
 	default:
-		thing, found := goGen.Generated[v]
+		thing, found := g.Generated[v]
 		if !found {
 			ptrToObj := ptr.Interface()
 			obj := v.Interface()
 			name := uniqueId(ptrToObj)
-			if goGen.LateInit {
+			if g.LateInit { // TODO:
 				if destVar, yes := ptrToObj.(*Var); yes {
 					if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
 						sourceVarName := e.Var().Name()
 						if _, found := knownLateInits[sourceVarName]; found {
 							destVarId := uniqueId(destVar)
-							*goGen.Runtime = append(*goGen.Runtime, fmt.Sprintf(`
+							*g.Runtime = append(*g.Runtime, fmt.Sprintf(`
 	%s.Value = %s.Value`[1:],
 								destVarId, uniqueId(e.Var())))
 						}
 					}
 				}
 			}
-			goGen.Generated[v] = name
+			g.Generated[v] = name
 
-			if ns, yes := ptrToObj.(*Namespace); yes {
+			if ns, yes := ptrToObj.(*Namespace); yes { // TODO:
 				if _, found := namespaces[ns.ToString(false)]; found {
-					oldNamespace := goGen.Namespace
-					oldRuntime := goGen.Runtime
-					oldImports := goGen.Import
-					oldRequired := goGen.Required
+					oldNamespace := g.Namespace
+					oldRuntime := g.Runtime
+					oldImports := g.Import
+					oldRequired := g.Required
 					defer func() {
-						goGen.Namespace = oldNamespace
-						goGen.Runtime = oldRuntime
-						goGen.Import = oldImports
-						goGen.Required = oldRequired
+						g.Namespace = oldNamespace
+						g.Runtime = oldRuntime
+						g.Import = oldImports
+						g.Required = oldRequired
 					}()
 
-					goGen.Namespace = ns
+					g.Namespace = ns
 
-					rt, found := goGen.Runtimes[ns]
+					rt, found := g.Runtimes[ns]
 					if !found {
 						newRuntime := []string{}
 						rt = &newRuntime
-						goGen.Runtimes[ns] = rt
+						g.Runtimes[ns] = rt
 					}
-					goGen.Runtime = rt
+					g.Runtime = rt
 
-					imp, found := goGen.Imports[ns]
+					imp, found := g.Imports[ns]
 					if !found {
 						newImport := Imports{}
 						imp = &newImport
-						goGen.Imports[ns] = imp
+						g.Imports[ns] = imp
 					}
-					goGen.Import = imp
+					g.Import = imp
 
-					rq, found := goGen.Requireds[ns]
+					rq, found := g.Requireds[ns]
 					if !found {
 						newRequired := map[*Namespace]struct{}{}
 						rq = &newRequired
-						goGen.Requireds[ns] = rq
+						g.Requireds[ns] = rq
 					}
-					goGen.Required = rq
+					g.Required = rq
 				}
 			}
 
-			goGen.emitVar(name, false, obj)
+			g.emitVar(name, false, obj)
 			return "&" + name
 		}
 		name := thing.(string)
-		status, found := goGen.Generated[name]
+		status, found := g.Generated[name]
 		if !found {
 			panic(fmt.Sprintf("cannot find generated thing %s: %+v", name, v.Interface()))
 		}
 		if status == nil {
-			*goGen.Runtime = append(*goGen.Runtime, fmt.Sprintf(`
+			*g.Runtime = append(*g.Runtime, fmt.Sprintf(`
 	%s = &%s`[1:],
 				asTarget(target), name))
-			return fmt.Sprintf("nil /* %s: &%s */", goGen.Namespace.ToString(false), name)
+			return fmt.Sprintf("nil /* %s: &%s */", g.Namespace.ToString(false), name)
 		}
 		return "&" + name
 	}
-}
-
-func (goGen *GoGen) emitSlice(target string, v reflect.Value) string {
-	numEntries := v.Len()
-	elemType := v.Type().Elem()
-	el := []string{}
-	for i := 0; i < numEntries; i++ {
-		res := goGen.emitValue(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
-		if res == "" {
-			el = append(el, "\tnil,")
-		} else {
-			el = append(el, "\t"+res+",")
-		}
-	}
-	return joinMembers(el)
 }

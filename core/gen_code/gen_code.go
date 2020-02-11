@@ -56,13 +56,15 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	GenGo      gen_go.GoGen
-	Required   *map[*Namespace]struct{} // Namespaces referenced by current one
-	Runtimes   map[*Namespace]*[]string
-	Imports    map[*Namespace]*Imports
-	Namespaces map[string]int                          // Set of the known namespaces (core, user, required stds)
-	Requireds  map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
-	LateInit   bool                                    // Whether emitting a namespace other than joker.core
+	GenGo        gen_go.GoGen
+	StaticImport *Imports
+	Import       *Imports
+	Required     *map[*Namespace]struct{} // Namespaces referenced by current one
+	Runtimes     map[*Namespace]*[]string
+	Imports      map[*Namespace]*Imports
+	Namespaces   map[string]int                          // Set of the known namespaces (core, user, required stds)
+	Requireds    map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInit     bool                                    // Whether emitting a namespace other than joker.core
 }
 
 var (
