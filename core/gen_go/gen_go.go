@@ -5,9 +5,10 @@ import (
 )
 
 type GoGen struct {
-	Statics   *[]string
-	Runtime   *[]string
-	Generated map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	Statics      *[]string
+	Runtime      *[]string
+	Generated    map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
+	StructHookFn func(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string)
 }
 
 // Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
@@ -107,30 +108,14 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 		typeName := coreTypeName(v)
 		obj := v.Interface()
 		lazy := ""
-		switch obj := obj.(type) { // TODO:
-		case Proc:
-			return g.emitProc(target, obj) // TODO
-		case Namespace:
-			nsName := obj.Name.Name()
-			if VerbosityLevel > 0 {
-				fmt.Printf("COMPILING %s\n", nsName)
-			}
-			lateInit := g.LateInit
-			g.LateInit = nsName != "joker.core"
-			defer func() {
-				g.LateInit = lateInit
-				if VerbosityLevel > 0 {
-					fmt.Printf("FINISHED %s\n", nsName)
-				}
-			}()
-		case VarRefExpr:
-			if curRequired := g.Required; curRequired != nil {
-				if vr := obj.Var(); vr != nil {
-					if ns := vr.Namespace(); ns != nil && ns != g.Namespace && ns != GLOBAL_ENV.CoreNamespace {
-						(*curRequired)[ns] = struct{}{}
-					}
-				}
-			}
+		if g.StructHookFn != nil {
+			res, deferredFunc := g.StructHookFn(target, obj)
+		}
+		if res != "-" {
+			return res
+		}
+		if deferredFunc != nil {
+			defer deferredFunc()
 		}
 		if obj == nil {
 			return ""

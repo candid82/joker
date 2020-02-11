@@ -407,6 +407,35 @@ func stdPackageName(pkg string) string {
 	return pkg
 }
 
+func (genEnv *GenEnv) emitStruct(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string) string {
+	res = "-" // Means no result, continue processing
+	switch obj := obj.(type) {
+	case Proc:
+		return g.emitProc(target, obj)
+	case Namespace:
+		nsName := obj.Name.Name()
+		if VerbosityLevel > 0 {
+			fmt.Printf("COMPILING %s\n", nsName)
+		}
+		lateInit := g.LateInit
+		g.LateInit = nsName != "joker.core"
+		deferredFunc := func() {
+			g.LateInit = lateInit
+			if VerbosityLevel > 0 {
+				fmt.Printf("FINISHED %s\n", nsName)
+			}
+		}
+	case VarRefExpr:
+		if curRequired := genEnv.Required; curRequired != nil {
+			if vr := obj.Var(); vr != nil {
+				if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
+					(*curRequired)[ns] = struct{}{}
+				}
+			}
+		}
+	}
+}
+
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	fnName := NameAsGo(p.Name)
 	newPackage := ""
