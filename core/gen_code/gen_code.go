@@ -196,18 +196,28 @@ func main() {
 	coreBaseIndex := totalNs - coreNs
 
 	namespaceArray := make([]string, totalNs)
-	namespaceIndex = -1
 
-	for nsNamePtr, _ := range GLOBAL_ENV.Namespaces {
-		nsName := *nsNamePtr
-		index, found := namespaces[nsName]
-		if !found {
-			// An std lib or user
-			index = namespaceIndex
-			namespaceIndex--
+	{
+		otherNs := []string{}
+		for nsNamePtr, _ := range GLOBAL_ENV.Namespaces {
+			nsName := *nsNamePtr
+			index, found := namespaces[nsName]
+			if !found {
+				// A std lib or user; stabilize the order of these later.
+				otherNs = append(otherNs, nsName)
+				continue
+			}
+			namespaceArray[coreBaseIndex+index] = nsName
+			namespaceIndices[nsName] = index
 		}
-		namespaceArray[coreBaseIndex+index] = nsName
-		namespaceIndices[nsName] = index
+		sort.Strings(otherNs) // Stabilize the order of std libs and user.
+		namespaceIndex = -1
+		for _, nsName := range otherNs {
+			index := namespaceIndex
+			namespaceIndex--
+			namespaceArray[coreBaseIndex+index] = nsName
+			namespaceIndices[nsName] = index
+		}
 	}
 
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.CoreNamespace)
@@ -776,11 +786,12 @@ func valueSortLess(a, b reflect.Value) bool {
 		aStr := a.String()
 		bStr := b.String()
 		if aIndex, found := namespaceIndices[aStr]; found {
-			if bIndex, found := namespaceIndices[bStr]; found {
-				return aIndex < bIndex
-			}
+			aStr = fmt.Sprintf("[%03d]%s", aIndex, aStr)
 		}
-		return a.String() < b.String()
+		if bIndex, found := namespaceIndices[bStr]; found {
+			bStr = fmt.Sprintf("[%03d]%s", bIndex, bStr)
+		}
+		return aStr < bStr
 	case reflect.Uintptr:
 		return a.Uint() < b.Uint()
 	case reflect.Array:
