@@ -51,6 +51,9 @@
   <a href="#joker.os">joker.os</a>
 </li>
 <li>
+  <a href="#joker.pprint">joker.pprint</a>
+</li>
+<li>
   <a href="#joker.repl">joker.repl</a>
 </li>
 <li>
@@ -76,6 +79,9 @@
 </li>
 <li>
   <a href="#joker.url">joker.url</a>
+</li>
+<li>
+  <a href="#joker.uuid">joker.uuid</a>
 </li>
 <li>
   <a href="#joker.walk">joker.walk</a>
@@ -235,9 +241,6 @@
   <a href="#Proc">Proc</a>
 </li>
 <li>
-  <a href="#ProcFn">ProcFn</a>
-</li>
-<li>
   <a href="#Ratio">Ratio</a>
 </li>
 <li>
@@ -380,6 +383,12 @@
   <a href="joker.os.html">details</a>
 </li>
 <li>
+  <h3 id="joker.pprint">joker.pprint</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Pretty printing utilities. Based on Clojure implementation.</p>
+  <a href="joker.pprint.html">details</a>
+</li>
+<li>
   <h3 id="joker.repl">joker.repl</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Utilities meant to be used interactively at the REPL.</p>
@@ -434,6 +443,12 @@
   <a href="joker.url.html">details</a>
 </li>
 <li>
+  <h3 id="joker.uuid">joker.uuid</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Generates UUIDs.</p>
+  <a href="joker.uuid.html">details</a>
+</li>
+<li>
   <h3 id="joker.walk">joker.walk</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Defines a generic tree walker for Clojure data structures.</p>
@@ -483,17 +498,20 @@
 <li>
   <h3 id="BigFloat">BigFloat</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  Wraps the Go &#39;math/big.Float&#39; type</p>
 </li>
 <li>
   <h3 id="BigInt">BigInt</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  Wraps the Go &#39;math/big.Int&#39; type</p>
 </li>
 <li>
   <h3 id="Boolean">Boolean</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps the Go &#39;bool&#39; type</p>
 </li>
 <li>
   <h3 id="Buffer">Buffer</h3>
@@ -518,7 +536,8 @@
 <li>
   <h3 id="Char">Char</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps the Go &#39;rune&#39; type</p>
 </li>
 <li>
   <h3 id="Collection">Collection</h3>
@@ -558,7 +577,8 @@
 <li>
   <h3 id="Double">Double</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps the Go &#39;float64&#39; type</p>
 </li>
 <li>
   <h3 id="Error">Error</h3>
@@ -583,7 +603,8 @@
 <li>
   <h3 id="Fn">Fn</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  A callable function or macro implemented via Joker code</p>
 </li>
 <li>
   <h3 id="Gettable">Gettable</h3>
@@ -624,7 +645,8 @@
 <li>
   <h3 id="Keyword">Keyword</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  A possibly-namespace-qualified name prefixed by &#39;:&#39;</p>
 </li>
 <li>
   <h3 id="LazySeq">LazySeq</h3>
@@ -669,7 +691,8 @@
 <li>
   <h3 id="Nil">Nil</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  The &#39;nil&#39; value</p>
 </li>
 <li>
   <h3 id="NodeSeq">NodeSeq</h3>
@@ -694,17 +717,14 @@
 <li>
   <h3 id="Proc">Proc</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
-</li>
-<li>
-  <h3 id="ProcFn">ProcFn</h3>
-  <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  A callable function implemented via Go code</p>
 </li>
 <li>
   <h3 id="Ratio">Ratio</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete reference type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  Wraps the Go &#39;math.big/Rat&#39; type</p>
 </li>
 <li>
   <h3 id="RecurBindings">RecurBindings</h3>
@@ -719,7 +739,8 @@
 <li>
   <h3 id="Regex">Regex</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete reference type)<br>
+  Wraps the Go &#39;regexp.Regexp&#39; type</p>
 </li>
 <li>
   <h3 id="Reversible">Reversible</h3>
@@ -754,7 +775,8 @@
 <li>
   <h3 id="String">String</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps the Go &#39;string&#39; type</p>
 </li>
 <li>
   <h3 id="Symbol">Symbol</h3>
@@ -764,7 +786,8 @@
 <li>
   <h3 id="Time">Time</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">(Concrete type)</p>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps the Go &#39;time.Time&#39; type</p>
 </li>
 <li>
   <h3 id="Type">Type</h3>

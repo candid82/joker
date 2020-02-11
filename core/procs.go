@@ -37,7 +37,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.14.1"
+const VERSION = "v0.14.2"
 
 const (
 	CLJ Dialect = iota
@@ -1483,6 +1483,9 @@ var procLibPath = func(args []Object) Object {
 			PanicOnErr(err)
 		} else {
 			file = AssertString(GLOBAL_ENV.file.Value, "").S
+			if linkDest, err := os.Readlink(file); err == nil {
+				file = linkDest
+			}
 		}
 		ns := GLOBAL_ENV.CurrentNamespace().Name
 
