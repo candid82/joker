@@ -93,13 +93,23 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 	case reflect.Slice, reflect.Array:
 		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), g.slice(target, v))
 
+	case reflect.Map:
+		typeName := coreTypeName(v)
+		obj := v.Interface()
+		if obj == nil {
+			return ""
+		}
+		return fmt.Sprintf(`
+%s{%s}`[1:],
+			typeName, joinMembers(g.keysAndValues(target, typeName, obj)))
+
 	case reflect.Struct:
 		typeName := coreTypeName(v)
 		obj := v.Interface()
 		lazy := ""
-		switch obj := obj.(type) {
+		switch obj := obj.(type) { // TODO:
 		case Proc:
-			return g.emitProc(target, obj)
+			return g.emitProc(target, obj) // TODO
 		case Namespace:
 			nsName := obj.Name.Name()
 			if VerbosityLevel > 0 {
@@ -132,16 +142,6 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 		return fmt.Sprintf(`
 %s{%s}`[1:],
 			typeName, joinMembers(members))
-
-	case reflect.Map:
-		typeName := coreTypeName(v)
-		obj := v.Interface()
-		if obj == nil {
-			return ""
-		}
-		return fmt.Sprintf(`
-%s{%s}`[1:],
-			typeName, joinMembers(g.keysAndValues(target, typeName, obj)))
 
 	default:
 		return fmt.Sprintf("nil /* UNKNOWN TYPE obj=%T v=%s v.Kind()=%s vt=%s */", v.Interface(), v, v.Kind(), v.Type())
