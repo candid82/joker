@@ -35,7 +35,7 @@ var %s %s = %s`[1:],
 	g.Generated[name] = obj // Generation is complete.
 }
 
-// Generate
+// Generate code specifying the value as it would be assigned to a given target with a given declared type.
 func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() && t == v.Type() {
@@ -178,7 +178,7 @@ func (g *GoGen) fields(target string, name string, obj interface{}) (members []s
 	for i := 0; i < numMembers; i++ {
 		vtf := vt.Field(i)
 		vf := v.Field(i)
-		val := g.emitValue(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
+		val := g.value(fmt.Sprintf("%s.%s%s", target, vtf.Name, assertValueType(target, vtf.Name, vtf.Type, vf)), vtf.Type, vf)
 		if val == "" {
 			continue
 		}
@@ -292,7 +292,7 @@ func (g *GoGen) pointer(target string, ptr reflect.Value) string {
 				}
 			}
 
-			g.emitVar(name, false, obj)
+			g.Var(name, false, obj)
 			return "&" + name
 		}
 		name := thing.(string)
