@@ -1,6 +1,7 @@
 package gen_go
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -9,6 +10,7 @@ type GoGen struct {
 	Runtime      *[]string
 	Generated    map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
 	StructHookFn func(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string)
+	TypeToString func(string) string // Convert stringize reflect.Type to how generate code will refer to it
 }
 
 // Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
@@ -23,14 +25,14 @@ func (g *GoGen) Var(name string, atRuntime bool, obj interface{}) {
 	if atRuntime {
 		*g.Statics = append(*g.Statics, fmt.Sprintf(`
 var %s %s`[1:],
-			name, coreTypeName(v)))
+			name, g.valueTypeToString(v)))
 		*g.Runtime = append(*g.Runtime, fmt.Sprintf(`
 	%s = %s`[1:],
 			name, g.value(name, reflect.TypeOf(nil), v)))
 	} else {
 		*g.Statics = append(*g.Statics, fmt.Sprintf(`
 var %s %s = %s`[1:],
-			name, coreTypeName(v), g.value(name, reflect.TypeOf(nil), v)))
+			name, g.valueTypeToString(v), g.value(name, reflect.TypeOf(nil), v)))
 	}
 
 	g.Generated[name] = obj // Generation is complete.
@@ -44,7 +46,7 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 		return ""
 	}
 
-	switch pkg := path.Base(v.Type().PkgPath()); pkg {
+	switch pkg := path.Base(v.Type().PkgPath()); pkg { // TODO:
 	case "reflect":
 		t := coreTypeString(fmt.Sprintf("%s", v))
 		components := strings.Split(t, ".")
@@ -92,10 +94,10 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 		return strconv.Quote(v.String())
 
 	case reflect.Slice, reflect.Array:
-		return fmt.Sprintf(`%s{%s}`, coreTypeName(v), g.slice(target, v))
+		return fmt.Sprintf(`%s{%s}`, g.valueTypeToString(v), g.slice(target, v))
 
 	case reflect.Map:
-		typeName := coreTypeName(v)
+		typeName := g.valueTypeToString(v)
 		obj := v.Interface()
 		if obj == nil {
 			return ""
@@ -105,7 +107,7 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 			typeName, joinMembers(g.keysAndValues(target, typeName, obj)))
 
 	case reflect.Struct:
-		typeName := coreTypeName(v)
+		typeName := g.valueTypeToString(v)
 		obj := v.Interface()
 		lazy := ""
 		if g.StructHookFn != nil {
@@ -293,4 +295,21 @@ func (g *GoGen) pointer(target string, ptr reflect.Value) string {
 		}
 		return "&" + name
 	}
+}
+
+func assertValueType(target, name string, valueType reflect.Type, r reflect.Value) string {
+	if r.IsZero() {
+		return ""
+	}
+	if r.Kind() == reflect.Interface {
+		r = r.Elem()
+	}
+	if valueType == r.Type() {
+		return ""
+	}
+	return ".(" + g.valueTypeToString(r) + ")"
+}
+
+func (g *GoGen) valueTypeToString(v reflect.Value) string {
+	return g.TypeToString(v.Type().String())
 }

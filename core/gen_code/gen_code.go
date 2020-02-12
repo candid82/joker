@@ -170,21 +170,27 @@ func main() {
 
 	goGen := &gen_go.GoGen{
 		Statics:      &statics,
-		StaticImport: imports,
 		Runtime:      &runtime,
-		Import:       imports,
 		Generated:    map[interface{}]interface{}{},
+		TypeToString: coreTypeString,
 	}
 	genEnv := &GenEnv{
-		GoGen:      &goGen,
-		Required:   nil,
-		Namespace:  GLOBAL_ENV.CoreNamespace,
-		Runtimes:   map[*Namespace]*[]string{},
-		Imports:    map[*Namespace]*Imports{},
-		Requireds:  map[*Namespace]*map[*Namespace]struct{}{},
-		Namespaces: namespaces,
-		LateInit:   false,
+		GoGen:        &goGen,
+		StaticImport: imports,
+		Required:     nil,
+		Import:       imports,
+		Namespace:    GLOBAL_ENV.CoreNamespace,
+		Runtimes:     map[*Namespace]*[]string{},
+		Imports:      map[*Namespace]*Imports{},
+		Requireds:    map[*Namespace]*map[*Namespace]struct{}{},
+		Namespaces:   namespaces,
+		LateInit:     false,
 	}
+	goGen.StructHookFn = func(genEnv *GenEnv) {
+		return func(target string, obj interface{}) string {
+			genEnv.emitStruct(target, obj)
+		}
+	}(genEnv)
 
 	// Order namespaces by when "discovered" for stability
 	// compiling and outputting.  Put the non-core namespaces
@@ -417,7 +423,7 @@ func stdPackageName(pkg string) string {
 	return pkg
 }
 
-func (genEnv *GenEnv) emitStruct(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string) string {
+func (genEnv *GenEnv) emitStruct(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string) {
 	res = "-" // Means no result, continue processing
 	switch obj := obj.(type) {
 	case Proc:
@@ -486,14 +492,6 @@ func coreTypeString(s string) string {
 	return strings.Replace(s, "core.", "", 1)
 }
 
-func coreTypeName(v reflect.Value) string {
-	return coreTypeString(v.Type().String())
-}
-
-func coreTypeOf(obj interface{}) string {
-	return coreTypeName(reflect.ValueOf(obj))
-}
-
 func uniqueId(obj interface{}) string {
 	switch obj := obj.(type) {
 	case *string:
@@ -501,19 +499,6 @@ func uniqueId(obj interface{}) string {
 	default:
 	}
 	return UniqueId(obj)
-}
-
-func assertValueType(target, name string, valueType reflect.Type, r reflect.Value) string {
-	if r.IsZero() {
-		return ""
-	}
-	if r.Kind() == reflect.Interface {
-		r = r.Elem()
-	}
-	if valueType == r.Type() {
-		return ""
-	}
-	return ".(" + coreTypeName(r) + ")"
 }
 
 func joinMembers(members []string) string {
