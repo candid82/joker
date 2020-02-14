@@ -3,7 +3,6 @@ package gen_go
 import (
 	"fmt"
 	"reflect"
-	"sort"
 	"strconv"
 )
 
@@ -16,6 +15,7 @@ type GoGen struct {
 	ValueHookFn    func(target string, t reflect.Type, v reflect.Value) string // return non-empty string to short-circuit value expansion
 	PointerHookFn  func(target string, v reflect.Value) string                 // return non-empty string to short-circuit value expansion
 	KeySortFn      func(keys []reflect.Value)
+	FieldSortFn    func(members []string)
 }
 
 // Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
@@ -163,7 +163,9 @@ func (g *GoGen) fields(target string, name string, obj interface{}) (members []s
 	%s: %s,`[1:],
 			vtf.Name, val))
 	}
-	sort.Strings(members) // TODO
+	if g.FieldSortFn != nil {
+		g.FieldSortFn(members)
+	}
 	return members
 }
 

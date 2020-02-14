@@ -174,6 +174,7 @@ func main() {
 		Generated:      map[interface{}]interface{}{},
 		TypeToStringFn: coreTypeString,
 		KeySortFn:      sortValues,
+		FieldSortFn:    sort.Strings,
 	}
 	genEnv := &GenEnv{
 		GoGen:        &goGen,
