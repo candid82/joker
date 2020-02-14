@@ -447,36 +447,6 @@ func stdPackageName(pkg string) string {
 	return pkg
 }
 
-func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
-	res = "-" // Means no result, continue processing
-	switch obj := obj.(type) {
-	case Proc:
-		return genEnv.emitProc(target, obj), nil
-	case Namespace:
-		nsName := obj.Name.Name()
-		if VerbosityLevel > 0 {
-			fmt.Printf("COMPILING %s\n", nsName)
-		}
-		lateInit := genEnv.LateInit
-		genEnv.LateInit = nsName != "joker.core"
-		deferredFunc = func(target string, obj interface{}) {
-			genEnv.LateInit = lateInit
-			if VerbosityLevel > 0 {
-				fmt.Printf("FINISHED %s\n", nsName)
-			}
-		}
-	case VarRefExpr:
-		if curRequired := genEnv.Required; curRequired != nil {
-			if vr := obj.Var(); vr != nil {
-				if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
-					(*curRequired)[ns] = struct{}{}
-				}
-			}
-		}
-	}
-	return
-}
-
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	fnName := NameAsGo(p.Name)
 	newPackage := ""
@@ -625,6 +595,36 @@ func QuotedImportList(pi *Imports, prefix string) string {
 	return imports
 }
 
+func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
+	res = "-" // Means no result, continue processing
+	switch obj := obj.(type) {
+	case Proc:
+		return genEnv.emitProc(target, obj), nil
+	case Namespace:
+		nsName := obj.Name.Name()
+		if VerbosityLevel > 0 {
+			fmt.Printf("COMPILING %s\n", nsName)
+		}
+		lateInit := genEnv.LateInit
+		genEnv.LateInit = nsName != "joker.core"
+		deferredFunc = func(target string, obj interface{}) {
+			genEnv.LateInit = lateInit
+			if VerbosityLevel > 0 {
+				fmt.Printf("FINISHED %s\n", nsName)
+			}
+		}
+	case VarRefExpr:
+		if curRequired := genEnv.Required; curRequired != nil {
+			if vr := obj.Var(); vr != nil {
+				if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
+					(*curRequired)[ns] = struct{}{}
+				}
+			}
+		}
+	}
+	return
+}
+
 func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value) string {
 	switch pkg := v.Type().PkgPath(); pkg {
 	case "reflect":
@@ -644,7 +644,7 @@ func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value
 		return fmt.Sprintf("%s.TypeOf((%s)(nil))%s", importedAs, t, el)
 	}
 
-	switch pkg := path.Base(v.Type().PkgPath()); pkg { // TODO:
+	switch pkg := path.Base(v.Type().PkgPath()); pkg {
 	case "core":
 	case ".":
 	default:
@@ -672,7 +672,7 @@ func (genEnv *GenEnv) ptrToValueFn(ptr, v reflect.Value) string {
 	ptrToObj := ptr.Interface()
 	obj := v.Interface()
 	name := uniqueId(ptrToObj)
-	if genEnv.LateInit { // TODO:
+	if genEnv.LateInit {
 		if destVar, yes := ptrToObj.(*Var); yes {
 			if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
 				sourceVarName := e.Var().Name()
@@ -687,7 +687,7 @@ func (genEnv *GenEnv) ptrToValueFn(ptr, v reflect.Value) string {
 	}
 	genEnv.GenGo.Generated[v] = name
 
-	if ns, yes := ptrToObj.(*Namespace); yes { // TODO:
+	if ns, yes := ptrToObj.(*Namespace); yes {
 		if _, found := namespaces[ns.ToString(false)]; found {
 			oldNamespace := genEnv.Namespace
 			oldRuntime := genEnv.GenGo.Runtime
@@ -898,6 +898,7 @@ func valueSortLess(a, b reflect.Value) bool {
 			return valueSortLess(av, bv)
 		}
 	case reflect.Ptr:
+		// Assume both are pointers (true for Joker)
 		return valueSortLess(a.Elem(), b.Elem())
 	}
 	return a.String() < b.String()
