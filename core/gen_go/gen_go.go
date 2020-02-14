@@ -8,7 +8,7 @@ import (
 	"unsafe"
 )
 
-type GoGen struct {
+type GenGo struct {
 	Statics        *[]string
 	Runtime        *[]string
 	Generated      map[interface{}]interface{} // key{reflect.Value} => map{string} that is the generated name of the var; else key{name} => map{obj}
@@ -23,7 +23,7 @@ type GoGen struct {
 }
 
 // Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
-func (g *GoGen) Var(name string, atRuntime bool, obj interface{}) {
+func (g *GenGo) Var(name string, atRuntime bool, obj interface{}) {
 	if _, found := g.Generated[name]; found {
 		return // Already generated.
 	}
@@ -48,7 +48,7 @@ var %s %s = %s`[1:],
 }
 
 // Generate code specifying the value as it would be assigned to a given target with a given declared type.
-func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
+func (g *GenGo) value(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() && t == v.Type() {
 		// Empty value and the target (destination) is of the same concrete type, so no need to emit anything.
@@ -127,7 +127,7 @@ func (g *GoGen) value(target string, t reflect.Type, v reflect.Value) string {
 }
 
 // Generate key/value assignments for a map.
-func (g *GoGen) keysAndValues(target string, name string, obj interface{}) (members []string) {
+func (g *GenGo) keysAndValues(target string, name string, obj interface{}) (members []string) {
 	v := reflect.ValueOf(obj)
 	if v.IsNil() {
 		return
@@ -152,7 +152,7 @@ func (g *GoGen) keysAndValues(target string, name string, obj interface{}) (memb
 }
 
 // Generate key/value assignments for fields of a structure.
-func (g *GoGen) fields(target string, name string, obj interface{}) (members []string) {
+func (g *GenGo) fields(target string, name string, obj interface{}) (members []string) {
 	v := reflect.ValueOf(obj)
 	vt := v.Type()
 	numMembers := v.NumField()
@@ -173,7 +173,7 @@ func (g *GoGen) fields(target string, name string, obj interface{}) (members []s
 	return members
 }
 
-func (g *GoGen) slice(target string, v reflect.Value) string {
+func (g *GenGo) slice(target string, v reflect.Value) string {
 	numEntries := v.Len()
 	elemType := v.Type().Elem()
 	el := []string{}
@@ -189,7 +189,7 @@ func (g *GoGen) slice(target string, v reflect.Value) string {
 }
 
 // Generate initial value for a pointer.
-func (g *GoGen) pointer(target string, ptr reflect.Value) string {
+func (g *GenGo) pointer(target string, ptr reflect.Value) string {
 	if ptr.IsNil() {
 		return "nil"
 	}
@@ -229,7 +229,7 @@ func (g *GoGen) pointer(target string, ptr reflect.Value) string {
 	}
 }
 
-func (g *GoGen) assertValueType(target, name string, valueType reflect.Type, r reflect.Value) string {
+func (g *GenGo) assertValueType(target, name string, valueType reflect.Type, r reflect.Value) string {
 	if r.IsZero() {
 		return ""
 	}
@@ -242,7 +242,7 @@ func (g *GoGen) assertValueType(target, name string, valueType reflect.Type, r r
 	return ".(" + g.valueTypeToStringFn(r) + ")"
 }
 
-func (g *GoGen) valueTypeToStringFn(v reflect.Value) string {
+func (g *GenGo) valueTypeToStringFn(v reflect.Value) string {
 	return g.TypeToStringFn(v.Type().String())
 }
 

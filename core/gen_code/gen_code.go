@@ -56,7 +56,7 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	GenGo        *gen_go.GoGen
+	GenGo        *gen_go.GenGo
 	StaticImport *Imports
 	Import       *Imports
 	Namespace    *Namespace
@@ -169,7 +169,7 @@ func main() {
 	// Mark "everything" as used.
 	ResetUsage()
 
-	goGen := &gen_go.GoGen{
+	genGo := &gen_go.GenGo{
 		Statics:        &statics,
 		Runtime:        &runtime,
 		Generated:      map[interface{}]interface{}{},
@@ -178,7 +178,7 @@ func main() {
 		FieldSortFn:    sort.Strings,
 	}
 	genEnv := &GenEnv{
-		GenGo:        goGen,
+		GenGo:        genGo,
 		StaticImport: imports,
 		Required:     nil,
 		Import:       imports,
@@ -190,27 +190,27 @@ func main() {
 		LateInit:     false,
 	}
 
-	goGen.WhereFn = func(genEnv *GenEnv) func() string {
+	genGo.WhereFn = func(genEnv *GenEnv) func() string {
 		return func() string {
 			return genEnv.Namespace.ToString(false)
 		}
 	}(genEnv)
-	goGen.StructHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
+	genGo.StructHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
 		return func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
 			return genEnv.structHookFn(target, obj)
 		}
 	}(genEnv)
-	goGen.ValueHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, v reflect.Value) string {
+	genGo.ValueHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, v reflect.Value) string {
 		return func(target string, t reflect.Type, v reflect.Value) string {
 			return genEnv.valueHookFn(target, t, v)
 		}
 	}(genEnv)
-	goGen.PointerHookFn = func(genEnv *GenEnv) func(target string, ptr, v reflect.Value) string {
+	genGo.PointerHookFn = func(genEnv *GenEnv) func(target string, ptr, v reflect.Value) string {
 		return func(target string, ptr, v reflect.Value) string {
 			return genEnv.pointerHookFn(target, ptr, v)
 		}
 	}(genEnv)
-	goGen.PtrToValueFn = func(genEnv *GenEnv) func(ptr, v reflect.Value) string {
+	genGo.PtrToValueFn = func(genEnv *GenEnv) func(ptr, v reflect.Value) string {
 		return func(ptr, v reflect.Value) string {
 			return genEnv.ptrToValueFn(ptr, v)
 		}
@@ -254,14 +254,14 @@ func main() {
 
 	// Emit the "global" (static) Joker variables.
 
-	goGen.Var("STR", false, STR)
-	goGen.Var("STRINGS", false, STRINGS)
-	goGen.Var("SYMBOLS", false, SYMBOLS)
-	goGen.Var("SPECIAL_SYMBOLS", false, SPECIAL_SYMBOLS)
-	goGen.Var("KEYWORDS", false, KEYWORDS)
-	goGen.Var("TYPE", false, TYPE)
-	goGen.Var("TYPES", false, TYPES)
-	goGen.Var("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
+	genGo.Var("STR", false, STR)
+	genGo.Var("STRINGS", false, STRINGS)
+	genGo.Var("SYMBOLS", false, SYMBOLS)
+	genGo.Var("SPECIAL_SYMBOLS", false, SPECIAL_SYMBOLS)
+	genGo.Var("KEYWORDS", false, KEYWORDS)
+	genGo.Var("TYPE", false, TYPE)
+	genGo.Var("TYPES", false, TYPES)
+	genGo.Var("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
 
 	// Emit the per-namespace files (a_*_code.go).
 
