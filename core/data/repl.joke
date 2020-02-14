@@ -24,13 +24,14 @@
   the bindings of the recursion point to the values of the exprs.
   Execution then jumps back to the recursion point, a loop or fn method."}
     throw {:forms [(throw expr)]
-           :doc "The expr is evaluated and thrown, therefore it should
-  yield an instance of some derivee of Throwable."}
+           :doc "The expr is evaluated and thrown, therefore it should yield an Error object.
+  User code should normally use (ex-info) function to create new Error objects."}
     try {:forms [(try expr* catch-clause* finally-clause?)]
-         :doc "catch-clause => (catch classname name expr*)
+         :doc "catch-clause => (catch type name expr*)
   finally-clause => (finally expr*)
 
-  Catches and handles exceptions and Go panics."}
+  Catches and handles errors.
+  User code should normally use (ex-info) function to create new Error objects."}
     var {:forms [(var symbol)]
          :doc "The symbol must resolve to a var, and the Var object
   itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
