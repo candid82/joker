@@ -16,7 +16,7 @@ then
     NOW="_test_AA/$(date +%Y%m%d%H%M%S).dir"
     mkdir -p "$NOW"
     mv -iv a_*.go "$NOW" || :
-    cp -aiv code.go gen_code/gen_code.go "$NOW"
+    cp -aiv code.go gen_go/gen_go.go gen_code/gen_code.go "$NOW"
     [ -x ../joker ] && cp -aiv ../joker "$NOW"
     (git log -n 1; git status) > "$NOW/git.txt"
     $LN -sfTv "$(basename $NOW)" _test_AA/LATEST
