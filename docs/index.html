@@ -6,6 +6,34 @@
   <div class="main">
     <title>Joker Standard Namespaces and Types</title>
     <h1>Indexes of Joker Standard Namespaces and Types</h1>
+    <h2>Index of <a href="#joker-special-forms">Special Forms</a></h2>
+    <ul class="index">
+      <li>
+  <a href="#def">def</a>
+</li>
+<li>
+  <a href="#do">do</a>
+</li>
+<li>
+  <a href="#if">if</a>
+</li>
+<li>
+  <a href="#quote">quote</a>
+</li>
+<li>
+  <a href="#recur">recur</a>
+</li>
+<li>
+  <a href="#throw">throw</a>
+</li>
+<li>
+  <a href="#try">try</a>
+</li>
+<li>
+  <a href="#var">var</a>
+</li>
+
+    </ul>
     <h2>Index of <a href="#joker-std-ns">Namespaces</a></h2>
     <ul class="index">
       <li>
@@ -293,6 +321,73 @@
 </li>
 <li>
   <a href="#VectorSeq">VectorSeq</a>
+</li>
+
+    </ul>
+    <h1 id="joker-special-forms">Joker Special Forms</h1>
+    <ul>
+      <li>
+  <h3 id="def">def</h3>
+  <pre class="var-usage"><div><code>(def symbol doc-string? init?)</code></div>
+</pre>
+  <p class="var-docstr">Creates and interns a global var with the name<br>
+  of symbol in the current namespace (*ns*) or locates such a var if<br>
+  it already exists.  If init is supplied, it is evaluated, and the<br>
+  root binding of the var is set to the resulting value.  If init is<br>
+  not supplied, the root binding of the var is unaffected.</p>
+</li>
+<li>
+  <h3 id="do">do</h3>
+  <pre class="var-usage"><div><code>(do exprs*)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates the expressions in order and returns the value of<br>
+  the last. If no expressions are supplied, returns nil.</p>
+</li>
+<li>
+  <h3 id="if">if</h3>
+  <pre class="var-usage"><div><code>(if test then else?)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates test. If not the singular values nil or false,<br>
+  evaluates and yields then, otherwise, evaluates and yields else. If<br>
+  else is not supplied it defaults to nil.</p>
+</li>
+<li>
+  <h3 id="quote">quote</h3>
+  <pre class="var-usage"><div><code>(quote form)</code></div>
+</pre>
+  <p class="var-docstr">Yields the unevaluated form.</p>
+</li>
+<li>
+  <h3 id="recur">recur</h3>
+  <pre class="var-usage"><div><code>(recur exprs*)</code></div>
+</pre>
+  <p class="var-docstr">Evaluates the exprs in order, then, in parallel, rebinds<br>
+  the bindings of the recursion point to the values of the exprs.<br>
+  Execution then jumps back to the recursion point, a loop or fn method.</p>
+</li>
+<li>
+  <h3 id="throw">throw</h3>
+  <pre class="var-usage"><div><code>(throw expr)</code></div>
+</pre>
+  <p class="var-docstr">The expr is evaluated and thrown, therefore it should yield an Error object.<br>
+  User code should normally use (ex-info) function to create new Error objects.</p>
+</li>
+<li>
+  <h3 id="try">try</h3>
+  <pre class="var-usage"><div><code>(try expr* catch-clause* finally-clause?)</code></div>
+</pre>
+  <p class="var-docstr">catch-clause =&gt; (catch type name expr*)<br>
+  finally-clause =&gt; (finally expr*)<br>
+<br>
+  Catches and handles errors.<br>
+  User code should normally use (ex-info) function to create new Error objects.</p>
+</li>
+<li>
+  <h3 id="var">var</h3>
+  <pre class="var-usage"><div><code>(var symbol)</code></div>
+</pre>
+  <p class="var-docstr">The symbol must resolve to a var, and the Var object<br>
+  itself (not its value) is returned. The reader macro #&#39;x expands to (var x).</p>
 </li>
 
     </ul>
