@@ -4,6 +4,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/candid82/joker/core/gen_go"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -159,36 +160,6 @@ func (v Var) Namespace() *Namespace {
 	return v.ns
 }
 
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-const flagPrivate = 0x20
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-var flagValOffset = func() uintptr {
-	field, ok := reflect.TypeOf(reflect.Value{}).FieldByName("flag")
-	if !ok {
-		panic("reflect.Value has no flag field")
-	}
-	return field.Offset
-}()
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-type flag uintptr
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-func flagField(v *reflect.Value) *flag {
-	return (*flag)(unsafe.Pointer(uintptr(unsafe.Pointer(v)) + flagValOffset))
-}
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-func UnsafeReflectValue(v reflect.Value) reflect.Value {
-	if !v.IsValid() || (v.CanInterface() && v.CanAddr()) {
-		return v
-	}
-	flagFieldPtr := flagField(&v)
-	*flagFieldPtr &^= flagPrivate
-	return v
-}
-
 func infoHolderNameAsGo(obj interface{}) (string, bool) {
 	v := reflect.ValueOf(obj)
 	if v.Kind() == reflect.Ptr {
@@ -237,15 +208,15 @@ func infoHolderNameAsGo(obj interface{}) (string, bool) {
 		return "", false
 	}
 	filename := ""
-	filenamePtr := UnsafeReflectValue(v.FieldByName("filename"))
+	filenamePtr := gen_go.UnsafeReflectValue(v.FieldByName("filename"))
 	if !(filenamePtr.IsZero() || filenamePtr.IsNil()) {
 		filename = filenamePtr.Elem().Interface().(string)
 		filename = "_" + FilenameAsGo(filename)
 	}
-	startLine := UnsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
-	startColumn := UnsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
-	endLine := UnsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
-	endColumn := UnsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
+	startLine := gen_go.UnsafeReflectValue(v.FieldByName("startLine")).Interface().(int)
+	startColumn := gen_go.UnsafeReflectValue(v.FieldByName("startColumn")).Interface().(int)
+	endLine := gen_go.UnsafeReflectValue(v.FieldByName("endLine")).Interface().(int)
+	endColumn := gen_go.UnsafeReflectValue(v.FieldByName("endColumn")).Interface().(int)
 	return fmt.Sprintf("%d_%d__%d_%d%s", startLine, startColumn, endLine, endColumn, filename), true
 }
 
