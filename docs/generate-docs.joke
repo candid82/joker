@@ -15,6 +15,9 @@
 (def var-template
   (slurp "templates/var.html"))
 
+(def special-form-template
+  (slurp "templates/special-form.html"))
+
 (def namespace-template
   (slurp "templates/ns-summary.html"))
 
@@ -85,6 +88,17 @@
   [s]
   (first (s/split s #"\n")))
 
+(defn special-form-doc
+  [name meta]
+  (let [usage (let [examples (for [form (:forms meta)]
+                               (s/replace usage-template "{usage}" (str form)))]
+                (s/join "" examples))]
+    (-> special-form-template
+        (s/replace "{id}" name)
+        (s/replace "{name}" name)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc meta)) "\n" "<br>\n"))
+        (s/replace "{usage}" usage))))
+
 (defn namespace-doc
   [ns-sym]
   (let [ns (find-ns ns-sym)
@@ -133,8 +147,17 @@
         (s/replace "{index}" var-links-doc))))
 
 (defn index-doc
-  [namespaces types]
-  (let [namespaces-docs (s/join
+  [special-forms namespaces types]
+  (let [special-forms-docs (s/join
+                            ""
+                            (for [sf (sort (keys special-forms))]
+                              (special-form-doc (str sf) (special-forms sf))))
+        special-form-links-doc (s/join
+                                ""
+                                (->> (sort (keys special-forms))
+                                     (map #(link-item-doc (str %)))))
+
+        namespaces-docs (s/join
                          ""
                          (for [ns-sym namespaces]
                            (namespace-doc ns-sym)))
@@ -151,6 +174,8 @@
                         (->> types
                              (map #(link-item-doc (str %)))))]
     (-> index-template
+        (s/replace "{index-of-special-forms}" special-form-links-doc)
+        (s/replace "{special-forms}" special-forms-docs)
         (s/replace "{index-of-namespaces}" ns-links-doc)
         (s/replace "{namespaces}" namespaces-docs)
         (s/replace "{index-of-types}" type-links-doc)
@@ -164,8 +189,9 @@
                         (sort))
         types (->> (joker.core/types__)
                    (map key)
-                   (sort))]
-    (spit "index.html" (index-doc namespaces types))
+                   (sort))
+        special-forms joker.repl/special-doc-map]
+    (spit "index.html" (index-doc special-forms namespaces types))
     (doseq [ns namespaces]
       (spit (str ns ".html") (ns-doc ns ns-vars-fn)))))
 
