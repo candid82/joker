@@ -56,9 +56,10 @@ const codePattern = "a_%s_code.go"
 const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
-	GenGo        gen_go.GoGen
+	GenGo        *gen_go.GoGen
 	StaticImport *Imports
 	Import       *Imports
+	Namespace    *Namespace
 	Required     *map[*Namespace]struct{} // Namespaces referenced by current one
 	Runtimes     map[*Namespace]*[]string
 	Imports      map[*Namespace]*Imports
@@ -177,7 +178,7 @@ func main() {
 		FieldSortFn:    sort.Strings,
 	}
 	genEnv := &GenEnv{
-		GoGen:        &goGen,
+		GenGo:        goGen,
 		StaticImport: imports,
 		Required:     nil,
 		Import:       imports,
@@ -189,19 +190,29 @@ func main() {
 		LateInit:     false,
 	}
 
-	goGen.StructHookFn = func(genEnv *GenEnv) {
-		return func(target string, t reflect.Type, obj interface{}) string {
-			genEnv.structHookFn(target, obj)
+	goGen.WhereFn = func(genEnv *GenEnv) func() string {
+		return func() string {
+			return genEnv.Namespace.ToString(false)
 		}
 	}(genEnv)
-	goGen.ValueHookFn = func(genEnv *GenEnv) {
-		return func(target string, t reflect.Type, obj interface{}) string {
-			genEnv.valueHookFn(target, obj)
+	goGen.StructHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
+		return func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
+			return genEnv.structHookFn(target, obj)
 		}
 	}(genEnv)
-	goGen.PointerHookFn = func(genEnv *GenEnv) {
-		return func(target string, t reflect.Type, obj interface{}) string {
-			genEnv.pointerHookFn(target, obj)
+	goGen.ValueHookFn = func(genEnv *GenEnv) func(target string, t reflect.Type, v reflect.Value) string {
+		return func(target string, t reflect.Type, v reflect.Value) string {
+			return genEnv.valueHookFn(target, t, v)
+		}
+	}(genEnv)
+	goGen.PointerHookFn = func(genEnv *GenEnv) func(target string, ptr, v reflect.Value) string {
+		return func(target string, ptr, v reflect.Value) string {
+			return genEnv.pointerHookFn(target, ptr, v)
+		}
+	}(genEnv)
+	goGen.PtrToValueFn = func(genEnv *GenEnv) func(ptr, v reflect.Value) string {
+		return func(ptr, v reflect.Value) string {
+			return genEnv.ptrToValueFn(ptr, v)
 		}
 	}(genEnv)
 
@@ -243,14 +254,14 @@ func main() {
 
 	// Emit the "global" (static) Joker variables.
 
-	genEnv.emitVar("STR", false, STR)
-	genEnv.emitVar("STRINGS", false, STRINGS)
-	genEnv.emitVar("SYMBOLS", false, SYMBOLS)
-	genEnv.emitVar("SPECIAL_SYMBOLS", false, SPECIAL_SYMBOLS)
-	genEnv.emitVar("KEYWORDS", false, KEYWORDS)
-	genEnv.emitVar("TYPE", false, TYPE)
-	genEnv.emitVar("TYPES", false, TYPES)
-	genEnv.emitVar("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
+	goGen.Var("STR", false, STR)
+	goGen.Var("STRINGS", false, STRINGS)
+	goGen.Var("SYMBOLS", false, SYMBOLS)
+	goGen.Var("SPECIAL_SYMBOLS", false, SPECIAL_SYMBOLS)
+	goGen.Var("KEYWORDS", false, KEYWORDS)
+	goGen.Var("TYPE", false, TYPE)
+	goGen.Var("TYPES", false, TYPES)
+	goGen.Var("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
 
 	// Emit the per-namespace files (a_*_code.go).
 
@@ -436,20 +447,20 @@ func stdPackageName(pkg string) string {
 	return pkg
 }
 
-func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{}) string) {
+func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, deferredFunc func(target string, obj interface{})) {
 	res = "-" // Means no result, continue processing
 	switch obj := obj.(type) {
 	case Proc:
-		return g.emitProc(target, obj)
+		return genEnv.emitProc(target, obj), nil
 	case Namespace:
 		nsName := obj.Name.Name()
 		if VerbosityLevel > 0 {
 			fmt.Printf("COMPILING %s\n", nsName)
 		}
-		lateInit := g.LateInit
-		g.LateInit = nsName != "joker.core"
-		deferredFunc := func() {
-			g.LateInit = lateInit
+		lateInit := genEnv.LateInit
+		genEnv.LateInit = nsName != "joker.core"
+		deferredFunc = func(target string, obj interface{}) {
+			genEnv.LateInit = lateInit
 			if VerbosityLevel > 0 {
 				fmt.Printf("FINISHED %s\n", nsName)
 			}
@@ -463,6 +474,7 @@ func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, 
 			}
 		}
 	}
+	return
 }
 
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
@@ -471,7 +483,7 @@ func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	if p.Package != "" {
 		pkgName := stdPackageName(p.Package)
 		thunkName := fmt.Sprintf("STD_thunk_%s_%s", NameAsGo(pkgName), fnName)
-		*genEnv.Statics = append(*genEnv.Statics, fmt.Sprintf(`
+		*genEnv.GenGo.Statics = append(*genEnv.GenGo.Statics, fmt.Sprintf(`
 // std/%s/a_%s_fast_init.go's init() function sets this to the same as its local var %s on the !fast_init side:
 var %s_var ProcFn
 func %s(a []Object) Object {
@@ -495,9 +507,9 @@ Proc{
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
 	importedAs := AddImport(genEnv.Import, "", "regexp", true)
 	source := fmt.Sprintf("%s.MustCompile(%s)", importedAs, strconv.Quote(v.Interface().(*regexp.Regexp).String()))
-	*genEnv.Runtime = append(*genEnv.Runtime, fmt.Sprintf(`
+	*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
 	%s = %s`[1:],
-		asTarget(target), source))
+		gen_go.AsTarget(target), source))
 	return fmt.Sprintf("nil /* %s: &%s */", genEnv.Namespace.ToString(false), source)
 }
 
@@ -512,17 +524,6 @@ func uniqueId(obj interface{}) string {
 	default:
 	}
 	return UniqueId(obj)
-}
-
-func asTarget(s string) string {
-	if s == "" || s[len(s)-1] != ')' {
-		return s
-	}
-	ix := strings.LastIndex(s, ".(")
-	if ix < 0 {
-		return s
-	}
-	return s[0:ix]
 }
 
 /* Represents an 'import ( foo "bar/bletch/foo" )' line to be produced. */
@@ -652,7 +653,7 @@ func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value
 	return ""
 }
 
-func (genEnv *GenEnv) pointerHookFn(target string, v reflect.Value) string {
+func (genEnv *GenEnv) pointerHookFn(target string, ptr, v reflect.Value) string {
 	switch pkg := v.Type().PkgPath(); pkg {
 	case "regexp":
 		return genEnv.emitPtrToRegexp(target, ptr)
@@ -665,6 +666,70 @@ func (genEnv *GenEnv) pointerHookFn(target string, v reflect.Value) string {
 		panic(fmt.Sprintf("unexpected PkgPath `%s' for &%+v", pkg, v.Interface()))
 	}
 	return ""
+}
+
+func (genEnv *GenEnv) ptrToValueFn(ptr, v reflect.Value) string {
+	ptrToObj := ptr.Interface()
+	obj := v.Interface()
+	name := uniqueId(ptrToObj)
+	if genEnv.LateInit { // TODO:
+		if destVar, yes := ptrToObj.(*Var); yes {
+			if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
+				sourceVarName := e.Var().Name()
+				if _, found := knownLateInits[sourceVarName]; found {
+					destVarId := uniqueId(destVar)
+					*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
+	%s.Value = %s.Value`[1:],
+						destVarId, uniqueId(e.Var())))
+				}
+			}
+		}
+	}
+	genEnv.GenGo.Generated[v] = name
+
+	if ns, yes := ptrToObj.(*Namespace); yes { // TODO:
+		if _, found := namespaces[ns.ToString(false)]; found {
+			oldNamespace := genEnv.Namespace
+			oldRuntime := genEnv.GenGo.Runtime
+			oldImports := genEnv.Import
+			oldRequired := genEnv.Required
+			defer func() {
+				genEnv.Namespace = oldNamespace
+				genEnv.GenGo.Runtime = oldRuntime
+				genEnv.Import = oldImports
+				genEnv.Required = oldRequired
+			}()
+
+			genEnv.Namespace = ns
+
+			rt, found := genEnv.Runtimes[ns]
+			if !found {
+				newRuntime := []string{}
+				rt = &newRuntime
+				genEnv.Runtimes[ns] = rt
+			}
+			genEnv.GenGo.Runtime = rt
+
+			imp, found := genEnv.Imports[ns]
+			if !found {
+				newImport := Imports{}
+				imp = &newImport
+				genEnv.Imports[ns] = imp
+			}
+			genEnv.Import = imp
+
+			rq, found := genEnv.Requireds[ns]
+			if !found {
+				newRequired := map[*Namespace]struct{}{}
+				rq = &newRequired
+				genEnv.Requireds[ns] = rq
+			}
+			genEnv.Required = rq
+		}
+	}
+
+	genEnv.GenGo.Var(name, false, obj)
+	return "&" + name
 }
 
 // catchPanic handles any panics that might occur during the handleMethods
