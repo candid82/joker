@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"unsafe"
 )
 
 type GenGo struct {
@@ -15,11 +14,11 @@ type GenGo struct {
 	TypeToStringFn func(string) string         // Convert stringize reflect.Type to how generate code will refer to it
 	KeySortFn      func(keys []reflect.Value)
 	FieldSortFn    func(members []string)
-	WhereFn        func() string // genEnv.Namespace.ToString(false)
+	WhereFn        func() string
 	StructHookFn   func(target string, t reflect.Type, obj interface{}) (res string, deferredFunc func(target string, obj interface{}))
 	ValueHookFn    func(target string, t reflect.Type, v reflect.Value) string // return non-empty string to short-circuit value expansion
 	PointerHookFn  func(target string, ptr, v reflect.Value) string            // return non-empty string to short-circuit value expansion
-	PtrToValueFn   func(ptr, v reflect.Value) string
+	PtrToValueFn   func(ptr, v reflect.Value) string                           // typically calls (*GenGo)Var() to generate the variable and returns that result
 }
 
 // Generate Go code to initialize a variable (either statically or at run time) to the value specified by obj.
@@ -267,36 +266,4 @@ func AsTarget(s string) string {
 		return s
 	}
 	return s[0:ix]
-}
-
-// NOTE: Below this line, code comes from github.com/jcburley/go-spew:
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-const flagPrivate = 0x20
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-var flagValOffset = func() uintptr {
-	field, ok := reflect.TypeOf(reflect.Value{}).FieldByName("flag")
-	if !ok {
-		panic("reflect.Value has no flag field")
-	}
-	return field.Offset
-}()
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-type flag uintptr
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-func flagField(v *reflect.Value) *flag {
-	return (*flag)(unsafe.Pointer(uintptr(unsafe.Pointer(v)) + flagValOffset))
-}
-
-// This comes from (davecgh|jcburley)/go-spew/bypass.go.
-func UnsafeReflectValue(v reflect.Value) reflect.Value {
-	if !v.IsValid() || (v.CanInterface() && v.CanAddr()) {
-		return v
-	}
-	flagFieldPtr := flagField(&v)
-	*flagFieldPtr &^= flagPrivate
-	return v
 }
