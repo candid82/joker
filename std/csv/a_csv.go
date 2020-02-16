@@ -6,7 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-
 var __csv_seq__P ProcFn = __csv_seq_
 var csv_seq_ Proc = Proc{Fn: __csv_seq__P, Name: "csv_seq_", Package: "std/csv"}
 

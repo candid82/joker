@@ -36,6 +36,9 @@
 (def package-slow-template
   (slurp "package-slow.tmpl"))
 
+(def package-fast-template
+  (slurp "package-fast.tmpl"))
+
 (def intern-template
   (slurp "intern.tmpl"))
 
@@ -318,6 +321,26 @@
               res)]
     res))
 
+(defn generate-thunk
+  [ns-name ns-name-final k v]
+  (let [fn (go-name (str k))]
+    (format "STD_thunk_%s_%s_var = __%s" ns-name fn fn)))
+
+(defn generate-ns-fast-init
+  [ns-sym ns-name ns-name-final]
+  (let [ns (find-ns ns-sym)
+        m (meta ns)
+        thunks (for [[k v] (sort-by first (ns-public-go-fns ns))]
+                 (generate-thunk ns-name ns-name-final k v))
+        res (-> package-fast-template
+                (rpl "{nsName}" ns-name-final)
+                (rpl "{imports}" ". \"github.com/candid82/joker/core\"")
+                (rpl "{thunks}" (s/join "\n\t" thunks)))
+        res (if (:empty m)
+              (comment-out res)
+              res)]
+    res))
+
 (defn ns-file-name
   [dir ns-name-final]
   (str dir "/a_" ns-name-final ".go"))
@@ -325,6 +348,10 @@
 (defn ns-file-name-slow-init
   [dir ns-name-final]
   (str dir "/a_" ns-name-final "_slow_init.go"))
+
+(defn ns-file-name-fast-init
+  [dir ns-name-final]
+  (str dir "/a_" ns-name-final "_fast_init.go"))
 
 (defn remove-blanky-lines
   [s]
@@ -340,8 +367,11 @@
   (let [ns-name (str ns-sym)
         dir (rpl ns-name "." "/")
         ns-name-final (rpl ns-name #".*[.]" "")
-        pre false]
+        pre (preloaded (joker-ize ns-sym))]
     (spit (ns-file-name dir ns-name-final)
           (remove-blanky-lines (generate-ns ns-sym ns-name ns-name-final)))
     (spit (ns-file-name-slow-init dir ns-name-final)
-          (remove-blanky-lines (generate-ns-slow-init ns-sym ns-name ns-name-final pre)))))
+          (remove-blanky-lines (generate-ns-slow-init ns-sym ns-name ns-name-final pre)))
+    (when pre
+      (spit (ns-file-name-fast-init dir ns-name-final)
+           (remove-blanky-lines (generate-ns-fast-init ns-sym ns-name ns-name-final))))))

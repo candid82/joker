@@ -7,7 +7,6 @@ import (
 	"strconv"
 )
 
-
 var __atoi__P ProcFn = __atoi_
 var atoi_ Proc = Proc{Fn: __atoi__P, Name: "atoi_", Package: "std/strconv"}
 

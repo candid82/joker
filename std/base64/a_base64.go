@@ -6,7 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-
 var __decode_string__P ProcFn = __decode_string_
 var decode_string_ Proc = Proc{Fn: __decode_string__P, Name: "decode_string_", Package: "std/base64"}
 
