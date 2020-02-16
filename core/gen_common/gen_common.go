@@ -1,5 +1,12 @@
 package gen_common
 
+// Imports of std libraries required by core libraries go here, as
+// both gen_data and gen_code pull in this package.
+import (
+	_ "github.com/candid82/joker/std/html"
+	_ "github.com/candid82/joker/std/string"
+)
+
 type FileInfo struct {
 	Name     string
 	Filename string
