@@ -17,7 +17,7 @@ func __abs_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		path := ExtractString(_args, 0)
-		 _res, err := filepath.Abs(path)
+		_res, err := filepath.Abs(path)
 		PanicOnErr(err)
 		return MakeString(_res)
 
@@ -103,7 +103,7 @@ func __eval_symlinks_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		path := ExtractString(_args, 0)
-		 _res, err := filepath.EvalSymlinks(path)
+		_res, err := filepath.EvalSymlinks(path)
 		PanicOnErr(err)
 		return MakeString(_res)
 
@@ -172,7 +172,7 @@ func __glob_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		pattern := ExtractString(_args, 0)
-		 _res, err := filepath.Glob(pattern)
+		_res, err := filepath.Glob(pattern)
 		PanicOnErr(err)
 		return MakeStringVector(_res)
 
@@ -209,7 +209,7 @@ func __ismatches_(_args []Object) Object {
 	case _c == 2:
 		pattern := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
-		 _res, err := filepath.Match(pattern, name)
+		_res, err := filepath.Match(pattern, name)
 		PanicOnErr(err)
 		return MakeBoolean(_res)
 
@@ -228,7 +228,7 @@ func __rel_(_args []Object) Object {
 	case _c == 2:
 		basepath := ExtractString(_args, 0)
 		targpath := ExtractString(_args, 1)
-		 _res, err := filepath.Rel(basepath, targpath)
+		_res, err := filepath.Rel(basepath, targpath)
 		PanicOnErr(err)
 		return MakeString(_res)
 
@@ -246,7 +246,7 @@ func __split_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		path := ExtractString(_args, 0)
-		 _dir, _file := filepath.Split(path)
+		_dir, _file := filepath.Split(path)
 		_res := NewVectorFrom(MakeString(_dir), MakeString(_file))
 		return _res
 

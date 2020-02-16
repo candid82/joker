@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-
 var __args__P ProcFn = __args_
 var args_ Proc = Proc{Fn: __args__P, Name: "args_", Package: "std/os"}
 
@@ -49,7 +48,7 @@ func __close_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		f := ExtractFile(_args, 0)
-		 err := f.Close()
+		err := f.Close()
 		PanicOnErr(err)
 		_res := NIL
 		return _res
@@ -68,7 +67,7 @@ func __create_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 _res, err := os.Create(name)
+		_res, err := os.Create(name)
 		PanicOnErr(err)
 		return MakeFile(_res)
 
@@ -223,7 +222,7 @@ func __open_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 _res, err := os.Open(name)
+		_res, err := os.Open(name)
 		PanicOnErr(err)
 		return MakeFile(_res)
 
@@ -241,7 +240,7 @@ func __remove_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 err := os.Remove(name)
+		err := os.Remove(name)
 		PanicOnErr(err)
 		_res := NIL
 		return _res
@@ -260,7 +259,7 @@ func __remove_all_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		path := ExtractString(_args, 0)
-		 err := os.RemoveAll(path)
+		err := os.RemoveAll(path)
 		PanicOnErr(err)
 		_res := NIL
 		return _res

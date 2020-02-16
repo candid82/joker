@@ -3,13 +3,12 @@
 package crypto
 
 import (
-	. "github.com/candid82/joker/core"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	. "github.com/candid82/joker/core"
 )
-
 
 var __hmac__P ProcFn = __hmac_
 var hmac_ Proc = Proc{Fn: __hmac__P, Name: "hmac_", Package: "std/crypto"}
@@ -38,7 +37,7 @@ func __md5_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := md5.Sum([]byte(data))
+		t := md5.Sum([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -56,7 +55,7 @@ func __sha1_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha1.Sum([]byte(data))
+		t := sha1.Sum([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -74,7 +73,7 @@ func __sha224_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha256.Sum224([]byte(data))
+		t := sha256.Sum224([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -92,7 +91,7 @@ func __sha256_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha256.Sum256([]byte(data))
+		t := sha256.Sum256([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -110,7 +109,7 @@ func __sha384_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha512.Sum384([]byte(data))
+		t := sha512.Sum384([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -128,7 +127,7 @@ func __sha512_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha512.Sum512([]byte(data))
+		t := sha512.Sum512([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -146,7 +145,7 @@ func __sha512_224_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha512.Sum512_224([]byte(data))
+		t := sha512.Sum512_224([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 
@@ -164,7 +163,7 @@ func __sha512_256_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		data := ExtractString(_args, 0)
-		 t := sha512.Sum512_256([]byte(data))
+		t := sha512.Sum512_256([]byte(data))
 		_res := string(t[:])
 		return MakeString(_res)
 

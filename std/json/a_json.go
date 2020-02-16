@@ -6,7 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-
 var __read_string__P ProcFn = __read_string_
 var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/json"}
 

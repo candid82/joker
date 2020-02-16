@@ -6,7 +6,6 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-
 var __send__P ProcFn = __send_
 var send_ Proc = Proc{Fn: __send__P, Name: "send_", Package: "std/http"}
 

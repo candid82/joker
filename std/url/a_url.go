@@ -7,7 +7,6 @@ import (
 	"net/url"
 )
 
-
 var __path_escape__P ProcFn = __path_escape_
 var path_escape_ Proc = Proc{Fn: __path_escape__P, Name: "path_escape_", Package: "std/url"}
 

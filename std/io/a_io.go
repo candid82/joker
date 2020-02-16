@@ -7,7 +7,6 @@ import (
 	"io"
 )
 
-
 var __copy__P ProcFn = __copy_
 var copy_ Proc = Proc{Fn: __copy__P, Name: "copy_", Package: "std/io"}
 
@@ -17,7 +16,7 @@ func __copy_(_args []Object) Object {
 	case _c == 2:
 		dst := ExtractIOWriter(_args, 0)
 		src := ExtractIOReader(_args, 1)
-		 n, err := io.Copy(dst, src)
+		n, err := io.Copy(dst, src)
 		PanicOnErr(err)
 		_res := int(n)
 		return MakeInt(_res)
