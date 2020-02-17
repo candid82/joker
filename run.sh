@@ -23,6 +23,7 @@ if [ -n "$OUT" ]; then
     echo >&2 "Unable to generate fresh library files; exiting."
     exit 2
 fi
+(cd std; go fmt ./... > /dev/null)
 NEW_SUM256="$(go run tools/sum256dir/main.go std)"
 
 if [ "$SUM256" != "$NEW_SUM256" ]; then
