@@ -41,3 +41,11 @@ func (ior *IOReader) Hash() uint32 {
 func (ior *IOReader) WithInfo(info *ObjectInfo) Object {
 	return ior
 }
+
+func (ior *IOReader) Close() error {
+	if c, ok := ior.Reader.(io.Closer); ok {
+		return c.Close()
+	} else {
+		return RT.NewError("Object is not closable: " + ior.ToString(false))
+	}
+}

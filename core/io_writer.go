@@ -41,3 +41,11 @@ func (iow *IOWriter) Hash() uint32 {
 func (iow *IOWriter) WithInfo(info *ObjectInfo) Object {
 	return iow
 }
+
+func (iow *IOWriter) Close() error {
+	if c, ok := iow.Writer.(io.Closer); ok {
+		return c.Close()
+	} else {
+		return RT.NewError("Object is not closable: " + iow.ToString(false))
+	}
+}

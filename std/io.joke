@@ -11,3 +11,17 @@
   {:added "1.0"
   :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
   [^IOWriter dst ^IOReader src])
+
+(defn pipe
+  "Pipe creates a synchronous in-memory pipe. It can be used to connect code expecting an IOReader
+  with code expecting an IOWriter.
+  Returns a vector [reader, writer]."
+  {:added "1.0"
+   :go "pipe()"}
+  [])
+
+(defn close
+  "Closes f (IOWriter, IOReader, or File) if possible. Otherwise throws an error."
+  {:added "1.0"
+   :go "close(f)"}
+  [^Object f])
