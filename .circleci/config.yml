@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.12.6
+      - image: circleci/golang:1.13.8
     working_directory: /go/src/github.com/candid82/joker
     steps:
       - checkout
