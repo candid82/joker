@@ -51,7 +51,6 @@ func main() {
 
 		libCode := ""
 		setLazy := ""
-		slowInit := ""
 		if _, found := namespaces[nsName]; !found && nsName != "user" {
 			libCode = `
 var {name}Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("{ns}"))
@@ -65,8 +64,6 @@ func {name}LazyInit() {
 			setLazy = `
 	{name}Namespace.Lazy = {name}LazyInit
 `[1:]
-			slowInit = `// +build !fast_init
-`
 		}
 		dataTemplate = strings.ReplaceAll(dataTemplate, "{lib-code}", libCode)
 		dataTemplate = strings.ReplaceAll(dataTemplate, "{set-lazy}", setLazy)
@@ -76,7 +73,6 @@ func {name}LazyInit() {
 		name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
 		fileContent := strings.ReplaceAll(dataTemplate, "{name}", name)
 		fileContent = strings.ReplaceAll(fileContent, "{ns}", nsName)
-		fileContent = strings.ReplaceAll(fileContent, "{slowInit}", slowInit)
 		fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
 		ioutil.WriteFile("a_"+name+"_data.go", []byte(fileContent), 0666)
 	}
