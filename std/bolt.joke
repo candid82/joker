@@ -1,0 +1,52 @@
+(ns
+  ^{:go-imports []
+    :doc "Provide API for Bolt embeded database https://github.com/etcd-io/bbolt."}
+  bolt)
+
+(defn ^BoltDB open
+  "Creates and opens a database at the given path.
+  If the file does not exist then it will be created automatically."
+  {:added "1.0"
+   :go {2 "open(filename, mode, nil)"
+        3 "open(filename, mode, options)"}}
+  ([^String filename ^Int mode])
+  ([^String filename ^Int mode ^Map options]))
+
+(defn close
+  "Releases all database resources.
+  It will block waiting for any open transactions to finish
+  before closing the database and returning."
+  {:added "1.0"
+   :go "close(db)"}
+  [^BoltDB db])
+
+; (defn update
+;   "Executes f within the context of a read-write managed transaction.
+;   If no error is thrown by f then the transaction is committed.
+;   If an error is thrown by f then the entire transaction is rolled back.
+;   Any error that is thrown by f is re-thrown by update."
+;   {:added "1.0"
+;    :go "update(db, f)"}
+;   [^BoltDB db ^Callable f])
+
+(defn create-bucket
+  "Creates a new bucket. Throws an error if the bucket already exists,
+  if the bucket name is blank, or if the bucket name is too long."
+  {:added "1.0"
+   :go "createBucket(db, name)"}
+  [^BoltDB db ^String name])
+
+(defn put
+  "Sets the value for a key in the bucket.
+  If the key exist then its previous value will be overwritten.
+  Throws an error if the key is blank, if the key is too large, or if the value is too large."
+  {:added "1.0"
+   :go "put(db, bucket, key, value)"}
+  [^BoltDB db ^String bucket ^String key ^String value])
+
+(defn get
+  "Retrieves the value for a key in the bucket.
+  Returns nil if the key does not exist."
+  {:added "1.0"
+   :go "get(db, bucket, key)"}
+  [^BoltDB db ^String bucket ^String key])

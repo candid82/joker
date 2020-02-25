@@ -15,6 +15,7 @@ import (
 
 	. "github.com/candid82/joker/core"
 	_ "github.com/candid82/joker/std/base64"
+	_ "github.com/candid82/joker/std/bolt"
 	_ "github.com/candid82/joker/std/crypto"
 	_ "github.com/candid82/joker/std/csv"
 	_ "github.com/candid82/joker/std/filepath"

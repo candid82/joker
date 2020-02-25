@@ -8,15 +8,15 @@ build() {
   go generate ./...
   (cd core; go fmt a_*.go > /dev/null)
   go vet -tags gen_code ./...
-  go build
-  if $OPTIMIZE_STARTUP; then
-      mv -f joker joker.slow
-      go build -tags fast_init
-      ln -f joker joker.fast
-      echo "...built both joker.slow and joker.fast (aka joker)."
-  else
-      ln -f joker joker.slow
-  fi
+  go build -tags fast_init
+  # if $OPTIMIZE_STARTUP; then
+  #     mv -f joker joker.slow
+  #     go build -tags fast_init
+  #     ln -f joker joker.fast
+  #     echo "...built both joker.slow and joker.fast (aka joker)."
+  # else
+  #     ln -f joker joker.slow
+  # fi
 }
 
 set -e  # Exit on error.
