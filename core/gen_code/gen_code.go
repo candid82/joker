@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -138,10 +139,11 @@ func main() {
 		namespaces[nsName] = namespaceIndex
 		namespaceIndex++
 
-		r, err := NewReaderFromFile("data/" + f.Filename)
+		file, err := os.Open("data/" + f.Filename)
 		PanicOnErr(err)
-		err = ProcessReader(r, f.Filename, EVAL)
+		err = ProcessReader(NewReader(bufio.NewReader(file), f.Name), f.Filename, EVAL)
 		PanicOnErr(err)
+		file.Close()
 
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 
