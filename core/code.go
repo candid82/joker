@@ -122,30 +122,9 @@ func (fn *Fn) AsGo() string {
 	panic("(*Fn)Asgo(): fn.fnExpr == nil")
 }
 
-func sameName(f, n string) (res bool) {
-	if f == n || filenameUnbracketed(f) == n {
-		return true
-	}
-	defer func() {
-		if VerbosityLevel > 0 && !res {
-			fmt.Fprintf(Stderr, "sameName(\"%s\", \"%s\") => %v\n", f, n, res)
-		}
-	}()
-	if !strings.HasPrefix(f, "data/") {
-		return false
-	}
-	if !strings.HasPrefix(n, "joker.") {
-		return false
-	}
-	f = strings.Replace(f, "data/", "", 1)
-	f = strings.ReplaceAll(f, "_", "-") // Filenames should really use hyphens instead of underscores IMO
-	n = strings.Replace(f, "joker.", "", 1)
-	return f == n
-}
-
 func (ns *Namespace) AsGo() string {
 	file := ""
-	if ns.Name.info != nil && ns.Name.info.filename != nil && !sameName(*ns.Name.info.filename, *ns.Name.name) {
+	if ns.Name.info != nil && ns.Name.info.filename != nil && *ns.Name.info.filename != *ns.Name.name && filenameUnbracketed(*ns.Name.info.filename) != *ns.Name.name {
 		file = "_FILE_" + StringAsGoName(*ns.Name.info.filename)
 	}
 	return "ns_" + StringAsGoName(*ns.Name.name) + file
