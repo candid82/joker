@@ -51,7 +51,6 @@ func parseArgs(args []string) {
 const hextable = "0123456789abcdef"
 const masterFile = "a_code.go"
 const codePattern = "a_%s_code.go"
-const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
 	GenGo            *gen_go.GenGo
@@ -139,14 +138,19 @@ func main() {
 		namespaces[nsName] = namespaceIndex
 		namespaceIndex++
 
-		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
+		r, err := NewReaderFromFile("data/" + f.Filename)
+		PanicOnErr(err)
+		err = ProcessReader(r, f.Filename, EVAL)
+		PanicOnErr(err)
 
-		ns.MaybeLazy("gen_code") // Process the namespace (read the digested data for e.g. joker.core)
+		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 
 		if VerbosityLevel > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
 	}
+
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 
 	statics := []string{}
 	runtime := []string{}
