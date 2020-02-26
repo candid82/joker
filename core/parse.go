@@ -1167,6 +1167,16 @@ func resolveMacro(obj Object, ctx *ParseContext) *Var {
 		}
 		vr.isUsed = true
 		vr.isGloballyUsed = true
+		if vr.ns == nil {
+			// This very likely represents a Joker
+			// bug. E.g. often seen while developing the
+			// fast-init (fast-startup) version of
+			// Joker. But it's much easier to debug when
+			// presented as a parse error (so the
+			// "offending" .joke source info is provided)
+			// along with the problematic var name.
+			panic(&ParseError{obj: obj, msg: fmt.Sprintf("No namespace for %s", vr.name.ToString(false))})
+		}
 		vr.ns.isUsed = true
 		vr.ns.isGloballyUsed = true
 		return vr
