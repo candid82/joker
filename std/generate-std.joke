@@ -12,6 +12,13 @@
 
 (def rpl s/replace)
 
+(defn debug
+  [& args]
+  (when ((os/env) "JOKER_DEBUG_STD")
+    (apply println args)))
+
+(debug "Preloaded:" preloaded)
+
 ;;; Discover namespaces dynamically by finding *.joke files.
 (def namespaces
   (vec (->> (os/ls ".")
@@ -22,6 +29,7 @@
             (map #(rpl % #"[.]joke$" ""))
             (map symbol))))
 
+(debug "Namespaces:" namespaces)
 (apply require :reload namespaces) ; :reload in case namespaces become 'joker.base64 etc.
 
 (def fn-template
