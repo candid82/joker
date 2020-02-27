@@ -421,13 +421,13 @@ So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`,
 
 ## Faster Startup
 
-**run.sh** builds (via the `go generate ./...` step) an extra set of Go source files that, when enabled via a build tag, statically initialize most of the core namespace info. (Some runtime initialization must still be performed, due mainly to limitations in the Go compiler.)
+**run.sh** builds (via the `go generate ./...` step) an extra set of Go source files that, unless disabled via a build tag, statically initialize most of the core namespace info. (Some runtime initialization must still be performed, due mainly to limitations in the Go compiler.)
  
-Unless the file **NO-OPTIMIZE-STARTUP.flag** exists in the top-level Joker directory, or **OPTIMIZE_STARTUP=false** is set in the environment, **run.sh** builds _two_ executables: `joker.slow`, which is the "normal" (slow-starting) version of Joker, and `joker.fast`, which uses static initialization rather than relying extensively on runtime initialization (including parsing of Joker forms).
+Unless the file **NO-OPTIMIZE-STARTUP.flag** exists in the top-level Joker directory, or **OPTIMIZE_STARTUP=false** is set in its environment, **run.sh** builds `joker.fast`, which uses static initialization rather than relying extensively on runtime initialization (including parsing of Joker forms); otherwise, it builds `joker.slow`, which is the "original" (slow-starting) version of Joker. Whichever it builds, it hardlinks to `joker`.
 
-The original version is built via `go build -tags slow_init` and is renamed **joker.slow**. Then the fast-startup version is built via `go build` and hardlinked to **joker.fast**, leaving **joker** as the fast-startup version.
+The newly built `joker` executable is then used to generate the **std** libraries, as usual. It can also be used to regenerate the documentation, and (ideally) for any other purpose. The fast-startup version should run about as fast as the slow-startup version after starting up; very little is overtly added to the runtime cost (a few "thunks" are introduced for some routines, but that should end up in the noise, performance-wise).
 
-This fast-startup version is then used to generate the **std** libraries, as is normal. It can also be used to regenerate the documentation, and (ideally) for any other purpose. It should run about as fast as Joker after starting up; very little is overtly added to the runtime cost (a few "thunks" are introduced for some routines, but that should end up in the noise, performance-wise).
+The original version can then be built via `go build -tags slow_init` and installed via `go install -tags slow_init`. Otherwise, `go build` and `go install` build and install the new, fast-startup, version.
 
 ### Developer Notes
 
@@ -451,7 +451,7 @@ The fast-startup version necessitated (as of this writing) these changes:
     - The list of files (`FileInfo`) and `std` imports have been moved into the new `core/gen_common/gen_common.go` as `CoreSourceFiles` so `gen_code.go` can share this info.
     - `// +build slow_init` is emitted in pertinent files (mainly the `a_*_data.go` files, but not `a_data.go` itself).
 * The new `run.sh` runs, via the `go generate ./...` step, `gen_code.go`, which takes about only a few seconds on my Ryzen 3, and which generates these static-initializing files.
-* `run.sh` continues on to building both the “normal” (slower) Joker, renamed to `joker.slow`, and the fast-startup version, hardlinked to `joker.fast`, which thus becomes the default for subsequent use (such as running `std/generate-std.joke` and then running the executable itself with whatever arguments were provided to `run.sh`).
+* `run.sh` continues on to building either the “original” (slower) Joker executable, hardlinked to `joker.slow`, or the fast-startup version, hardlinked to `joker.fast`. Whichever is built, it becomes the default for subsequent use (such as running `std/generate-std.joke` and then running the executable itself with whatever arguments were provided to `run.sh`).
 * A new `core/code.go` module is a helper for `gen_code.go`, since the latter isn’t part of `package core`.
 * A new `core/gen_go` package is used solely by `gen_code` and implements the details of compiling Go variables into (mostly) static Go code.
 * The new private function `joker.core/ns-initialized?` tells whether a namespace has been initialized (fully, including potentially lazily, loaded). Useful as a debugging tool, it's also used by `std/generate-std.joke` to determine which `std` libraries are preloaded by loading all core libraries due to being required by them.
