@@ -1,6 +1,4 @@
 joker
-joker.fast
-joker.slow
 .vscode
 .idea
 core/a_*.go
