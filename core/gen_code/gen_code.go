@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -52,7 +52,6 @@ func parseArgs(args []string) {
 const hextable = "0123456789abcdef"
 const masterFile = "a_code.go"
 const codePattern = "a_%s_code.go"
-const dataPattern = "a_%s_data.go"
 
 type GenEnv struct {
 	GenGo            *gen_go.GenGo
@@ -147,12 +146,20 @@ func main() {
 		namespaces[nsName] = namespaceIndex
 		namespaceIndex++
 
+		file, err := os.Open("data/" + f.Filename)
+		PanicOnErr(err)
+		err = ProcessReader(NewReader(bufio.NewReader(file), f.Name), f.Filename, EVAL)
+		PanicOnErr(err)
+		file.Close()
+
 		ns := GLOBAL_ENV.Namespaces[nsNamePtr]
 
 		if VerbosityLevel > 0 {
 			fmt.Printf("READ ns=%s mappings=%d\n", nsName, len(ns.Mappings()))
 		}
 	}
+
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 
 	statics := []string{}
 	runtime := []string{}
@@ -444,7 +451,7 @@ func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 		pkgName := stdPackageName(p.Package)
 		thunkName := fmt.Sprintf("STD_thunk_%s_%s", StringAsGoName(pkgName), fnName)
 		*genEnv.GenGo.Statics = append(*genEnv.GenGo.Statics, fmt.Sprintf(`
-// std/%s/a_%s.go's init() function sets this to the same as its local var %s:
+// package std/%s defines an init() function that sets this to the same as its local var %s:
 var %s_var ProcFn
 func %s(a []Object) Object {
 	return %s_var(a)

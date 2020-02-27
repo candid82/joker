@@ -109,6 +109,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 1. The following features are not implemented: protocols, records, structmaps, chunked seqs, transients, tagged literals, unchecked arithmetics, primitive arrays, custom data readers, transducers, validators and watch functions for vars and atoms, hierarchies, sorted maps and sets.
 1. Unrelated to the features listed above, the following function from clojure.core namespace are not currently implemented but will probably be implemented in some form in the future: `subseq`, `iterator-seq`, `reduced?`, `reduced`, `mix-collection-hash`, `definline`, `re-groups`, `hash-ordered-coll`, `enumeration-seq`, `compare-and-set!`, `rationalize`, `load-reader`, `find-keyword`, `comparator`, `resultset-seq`, `file-seq`, `sorted?`, `ensure-reduced`, `rsubseq`, `pr-on`, `seque`, `alter-var-root`, `hash-unordered-coll`, `re-matcher`, `unreduced`.
 1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other built-in namespaces include `joker.string`, `joker.json`, `joker.os`, `joker.base64` etc. See [standard library reference](https://candid82.github.io/joker/) for details.
+1. Joker doesn't support AOT compilation and `(-main)` entry point as Clojure does. It simply reads s-expressions from the file and executes them sequentially. If you want some code to be executed only if the file it's in is passed as `joker` argument but not if it's loaded from other files, use `(when (= *main-file* *file*) ...)` idiom. See https://github.com/candid82/joker/issues/277 for details.
 1. Miscellaneous:
   - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
   - `slurp` only takes one argument - a filename (string). No options are supported.
@@ -256,7 +257,7 @@ Below commands should get you up and running.
 ```
 go get -d github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
-./run.sh --version && go install
+./run.sh --version && go install # -tags fast_init (if you want to install the fast-startup version)
 ```
 
 ### Cross-platform Builds
@@ -264,7 +265,7 @@ cd $GOPATH/src/github.com/candid82/joker
 After building the native version (to autogenerate appropriate files, "vet" the source code, etc.), set the appropriate environment variables and invoke `go build`. E.g.:
 
 ```
-$ GOOS=linux GOARCH=arm GOARM=6 go build
+$ GOOS=linux GOARCH=arm GOARM=6 go build # -tags fast_init (if you want to build the fast-startup version)
 ```
 
 (The `run.sh` script does not support cross-platform building.)
