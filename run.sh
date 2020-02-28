@@ -8,13 +8,11 @@ build() {
   go generate ./...
   (cd core; go fmt a_*.go > /dev/null)
   go vet -tags gen_code ./...
-  go build -tags slow_init
   if $OPTIMIZE_STARTUP; then
-      mv -f joker joker.slow
       go build
       ln -f joker joker.fast
-      echo "...built both joker.slow and joker.fast (aka joker)."
   else
+      go build -tags slow_init
       ln -f joker joker.slow
   fi
 }
