@@ -3242,7 +3242,7 @@
   *loaded-libs* #{'joker.base64 'joker.html 'joker.http 'joker.json 'joker.io
                   'joker.math 'joker.os 'joker.string 'joker.time 'joker.url
                   'joker.yaml 'joker.strconv 'joker.crypto 'joker.hex 'joker.filepath
-                  'joker.csv 'joker.uuid})
+                  'joker.csv 'joker.uuid 'joker.bolt})
 
 (defonce ^:dynamic
   ^{:private true
