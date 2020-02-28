@@ -6,6 +6,25 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
+var __by_prefix__P ProcFn = __by_prefix_
+var by_prefix_ Proc = Proc{Fn: __by_prefix__P, Name: "by_prefix_", Package: "std/bolt"}
+
+func __by_prefix_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		db := ExtractBoltDB(_args, 0)
+		bucket := ExtractString(_args, 1)
+		prefix := ExtractString(_args, 2)
+		_res := byPrefix(db, bucket, prefix)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __close__P ProcFn = __close_
 var close_ Proc = Proc{Fn: __close__P, Name: "close_", Package: "std/bolt"}
 
@@ -41,6 +60,43 @@ func __create_bucket_(_args []Object) Object {
 	return NIL
 }
 
+var __delete__P ProcFn = __delete_
+var delete_ Proc = Proc{Fn: __delete__P, Name: "delete_", Package: "std/bolt"}
+
+func __delete_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		db := ExtractBoltDB(_args, 0)
+		bucket := ExtractString(_args, 1)
+		key := ExtractString(_args, 2)
+		_res := delete(db, bucket, key)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __delete_bucket__P ProcFn = __delete_bucket_
+var delete_bucket_ Proc = Proc{Fn: __delete_bucket__P, Name: "delete_bucket_", Package: "std/bolt"}
+
+func __delete_bucket_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		db := ExtractBoltDB(_args, 0)
+		name := ExtractString(_args, 1)
+		_res := deleteBucket(db, name)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __get__P ProcFn = __get_
 var get_ Proc = Proc{Fn: __get__P, Name: "get_", Package: "std/bolt"}
 
@@ -60,6 +116,24 @@ func __get_(_args []Object) Object {
 	return NIL
 }
 
+var __next_sequence__P ProcFn = __next_sequence_
+var next_sequence_ Proc = Proc{Fn: __next_sequence__P, Name: "next_sequence_", Package: "std/bolt"}
+
+func __next_sequence_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		db := ExtractBoltDB(_args, 0)
+		bucket := ExtractString(_args, 1)
+		_res := nextSequence(db, bucket)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __open__P ProcFn = __open_
 var open_ Proc = Proc{Fn: __open__P, Name: "open_", Package: "std/bolt"}
 
@@ -69,14 +143,7 @@ func __open_(_args []Object) Object {
 	case _c == 2:
 		filename := ExtractString(_args, 0)
 		mode := ExtractInt(_args, 1)
-		_res := open(filename, mode, nil)
-		return MakeBoltDB(_res)
-
-	case _c == 3:
-		filename := ExtractString(_args, 0)
-		mode := ExtractInt(_args, 1)
-		options := ExtractMap(_args, 2)
-		_res := open(filename, mode, options)
+		_res := open(filename, mode)
 		return MakeBoltDB(_res)
 
 	default:
