@@ -1,4 +1,4 @@
-// +build !fast_init
+// +build slow_init
 
 package core
 

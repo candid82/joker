@@ -65,7 +65,7 @@ func {name}LazyInit() {
 			setLazy = `
 	{name}Namespace.Lazy = {name}LazyInit
 `[1:]
-			slowInit = `// +build !fast_init
+			slowInit = `// +build slow_init
 `
 		}
 		dataTemplate = strings.ReplaceAll(dataTemplate, "{lib-code}", libCode)
