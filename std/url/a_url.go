@@ -80,7 +80,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var urlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.url"))
+var urlNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.url"))
 
 func init() {
 	urlNamespace.Lazy = Init

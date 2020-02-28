@@ -48,7 +48,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var hexNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.hex"))
+var hexNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.hex"))
 
 func init() {
 	hexNamespace.Lazy = Init

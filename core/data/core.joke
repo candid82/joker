@@ -3238,14 +3238,6 @@
 
 (defonce ^:dynamic
   ^{:private true
-    :doc "A set of symbols representing currently loaded libs"}
-  *loaded-libs* #{'joker.base64 'joker.html 'joker.http 'joker.json 'joker.io
-                  'joker.math 'joker.os 'joker.string 'joker.time 'joker.url
-                  'joker.yaml 'joker.strconv 'joker.crypto 'joker.hex 'joker.filepath
-                  'joker.csv 'joker.uuid 'joker.bolt})
-
-(defonce ^:dynamic
-  ^{:private true
     :doc "A set of symbols representing available core (not std) namespaces"}
   *core-namespaces* #{})
 
@@ -3854,6 +3846,12 @@
 
   Defaults to true"
   {:added "1.0"})
+
+(add-doc-and-meta *loaded-libs*
+  "A set of symbols representing currently loaded libs"
+  {:added "1.0"
+   :dynamic true
+   :private true})
 
 (defmacro letfn
   "fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)

@@ -552,7 +552,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var mathNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.math"))
+var mathNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.math"))
 
 func init() {
 	mathNamespace.Lazy = Init

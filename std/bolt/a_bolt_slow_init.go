@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of bolt.InternsOrThunks().")
 	}
-	boltNamespace.ResetMeta(MakeMeta(nil, `Provide API for Bolt embeded database https://github.com/etcd-io/bbolt.
+	boltNamespace.ResetMeta(MakeMeta(nil, `Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
 
          Example:
 
