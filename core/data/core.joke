@@ -3786,7 +3786,7 @@
        ~(emit gpred gexpr clauses))))
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
-  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring :ns *ns* :name (symbol '~name))))
+  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring :ns *ns* :name '~name)))
 
 (add-doc-and-meta *file*
   "The path of the file being evaluated, as a String.
