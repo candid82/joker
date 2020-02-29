@@ -220,13 +220,13 @@ Further, if the new namespace depends on any standard-library-wrapping namespace
 * Edit the **core/gen\_common/gen\_common.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` files have already been created), perhaps by using an older version of Joker to run `generate-std.joke` from within the `std` subdirectory
 
-(Do not add the namespace to `*loaded-libs*`; that's for only libraries that have already been loaded. It will be automatically added to `*core-namespaces*` as an "available" library; and, upon being loaded, it will be added to `*loaded-libs*`. The fast-startup version of Joker will have already loaded all core libraries upon startup.)
-
 Create suitable tests, e.g. in `tests/eval/`.
 
 Finally, it's time to build as usual (e.g. via `./run.sh`), then run `./eval-tests.sh` or even `./all-tests.sh`.
 
-Note that core libraries (other than `joker.core` and, when running the Repl, `joker.repl`) do not show up in `joker.core/*loaded-libs*` (which is returned by the public function `loaded-libs`) until after they've been loaded via `:require` or similar.
+When Joker is run, the namespace is automatically added to `*core-namespaces*` as an "available" library; upon being loaded, it will be added to `*loaded-libs*`. (The fast-startup version of Joker will have already loaded all core libraries upon startup.)
+
+Note that, in the `slow_init` version of Joker, core libraries (other than `joker.core` and, when running the Repl, `joker.repl`) do not show up in `joker.core/*loaded-libs*` (which is returned by the public function `loaded-libs`) until after they've been loaded via `:require` or similar.
 
 ### Standard-library-wrapping (std) Namespaces
 
@@ -280,11 +280,11 @@ If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.
 
 Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for each public member (in `joker.foo`), one must:
 
-* Add the namespace to `*loaded-libs*` by editing its `defonce` definition in `core/data/core.joke`
 * `mkdir -p std/foo`
 * `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo.go`
 * If necessary, write supporting Go code, which goes in `std/foo/foo_native.go` and other Go files in `std/foo/*.go`
-* Add the resulting set of Go files, as well as `std/foo.joke`, to the repository
+* Add the resulting set of Go files (in `std/foo`), as well as `std/foo.joke`, to the repository
+* Add the appropriate line to the `import` block at the top of `main.go`
 * Add tests to `tests/eval/`
 * Rebuild the Joker executable (via `run.sh` or equivalent)
 * Run the tests (via `./all-tests.sh` or just `./eval-tests.sh`)

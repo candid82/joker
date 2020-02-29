@@ -38,6 +38,9 @@ func NewEnv() *Env {
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
 		MakeMeta(nil, "Map of configuration key/value pairs for linter mode", "1.0"))
+	res.libs = res.CoreNamespace.Intern(MakeSymbol("*loaded-libs*"))
+	res.libs.Value = EmptySet()
+	res.libs.isPrivate = true
 	return res
 }
 

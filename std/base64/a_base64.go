@@ -45,7 +45,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var base64Namespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.base64"))
+var base64Namespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.base64"))
 
 func init() {
 	base64Namespace.Lazy = Init
