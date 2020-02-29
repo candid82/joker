@@ -35,6 +35,11 @@ func (f *File) WithInfo(info *ObjectInfo) Object {
 	return f
 }
 
+// To satisfy Named interface
+func (f *File) Namespace() string {
+	return ""
+}
+
 func MakeFile(f *os.File) *File {
 	return &File{f}
 }

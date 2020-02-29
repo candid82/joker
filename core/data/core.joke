@@ -1169,7 +1169,7 @@
   (rseq__ rev))
 
 (defn name
-  "Returns the name String of a string, symbol or keyword."
+  "Returns the name String of a string, symbol, keyword or any Named object (e.g. File)."
   {:tag String
   :added "1.0"}
   ;; TODO: types
@@ -3238,14 +3238,6 @@
 
 (defonce ^:dynamic
   ^{:private true
-    :doc "A set of symbols representing currently loaded libs"}
-  *loaded-libs* #{'joker.base64 'joker.html 'joker.http 'joker.json 'joker.io
-                  'joker.math 'joker.os 'joker.string 'joker.time 'joker.url
-                  'joker.yaml 'joker.strconv 'joker.crypto 'joker.hex 'joker.filepath
-                  'joker.csv 'joker.uuid 'joker.bolt})
-
-(defonce ^:dynamic
-  ^{:private true
     :doc "A set of symbols representing available core (not std) namespaces"}
   *core-namespaces* #{})
 
@@ -3786,7 +3778,7 @@
        ~(emit gpred gexpr clauses))))
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
-  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
+  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring :ns *ns* :name '~name)))
 
 (add-doc-and-meta *file*
   "The path of the file being evaluated, as a String.
@@ -3854,6 +3846,12 @@
 
   Defaults to true"
   {:added "1.0"})
+
+(add-doc-and-meta *loaded-libs*
+  "A set of symbols representing currently loaded libs"
+  {:added "1.0"
+   :dynamic true
+   :private true})
 
 (defmacro letfn
   "fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)

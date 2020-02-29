@@ -481,7 +481,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
+var stringNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.string"))
 
 func init() {
 	stringNamespace.Lazy = Init

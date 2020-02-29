@@ -4,6 +4,7 @@ package os
 
 import (
 	. "github.com/candid82/joker/core"
+	"io/ioutil"
 	"os"
 )
 
@@ -68,6 +69,25 @@ func __create_(_args []Object) Object {
 	case _c == 1:
 		name := ExtractString(_args, 0)
 		_res, err := os.Create(name)
+		PanicOnErr(err)
+		return MakeFile(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __create_temp__P ProcFn = __create_temp_
+var create_temp_ Proc = Proc{Fn: __create_temp__P, Name: "create_temp_", Package: "std/os"}
+
+func __create_temp_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		dir := ExtractString(_args, 0)
+		pattern := ExtractString(_args, 1)
+		_res, err := ioutil.TempFile(dir, pattern)
 		PanicOnErr(err)
 		return MakeFile(_res)
 
@@ -214,6 +234,25 @@ func __mkdir_(_args []Object) Object {
 	return NIL
 }
 
+var __mkdir_temp__P ProcFn = __mkdir_temp_
+var mkdir_temp_ Proc = Proc{Fn: __mkdir_temp__P, Name: "mkdir_temp_", Package: "std/os"}
+
+func __mkdir_temp_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		dir := ExtractString(_args, 0)
+		pattern := ExtractString(_args, 1)
+		_res, err := ioutil.TempDir(dir, pattern)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __open__P ProcFn = __open_
 var open_ Proc = Proc{Fn: __open__P, Name: "open_", Package: "std/os"}
 
@@ -344,12 +383,28 @@ func __stat_(_args []Object) Object {
 	return NIL
 }
 
+var __temp_dir__P ProcFn = __temp_dir_
+var temp_dir_ Proc = Proc{Fn: __temp_dir__P, Name: "temp_dir_", Package: "std/os"}
+
+func __temp_dir_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.TempDir()
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func Init() {
 
 	InternsOrThunks()
 }
 
-var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
+var osNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.os"))
 
 func init() {
 	osNamespace.Lazy = Init
