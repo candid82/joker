@@ -1169,7 +1169,7 @@
   (rseq__ rev))
 
 (defn name
-  "Returns the name String of a string, symbol or keyword."
+  "Returns the name String of a string, symbol, keyword or any Named object (e.g. File)."
   {:tag String
   :added "1.0"}
   ;; TODO: types
