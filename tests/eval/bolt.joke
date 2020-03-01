@@ -1,0 +1,23 @@
+(ns joker.test-joker.bolt
+  (:require
+   [joker.test :refer [deftest is testing]]
+   [joker.bolt :refer [open close create-bucket next-sequence put get]]
+   [joker.os :refer [create-temp remove]]
+   [joker.json :refer [write-string read-string]]))
+
+(deftest example-1
+  (testing "example in docstring"
+    (let [f (create-temp "" "bolt-test-")
+          db (open (name f) 0600)
+          users "users"
+          joe "Joe Black"]
+      (try
+        (is (nil? (create-bucket db users)))
+        (let [id (next-sequence db users)
+              _ (is (= id 1))
+              _ (is (nil? (put db users (str id) (write-string {:id id :name joe}))))
+              m (read-string (get db users (str id)))
+              s (str (sort m))]
+          (is (= s (format "([\"id\" %d] [\"name\" \"%s\"])" id joe))))
+        (finally (close db)
+                 (remove (name f)))))))
