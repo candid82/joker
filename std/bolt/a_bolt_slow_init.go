@@ -50,6 +50,12 @@ func InternsOrThunks() {
 			`Creates a new bucket. Throws an error if the bucket already exists,
   if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
 
+	boltNamespace.InternVar("create-bucket-if-not-exists", create_bucket_if_not_exists_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
+			`Creates a new bucket if it doesn't already exist.
+   Throws an error if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
+
 	boltNamespace.InternVar("delete", delete_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
