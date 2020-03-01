@@ -60,6 +60,24 @@ func __create_bucket_(_args []Object) Object {
 	return NIL
 }
 
+var __create_bucket_if_not_exists__P ProcFn = __create_bucket_if_not_exists_
+var create_bucket_if_not_exists_ Proc = Proc{Fn: __create_bucket_if_not_exists__P, Name: "create_bucket_if_not_exists_", Package: "std/bolt"}
+
+func __create_bucket_if_not_exists_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		db := ExtractBoltDB(_args, 0)
+		name := ExtractString(_args, 1)
+		_res := createBucketIfNotExists(db, name)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __delete__P ProcFn = __delete_
 var delete_ Proc = Proc{Fn: __delete__P, Name: "delete_", Package: "std/bolt"}
 

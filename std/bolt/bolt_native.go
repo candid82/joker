@@ -65,26 +65,29 @@ func ExtractBoltDB(args []Object, index int) *bolt.DB {
 }
 
 func open(filename string, mode int) *bolt.DB {
-	RT.GIL.Unlock()
 	db, err := bolt.Open(filename, os.FileMode(mode), nil)
-	RT.GIL.Lock()
 	PanicOnErr(err)
 	return db
 }
 
 func close(db *bolt.DB) Nil {
-	RT.GIL.Unlock()
 	err := db.Close()
-	RT.GIL.Lock()
 	PanicOnErr(err)
 	return NIL
 }
 
 func createBucket(db *bolt.DB, name string) Nil {
 	db.Update(func(tx *bolt.Tx) error {
-		RT.GIL.Unlock()
 		_, err := tx.CreateBucket([]byte(name))
-		RT.GIL.Lock()
+		PanicOnErr(err)
+		return nil
+	})
+	return NIL
+}
+
+func createBucketIfNotExists(db *bolt.DB, name string) Nil {
+	db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(name))
 		PanicOnErr(err)
 		return nil
 	})
@@ -93,9 +96,7 @@ func createBucket(db *bolt.DB, name string) Nil {
 
 func deleteBucket(db *bolt.DB, name string) Nil {
 	db.Update(func(tx *bolt.Tx) error {
-		RT.GIL.Unlock()
 		err := tx.DeleteBucket([]byte(name))
-		RT.GIL.Lock()
 		PanicOnErr(err)
 		return nil
 	})
@@ -114,9 +115,7 @@ func nextSequence(db *bolt.DB, bucket string) Int {
 	var id uint64
 	db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
-		RT.GIL.Unlock()
 		id, _ = b.NextSequence()
-		RT.GIL.Lock()
 		return nil
 	})
 	return MakeInt(int(id))
@@ -125,9 +124,7 @@ func nextSequence(db *bolt.DB, bucket string) Int {
 func put(db *bolt.DB, bucket, key, value string) Nil {
 	db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
-		RT.GIL.Unlock()
 		err := b.Put([]byte(key), []byte(value))
-		RT.GIL.Lock()
 		PanicOnErr(err)
 		return nil
 	})
@@ -137,9 +134,7 @@ func put(db *bolt.DB, bucket, key, value string) Nil {
 func delete(db *bolt.DB, bucket, key string) Nil {
 	db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
-		RT.GIL.Unlock()
 		err := b.Delete([]byte(key))
-		RT.GIL.Lock()
 		PanicOnErr(err)
 		return nil
 	})
@@ -150,9 +145,7 @@ func get(db *bolt.DB, bucket, key string) Object {
 	var v []byte
 	db.View(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
-		RT.GIL.Unlock()
 		v = b.Get([]byte(key))
-		RT.GIL.Lock()
 		return nil
 	})
 	if v == nil {
@@ -166,11 +159,9 @@ func byPrefix(db *bolt.DB, bucket, prefix string) *Vector {
 	db.View(func(tx *bolt.Tx) error {
 		c := getBucket(tx, bucket).Cursor()
 		pr := []byte(prefix)
-		RT.GIL.Unlock()
 		for k, v := c.Seek(pr); k != nil && bytes.HasPrefix(k, pr); k, v = c.Next() {
 			res = res.Conjoin(NewVectorFrom(MakeString(string(k)), MakeString(string(v))))
 		}
-		RT.GIL.Lock()
 		return nil
 	})
 	return res

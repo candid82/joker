@@ -42,6 +42,13 @@
    :go "createBucket(db, name)"}
   [^BoltDB db ^String name])
 
+(defn create-bucket-if-not-exists
+  "Creates a new bucket if it doesn't already exist.
+   Throws an error if the bucket name is blank, or if the bucket name is too long."
+  {:added "1.0"
+   :go "createBucketIfNotExists(db, name)"}
+  [^BoltDB db ^String name])
+
 (defn delete-bucket
   "Deletes a bucket. Throws an error if the bucket doesn't exist."
   {:added "1.0"
