@@ -239,8 +239,6 @@ Note that, in the `slow_init` version of Joker, core libraries (other than `joke
 
 These namespaces are also defined by Joker code, which resides in `std/*.joke` files.
 
-(Note that, unlike with core namespaces, multi-level namespaces here would have pathnames reflecting multiple levels. E.g. a `joker.a.b` namespace would be defined by `std/a/b.joke`. However, such namespaces do not exist in Joker as of `v0.14`.)
-
 These `*.joke` files, however, have code of a particular form that is processed by the `std/generate-std.joke` script (after an initial version of Joker is built). They cannot, as explained below, define arbitrary macros and functions for use by normal Joker code.
 
 #### The Joker Script That Writes Go Code
@@ -361,10 +359,11 @@ Any non-function runtime initializations are performed in
 
 `<NSNAME>Namespace` is then defined as a global variable
 initialized to a global Clojure namespace with `NSFULLNAME`
-(e.g. `"joker.foo"`) as a symbol:
+(e.g. `"joker.foo"`) as a symbol, said namespace being added
+to the set `joker.core/*loaded-libs*`:
 
 ```Go
-var fooNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.foo"))
+var fooNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.foo"))
 ```
 
 `a_foo.go` finishes with:
