@@ -8,7 +8,7 @@ These notes are intended for developers working on the internals of Joker itself
 
 As with Clojure, Joker supports "libraries" of code organized into _namespaces_. It offers a number of namespaces that are built-in to the Joker executable itself, as well as the ability to dynamically (at run time and on-demand) extend these namespaces via external Joker source files typically organized into directory trees and deployed alongside the Joker executable. (Currently, Joker does not support dynamic extension via non-Joker code, such as Go plugins.)
 
-Whether built-in (as described below) or separately deployed via source files written in Joker (as described in [Organizing Libraries (Namespaces)](https://github.com/candid82/joker/LIBRARIES.md), developers should be aware of the progression of any given namespace.
+Whether built-in (as described below) or separately deployed via source files written in Joker (as described in [Organizing Libraries (Namespaces)](https://github.com/candid82/joker/LIBRARIES.md)), developers should be aware of the progression of any given namespace.
 
 ## Namespace States
 
@@ -113,7 +113,7 @@ Similarly, referencing `joker.template` causes `joker.walk` to also be loaded (i
 
 A helpful (if longwindedly-named) function is then defined to return a set of all mapped namespaces, as strings, which can in turn be used to easily determine whether a namespace (as a string) is mapped. `a.b.c` and the nonexistent `joker.foo` are each tested this way.
 
-The private function `joker.core/ns-initialized?` is then used to test whether various mapped namespaces have been initialized. Of these, only `joker.os` returns false, because it has not yet been referenced.
+The private function `joker.core/ns-initialized?` is then used to test whether various mapped namespaces have been initialized. Of these, only `joker.os` returns `false`, because it has not yet been referenced.
 
 Note that, at present, there are no explicit tests for whether a namespace is _available_ (in the general sense). One could attempt to load a namespace with a `(try ...)`, but that would have the (potential) side effect of actually loading the namespace.
 
@@ -164,7 +164,7 @@ As this approach does *not* involve the normal Read phase at Joker startup time,
 
 A disadvantage of this approach is that it requires changes to `core/pack.go` when changes are made to certain aspects of the AST.
 
-The generated `core/a_*_data.go` files also cause namespaces (for files corresponding directly to libraries, i.e. not linter-related `.joke` files) to be mapped when Joker is run, and to set their lazy-initialization function (in the `.Lazy` field for the namespace) to point to a function that nulls out that `.Lazy` field and processes the binary data.
+The generated `core/a_*_data.go` files also cause namespaces (for files corresponding directly to libraries, i.e. not linter-related `.joke` files) to be mapped when Joker is run, and to set their lazy-initialization function (in the `.Lazy` field for the namespace) to point to a function that nulls out that `.Lazy` field and processes the binary data. This is not needed by the default, fast-startup, Joker executable; hence, such files are `// +build slow_init`.
 
 #### The gen_code Tool
 
