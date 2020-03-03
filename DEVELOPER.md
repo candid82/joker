@@ -509,4 +509,4 @@ This enables `joker.core/go-spew` and some internal code (typically depending on
 
 ### `slow_init`
 
-This build tag is deprecated. If used to build a Joker executable, it'll either fail to build, build a non-functioning executable, or build an executable identical to the fast-startup version (i.e. `-tags slow_init` will be a no-op).
+This build tag is no longer supported, and is thus a no-op.
