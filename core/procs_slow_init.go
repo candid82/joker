@@ -185,7 +185,3 @@ func init() {
 	intern("go-spew__", procGoSpew, "procGoSpew")
 	intern("verbosity-level__", procVerbosityLevel, "procVerbosityLevel")
 }
-
-func lateInitializations() {
-	// none needed for slow_init
-}
