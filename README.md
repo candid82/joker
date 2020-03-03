@@ -257,7 +257,7 @@ Below commands should get you up and running.
 ```
 go get -d github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
-./run.sh --version && go install # -tags slow_init (if you want to install the original, slow-startup, version)
+./run.sh --version && go install
 ```
 
 ### Cross-platform Builds
@@ -265,7 +265,7 @@ cd $GOPATH/src/github.com/candid82/joker
 After building the native version (to autogenerate appropriate files, "vet" the source code, etc.), set the appropriate environment variables and invoke `go build`. E.g.:
 
 ```
-$ GOOS=linux GOARCH=arm GOARM=6 go build # -tags slow_init (if you want to build the original, slow-startup, version)
+$ GOOS=linux GOARCH=arm GOARM=6 go build
 ```
 
 (The `run.sh` script does not support cross-platform building.)
