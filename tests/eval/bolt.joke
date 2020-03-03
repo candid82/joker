@@ -20,4 +20,5 @@
               s (str (sort m))]
           (is (= s (format "([\"id\" %d] [\"name\" \"%s\"])" id joe))))
         (finally (close db)
+                 (joker.os/close f)  ; Windows requires the file iself to be closed for remove to work.
                  (remove (name f)))))))
