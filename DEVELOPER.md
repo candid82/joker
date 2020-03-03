@@ -269,7 +269,7 @@ Another advantage (besides performance) of this approach is that the resulting c
 
 That means a *core* namespace may actually depend on one of these (standard-library-wrapping) namespaces, as long as `std/generate-std.joke` has been run and the resulting `std/*/a_*.go` file has been made available in the working directory (e.g. by being added to the Git repository).
 
-*NOTE:* `generate-std.joke` generates two or three `a_*.go` files per namespace, depending on whether the namespace is required by any of the core namespaces. `a_*_slow_init.go` handles the runtime (including "lazy") initialization; if the namespace is required by a core namespace, it's not generated, and `a_*_fast_init.go` is generated to handle the corresponding runtime/lazy initialization.
+*NOTE:* `generate-std.joke` generates two or three `a_*.go` files per namespace, depending on whether the namespace is required by any of the core namespaces. `a_*_slow_init.go` handles the runtime (including "lazy") initialization; if the namespace is required by a core namespace, it's generated for only the `gen_code` program to use, and `a_*_fast_init.go` is generated to handle the runtime/lazy initialization needed by Joker itself.
 
 #### Optimizing Build Time
 
