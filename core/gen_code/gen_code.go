@@ -4,7 +4,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -147,10 +146,11 @@ func init() {
 
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 
-	content, err := ioutil.ReadFile("data/" + f.Filename)
+	file, err := os.Open("data/" + f.Filename)
 	PanicOnErr(err)
-	content, err = PackReader(NewReader(bytes.NewReader(content), f.Name), "")
+	content, err := PackReader(NewReader(bufio.NewReader(file), f.Name), f.Filename)
 	PanicOnErr(err)
+	file.Close()
 
 	dst := packContent(content)
 
