@@ -153,13 +153,13 @@ As explained in the block comment just above the `var CoreSourceFiles []...` def
 
 #### Compiling Core Namespace Structures to Native Go Code
 
-Processing a `.joke` file consists of reading and evaluating the file via Joker's (Clojure-like) Reader. This is done for the core-library-defining (that is, not linter-specific) files, yielding fully populated data structures as if all core namespaces (and _std_ namespaces upon which they depend) have been fully loaded in a Joker invocation. (Keep in mind that this is done before a proper Joker executable is actually built.)
+Processing a `.joke` file consists of reading and evaluating forms in the file via Joker's (Clojure-like) Reader. This is done for the core-library-defining (that is, not linter-specific) files, yielding fully populated data structures as if all core namespaces (and _std_ namespaces upon which they depend) have been fully loaded in a Joker invocation. (Keep in mind that this is done before a proper Joker executable is actually built.)
 
 Then, the data structures defining (among other things) the resulting namespaces are compiled into Go code that, when (in turn) compiled into a Joker executable, creates them _in toto_, mostly via static initialization of numerous package-scope variables.
 
 #### Packing Linter-specific Joker Files as Native Go Data Structures
 
-Linter-specific files (named `core/data/linter_*.joke`) are treated differently. After all the core-library-defining files are compiled to Go code (as described above), these linter-specific files are read and evaluated, "packing" the resulting forms into a portable binary format, and encoding the resulting binary data as Go source files named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
+Linter-specific files (named `core/data/linter_*.joke`) are treated differently. After all the core-library-defining files are compiled to Go code (as described above), these linter-specific files are read and evaluated, "packing" the resulting forms into a portable binary format, and encoding the resulting binary data as a `[]byte` array in Go source files named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
 
 This approach does *not* involve the normal Read phase at Joker startup time (though the Evaluation phase remains largely the same). So, the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data stream, and parsed back out at load time; so not all parsing overhead is avoided.
 
@@ -171,7 +171,7 @@ As native-Go-code compilation (for core namespaces and linter files) occurs befo
 
 The resulting Joker executable thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy initialization (such as compiled regular expressions in `joker.hiccup`) when the respective namespaces are actually referenced for the first time during that invocation.
 
-When in linter mode, the pertinent data structures defined in the `core/a_*_data.go` files are unpacked and evaluated upon startup.
+When in linter mode, the forms encoded (as a `[]byte` array) in the pertinent `core/a_linter_*_data.go` files are unpacked and evaluated upon startup, after `joker.core` has been fully loaded.
 
 #### Avoid Copying Dynamic Variables
 
@@ -425,7 +425,7 @@ So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`,
 ## Faster Startup
 
 **run.sh** builds (via the `go generate ./...` step) an extra set of Go source files that, unless disabled via a build tag, statically initialize most of the core namespace info. (Some runtime initialization must still be performed, due mainly to limitations in the Go compiler.)
- 
+
 ### Developer Notes
 
 TBD, but something like this was done to search for Joker code that runs before `main()` and determine how best to handle it in a slow-vs-fast split build:
