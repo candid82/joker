@@ -217,11 +217,11 @@ Assuming one has determined it appropriate to add a new core namespace to the Jo
 
 Then, besides putting that source code in `core/data/*.joke`, one must:
 
-* Add it to the **core/gen\_common/gen\_common.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
+* Add it to the **core/gen\_code/gen\_code.go** `CoreSourceFiles` array (after any core namespaces upon which it depends)
 
 Further, if the new namespace depends on any standard-library-wrapping namespaces:
 
-* Edit the **core/gen\_common/gen\_common.go** `import` statement to include each such library's Go code
+* Edit the **core/gen\_code/gen\_code.go** `import` statement to include each such library's Go code
 * Ensure that code has already been generated (that library's `std/*/a_*.go` files have already been created), perhaps by using an older version of Joker to run `generate-std.joke` from within the `std` subdirectory
 
 Create suitable tests, e.g. in `tests/eval/`.
