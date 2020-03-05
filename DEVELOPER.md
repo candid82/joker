@@ -154,13 +154,13 @@ The first line builds and runs `core/gen_data/gen_data.go`, which finds, in the 
 
 As explained in the block comment just above the `var CoreSourceFiles []...` definition in `core/gen_common/gen_common.go`, the files must be ordered so any given file depends solely on files (namespaces) defined above it (earlier in the array).
 
-Processing a `.joke` file consists of reading the file via Joker's (Clojure-like) Reader, "packing" the results into a portable binary format, and encoding the resulting binary data as a Go source file named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
+Processing a `.joke` file consists of reading and evaluating forms in the file via Joker's (Clojure-like) Reader, "packing" the forms into a portable binary format, and encoding the resulting binary data as a `[]byte` array in a Go source file named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
 
 As this all occurs before the `go build` step performed by `run.sh`, the result is that that step includes some of those `core/a_*_data.go` source files. (`go build -tags slow_init` includes all of them.) The binary data contained therein is, when needed, unpacked and the results used to construct the data structures into which Joker (Clojure) expressions are converted when read (aka the Abstract Syntax Tree, or "AST").
 
-(Note that "when needed", as used above, is immediately upon startup for `joker.core`; it also applies to `joker.repl` when the REPL is to be immediately entered; otherwise, it applies when the namespace is referenced such as via a `require` or `use` invocation.)
+(Note that "when needed", as used above, is immediately upon startup for `joker.core` and, in linter mode, immediately thereafter for two `core/a_linter_*data.go` files; it also applies to `joker.repl` when the REPL is to be immediately entered; otherwise, it applies when the namespace is referenced such as via a `require` or `use` invocation.)
 
-As this approach does *not* involve the normal Read phase at Joker startup time, the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data stream, and parsed back out at load time; so not all parsing overhead is avoided.
+As this approach does *not* involve the normal Read phase at Joker startup time (though the Evaluation phase remains largely the same), the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data stream, and parsed back out at load time; so not all parsing overhead is avoided.
 
 A disadvantage of this approach is that it requires changes to `core/pack.go` when changes are made to certain aspects of the AST.
 
@@ -175,6 +175,8 @@ The final `go:generate` line in `core/object.go` builds and runs `core/gen_code/
 Then, these data structures are compiled into Go code that, when (in turn) compiled into a Joker executable, creates them _in toto_, mostly via static initialization of numerous package-scope variables. This is where `gen_code` differs from `gen_data`.
 
 The resulting Joker executable (built via `go build`, i.e. without `-tags slow_init`) thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy initialization (such as compiled regular expressions in `joker.hiccup`) when the respective namespaces are actually referenced for the first time during that invocation.
+
+When in linter mode, the forms encoded (as a `[]byte` array) in the pertinent `core/a_linter_*_data.go` files are unpacked and evaluated upon startup, after `joker.core` has been fully loaded.
 
 ##### Avoid Copying Dynamic Variables
 
@@ -428,7 +430,7 @@ So, while `joker.repl` and `joker.tools.cli` currently depend on `joker.string`,
 ## Faster Startup
 
 **run.sh** builds (via the `go generate ./...` step) an extra set of Go source files that, unless disabled via a build tag, statically initialize most of the core namespace info. (Some runtime initialization must still be performed, due mainly to limitations in the Go compiler.)
- 
+
 Unless the file **NO-OPTIMIZE-STARTUP.flag** exists in the top-level Joker directory, or **OPTIMIZE_STARTUP=false** is set in its environment, **run.sh** builds `joker.fast`, which uses static initialization rather than relying extensively on runtime initialization (including parsing of Joker forms); otherwise, it builds `joker.slow`, which is the "original" (slow-starting) version of Joker. Whichever it builds, it hardlinks to `joker`.
 
 The newly built `joker` executable is then used to generate the **std** libraries, as usual. It can also be used to regenerate the documentation, and (ideally) for any other purpose. The fast-startup version should run about as fast as the slow-startup version after starting up; very little is overtly added to the runtime cost (a few "thunks" are introduced for some routines, but that should end up in the noise, performance-wise).
