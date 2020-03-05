@@ -6,10 +6,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 
 	. "github.com/candid82/joker/core"
-	"github.com/chzyer/readline"
+	"github.com/peterh/liner"
 )
 
 func repl(phase Phase) {
@@ -20,20 +22,27 @@ func repl(phase Phase) {
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
 	var runeReader io.RuneReader
-	var rl *readline.Instance
-	var err error
+	var rl *liner.State
+	var historyFilename string
 	if noReadline {
 		runeReader = bufio.NewReader(Stdin)
 	} else {
-		rl, err = readline.New("")
-		if err != nil {
-			fmt.Println("Error: " + err.Error())
-			return
-		}
+		historyFilename = filepath.Join(os.TempDir(), ".joker-history")
+		rl = liner.NewLiner()
 		defer rl.Close()
+		rl.SetCtrlCAborts(true)
+
+		if f, err := os.Open(historyFilename); err == nil {
+			rl.ReadHistory(f)
+			f.Close()
+		}
+
 		runeReader = NewLineRuneReader(rl)
+
 		for _, line := range strings.Split(string(dataRead), "\n") {
-			rl.SaveHistory(line)
+			if strings.TrimSpace(line) != "" {
+				rl.AppendHistory(line)
+			}
 		}
 		dataRead = []rune{}
 	}
@@ -44,9 +53,15 @@ func repl(phase Phase) {
 		if noReadline {
 			print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		} else {
-			rl.SetPrompt(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+			runeReader.(*LineRuneReader).Prompt = (GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
+			if !noReadline {
+				if f, err := os.Create(historyFilename); err == nil {
+					rl.WriteHistory(f)
+					f.Close()
+				}
+			}
 			return
 		}
 	}
