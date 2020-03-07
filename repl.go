@@ -8,11 +8,37 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	. "github.com/candid82/joker/core"
 	"github.com/peterh/liner"
 )
+
+var completeRegex *regexp.Regexp = regexp.MustCompile(`([0-9A-Za-z_\-\+\*\'\.]+)/([0-9A-Za-z_\-\+\*\']*$)`)
+
+func completer(line string, pos int) (head string, c []string, tail string) {
+	head = line[:pos]
+	tail = line[pos:]
+	var match []string
+	if match = completeRegex.FindStringSubmatch(head); match != nil {
+		nsName := match[1]
+		prefix := match[2]
+		ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), MakeSymbol(nsName+"/"+prefix))
+		if ns == nil {
+			return
+		}
+		for k, _ := range ns.Mappings() {
+			if strings.HasPrefix(*k, prefix) {
+				c = append(c, *k)
+			}
+		}
+		if len(c) > 0 {
+			head = head[:len(head)-len(prefix)]
+		}
+	}
+	return
+}
 
 func repl(phase Phase) {
 	ProcessReplData()
@@ -31,6 +57,7 @@ func repl(phase Phase) {
 		rl = liner.NewLiner()
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
+		rl.SetWordCompleter(completer)
 
 		if f, err := os.Open(historyFilename); err == nil {
 			rl.ReadHistory(f)
