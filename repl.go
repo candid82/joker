@@ -15,27 +15,33 @@ import (
 	"github.com/peterh/liner"
 )
 
-var completeRegex *regexp.Regexp = regexp.MustCompile(`([0-9A-Za-z_\-\+\*\'\.]+)/([0-9A-Za-z_\-\+\*\']*$)`)
+var qualifiedSymbolRe *regexp.Regexp = regexp.MustCompile(`([0-9A-Za-z_\-\+\*\'\.]+)/([0-9A-Za-z_\-\+\*\']*$)`)
+var callRe *regexp.Regexp = regexp.MustCompile(`\(\s*([0-9A-Za-z_\-\+\*\']*$)`)
 
 func completer(line string, pos int) (head string, c []string, tail string) {
 	head = line[:pos]
 	tail = line[pos:]
 	var match []string
-	if match = completeRegex.FindStringSubmatch(head); match != nil {
+	var prefix string
+	var ns *Namespace
+	if match = qualifiedSymbolRe.FindStringSubmatch(head); match != nil {
 		nsName := match[1]
-		prefix := match[2]
-		ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), MakeSymbol(nsName+"/"+prefix))
-		if ns == nil {
-			return
+		prefix = match[2]
+		ns = GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), MakeSymbol(nsName+"/"+prefix))
+	} else if match = callRe.FindStringSubmatch(head); match != nil {
+		prefix = match[1]
+		ns = GLOBAL_ENV.CurrentNamespace()
+	}
+	if ns == nil {
+		return
+	}
+	for k, _ := range ns.Mappings() {
+		if strings.HasPrefix(*k, prefix) {
+			c = append(c, *k)
 		}
-		for k, _ := range ns.Mappings() {
-			if strings.HasPrefix(*k, prefix) {
-				c = append(c, *k)
-			}
-		}
-		if len(c) > 0 {
-			head = head[:len(head)-len(prefix)]
-		}
+	}
+	if len(c) > 0 {
+		head = head[:len(head)-len(prefix)]
 	}
 	return
 }
