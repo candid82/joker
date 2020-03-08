@@ -10,12 +10,27 @@
     <h2>Index</h2>
     <ul class="index">
       <li>
+  <a href="#close">close</a>
+</li>
+<li>
   <a href="#copy">copy</a>
+</li>
+<li>
+  <a href="#pipe">pipe</a>
 </li>
 
     </ul>
     <ul>
       <li>
+  <h3 id="close">close</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(close f)</code></div>
+</pre>
+  <p class="var-docstr">Closes f (IOWriter, IOReader, or File) if possible. Otherwise throws an error.</p>
+  
+</li>
+<li>
   <h3 id="copy">copy</h3>
   <span class="var-type Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -25,6 +40,17 @@
   Returns the number of bytes copied or throws an error.<br>
   src must be IOReader, e.g. as returned by joker.os/open.<br>
   dst must be IOWriter, e.g. as returned by joker.os/create.</p>
+  
+</li>
+<li>
+  <h3 id="pipe">pipe</h3>
+  <span class="var-type Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(pipe)</code></div>
+</pre>
+  <p class="var-docstr">Pipe creates a synchronous in-memory pipe. It can be used to connect code expecting an IOReader<br>
+  with code expecting an IOWriter.<br>
+  Returns a vector [reader, writer].</p>
   
 </li>
 
