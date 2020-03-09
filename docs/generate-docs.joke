@@ -4,8 +4,6 @@
 (alias 'os 'joker.os)
 (alias 's 'joker.string)
 
-(def rpl s/replace)
-
 (def index-template
   (slurp "templates/index.html"))
 
@@ -40,11 +38,14 @@
       (= Fn (type @v)) "Function"
       (= Proc (type @v)) "Function"
       (:tag m) (str (:tag m))
+      (:const m) (str "Constant " (type @v))
       :else (str (type @v)))))
 
 (defn link-item-doc
-  [k]
-  (s/replace link-item-template "{name}" k))
+  [n k]
+  (-> link-item-template
+      (s/replace "{name}" n)
+      (s/replace "{kind}" k)))
 
 (defn usage
   [k m]
@@ -127,24 +128,58 @@
         (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (s/replace "{added}" (str (:added m))))))
 
+(defn ^Keyword sym-kind
+  [^Var v]
+  (condp = (type (deref v))
+    Fn :function
+    Proc :function
+    (let [m (meta v)]
+      (cond
+        (not (bound? v)) :others
+        (:special-form m) :others
+        (:macro m) :function
+        (:const m) :constant
+        :else :variable))))
+
+(defn ^Boolean sym-kind-is
+  [^Var s ^Keyword x]
+  (= x (sym-kind s)))
+
+(defn filter-vals
+  "Filters on values in a map using supplied function, returning map with only matching key/value pairs."
+  [f m]
+  (into {} (filter #(-> % val f) m)))
+
+(defn section-doc
+  [ns-sym ns-vars-fn match]
+  (s/join
+   ""
+   (for [[k v] (sort (filter-vals match (ns-vars-fn ns-sym)))]
+     (var-doc k v))))
+
 (defn ns-doc
   [ns-sym ns-vars-fn]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        vars-doc (s/join
-                  ""
-                  (for [[k v] (sort (ns-vars-fn ns-sym))]
-                    (var-doc k v)))
-        var-links-doc (s/join
+        index (s/join
                        ""
-                       (for [k (sort (keys (ns-vars-fn ns-sym)))]
-                         (link-item-doc (str k))))]
+                       (for [[k v] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns-sym))]
+                         (link-item-doc (str k) (type-name v))))
+        functions-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :function))
+        constants-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :constant))
+        variables-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :variable))
+        types-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :type))
+        others-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :other))]
     (-> ns-template
         (s/replace "{name}" (name ns-sym))
         (s/replace "{added}" (str (:added m)))
         (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
-        (s/replace "{vars}" vars-doc)
-        (s/replace "{index}" var-links-doc))))
+        (s/replace "{constants}" constants-doc)
+        (s/replace "{variables}" variables-doc)
+        (s/replace "{functions}" functions-doc)
+        (s/replace "{types}" types-doc)
+        (s/replace "{others}" others-doc)
+        (s/replace "{index}" index))))
 
 (defn index-doc
   [special-forms namespaces types]
@@ -155,7 +190,7 @@
         special-form-links-doc (s/join
                                 ""
                                 (->> (sort (keys special-forms))
-                                     (map #(link-item-doc (str %)))))
+                                     (map #(link-item-doc (str %) "Special Form"))))
 
         namespaces-docs (s/join
                          ""
@@ -164,7 +199,7 @@
         ns-links-doc (s/join
                       ""
                       (->> namespaces
-                           (map #(link-item-doc (str %)))))
+                           (map #(link-item-doc (str %) "Namespace"))))
         types-docs (s/join
                     ""
                     (for [t types]
@@ -172,7 +207,7 @@
         type-links-doc (s/join
                         ""
                         (->> types
-                             (map #(link-item-doc (str %)))))]
+                             (map #(link-item-doc (str %) "Type"))))]
     (-> index-template
         (s/replace "{index-of-special-forms}" special-form-links-doc)
         (s/replace "{special-forms}" special-forms-docs)

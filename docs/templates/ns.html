@@ -6,13 +6,57 @@
   <div class="main">
     <h1>Namespace: {name}</h1>
     <span class="var-added">v{added}</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions and Macros</a>
+      </li>
+      <li>
+        <a href="#_others">Others</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">{docstring}</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       {index}
     </ul>
+    <h3>Legend</h3>
+    <ul class="legend">
+      <span class="var-type Int">Constant</span>
+      <span class="var-type Function">Function</span>
+      <span class="var-type Macro">Macro</span>
+      <span class="var-type Object">Object</span>
+      <span class="var-type Special">Special form</span>
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
     <ul>
-      {vars}
+      {constants}
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      {variables}
+    </ul>
+    <h2 id="_functions">Functions and Macros</h2>
+    <ul>
+      {functions}
+    </ul>
+    <h2 id="_others">Others</h2>
+    <ul>
+      {others}
     </ul>
   </div>
 </body>
