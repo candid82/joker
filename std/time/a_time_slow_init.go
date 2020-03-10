@@ -17,107 +17,107 @@ func InternsOrThunks() {
 	timeNamespace.InternVar("ansi-c", ansi_c_,
 		MakeMeta(
 			nil,
-			`Mon Jan _2 15:04:05 2006`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Mon Jan _2 15:04:05 2006`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("hour", hour_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 hour`, "1.0").Plus(MakeKeyword("tag"), String{S: "BigInt"}))
+			`Number of nanoseconds in 1 hour`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "BigInt"}))
 
 	timeNamespace.InternVar("kitchen", kitchen_,
 		MakeMeta(
 			nil,
-			`3:04PM`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`3:04PM`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("microsecond", microsecond_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 microsecond`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			`Number of nanoseconds in 1 microsecond`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("millisecond", millisecond_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 millisecond`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			`Number of nanoseconds in 1 millisecond`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("minute", minute_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 minute`, "1.0").Plus(MakeKeyword("tag"), String{S: "BigInt"}))
+			`Number of nanoseconds in 1 minute`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "BigInt"}))
 
 	timeNamespace.InternVar("nanosecond", nanosecond_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 nanosecond`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			`Number of nanoseconds in 1 nanosecond`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("rfc1123", rfc1123_,
 		MakeMeta(
 			nil,
-			`Mon, 02 Jan 2006 15:04:05 MST`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Mon, 02 Jan 2006 15:04:05 MST`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc1123-z", rfc1123_z_,
 		MakeMeta(
 			nil,
-			`Mon, 02 Jan 2006 15:04:05 -0700`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Mon, 02 Jan 2006 15:04:05 -0700`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc3339", rfc3339_,
 		MakeMeta(
 			nil,
-			`2006-01-02T15:04:05Z07:00`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`2006-01-02T15:04:05Z07:00`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc3339-nano", rfc3339_nano_,
 		MakeMeta(
 			nil,
-			`2006-01-02T15:04:05.999999999Z07:00`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`2006-01-02T15:04:05.999999999Z07:00`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc822", rfc822_,
 		MakeMeta(
 			nil,
-			`02 Jan 06 15:04 MST`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`02 Jan 06 15:04 MST`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc822-z", rfc822_z_,
 		MakeMeta(
 			nil,
-			`02 Jan 06 15:04 -0700`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`02 Jan 06 15:04 -0700`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("rfc850", rfc850_,
 		MakeMeta(
 			nil,
-			`Monday, 02-Jan-06 15:04:05 MST`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Monday, 02-Jan-06 15:04:05 MST`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("ruby-date", ruby_date_,
 		MakeMeta(
 			nil,
-			`Mon Jan 02 15:04:05 -0700 2006`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Mon Jan 02 15:04:05 -0700 2006`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("second", second_,
 		MakeMeta(
 			nil,
-			`Number of nanoseconds in 1 second`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			`Number of nanoseconds in 1 second`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("stamp", stamp_,
 		MakeMeta(
 			nil,
-			`Jan _2 15:04:05`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Jan _2 15:04:05`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("stamp-micro", stamp_micro_,
 		MakeMeta(
 			nil,
-			`Jan _2 15:04:05.000000`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Jan _2 15:04:05.000000`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("stamp-milli", stamp_milli_,
 		MakeMeta(
 			nil,
-			`Jan _2 15:04:05.000`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Jan _2 15:04:05.000`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("stamp-nano", stamp_nano_,
 		MakeMeta(
 			nil,
-			`Jan _2 15:04:05.000000000`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Jan _2 15:04:05.000000000`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("unix-date", unix_date_,
 		MakeMeta(
 			nil,
-			`Mon Jan _2 15:04:05 MST 2006`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Mon Jan _2 15:04:05 MST 2006`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("add", add_,
 		MakeMeta(

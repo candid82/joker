@@ -46,6 +46,7 @@
   (let [m (meta v)]
     (condp = (type (deref v))
       Fn (cond
+           (:special-form m) :special
            (:macro m) :macro
            :else :function)
       Proc :function
@@ -59,6 +60,7 @@
   [^Var v]
   (condp = (sym-kind v)
     :function "Function"
+    :special "Special form"
     :macro "Macro"
     :other "Other"
     :constant "Constant"
@@ -176,7 +178,7 @@
                        ""
                        (for [[k v] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns-sym))]
                          (link-item-doc (str k) (sym-kind-name v))))
-        functions-doc (section-doc ns-sym ns-vars-fn #(or (sym-kind-is % :function) (sym-kind-is % :macro)))
+        functions-doc (section-doc ns-sym ns-vars-fn #(or (sym-kind-is % :function) (sym-kind-is % :macro) (sym-kind-is % :special)))
         constants-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :constant))
         variables-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :variable))
         types-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :type))
