@@ -41,6 +41,29 @@
       (:const m) (str "Constant " (type @v))
       :else (str (type @v)))))
 
+(defn ^Keyword sym-kind
+  [^Var v]
+  (let [m (meta v)]
+    (condp = (type (deref v))
+      Fn (cond
+           (:macro m) :macro
+           :else :function)
+      Proc :function
+      (cond
+        (not (bound? v)) :other  ; E.g. joker.core/*1
+        (:special-form m) :special
+        (:const m) :constant
+        :else :variable))))
+
+(defn ^String sym-kind-name
+  [^Var v]
+  (condp = (sym-kind v)
+    :function "Function"
+    :macro "Macro"
+    :other "Other"
+    :constant "Constant"
+    :variable "Variable"))
+
 (defn link-item-doc
   [n k]
   (-> link-item-template
@@ -74,6 +97,7 @@
         (s/replace "{id}" (str k))
         (s/replace "{name}" (str k))
         (s/replace "{type}" (type-name v))
+        (s/replace "{kind}" (sym-kind-name v))
         (s/replace "{usage}" (usage k m))
         (s/replace "{docstring}" (s/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
         (s/replace "{added}" (str (:added m)))
@@ -128,19 +152,6 @@
         (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
         (s/replace "{added}" (str (:added m))))))
 
-(defn ^Keyword sym-kind
-  [^Var v]
-  (condp = (type (deref v))
-    Fn :function
-    Proc :function
-    (let [m (meta v)]
-      (cond
-        (not (bound? v)) :others
-        (:special-form m) :others
-        (:macro m) :function
-        (:const m) :constant
-        :else :variable))))
-
 (defn ^Boolean sym-kind-is
   [^Var s ^Keyword x]
   (= x (sym-kind s)))
@@ -152,10 +163,10 @@
 
 (defn section-doc
   [ns-sym ns-vars-fn match]
-  (s/join
-   ""
-   (for [[k v] (sort (filter-vals match (ns-vars-fn ns-sym)))]
-     (var-doc k v))))
+  (s/replace (s/join
+    ""
+    (for [[k v] (sort (filter-vals match (ns-vars-fn ns-sym)))]
+      (var-doc k v))) #"^$" "(None.)"))
 
 (defn ns-doc
   [ns-sym ns-vars-fn]
@@ -164,8 +175,8 @@
         index (s/join
                        ""
                        (for [[k v] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns-sym))]
-                         (link-item-doc (str k) (type-name v))))
-        functions-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :function))
+                         (link-item-doc (str k) (sym-kind-name v))))
+        functions-doc (section-doc ns-sym ns-vars-fn #(or (sym-kind-is % :function) (sym-kind-is % :macro)))
         constants-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :constant))
         variables-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :variable))
         types-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :type))

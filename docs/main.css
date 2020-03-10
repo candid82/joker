@@ -78,7 +78,7 @@ h2 {
   padding-top: 15px;
 }
 
-.var-type, .var-added {
+.var-kind, .var-added {
   display: inline-block;
   font-size: 0.9rem;
   color: #444;
@@ -89,23 +89,28 @@ h2 {
   margin-bottom: 20px;
 }
 
-.var-type {
+.var-kind {
   background-color: #fdf7c7;
 }
 
-.var-type.Function {
+.var-kind.Constant {
+  background-color: #505050;
+  color: #ffffff;
+}
+
+.var-kind.Function {
   background-color: #d4f0f5;
 }
 
-.var-type.Macro {
+.var-kind.Macro {
   background-color: #f7c15f;
 }
 
-.var-type.Object {
+.var-kind.Variable {
   background-color: #f8f9f8;
 }
 
-.var-type.Special {
+.var-kind.Special {
   background-color: #a5f9b4;
 }
 
