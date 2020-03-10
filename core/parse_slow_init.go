@@ -1,4 +1,4 @@
-// +build slow_init
+// +build gen_code gen_data
 
 package core
 
