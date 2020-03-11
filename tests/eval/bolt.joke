@@ -9,8 +9,8 @@
   (testing "example in docstring"
     (let [f (create-temp "" "bolt-test-")
           db-name (name f)
-          db (open db-name 0600)
           _ (joker.os/close f) ; Windows requires the file itself to be closed for remove to work.
+          db (open db-name 0600)
           users "users"
           joe "Joe Black"]
       (try
