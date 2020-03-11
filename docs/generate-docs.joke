@@ -3,6 +3,7 @@
 (alias 'cli 'joker.tools.cli)
 (alias 'os 'joker.os)
 (alias 's 'joker.string)
+(alias 'h 'joker.html)
 
 (def index-template
   (slurp "templates/index.html"))
@@ -70,6 +71,7 @@
   [n k]
   (-> link-item-template
       (s/replace "{name}" n)
+      (s/replace "{escaped-name}" (h/escape n))
       (s/replace "{kind}" k)))
 
 (defn usage
@@ -79,7 +81,7 @@
                      (s/replace usage-template "{usage}" (str form)))]
       (s/join "" examples))
     (let [examples (for [arglist (:arglists m)]
-                     (s/replace usage-template "{usage}" (str (apply list k arglist))))]
+                     (s/replace usage-template "{usage}" (h/escape (str (apply list k arglist)))))]
       (s/join "" examples))))
 
 (defn- source-file
@@ -97,7 +99,7 @@
       (println "WARNING: public var without doc meta key: " full-name))
     (-> var-template
         (s/replace "{id}" (str k))
-        (s/replace "{name}" (str k))
+        (s/replace "{name}" (h/escape (str k)))
         (s/replace "{type}" (type-name v))
         (s/replace "{kind}" (sym-kind-name v))
         (s/replace "{usage}" (usage k m))
