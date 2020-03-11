@@ -271,7 +271,7 @@ Another advantage (besides performance) of this approach is that the resulting c
 
 That means a *core* namespace may actually depend on one of these (standard-library-wrapping) namespaces, as long as `std/generate-std.joke` has been run and the resulting `std/*/a_*.go` file has been made available in the working directory (e.g. by being added to the Git repository).
 
-*NOTE:* `generate-std.joke` generates two or three `a_*.go` files per namespace, depending on whether the namespace is required by any of the core namespaces. `a_*_slow_init.go` handles the runtime (including "lazy") initialization; if the namespace is required by a core namespace, it's generated only for the slow-startup executable, and `a_*_fast_init.go`, generated only for the fast-startup executable, handles the corresponding runtime/lazy initialization.
+*NOTE:* `generate-std.joke` generates two or three `a_*.go` files per namespace, depending on whether the namespace is required by any of the core namespaces. `a_*_slow_init.go` handles the runtime (including "lazy") initialization; if the namespace is required by a core namespace, it's generated for only the `gen_code` and `gen_data` programs to use, and `a_*_fast_init.go` is generated to handle the runtime/lazy initialization needed by Joker itself.
 
 #### Optimizing Build Time
 
@@ -453,12 +453,6 @@ Converting `joker.os` and `joker.string` into _core_ libraries (so, the underlyi
 
 **run.sh** builds (via the `go generate ./...` step) an extra set of Go source files that, unless disabled via a build tag, statically initialize most of the core namespace info. (Some runtime initialization must still be performed, due mainly to limitations in the Go compiler.)
 
-Unless the file **NO-OPTIMIZE-STARTUP.flag** exists in the top-level Joker directory, or **OPTIMIZE_STARTUP=false** is set in its environment, **run.sh** builds `joker.fast`, which uses static initialization rather than relying extensively on runtime initialization (including parsing of Joker forms); otherwise, it builds `joker.slow`, which is the "original" (slow-starting) version of Joker. Whichever it builds, it hardlinks to `joker`.
-
-The newly built `joker` executable is then used to generate the **std** libraries, as usual. It can also be used to regenerate the documentation, and (ideally) for any other purpose. The fast-startup version should run about as fast as the slow-startup version after starting up; very little is overtly added to the runtime cost (a few "thunks" are introduced for some routines, but that should end up in the noise, performance-wise).
-
-The original version can then be built via `go build -tags slow_init` and installed via `go install -tags slow_init`. Otherwise, `go build` and `go install` build and install the new, fast-startup, version.
-
 ### Developer Notes
 
 TBD, but something like this was done to search for Joker code that runs before `main()` and determine how best to handle it in a slow-vs-fast split build:
@@ -473,13 +467,12 @@ The fast-startup version necessitated (as of this writing) these changes:
 
 * `Regex` is now `*Regex` (a reference type), mainly so runtime initialization (from a `regexp.MustCompile()` call) can be assigned into the `.Value` or equivalent member of a static structure.
 * `internalNamespaceInfo` is a new struct type that wraps `[]byte` for the core namespace, adding `init func()` (the slow version uses this for lazy-loading of core namespaces; might be replaceable via the `.Lazy` mechanism if we always map all core namespaces) and `available bool` (which aids detecting missing `a_*.go` files more elegantly).
-* Many (larger/complicated) static vars' definitions and initializations have been separated out into `_slow_init.go` files (e.g. `procs_slow_init.go`, `environment_slow_init.go`, etc.), which are `// +build slow_init`, in that they aren't built into the fast-startup version of Joker.
+* Many (larger/complicated) static vars' definitions and initializations have been separated out into `_slow_init.go` files (e.g. `procs_slow_init.go`, `environment_slow_init.go`, etc.), which are `// +build slow_init`, in that they aren't built into Joker itself.
 * An additional source file, `core/environment_fast_init.go`, contains an empty receiver to parallel the one in `core/environment_slow_init.go`.
 * `Proc` now wraps the former `Proc` (renamed `ProcFn`) and adds self-identifying info (the name of the procedure and its package), to help code generation when it encounters them.
-* A new `core/gen_code/gen_code.go` program parallels (and is run in addition to) `gen_data.go`. It generates `a_*code.go` files that mostly define static variables representing the structures resulting when loading `core/data/core.joke` and the like; these are `// +build !slow_init`, so they are compiled only when building the fast-startup version of Joker.
+* A new `core/gen_code/gen_code.go` program parallels (and is run in addition to) `gen_data.go`. It generates `a_*code.go` files that mostly define static variables representing the structures resulting when loading `core/data/core.joke` and the like; these are `// +build !slow_init`, so they are compiled only when building Joker itself.
 * `gen_data.go` changes include:
     - The list of files (`FileInfo`) and `std` imports have been moved into the new `core/gen_common/gen_common.go` as `CoreSourceFiles` so `gen_code.go` can share this info.
-    - `// +build slow_init` is emitted in pertinent files (mainly the `a_*_data.go` files, but not `a_data.go` itself).
 * The new `run.sh` runs, via the `go generate ./...` step, `gen_code.go`, which takes about only a few seconds on my Ryzen 3, and which generates these static-initializing files.
 * `run.sh` continues on to building either the “original” (slower) Joker executable, hardlinked to `joker.slow`, or the fast-startup version, hardlinked to `joker.fast`. Whichever is built, it becomes the default for subsequent use (such as running `std/generate-std.joke` and then running the executable itself with whatever arguments were provided to `run.sh`).
 * A new `core/code.go` module is a helper for `gen_code.go`, since the latter isn’t part of `package core`.
@@ -540,8 +533,4 @@ This enables `joker.core/go-spew` and some internal code (typically depending on
 
 ### `slow_init`
 
-This determines whether the original, "slow-startup", code (versus the fast-startup code) should be built.
-
-Much (not all) of the code conditionally built on `slow_init` or `!slow_init` is auto-generated by `gen_code`, `gen_data`, and `generate-std.joke`.
-
-Currently, after `go generate ./...` is run, `go build` and `go install` can specify `-tags slow_init` to build a Joker executable using the original, slow-startup, code. Soon, assuming the newer, fast-startup, code is determined to be sufficiently stable, this build tag will be deprecated (perhaps by building Joker executables that crash upon startup); and, later, very likely removed. In the meantime, this support enables easy A/B testing in case the fast-startup mechanism is suspect with regards to some misbehavior (such as a Joker crash).
+This build tag is no longer supported, and is thus a no-op.

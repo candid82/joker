@@ -1,4 +1,4 @@
-// +build slow_init
+// +build gen_code gen_data
 
 package core
 
@@ -184,8 +184,4 @@ func init() {
 
 	intern("go-spew__", procGoSpew, "procGoSpew")
 	intern("verbosity-level__", procVerbosityLevel, "procVerbosityLevel")
-}
-
-func lateInitializations() {
-	// none needed for slow_init
 }
