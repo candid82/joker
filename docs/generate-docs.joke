@@ -74,15 +74,34 @@
       (s/replace "{escaped-name}" (h/escape n))
       (s/replace "{kind}" k)))
 
+(defn maybe-tag-prefix
+  [x]
+  (if-let [m (meta x)]
+    (if-let [t (:tag m)]
+      (str "^" t " ")
+      "")
+    ""))
+
+(defn tagged-arg
+  [a]
+  (str (maybe-tag-prefix a) a))
+
+(defn tagged-vector
+  [v]
+  (map tagged-arg v))
+
+(defn tagged-arglist
+  [k l]
+  (str (maybe-tag-prefix l) "(" (s/join " " (cons k (tagged-vector l))) ")"))
+
 (defn usage
   [k m]
-  (if (:special-form m)
-    (let [examples (for [form (:forms m)]
-                     (s/replace usage-template "{usage}" (str form)))]
-      (s/join "" examples))
-    (let [examples (for [arglist (:arglists m)]
-                     (s/replace usage-template "{usage}" (h/escape (str (apply list k arglist)))))]
-      (s/join "" examples))))
+  (let [usages (if (:special-form m)
+                 (for [form (:forms m)]
+                   (str form))
+                 (for [arglist (:arglists m)]
+                   (tagged-arglist k arglist)))]
+    (s/join "" (map #(s/replace usage-template "{usage}" (h/escape %)) usages))))
 
 (defn- source-file
   [ns]
