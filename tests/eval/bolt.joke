@@ -10,7 +10,7 @@
     (let [f (create-temp "" "bolt-test-")
           db-name (name f)
           db (open db-name 0600)
-          f (joker.os/close f) ; Windows requires the file itself to be closed for remove to work.
+          _ (joker.os/close f) ; Windows requires the file itself to be closed for remove to work.
           users "users"
           joe "Joe Black"]
       (try
