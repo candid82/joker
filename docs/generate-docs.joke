@@ -52,7 +52,7 @@
            :else :function)
       Proc :function
       (cond
-        (not (bound? v)) :other  ; E.g. joker.core/*1
+        (not (bound? v)) :variable  ; E.g. joker.core/*1
         (:special-form m) :special
         (:const m) :constant
         :else :variable))))
@@ -184,7 +184,9 @@
         constants-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :constant))
         variables-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :variable))
         types-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :type))
-        others-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :other))]
+        _ (when (not= "(None.)" types-doc) (throw (ex-info (str "non-null types: " types-doc) {})))
+        others-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :other))
+        _ (when (not= "(None.)" others-doc) (throw (ex-info (str "non-null others: " others-doc) {})))]
     (-> ns-template
         (s/replace "{name}" (name ns-sym))
         (s/replace "{added}" (str (:added m)))
