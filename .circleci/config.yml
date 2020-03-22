@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: go get liner
-          command: go get -d -v github.com/peterh/liner
+          command: go get -d -v github.com/candid82/liner
       - run:
           name: go get profile
           command: go get -d -v github.com/pkg/profile

@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	. "github.com/candid82/joker/core"
-	"github.com/peterh/liner"
+	"github.com/candid82/liner"
 )
 
 var qualifiedSymbolRe *regexp.Regexp = regexp.MustCompile(`([0-9A-Za-z_\-\+\*\'\.]+)/([0-9A-Za-z_\-\+\*\']*$)`)

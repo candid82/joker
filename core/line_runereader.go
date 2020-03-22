@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/peterh/liner"
+	"github.com/candid82/liner"
 )
 
 type (
