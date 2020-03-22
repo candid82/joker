@@ -16,7 +16,7 @@ import (
 )
 
 var qualifiedSymbolRe *regexp.Regexp = regexp.MustCompile(`([0-9A-Za-z_\-\+\*\'\.]+)/([0-9A-Za-z_\-\+\*\']*$)`)
-var callRe *regexp.Regexp = regexp.MustCompile(`\(\s*([0-9A-Za-z_\-\+\*\']*$)`)
+var callRe *regexp.Regexp = regexp.MustCompile(`\(\s*([0-9A-Za-z_\-\+\*\'\.]*$)`)
 
 func completer(line string, pos int) (head string, c []string, tail string) {
 	head = line[:pos]
@@ -24,6 +24,7 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	var match []string
 	var prefix string
 	var ns *Namespace
+	var addNamespaces bool
 	if match = qualifiedSymbolRe.FindStringSubmatch(head); match != nil {
 		nsName := match[1]
 		prefix = match[2]
@@ -31,6 +32,7 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	} else if match = callRe.FindStringSubmatch(head); match != nil {
 		prefix = match[1]
 		ns = GLOBAL_ENV.CurrentNamespace()
+		addNamespaces = true
 	}
 	if ns == nil {
 		return
@@ -38,6 +40,18 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	for k, _ := range ns.Mappings() {
 		if strings.HasPrefix(*k, prefix) {
 			c = append(c, *k)
+		}
+	}
+	if addNamespaces {
+		for k, _ := range GLOBAL_ENV.Namespaces {
+			if strings.HasPrefix(*k, prefix) {
+				c = append(c, *k)
+			}
+		}
+		for k, _ := range ns.Aliases() {
+			if strings.HasPrefix(*k, prefix) {
+				c = append(c, *k)
+			}
 		}
 	}
 	if len(c) > 0 {
