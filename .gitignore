@@ -5,3 +5,5 @@ core/a_*.go
 *.exe
 *~
 *.zip
+*.docset
+.DS_Store
