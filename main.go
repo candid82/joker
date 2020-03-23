@@ -683,10 +683,7 @@ var runningProfile interface {
 }
 
 func main() {
-	SetExitJoker(func(code int) {
-		finish()
-		os.Exit(code)
-	})
+	OnExit(finish)
 
 	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 
