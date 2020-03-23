@@ -119,3 +119,8 @@ str-or-pattern."
   [nsname]
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))
+
+(defn quit
+  "Exit Joker"
+  []
+  (eval '(joker.os/exit 0)))  ; Avoid direct (and thus circular) reference.

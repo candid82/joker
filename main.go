@@ -154,12 +154,6 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 		return
 	}
 
-	if kw, yes := obj.(Keyword); yes {
-		if kw.ToString(false) == ":repl/quit" {
-			ExitJoker(0)
-		}
-	}
-
 	if phase == READ {
 		fmt.Println(obj.ToString(true))
 		return false
@@ -226,7 +220,7 @@ func srepl(port string, phase Phase) {
 
 	reader := NewReader(runeReader, "<srepl>")
 
-	fmt.Fprintf(Stdout, "Welcome to joker %s, client at %s. Use ':repl/quit', or close the connection, to exit.\n",
+	fmt.Fprintf(Stdout, "Welcome to joker %s, client at %s. Use '(joker.repl/quit)', or close the connection, to exit.\n",
 		VERSION, conn.RemoteAddr())
 
 	for {
