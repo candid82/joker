@@ -75,6 +75,7 @@ func repl(phase Phase) {
 	} else {
 		historyFilename = filepath.Join(os.TempDir(), ".joker-history")
 		rl = liner.NewLiner()
+		OnExit(func() { rl.Close() })
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
 		rl.SetWordCompleter(completer)
