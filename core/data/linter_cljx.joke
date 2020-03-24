@@ -394,3 +394,5 @@
 (ns-unmap 'user 'close!)
 (ns-unmap 'joker.core 'chan)
 (ns-unmap 'user 'chan)
+(ns-unmap 'joker.core 'exit)
+(ns-unmap 'user 'exit)
