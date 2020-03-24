@@ -28,10 +28,12 @@
   [])
 
 (defn exit
-  "Causes the current program to exit with the given status code."
+  "Causes the current program to exit with the given status code (defaults to 0)."
   {:added "1.0"
-  :go "NIL; ExitJoker(code)"}
-  [^Int code])
+  :go {1 "NIL; ExitJoker(code)"
+       0 "NIL; ExitJoker(0)"}}
+  ([^Int code])
+  ([]))
 
 (defn sh
   "Executes the named program with the given arguments. Returns a map with the following keys:

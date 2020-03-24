@@ -176,6 +176,11 @@ func __exit_(_args []Object) Object {
 		ExitJoker(code)
 		return _res
 
+	case _c == 0:
+		_res := NIL
+		ExitJoker(0)
+		return _res
+
 	default:
 		PanicArity(_c)
 	}

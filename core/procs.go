@@ -1617,6 +1617,11 @@ var procVerbosityLevel = func(args []Object) Object {
 	return MakeInt(VerbosityLevel)
 }
 
+var procExit = func(args []Object) Object {
+	ExitJoker(EnsureInt(args, 0).I)
+	return NIL
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()

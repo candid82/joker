@@ -82,8 +82,8 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
-			`Causes the current program to exit with the given status code.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("code")), NewVectorFrom()),
+			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0"))
 
 	osNamespace.InternVar("get-env", get_env_,
 		MakeMeta(
