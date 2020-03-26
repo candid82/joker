@@ -119,6 +119,24 @@ func __hours_(_args []Object) Object {
 	return NIL
 }
 
+var __in_timezone__P ProcFn = __in_timezone_
+var in_timezone_ Proc = Proc{Fn: __in_timezone__P, Name: "in_timezone_", Package: "std/time"}
+
+func __in_timezone_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		t := ExtractTime(_args, 0)
+		tz := ExtractString(_args, 1)
+		_res := inTimezone(t, tz)
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __minutes__P ProcFn = __minutes_
 var minutes_ Proc = Proc{Fn: __minutes__P, Name: "minutes_", Package: "std/time"}
 
