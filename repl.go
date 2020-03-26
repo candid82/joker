@@ -73,9 +73,22 @@ func repl(phase Phase) {
 	if noReadline {
 		runeReader = bufio.NewReader(Stdin)
 	} else {
-		historyFilename = filepath.Join(os.TempDir(), ".joker-history")
+		home := HomeDir()
+		jokerd := filepath.Join(home, ".jokerd")
+		if _, err := os.Stat(jokerd); os.IsNotExist(err) {
+			if err := os.MkdirAll(jokerd, 0777); err != nil {
+				fmt.Fprintf(Stderr, "WARNING: could not create %s \n", jokerd)
+			}
+		}
+		historyFilename = filepath.Join(jokerd, ".repl_history")
 		rl = liner.NewLiner()
-		OnExit(func() { rl.Close() })
+		OnExit(func() {
+			if f, err := os.Create(historyFilename); err == nil {
+				rl.WriteHistory(f)
+				f.Close()
+			}
+			rl.Close()
+		})
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
 		rl.SetWordCompleter(completer)
