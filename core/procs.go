@@ -1617,6 +1617,11 @@ var procVerbosityLevel = func(args []Object) Object {
 	return MakeInt(VerbosityLevel)
 }
 
+var procExit = func(args []Object) Object {
+	ExitJoker(EnsureInt(args, 0).I)
+	return NIL
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
@@ -1798,12 +1803,9 @@ func findConfigFile(filename string, workingDir string, findDir bool) string {
 		oldFilename := filename
 		filename = filepath.Dir(filename)
 		if filename == oldFilename {
-			home, ok := os.LookupEnv("HOME")
-			if !ok {
-				home, ok = os.LookupEnv("USERPROFILE")
-				if !ok {
-					return ""
-				}
+			home := HomeDir()
+			if home == "" {
+				return ""
 			}
 			p := filepath.Join(home, configName)
 			if info, err := os.Stat(p); err == nil {

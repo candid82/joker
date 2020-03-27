@@ -149,6 +149,11 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
 			`Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
+	timeNamespace.InternVar("in-timezone", in_timezone_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("tz"))),
+			`Returns a copy of t representing the same time instant, but with the copy's timezone information set to tz for display purposes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
+
 	timeNamespace.InternVar("minutes", minutes_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("d"))),

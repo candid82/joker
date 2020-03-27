@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: go get readline
-          command: go get -d -v github.com/chzyer/readline
+          name: go get liner
+          command: go get -d -v github.com/candid82/liner
       - run:
           name: go get profile
           command: go get -d -v github.com/pkg/profile

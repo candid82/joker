@@ -82,8 +82,8 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
-			`Causes the current program to exit with the given status code.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("code")), NewVectorFrom()),
+			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0"))
 
 	osNamespace.InternVar("get-env", get_env_,
 		MakeMeta(
@@ -93,7 +93,13 @@ func InternsOrThunks() {
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Reads the directory named by dirname and returns a list of directory entries sorted by filename.`, "1.0"))
+			`Reads the directory named by dirname and returns a list of directory entries sorted by filename.
+  Each entry is a map with the following keys:
+  :name - name (String)
+  :size - size in bytes (Int)
+  :mode - mode (Int)
+  :dir? - true if the file is a directory (Boolean)
+  :modtime - modification time (unix timestamp) (Int)`, "1.0"))
 
 	osNamespace.InternVar("mkdir", mkdir_,
 		MakeMeta(

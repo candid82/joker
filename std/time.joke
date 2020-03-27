@@ -126,6 +126,12 @@
   :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
   [^Int d ^Int m])
 
+(defn ^Time in-timezone
+  "Returns a copy of t representing the same time instant, but with the copy's timezone information set to tz for display purposes."
+  {:added "1.0"
+   :go "inTimezone(t, tz)"}
+  [^Time t ^String tz])
+
 (def
   ^{:doc "Number of nanoseconds in 1 nanosecond"
     :added "1.0"

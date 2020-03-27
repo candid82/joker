@@ -6,10 +6,17 @@ import (
 	"os"
 )
 
-var ExitJoker func(rc int)
+var exitCallbacks []func()
 
-func SetExitJoker(fn func(rc int)) {
-	ExitJoker = fn
+func ExitJoker(rc int) {
+	for _, f := range exitCallbacks {
+		f()
+	}
+	os.Exit(rc)
+}
+
+func OnExit(f func()) {
+	exitCallbacks = append(exitCallbacks, f)
 }
 
 func writeIndent(w io.Writer, n int) {
@@ -49,4 +56,12 @@ func ToBool(obj Object) bool {
 	default:
 		return true
 	}
+}
+
+func HomeDir() string {
+	home, ok := os.LookupEnv("HOME")
+	if !ok {
+		home, _ = os.LookupEnv("USERPROFILE")
+	}
+	return home
 }

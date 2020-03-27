@@ -8,7 +8,9 @@
 (deftest example-1
   (testing "example in docstring"
     (let [f (create-temp "" "bolt-test-")
-          db (open (name f) 0600)
+          db-name (name f)
+          _ (joker.os/close f) ; Windows requires the file itself to be closed for remove to work.
+          db (open db-name 0600)
           users "users"
           joe "Joe Black"]
       (try
@@ -20,5 +22,4 @@
               s (str (sort m))]
           (is (= s (format "([\"id\" %d] [\"name\" \"%s\"])" id joe))))
         (finally (close db)
-                 (joker.os/close f)  ; Windows requires the file iself to be closed for remove to work.
-                 (remove (name f)))))))
+                 (remove db-name))))))

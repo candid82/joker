@@ -4,20 +4,22 @@ package core
 
 import (
 	"io"
+	"strings"
 	"unicode/utf8"
 
-	"github.com/chzyer/readline"
+	"github.com/candid82/liner"
 )
 
 type (
 	LineRuneReader struct {
-		rl     *readline.Instance
+		rl     *liner.State
 		buffer []rune
 		i      int
+		Prompt string
 	}
 )
 
-func NewLineRuneReader(rl *readline.Instance) *LineRuneReader {
+func NewLineRuneReader(rl *liner.State) *LineRuneReader {
 	return &LineRuneReader{rl: rl}
 }
 
@@ -27,9 +29,12 @@ func (lrr *LineRuneReader) ReadRune() (rune, int, error) {
 		lrr.i++
 		return r, utf8.RuneLen(r), nil
 	}
-	line, err := lrr.rl.Readline()
+	line, err := lrr.rl.Prompt(lrr.Prompt)
 	if err != nil {
 		return EOF, 0, io.EOF
+	}
+	if strings.TrimSpace(line) != "" {
+		lrr.rl.AppendHistory(line)
 	}
 	lrr.buffer = make([]rune, 0, len(line)+1)
 	for _, r := range line {
