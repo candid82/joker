@@ -195,6 +195,7 @@
   ^{:doc "pi"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Pi"}
   pi)
 
@@ -202,6 +203,7 @@
   ^{:doc "e"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.E"}
   e)
 
@@ -209,6 +211,7 @@
   ^{:doc "Phi"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Phi"}
   phi)
 
@@ -216,6 +219,7 @@
   ^{:doc "Square root of 2"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Sqrt2"}
   sqrt-of-2)
 
@@ -223,6 +227,7 @@
   ^{:doc "Square root of e"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.SqrtE"}
   sqrt-of-e)
 
@@ -230,6 +235,7 @@
   ^{:doc "Square root of pi"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.SqrtPi"}
   sqrt-of-pi)
 
@@ -237,6 +243,7 @@
   ^{:doc "Square root of phi"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.SqrtPhi"}
   sqrt-of-phi)
 
@@ -244,6 +251,7 @@
   ^{:doc "Natural logarithm of 2"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Ln2"}
   ln-of-2)
 
@@ -251,6 +259,7 @@
   ^{:doc "Base-2 logarithm of e"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Log2E"}
   log-2-of-e)
 
@@ -258,6 +267,7 @@
   ^{:doc "Natural logarithm of 10"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Ln10"}
   ln-of-10)
 
@@ -265,6 +275,7 @@
   ^{:doc "Base-10 logarithm of e"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Log10E"}
   log-10-of-e)
 
@@ -272,6 +283,7 @@
   ^{:doc "Natural logarithm of 2"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.Ln2"}
   ln-of-2)
 
@@ -279,6 +291,7 @@
   ^{:doc "Largest finite value representable by Double"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.MaxFloat64"}
   max-double)
 
@@ -286,5 +299,6 @@
   ^{:doc "Smallest positive, non-zero value representable by Double"
     :added "1.0"
     :tag Double
+    :const true
     :go "math.SmallestNonzeroFloat64"}
   smallest-nonzero-double)

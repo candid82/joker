@@ -262,6 +262,7 @@
 
 (def ^:const
   ^{:doc "Used to initialize *report-counters*"
+    :const true
     :added "1.0"}
   *initial-report-counters* {:test 0, :pass 0, :fail 0, :error 0})
 

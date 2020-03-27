@@ -17,67 +17,67 @@ func InternsOrThunks() {
 	mathNamespace.InternVar("e", e_,
 		MakeMeta(
 			nil,
-			`e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`e`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("ln-of-10", ln_of_10_,
 		MakeMeta(
 			nil,
-			`Natural logarithm of 10`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Natural logarithm of 10`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("ln-of-2", ln_of_2_,
 		MakeMeta(
 			nil,
-			`Natural logarithm of 2`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Natural logarithm of 2`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-10-of-e", log_10_of_e_,
 		MakeMeta(
 			nil,
-			`Base-10 logarithm of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Base-10 logarithm of e`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-2-of-e", log_2_of_e_,
 		MakeMeta(
 			nil,
-			`Base-2 logarithm of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Base-2 logarithm of e`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("max-double", max_double_,
 		MakeMeta(
 			nil,
-			`Largest finite value representable by Double`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Largest finite value representable by Double`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("phi", phi_,
 		MakeMeta(
 			nil,
-			`Phi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Phi`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("pi", pi_,
 		MakeMeta(
 			nil,
-			`pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`pi`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("smallest-nonzero-double", smallest_nonzero_double_,
 		MakeMeta(
 			nil,
-			`Smallest positive, non-zero value representable by Double`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Smallest positive, non-zero value representable by Double`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sqrt-of-2", sqrt_of_2_,
 		MakeMeta(
 			nil,
-			`Square root of 2`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Square root of 2`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sqrt-of-e", sqrt_of_e_,
 		MakeMeta(
 			nil,
-			`Square root of e`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Square root of e`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sqrt-of-phi", sqrt_of_phi_,
 		MakeMeta(
 			nil,
-			`Square root of phi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Square root of phi`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sqrt-of-pi", sqrt_of_pi_,
 		MakeMeta(
 			nil,
-			`Square root of pi`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Square root of pi`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("abs", abs_,
 		MakeMeta(
