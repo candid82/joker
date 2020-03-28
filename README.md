@@ -46,7 +46,7 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 [Standard library reference](https://candid82.github.io/joker/)
 
-[Dash Docset](dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml)
+<a href="dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml">Dash Docset</a>
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
