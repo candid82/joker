@@ -333,7 +333,7 @@
     <h1 id="joker-special-forms">Joker Special Forms</h1>
     <ul>
       <li>
-  <h3 id="def">def</h3>
+  <h3 class="Function" id="def">def</h3>
   <pre class="var-usage"><div><code>(def symbol doc-string? init?)</code></div>
 </pre>
   <p class="var-docstr">Creates and interns a global var with the name<br>
@@ -343,14 +343,14 @@
   not supplied, the root binding of the var is unaffected.</p>
 </li>
 <li>
-  <h3 id="do">do</h3>
+  <h3 class="Function" id="do">do</h3>
   <pre class="var-usage"><div><code>(do exprs*)</code></div>
 </pre>
   <p class="var-docstr">Evaluates the expressions in order and returns the value of<br>
   the last. If no expressions are supplied, returns nil.</p>
 </li>
 <li>
-  <h3 id="if">if</h3>
+  <h3 class="Function" id="if">if</h3>
   <pre class="var-usage"><div><code>(if test then else?)</code></div>
 </pre>
   <p class="var-docstr">Evaluates test. If not the singular values nil or false,<br>
@@ -358,13 +358,13 @@
   else is not supplied it defaults to nil.</p>
 </li>
 <li>
-  <h3 id="quote">quote</h3>
+  <h3 class="Function" id="quote">quote</h3>
   <pre class="var-usage"><div><code>(quote form)</code></div>
 </pre>
   <p class="var-docstr">Yields the unevaluated form.</p>
 </li>
 <li>
-  <h3 id="recur">recur</h3>
+  <h3 class="Function" id="recur">recur</h3>
   <pre class="var-usage"><div><code>(recur exprs*)</code></div>
 </pre>
   <p class="var-docstr">Evaluates the exprs in order, then, in parallel, rebinds<br>
@@ -372,14 +372,14 @@
   Execution then jumps back to the recursion point, a loop or fn method.</p>
 </li>
 <li>
-  <h3 id="throw">throw</h3>
+  <h3 class="Function" id="throw">throw</h3>
   <pre class="var-usage"><div><code>(throw expr)</code></div>
 </pre>
   <p class="var-docstr">The expr is evaluated and thrown, therefore it should yield an Error object.<br>
   User code should normally use (ex-info) function to create new Error objects.</p>
 </li>
 <li>
-  <h3 id="try">try</h3>
+  <h3 class="Function" id="try">try</h3>
   <pre class="var-usage"><div><code>(try expr* catch-clause* finally-clause?)</code></div>
 </pre>
   <p class="var-docstr">catch-clause =&gt; (catch type name expr*)<br>
@@ -389,7 +389,7 @@
   User code should normally use (ex-info) function to create new Error objects.</p>
 </li>
 <li>
-  <h3 id="var">var</h3>
+  <h3 class="Function" id="var">var</h3>
   <pre class="var-usage"><div><code>(var symbol)</code></div>
 </pre>
   <p class="var-docstr">The symbol must resolve to a var, and the Var object<br>
@@ -400,169 +400,169 @@
     <h1 id="joker-std-ns">Joker Standard Namespaces</h1>
     <ul>
       <li>
-  <h3 id="joker.base64">joker.base64</h3>
+  <h3 class="ns" id="joker.base64">joker.base64</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements base64 encoding as specified by RFC 4648.</p>
   <a href="joker.base64.html">details</a>
 </li>
 <li>
-  <h3 id="joker.better-cond">joker.better-cond</h3>
+  <h3 class="ns" id="joker.better-cond">joker.better-cond</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">A collection of variations on Clojure&#39;s core macros.</p>
   <a href="joker.better-cond.html">details</a>
 </li>
 <li>
-  <h3 id="joker.bolt">joker.bolt</h3>
+  <h3 class="ns" id="joker.bolt">joker.bolt</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.</p>
   <a href="joker.bolt.html">details</a>
 </li>
 <li>
-  <h3 id="joker.core">joker.core</h3>
+  <h3 class="ns" id="joker.core">joker.core</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Core library of Joker.</p>
   <a href="joker.core.html">details</a>
 </li>
 <li>
-  <h3 id="joker.crypto">joker.crypto</h3>
+  <h3 class="ns" id="joker.crypto">joker.crypto</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements common cryptographic and hash functions.</p>
   <a href="joker.crypto.html">details</a>
 </li>
 <li>
-  <h3 id="joker.csv">joker.csv</h3>
+  <h3 class="ns" id="joker.csv">joker.csv</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Reads and writes comma-separated values (CSV) files as defined in RFC 4180.</p>
   <a href="joker.csv.html">details</a>
 </li>
 <li>
-  <h3 id="joker.filepath">joker.filepath</h3>
+  <h3 class="ns" id="joker.filepath">joker.filepath</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements utility routines for manipulating filename paths.</p>
   <a href="joker.filepath.html">details</a>
 </li>
 <li>
-  <h3 id="joker.hex">joker.hex</h3>
+  <h3 class="ns" id="joker.hex">joker.hex</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements hexadecimal encoding and decoding.</p>
   <a href="joker.hex.html">details</a>
 </li>
 <li>
-  <h3 id="joker.hiccup">joker.hiccup</h3>
+  <h3 class="ns" id="joker.hiccup">joker.hiccup</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Renders HTML, XML, or XHTML markup to a string, based on prior work in Hiccup.</p>
   <a href="joker.hiccup.html">details</a>
 </li>
 <li>
-  <h3 id="joker.html">joker.html</h3>
+  <h3 class="ns" id="joker.html">joker.html</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides functions for escaping and unescaping HTML text.</p>
   <a href="joker.html.html">details</a>
 </li>
 <li>
-  <h3 id="joker.http">joker.http</h3>
+  <h3 class="ns" id="joker.http">joker.http</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides HTTP client and server implementations.</p>
   <a href="joker.http.html">details</a>
 </li>
 <li>
-  <h3 id="joker.io">joker.io</h3>
+  <h3 class="ns" id="joker.io">joker.io</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides basic interfaces to I/O primitives.</p>
   <a href="joker.io.html">details</a>
 </li>
 <li>
-  <h3 id="joker.json">joker.json</h3>
+  <h3 class="ns" id="joker.json">joker.json</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements encoding and decoding of JSON as defined in RFC 4627.</p>
   <a href="joker.json.html">details</a>
 </li>
 <li>
-  <h3 id="joker.math">joker.math</h3>
+  <h3 class="ns" id="joker.math">joker.math</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides basic constants and mathematical functions.</p>
   <a href="joker.math.html">details</a>
 </li>
 <li>
-  <h3 id="joker.os">joker.os</h3>
+  <h3 class="ns" id="joker.os">joker.os</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides a platform-independent interface to operating system functionality.</p>
   <a href="joker.os.html">details</a>
 </li>
 <li>
-  <h3 id="joker.pprint">joker.pprint</h3>
+  <h3 class="ns" id="joker.pprint">joker.pprint</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Pretty printing utilities. Based on Clojure implementation.</p>
   <a href="joker.pprint.html">details</a>
 </li>
 <li>
-  <h3 id="joker.repl">joker.repl</h3>
+  <h3 class="ns" id="joker.repl">joker.repl</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Utilities meant to be used interactively at the REPL.</p>
   <a href="joker.repl.html">details</a>
 </li>
 <li>
-  <h3 id="joker.set">joker.set</h3>
+  <h3 class="ns" id="joker.set">joker.set</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Set operations such as union/intersection.</p>
   <a href="joker.set.html">details</a>
 </li>
 <li>
-  <h3 id="joker.strconv">joker.strconv</h3>
+  <h3 class="ns" id="joker.strconv">joker.strconv</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements conversions to and from string representations of basic data types.</p>
   <a href="joker.strconv.html">details</a>
 </li>
 <li>
-  <h3 id="joker.string">joker.string</h3>
+  <h3 class="ns" id="joker.string">joker.string</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements simple functions to manipulate strings.</p>
   <a href="joker.string.html">details</a>
 </li>
 <li>
-  <h3 id="joker.template">joker.template</h3>
+  <h3 class="ns" id="joker.template">joker.template</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Macros that expand to repeated copies of a template expression.</p>
   <a href="joker.template.html">details</a>
 </li>
 <li>
-  <h3 id="joker.test">joker.test</h3>
+  <h3 class="ns" id="joker.test">joker.test</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">A unit testing framework.</p>
   <a href="joker.test.html">details</a>
 </li>
 <li>
-  <h3 id="joker.time">joker.time</h3>
+  <h3 class="ns" id="joker.time">joker.time</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides functionality for measuring and displaying time.</p>
   <a href="joker.time.html">details</a>
 </li>
 <li>
-  <h3 id="joker.tools.cli">joker.tools.cli</h3>
+  <h3 class="ns" id="joker.tools.cli">joker.tools.cli</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Tools for working with command line arguments.</p>
   <a href="joker.tools.cli.html">details</a>
 </li>
 <li>
-  <h3 id="joker.url">joker.url</h3>
+  <h3 class="ns" id="joker.url">joker.url</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Parses URLs and implements query escaping.</p>
   <a href="joker.url.html">details</a>
 </li>
 <li>
-  <h3 id="joker.uuid">joker.uuid</h3>
+  <h3 class="ns" id="joker.uuid">joker.uuid</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Generates UUIDs.</p>
   <a href="joker.uuid.html">details</a>
 </li>
 <li>
-  <h3 id="joker.walk">joker.walk</h3>
+  <h3 class="ns" id="joker.walk">joker.walk</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Defines a generic tree walker for Clojure data structures.</p>
   <a href="joker.walk.html">details</a>
 </li>
 <li>
-  <h3 id="joker.yaml">joker.yaml</h3>
+  <h3 class="ns" id="joker.yaml">joker.yaml</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Implements encoding and decoding of YAML.</p>
   <a href="joker.yaml.html">details</a>
@@ -573,357 +573,357 @@
     <p><em>Note:</em> These types are "omnipresent", in that they're not members of any particular namespace, but are available for resolution regardless of the current value of <tt>*ns*</tt> (the current namespace).</p>
     <ul>
       <li>
-  <h3 id="ArrayMap">ArrayMap</h3>
+  <h3 class="type" id="ArrayMap">ArrayMap</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="ArrayMapSeq">ArrayMapSeq</h3>
+  <h3 class="type" id="ArrayMapSeq">ArrayMapSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="ArrayNodeSeq">ArrayNodeSeq</h3>
+  <h3 class="type" id="ArrayNodeSeq">ArrayNodeSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="ArraySeq">ArraySeq</h3>
+  <h3 class="type" id="ArraySeq">ArraySeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Associative">Associative</h3>
+  <h3 class="type" id="Associative">Associative</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Atom">Atom</h3>
+  <h3 class="type" id="Atom">Atom</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="BigFloat">BigFloat</h3>
+  <h3 class="type" id="BigFloat">BigFloat</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   Wraps the Go &#39;math/big.Float&#39; type</p>
 </li>
 <li>
-  <h3 id="BigInt">BigInt</h3>
+  <h3 class="type" id="BigInt">BigInt</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   Wraps the Go &#39;math/big.Int&#39; type</p>
 </li>
 <li>
-  <h3 id="BoltDB">BoltDB</h3>
+  <h3 class="type" id="BoltDB">BoltDB</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps Bolt DB type</p>
 </li>
 <li>
-  <h3 id="Boolean">Boolean</h3>
+  <h3 class="type" id="Boolean">Boolean</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;bool&#39; type</p>
 </li>
 <li>
-  <h3 id="Buffer">Buffer</h3>
+  <h3 class="type" id="Buffer">Buffer</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="BufferedReader">BufferedReader</h3>
+  <h3 class="type" id="BufferedReader">BufferedReader</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Callable">Callable</h3>
+  <h3 class="type" id="Callable">Callable</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Channel">Channel</h3>
+  <h3 class="type" id="Channel">Channel</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Char">Char</h3>
+  <h3 class="type" id="Char">Char</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;rune&#39; type</p>
 </li>
 <li>
-  <h3 id="Collection">Collection</h3>
+  <h3 class="type" id="Collection">Collection</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Comparable">Comparable</h3>
+  <h3 class="type" id="Comparable">Comparable</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Comparator">Comparator</h3>
+  <h3 class="type" id="Comparator">Comparator</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="ConsSeq">ConsSeq</h3>
+  <h3 class="type" id="ConsSeq">ConsSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Counted">Counted</h3>
+  <h3 class="type" id="Counted">Counted</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Delay">Delay</h3>
+  <h3 class="type" id="Delay">Delay</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Deref">Deref</h3>
+  <h3 class="type" id="Deref">Deref</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Double">Double</h3>
+  <h3 class="type" id="Double">Double</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;float64&#39; type</p>
 </li>
 <li>
-  <h3 id="Error">Error</h3>
+  <h3 class="type" id="Error">Error</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="EvalError">EvalError</h3>
+  <h3 class="type" id="EvalError">EvalError</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="ExInfo">ExInfo</h3>
+  <h3 class="type" id="ExInfo">ExInfo</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="File">File</h3>
+  <h3 class="type" id="File">File</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Fn">Fn</h3>
+  <h3 class="type" id="Fn">Fn</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   A callable function or macro implemented via Joker code</p>
 </li>
 <li>
-  <h3 id="Gettable">Gettable</h3>
+  <h3 class="type" id="Gettable">Gettable</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="HashMap">HashMap</h3>
+  <h3 class="type" id="HashMap">HashMap</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="IOReader">IOReader</h3>
+  <h3 class="type" id="IOReader">IOReader</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="IOWriter">IOWriter</h3>
+  <h3 class="type" id="IOWriter">IOWriter</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Indexed">Indexed</h3>
+  <h3 class="type" id="Indexed">Indexed</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Int">Int</h3>
+  <h3 class="type" id="Int">Int</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;int&#39; type, which is 32 bits wide on 32-bit hosts, 64 bits wide on 64-bit hosts, etc.</p>
 </li>
 <li>
-  <h3 id="KVReduce">KVReduce</h3>
+  <h3 class="type" id="KVReduce">KVReduce</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Keyword">Keyword</h3>
+  <h3 class="type" id="Keyword">Keyword</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   A possibly-namespace-qualified name prefixed by &#39;:&#39;</p>
 </li>
 <li>
-  <h3 id="LazySeq">LazySeq</h3>
+  <h3 class="type" id="LazySeq">LazySeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="List">List</h3>
+  <h3 class="type" id="List">List</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Map">Map</h3>
+  <h3 class="type" id="Map">Map</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="MapSet">MapSet</h3>
+  <h3 class="type" id="MapSet">MapSet</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="MappingSeq">MappingSeq</h3>
+  <h3 class="type" id="MappingSeq">MappingSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Meta">Meta</h3>
+  <h3 class="type" id="Meta">Meta</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Named">Named</h3>
+  <h3 class="type" id="Named">Named</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Namespace">Namespace</h3>
+  <h3 class="type" id="Namespace">Namespace</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Nil">Nil</h3>
+  <h3 class="type" id="Nil">Nil</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   The &#39;nil&#39; value</p>
 </li>
 <li>
-  <h3 id="NodeSeq">NodeSeq</h3>
+  <h3 class="type" id="NodeSeq">NodeSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Number">Number</h3>
+  <h3 class="type" id="Number">Number</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="ParseError">ParseError</h3>
+  <h3 class="type" id="ParseError">ParseError</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Pending">Pending</h3>
+  <h3 class="type" id="Pending">Pending</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Proc">Proc</h3>
+  <h3 class="type" id="Proc">Proc</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   A callable function implemented via Go code</p>
 </li>
 <li>
-  <h3 id="Ratio">Ratio</h3>
+  <h3 class="type" id="Ratio">Ratio</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   Wraps the Go &#39;math.big/Rat&#39; type</p>
 </li>
 <li>
-  <h3 id="RecurBindings">RecurBindings</h3>
+  <h3 class="type" id="RecurBindings">RecurBindings</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Ref">Ref</h3>
+  <h3 class="type" id="Ref">Ref</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Regex">Regex</h3>
+  <h3 class="type" id="Regex">Regex</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)<br>
   Wraps the Go &#39;regexp.Regexp&#39; type</p>
 </li>
 <li>
-  <h3 id="Reversible">Reversible</h3>
+  <h3 class="type" id="Reversible">Reversible</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Seq">Seq</h3>
+  <h3 class="type" id="Seq">Seq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Seqable">Seqable</h3>
+  <h3 class="type" id="Seqable">Seqable</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Sequential">Sequential</h3>
+  <h3 class="type" id="Sequential">Sequential</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Set">Set</h3>
+  <h3 class="type" id="Set">Set</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="Stack">Stack</h3>
+  <h3 class="type" id="Stack">Stack</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
-  <h3 id="String">String</h3>
+  <h3 class="type" id="String">String</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;string&#39; type</p>
 </li>
 <li>
-  <h3 id="Symbol">Symbol</h3>
+  <h3 class="type" id="Symbol">Symbol</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)</p>
 </li>
 <li>
-  <h3 id="Time">Time</h3>
+  <h3 class="type" id="Time">Time</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;time.Time&#39; type</p>
 </li>
 <li>
-  <h3 id="Type">Type</h3>
+  <h3 class="type" id="Type">Type</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Var">Var</h3>
+  <h3 class="type" id="Var">Var</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="Vector">Vector</h3>
+  <h3 class="type" id="Vector">Vector</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="VectorRSeq">VectorRSeq</h3>
+  <h3 class="type" id="VectorRSeq">VectorRSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
-  <h3 id="VectorSeq">VectorSeq</h3>
+  <h3 class="type" id="VectorSeq">VectorSeq</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
 </li>

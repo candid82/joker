@@ -355,7 +355,7 @@
     Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
     <ul>
       <li>
-  <h3 id="*initial-report-counters*">*initial-report-counters*</h3>
+  <h3 class="Constant" id="*initial-report-counters*">*initial-report-counters*</h3>
   <span class="var-kind Constant">Constant ArrayMap</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -367,7 +367,7 @@
     <h2 id="_variables">Variables</h2>
     <ul>
       <li>
-  <h3 id="*load-tests*">*load-tests*</h3>
+  <h3 class="Variable" id="*load-tests*">*load-tests*</h3>
   <span class="var-kind Variable">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -377,7 +377,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L239">source</a>
 </li>
 <li>
-  <h3 id="*report-counters*">*report-counters*</h3>
+  <h3 class="Variable" id="*report-counters*">*report-counters*</h3>
   <span class="var-kind Variable">Atom</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -385,7 +385,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L257">source</a>
 </li>
 <li>
-  <h3 id="*stack-trace-depth*">*stack-trace-depth*</h3>
+  <h3 class="Variable" id="*stack-trace-depth*">*stack-trace-depth*</h3>
   <span class="var-kind Variable">Int</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -395,7 +395,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L246">source</a>
 </li>
 <li>
-  <h3 id="*test-out*">*test-out*</h3>
+  <h3 class="Variable" id="*test-out*">*test-out*</h3>
   <span class="var-kind Variable">IOWriter</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -403,7 +403,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L279">source</a>
 </li>
 <li>
-  <h3 id="*testing-contexts*">*testing-contexts*</h3>
+  <h3 class="Variable" id="*testing-contexts*">*testing-contexts*</h3>
   <span class="var-kind Variable">List</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -411,7 +411,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L274">source</a>
 </li>
 <li>
-  <h3 id="*testing-vars*">*testing-vars*</h3>
+  <h3 class="Variable" id="*testing-vars*">*testing-vars*</h3>
   <span class="var-kind Variable">List</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -423,7 +423,7 @@
     <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
-  <h3 id="are">are</h3>
+  <h3 class="Macro" id="are">are</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(are argv expr &amp; args)</code></div>
@@ -443,7 +443,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L566">source</a>
 </li>
 <li>
-  <h3 id="assert-any">assert-any</h3>
+  <h3 class="Function" id="assert-any">assert-any</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assert-any msg form)</code></div>
@@ -453,7 +453,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L447">source</a>
 </li>
 <li>
-  <h3 id="assert-expr">assert-expr</h3>
+  <h3 class="Function" id="assert-expr">assert-expr</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -461,7 +461,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L468">source</a>
 </li>
 <li>
-  <h3 id="assert-predicate">assert-predicate</h3>
+  <h3 class="Function" id="assert-predicate">assert-predicate</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assert-predicate msg form)</code></div>
@@ -474,7 +474,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L428">source</a>
 </li>
 <li>
-  <h3 id="compose-fixtures">compose-fixtures</h3>
+  <h3 class="Function" id="compose-fixtures">compose-fixtures</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(compose-fixtures f1 f2)</code></div>
@@ -484,7 +484,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L683">source</a>
 </li>
 <li>
-  <h3 id="deftest">deftest</h3>
+  <h3 class="Macro" id="deftest">deftest</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(deftest name &amp; body)</code></div>
@@ -502,7 +502,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L616">source</a>
 </li>
 <li>
-  <h3 id="deftest-">deftest-</h3>
+  <h3 class="Macro" id="deftest-">deftest-</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(deftest- name &amp; body)</code></div>
@@ -511,7 +511,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L633">source</a>
 </li>
 <li>
-  <h3 id="do-report">do-report</h3>
+  <h3 class="Function" id="do-report">do-report</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(do-report m)</code></div>
@@ -522,7 +522,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L343">source</a>
 </li>
 <li>
-  <h3 id="function?">function?</h3>
+  <h3 class="Function" id="function?">function?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(function? x)</code></div>
@@ -532,7 +532,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L416">source</a>
 </li>
 <li>
-  <h3 id="get-possibly-unbound-var">get-possibly-unbound-var</h3>
+  <h3 class="Function" id="get-possibly-unbound-var">get-possibly-unbound-var</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-possibly-unbound-var v)</code></div>
@@ -541,7 +541,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L408">source</a>
 </li>
 <li>
-  <h3 id="inc-report-counter">inc-report-counter</h3>
+  <h3 class="Function" id="inc-report-counter">inc-report-counter</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(inc-report-counter name)</code></div>
@@ -551,7 +551,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L313">source</a>
 </li>
 <li>
-  <h3 id="is">is</h3>
+  <h3 class="Macro" id="is">is</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(is form)</code></div>
@@ -573,7 +573,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L548">source</a>
 </li>
 <li>
-  <h3 id="join-fixtures">join-fixtures</h3>
+  <h3 class="Function" id="join-fixtures">join-fixtures</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(join-fixtures fixtures)</code></div>
@@ -583,7 +583,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L690">source</a>
 </li>
 <li>
-  <h3 id="report">report</h3>
+  <h3 class="Function" id="report">report</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -596,7 +596,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L323">source</a>
 </li>
 <li>
-  <h3 id="run-all-tests">run-all-tests</h3>
+  <h3 class="Function" id="run-all-tests">run-all-tests</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(run-all-tests)</code></div>
@@ -609,7 +609,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L774">source</a>
 </li>
 <li>
-  <h3 id="run-tests">run-tests</h3>
+  <h3 class="Function" id="run-tests">run-tests</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(run-tests)</code></div>
@@ -621,7 +621,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L762">source</a>
 </li>
 <li>
-  <h3 id="set-test">set-test</h3>
+  <h3 class="Macro" id="set-test">set-test</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set-test name &amp; body)</code></div>
@@ -634,7 +634,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L642">source</a>
 </li>
 <li>
-  <h3 id="successful?">successful?</h3>
+  <h3 class="Function" id="successful?">successful?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(successful? summary)</code></div>
@@ -644,7 +644,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L783">source</a>
 </li>
 <li>
-  <h3 id="test-all-vars">test-all-vars</h3>
+  <h3 class="Function" id="test-all-vars">test-all-vars</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-all-vars ns)</code></div>
@@ -653,7 +653,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L731">source</a>
 </li>
 <li>
-  <h3 id="test-ns">test-ns</h3>
+  <h3 class="Function" id="test-ns">test-ns</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-ns ns)</code></div>
@@ -668,7 +668,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L737">source</a>
 </li>
 <li>
-  <h3 id="test-var">test-var</h3>
+  <h3 class="Function" id="test-var">test-var</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-var v)</code></div>
@@ -678,7 +678,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L702">source</a>
 </li>
 <li>
-  <h3 id="test-vars">test-vars</h3>
+  <h3 class="Function" id="test-vars">test-vars</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test-vars vars)</code></div>
@@ -688,7 +688,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L717">source</a>
 </li>
 <li>
-  <h3 id="testing">testing</h3>
+  <h3 class="Macro" id="testing">testing</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing string &amp; body)</code></div>
@@ -698,7 +698,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L591">source</a>
 </li>
 <li>
-  <h3 id="testing-contexts-str">testing-contexts-str</h3>
+  <h3 class="Function" id="testing-contexts-str">testing-contexts-str</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing-contexts-str)</code></div>
@@ -708,7 +708,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L306">source</a>
 </li>
 <li>
-  <h3 id="testing-vars-str">testing-vars-str</h3>
+  <h3 class="Function" id="testing-vars-str">testing-vars-str</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(testing-vars-str m)</code></div>
@@ -719,7 +719,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L293">source</a>
 </li>
 <li>
-  <h3 id="try-expr">try-expr</h3>
+  <h3 class="Macro" id="try-expr">try-expr</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(try-expr msg form)</code></div>
@@ -729,7 +729,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L532">source</a>
 </li>
 <li>
-  <h3 id="use-fixtures">use-fixtures</h3>
+  <h3 class="Function" id="use-fixtures">use-fixtures</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
@@ -739,7 +739,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L664">source</a>
 </li>
 <li>
-  <h3 id="with-test">with-test</h3>
+  <h3 class="Macro" id="with-test">with-test</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(with-test definition &amp; body)</code></div>
@@ -752,7 +752,7 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/test.joke#L603">source</a>
 </li>
 <li>
-  <h3 id="with-test-out">with-test-out</h3>
+  <h3 class="Macro" id="with-test-out">with-test-out</h3>
   <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(with-test-out &amp; body)</code></div>
