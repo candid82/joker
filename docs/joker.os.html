@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.os</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Provides a platform-independent interface to operating system functionality.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#args">args</a>
@@ -77,10 +96,20 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
   <h3 id="args">args</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(args)</code></div>
 </pre>
@@ -89,7 +118,7 @@
 </li>
 <li>
   <h3 id="chdir">chdir</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(chdir dirname)</code></div>
 </pre>
@@ -98,7 +127,7 @@
 </li>
 <li>
   <h3 id="close">close</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(close f)</code></div>
 </pre>
@@ -107,7 +136,7 @@
 </li>
 <li>
   <h3 id="create">create</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create name)</code></div>
 </pre>
@@ -116,7 +145,7 @@
 </li>
 <li>
   <h3 id="create-temp">create-temp</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-temp dir pattern)</code></div>
 </pre>
@@ -131,7 +160,7 @@
 </li>
 <li>
   <h3 id="cwd">cwd</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cwd)</code></div>
 </pre>
@@ -141,7 +170,7 @@
 </li>
 <li>
   <h3 id="env">env</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(env)</code></div>
 </pre>
@@ -150,7 +179,7 @@
 </li>
 <li>
   <h3 id="exec">exec</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(exec name opts)</code></div>
 </pre>
@@ -173,7 +202,7 @@
 </li>
 <li>
   <h3 id="exists?">exists?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(exists? path)</code></div>
 </pre>
@@ -182,16 +211,17 @@
 </li>
 <li>
   <h3 id="exit">exit</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(exit code)</code></div>
+<div><code>(exit)</code></div>
 </pre>
-  <p class="var-docstr">Causes the current program to exit with the given status code.</p>
+  <p class="var-docstr">Causes the current program to exit with the given status code (defaults to 0).</p>
   
 </li>
 <li>
   <h3 id="get-env">get-env</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-env key)</code></div>
 </pre>
@@ -200,16 +230,22 @@
 </li>
 <li>
   <h3 id="ls">ls</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ls dirname)</code></div>
 </pre>
-  <p class="var-docstr">Reads the directory named by dirname and returns a list of directory entries sorted by filename.</p>
+  <p class="var-docstr">Reads the directory named by dirname and returns a list of directory entries sorted by filename.<br>
+  Each entry is a map with the following keys:<br>
+  :name - name (String)<br>
+  :size - size in bytes (Int)<br>
+  :mode - mode (Int)<br>
+  :dir? - true if the file is a directory (Boolean)<br>
+  :modtime - modification time (unix timestamp) (Int)</p>
   
 </li>
 <li>
   <h3 id="mkdir">mkdir</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
 </pre>
@@ -218,7 +254,7 @@
 </li>
 <li>
   <h3 id="mkdir-temp">mkdir-temp</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(mkdir-temp dir pattern)</code></div>
 </pre>
@@ -233,7 +269,7 @@
 </li>
 <li>
   <h3 id="open">open</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(open name)</code></div>
 </pre>
@@ -243,7 +279,7 @@
 </li>
 <li>
   <h3 id="remove">remove</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove name)</code></div>
 </pre>
@@ -252,7 +288,7 @@
 </li>
 <li>
   <h3 id="remove-all">remove-all</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove-all path)</code></div>
 </pre>
@@ -264,7 +300,7 @@
 </li>
 <li>
   <h3 id="set-env">set-env</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set-env key value)</code></div>
 </pre>
@@ -273,9 +309,9 @@
 </li>
 <li>
   <h3 id="sh">sh</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(sh name & arguments)</code></div>
+  <pre class="var-usage"><div><code>(sh name &amp; arguments)</code></div>
 </pre>
   <p class="var-docstr">Executes the named program with the given arguments. Returns a map with the following keys:<br>
       :success - whether or not the execution was successful,<br>
@@ -287,9 +323,9 @@
 </li>
 <li>
   <h3 id="sh-from">sh-from</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(sh-from dir name & arguments)</code></div>
+  <pre class="var-usage"><div><code>(sh-from dir name &amp; arguments)</code></div>
 </pre>
   <p class="var-docstr">Executes the named program with the given arguments and working directory set to dir.<br>
   Returns a map with the following keys:<br>
@@ -302,7 +338,7 @@
 </li>
 <li>
   <h3 id="stat">stat</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(stat filename)</code></div>
 </pre>
@@ -316,7 +352,7 @@
 </li>
 <li>
   <h3 id="temp-dir">temp-dir</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(temp-dir)</code></div>
 </pre>

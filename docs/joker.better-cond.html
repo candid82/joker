@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.better-cond</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">A collection of variations on Clojure&#39;s core macros.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#cond">cond</a>
@@ -26,12 +45,22 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
   <h3 id="cond">cond</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(cond & clauses)</code></div>
+  <pre class="var-usage"><div><code>(cond &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">A variation on cond which sports let bindings, do and implicit else:<br>
      (cond <br>
@@ -46,7 +75,7 @@
 </li>
 <li>
   <h3 id="if-let">if-let</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(if-let bindings then)</code></div>
 <div><code>(if-let bindings then else)</code></div>
@@ -57,7 +86,7 @@
 </li>
 <li>
   <h3 id="if-some">if-some</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(if-some bindings then)</code></div>
 <div><code>(if-some bindings then else)</code></div>
@@ -68,9 +97,9 @@
 </li>
 <li>
   <h3 id="when-let">when-let</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-let bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(when-let bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">A variation on when-let where all the exprs in the bindings vector must be true.<br>
    Also supports :let.</p>
@@ -78,9 +107,9 @@
 </li>
 <li>
   <h3 id="when-some">when-some</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-some bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(when-some bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">A variation on when-some where all the exprs in the bindings vector must be non-nil.<br>
    Also supports :let.</p>

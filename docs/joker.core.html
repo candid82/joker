@@ -6,14 +6,33 @@
   <div class="main">
     <h1>Namespace: joker.core</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Core library of Joker.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#*">*</a>
 </li>
 <li>
-  <a href="#*'">*'</a>
+  <a href="#*'">*&#39;</a>
 </li>
 <li>
   <a href="#*1">*1</a>
@@ -70,31 +89,31 @@
   <a href="#+">+</a>
 </li>
 <li>
-  <a href="#+'">+'</a>
+  <a href="#+'">+&#39;</a>
 </li>
 <li>
   <a href="#-">-</a>
 </li>
 <li>
-  <a href="#-'">-'</a>
+  <a href="#-'">-&#39;</a>
 </li>
 <li>
-  <a href="#->">-></a>
+  <a href="#->">-&gt;</a>
 </li>
 <li>
-  <a href="#->>">->></a>
+  <a href="#->>">-&gt;&gt;</a>
 </li>
 <li>
   <a href="#/">/</a>
 </li>
 <li>
-  <a href="#<"><</a>
+  <a href="#<">&lt;</a>
 </li>
 <li>
-  <a href="#<!"><!</a>
+  <a href="#<!">&lt;!</a>
 </li>
 <li>
-  <a href="#<="><=</a>
+  <a href="#<=">&lt;=</a>
 </li>
 <li>
   <a href="#=">=</a>
@@ -103,13 +122,13 @@
   <a href="#==">==</a>
 </li>
 <li>
-  <a href="#>">></a>
+  <a href="#>">&gt;</a>
 </li>
 <li>
-  <a href="#>!">>!</a>
+  <a href="#>!">&gt;!</a>
 </li>
 <li>
-  <a href="#>=">>=</a>
+  <a href="#>=">&gt;=</a>
 </li>
 <li>
   <a href="#alias">alias</a>
@@ -133,7 +152,7 @@
   <a href="#array-map">array-map</a>
 </li>
 <li>
-  <a href="#as->">as-></a>
+  <a href="#as->">as-&gt;</a>
 </li>
 <li>
   <a href="#assert">assert</a>
@@ -259,10 +278,10 @@
   <a href="#cond">cond</a>
 </li>
 <li>
-  <a href="#cond->">cond-></a>
+  <a href="#cond->">cond-&gt;</a>
 </li>
 <li>
-  <a href="#cond->>">cond->></a>
+  <a href="#cond->>">cond-&gt;&gt;</a>
 </li>
 <li>
   <a href="#condp">condp</a>
@@ -295,7 +314,7 @@
   <a href="#dec">dec</a>
 </li>
 <li>
-  <a href="#dec'">dec'</a>
+  <a href="#dec'">dec&#39;</a>
 </li>
 <li>
   <a href="#declare">declare</a>
@@ -409,6 +428,9 @@
   <a href="#ex-message">ex-message</a>
 </li>
 <li>
+  <a href="#exit">exit</a>
+</li>
+<li>
   <a href="#false?">false?</a>
 </li>
 <li>
@@ -517,7 +539,7 @@
   <a href="#inc">inc</a>
 </li>
 <li>
-  <a href="#inc'">inc'</a>
+  <a href="#inc'">inc&#39;</a>
 </li>
 <li>
   <a href="#indexed?">indexed?</a>
@@ -1015,10 +1037,10 @@
   <a href="#some">some</a>
 </li>
 <li>
-  <a href="#some->">some-></a>
+  <a href="#some->">some-&gt;</a>
 </li>
 <li>
-  <a href="#some->>">some->></a>
+  <a href="#some->>">some-&gt;&gt;</a>
 </li>
 <li>
   <a href="#some-fn">some-fn</a>
@@ -1190,36 +1212,16 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
     <ul>
       <li>
-  <h3 id="*">*</h3>
-  <span class="var-type Function">Function</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(*)</code></div>
-<div><code>(* x)</code></div>
-<div><code>(* x y)</code></div>
-<div><code>(* x y & more)</code></div>
-</pre>
-  <p class="var-docstr">Returns the product of nums. (*) returns 1. Does not auto-promote<br>
-  ints, will overflow. See also: *&#39;</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L779">source</a>
-</li>
-<li>
-  <h3 id="*'">*'</h3>
-  <span class="var-type Function">Function</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(*')</code></div>
-<div><code>(*' x)</code></div>
-<div><code>(*' x y)</code></div>
-<div><code>(*' x y & more)</code></div>
-</pre>
-  <p class="var-docstr">Returns the product of nums. (*) returns 1. Supports arbitrary precision.<br>
-  See also: *</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L769">source</a>
-</li>
-<li>
   <h3 id="*1">*1</h3>
-  <span class="var-type Object">Object</span>
+  <span class="var-kind Variable">Object</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the most recent value printed</p>
@@ -1227,7 +1229,7 @@
 </li>
 <li>
   <h3 id="*2">*2</h3>
-  <span class="var-type Object">Object</span>
+  <span class="var-kind Variable">Object</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the second most recent value printed</p>
@@ -1235,7 +1237,7 @@
 </li>
 <li>
   <h3 id="*3">*3</h3>
-  <span class="var-type Object">Object</span>
+  <span class="var-kind Variable">Object</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the third most recent value printed</p>
@@ -1243,7 +1245,7 @@
 </li>
 <li>
   <h3 id="*assert*">*assert*</h3>
-  <span class="var-type Boolean">Boolean</span>
+  <span class="var-kind Variable">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">When set to logical false, assert is a noop. Defaults to true.</p>
@@ -1251,7 +1253,7 @@
 </li>
 <li>
   <h3 id="*command-line-args*">*command-line-args*</h3>
-  <span class="var-type Seq">Seq</span>
+  <span class="var-kind Variable">Seq</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">A sequence of the supplied command line arguments, or nil if<br>
@@ -1260,7 +1262,7 @@
 </li>
 <li>
   <h3 id="*e">*e</h3>
-  <span class="var-type Object">Object</span>
+  <span class="var-kind Variable">Object</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the most recent exception caught by the repl</p>
@@ -1268,7 +1270,7 @@
 </li>
 <li>
   <h3 id="*err*">*err*</h3>
-  <span class="var-type IOWriter">IOWriter</span>
+  <span class="var-kind Variable">IOWriter</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">A IOWriter object representing standard error for print operations.<br>
@@ -1278,7 +1280,7 @@
 </li>
 <li>
   <h3 id="*file*">*file*</h3>
-  <span class="var-type String">String</span>
+  <span class="var-kind Variable">String</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">The path of the file being evaluated, as a String.<br>
@@ -1288,7 +1290,7 @@
 </li>
 <li>
   <h3 id="*flush-on-newline*">*flush-on-newline*</h3>
-  <span class="var-type Boolean">Boolean</span>
+  <span class="var-kind Variable">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">When set to true, output will be flushed whenever a newline is printed.<br>
@@ -1298,7 +1300,7 @@
 </li>
 <li>
   <h3 id="*in*">*in*</h3>
-  <span class="var-type BufferedReader">BufferedReader</span>
+  <span class="var-kind Variable">BufferedReader</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">A BufferedReader object representing standard input for read operations.<br>
@@ -1308,7 +1310,7 @@
 </li>
 <li>
   <h3 id="*joker-version*">*joker-version*</h3>
-  <span class="var-type ArrayMap">ArrayMap</span>
+  <span class="var-kind Variable">ArrayMap</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">The version info for Clojure core, as a map containing :major :minor<br>
@@ -1318,7 +1320,7 @@
 </li>
 <li>
   <h3 id="*linter-config*">*linter-config*</h3>
-  <span class="var-type ArrayMap">ArrayMap</span>
+  <span class="var-kind Variable">ArrayMap</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">Map of configuration key/value pairs for linter mode</p>
@@ -1326,7 +1328,7 @@
 </li>
 <li>
   <h3 id="*linter-mode*">*linter-mode*</h3>
-  <span class="var-type Boolean">Boolean</span>
+  <span class="var-kind Variable">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">true if Joker is running in linter mode</p>
@@ -1334,7 +1336,7 @@
 </li>
 <li>
   <h3 id="*main-file*">*main-file*</h3>
-  <span class="var-type String">String</span>
+  <span class="var-kind Variable">String</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">The absolute path of &lt;filename&gt; on the command line, as a String.<br>
@@ -1344,7 +1346,7 @@
 </li>
 <li>
   <h3 id="*ns*">*ns*</h3>
-  <span class="var-type Namespace">Namespace</span>
+  <span class="var-kind Variable">Namespace</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">A Namespace object representing the current namespace.</p>
@@ -1352,7 +1354,7 @@
 </li>
 <li>
   <h3 id="*out*">*out*</h3>
-  <span class="var-type IOWriter">IOWriter</span>
+  <span class="var-kind Variable">IOWriter</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">A IOWriter object representing standard output for print operations.<br>
@@ -1362,7 +1364,7 @@
 </li>
 <li>
   <h3 id="*print-readably*">*print-readably*</h3>
-  <span class="var-type Boolean">Boolean</span>
+  <span class="var-kind Variable">Boolean</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">When set to logical false, strings and characters will be printed with<br>
@@ -1372,26 +1374,65 @@
   
 </li>
 <li>
+  <h3 id="default-data-readers">default-data-readers</h3>
+  <span class="var-kind Variable">ArrayMap</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Default map of data reader functions provided by Joker. May be<br>
+  overridden by binding *data-readers*.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4333">source</a>
+</li>
+
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 id="*">*</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(*)</code></div>
+<div><code>(* x)</code></div>
+<div><code>(* x y)</code></div>
+<div><code>(* x y &amp; more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the product of nums. (*) returns 1. Does not auto-promote<br>
+  ints, will overflow. See also: *&#39;</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L779">source</a>
+</li>
+<li>
+  <h3 id="*'">*&#39;</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(*&#39;)</code></div>
+<div><code>(*&#39; x)</code></div>
+<div><code>(*&#39; x y)</code></div>
+<div><code>(*&#39; x y &amp; more)</code></div>
+</pre>
+  <p class="var-docstr">Returns the product of nums. (*) returns 1. Supports arbitrary precision.<br>
+  See also: *</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L769">source</a>
+</li>
+<li>
   <h3 id="+">+</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(+)</code></div>
 <div><code>(+ x)</code></div>
 <div><code>(+ x y)</code></div>
-<div><code>(+ x y & more)</code></div>
+<div><code>(+ x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the sum of nums. (+) returns 0. Does not auto-promote<br>
   ints, will overflow. See also: +&#39;</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L759">source</a>
 </li>
 <li>
-  <h3 id="+'">+'</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="+'">+&#39;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(+')</code></div>
-<div><code>(+' x)</code></div>
-<div><code>(+' x y)</code></div>
-<div><code>(+' x y & more)</code></div>
+  <pre class="var-usage"><div><code>(+&#39;)</code></div>
+<div><code>(+&#39; x)</code></div>
+<div><code>(+&#39; x y)</code></div>
+<div><code>(+&#39; x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the sum of nums. (+) returns 0. Supports arbitrary precision.<br>
   See also: +</p>
@@ -1399,11 +1440,11 @@
 </li>
 <li>
   <h3 id="-">-</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(- x)</code></div>
 <div><code>(- x y)</code></div>
-<div><code>(- x y & more)</code></div>
+<div><code>(- x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">If no ys are supplied, returns the negation of x, else subtracts<br>
   the ys from x and returns the result. Does not auto-promote<br>
@@ -1411,12 +1452,12 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L808">source</a>
 </li>
 <li>
-  <h3 id="-'">-'</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="-'">-&#39;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(-' x)</code></div>
-<div><code>(-' x y)</code></div>
-<div><code>(-' x y & more)</code></div>
+  <pre class="var-usage"><div><code>(-&#39; x)</code></div>
+<div><code>(-&#39; x y)</code></div>
+<div><code>(-&#39; x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">If no ys are supplied, returns the negation of x, else subtracts<br>
   the ys from x and returns the result. Supports arbitrary precision.<br>
@@ -1424,10 +1465,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L798">source</a>
 </li>
 <li>
-  <h3 id="->">-></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="->">-&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(-> x & forms)</code></div>
+  <pre class="var-usage"><div><code>(-&gt; x &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">Threads the expr through the forms. Inserts x as the<br>
   second item in the first form, making a list of it if it is not a<br>
@@ -1436,10 +1477,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1222">source</a>
 </li>
 <li>
-  <h3 id="->>">->></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="->>">-&gt;&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(->> x & forms)</code></div>
+  <pre class="var-usage"><div><code>(-&gt;&gt; x &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">Threads the expr through the forms. Inserts x as the<br>
   last item in the first form, making a list of it if it is not a<br>
@@ -1449,33 +1490,33 @@
 </li>
 <li>
   <h3 id="/">/</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(/ x)</code></div>
 <div><code>(/ x y)</code></div>
-<div><code>(/ x y & more)</code></div>
+<div><code>(/ x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">If no denominators are supplied, returns 1/numerator,<br>
   else returns numerator divided by all of the denominators.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L789">source</a>
 </li>
 <li>
-  <h3 id="<"><</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="<">&lt;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(< x)</code></div>
-<div><code>(< x y)</code></div>
-<div><code>(< x y & more)</code></div>
+  <pre class="var-usage"><div><code>(&lt; x)</code></div>
+<div><code>(&lt; x y)</code></div>
+<div><code>(&lt; x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns non-nil if nums are in monotonically increasing order,<br>
   otherwise false.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L696">source</a>
 </li>
 <li>
-  <h3 id="<!"><!</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="<!">&lt;!</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(<! ch)</code></div>
+  <pre class="var-usage"><div><code>(&lt;! ch)</code></div>
 </pre>
   <p class="var-docstr">Takes a value from ch.<br>
   Returns nil if ch is closed and nothing is available on ch.<br>
@@ -1483,12 +1524,12 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4522">source</a>
 </li>
 <li>
-  <h3 id="<="><=</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="<=">&lt;=</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(<= x)</code></div>
-<div><code>(<= x y)</code></div>
-<div><code>(<= x y & more)</code></div>
+  <pre class="var-usage"><div><code>(&lt;= x)</code></div>
+<div><code>(&lt;= x y)</code></div>
+<div><code>(&lt;= x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns non-nil if nums are in monotonically non-decreasing order,<br>
   otherwise false.</p>
@@ -1496,11 +1537,11 @@
 </li>
 <li>
   <h3 id="=">=</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(= x)</code></div>
 <div><code>(= x y)</code></div>
-<div><code>(= x y & more)</code></div>
+<div><code>(= x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Equality. Returns true if x equals y, false if not. Works for nil, and compares<br>
   numbers and collections in a type-independent manner.  Immutable data<br>
@@ -1510,33 +1551,33 @@
 </li>
 <li>
   <h3 id="==">==</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(== x)</code></div>
 <div><code>(== x y)</code></div>
-<div><code>(== x y & more)</code></div>
+<div><code>(== x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns non-nil if nums all have the equivalent<br>
   value (type-independent), otherwise false</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L857">source</a>
 </li>
 <li>
-  <h3 id=">">></h3>
-  <span class="var-type Function">Function</span>
+  <h3 id=">">&gt;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(> x)</code></div>
-<div><code>(> x y)</code></div>
-<div><code>(> x y & more)</code></div>
+  <pre class="var-usage"><div><code>(&gt; x)</code></div>
+<div><code>(&gt; x y)</code></div>
+<div><code>(&gt; x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns non-nil if nums are in monotonically decreasing order,<br>
   otherwise false.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L831">source</a>
 </li>
 <li>
-  <h3 id=">!">>!</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id=">!">&gt;!</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(>! ch val)</code></div>
+  <pre class="var-usage"><div><code>(&gt;! ch val)</code></div>
 </pre>
   <p class="var-docstr">Puts val into ch.<br>
   Throws an exception if val is nil.<br>
@@ -1545,12 +1586,12 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4530">source</a>
 </li>
 <li>
-  <h3 id=">=">>=</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id=">=">&gt;=</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(>= x)</code></div>
-<div><code>(>= x y)</code></div>
-<div><code>(>= x y & more)</code></div>
+  <pre class="var-usage"><div><code>(&gt;= x)</code></div>
+<div><code>(&gt;= x y)</code></div>
+<div><code>(&gt;= x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns non-nil if nums are in monotonically non-increasing order,<br>
   otherwise false.</p>
@@ -1558,7 +1599,7 @@
 </li>
 <li>
   <h3 id="alias">alias</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(alias alias namespace-sym)</code></div>
 </pre>
@@ -1570,7 +1611,7 @@
 </li>
 <li>
   <h3 id="all-ns">all-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(all-ns)</code></div>
 </pre>
@@ -1579,9 +1620,9 @@
 </li>
 <li>
   <h3 id="alter-meta!">alter-meta!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(alter-meta! ref f & args)</code></div>
+  <pre class="var-usage"><div><code>(alter-meta! ref f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Atomically sets the metadata for a namespace/var/atom to be:<br>
 <br>
@@ -1592,11 +1633,11 @@
 </li>
 <li>
   <h3 id="and">and</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(and)</code></div>
 <div><code>(and x)</code></div>
-<div><code>(and x & next)</code></div>
+<div><code>(and x &amp; next)</code></div>
 </pre>
   <p class="var-docstr">Evaluates exprs one at a time, from left to right. If a form<br>
   returns logical false (nil or false), and returns that value and<br>
@@ -1606,7 +1647,7 @@
 </li>
 <li>
   <h3 id="any?">any?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(any? x)</code></div>
 </pre>
@@ -1615,32 +1656,32 @@
 </li>
 <li>
   <h3 id="apply">apply</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(apply f args)</code></div>
 <div><code>(apply f x args)</code></div>
 <div><code>(apply f x y args)</code></div>
 <div><code>(apply f x y z args)</code></div>
-<div><code>(apply f a b c d & args)</code></div>
+<div><code>(apply f a b c d &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Applies fn f to the argument list formed by prepending intervening arguments to args.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L521">source</a>
 </li>
 <li>
   <h3 id="array-map">array-map</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(array-map & keyvals)</code></div>
+  <pre class="var-usage"><div><code>(array-map &amp; keyvals)</code></div>
 </pre>
   <p class="var-docstr">Constructs an array-map. If any keys are equal, they are handled as<br>
          if by repeated uses of assoc.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2505">source</a>
 </li>
 <li>
-  <h3 id="as->">as-></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="as->">as-&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(as-> expr name & forms)</code></div>
+  <pre class="var-usage"><div><code>(as-&gt; expr name &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">Binds name to expr, evaluates the first form in the lexical context<br>
   of that binding, then binds name to that result, repeating for each<br>
@@ -1649,7 +1690,7 @@
 </li>
 <li>
   <h3 id="assert">assert</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assert x)</code></div>
 <div><code>(assert x message)</code></div>
@@ -1660,10 +1701,10 @@
 </li>
 <li>
   <h3 id="assoc">assoc</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assoc map key val)</code></div>
-<div><code>(assoc map key val & kvs)</code></div>
+<div><code>(assoc map key val &amp; kvs)</code></div>
 </pre>
   <p class="var-docstr">`assoc[iate]. When applied to a map, returns a new map of the<br>
          same (hashed/sorted) type, that contains the mapping of key(s) to<br>
@@ -1673,7 +1714,7 @@
 </li>
 <li>
   <h3 id="assoc-in">assoc-in</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(assoc-in m ks v)</code></div>
 </pre>
@@ -1684,7 +1725,7 @@
 </li>
 <li>
   <h3 id="associative?">associative?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(associative? coll)</code></div>
 </pre>
@@ -1693,9 +1734,9 @@
 </li>
 <li>
   <h3 id="atom">atom</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(atom x & options)</code></div>
+  <pre class="var-usage"><div><code>(atom x &amp; options)</code></div>
 </pre>
   <p class="var-docstr">Creates and returns an Atom with an initial value of x and zero or<br>
   more options (in any order):<br>
@@ -1708,7 +1749,7 @@
 </li>
 <li>
   <h3 id="bigfloat">bigfloat</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bigfloat x)</code></div>
 </pre>
@@ -1717,7 +1758,7 @@
 </li>
 <li>
   <h3 id="bigfloat?">bigfloat?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bigfloat? n)</code></div>
 </pre>
@@ -1726,7 +1767,7 @@
 </li>
 <li>
   <h3 id="bigint">bigint</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bigint x)</code></div>
 </pre>
@@ -1735,9 +1776,9 @@
 </li>
 <li>
   <h3 id="binding">binding</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(binding bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(binding bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">binding =&gt; var-symbol init-expr<br>
 <br>
@@ -1750,27 +1791,27 @@
 </li>
 <li>
   <h3 id="bit-and">bit-and</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-and x y)</code></div>
-<div><code>(bit-and x y & more)</code></div>
+<div><code>(bit-and x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Bitwise and</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L925">source</a>
 </li>
 <li>
   <h3 id="bit-and-not">bit-and-not</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-and-not x y)</code></div>
-<div><code>(bit-and-not x y & more)</code></div>
+<div><code>(bit-and-not x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Bitwise and with complement</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L946">source</a>
 </li>
 <li>
   <h3 id="bit-clear">bit-clear</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-clear x n)</code></div>
 </pre>
@@ -1779,7 +1820,7 @@
 </li>
 <li>
   <h3 id="bit-flip">bit-flip</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-flip x n)</code></div>
 </pre>
@@ -1788,7 +1829,7 @@
 </li>
 <li>
   <h3 id="bit-not">bit-not</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-not x)</code></div>
 </pre>
@@ -1797,17 +1838,17 @@
 </li>
 <li>
   <h3 id="bit-or">bit-or</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-or x y)</code></div>
-<div><code>(bit-or x y & more)</code></div>
+<div><code>(bit-or x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Bitwise or</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L932">source</a>
 </li>
 <li>
   <h3 id="bit-set">bit-set</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-set x n)</code></div>
 </pre>
@@ -1816,7 +1857,7 @@
 </li>
 <li>
   <h3 id="bit-shift-left">bit-shift-left</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-shift-left x n)</code></div>
 </pre>
@@ -1825,7 +1866,7 @@
 </li>
 <li>
   <h3 id="bit-shift-right">bit-shift-right</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-shift-right x n)</code></div>
 </pre>
@@ -1834,7 +1875,7 @@
 </li>
 <li>
   <h3 id="bit-test">bit-test</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-test x n)</code></div>
 </pre>
@@ -1843,17 +1884,17 @@
 </li>
 <li>
   <h3 id="bit-xor">bit-xor</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bit-xor x y)</code></div>
-<div><code>(bit-xor x y & more)</code></div>
+<div><code>(bit-xor x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Bitwise exclusive or</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L939">source</a>
 </li>
 <li>
   <h3 id="boolean">boolean</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(boolean x)</code></div>
 </pre>
@@ -1862,7 +1903,7 @@
 </li>
 <li>
   <h3 id="boolean?">boolean?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(boolean? x)</code></div>
 </pre>
@@ -1871,9 +1912,9 @@
 </li>
 <li>
   <h3 id="bound?">bound?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(bound? & vars)</code></div>
+  <pre class="var-usage"><div><code>(bound? &amp; vars)</code></div>
 </pre>
   <p class="var-docstr">Returns true if all of the vars provided as arguments have any bound value.<br>
   Implies that deref&#39;ing the provided vars will succeed. Returns true if no vars are provided.</p>
@@ -1881,7 +1922,7 @@
 </li>
 <li>
   <h3 id="bounded-count">bounded-count</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(bounded-count n coll)</code></div>
 </pre>
@@ -1891,7 +1932,7 @@
 </li>
 <li>
   <h3 id="butlast">butlast</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(butlast coll)</code></div>
 </pre>
@@ -1900,7 +1941,7 @@
 </li>
 <li>
   <h3 id="callable?">callable?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(callable? x)</code></div>
 </pre>
@@ -1910,9 +1951,9 @@
 </li>
 <li>
   <h3 id="case">case</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(case expr & clauses)</code></div>
+  <pre class="var-usage"><div><code>(case expr &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">Takes an expression, and a set of clauses.<br>
 <br>
@@ -1931,7 +1972,7 @@
 </li>
 <li>
   <h3 id="cast">cast</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cast t x)</code></div>
 </pre>
@@ -1940,7 +1981,7 @@
 </li>
 <li>
   <h3 id="chan">chan</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(chan)</code></div>
 <div><code>(chan n)</code></div>
@@ -1950,7 +1991,7 @@
 </li>
 <li>
   <h3 id="char">char</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(char x)</code></div>
 </pre>
@@ -1959,7 +2000,7 @@
 </li>
 <li>
   <h3 id="char?">char?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(char? x)</code></div>
 </pre>
@@ -1968,7 +2009,7 @@
 </li>
 <li>
   <h3 id="chunked-seq?">chunked-seq?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(chunked-seq? s)</code></div>
 </pre>
@@ -1977,7 +2018,7 @@
 </li>
 <li>
   <h3 id="class">class</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(class x)</code></div>
 </pre>
@@ -1986,7 +2027,7 @@
 </li>
 <li>
   <h3 id="close!">close!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(close! ch)</code></div>
 </pre>
@@ -2002,7 +2043,7 @@
 </li>
 <li>
   <h3 id="coll?">coll?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(coll? x)</code></div>
 </pre>
@@ -2011,22 +2052,22 @@
 </li>
 <li>
   <h3 id="comment">comment</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(comment & body)</code></div>
+  <pre class="var-usage"><div><code>(comment &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Ignores body, yields nil</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2824">source</a>
 </li>
 <li>
   <h3 id="comp">comp</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(comp)</code></div>
 <div><code>(comp f)</code></div>
 <div><code>(comp f g)</code></div>
 <div><code>(comp f g h)</code></div>
-<div><code>(comp f1 f2 f3 & fs)</code></div>
+<div><code>(comp f1 f2 f3 &amp; fs)</code></div>
 </pre>
   <p class="var-docstr">Takes a set of functions and returns a fn that is the composition<br>
   of those fns.  The returned fn takes a variable number of args,<br>
@@ -2036,7 +2077,7 @@
 </li>
 <li>
   <h3 id="compare">compare</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(compare x y)</code></div>
 </pre>
@@ -2048,7 +2089,7 @@
 </li>
 <li>
   <h3 id="complement">complement</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(complement f)</code></div>
 </pre>
@@ -2058,21 +2099,21 @@
 </li>
 <li>
   <h3 id="concat">concat</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(concat)</code></div>
 <div><code>(concat x)</code></div>
 <div><code>(concat x y)</code></div>
-<div><code>(concat x y & zs)</code></div>
+<div><code>(concat x y &amp; zs)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy seq representing the concatenation of the elements in the supplied colls.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L557">source</a>
 </li>
 <li>
   <h3 id="cond">cond</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(cond & clauses)</code></div>
+  <pre class="var-usage"><div><code>(cond &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">Takes a set of test/expr pairs. It evaluates each test one at a<br>
   time.  If a test returns logical true, cond evaluates and returns<br>
@@ -2081,10 +2122,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L474">source</a>
 </li>
 <li>
-  <h3 id="cond->">cond-></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="cond->">cond-&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(cond-> expr & clauses)</code></div>
+  <pre class="var-usage"><div><code>(cond-&gt; expr &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">Takes an expression and a set of test/form pairs. Threads expr (via -&gt;)<br>
   through each form for which the corresponding test<br>
@@ -2093,10 +2134,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4219">source</a>
 </li>
 <li>
-  <h3 id="cond->>">cond->></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="cond->>">cond-&gt;&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(cond->> expr & clauses)</code></div>
+  <pre class="var-usage"><div><code>(cond-&gt;&gt; expr &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">Takes an expression and a set of test/form pairs. Threads expr (via -&gt;&gt;)<br>
   through each form for which the corresponding test expression<br>
@@ -2106,9 +2147,9 @@
 </li>
 <li>
   <h3 id="condp">condp</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(condp pred expr & clauses)</code></div>
+  <pre class="var-usage"><div><code>(condp pred expr &amp; clauses)</code></div>
 </pre>
   <p class="var-docstr">Takes a binary predicate, an expression, and a set of clauses.<br>
   Each clause can take the form of either:<br>
@@ -2132,10 +2173,10 @@
 </li>
 <li>
   <h3 id="conj">conj</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(conj coll x)</code></div>
-<div><code>(conj coll x & xs)</code></div>
+<div><code>(conj coll x &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">conj[oin]. Returns a new collection with the xs<br>
          &#39;added&#39;. (conj nil item) returns (item).  The &#39;addition&#39; may<br>
@@ -2144,7 +2185,7 @@
 </li>
 <li>
   <h3 id="cons">cons</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cons x seq)</code></div>
 </pre>
@@ -2154,7 +2195,7 @@
 </li>
 <li>
   <h3 id="constantly">constantly</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(constantly x)</code></div>
 </pre>
@@ -2163,7 +2204,7 @@
 </li>
 <li>
   <h3 id="contains?">contains?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(contains? coll key)</code></div>
 </pre>
@@ -2176,7 +2217,7 @@
 </li>
 <li>
   <h3 id="count">count</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(count coll)</code></div>
 </pre>
@@ -2186,7 +2227,7 @@
 </li>
 <li>
   <h3 id="counted?">counted?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(counted? coll)</code></div>
 </pre>
@@ -2195,7 +2236,7 @@
 </li>
 <li>
   <h3 id="create-ns">create-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-ns sym)</code></div>
 </pre>
@@ -2206,7 +2247,7 @@
 </li>
 <li>
   <h3 id="cycle">cycle</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cycle coll)</code></div>
 </pre>
@@ -2215,7 +2256,7 @@
 </li>
 <li>
   <h3 id="dec">dec</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dec x)</code></div>
 </pre>
@@ -2224,10 +2265,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L892">source</a>
 </li>
 <li>
-  <h3 id="dec'">dec'</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="dec'">dec&#39;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(dec' x)</code></div>
+  <pre class="var-usage"><div><code>(dec&#39; x)</code></div>
 </pre>
   <p class="var-docstr">Returns a number one less than num. Supports arbitrary precision.<br>
   See also: dec</p>
@@ -2235,16 +2276,16 @@
 </li>
 <li>
   <h3 id="declare">declare</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(declare & names)</code></div>
+  <pre class="var-usage"><div><code>(declare &amp; names)</code></div>
 </pre>
   <p class="var-docstr">defs the supplied var names with no bindings, useful for making forward declarations.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1875">source</a>
 </li>
 <li>
   <h3 id="dedupe">dedupe</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dedupe coll)</code></div>
 </pre>
@@ -2252,17 +2293,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4309">source</a>
 </li>
 <li>
-  <h3 id="default-data-readers">default-data-readers</h3>
-  <span class="var-type ArrayMap">ArrayMap</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Default map of data reader functions provided by Joker. May be<br>
-  overridden by binding *data-readers*.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4333">source</a>
-</li>
-<li>
   <h3 id="defmacro">defmacro</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(defmacro name doc-string? attr-map? [params*] body)</code></div>
 <div><code>(defmacro name doc-string? attr-map? ([params*] body) + attr-map?)</code></div>
@@ -2274,18 +2306,18 @@
 </li>
 <li>
   <h3 id="defmethod">defmethod</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(defmethod multifn dispatch-val & fn-tail)</code></div>
+  <pre class="var-usage"><div><code>(defmethod multifn dispatch-val &amp; fn-tail)</code></div>
 </pre>
   <p class="var-docstr">Creates and installs a new method of multimethod associated with dispatch-value. </p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4436">source</a>
 </li>
 <li>
   <h3 id="defmulti">defmulti</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(defmulti name docstring? attr-map? dispatch-fn & options)</code></div>
+  <pre class="var-usage"><div><code>(defmulti name docstring? attr-map? dispatch-fn &amp; options)</code></div>
 </pre>
   <p class="var-docstr">Creates a new multimethod with the associated dispatch function.<br>
   The docstring and attr-map are optional.<br>
@@ -2313,7 +2345,7 @@
 </li>
 <li>
   <h3 id="defn">defn</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(defn name doc-string? attr-map? [params*] prepost-map? body)</code></div>
 <div><code>(defn name doc-string? attr-map? ([params*] prepost-map? body) + attr-map?)</code></div>
@@ -2326,16 +2358,16 @@
 </li>
 <li>
   <h3 id="defn-">defn-</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(defn- name & decls)</code></div>
+  <pre class="var-usage"><div><code>(defn- name &amp; decls)</code></div>
 </pre>
   <p class="var-docstr">same as defn, yielding non-public def</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3004">source</a>
 </li>
 <li>
   <h3 id="defonce">defonce</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(defonce name expr)</code></div>
 </pre>
@@ -2345,9 +2377,9 @@
 </li>
 <li>
   <h3 id="delay">delay</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(delay & body)</code></div>
+  <pre class="var-usage"><div><code>(delay &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Takes a body of expressions and yields a Delay object that will<br>
   invoke the body only the first time it is forced (with force or deref/@), and<br>
@@ -2357,7 +2389,7 @@
 </li>
 <li>
   <h3 id="delay?">delay?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(delay? x)</code></div>
 </pre>
@@ -2366,7 +2398,7 @@
 </li>
 <li>
   <h3 id="denominator">denominator</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(denominator r)</code></div>
 </pre>
@@ -2375,7 +2407,7 @@
 </li>
 <li>
   <h3 id="deref">deref</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(deref ref)</code></div>
 </pre>
@@ -2386,11 +2418,11 @@
 </li>
 <li>
   <h3 id="disj">disj</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(disj set)</code></div>
 <div><code>(disj set key)</code></div>
-<div><code>(disj set key & ks)</code></div>
+<div><code>(disj set key &amp; ks)</code></div>
 </pre>
   <p class="var-docstr">disj[oin]. Returns a new set of the same (hashed/sorted) type, that<br>
   does not contain key(s).</p>
@@ -2398,11 +2430,11 @@
 </li>
 <li>
   <h3 id="dissoc">dissoc</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dissoc map)</code></div>
 <div><code>(dissoc map key)</code></div>
-<div><code>(dissoc map key & ks)</code></div>
+<div><code>(dissoc map key &amp; ks)</code></div>
 </pre>
   <p class="var-docstr">dissoc[iate]. Returns a new map of the same (hashed/sorted) type,<br>
   that does not contain a mapping for key(s).</p>
@@ -2410,7 +2442,7 @@
 </li>
 <li>
   <h3 id="distinct">distinct</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(distinct coll)</code></div>
 </pre>
@@ -2419,18 +2451,18 @@
 </li>
 <li>
   <h3 id="distinct?">distinct?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(distinct? x)</code></div>
 <div><code>(distinct? x y)</code></div>
-<div><code>(distinct? x y & more)</code></div>
+<div><code>(distinct? x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns true if no two of the arguments are =</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3140">source</a>
 </li>
 <li>
   <h3 id="doall">doall</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(doall coll)</code></div>
 <div><code>(doall n coll)</code></div>
@@ -2445,7 +2477,7 @@
 </li>
 <li>
   <h3 id="dorun">dorun</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dorun coll)</code></div>
 <div><code>(dorun n coll)</code></div>
@@ -2459,9 +2491,9 @@
 </li>
 <li>
   <h3 id="doseq">doseq</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(doseq seq-exprs & body)</code></div>
+  <pre class="var-usage"><div><code>(doseq seq-exprs &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Repeatedly executes body (presumably for side-effects) with<br>
   bindings and filtering as provided by &#34;for&#34;.  Does not retain<br>
@@ -2470,9 +2502,9 @@
 </li>
 <li>
   <h3 id="dotimes">dotimes</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(dotimes bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(dotimes bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; name n<br>
 <br>
@@ -2482,9 +2514,9 @@
 </li>
 <li>
   <h3 id="doto">doto</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(doto x & forms)</code></div>
+  <pre class="var-usage"><div><code>(doto x &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">Evaluates x then calls all of the methods and functions with the<br>
   value of x supplied at the front of the given arguments.  The forms<br>
@@ -2493,7 +2525,7 @@
 </li>
 <li>
   <h3 id="double">double</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(double x)</code></div>
 </pre>
@@ -2502,7 +2534,7 @@
 </li>
 <li>
   <h3 id="double?">double?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(double? x)</code></div>
 </pre>
@@ -2511,7 +2543,7 @@
 </li>
 <li>
   <h3 id="drop">drop</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(drop n coll)</code></div>
 </pre>
@@ -2520,7 +2552,7 @@
 </li>
 <li>
   <h3 id="drop-last">drop-last</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(drop-last s)</code></div>
 <div><code>(drop-last n s)</code></div>
@@ -2530,7 +2562,7 @@
 </li>
 <li>
   <h3 id="drop-while">drop-while</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(drop-while pred coll)</code></div>
 </pre>
@@ -2540,7 +2572,7 @@
 </li>
 <li>
   <h3 id="empty">empty</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(empty coll)</code></div>
 </pre>
@@ -2549,7 +2581,7 @@
 </li>
 <li>
   <h3 id="empty?">empty?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(empty? coll)</code></div>
 </pre>
@@ -2559,7 +2591,7 @@
 </li>
 <li>
   <h3 id="eval">eval</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(eval form)</code></div>
 </pre>
@@ -2568,7 +2600,7 @@
 </li>
 <li>
   <h3 id="even?">even?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(even? n)</code></div>
 </pre>
@@ -2577,12 +2609,12 @@
 </li>
 <li>
   <h3 id="every-pred">every-pred</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(every-pred p)</code></div>
 <div><code>(every-pred p1 p2)</code></div>
 <div><code>(every-pred p1 p2 p3)</code></div>
-<div><code>(every-pred p1 p2 p3 & ps)</code></div>
+<div><code>(every-pred p1 p2 p3 &amp; ps)</code></div>
 </pre>
   <p class="var-docstr">Takes a set of predicates and returns a function f that returns true if all of its<br>
   composing predicates return a logical true value against all of its arguments, else it returns<br>
@@ -2592,7 +2624,7 @@
 </li>
 <li>
   <h3 id="every?">every?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(every? pred coll)</code></div>
 </pre>
@@ -2602,7 +2634,7 @@
 </li>
 <li>
   <h3 id="ex-cause">ex-cause</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ex-cause ex)</code></div>
 </pre>
@@ -2612,7 +2644,7 @@
 </li>
 <li>
   <h3 id="ex-data">ex-data</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ex-data ex)</code></div>
 </pre>
@@ -2622,7 +2654,7 @@
 </li>
 <li>
   <h3 id="ex-info">ex-info</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ex-info msg map)</code></div>
 <div><code>(ex-info msg map cause)</code></div>
@@ -2632,7 +2664,7 @@
 </li>
 <li>
   <h3 id="ex-message">ex-message</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ex-message ex)</code></div>
 </pre>
@@ -2641,8 +2673,18 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2924">source</a>
 </li>
 <li>
+  <h3 id="exit">exit</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exit)</code></div>
+<div><code>(exit code)</code></div>
+</pre>
+  <p class="var-docstr">Causes the current program to exit with the given status code (defaults to 0).</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4582">source</a>
+</li>
+<li>
   <h3 id="false?">false?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(false? x)</code></div>
 </pre>
@@ -2651,7 +2693,7 @@
 </li>
 <li>
   <h3 id="ffirst">ffirst</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ffirst x)</code></div>
 </pre>
@@ -2660,7 +2702,7 @@
 </li>
 <li>
   <h3 id="filter">filter</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(filter pred coll)</code></div>
 </pre>
@@ -2670,7 +2712,7 @@
 </li>
 <li>
   <h3 id="filterv">filterv</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(filterv pred coll)</code></div>
 </pre>
@@ -2680,7 +2722,7 @@
 </li>
 <li>
   <h3 id="find">find</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(find map key)</code></div>
 </pre>
@@ -2689,7 +2731,7 @@
 </li>
 <li>
   <h3 id="find-ns">find-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(find-ns sym)</code></div>
 </pre>
@@ -2698,7 +2740,7 @@
 </li>
 <li>
   <h3 id="find-var">find-var</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(find-var sym)</code></div>
 </pre>
@@ -2708,7 +2750,7 @@
 </li>
 <li>
   <h3 id="first">first</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(first coll)</code></div>
 </pre>
@@ -2718,7 +2760,7 @@
 </li>
 <li>
   <h3 id="flatten">flatten</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(flatten x)</code></div>
 </pre>
@@ -2729,7 +2771,7 @@
 </li>
 <li>
   <h3 id="float?">float?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(float? n)</code></div>
 </pre>
@@ -2738,7 +2780,7 @@
 </li>
 <li>
   <h3 id="flush">flush</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(flush)</code></div>
 </pre>
@@ -2748,7 +2790,7 @@
 </li>
 <li>
   <h3 id="fn">fn</h3>
-  <span class="var-type Special form">Special form</span>
+  <span class="var-kind Special form">Special form</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(fn name? [params*] exprs*)</code></div>
 <div><code>(fn name? ([params*] exprs*) +)</code></div>
@@ -2763,7 +2805,7 @@
 </li>
 <li>
   <h3 id="fn?">fn?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(fn? x)</code></div>
 </pre>
@@ -2772,7 +2814,7 @@
 </li>
 <li>
   <h3 id="fnext">fnext</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(fnext x)</code></div>
 </pre>
@@ -2781,7 +2823,7 @@
 </li>
 <li>
   <h3 id="fnil">fnil</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(fnil f x)</code></div>
 <div><code>(fnil f x y)</code></div>
@@ -2796,7 +2838,7 @@
 </li>
 <li>
   <h3 id="for">for</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(for seq-exprs body-expr)</code></div>
 </pre>
@@ -2813,7 +2855,7 @@
 </li>
 <li>
   <h3 id="force">force</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(force x)</code></div>
 </pre>
@@ -2822,16 +2864,16 @@
 </li>
 <li>
   <h3 id="format">format</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(format fmt & args)</code></div>
+  <pre class="var-usage"><div><code>(format fmt &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Formats a string using fmt.Sprintf</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3155">source</a>
 </li>
 <li>
   <h3 id="frequencies">frequencies</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(frequencies coll)</code></div>
 </pre>
@@ -2841,7 +2883,7 @@
 </li>
 <li>
   <h3 id="gensym">gensym</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(gensym)</code></div>
 <div><code>(gensym prefix-string)</code></div>
@@ -2853,7 +2895,7 @@
 </li>
 <li>
   <h3 id="get">get</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get map key)</code></div>
 <div><code>(get map key not-found)</code></div>
@@ -2863,7 +2905,7 @@
 </li>
 <li>
   <h3 id="get-in">get-in</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-in m ks)</code></div>
 <div><code>(get-in m ks not-found)</code></div>
@@ -2875,7 +2917,7 @@
 </li>
 <li>
   <h3 id="get-method">get-method</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-method multifn dispatch-val)</code></div>
 </pre>
@@ -2885,9 +2927,9 @@
 </li>
 <li>
   <h3 id="go">go</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(go & body)</code></div>
+  <pre class="var-usage"><div><code>(go &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Schedules the body to run inside a goroutine.<br>
   Immediately returns a channel which will receive the result of the body when<br>
@@ -2906,7 +2948,7 @@
 </li>
 <li>
   <h3 id="group-by">group-by</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(group-by f coll)</code></div>
 </pre>
@@ -2917,7 +2959,7 @@
 </li>
 <li>
   <h3 id="hash">hash</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(hash x)</code></div>
 </pre>
@@ -2926,9 +2968,9 @@
 </li>
 <li>
   <h3 id="hash-map">hash-map</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(hash-map & keyvals)</code></div>
+  <pre class="var-usage"><div><code>(hash-map &amp; keyvals)</code></div>
 </pre>
   <p class="var-docstr">keyval =&gt; key val<br>
          Returns a new hash map with supplied mappings.  If any keys are<br>
@@ -2937,9 +2979,9 @@
 </li>
 <li>
   <h3 id="hash-set">hash-set</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(hash-set & keys)</code></div>
+  <pre class="var-usage"><div><code>(hash-set &amp; keys)</code></div>
 </pre>
   <p class="var-docstr">Returns a new hash set with supplied keys.  Any equal keys are<br>
          handled as if by repeated uses of conj.</p>
@@ -2947,7 +2989,7 @@
 </li>
 <li>
   <h3 id="ident?">ident?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ident? x)</code></div>
 </pre>
@@ -2956,7 +2998,7 @@
 </li>
 <li>
   <h3 id="identical?">identical?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(identical? x y)</code></div>
 </pre>
@@ -2965,7 +3007,7 @@
 </li>
 <li>
   <h3 id="identity">identity</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(identity x)</code></div>
 </pre>
@@ -2974,10 +3016,10 @@
 </li>
 <li>
   <h3 id="if-let">if-let</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(if-let bindings then)</code></div>
-<div><code>(if-let bindings then else & oldform)</code></div>
+<div><code>(if-let bindings then else &amp; oldform)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; binding-form test<br>
 <br>
@@ -2987,7 +3029,7 @@
 </li>
 <li>
   <h3 id="if-not">if-not</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(if-not test then)</code></div>
 <div><code>(if-not test then else)</code></div>
@@ -2998,10 +3040,10 @@
 </li>
 <li>
   <h3 id="if-some">if-some</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(if-some bindings then)</code></div>
-<div><code>(if-some bindings then else & oldform)</code></div>
+<div><code>(if-some bindings then else &amp; oldform)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; binding-form test<br>
 <br>
@@ -3011,7 +3053,7 @@
 </li>
 <li>
   <h3 id="in-ns">in-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(in-ns name)</code></div>
 </pre>
@@ -3020,7 +3062,7 @@
 </li>
 <li>
   <h3 id="inc">inc</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(inc x)</code></div>
 </pre>
@@ -3029,10 +3071,10 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L715">source</a>
 </li>
 <li>
-  <h3 id="inc'">inc'</h3>
-  <span class="var-type Function">Function</span>
+  <h3 id="inc'">inc&#39;</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(inc' x)</code></div>
+  <pre class="var-usage"><div><code>(inc&#39; x)</code></div>
 </pre>
   <p class="var-docstr">Returns a number one greater than num. Supports arbitrary precision.<br>
   See also: inc</p>
@@ -3040,7 +3082,7 @@
 </li>
 <li>
   <h3 id="indexed?">indexed?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(indexed? coll)</code></div>
 </pre>
@@ -3049,7 +3091,7 @@
 </li>
 <li>
   <h3 id="instance?">instance?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(instance? c x)</code></div>
 </pre>
@@ -3059,7 +3101,7 @@
 </li>
 <li>
   <h3 id="int">int</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(int x)</code></div>
 </pre>
@@ -3068,7 +3110,7 @@
 </li>
 <li>
   <h3 id="int?">int?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(int? x)</code></div>
 </pre>
@@ -3077,7 +3119,7 @@
 </li>
 <li>
   <h3 id="integer?">integer?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(integer? n)</code></div>
 </pre>
@@ -3086,19 +3128,19 @@
 </li>
 <li>
   <h3 id="interleave">interleave</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(interleave)</code></div>
 <div><code>(interleave c1)</code></div>
 <div><code>(interleave c1 c2)</code></div>
-<div><code>(interleave c1 c2 & colls)</code></div>
+<div><code>(interleave c1 c2 &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy seq of the first item in each coll, then the second etc.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2469">source</a>
 </li>
 <li>
   <h3 id="intern">intern</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(intern ns name)</code></div>
 <div><code>(intern ns name val)</code></div>
@@ -3111,7 +3153,7 @@
 </li>
 <li>
   <h3 id="interpose">interpose</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(interpose sep coll)</code></div>
 </pre>
@@ -3121,7 +3163,7 @@
 </li>
 <li>
   <h3 id="into">into</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(into to from)</code></div>
 </pre>
@@ -3131,7 +3173,7 @@
 </li>
 <li>
   <h3 id="iterate">iterate</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(iterate f x)</code></div>
 </pre>
@@ -3140,7 +3182,7 @@
 </li>
 <li>
   <h3 id="joker-version">joker-version</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(joker-version)</code></div>
 </pre>
@@ -3149,12 +3191,12 @@
 </li>
 <li>
   <h3 id="juxt">juxt</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(juxt f)</code></div>
 <div><code>(juxt f g)</code></div>
 <div><code>(juxt f g h)</code></div>
-<div><code>(juxt f g h & fs)</code></div>
+<div><code>(juxt f g h &amp; fs)</code></div>
 </pre>
   <p class="var-docstr">Takes a set of functions and returns a fn that is the juxtaposition<br>
   of those fns.  The returned fn takes a variable number of args, and<br>
@@ -3165,7 +3207,7 @@
 </li>
 <li>
   <h3 id="keep">keep</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keep f coll)</code></div>
 </pre>
@@ -3176,7 +3218,7 @@
 </li>
 <li>
   <h3 id="keep-indexed">keep-indexed</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keep-indexed f coll)</code></div>
 </pre>
@@ -3187,7 +3229,7 @@
 </li>
 <li>
   <h3 id="key">key</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(key e)</code></div>
 </pre>
@@ -3196,7 +3238,7 @@
 </li>
 <li>
   <h3 id="keys">keys</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keys map)</code></div>
 </pre>
@@ -3205,7 +3247,7 @@
 </li>
 <li>
   <h3 id="keyword">keyword</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keyword name)</code></div>
 <div><code>(keyword ns name)</code></div>
@@ -3216,7 +3258,7 @@
 </li>
 <li>
   <h3 id="keyword?">keyword?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keyword? x)</code></div>
 </pre>
@@ -3225,7 +3267,7 @@
 </li>
 <li>
   <h3 id="last">last</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(last coll)</code></div>
 </pre>
@@ -3234,9 +3276,9 @@
 </li>
 <li>
   <h3 id="lazy-cat">lazy-cat</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(lazy-cat & colls)</code></div>
+  <pre class="var-usage"><div><code>(lazy-cat &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Expands to code which yields a lazy sequence of the concatenation<br>
   of the supplied colls.  Each coll expr is not evaluated until it is<br>
@@ -3247,9 +3289,9 @@
 </li>
 <li>
   <h3 id="lazy-seq">lazy-seq</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(lazy-seq & body)</code></div>
+  <pre class="var-usage"><div><code>(lazy-seq &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Takes a body of expressions that returns an ISeq or nil, and yields<br>
   a Seqable object that will invoke the body only the first time seq<br>
@@ -3259,7 +3301,7 @@
 </li>
 <li>
   <h3 id="let">let</h3>
-  <span class="var-type Special form">Special form</span>
+  <span class="var-kind Special form">Special form</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(let [bindings*] exprs*)</code></div>
 </pre>
@@ -3272,7 +3314,7 @@
 </li>
 <li>
   <h3 id="letfn">letfn</h3>
-  <span class="var-type Special form">Special form</span>
+  <span class="var-kind Special form">Special form</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(letfn [fnspecs*] exprs*)</code></div>
 </pre>
@@ -3285,7 +3327,7 @@
 </li>
 <li>
   <h3 id="line-seq">line-seq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(line-seq rdr)</code></div>
 </pre>
@@ -3295,22 +3337,22 @@
 </li>
 <li>
   <h3 id="list">list</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(list & items)</code></div>
+  <pre class="var-usage"><div><code>(list &amp; items)</code></div>
 </pre>
   <p class="var-docstr">Creates a new list containing the items.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L14">source</a>
 </li>
 <li>
   <h3 id="list*">list*</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(list* args)</code></div>
 <div><code>(list* a args)</code></div>
 <div><code>(list* a b args)</code></div>
 <div><code>(list* a b c args)</code></div>
-<div><code>(list* a b c d & more)</code></div>
+<div><code>(list* a b c d &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Creates a new list containing the items prepended to the rest, the<br>
   last of which will be treated as a sequence.</p>
@@ -3318,7 +3360,7 @@
 </li>
 <li>
   <h3 id="list?">list?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(list? x)</code></div>
 </pre>
@@ -3327,9 +3369,9 @@
 </li>
 <li>
   <h3 id="load">load</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(load & libs)</code></div>
+  <pre class="var-usage"><div><code>(load &amp; libs)</code></div>
 </pre>
   <p class="var-docstr">Loads code from libs, throwing error if cyclic dependency detected,<br>
   and ignoring libs already being loaded.</p>
@@ -3337,7 +3379,7 @@
 </li>
 <li>
   <h3 id="load-file">load-file</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(load-file f)</code></div>
 </pre>
@@ -3346,7 +3388,7 @@
 </li>
 <li>
   <h3 id="load-string">load-string</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(load-string s)</code></div>
 </pre>
@@ -3356,7 +3398,7 @@
 </li>
 <li>
   <h3 id="loaded-libs">loaded-libs</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(loaded-libs)</code></div>
 </pre>
@@ -3365,7 +3407,7 @@
 </li>
 <li>
   <h3 id="loop">loop</h3>
-  <span class="var-type Special form">Special form</span>
+  <span class="var-kind Special form">Special form</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(loop [bindings*] exprs*)</code></div>
 </pre>
@@ -3376,7 +3418,7 @@
 </li>
 <li>
   <h3 id="macroexpand">macroexpand</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(macroexpand form)</code></div>
 </pre>
@@ -3387,7 +3429,7 @@
 </li>
 <li>
   <h3 id="macroexpand-1">macroexpand-1</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(macroexpand-1 form)</code></div>
 </pre>
@@ -3396,12 +3438,12 @@
 </li>
 <li>
   <h3 id="map">map</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(map f coll)</code></div>
 <div><code>(map f c1 c2)</code></div>
 <div><code>(map f c1 c2 c3)</code></div>
-<div><code>(map f c1 c2 c3 & colls)</code></div>
+<div><code>(map f c1 c2 c3 &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy sequence consisting of the result of applying f to the<br>
   set of first items of each coll, followed by applying f to the set<br>
@@ -3412,7 +3454,7 @@
 </li>
 <li>
   <h3 id="map-indexed">map-indexed</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(map-indexed f coll)</code></div>
 </pre>
@@ -3424,7 +3466,7 @@
 </li>
 <li>
   <h3 id="map?">map?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(map? x)</code></div>
 </pre>
@@ -3433,9 +3475,9 @@
 </li>
 <li>
   <h3 id="mapcat">mapcat</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(mapcat f & colls)</code></div>
+  <pre class="var-usage"><div><code>(mapcat f &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Returns the result of applying concat to the result of applying map<br>
   to f and colls.  Thus function f should return a collection.</p>
@@ -3443,12 +3485,12 @@
 </li>
 <li>
   <h3 id="mapv">mapv</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(mapv f coll)</code></div>
 <div><code>(mapv f c1 c2)</code></div>
 <div><code>(mapv f c1 c2 c3)</code></div>
-<div><code>(mapv f c1 c2 c3 & colls)</code></div>
+<div><code>(mapv f c1 c2 c3 &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Returns a vector consisting of the result of applying f to the<br>
   set of first items of each coll, followed by applying f to the set<br>
@@ -3459,29 +3501,29 @@
 </li>
 <li>
   <h3 id="max">max</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(max x)</code></div>
 <div><code>(max x y)</code></div>
-<div><code>(max x y & more)</code></div>
+<div><code>(max x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the greatest of the nums.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L870">source</a>
 </li>
 <li>
   <h3 id="max-key">max-key</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(max-key k x)</code></div>
 <div><code>(max-key k x y)</code></div>
-<div><code>(max-key k x y & more)</code></div>
+<div><code>(max-key k x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the x for which (k x), a number, is greatest.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3063">source</a>
 </li>
 <li>
   <h3 id="memoize">memoize</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(memoize f)</code></div>
 </pre>
@@ -3493,9 +3535,9 @@
 </li>
 <li>
   <h3 id="merge">merge</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(merge & maps)</code></div>
+  <pre class="var-usage"><div><code>(merge &amp; maps)</code></div>
 </pre>
   <p class="var-docstr">Returns a map that consists of the rest of the maps conj-ed onto<br>
   the first.  If a key occurs in more than one map, the mapping from<br>
@@ -3504,9 +3546,9 @@
 </li>
 <li>
   <h3 id="merge-with">merge-with</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(merge-with f & maps)</code></div>
+  <pre class="var-usage"><div><code>(merge-with f &amp; maps)</code></div>
 </pre>
   <p class="var-docstr">Returns a map that consists of the rest of the maps conj-ed onto<br>
   the first.  If a key occurs in more than one map, the mapping(s)<br>
@@ -3516,7 +3558,7 @@
 </li>
 <li>
   <h3 id="meta">meta</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(meta obj)</code></div>
 </pre>
@@ -3525,7 +3567,7 @@
 </li>
 <li>
   <h3 id="methods">methods</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(methods multifn)</code></div>
 </pre>
@@ -3534,29 +3576,29 @@
 </li>
 <li>
   <h3 id="min">min</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(min x)</code></div>
 <div><code>(min x y)</code></div>
-<div><code>(min x y & more)</code></div>
+<div><code>(min x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the least of the nums.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L878">source</a>
 </li>
 <li>
   <h3 id="min-key">min-key</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(min-key k x)</code></div>
 <div><code>(min-key k x y)</code></div>
-<div><code>(min-key k x y & more)</code></div>
+<div><code>(min-key k x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the x for which (k x), a number, is least.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3071">source</a>
 </li>
 <li>
   <h3 id="mod">mod</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(mod num div)</code></div>
 </pre>
@@ -3565,7 +3607,7 @@
 </li>
 <li>
   <h3 id="name">name</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(name x)</code></div>
 </pre>
@@ -3574,7 +3616,7 @@
 </li>
 <li>
   <h3 id="namespace">namespace</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(namespace x)</code></div>
 </pre>
@@ -3583,7 +3625,7 @@
 </li>
 <li>
   <h3 id="nat-int?">nat-int?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nat-int? x)</code></div>
 </pre>
@@ -3592,7 +3634,7 @@
 </li>
 <li>
   <h3 id="neg-int?">neg-int?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(neg-int? x)</code></div>
 </pre>
@@ -3601,7 +3643,7 @@
 </li>
 <li>
   <h3 id="neg?">neg?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(neg? x)</code></div>
 </pre>
@@ -3610,7 +3652,7 @@
 </li>
 <li>
   <h3 id="newline">newline</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(newline)</code></div>
 </pre>
@@ -3619,7 +3661,7 @@
 </li>
 <li>
   <h3 id="next">next</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(next coll)</code></div>
 </pre>
@@ -3629,7 +3671,7 @@
 </li>
 <li>
   <h3 id="nfirst">nfirst</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nfirst x)</code></div>
 </pre>
@@ -3638,7 +3680,7 @@
 </li>
 <li>
   <h3 id="nil?">nil?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nil? x)</code></div>
 </pre>
@@ -3647,7 +3689,7 @@
 </li>
 <li>
   <h3 id="nnext">nnext</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nnext x)</code></div>
 </pre>
@@ -3656,7 +3698,7 @@
 </li>
 <li>
   <h3 id="not">not</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(not x)</code></div>
 </pre>
@@ -3665,7 +3707,7 @@
 </li>
 <li>
   <h3 id="not-any?">not-any?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(not-any? pred coll)</code></div>
 </pre>
@@ -3675,7 +3717,7 @@
 </li>
 <li>
   <h3 id="not-empty">not-empty</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(not-empty coll)</code></div>
 </pre>
@@ -3684,7 +3726,7 @@
 </li>
 <li>
   <h3 id="not-every?">not-every?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(not-every? pred coll)</code></div>
 </pre>
@@ -3694,18 +3736,18 @@
 </li>
 <li>
   <h3 id="not=">not=</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(not= x)</code></div>
 <div><code>(not= x y)</code></div>
-<div><code>(not= x y & more)</code></div>
+<div><code>(not= x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Same as (not (= obj1 obj2))</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L629">source</a>
 </li>
 <li>
   <h3 id="ns">ns</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns name docstring? attr-map? references*)</code></div>
 </pre>
@@ -3724,7 +3766,7 @@
 </li>
 <li>
   <h3 id="ns-aliases">ns-aliases</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-aliases ns)</code></div>
 </pre>
@@ -3733,7 +3775,7 @@
 </li>
 <li>
   <h3 id="ns-interns">ns-interns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-interns ns)</code></div>
 </pre>
@@ -3742,7 +3784,7 @@
 </li>
 <li>
   <h3 id="ns-map">ns-map</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-map ns)</code></div>
 </pre>
@@ -3751,7 +3793,7 @@
 </li>
 <li>
   <h3 id="ns-name">ns-name</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-name ns)</code></div>
 </pre>
@@ -3760,7 +3802,7 @@
 </li>
 <li>
   <h3 id="ns-publics">ns-publics</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-publics ns)</code></div>
 </pre>
@@ -3769,7 +3811,7 @@
 </li>
 <li>
   <h3 id="ns-refers">ns-refers</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-refers ns)</code></div>
 </pre>
@@ -3778,7 +3820,7 @@
 </li>
 <li>
   <h3 id="ns-resolve">ns-resolve</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-resolve ns sym)</code></div>
 <div><code>(ns-resolve ns env sym)</code></div>
@@ -3791,7 +3833,7 @@
 </li>
 <li>
   <h3 id="ns-sources">ns-sources</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-sources sources)</code></div>
 </pre>
@@ -3810,7 +3852,7 @@
 </li>
 <li>
   <h3 id="ns-unalias">ns-unalias</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-unalias ns sym)</code></div>
 </pre>
@@ -3819,7 +3861,7 @@
 </li>
 <li>
   <h3 id="ns-unmap">ns-unmap</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ns-unmap ns sym)</code></div>
 </pre>
@@ -3828,7 +3870,7 @@
 </li>
 <li>
   <h3 id="nth">nth</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nth coll index)</code></div>
 <div><code>(nth coll index not-found)</code></div>
@@ -3840,7 +3882,7 @@
 </li>
 <li>
   <h3 id="nthnext">nthnext</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nthnext coll n)</code></div>
 </pre>
@@ -3849,7 +3891,7 @@
 </li>
 <li>
   <h3 id="nthrest">nthrest</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(nthrest coll n)</code></div>
 </pre>
@@ -3858,7 +3900,7 @@
 </li>
 <li>
   <h3 id="num">num</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(num x)</code></div>
 </pre>
@@ -3867,7 +3909,7 @@
 </li>
 <li>
   <h3 id="number?">number?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(number? x)</code></div>
 </pre>
@@ -3876,7 +3918,7 @@
 </li>
 <li>
   <h3 id="numerator">numerator</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(numerator r)</code></div>
 </pre>
@@ -3885,7 +3927,7 @@
 </li>
 <li>
   <h3 id="odd?">odd?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(odd? n)</code></div>
 </pre>
@@ -3894,11 +3936,11 @@
 </li>
 <li>
   <h3 id="or">or</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(or)</code></div>
 <div><code>(or x)</code></div>
-<div><code>(or x & next)</code></div>
+<div><code>(or x &amp; next)</code></div>
 </pre>
   <p class="var-docstr">Evaluates exprs one at a time, from left to right. If a form<br>
   returns a logical true value, or returns that value and doesn&#39;t<br>
@@ -3908,13 +3950,13 @@
 </li>
 <li>
   <h3 id="partial">partial</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(partial f)</code></div>
 <div><code>(partial f arg1)</code></div>
 <div><code>(partial f arg1 arg2)</code></div>
 <div><code>(partial f arg1 arg2 arg3)</code></div>
-<div><code>(partial f arg1 arg2 arg3 & more)</code></div>
+<div><code>(partial f arg1 arg2 arg3 &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Takes a function f and fewer than the normal arguments to f, and<br>
   returns a fn that takes a variable number of additional args. When<br>
@@ -3923,7 +3965,7 @@
 </li>
 <li>
   <h3 id="partition">partition</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(partition n coll)</code></div>
 <div><code>(partition n step coll)</code></div>
@@ -3938,7 +3980,7 @@
 </li>
 <li>
   <h3 id="partition-all">partition-all</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(partition-all n coll)</code></div>
 <div><code>(partition-all n step coll)</code></div>
@@ -3949,7 +3991,7 @@
 </li>
 <li>
   <h3 id="partition-by">partition-by</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(partition-by f coll)</code></div>
 </pre>
@@ -3959,7 +4001,7 @@
 </li>
 <li>
   <h3 id="peek">peek</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(peek coll)</code></div>
 </pre>
@@ -3969,7 +4011,7 @@
 </li>
 <li>
   <h3 id="pop">pop</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pop coll)</code></div>
 </pre>
@@ -3981,7 +4023,7 @@
 </li>
 <li>
   <h3 id="pos-int?">pos-int?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pos-int? x)</code></div>
 </pre>
@@ -3990,7 +4032,7 @@
 </li>
 <li>
   <h3 id="pos?">pos?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pos? x)</code></div>
 </pre>
@@ -3999,7 +4041,7 @@
 </li>
 <li>
   <h3 id="pprint">pprint</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pprint x)</code></div>
 </pre>
@@ -4008,9 +4050,9 @@
 </li>
 <li>
   <h3 id="pr">pr</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(pr & args)</code></div>
+  <pre class="var-usage"><div><code>(pr &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Prints the object(s) to the output stream that is the current value<br>
          of *out*.  Prints the object(s), separated by spaces if there is<br>
@@ -4020,25 +4062,25 @@
 </li>
 <li>
   <h3 id="pr-err">pr-err</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(pr-err & xs)</code></div>
+  <pre class="var-usage"><div><code>(pr-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">pr to *err*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2875">source</a>
 </li>
 <li>
   <h3 id="pr-str">pr-str</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(pr-str & xs)</code></div>
+  <pre class="var-usage"><div><code>(pr-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">pr to a string, returning it</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2847">source</a>
 </li>
 <li>
   <h3 id="prefer-method">prefer-method</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prefer-method multifn dispatch-val-x dispatch-val-y)</code></div>
 </pre>
@@ -4048,7 +4090,7 @@
 </li>
 <li>
   <h3 id="prefers">prefers</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prefers multifn)</code></div>
 </pre>
@@ -4057,9 +4099,9 @@
 </li>
 <li>
   <h3 id="print">print</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(print & more)</code></div>
+  <pre class="var-usage"><div><code>(print &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Prints the object(s) to the output stream that is the current value<br>
   of *out*.  print and println produce output for human consumption.</p>
@@ -4067,88 +4109,88 @@
 </li>
 <li>
   <h3 id="print-err">print-err</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(print-err & xs)</code></div>
+  <pre class="var-usage"><div><code>(print-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">print to *err*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2889">source</a>
 </li>
 <li>
   <h3 id="print-str">print-str</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(print-str & xs)</code></div>
+  <pre class="var-usage"><div><code>(print-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">print to a string, returning it</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2861">source</a>
 </li>
 <li>
   <h3 id="printf">printf</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(printf fmt & args)</code></div>
+  <pre class="var-usage"><div><code>(printf fmt &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Prints formatted output, as per format</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3161">source</a>
 </li>
 <li>
   <h3 id="println">println</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(println & more)</code></div>
+  <pre class="var-usage"><div><code>(println &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Same as print followed by (newline)</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2170">source</a>
 </li>
 <li>
   <h3 id="println-err">println-err</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(println-err & xs)</code></div>
+  <pre class="var-usage"><div><code>(println-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">println to *err*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2896">source</a>
 </li>
 <li>
   <h3 id="println-str">println-str</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(println-str & xs)</code></div>
+  <pre class="var-usage"><div><code>(println-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">println to a string, returning it</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2868">source</a>
 </li>
 <li>
   <h3 id="prn">prn</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(prn & more)</code></div>
+  <pre class="var-usage"><div><code>(prn &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Same as pr followed by (newline). Observes *flush-on-newline*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2153">source</a>
 </li>
 <li>
   <h3 id="prn-err">prn-err</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(prn-err & xs)</code></div>
+  <pre class="var-usage"><div><code>(prn-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">prn to *err*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2882">source</a>
 </li>
 <li>
   <h3 id="prn-str">prn-str</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(prn-str & xs)</code></div>
+  <pre class="var-usage"><div><code>(prn-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">prn to a string, returning it</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2854">source</a>
 </li>
 <li>
   <h3 id="qualified-ident?">qualified-ident?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(qualified-ident? x)</code></div>
 </pre>
@@ -4157,7 +4199,7 @@
 </li>
 <li>
   <h3 id="qualified-keyword?">qualified-keyword?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(qualified-keyword? x)</code></div>
 </pre>
@@ -4166,7 +4208,7 @@
 </li>
 <li>
   <h3 id="qualified-symbol?">qualified-symbol?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(qualified-symbol? x)</code></div>
 </pre>
@@ -4175,7 +4217,7 @@
 </li>
 <li>
   <h3 id="quot">quot</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(quot num div)</code></div>
 </pre>
@@ -4184,7 +4226,7 @@
 </li>
 <li>
   <h3 id="rand">rand</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rand)</code></div>
 <div><code>(rand n)</code></div>
@@ -4195,7 +4237,7 @@
 </li>
 <li>
   <h3 id="rand-int">rand-int</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rand-int n)</code></div>
 </pre>
@@ -4204,7 +4246,7 @@
 </li>
 <li>
   <h3 id="rand-nth">rand-nth</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rand-nth coll)</code></div>
 </pre>
@@ -4215,7 +4257,7 @@
 </li>
 <li>
   <h3 id="random-sample">random-sample</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(random-sample prob coll)</code></div>
 </pre>
@@ -4225,7 +4267,7 @@
 </li>
 <li>
   <h3 id="range">range</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(range)</code></div>
 <div><code>(range end)</code></div>
@@ -4240,7 +4282,7 @@
 </li>
 <li>
   <h3 id="ratio?">ratio?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ratio? n)</code></div>
 </pre>
@@ -4249,7 +4291,7 @@
 </li>
 <li>
   <h3 id="rational?">rational?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rational? n)</code></div>
 </pre>
@@ -4258,7 +4300,7 @@
 </li>
 <li>
   <h3 id="re-find">re-find</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-find re s)</code></div>
 </pre>
@@ -4267,7 +4309,7 @@
 </li>
 <li>
   <h3 id="re-matches">re-matches</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-matches re s)</code></div>
 </pre>
@@ -4276,7 +4318,7 @@
 </li>
 <li>
   <h3 id="re-pattern">re-pattern</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-pattern s)</code></div>
 </pre>
@@ -4285,7 +4327,7 @@
 </li>
 <li>
   <h3 id="re-seq">re-seq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-seq re s)</code></div>
 </pre>
@@ -4294,7 +4336,7 @@
 </li>
 <li>
   <h3 id="read">read</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(read)</code></div>
 <div><code>(read reader)</code></div>
@@ -4304,7 +4346,7 @@
 </li>
 <li>
   <h3 id="read-line">read-line</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(read-line)</code></div>
 </pre>
@@ -4313,7 +4355,7 @@
 </li>
 <li>
   <h3 id="read-string">read-string</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(read-string s)</code></div>
 </pre>
@@ -4322,7 +4364,7 @@
 </li>
 <li>
   <h3 id="realized?">realized?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(realized? x)</code></div>
 </pre>
@@ -4331,7 +4373,7 @@
 </li>
 <li>
   <h3 id="reduce">reduce</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reduce f coll)</code></div>
 <div><code>(reduce f val coll)</code></div>
@@ -4349,7 +4391,7 @@
 </li>
 <li>
   <h3 id="reduce-kv">reduce-kv</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reduce-kv f init coll)</code></div>
 </pre>
@@ -4363,7 +4405,7 @@
 </li>
 <li>
   <h3 id="reductions">reductions</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reductions f coll)</code></div>
 <div><code>(reductions f init coll)</code></div>
@@ -4374,9 +4416,9 @@
 </li>
 <li>
   <h3 id="refer">refer</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(refer ns-sym & filters)</code></div>
+  <pre class="var-usage"><div><code>(refer ns-sym &amp; filters)</code></div>
 </pre>
   <p class="var-docstr">refers to all public vars of ns, subject to filters.<br>
   filters can include at most one each of:<br>
@@ -4396,16 +4438,16 @@
 </li>
 <li>
   <h3 id="refer-clojure">refer-clojure</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(refer-clojure & filters)</code></div>
+  <pre class="var-usage"><div><code>(refer-clojure &amp; filters)</code></div>
 </pre>
   <p class="var-docstr">Same as (refer &#39;joker.core &lt;filters&gt;)</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3210">source</a>
 </li>
 <li>
   <h3 id="rem">rem</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rem num div)</code></div>
 </pre>
@@ -4414,7 +4456,7 @@
 </li>
 <li>
   <h3 id="remove">remove</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove pred coll)</code></div>
 </pre>
@@ -4424,7 +4466,7 @@
 </li>
 <li>
   <h3 id="remove-all-methods">remove-all-methods</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove-all-methods multifn)</code></div>
 </pre>
@@ -4433,7 +4475,7 @@
 </li>
 <li>
   <h3 id="remove-method">remove-method</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove-method multifn dispatch-val)</code></div>
 </pre>
@@ -4442,7 +4484,7 @@
 </li>
 <li>
   <h3 id="remove-ns">remove-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(remove-ns sym)</code></div>
 </pre>
@@ -4452,7 +4494,7 @@
 </li>
 <li>
   <h3 id="repeat">repeat</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(repeat x)</code></div>
 <div><code>(repeat n x)</code></div>
@@ -4462,7 +4504,7 @@
 </li>
 <li>
   <h3 id="repeatedly">repeatedly</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(repeatedly f)</code></div>
 <div><code>(repeatedly n f)</code></div>
@@ -4474,7 +4516,7 @@
 </li>
 <li>
   <h3 id="replace">replace</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(replace smap coll)</code></div>
 </pre>
@@ -4485,9 +4527,9 @@
 </li>
 <li>
   <h3 id="require">require</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(require & args)</code></div>
+  <pre class="var-usage"><div><code>(require &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Loads libs, skipping any that are already loaded. Each argument is<br>
   either a libspec that identifies a lib, a prefix list that<br>
@@ -4554,7 +4596,7 @@
 </li>
 <li>
   <h3 id="requiring-resolve">requiring-resolve</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(requiring-resolve sym)</code></div>
 </pre>
@@ -4564,7 +4606,7 @@
 </li>
 <li>
   <h3 id="reset!">reset!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reset! atom newval)</code></div>
 </pre>
@@ -4574,7 +4616,7 @@
 </li>
 <li>
   <h3 id="reset-meta!">reset-meta!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reset-meta! ref metadata-map)</code></div>
 </pre>
@@ -4583,7 +4625,7 @@
 </li>
 <li>
   <h3 id="reset-vals!">reset-vals!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reset-vals! atom newval)</code></div>
 </pre>
@@ -4593,7 +4635,7 @@
 </li>
 <li>
   <h3 id="resolve">resolve</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(resolve sym)</code></div>
 <div><code>(resolve env sym)</code></div>
@@ -4603,7 +4645,7 @@
 </li>
 <li>
   <h3 id="rest">rest</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rest coll)</code></div>
 </pre>
@@ -4613,7 +4655,7 @@
 </li>
 <li>
   <h3 id="reverse">reverse</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reverse coll)</code></div>
 </pre>
@@ -4622,7 +4664,7 @@
 </li>
 <li>
   <h3 id="reversible?">reversible?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reversible? coll)</code></div>
 </pre>
@@ -4631,7 +4673,7 @@
 </li>
 <li>
   <h3 id="rseq">rseq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rseq rev)</code></div>
 </pre>
@@ -4641,7 +4683,7 @@
 </li>
 <li>
   <h3 id="run!">run!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(run! proc coll)</code></div>
 </pre>
@@ -4651,7 +4693,7 @@
 </li>
 <li>
   <h3 id="second">second</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(second x)</code></div>
 </pre>
@@ -4660,7 +4702,7 @@
 </li>
 <li>
   <h3 id="select-keys">select-keys</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(select-keys map keyseq)</code></div>
 </pre>
@@ -4669,7 +4711,7 @@
 </li>
 <li>
   <h3 id="seq">seq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(seq coll)</code></div>
 </pre>
@@ -4679,7 +4721,7 @@
 </li>
 <li>
   <h3 id="seq?">seq?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(seq? x)</code></div>
 </pre>
@@ -4688,7 +4730,7 @@
 </li>
 <li>
   <h3 id="seqable?">seqable?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(seqable? x)</code></div>
 </pre>
@@ -4697,7 +4739,7 @@
 </li>
 <li>
   <h3 id="sequence">sequence</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sequence coll)</code></div>
 </pre>
@@ -4707,7 +4749,7 @@
 </li>
 <li>
   <h3 id="sequential?">sequential?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sequential? coll)</code></div>
 </pre>
@@ -4716,7 +4758,7 @@
 </li>
 <li>
   <h3 id="set">set</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set coll)</code></div>
 </pre>
@@ -4725,7 +4767,7 @@
 </li>
 <li>
   <h3 id="set?">set?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set? x)</code></div>
 </pre>
@@ -4734,7 +4776,7 @@
 </li>
 <li>
   <h3 id="shuffle">shuffle</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(shuffle coll)</code></div>
 </pre>
@@ -4743,7 +4785,7 @@
 </li>
 <li>
   <h3 id="simple-ident?">simple-ident?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(simple-ident? x)</code></div>
 </pre>
@@ -4752,7 +4794,7 @@
 </li>
 <li>
   <h3 id="simple-keyword?">simple-keyword?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(simple-keyword? x)</code></div>
 </pre>
@@ -4761,7 +4803,7 @@
 </li>
 <li>
   <h3 id="simple-symbol?">simple-symbol?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(simple-symbol? x)</code></div>
 </pre>
@@ -4770,7 +4812,7 @@
 </li>
 <li>
   <h3 id="slurp">slurp</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(slurp f)</code></div>
 </pre>
@@ -4779,7 +4821,7 @@
 </li>
 <li>
   <h3 id="some">some</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(some pred coll)</code></div>
 </pre>
@@ -4790,20 +4832,20 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1635">source</a>
 </li>
 <li>
-  <h3 id="some->">some-></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="some->">some-&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(some-> expr & forms)</code></div>
+  <pre class="var-usage"><div><code>(some-&gt; expr &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">When expr is not nil, threads it into the first form (via -&gt;),<br>
   and when that result is not nil, through the next etc.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4277">source</a>
 </li>
 <li>
-  <h3 id="some->>">some->></h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 id="some->>">some-&gt;&gt;</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(some->> expr & forms)</code></div>
+  <pre class="var-usage"><div><code>(some-&gt;&gt; expr &amp; forms)</code></div>
 </pre>
   <p class="var-docstr">When expr is not nil, threads it into the first form (via -&gt;&gt;),<br>
   and when that result is not nil, through the next etc.</p>
@@ -4811,12 +4853,12 @@
 </li>
 <li>
   <h3 id="some-fn">some-fn</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(some-fn p)</code></div>
 <div><code>(some-fn p1 p2)</code></div>
 <div><code>(some-fn p1 p2 p3)</code></div>
-<div><code>(some-fn p1 p2 p3 & ps)</code></div>
+<div><code>(some-fn p1 p2 p3 &amp; ps)</code></div>
 </pre>
   <p class="var-docstr">Takes a set of predicates and returns a function f that returns the first logical true value<br>
   returned by one of its composing predicates against any of its arguments, else it returns<br>
@@ -4826,7 +4868,7 @@
 </li>
 <li>
   <h3 id="some?">some?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(some? x)</code></div>
 </pre>
@@ -4835,7 +4877,7 @@
 </li>
 <li>
   <h3 id="sort">sort</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sort coll)</code></div>
 <div><code>(sort comp coll)</code></div>
@@ -4846,7 +4888,7 @@
 </li>
 <li>
   <h3 id="sort-by">sort-by</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sort-by keyfn coll)</code></div>
 <div><code>(sort-by keyfn comp coll)</code></div>
@@ -4858,7 +4900,7 @@
 </li>
 <li>
   <h3 id="special-symbol?">special-symbol?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(special-symbol? s)</code></div>
 </pre>
@@ -4867,9 +4909,9 @@
 </li>
 <li>
   <h3 id="spit">spit</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(spit f content & options)</code></div>
+  <pre class="var-usage"><div><code>(spit f content &amp; options)</code></div>
 </pre>
   <p class="var-docstr">Opposite of slurp.  Opens file f, writes content, then<br>
   closes f.</p>
@@ -4877,7 +4919,7 @@
 </li>
 <li>
   <h3 id="split-at">split-at</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split-at n coll)</code></div>
 </pre>
@@ -4886,7 +4928,7 @@
 </li>
 <li>
   <h3 id="split-with">split-with</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split-with pred coll)</code></div>
 </pre>
@@ -4895,9 +4937,9 @@
 </li>
 <li>
   <h3 id="str">str</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(str & xs)</code></div>
+  <pre class="var-usage"><div><code>(str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">With no args, returns the empty string. With one arg x, returns<br>
          string representation of x. (str nil) returns the empty string. With more than<br>
@@ -4906,7 +4948,7 @@
 </li>
 <li>
   <h3 id="string?">string?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(string? x)</code></div>
 </pre>
@@ -4915,7 +4957,7 @@
 </li>
 <li>
   <h3 id="subs">subs</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(subs s start)</code></div>
 <div><code>(subs s start end)</code></div>
@@ -4926,7 +4968,7 @@
 </li>
 <li>
   <h3 id="subvec">subvec</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(subvec v start)</code></div>
 <div><code>(subvec v start end)</code></div>
@@ -4940,9 +4982,9 @@
 </li>
 <li>
   <h3 id="swap!">swap!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(swap! atom f & args)</code></div>
+  <pre class="var-usage"><div><code>(swap! atom f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Atomically swaps the value of atom to be:<br>
   (apply f current-value-of-atom args).<br>
@@ -4951,9 +4993,9 @@
 </li>
 <li>
   <h3 id="swap-vals!">swap-vals!</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(swap-vals! atom f & args)</code></div>
+  <pre class="var-usage"><div><code>(swap-vals! atom f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Atomically swaps the value of atom to be:<br>
   (apply f current-value-of-atom args). Note that f may be called<br>
@@ -4963,7 +5005,7 @@
 </li>
 <li>
   <h3 id="symbol">symbol</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(symbol name)</code></div>
 <div><code>(symbol ns name)</code></div>
@@ -4973,7 +5015,7 @@
 </li>
 <li>
   <h3 id="symbol?">symbol?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(symbol? x)</code></div>
 </pre>
@@ -4982,7 +5024,7 @@
 </li>
 <li>
   <h3 id="take">take</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(take n coll)</code></div>
 </pre>
@@ -4992,7 +5034,7 @@
 </li>
 <li>
   <h3 id="take-last">take-last</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(take-last n coll)</code></div>
 </pre>
@@ -5002,7 +5044,7 @@
 </li>
 <li>
   <h3 id="take-nth">take-nth</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(take-nth n coll)</code></div>
 </pre>
@@ -5011,7 +5053,7 @@
 </li>
 <li>
   <h3 id="take-while">take-while</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(take-while pred coll)</code></div>
 </pre>
@@ -5021,7 +5063,7 @@
 </li>
 <li>
   <h3 id="test">test</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(test v)</code></div>
 </pre>
@@ -5031,7 +5073,7 @@
 </li>
 <li>
   <h3 id="the-ns">the-ns</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(the-ns x)</code></div>
 </pre>
@@ -5042,7 +5084,7 @@
 </li>
 <li>
   <h3 id="time">time</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(time expr)</code></div>
 </pre>
@@ -5051,10 +5093,10 @@
 </li>
 <li>
   <h3 id="trampoline">trampoline</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trampoline f)</code></div>
-<div><code>(trampoline f & args)</code></div>
+<div><code>(trampoline f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">trampoline can be used to convert algorithms requiring mutual<br>
   recursion without stack consumption. Calls f with supplied args, if<br>
@@ -5067,7 +5109,7 @@
 </li>
 <li>
   <h3 id="tree-seq">tree-seq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(tree-seq branch? children root)</code></div>
 </pre>
@@ -5081,7 +5123,7 @@
 </li>
 <li>
   <h3 id="true?">true?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(true? x)</code></div>
 </pre>
@@ -5090,7 +5132,7 @@
 </li>
 <li>
   <h3 id="type">type</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(type x)</code></div>
 </pre>
@@ -5099,7 +5141,7 @@
 </li>
 <li>
   <h3 id="unsigned-bit-shift-right">unsigned-bit-shift-right</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(unsigned-bit-shift-right x n)</code></div>
 </pre>
@@ -5108,13 +5150,13 @@
 </li>
 <li>
   <h3 id="update">update</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(update m k f)</code></div>
 <div><code>(update m k f x)</code></div>
 <div><code>(update m k f x y)</code></div>
 <div><code>(update m k f x y z)</code></div>
-<div><code>(update m k f x y z & more)</code></div>
+<div><code>(update m k f x y z &amp; more)</code></div>
 </pre>
   <p class="var-docstr">&#39;Updates&#39; a value in an associative structure, where k is a<br>
   key and f is a function that will take the old value<br>
@@ -5124,9 +5166,9 @@
 </li>
 <li>
   <h3 id="update-in">update-in</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(update-in m ks f & args)</code></div>
+  <pre class="var-usage"><div><code>(update-in m ks f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">&#39;Updates&#39; a value in a nested associative structure, where ks is a<br>
   sequence of keys and f is a function that will take the old value<br>
@@ -5137,9 +5179,9 @@
 </li>
 <li>
   <h3 id="use">use</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(use & args)</code></div>
+  <pre class="var-usage"><div><code>(use &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Like &#39;require, but also refers to each lib&#39;s namespace using<br>
   joker.core/refer. Use :use in the ns macro in preference to calling<br>
@@ -5152,7 +5194,7 @@
 </li>
 <li>
   <h3 id="val">val</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(val e)</code></div>
 </pre>
@@ -5161,7 +5203,7 @@
 </li>
 <li>
   <h3 id="vals">vals</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(vals map)</code></div>
 </pre>
@@ -5170,7 +5212,7 @@
 </li>
 <li>
   <h3 id="var-get">var-get</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(var-get x)</code></div>
 </pre>
@@ -5179,7 +5221,7 @@
 </li>
 <li>
   <h3 id="var-set">var-set</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(var-set x val)</code></div>
 </pre>
@@ -5188,7 +5230,7 @@
 </li>
 <li>
   <h3 id="var?">var?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(var? v)</code></div>
 </pre>
@@ -5197,9 +5239,9 @@
 </li>
 <li>
   <h3 id="vary-meta">vary-meta</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(vary-meta obj f & args)</code></div>
+  <pre class="var-usage"><div><code>(vary-meta obj f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Returns an object of the same type and value as obj, with<br>
   (apply f (meta obj) args) as its metadata.</p>
@@ -5207,7 +5249,7 @@
 </li>
 <li>
   <h3 id="vec">vec</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(vec coll)</code></div>
 </pre>
@@ -5216,16 +5258,16 @@
 </li>
 <li>
   <h3 id="vector">vector</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(vector & args)</code></div>
+  <pre class="var-usage"><div><code>(vector &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Creates a new vector containing the args.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L307">source</a>
 </li>
 <li>
   <h3 id="vector?">vector?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(vector? x)</code></div>
 </pre>
@@ -5234,18 +5276,18 @@
 </li>
 <li>
   <h3 id="when">when</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when test & body)</code></div>
+  <pre class="var-usage"><div><code>(when test &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Evaluates test. If logical true, evaluates body in an implicit do.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L383">source</a>
 </li>
 <li>
   <h3 id="when-first">when-first</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-first bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(when-first bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; x xs<br>
 <br>
@@ -5254,9 +5296,9 @@
 </li>
 <li>
   <h3 id="when-let">when-let</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-let bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(when-let bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; binding-form test<br>
 <br>
@@ -5265,18 +5307,18 @@
 </li>
 <li>
   <h3 id="when-not">when-not</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-not test & body)</code></div>
+  <pre class="var-usage"><div><code>(when-not test &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Evaluates test. If logical false, evaluates body in an implicit do.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L392">source</a>
 </li>
 <li>
   <h3 id="when-some">when-some</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(when-some bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(when-some bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">bindings =&gt; binding-form test<br>
 <br>
@@ -5286,9 +5328,9 @@
 </li>
 <li>
   <h3 id="while">while</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(while test & body)</code></div>
+  <pre class="var-usage"><div><code>(while test &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Repeatedly executes body while test expression is true. Presumes<br>
   some side-effect will cause test to become false/nil. Returns nil</p>
@@ -5296,9 +5338,9 @@
 </li>
 <li>
   <h3 id="with-bindings">with-bindings</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-bindings binding-map & body)</code></div>
+  <pre class="var-usage"><div><code>(with-bindings binding-map &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>
   Then executes body. Resets the vars back to the original<br>
@@ -5307,9 +5349,9 @@
 </li>
 <li>
   <h3 id="with-bindings*">with-bindings*</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-bindings* binding-map f & args)</code></div>
+  <pre class="var-usage"><div><code>(with-bindings* binding-map f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>
   Then calls f with the supplied arguments. Resets the vars back to the original<br>
@@ -5318,9 +5360,9 @@
 </li>
 <li>
   <h3 id="with-in-str">with-in-str</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-in-str s & body)</code></div>
+  <pre class="var-usage"><div><code>(with-in-str s &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Evaluates body in a context in which *in* is bound to a fresh<br>
   Buffer initialized with the string s.</p>
@@ -5328,7 +5370,7 @@
 </li>
 <li>
   <h3 id="with-meta">with-meta</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(with-meta obj m)</code></div>
 </pre>
@@ -5338,9 +5380,9 @@
 </li>
 <li>
   <h3 id="with-out-str">with-out-str</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-out-str & body)</code></div>
+  <pre class="var-usage"><div><code>(with-out-str &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Evaluates exprs in a context in which *out* is bound to a fresh<br>
   Buffer.  Returns the string created by any nested printing<br>
@@ -5349,25 +5391,25 @@
 </li>
 <li>
   <h3 id="with-redefs">with-redefs</h3>
-  <span class="var-type Macro">Macro</span>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-redefs bindings & body)</code></div>
+  <pre class="var-usage"><div><code>(with-redefs bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">The same as binding</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1447">source</a>
 </li>
 <li>
   <h3 id="with-redefs-fn">with-redefs-fn</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(with-redefs-fn binding-map f & args)</code></div>
+  <pre class="var-usage"><div><code>(with-redefs-fn binding-map f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">The same as with-bindings*</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1412">source</a>
 </li>
 <li>
   <h3 id="xml-seq">xml-seq</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(xml-seq root)</code></div>
 </pre>
@@ -5376,7 +5418,7 @@
 </li>
 <li>
   <h3 id="zero?">zero?</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(zero? x)</code></div>
 </pre>
@@ -5385,7 +5427,7 @@
 </li>
 <li>
   <h3 id="zipmap">zipmap</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(zipmap keys vals)</code></div>
 </pre>

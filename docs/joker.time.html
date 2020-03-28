@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.time</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Provides functionality for measuring and displaying time.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#add">add</a>
@@ -29,6 +48,9 @@
 </li>
 <li>
   <a href="#hours">hours</a>
+</li>
+<li>
+  <a href="#in-timezone">in-timezone</a>
 </li>
 <li>
   <a href="#kitchen">kitchen</a>
@@ -128,10 +150,188 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      <li>
+  <h3 id="ansi-c">ansi-c</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan _2 15:04:05 2006</p>
+  
+</li>
+<li>
+  <h3 id="hour">hour</h3>
+  <span class="var-kind Constant">BigInt</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 hour</p>
+  
+</li>
+<li>
+  <h3 id="kitchen">kitchen</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">3:04PM</p>
+  
+</li>
+<li>
+  <h3 id="microsecond">microsecond</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 microsecond</p>
+  
+</li>
+<li>
+  <h3 id="millisecond">millisecond</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 millisecond</p>
+  
+</li>
+<li>
+  <h3 id="minute">minute</h3>
+  <span class="var-kind Constant">BigInt</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 minute</p>
+  
+</li>
+<li>
+  <h3 id="nanosecond">nanosecond</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 nanosecond</p>
+  
+</li>
+<li>
+  <h3 id="rfc1123">rfc1123</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 MST</p>
+  
+</li>
+<li>
+  <h3 id="rfc1123-z">rfc1123-z</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 -0700</p>
+  
+</li>
+<li>
+  <h3 id="rfc3339">rfc3339</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">2006-01-02T15:04:05Z07:00</p>
+  
+</li>
+<li>
+  <h3 id="rfc3339-nano">rfc3339-nano</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">2006-01-02T15:04:05.999999999Z07:00</p>
+  
+</li>
+<li>
+  <h3 id="rfc822">rfc822</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">02 Jan 06 15:04 MST</p>
+  
+</li>
+<li>
+  <h3 id="rfc822-z">rfc822-z</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">02 Jan 06 15:04 -0700</p>
+  
+</li>
+<li>
+  <h3 id="rfc850">rfc850</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Monday, 02-Jan-06 15:04:05 MST</p>
+  
+</li>
+<li>
+  <h3 id="ruby-date">ruby-date</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan 02 15:04:05 -0700 2006</p>
+  
+</li>
+<li>
+  <h3 id="second">second</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Number of nanoseconds in 1 second</p>
+  
+</li>
+<li>
+  <h3 id="stamp">stamp</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05</p>
+  
+</li>
+<li>
+  <h3 id="stamp-micro">stamp-micro</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000000</p>
+  
+</li>
+<li>
+  <h3 id="stamp-milli">stamp-milli</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000</p>
+  
+</li>
+<li>
+  <h3 id="stamp-nano">stamp-nano</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Jan _2 15:04:05.000000000</p>
+  
+</li>
+<li>
+  <h3 id="unix-date">unix-date</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Mon Jan _2 15:04:05 MST 2006</p>
+  
+</li>
+
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
   <h3 id="add">add</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(add t d)</code></div>
 </pre>
@@ -140,7 +340,7 @@
 </li>
 <li>
   <h3 id="add-date">add-date</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(add-date t years months days)</code></div>
 </pre>
@@ -148,16 +348,8 @@
   
 </li>
 <li>
-  <h3 id="ansi-c">ansi-c</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Mon Jan _2 15:04:05 2006</p>
-  
-</li>
-<li>
   <h3 id="format">format</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(format t layout)</code></div>
 </pre>
@@ -170,7 +362,7 @@
 </li>
 <li>
   <h3 id="from-unix">from-unix</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(from-unix sec nsec)</code></div>
 </pre>
@@ -179,16 +371,8 @@
   
 </li>
 <li>
-  <h3 id="hour">hour</h3>
-  <span class="var-type BigInt">BigInt</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 hour</p>
-  
-</li>
-<li>
   <h3 id="hours">hours</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(hours d)</code></div>
 </pre>
@@ -196,40 +380,17 @@
   
 </li>
 <li>
-  <h3 id="kitchen">kitchen</h3>
-  <span class="var-type String">String</span>
+  <h3 id="in-timezone">in-timezone</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">3:04PM</p>
-  
-</li>
-<li>
-  <h3 id="microsecond">microsecond</h3>
-  <span class="var-type Int">Int</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 microsecond</p>
-  
-</li>
-<li>
-  <h3 id="millisecond">millisecond</h3>
-  <span class="var-type Int">Int</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 millisecond</p>
-  
-</li>
-<li>
-  <h3 id="minute">minute</h3>
-  <span class="var-type BigInt">BigInt</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 minute</p>
+  <pre class="var-usage"><div><code>(in-timezone t tz)</code></div>
+</pre>
+  <p class="var-docstr">Returns a copy of t representing the same time instant, but with the copy&#39;s timezone information set to tz for display purposes.</p>
   
 </li>
 <li>
   <h3 id="minutes">minutes</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(minutes d)</code></div>
 </pre>
@@ -237,16 +398,8 @@
   
 </li>
 <li>
-  <h3 id="nanosecond">nanosecond</h3>
-  <span class="var-type Int">Int</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 nanosecond</p>
-  
-</li>
-<li>
   <h3 id="now">now</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(now)</code></div>
 </pre>
@@ -255,7 +408,7 @@
 </li>
 <li>
   <h3 id="parse">parse</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse layout value)</code></div>
 </pre>
@@ -264,7 +417,7 @@
 </li>
 <li>
   <h3 id="parse-duration">parse-duration</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-duration s)</code></div>
 </pre>
@@ -274,64 +427,8 @@
   
 </li>
 <li>
-  <h3 id="rfc1123">rfc1123</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 MST</p>
-  
-</li>
-<li>
-  <h3 id="rfc1123-z">rfc1123-z</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Mon, 02 Jan 2006 15:04:05 -0700</p>
-  
-</li>
-<li>
-  <h3 id="rfc3339">rfc3339</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">2006-01-02T15:04:05Z07:00</p>
-  
-</li>
-<li>
-  <h3 id="rfc3339-nano">rfc3339-nano</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">2006-01-02T15:04:05.999999999Z07:00</p>
-  
-</li>
-<li>
-  <h3 id="rfc822">rfc822</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">02 Jan 06 15:04 MST</p>
-  
-</li>
-<li>
-  <h3 id="rfc822-z">rfc822-z</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">02 Jan 06 15:04 -0700</p>
-  
-</li>
-<li>
-  <h3 id="rfc850">rfc850</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Monday, 02-Jan-06 15:04:05 MST</p>
-  
-</li>
-<li>
   <h3 id="round">round</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(round d m)</code></div>
 </pre>
@@ -340,24 +437,8 @@
   
 </li>
 <li>
-  <h3 id="ruby-date">ruby-date</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Mon Jan 02 15:04:05 -0700 2006</p>
-  
-</li>
-<li>
-  <h3 id="second">second</h3>
-  <span class="var-type Int">Int</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Number of nanoseconds in 1 second</p>
-  
-</li>
-<li>
   <h3 id="seconds">seconds</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(seconds d)</code></div>
 </pre>
@@ -366,7 +447,7 @@
 </li>
 <li>
   <h3 id="since">since</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(since t)</code></div>
 </pre>
@@ -375,7 +456,7 @@
 </li>
 <li>
   <h3 id="sleep">sleep</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sleep d)</code></div>
 </pre>
@@ -384,40 +465,8 @@
   
 </li>
 <li>
-  <h3 id="stamp">stamp</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Jan _2 15:04:05</p>
-  
-</li>
-<li>
-  <h3 id="stamp-micro">stamp-micro</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Jan _2 15:04:05.000000</p>
-  
-</li>
-<li>
-  <h3 id="stamp-milli">stamp-milli</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Jan _2 15:04:05.000</p>
-  
-</li>
-<li>
-  <h3 id="stamp-nano">stamp-nano</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Jan _2 15:04:05.000000000</p>
-  
-</li>
-<li>
   <h3 id="string">string</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(string d)</code></div>
 </pre>
@@ -426,7 +475,7 @@
 </li>
 <li>
   <h3 id="sub">sub</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sub t u)</code></div>
 </pre>
@@ -435,7 +484,7 @@
 </li>
 <li>
   <h3 id="truncate">truncate</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(truncate d m)</code></div>
 </pre>
@@ -444,7 +493,7 @@
 </li>
 <li>
   <h3 id="unix">unix</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(unix t)</code></div>
 </pre>
@@ -452,16 +501,8 @@
   
 </li>
 <li>
-  <h3 id="unix-date">unix-date</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Mon Jan _2 15:04:05 MST 2006</p>
-  
-</li>
-<li>
   <h3 id="until">until</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(until t)</code></div>
 </pre>

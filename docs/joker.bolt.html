@@ -6,6 +6,25 @@
   <div class="main">
     <h1>Namespace: joker.bolt</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.<br>
 <br>
          Example:<br>
@@ -22,7 +41,7 @@
          nil<br>
          user=&gt; (joker.json/read-string (joker.bolt/get db &#34;users&#34; (str id)))<br>
          {&#34;id&#34; 1, &#34;name&#34; &#34;Joe Black&#34;}</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#by-prefix">by-prefix</a>
@@ -56,10 +75,20 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
   <h3 id="by-prefix">by-prefix</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(by-prefix db bucket prefix)</code></div>
 </pre>
@@ -71,7 +100,7 @@
 </li>
 <li>
   <h3 id="close">close</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(close db)</code></div>
 </pre>
@@ -82,7 +111,7 @@
 </li>
 <li>
   <h3 id="create-bucket">create-bucket</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-bucket db name)</code></div>
 </pre>
@@ -92,7 +121,7 @@
 </li>
 <li>
   <h3 id="create-bucket-if-not-exists">create-bucket-if-not-exists</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-bucket-if-not-exists db name)</code></div>
 </pre>
@@ -102,7 +131,7 @@
 </li>
 <li>
   <h3 id="delete">delete</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(delete db bucket key)</code></div>
 </pre>
@@ -111,7 +140,7 @@
 </li>
 <li>
   <h3 id="delete-bucket">delete-bucket</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(delete-bucket db name)</code></div>
 </pre>
@@ -120,7 +149,7 @@
 </li>
 <li>
   <h3 id="get">get</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get db bucket key)</code></div>
 </pre>
@@ -130,7 +159,7 @@
 </li>
 <li>
   <h3 id="next-sequence">next-sequence</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(next-sequence db bucket)</code></div>
 </pre>
@@ -139,7 +168,7 @@
 </li>
 <li>
   <h3 id="open">open</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(open filename mode)</code></div>
 </pre>
@@ -151,7 +180,7 @@
 </li>
 <li>
   <h3 id="put">put</h3>
-  <span class="var-type Function">Function</span>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(put db bucket key value)</code></div>
 </pre>
