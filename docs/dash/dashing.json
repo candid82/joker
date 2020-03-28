@@ -1,0 +1,16 @@
+{
+    "name": "Joker",
+    "package": "joker",
+    "index": "index.html",
+    "selectors": {
+        "h3.ns": "Namespace",
+        "h3.type": "Type",
+        "h3.Function": "Function",
+        "h3.Variable": "Variable",
+        "h3.Constant": "Constant"
+    },
+    "icon32x32": "../joker32.png",
+    "allowJS": false,
+    "ExternalURL": "https://candid82.github.io/joker",
+    "ignore": ["{name}"]
+}
