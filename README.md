@@ -46,11 +46,13 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 [Standard library reference](https://candid82.github.io/joker/)
 
-<a href="dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml">Dash Docset</a>
+Dash docset: `dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml`
+
+(either copy and paste this link to your browser's url bar or open it in a terminal with `open` command)
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
-[Organizing Libraries (Namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
+[Organizing libraries (namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
 
 [Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
 
