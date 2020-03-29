@@ -28,7 +28,7 @@ You can also [build](#building) Joker from the source code.
 
 ## Usage
 
-`joker` - launch REPL
+`joker` - launch REPL. Exit via `(exit)`, **EOF** (such as `Ctrl-D`), or **SIGINT** (such as `Ctrl-C`).
 
 `joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--file <filename>`
 in which case drops into the REPL after the script is (successfully) executed. (Note use of `--file` in this case, to ensure `<filename>` is not treated as a `<socket>` specification for the repl.)
@@ -46,9 +46,13 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 [Standard library reference](https://candid82.github.io/joker/)
 
+Dash docset: `dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml`
+
+(either copy and paste this link to your browser's url bar or open it in a terminal with `open` command)
+
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
-[Organizing Libraries (Namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
+[Organizing libraries (namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
 
 [Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
 

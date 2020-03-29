@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.filepath</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Implements utility routines for manipulating filename paths.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#abs">abs</a>
@@ -68,10 +87,36 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
     <ul>
       <li>
-  <h3 id="abs">abs</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Constant" id="list-separator">list-separator</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">OS-specific path list separator.</p>
+  
+</li>
+<li>
+  <h3 class="Constant" id="separator">separator</h3>
+  <span class="var-kind Constant">String</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">OS-specific path separator.</p>
+  
+</li>
+
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="abs">abs</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(abs path)</code></div>
 </pre>
@@ -82,8 +127,8 @@
   
 </li>
 <li>
-  <h3 id="abs?">abs?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="abs?">abs?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(abs? path)</code></div>
 </pre>
@@ -91,8 +136,8 @@
   
 </li>
 <li>
-  <h3 id="base">base</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="base">base</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(base path)</code></div>
 </pre>
@@ -102,8 +147,8 @@
   
 </li>
 <li>
-  <h3 id="clean">clean</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="clean">clean</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(clean path)</code></div>
 </pre>
@@ -125,8 +170,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="dir">dir</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="dir">dir</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dir path)</code></div>
 </pre>
@@ -137,8 +182,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="eval-symlinks">eval-symlinks</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="eval-symlinks">eval-symlinks</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(eval-symlinks path)</code></div>
 </pre>
@@ -148,8 +193,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="ext">ext</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="ext">ext</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ext path)</code></div>
 </pre>
@@ -158,8 +203,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="file-seq">file-seq</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="file-seq">file-seq</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(file-seq root)</code></div>
 </pre>
@@ -167,8 +212,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="from-slash">from-slash</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="from-slash">from-slash</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(from-slash path)</code></div>
 </pre>
@@ -177,8 +222,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="glob">glob</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="glob">glob</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(glob pattern)</code></div>
 </pre>
@@ -191,10 +236,10 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="join">join</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="join">join</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(join & elems)</code></div>
+  <pre class="var-usage"><div><code>(join &amp; elems)</code></div>
 </pre>
   <p class="var-docstr">Joins any number of path elements into a single path, adding a separator if necessary.<br>
   Calls clean on the result; in particular, all empty strings are ignored. On Windows,<br>
@@ -202,16 +247,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="list-separator">list-separator</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">OS-specific path list separator.</p>
-  
-</li>
-<li>
-  <h3 id="matches?">matches?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="matches?">matches?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(matches? pattern name)</code></div>
 </pre>
@@ -222,8 +259,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="rel">rel</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="rel">rel</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rel basepath targpath)</code></div>
 </pre>
@@ -235,16 +272,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="separator">separator</h3>
-  <span class="var-type String">String</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">OS-specific path separator.</p>
-  
-</li>
-<li>
-  <h3 id="split">split</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="split">split</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split path)</code></div>
 </pre>
@@ -254,8 +283,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="split-list">split-list</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="split-list">split-list</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split-list path)</code></div>
 </pre>
@@ -264,8 +293,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="to-slash">to-slash</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="to-slash">to-slash</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(to-slash path)</code></div>
 </pre>
@@ -274,8 +303,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   
 </li>
 <li>
-  <h3 id="volume-name">volume-name</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="volume-name">volume-name</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(volume-name path)</code></div>
 </pre>

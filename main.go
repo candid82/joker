@@ -220,7 +220,7 @@ func srepl(port string, phase Phase) {
 
 	reader := NewReader(runeReader, "<srepl>")
 
-	fmt.Fprintf(Stdout, "Welcome to joker %s, client at %s. Use '(joker.os/exit 0)', or close the connection, to exit.\n",
+	fmt.Fprintf(Stdout, "Welcome to joker %s, client at %s. Use '(exit)', or close the connection, to exit.\n",
 		VERSION, conn.RemoteAddr())
 
 	for {
@@ -677,10 +677,7 @@ var runningProfile interface {
 }
 
 func main() {
-	SetExitJoker(func(code int) {
-		finish()
-		os.Exit(code)
-	})
+	OnExit(finish)
 
 	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 

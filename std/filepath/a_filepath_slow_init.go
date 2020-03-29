@@ -17,12 +17,12 @@ func InternsOrThunks() {
 	filepathNamespace.InternVar("list-separator", list_separator_,
 		MakeMeta(
 			nil,
-			`OS-specific path list separator.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`OS-specific path list separator.`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	filepathNamespace.InternVar("separator", separator_,
 		MakeMeta(
 			nil,
-			`OS-specific path separator.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`OS-specific path separator.`, "1.0").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	filepathNamespace.InternVar("abs", abs_,
 		MakeMeta(

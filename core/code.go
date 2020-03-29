@@ -334,7 +334,3 @@ func (v Var) Namespace() *Namespace {
 func (v *VarRefExpr) Var() *Var {
 	return v.vr
 }
-
-func (ns *Namespace) Mappings() map[*string]*Var {
-	return ns.mappings
-}
