@@ -6,6 +6,25 @@
   <div class="main">
     <h1>Namespace: joker.walk</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Defines a generic tree walker for Clojure data structures.<br>
          Takes any data structure (list, vector, map, set, seq), calls<br>
          a function on every element, and uses the return value of the<br>
@@ -16,7 +35,7 @@
          Note: &#34;walk&#34; supports all Clojure data structures EXCEPT maps<br>
          created with sorted-map-by.  There is no (obvious) way to retrieve<br>
          the sorting function.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#keywordize-keys">keywordize-keys</a>
@@ -50,10 +69,20 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
-  <h3 id="keywordize-keys">keywordize-keys</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="keywordize-keys">keywordize-keys</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(keywordize-keys m)</code></div>
 </pre>
@@ -61,8 +90,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L97">source</a>
 </li>
 <li>
-  <h3 id="macroexpand-all">macroexpand-all</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="macroexpand-all">macroexpand-all</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(macroexpand-all form)</code></div>
 </pre>
@@ -70,8 +99,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L129">source</a>
 </li>
 <li>
-  <h3 id="postwalk">postwalk</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="postwalk">postwalk</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk f form)</code></div>
 </pre>
@@ -81,8 +110,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L56">source</a>
 </li>
 <li>
-  <h3 id="postwalk-demo">postwalk-demo</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="postwalk-demo">postwalk-demo</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-demo form)</code></div>
 </pre>
@@ -91,8 +120,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L83">source</a>
 </li>
 <li>
-  <h3 id="postwalk-replace">postwalk-replace</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="postwalk-replace">postwalk-replace</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(postwalk-replace smap form)</code></div>
 </pre>
@@ -102,8 +131,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L121">source</a>
 </li>
 <li>
-  <h3 id="prewalk">prewalk</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="prewalk">prewalk</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk f form)</code></div>
 </pre>
@@ -111,8 +140,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L64">source</a>
 </li>
 <li>
-  <h3 id="prewalk-demo">prewalk-demo</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="prewalk-demo">prewalk-demo</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-demo form)</code></div>
 </pre>
@@ -121,8 +150,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L90">source</a>
 </li>
 <li>
-  <h3 id="prewalk-replace">prewalk-replace</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="prewalk-replace">prewalk-replace</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(prewalk-replace smap form)</code></div>
 </pre>
@@ -132,8 +161,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L113">source</a>
 </li>
 <li>
-  <h3 id="stringify-keys">stringify-keys</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="stringify-keys">stringify-keys</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(stringify-keys m)</code></div>
 </pre>
@@ -141,8 +170,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/walk.joke#L105">source</a>
 </li>
 <li>
-  <h3 id="walk">walk</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="walk">walk</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(walk inner outer form)</code></div>
 </pre>

@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.set</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Set operations such as union/intersection.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#difference">difference</a>
@@ -47,21 +66,31 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
-  <h3 id="difference">difference</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="difference">difference</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(difference s1)</code></div>
 <div><code>(difference s1 s2)</code></div>
-<div><code>(difference s1 s2 & sets)</code></div>
+<div><code>(difference s1 s2 &amp; sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the first set without elements of the remaining sets</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L50">source</a>
 </li>
 <li>
-  <h3 id="index">index</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="index">index</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(index xrel ks)</code></div>
 </pre>
@@ -70,19 +99,19 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L96">source</a>
 </li>
 <li>
-  <h3 id="intersection">intersection</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="intersection">intersection</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(intersection s1)</code></div>
 <div><code>(intersection s1 s2)</code></div>
-<div><code>(intersection s1 s2 & sets)</code></div>
+<div><code>(intersection s1 s2 &amp; sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the intersection of the input sets</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L34">source</a>
 </li>
 <li>
-  <h3 id="join">join</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="join">join</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(join xrel yrel)</code></div>
 <div><code>(join xrel yrel km)</code></div>
@@ -93,8 +122,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L112">source</a>
 </li>
 <li>
-  <h3 id="map-invert">map-invert</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="map-invert">map-invert</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(map-invert m)</code></div>
 </pre>
@@ -102,8 +131,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L107">source</a>
 </li>
 <li>
-  <h3 id="project">project</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="project">project</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(project xrel ks)</code></div>
 </pre>
@@ -111,8 +140,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L73">source</a>
 </li>
 <li>
-  <h3 id="rename">rename</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="rename">rename</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rename xrel kmap)</code></div>
 </pre>
@@ -120,8 +149,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L90">source</a>
 </li>
 <li>
-  <h3 id="rename-keys">rename-keys</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="rename-keys">rename-keys</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(rename-keys map kmap)</code></div>
 </pre>
@@ -129,8 +158,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L79">source</a>
 </li>
 <li>
-  <h3 id="select">select</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="select">select</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(select pred xset)</code></div>
 </pre>
@@ -138,8 +167,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L66">source</a>
 </li>
 <li>
-  <h3 id="subset?">subset?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="subset?">subset?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(subset? set1 set2)</code></div>
 </pre>
@@ -147,8 +176,8 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L143">source</a>
 </li>
 <li>
-  <h3 id="superset?">superset?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="superset?">superset?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(superset? set1 set2)</code></div>
 </pre>
@@ -156,13 +185,13 @@
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L151">source</a>
 </li>
 <li>
-  <h3 id="union">union</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="union">union</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(union)</code></div>
 <div><code>(union s1)</code></div>
 <div><code>(union s1 s2)</code></div>
-<div><code>(union s1 s2 & sets)</code></div>
+<div><code>(union s1 s2 &amp; sets)</code></div>
 </pre>
   <p class="var-docstr">Return a set that is the union of the input sets</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/set.joke#L21">source</a>

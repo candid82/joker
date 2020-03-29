@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.string</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Implements simple functions to manipulate strings.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#blank?">blank?</a>
@@ -86,10 +105,20 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
-  <h3 id="blank?">blank?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="blank?">blank?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(blank? s)</code></div>
 </pre>
@@ -97,8 +126,8 @@
   
 </li>
 <li>
-  <h3 id="capitalize">capitalize</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="capitalize">capitalize</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(capitalize s)</code></div>
 </pre>
@@ -107,8 +136,8 @@
   
 </li>
 <li>
-  <h3 id="ends-with?">ends-with?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="ends-with?">ends-with?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(ends-with? s substr)</code></div>
 </pre>
@@ -116,8 +145,8 @@
   
 </li>
 <li>
-  <h3 id="escape">escape</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="escape">escape</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(escape s cmap)</code></div>
 </pre>
@@ -129,8 +158,8 @@
   
 </li>
 <li>
-  <h3 id="includes?">includes?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="includes?">includes?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(includes? s substr)</code></div>
 </pre>
@@ -138,8 +167,8 @@
   
 </li>
 <li>
-  <h3 id="index-of">index-of</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="index-of">index-of</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(index-of s value)</code></div>
 <div><code>(index-of s value from)</code></div>
@@ -149,8 +178,8 @@
   
 </li>
 <li>
-  <h3 id="join">join</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="join">join</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(join coll)</code></div>
 <div><code>(join separator coll)</code></div>
@@ -159,8 +188,8 @@
   
 </li>
 <li>
-  <h3 id="last-index-of">last-index-of</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="last-index-of">last-index-of</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(last-index-of s value)</code></div>
 <div><code>(last-index-of s value from)</code></div>
@@ -170,8 +199,8 @@
   
 </li>
 <li>
-  <h3 id="lower-case">lower-case</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="lower-case">lower-case</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(lower-case s)</code></div>
 </pre>
@@ -179,8 +208,8 @@
   
 </li>
 <li>
-  <h3 id="pad-left">pad-left</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="pad-left">pad-left</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pad-left s pad n)</code></div>
 </pre>
@@ -188,8 +217,8 @@
   
 </li>
 <li>
-  <h3 id="pad-right">pad-right</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="pad-right">pad-right</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pad-right s pad n)</code></div>
 </pre>
@@ -197,8 +226,8 @@
   
 </li>
 <li>
-  <h3 id="re-quote">re-quote</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="re-quote">re-quote</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-quote s)</code></div>
 </pre>
@@ -206,8 +235,8 @@
   
 </li>
 <li>
-  <h3 id="replace">replace</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="replace">replace</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(replace s match repl)</code></div>
 </pre>
@@ -220,8 +249,8 @@
   
 </li>
 <li>
-  <h3 id="replace-first">replace-first</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="replace-first">replace-first</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(replace-first s match repl)</code></div>
 </pre>
@@ -234,8 +263,8 @@
   
 </li>
 <li>
-  <h3 id="reverse">reverse</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="reverse">reverse</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(reverse s)</code></div>
 </pre>
@@ -243,8 +272,8 @@
   
 </li>
 <li>
-  <h3 id="split">split</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="split">split</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split s sep)</code></div>
 <div><code>(split s sep n)</code></div>
@@ -253,8 +282,8 @@
   
 </li>
 <li>
-  <h3 id="split-lines">split-lines</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="split-lines">split-lines</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(split-lines s)</code></div>
 </pre>
@@ -262,8 +291,8 @@
   
 </li>
 <li>
-  <h3 id="starts-with?">starts-with?</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="starts-with?">starts-with?</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(starts-with? s substr)</code></div>
 </pre>
@@ -271,8 +300,8 @@
   
 </li>
 <li>
-  <h3 id="trim">trim</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="trim">trim</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trim s)</code></div>
 </pre>
@@ -280,8 +309,8 @@
   
 </li>
 <li>
-  <h3 id="trim-left">trim-left</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="trim-left">trim-left</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trim-left s)</code></div>
 </pre>
@@ -289,8 +318,8 @@
   
 </li>
 <li>
-  <h3 id="trim-newline">trim-newline</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="trim-newline">trim-newline</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trim-newline s)</code></div>
 </pre>
@@ -298,8 +327,8 @@
   
 </li>
 <li>
-  <h3 id="trim-right">trim-right</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="trim-right">trim-right</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trim-right s)</code></div>
 </pre>
@@ -307,8 +336,8 @@
   
 </li>
 <li>
-  <h3 id="triml">triml</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="triml">triml</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(triml s)</code></div>
 </pre>
@@ -316,8 +345,8 @@
   
 </li>
 <li>
-  <h3 id="trimr">trimr</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="trimr">trimr</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(trimr s)</code></div>
 </pre>
@@ -325,8 +354,8 @@
   
 </li>
 <li>
-  <h3 id="upper-case">upper-case</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="upper-case">upper-case</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(upper-case s)</code></div>
 </pre>
