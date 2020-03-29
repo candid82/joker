@@ -1,4 +1,4 @@
-// +build !gen_data
+// +build !gen_code
 
 package core
 
