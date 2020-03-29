@@ -3,3 +3,5 @@
 
 # DOS line endings on .bat files.
 *.bat text=auto
+
+*.tgz binary
