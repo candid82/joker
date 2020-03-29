@@ -1,0 +1,6 @@
+(require '[joker.string :as s])
+
+(def xml-template
+  (slurp "templates/xml.html"))
+
+(spit "joker.xml" (s/replace xml-template "{version}" (joker-version)))
