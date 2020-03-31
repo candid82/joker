@@ -136,3 +136,19 @@ code {
 .var-docstr {
   margin-top: 0;
 }
+
+.tooltip {
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

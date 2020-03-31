@@ -29,6 +29,9 @@
 (def usage-template
   (slurp "templates/usage.html"))
 
+(def usage-with-types-template
+  (slurp "templates/usage-with-types.html"))
+
 (defn type-name
   [v]
   (let [m (meta v)]
@@ -94,14 +97,27 @@
   [k l]
   (str (maybe-tag-prefix l) "(" (s/join " " (cons k (tagged-vector l))) ")"))
 
+(defn maybe-typed-usage
+  [u uwt]
+  (if (s/includes? uwt "^")
+    (-> usage-with-types-template
+        (s/replace "{usage}" (h/escape u))
+        (s/replace "{usage-with-types}" (h/escape uwt)))
+    (s/replace usage-template "{usage}" (h/escape u))))
+
 (defn usage
   [k m]
-  (let [usages (if (:special-form m)
+  (let [usages-with-types (if (:special-form m)
+                            (for [form (:forms m)]
+                              (str form))
+                            (for [arglist (:arglists m)]
+                              (tagged-arglist k arglist)))
+        usages (if (:special-form m)
                  (for [form (:forms m)]
-                   (str form))
+                   "")
                  (for [arglist (:arglists m)]
-                   (tagged-arglist k arglist)))]
-    (s/join "" (map #(s/replace usage-template "{usage}" (h/escape %)) usages))))
+                   (str (apply list k arglist))))]
+    (s/join "" (map maybe-typed-usage usages usages-with-types))))
 
 (defn- source-file
   [ns]
