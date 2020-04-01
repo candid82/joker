@@ -7,6 +7,5 @@ core/a_*.go
 *.zip
 *.docset
 .DS_Store
-docs/joker.xml
 docs/dash/*.html
 docs/dash/*.css
