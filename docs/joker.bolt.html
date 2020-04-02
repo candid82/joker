@@ -97,6 +97,7 @@
   Returns a vector of [key value] tuples. Passing empty prefix<br>
   will return all key/values in bucket.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="close">close</h3>
@@ -108,6 +109,7 @@
   It will block waiting for any open transactions to finish<br>
   before closing the database and returning.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="create-bucket">create-bucket</h3>
@@ -117,6 +119,7 @@
 </pre>
   <p class="var-docstr">Creates a new bucket. Throws an error if the bucket already exists,<br>
   if the bucket name is blank, or if the bucket name is too long.</p>
+  
   
 </li>
 <li>
@@ -128,6 +131,7 @@
   <p class="var-docstr">Creates a new bucket if it doesn&#39;t already exist.<br>
    Throws an error if the bucket name is blank, or if the bucket name is too long.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="delete">delete</h3>
@@ -137,6 +141,7 @@
 </pre>
   <p class="var-docstr">Removes a key from the bucket if it exists.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="delete-bucket">delete-bucket</h3>
@@ -145,6 +150,7 @@
   <pre class="var-usage"><div><code>(delete-bucket db name)</code></div>
 </pre>
   <p class="var-docstr">Deletes a bucket. Throws an error if the bucket doesn&#39;t exist.</p>
+  
   
 </li>
 <li>
@@ -156,6 +162,7 @@
   <p class="var-docstr">Retrieves the value for a key in the bucket.<br>
   Returns nil if the key does not exist.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="next-sequence">next-sequence</h3>
@@ -164,6 +171,7 @@
   <pre class="var-usage"><div><code>(next-sequence db bucket)</code></div>
 </pre>
   <p class="var-docstr">Returns an autoincrementing integer for the bucket.</p>
+  
   
 </li>
 <li>
@@ -177,6 +185,7 @@
   with mode perm (before umask).<br>
   mode is normally passed as an octal literal, e.g. 0600</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="put">put</h3>
@@ -188,9 +197,11 @@
   If the key exist then its previous value will be overwritten.<br>
   Throws an error if the key is blank, if the key is too large, or if the value is too large.</p>
   
+  
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

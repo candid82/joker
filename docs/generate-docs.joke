@@ -114,7 +114,7 @@
                               (tagged-arglist k arglist)))
         usages (if (:special-form m)
                  (for [form (:forms m)]
-                   "")
+                   (str form))
                  (for [arglist (:arglists m)]
                    (str (apply list k arglist))))]
     (s/join "" (map maybe-typed-usage usages usages-with-types))))
@@ -127,7 +127,8 @@
   [k v]
   (let [m (meta v)
         ns (get m :ns "<internal>")
-        full-name (str ns "/" (str k))]
+        full-name (str ns "/" (str k))
+        usage-str (usage k m)]
     (when-not (or (:added m) (:private m))
       (println "WARNING: public var without added meta key: " full-name))
     (when-not (or (:doc m) (:private m))
@@ -137,7 +138,7 @@
         (s/replace "{name}" (h/escape (str k)))
         (s/replace "{type}" (type-name v))
         (s/replace "{kind}" (sym-kind-name v))
-        (s/replace "{usage}" (usage k m))
+        (s/replace "{usage}" usage-str)
         (s/replace "{docstring}" (s/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
         (s/replace "{added}" (str (:added m)))
         (s/replace
@@ -146,7 +147,11 @@
            (format "<a href=\"https://github.com/candid82/joker/blob/master/core/data/%s.joke#L%s\">source</a>"
                    (source-file (:ns m))
                    (str (:line m)))
-           "")))))
+           ""))
+        (s/replace "{show-types}"
+                   (if (s/includes? usage-str "^")
+                     "<a href=\"#\" class=\"types\">show types</a>"
+                     "")))))
 
 (defn- first-line
   [s]

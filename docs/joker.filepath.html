@@ -97,6 +97,7 @@
   <pre class="var-usage"></pre>
   <p class="var-docstr">OS-specific path list separator.</p>
   
+  
 </li>
 <li>
   <h3 class="Constant" id="separator">separator</h3>
@@ -104,6 +105,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">OS-specific path separator.</p>
+  
   
 </li>
 
@@ -125,6 +127,7 @@
   The absolute path name for a given file is not guaranteed to be unique.<br>
   Calls clean on the result.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="abs?">abs?</h3>
@@ -133,6 +136,7 @@
   <pre class="var-usage"><div><code>(abs? path)</code></div>
 </pre>
   <p class="var-docstr">Reports whether the path is absolute.</p>
+  
   
 </li>
 <li>
@@ -144,6 +148,7 @@
   <p class="var-docstr">Returns the last element of path. Trailing path separators are removed before<br>
   extracting the last element. If the path is empty, returns &#34;.&#34;. If the path consists<br>
   entirely of separators, returns a single separator.</p>
+  
   
 </li>
 <li>
@@ -168,6 +173,7 @@ Finally, any occurrences of slash are replaced by separator.<br>
 <br>
 If the result of this process is an empty string, returns the string &#34;.&#34;.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="dir">dir</h3>
@@ -180,6 +186,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   If the path is empty, returns &#34;.&#34;. If the path consists entirely of separators,<br>
   returns a single separator. The returned path does not end in a separator unless it is the root directory.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="eval-symlinks">eval-symlinks</h3>
@@ -191,6 +198,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   relative to the current directory, unless one of the components is an absolute symbolic link.<br>
   Calls clean on the result.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="ext">ext</h3>
@@ -201,6 +209,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <p class="var-docstr">Returns the file name extension used by path. The extension is the suffix beginning at the final dot<br>
   in the final element of path; it is empty if there is no dot.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="file-seq">file-seq</h3>
@@ -209,6 +218,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <pre class="var-usage"><div><code>(file-seq root)</code></div>
 </pre>
   <p class="var-docstr">Returns a seq of maps with info about files or directories under root.</p>
+  
   
 </li>
 <li>
@@ -219,6 +229,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
 </pre>
   <p class="var-docstr">Returns the result of replacing each slash (&#39;/&#39;) character in path with a separator character.<br>
   Multiple slashes are replaced by multiple separators.</p>
+  
   
 </li>
 <li>
@@ -234,6 +245,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   Ignores file system errors such as I/O errors reading directories.<br>
   Throws exception when pattern is malformed.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="join">join</h3>
@@ -244,6 +256,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <p class="var-docstr">Joins any number of path elements into a single path, adding a separator if necessary.<br>
   Calls clean on the result; in particular, all empty strings are ignored. On Windows,<br>
   the result is a UNC path if and only if the first path element is a UNC path.</p>
+  
   
 </li>
 <li>
@@ -256,6 +269,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   Requires pattern to match all of name, not just a substring.<br>
   Throws exception if pattern is malformed.<br>
   On Windows, escaping is disabled. Instead, &#39;\&#39; is treated as path separator.</p>
+  
   
 </li>
 <li>
@@ -270,6 +284,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   relative to basepath or if knowing the current working directory would be necessary to compute it.<br>
   Calls clean on the result.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="split">split</h3>
@@ -281,6 +296,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   If there is no separator in path, returns an empty dir and file set to path. The returned values have<br>
   the property that path = dir+file.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="split-list">split-list</h3>
@@ -290,6 +306,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
 </pre>
   <p class="var-docstr">Splits a list of paths joined by the OS-specific list-separator, usually found in PATH or GOPATH environment variables.<br>
   Returns an empty slice when passed an empty string.</p>
+  
   
 </li>
 <li>
@@ -301,6 +318,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <p class="var-docstr">Returns the result of replacing each separator character in path with a slash (&#39;/&#39;) character.<br>
   Multiple separators are replaced by multiple slashes.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="volume-name">volume-name</h3>
@@ -311,9 +329,11 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <p class="var-docstr">Returns leading volume name. Given &#34;C:\foo\bar&#34; it returns &#34;C:&#34; on Windows. Given &#34;\\host\share\foo&#34;<br>
   returns &#34;\\host\share&#34;. On other platforms it returns &#34;&#34;.</p>
   
+  
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

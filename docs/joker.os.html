@@ -115,6 +115,7 @@
 </pre>
   <p class="var-docstr">Returns a sequence of the command line arguments, starting with the program name (normally, joker).</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="chdir">chdir</h3>
@@ -123,6 +124,7 @@
   <pre class="var-usage"><div><code>(chdir dirname)</code></div>
 </pre>
   <p class="var-docstr">Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.</p>
+  
   
 </li>
 <li>
@@ -133,6 +135,7 @@
 </pre>
   <p class="var-docstr">Closes the file, rendering it unusable for I/O.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="create">create</h3>
@@ -141,6 +144,7 @@
   <pre class="var-usage"><div><code>(create name)</code></div>
 </pre>
   <p class="var-docstr">Creates the named file with mode 0666 (before umask), truncating it if it already exists.</p>
+  
   
 </li>
 <li>
@@ -157,6 +161,7 @@
   The caller can use (name f) to find the pathname of the file.<br>
   It is the caller&#39;s responsibility to remove the file when no longer needed.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="cwd">cwd</h3>
@@ -167,6 +172,7 @@
   <p class="var-docstr">Returns a rooted path name corresponding to the current directory. If the current directory can<br>
   be reached via multiple paths (due to symbolic links), cwd may return any one of them.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="env">env</h3>
@@ -175,6 +181,7 @@
   <pre class="var-usage"><div><code>(env)</code></div>
 </pre>
   <p class="var-docstr">Returns a map representing the environment.</p>
+  
   
 </li>
 <li>
@@ -199,6 +206,7 @@
   :out - string capturing stdout of the program (unless :stdout option was passed)<br>
   :err - string capturing stderr of the program (unless :stderr option was passed).</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="exists?">exists?</h3>
@@ -207,6 +215,7 @@
   <pre class="var-usage"><div><code>(exists? path)</code></div>
 </pre>
   <p class="var-docstr">Returns true if file or directory with the given path exists. Otherwise returns false.</p>
+  
   
 </li>
 <li>
@@ -218,6 +227,7 @@
 </pre>
   <p class="var-docstr">Causes the current program to exit with the given status code (defaults to 0).</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="get-env">get-env</h3>
@@ -226,6 +236,7 @@
   <pre class="var-usage"><div><code>(get-env key)</code></div>
 </pre>
   <p class="var-docstr">Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.</p>
+  
   
 </li>
 <li>
@@ -242,6 +253,7 @@
   :dir? - true if the file is a directory (Boolean)<br>
   :modtime - modification time (unix timestamp) (Int)</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="mkdir">mkdir</h3>
@@ -250,6 +262,7 @@
   <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
 </pre>
   <p class="var-docstr">Creates a new directory with the specified name and permission bits.</p>
+  
   
 </li>
 <li>
@@ -266,6 +279,7 @@
   Multiple programs calling joker.os/make-temp-dir simultaneously will not choose the same directory.<br>
   It is the caller&#39;s responsibility to remove the directory when no longer needed.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="open">open</h3>
@@ -276,6 +290,7 @@
   <p class="var-docstr">Opens the named file for reading. If successful, the file can be used for reading;<br>
   the associated file descriptor has mode O_RDONLY.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="remove">remove</h3>
@@ -284,6 +299,7 @@
   <pre class="var-usage"><div><code>(remove name)</code></div>
 </pre>
   <p class="var-docstr">Removes the named file or (empty) directory.</p>
+  
   
 </li>
 <li>
@@ -297,6 +313,7 @@
   It removes everything it can, then panics with the first error (if<br>
   any) it encountered.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="set-env">set-env</h3>
@@ -305,6 +322,7 @@
   <pre class="var-usage"><div><code>(set-env key value)</code></div>
 </pre>
   <p class="var-docstr">Sets the specified key to the specified value in the environment.</p>
+  
   
 </li>
 <li>
@@ -319,6 +337,7 @@
       :exit - exit code of program (or attempt to execute it),<br>
       :out - string capturing stdout of the program,<br>
       :err - string capturing stderr of the program.</p>
+  
   
 </li>
 <li>
@@ -335,6 +354,7 @@
       :out - string capturing stdout of the program,<br>
       :err - string capturing stderr of the program.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="stat">stat</h3>
@@ -349,6 +369,7 @@
   :modtime - modification time<br>
   :dir? - true if file is a directory</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="temp-dir">temp-dir</h3>
@@ -362,9 +383,11 @@
   value from %TMP%, %TEMP%, %USERPROFILE%, or the Windows directory.<br>
   The directory is neither guaranteed to exist nor have accessible permissions.</p>
   
+  
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

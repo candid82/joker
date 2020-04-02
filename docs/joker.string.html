@@ -124,6 +124,7 @@
 </pre>
   <p class="var-docstr">True if s is nil, empty, or contains only whitespace.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="capitalize">capitalize</h3>
@@ -134,6 +135,7 @@
   <p class="var-docstr">Converts first character of the string to upper-case, all other<br>
   characters to lower-case.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="ends-with?">ends-with?</h3>
@@ -142,6 +144,7 @@
   <pre class="var-usage"><div><code>(ends-with? s substr)</code></div>
 </pre>
   <p class="var-docstr">True if s ends with substr.</p>
+  
   
 </li>
 <li>
@@ -156,6 +159,7 @@
   If (cmap ch) is nil, append ch to the new string.<br>
   If (cmap ch) is non-nil, append (str (cmap ch)) instead.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="includes?">includes?</h3>
@@ -164,6 +168,7 @@
   <pre class="var-usage"><div><code>(includes? s substr)</code></div>
 </pre>
   <p class="var-docstr">True if s includes substr.</p>
+  
   
 </li>
 <li>
@@ -176,6 +181,7 @@
   <p class="var-docstr">Return index of value (string or char) in s, optionally searching<br>
   forward from from or nil if not found.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="join">join</h3>
@@ -185,6 +191,7 @@
 <div><code>(join separator coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.</p>
+  
   
 </li>
 <li>
@@ -197,6 +204,7 @@
   <p class="var-docstr">Return last index of value (string or char) in s, optionally<br>
   searching backward from from or nil if not found.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="lower-case">lower-case</h3>
@@ -205,6 +213,7 @@
   <pre class="var-usage"><div><code>(lower-case s)</code></div>
 </pre>
   <p class="var-docstr">Converts string to all lower-case.</p>
+  
   
 </li>
 <li>
@@ -215,6 +224,7 @@
 </pre>
   <p class="var-docstr">Returns s padded with pad at the beginning to length n.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="pad-right">pad-right</h3>
@@ -224,6 +234,7 @@
 </pre>
   <p class="var-docstr">Returns s padded with pad at the end to length n.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="re-quote">re-quote</h3>
@@ -232,6 +243,7 @@
   <pre class="var-usage"><div><code>(re-quote s)</code></div>
 </pre>
   <p class="var-docstr">Returns an instance of Regex that matches the string exactly</p>
+  
   
 </li>
 <li>
@@ -247,6 +259,7 @@
   parenthesized group in the pattern.<br>
   </p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="replace-first">replace-first</h3>
@@ -261,6 +274,7 @@
   parenthesized group in the pattern.<br>
   </p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="reverse">reverse</h3>
@@ -269,6 +283,7 @@
   <pre class="var-usage"><div><code>(reverse s)</code></div>
 </pre>
   <p class="var-docstr">Returns s with its characters reversed.</p>
+  
   
 </li>
 <li>
@@ -280,6 +295,7 @@
 </pre>
   <p class="var-docstr">Splits string on a string or regular expression. Returns vector of the splits.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="split-lines">split-lines</h3>
@@ -288,6 +304,7 @@
   <pre class="var-usage"><div><code>(split-lines s)</code></div>
 </pre>
   <p class="var-docstr">Splits string on \n or \r\n. Returns vector of the splits.</p>
+  
   
 </li>
 <li>
@@ -298,6 +315,7 @@
 </pre>
   <p class="var-docstr">True if s starts with substr.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="trim">trim</h3>
@@ -306,6 +324,7 @@
   <pre class="var-usage"><div><code>(trim s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from both ends of string.</p>
+  
   
 </li>
 <li>
@@ -316,6 +335,7 @@
 </pre>
   <p class="var-docstr">Removes whitespace from the left side of string.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="trim-newline">trim-newline</h3>
@@ -324,6 +344,7 @@
   <pre class="var-usage"><div><code>(trim-newline s)</code></div>
 </pre>
   <p class="var-docstr">Removes all trailing newline \n or return \r characters from string.</p>
+  
   
 </li>
 <li>
@@ -334,6 +355,7 @@
 </pre>
   <p class="var-docstr">Removes whitespace from the right side of string.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="triml">triml</h3>
@@ -342,6 +364,7 @@
   <pre class="var-usage"><div><code>(triml s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from the left side of string.</p>
+  
   
 </li>
 <li>
@@ -352,6 +375,7 @@
 </pre>
   <p class="var-docstr">Removes whitespace from the right side of string.</p>
   
+  
 </li>
 <li>
   <h3 class="Function" id="upper-case">upper-case</h3>
@@ -361,9 +385,11 @@
 </pre>
   <p class="var-docstr">Converts string to all upper-case.</p>
   
+  
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>
