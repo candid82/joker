@@ -9,3 +9,4 @@ core/a_*.go
 .DS_Store
 docs/dash/*.html
 docs/dash/*.css
+docs/dash/*.js

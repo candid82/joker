@@ -6,9 +6,11 @@ rm -f ./joker.xml
 pushd dash
   rm -f ./*.html
   rm -f ./*.css
+  rm -f ./*.js
   rm -rf joker.docset
 	cp ../*.html ./
 	cp ../*.css ./
+	cp ../*.js ./
 	dashing build joker
 	tar --exclude='.DS_Store' -cvzf ../joker.tgz joker.docset
 popd
