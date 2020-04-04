@@ -131,9 +131,27 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			sym.ToString(false), existingVar.ToString(false), ns.ToString(false)), sym.GetInfo().Pos()))
 	}
 	if LINTER_MODE && existingVar.expr != nil && !existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
-		printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+		if !isDeclaredInConfig(existingVar) {
+			printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+		}
 	}
 	return existingVar
+}
+
+func isDeclaredInConfig(vr *Var) bool {
+	m := vr.GetMeta()
+	if m == nil {
+		return false
+	}
+	ok, v := m.Get(KEYWORDS.file)
+	if !ok {
+		return false
+	}
+	s, ok := v.(String)
+	if !ok {
+		return false
+	}
+	return strings.Contains(s.S, ".jokerd")
 }
 
 func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {

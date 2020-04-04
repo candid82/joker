@@ -246,12 +246,13 @@ func makeDialectKeyword(dialect Dialect) Keyword {
 
 func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	ProcessLinterFiles(dialect, filename, workingDir)
+	ProcessLinterData(dialect)
+	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	LINTER_MODE = true
 	DIALECT = dialect
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
-	ProcessLinterData(dialect)
 }
 
 func detectDialect(filename string) Dialect {

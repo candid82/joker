@@ -396,3 +396,9 @@
 (ns-unmap 'user 'chan)
 (ns-unmap 'joker.core 'exit)
 (ns-unmap 'user 'exit)
+
+(ns clojure.test)
+
+(defmacro deftest
+  [name & body]
+  `(defn ~name [] ~@body))

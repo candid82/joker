@@ -1,0 +1,1 @@
+tests/linter/deftest/input.clj:5:4: Parse error: Unable to resolve symbol: foo/bar
