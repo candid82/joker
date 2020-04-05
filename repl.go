@@ -60,6 +60,16 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	return
 }
 
+func saveReplHistory(rl *liner.State, filename string) {
+	if filename == "" {
+		return
+	}
+	if f, err := os.Create(filename); err == nil {
+		rl.WriteHistory(f)
+		f.Close()
+	}
+}
+
 func repl(phase Phase) {
 	ProcessReplData()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
@@ -80,22 +90,22 @@ func repl(phase Phase) {
 				fmt.Fprintf(Stderr, "WARNING: could not create %s \n", jokerd)
 			}
 		}
-		historyFilename = filepath.Join(jokerd, ".repl_history")
+		if !noReplHistory {
+			historyFilename = filepath.Join(jokerd, ".repl_history")
+		}
 		rl = liner.NewLiner()
 		OnExit(func() {
-			if f, err := os.Create(historyFilename); err == nil {
-				rl.WriteHistory(f)
-				f.Close()
-			}
-			rl.Close()
+			saveReplHistory(rl, historyFilename)
 		})
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
 		rl.SetWordCompleter(completer)
 
-		if f, err := os.Open(historyFilename); err == nil {
-			rl.ReadHistory(f)
-			f.Close()
+		if !noReplHistory {
+			if f, err := os.Open(historyFilename); err == nil {
+				rl.ReadHistory(f)
+				f.Close()
+			}
 		}
 
 		runeReader = NewLineRuneReader(rl)
@@ -117,12 +127,7 @@ func repl(phase Phase) {
 			runeReader.(*LineRuneReader).Prompt = (GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
-			if !noReadline {
-				if f, err := os.Create(historyFilename); err == nil {
-					rl.WriteHistory(f)
-					f.Close()
-				}
-			}
+			saveReplHistory(rl, historyFilename)
 			return
 		}
 	}

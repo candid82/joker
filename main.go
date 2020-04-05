@@ -385,6 +385,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    After failure processing --eval or --file, drop into repl instead of exiting.")
 	fmt.Fprintln(out, "  --no-readline")
 	fmt.Fprintln(out, "    Disable readline functionality in the repl. Useful when using rlwrap.")
+	fmt.Fprintln(out, "  --no-repl-history")
+	fmt.Fprintln(out, "    Do not read or save repl command history to a file.")
 	fmt.Fprintln(out, "  --working-dir <directory>")
 	fmt.Fprintln(out, "    Specify directory to lint or working directory for lint configuration if linting single file (requires --lint).")
 	fmt.Fprintln(out, "  --report-globally-unused")
@@ -429,6 +431,7 @@ var (
 	cpuProfileRateFlag       bool
 	memProfileName           string
 	noReadline               bool
+	noReplHistory            bool
 	exitToRepl               bool
 	errorToRepl              bool
 )
@@ -576,6 +579,8 @@ func parseArgs(args []string) {
 			}
 		case "--no-readline":
 			noReadline = true
+		case "--no-repl-history":
+			noReplHistory = true
 		case "--exit-to-repl":
 			exitToRepl = true
 			if i < length-1 && notOption(args[i+1]) {
@@ -708,6 +713,7 @@ func main() {
 		fmt.Fprintf(debugOut, "replSocket=%v\n", replSocket)
 		fmt.Fprintf(debugOut, "classPath=%v\n", classPath)
 		fmt.Fprintf(debugOut, "noReadline=%v\n", noReadline)
+		fmt.Fprintf(debugOut, "noReplHistory=%v\n", noReplHistory)
 		fmt.Fprintf(debugOut, "filename=%v\n", filename)
 		fmt.Fprintf(debugOut, "remainingArgs=%v\n", remainingArgs)
 		fmt.Fprintf(debugOut, "exitToRepl=%v\n", exitToRepl)
