@@ -100,6 +100,12 @@ func (ns *Namespace) ReferAll(other *Namespace) {
 	}
 }
 
+func (ns *Namespace) InternFake(sym Symbol) *Var {
+	vr := ns.Intern(sym)
+	vr.isFake = true
+	return vr
+}
+
 func (ns *Namespace) Intern(sym Symbol) *Var {
 	if sym.ns != nil {
 		panic(RT.NewError("Can't intern namespace-qualified symbol " + sym.ToString(false)))

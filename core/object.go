@@ -145,6 +145,7 @@ type (
 		isDynamic      bool
 		isUsed         bool
 		isGloballyUsed bool
+		isFake         bool
 		taggedType     *Type
 	}
 	ProcFn func([]Object) Object

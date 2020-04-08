@@ -1426,7 +1426,7 @@ func isUnknownCallable(expr Expr) (bool, Seq) {
 		if c.vr.expr != nil {
 			return false, nil
 		}
-		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
+		if sym.ns == nil && c.vr.isFake && c.vr.ns != GLOBAL_ENV.CoreNamespace {
 			return true, nil
 		}
 	}
@@ -1696,7 +1696,7 @@ func InternFakeSymbol(ns *Namespace, sym Symbol) *Var {
 		ns:   nil,
 		name: STRINGS.Intern(sym.ToString(false)),
 	}
-	return GLOBAL_ENV.CurrentNamespace().Intern(fakeSym)
+	return GLOBAL_ENV.CurrentNamespace().InternFake(fakeSym)
 }
 
 func isInteropSymbol(sym Symbol) bool {
