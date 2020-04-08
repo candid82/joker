@@ -1690,7 +1690,7 @@ func InternFakeSymbol(ns *Namespace, sym Symbol) *Var {
 			ns:   nil,
 			name: sym.name,
 		}
-		return ns.Intern(fakeSym)
+		return ns.InternFake(fakeSym)
 	}
 	fakeSym := Symbol{
 		ns:   nil,
