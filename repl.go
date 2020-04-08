@@ -101,6 +101,7 @@ func repl(phase Phase) {
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
 		rl.SetWordCompleter(completer)
+		rl.SetTabCompletionStyle(liner.TabPrints)
 
 		if !noReplHistory {
 			if f, err := os.Open(historyFilename); err == nil {
