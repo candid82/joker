@@ -97,6 +97,9 @@ func repl(phase Phase) {
 		OnExit(func() {
 			saveReplHistory(rl, historyFilename)
 		})
+		OnExit(func() {
+			rl.Close()
+		})
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
 		rl.SetWordCompleter(completer)
