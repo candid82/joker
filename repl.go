@@ -96,6 +96,7 @@ func repl(phase Phase) {
 		rl = liner.NewLiner()
 		OnExit(func() {
 			saveReplHistory(rl, historyFilename)
+			rl.Close()
 		})
 		defer rl.Close()
 		rl.SetCtrlCAborts(true)
