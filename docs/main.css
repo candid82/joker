@@ -28,6 +28,37 @@ a:visited {
   margin: auto;
 }
 
+#search {
+  float: right;
+  position: relative;
+}
+
+#search-suggestions {
+  border: 1px solid #dcd3d3;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  background-color: white;
+  padding: 5px;
+  position: absolute;
+  width: 288px;
+  top: 22px;
+}
+
+#search-suggestions > li {
+  padding: 5px;
+}
+
+#search-suggestions > li.selected {
+  background-color: #d3efff;
+}
+
+#search-input {
+  height: 35px;
+  width: 300px;
+  font-size: 1.2rem;
+  padding: 5px;
+}
+
 p {
   line-height: 1.6;
   color: #333;

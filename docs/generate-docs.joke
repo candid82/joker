@@ -8,6 +8,9 @@
 (def index-template
   (slurp "templates/index.html"))
 
+(def mainjs-template
+  (slurp "templates/main.js"))
+
 (def ns-template
   (slurp "templates/ns.html"))
 
@@ -282,8 +285,12 @@
         types (->> (joker.core/types__)
                    (map key)
                    (sort))
-        special-forms joker.repl/special-doc-map]
+        special-forms joker.repl/special-doc-map
+        terms (for [ns namespaces
+                    [k _] (ns-vars-fn ns)]
+                (joker.strconv/quote (str (name ns) "/" k)))]
     (spit "index.html" (index-doc special-forms namespaces types))
+    (spit "main.js" (s/replace mainjs-template "{search-terms}" (s/join "," terms)))
     (doseq [ns namespaces]
       (spit (str ns ".html") (ns-doc ns ns-vars-fn)))))
 
