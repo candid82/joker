@@ -287,7 +287,7 @@
                    (sort))
         special-forms joker.repl/special-doc-map
         terms (for [ns namespaces
-                    [k _] (ns-vars-fn ns)]
+                    [k _] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns))]
                 (joker.strconv/quote (str (name ns) "/" k)))]
     (spit "index.html" (index-doc special-forms namespaces types))
     (spit "main.js" (s/replace mainjs-template "{search-terms}" (s/join "," terms)))
