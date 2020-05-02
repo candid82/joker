@@ -3297,11 +3297,15 @@
   pathname. HTTP URLs are cached in $HOME/.jokerd/deps/."
   {:added "1.0"}
   ^Nil [^Map sources]
-  (let [existing-source-keys (set (map first *ns-sources*))
-        merge-fn (fn [existing-sources [k v]]
-                   (concat existing-sources
-                           (if-not (existing-source-keys k) [[k v]])))]
-    (->> (reduce merge-fn *ns-sources* sources)
+  (let [validate (fn [[k v]]
+                   (when-not (and (map? v)
+                                  (string? (:url v)))
+                     (throw (ex-info (format "Source value for %s must be a map with :url key (a string), got: %s" k v)
+                                     {}))))
+        _ (doseq [s sources] (validate s))
+        existing-source-keys (set (map first *ns-sources*))
+        new-sources (remove (fn [[k v]] (existing-source-keys k)) sources)]
+    (->> (concat *ns-sources* new-sources)
          (vec)
          (var-set #'*ns-sources*))))
 
