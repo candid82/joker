@@ -79,6 +79,15 @@ func ExtractInt(args []Object, index int) int {
 	return EnsureInt(args, index).I
 }
 
+func ExtractInteger(args []Object, index int) int {
+	switch c := args[index].(type) {
+	case Number:
+		return c.Int().I
+	default:
+		panic(RT.NewArgTypeError(index, c, "Number"))
+	}
+}
+
 func ExtractBoolean(args []Object, index int) bool {
 	return EnsureBoolean(args, index).B
 }

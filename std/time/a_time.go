@@ -36,7 +36,7 @@ func __add_(_args []Object) Object {
 	switch {
 	case _c == 2:
 		t := ExtractTime(_args, 0)
-		d := ExtractInt(_args, 1)
+		d := ExtractInteger(_args, 1)
 		_res := t.Add(time.Duration(d))
 		return MakeTime(_res)
 
@@ -54,9 +54,9 @@ func __add_date_(_args []Object) Object {
 	switch {
 	case _c == 4:
 		t := ExtractTime(_args, 0)
-		years := ExtractInt(_args, 1)
-		months := ExtractInt(_args, 2)
-		days := ExtractInt(_args, 3)
+		years := ExtractInteger(_args, 1)
+		months := ExtractInteger(_args, 2)
+		days := ExtractInteger(_args, 3)
 		_res := t.AddDate(years, months, days)
 		return MakeTime(_res)
 
@@ -91,8 +91,8 @@ func __from_unix_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		sec := ExtractInt(_args, 0)
-		nsec := ExtractInt(_args, 1)
+		sec := ExtractInteger(_args, 0)
+		nsec := ExtractInteger(_args, 1)
 		_res := time.Unix(int64(sec), int64(nsec))
 		return MakeTime(_res)
 
@@ -109,7 +109,7 @@ func __hours_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		d := ExtractInt(_args, 0)
+		d := ExtractInteger(_args, 0)
 		_res := time.Duration(d).Hours()
 		return MakeDouble(_res)
 
@@ -144,7 +144,7 @@ func __minutes_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		d := ExtractInt(_args, 0)
+		d := ExtractInteger(_args, 0)
 		_res := time.Duration(d).Minutes()
 		return MakeDouble(_res)
 
@@ -215,8 +215,8 @@ func __round_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		d := ExtractInt(_args, 0)
-		m := ExtractInt(_args, 1)
+		d := ExtractInteger(_args, 0)
+		m := ExtractInteger(_args, 1)
 		_res := int(time.Duration(d).Round(time.Duration(m)))
 		return MakeInt(_res)
 
@@ -233,7 +233,7 @@ func __seconds_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		d := ExtractInt(_args, 0)
+		d := ExtractInteger(_args, 0)
 		_res := time.Duration(d).Seconds()
 		return MakeDouble(_res)
 
@@ -267,7 +267,7 @@ func __sleep_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		d := ExtractInt(_args, 0)
+		d := ExtractInteger(_args, 0)
 		RT.GIL.Unlock()
 		time.Sleep(time.Duration(d))
 		RT.GIL.Lock()
@@ -287,7 +287,7 @@ func __string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
-		d := ExtractInt(_args, 0)
+		d := ExtractInteger(_args, 0)
 		_res := time.Duration(d).String()
 		return MakeString(_res)
 
@@ -322,8 +322,8 @@ func __truncate_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		d := ExtractInt(_args, 0)
-		m := ExtractInt(_args, 1)
+		d := ExtractInteger(_args, 0)
+		m := ExtractInteger(_args, 1)
 		_res := int(time.Duration(d).Truncate(time.Duration(m)))
 		return MakeInt(_res)
 

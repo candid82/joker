@@ -8,7 +8,7 @@
   A negative or zero duration causes sleep to return immediately."
   {:added "1.0"
   :go "! RT.GIL.Unlock(); time.Sleep(time.Duration(d)); RT.GIL.Lock(); _res := NIL"}
-  [^Int d])
+  [^Integer d])
 
 (defn ^Time now
   "Returns the current local time."
@@ -21,7 +21,7 @@
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999]."
   {:added "1.0"
   :go "time.Unix(int64(sec), int64(nsec))"}
-  [^Int sec ^Int nsec])
+  [^Integer sec ^Integer nsec])
 
 (defn ^Int unix
   "Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC."
@@ -40,13 +40,13 @@
   "Returns the time t+d."
   {:added "1.0"
   :go "t.Add(time.Duration(d))"}
-  [^Time t ^Int d])
+  [^Time t ^Integer d])
 
 (defn ^Time add-date
   "Returns the time t + (years, months, days)."
   {:added "1.0"
    :go "t.AddDate(years, months, days)"}
-  [^Time t ^Int years ^Int months ^Int days])
+  [^Time t ^Integer years ^Integer months ^Integer days])
 
 (defn ^Time parse
   "Parses a time string."
@@ -91,13 +91,13 @@
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of hours."
   {:added "1.0"
   :go "time.Duration(d).Hours()"}
-  [^Int d])
+  [^Integer d])
 
 (defn ^Double minutes
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes."
   {:added "1.0"
   :go "time.Duration(d).Minutes()"}
-  [^Int d])
+  [^Integer d])
 
 (defn ^Int round
   "Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
@@ -105,26 +105,26 @@
   {:added "1.0"
   ;; TODO: 32-bit issue
   :go "int(time.Duration(d).Round(time.Duration(m)))"}
-  [^Int d ^Int m])
+  [^Integer d ^Integer m])
 
 (defn ^Double seconds
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds."
   {:added "1.0"
   :go "time.Duration(d).Seconds()"}
-  [^Int d])
+  [^Integer d])
 
 (defn ^String string
   "Returns a string representing the duration in the form 72h3m0.5s."
   {:added "1.0"
   :go "time.Duration(d).String()"}
-  [^Int d])
+  [^Integer d])
 
 (defn ^Int truncate
   "Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged."
   {:added "1.0"
   ;; TODO: 32-bit issue
   :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
-  [^Int d ^Int m])
+  [^Integer d ^Integer m])
 
 (defn ^Time in-timezone
   "Returns a copy of t representing the same time instant, but with the copy's timezone information set to tz for display purposes."
