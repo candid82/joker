@@ -1061,7 +1061,11 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%g", d.D)
+	res := fmt.Sprintf("%g", d.D)
+	if !strings.ContainsRune(res, '.') {
+		res += ".0"
+	}
+	return res
 }
 
 func (d Double) Equals(other interface{}) bool {
