@@ -20,6 +20,7 @@
               _ (is (nil? (put db users (str id) (write-string {:id id :name joe}))))
               m (read-string (get db users (str id)))
               s (str (sort m))]
-          (is (= s (format "([\"id\" %d] [\"name\" \"%s\"])" id joe))))
+          (is (= (format "([\"id\" %d] [\"name\" \"%s\"])" id joe)
+                 s)))
         (finally (close db)
                  (remove db-name))))))

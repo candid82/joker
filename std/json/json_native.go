@@ -48,6 +48,9 @@ func toObject(v interface{}, keywordize bool) Object {
 	case string:
 		return MakeString(v)
 	case float64:
+		if v == float64(int(v)) {
+			return Int{I: int(v)}
+		}
 		return Double{D: v}
 	case bool:
 		return Boolean{B: v}
