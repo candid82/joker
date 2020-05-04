@@ -62,17 +62,20 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	return
 }
 
-func saveReplHistory(rl *liner.State, filename string) {
+func saveReplHistory(rlp **liner.State, filename string) {
+	rl := *rlp
 	if filename == "" {
 		return
 	}
 	if f, err := os.Create(filename); err == nil {
-		rl.WriteHistory(f)
+		num, _ := rl.WriteHistory(f)
+		fmt.Fprintf(Stderr, "wrote %d entries to %s\n", num, filename)
 		f.Close()
 	}
 }
 
-func setLinerMode(rl *liner.State, historyFilename string) {
+func setLinerMode(rlp **liner.State, historyFilename string) {
+	rl := *rlp
 	rl.SetCtrlCAborts(true)
 	rl.SetWordCompleter(completer)
 	rl.SetTabCompletionStyle(liner.TabPrints)
@@ -94,6 +97,7 @@ func repl(phase Phase) {
 
 	var runeReader io.RuneReader
 	var rl *liner.State
+	rlp := &rl // Handle multiple SIGTSTP, each of which changes rl upon SIGCONT
 	var historyFilename string
 	var reader *Reader
 	if noReadline {
@@ -113,28 +117,34 @@ func repl(phase Phase) {
 		defer rl.Close()
 
 		OnExit(func() {
-			saveReplHistory(rl, historyFilename)
-			rl.Close()
+			saveReplHistory(rlp, historyFilename)
+			(*rlp).Close()
 		})
 
 		OnSuspend(func() {
-			saveReplHistory(rl, historyFilename)
-			rl.Close()
+			saveReplHistory(rlp, historyFilename)
+			(*rlp).Close()
 		}, func() {
 			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
 			PanicOnErr(err)
 		}, func() {
 			rl = liner.NewLiner()
-			setLinerMode(rl, historyFilename)
-			runeReader = NewLineRuneReader(rl)
+			setLinerMode(rlp, historyFilename)
+			runeReader = NewLineRuneReader(*rlp)
 			reader = NewReader(runeReader, "<repl>")
 		})
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGTSTP)
+		go func() {
+			for {
+				_ = <-c
+				SuspendJoker()
+			}
+		}()
 
-		setLinerMode(rl, historyFilename)
+		setLinerMode(rlp, historyFilename)
 
-		runeReader = NewLineRuneReader(rl)
+		runeReader = NewLineRuneReader(*rlp)
 
 		for _, line := range strings.Split(string(dataRead), "\n") {
 			if strings.TrimSpace(line) != "" {
@@ -153,7 +163,7 @@ func repl(phase Phase) {
 			runeReader.(*LineRuneReader).Prompt = (GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
-			saveReplHistory(rl, historyFilename)
+			saveReplHistory(rlp, historyFilename)
 			return
 		}
 	}
