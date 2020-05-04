@@ -650,7 +650,7 @@ var procHashSet = func(args []Object) Object {
 	return res
 }
 
-var procStr = func(args []Object) Object {
+func str(args ...Object) string {
 	var buffer bytes.Buffer
 	for _, obj := range args {
 		if !obj.Equals(NIL) {
@@ -660,7 +660,11 @@ var procStr = func(args []Object) Object {
 			buffer.WriteString(obj.ToString(!escaped))
 		}
 	}
-	return String{S: buffer.String()}
+	return buffer.String()
+}
+
+var procStr = func(args []Object) Object {
+	return String{S: str(args...)}
 }
 
 var procSymbol = func(args []Object) Object {
@@ -1348,7 +1352,7 @@ var procSlurp = func(args []Object) Object {
 
 var procSpit = func(args []Object) Object {
 	filename := EnsureString(args, 0)
-	content := EnsureString(args, 1)
+	content := args[1]
 	opts := EnsureMap(args, 2)
 	appendFile := false
 	if ok, append := opts.Get(MakeKeyword("append")); ok {
@@ -1363,7 +1367,7 @@ var procSpit = func(args []Object) Object {
 	f, err := os.OpenFile(filename.S, flags, 0644)
 	PanicOnErr(err)
 	defer f.Close()
-	_, err = f.WriteString(content.S)
+	_, err = f.WriteString(str(content))
 	PanicOnErr(err)
 	return NIL
 }
