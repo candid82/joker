@@ -62,8 +62,7 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	return
 }
 
-func saveReplHistory(rlp **liner.State, filename string) {
-	rl := *rlp
+func saveReplHistory(rl *liner.State, filename string) {
 	if filename == "" {
 		return
 	}
@@ -73,8 +72,7 @@ func saveReplHistory(rlp **liner.State, filename string) {
 	}
 }
 
-func setLinerMode(rlp **liner.State, historyFilename string) {
-	rl := *rlp
+func setLinerMode(rl *liner.State, historyFilename string) {
 	rl.SetCtrlCAborts(true)
 	rl.SetWordCompleter(completer)
 	rl.SetTabCompletionStyle(liner.TabPrints)
@@ -96,7 +94,6 @@ func repl(phase Phase) {
 
 	var runeReader io.RuneReader
 	var rl *liner.State
-	rlp := &rl // Handle multiple SIGTSTP, each of which changes rl upon SIGCONT
 	var historyFilename string
 	var reader *Reader
 	if noReadline {
@@ -116,20 +113,20 @@ func repl(phase Phase) {
 		defer rl.Close()
 
 		OnExit(func() {
-			saveReplHistory(rlp, historyFilename)
-			(*rlp).Close()
+			saveReplHistory(rl, historyFilename)
+			rl.Close()
 		})
 
 		OnSuspend(func() {
-			saveReplHistory(rlp, historyFilename)
-			(*rlp).Close()
+			saveReplHistory(rl, historyFilename)
+			rl.Close()
 		}, func() {
 			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
 			PanicOnErr(err)
 		}, func() {
 			rl = liner.NewLiner()
-			setLinerMode(rlp, historyFilename)
-			runeReader = NewLineRuneReader(*rlp)
+			setLinerMode(rl, historyFilename)
+			runeReader = NewLineRuneReader(rl)
 			reader = NewReader(runeReader, "<repl>")
 		})
 		c := make(chan os.Signal, 1)
@@ -141,9 +138,9 @@ func repl(phase Phase) {
 			}
 		}()
 
-		setLinerMode(rlp, historyFilename)
+		setLinerMode(rl, historyFilename)
 
-		runeReader = NewLineRuneReader(*rlp)
+		runeReader = NewLineRuneReader(rl)
 
 		for _, line := range strings.Split(string(dataRead), "\n") {
 			if strings.TrimSpace(line) != "" {
@@ -162,7 +159,7 @@ func repl(phase Phase) {
 			runeReader.(*LineRuneReader).Prompt = (GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
 		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
-			saveReplHistory(rlp, historyFilename)
+			saveReplHistory(rl, historyFilename)
 			return
 		}
 	}
