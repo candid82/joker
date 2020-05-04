@@ -1351,7 +1351,7 @@ var procSlurp = func(args []Object) Object {
 }
 
 var procSpit = func(args []Object) Object {
-	filename := EnsureString(args, 0)
+	f := args[0]
 	content := args[1]
 	opts := EnsureMap(args, 2)
 	appendFile := false
@@ -1364,11 +1364,19 @@ var procSpit = func(args []Object) Object {
 	} else {
 		flags |= os.O_TRUNC
 	}
-	f, err := os.OpenFile(filename.S, flags, 0644)
-	PanicOnErr(err)
-	defer f.Close()
-	_, err = f.WriteString(str(content))
-	PanicOnErr(err)
+	switch f := f.(type) {
+	case String:
+		file, err := os.OpenFile(f.S, flags, 0644)
+		PanicOnErr(err)
+		defer file.Close()
+		_, err = file.WriteString(str(content))
+		PanicOnErr(err)
+	case io.Writer:
+		_, err := io.WriteString(f, str(content))
+		PanicOnErr(err)
+	default:
+		panic(RT.NewArgTypeError(0, args[0], "String or IOWriter"))
+	}
 	return NIL
 }
 

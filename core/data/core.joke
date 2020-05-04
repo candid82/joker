@@ -3985,7 +3985,9 @@
 
 (defn spit
   "Opposite of slurp.  Opens file f, writes content, then
-  closes f."
+  closes f.
+  f can be a string (filename) or a writer object like *out* or
+  the one returned by joker.os/create."
   {:added "1.0"}
   ^Nil [f content & options]
   (spit__ f content (apply hash-map options)))
