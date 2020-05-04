@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 
 	. "github.com/candid82/joker/core"
 	"github.com/candid82/liner"
@@ -70,16 +72,30 @@ func saveReplHistory(rl *liner.State, filename string) {
 	}
 }
 
+func setLinerMode(rl *liner.State, historyFilename string) {
+	rl.SetCtrlCAborts(true)
+	rl.SetWordCompleter(completer)
+	rl.SetTabCompletionStyle(liner.TabPrints)
+
+	if !noReplHistory {
+		if f, err := os.Open(historyFilename); err == nil {
+			rl.ReadHistory(f)
+			f.Close()
+		}
+	}
+}
+
 func repl(phase Phase) {
 	ProcessReplData()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
-	fmt.Printf("Welcome to joker %s. Use '(exit)', EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
+	fmt.Printf("Welcome to joker %s. Use '(exit)', EOF (Ctrl-D), or SIGINT (Ctrl-C) to exit; '(suspend)' to suspend.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
 	var runeReader io.RuneReader
 	var rl *liner.State
 	var historyFilename string
+	var reader *Reader
 	if noReadline {
 		runeReader = bufio.NewReader(Stdin)
 	} else {
@@ -94,21 +110,29 @@ func repl(phase Phase) {
 			historyFilename = filepath.Join(jokerd, ".repl_history")
 		}
 		rl = liner.NewLiner()
+		defer rl.Close()
+
 		OnExit(func() {
 			saveReplHistory(rl, historyFilename)
 			rl.Close()
 		})
-		defer rl.Close()
-		rl.SetCtrlCAborts(true)
-		rl.SetWordCompleter(completer)
-		rl.SetTabCompletionStyle(liner.TabPrints)
 
-		if !noReplHistory {
-			if f, err := os.Open(historyFilename); err == nil {
-				rl.ReadHistory(f)
-				f.Close()
-			}
-		}
+		OnSuspend(func() {
+			saveReplHistory(rl, historyFilename)
+			rl.Close()
+		}, func() {
+			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+			PanicOnErr(err)
+		}, func() {
+			rl = liner.NewLiner()
+			setLinerMode(rl, historyFilename)
+			runeReader = NewLineRuneReader(rl)
+			reader = NewReader(runeReader, "<repl>")
+		})
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGTSTP)
+
+		setLinerMode(rl, historyFilename)
 
 		runeReader = NewLineRuneReader(rl)
 
@@ -120,7 +144,7 @@ func repl(phase Phase) {
 		dataRead = []rune{}
 	}
 
-	reader := NewReader(runeReader, "<repl>")
+	reader = NewReader(runeReader, "<repl>")
 
 	for {
 		if noReadline {

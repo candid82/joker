@@ -19,6 +19,33 @@ func OnExit(f func()) {
 	exitCallbacks = append(exitCallbacks, f)
 }
 
+type suspendCallbackFns struct {
+	leave func()
+	stop  func() // Only one gets called; nil's are ignored.
+	rtn   func()
+}
+
+var suspendCallbacks []suspendCallbackFns
+
+func SuspendJoker() {
+	for _, fns := range suspendCallbacks {
+		fns.leave()
+	}
+	for _, fns := range suspendCallbacks {
+		if fns.stop != nil {
+			fns.stop()
+			break
+		}
+	}
+	for _, fns := range suspendCallbacks {
+		fns.rtn()
+	}
+}
+
+func OnSuspend(leave func(), stop func(), rtn func()) {
+	suspendCallbacks = append(suspendCallbacks, suspendCallbackFns{leave, stop, rtn})
+}
+
 func writeIndent(w io.Writer, n int) {
 	space := []byte(" ")
 	for i := 0; i < n; i++ {
