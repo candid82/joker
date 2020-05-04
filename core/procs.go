@@ -2004,11 +2004,15 @@ func ProcessLinterFile(configDir string, filename string) {
 }
 
 func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
-	if dialect == EDN || dialect == JOKER {
+	if dialect == EDN {
 		return
 	}
 	configDir := findConfigFile(filename, workingDir, true)
 	if configDir == "" {
+		return
+	}
+	if dialect == JOKER {
+		ProcessLinterFile(configDir, "linter.joke")
 		return
 	}
 	ProcessLinterFile(configDir, "linter.cljc")
