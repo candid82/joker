@@ -198,7 +198,7 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
  (t/deftest ...)
  ```
 
-3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
+3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only), or `.jokerd/linter.joke` (Joker only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
 
    *  :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
    * If you really want some symbols to be considered declared *in any namespace no matter what*, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
