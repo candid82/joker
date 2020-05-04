@@ -68,8 +68,7 @@ func saveReplHistory(rlp **liner.State, filename string) {
 		return
 	}
 	if f, err := os.Create(filename); err == nil {
-		num, _ := rl.WriteHistory(f)
-		fmt.Fprintf(Stderr, "wrote %d entries to %s\n", num, filename)
+		rl.WriteHistory(f)
 		f.Close()
 	}
 }
