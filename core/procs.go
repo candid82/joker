@@ -1332,9 +1332,18 @@ var procBufferedReader = func(args []Object) Object {
 }
 
 var procSlurp = func(args []Object) Object {
-	b, err := ioutil.ReadFile(EnsureString(args, 0).S)
-	PanicOnErr(err)
-	return String{S: string(b)}
+	switch f := args[0].(type) {
+	case String:
+		b, err := ioutil.ReadFile(f.S)
+		PanicOnErr(err)
+		return String{S: string(b)}
+	case io.Reader:
+		b, err := ioutil.ReadAll(f)
+		PanicOnErr(err)
+		return String{S: string(b)}
+	default:
+		panic(RT.NewArgTypeError(0, args[0], "String or IOReader"))
+	}
 }
 
 var procSpit = func(args []Object) Object {

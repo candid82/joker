@@ -3976,9 +3976,11 @@
           coll))
 
 (defn slurp
-  "Opens file f and reads all its contents, returning a string."
+  "Opens file f and reads all its contents, returning a string.
+  f can be a string (filename) or a reader object like *in* or
+  the one returned by joker.os/open."
   {:added "1.0"}
-  ^String [^String f]
+  ^String [f]
   (slurp__ f))
 
 (defn spit
