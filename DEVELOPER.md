@@ -476,7 +476,7 @@ The fast-startup version necessitated (as of this writing) these changes:
 
 ### go-spew
 
-When built via e.g. `go builds -tags go_spew`, the private `joker.core/go-spew` function is enabled. (Otherwise it does nothing and returns `false`.)
+When built via e.g. `go build -tags go_spew`, the private `joker.core/go-spew` function is enabled. (Otherwise it does nothing and returns `false`.)
 
 This function dumps, to `stderr`, the internal structure of the argument passed to it (i.e. a Joker object), and returns `true`.
 
