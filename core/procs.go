@@ -1640,13 +1640,6 @@ var procExit = func(args []Object) Object {
 	return NIL
 }
 
-var procSuspend = func(args []Object) Object {
-	if !SuspendJoker() {
-		panic(RT.NewError("(joker.core/suspend) not implemented"))
-	}
-	return NIL
-}
-
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()

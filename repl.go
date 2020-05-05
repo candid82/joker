@@ -72,19 +72,6 @@ func saveReplHistory(rl *liner.State, filename string) {
 	}
 }
 
-func setLinerMode(rl *liner.State, historyFilename string) {
-	rl.SetCtrlCAborts(true)
-	rl.SetWordCompleter(completer)
-	rl.SetTabCompletionStyle(liner.TabPrints)
-
-	if !noReplHistory {
-		if f, err := os.Open(historyFilename); err == nil {
-			rl.ReadHistory(f)
-			f.Close()
-		}
-	}
-}
-
 func repl(phase Phase) {
 	ProcessReplData()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
@@ -117,29 +104,34 @@ func repl(phase Phase) {
 			rl.Close()
 		})
 
-		OnSuspend(func() {
-			saveReplHistory(rl, historyFilename)
-			rl.Close()
-		}, func() {
-			rl = liner.NewLiner()
-			setLinerMode(rl, historyFilename)
-			runeReader = NewLineRuneReader(rl)
-			reader = NewReader(runeReader, "<repl>")
-		})
-		SuspendStopFn = func() {
-			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
-			PanicOnErr(err)
-		}
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGTSTP)
+		stop := make(chan os.Signal, 1)
+		cont := make(chan os.Signal, 1)
+		signal.Notify(stop, syscall.SIGTSTP)
+		signal.Notify(cont, syscall.SIGCONT)
 		go func() {
 			for {
-				_ = <-c
-				SuspendJoker()
+				<-stop
+				err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+				PanicOnErr(err)
 			}
 		}()
 
-		setLinerMode(rl, historyFilename)
+		rl.SetCtrlCAborts(true)
+		rl.SetWordCompleter(completer)
+		rl.SetTabCompletionStyle(liner.TabPrints)
+		rl.SetSuspendFn(func() {
+			fmt.Println("^Z [Joker]")
+			err := syscall.Kill(syscall.Getpid(), syscall.SIGTSTP)
+			PanicOnErr(err)
+			<-cont
+		})
+
+		if !noReplHistory {
+			if f, err := os.Open(historyFilename); err == nil {
+				rl.ReadHistory(f)
+				f.Close()
+			}
+		}
 
 		runeReader = NewLineRuneReader(rl)
 

@@ -4591,13 +4591,3 @@
   ([] (exit 0))
   ([^Int code]
    (exit__ code)))
-
-(defn suspend
-  "Suspends the current process.
-
-  If necessary, the terminal state will be restored to the original
-  state (prior to running Joker) before suspending and, if and when
-  resumed, will be restored to the state within Joker."
-  {:added "1.0"}
-  []
-  (suspend__))

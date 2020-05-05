@@ -19,32 +19,6 @@ func OnExit(f func()) {
 	exitCallbacks = append(exitCallbacks, f)
 }
 
-type suspendCallbackFns struct {
-	leave func()
-	rtn   func()
-}
-
-var SuspendStopFn func()
-var suspendCallbacks []suspendCallbackFns
-
-func SuspendJoker() bool {
-	if SuspendStopFn == nil {
-		return false
-	}
-	for _, fns := range suspendCallbacks {
-		fns.leave()
-	}
-	SuspendStopFn()
-	for _, fns := range suspendCallbacks {
-		fns.rtn()
-	}
-	return true
-}
-
-func OnSuspend(leave func(), rtn func()) {
-	suspendCallbacks = append(suspendCallbacks, suspendCallbackFns{leave, rtn})
-}
-
 func writeIndent(w io.Writer, n int) {
 	space := []byte(" ")
 	for i := 0; i < n; i++ {
