@@ -121,14 +121,15 @@ func repl(phase Phase) {
 			saveReplHistory(rl, historyFilename)
 			rl.Close()
 		}, func() {
-			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
-			PanicOnErr(err)
-		}, func() {
 			rl = liner.NewLiner()
 			setLinerMode(rl, historyFilename)
 			runeReader = NewLineRuneReader(rl)
 			reader = NewReader(runeReader, "<repl>")
 		})
+		SuspendStopFn = func() {
+			err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+			PanicOnErr(err)
+		}
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGTSTP)
 		go func() {

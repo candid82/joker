@@ -1641,7 +1641,9 @@ var procExit = func(args []Object) Object {
 }
 
 var procSuspend = func(args []Object) Object {
-	SuspendJoker()
+	if !SuspendJoker() {
+		panic(RT.NewError("(joker.core/suspend) not implemented"))
+	}
 	return NIL
 }
 
