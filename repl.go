@@ -75,7 +75,7 @@ func saveReplHistory(rl *liner.State, filename string) {
 func repl(phase Phase) {
 	ProcessReplData()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
-	fmt.Printf("Welcome to joker %s. Use '(exit)', EOF (Ctrl-D), or SIGINT (Ctrl-C) to exit; '(suspend)' to suspend.\n", VERSION)
+	fmt.Printf("Welcome to joker %s. Use '(exit)', EOF (Ctrl-D), or SIGINT (Ctrl-C) to exit.\n", VERSION)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
@@ -111,6 +111,7 @@ func repl(phase Phase) {
 		go func() {
 			for {
 				<-stop
+				rl.Suspend()
 				err := syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
 				PanicOnErr(err)
 			}
@@ -124,6 +125,7 @@ func repl(phase Phase) {
 			err := syscall.Kill(syscall.Getpid(), syscall.SIGTSTP)
 			PanicOnErr(err)
 			<-cont
+			rl.Continue()
 		})
 
 		if !noReplHistory {

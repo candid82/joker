@@ -12,4 +12,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/candid82/liner => /home/craig/go/src/github.com/candid82/liner
+replace github.com/candid82/liner => /Users/craig/go/src/github.com/candid82/liner
