@@ -12,7 +12,7 @@ import (
 func env() Object {
 	res := EmptyArrayMap()
 	for _, v := range os.Environ() {
-		parts := strings.Split(v, "=")
+		parts := strings.SplitN(v, "=", 2)
 		res.Add(String{S: parts[0]}, String{S: parts[1]})
 	}
 	return res
