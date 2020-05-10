@@ -1,5 +1,5 @@
-github.com/candid82/liner v1.3.2 h1:ukEI5qoLLT+kN5r9g+4jsyDguDDTymoQhndqN6yJ+lM=
-github.com/candid82/liner v1.3.2/go.mod h1:shD5EWTOYasmaGjMfuaB82N9YxGMIAEoXjQEH6RoGvo=
+github.com/candid82/liner v1.4.0 h1:nUhs4pv/cnpnBERwJHmqmgargZTWnPbDJ67HtQcfSTo=
+github.com/candid82/liner v1.4.0/go.mod h1:shD5EWTOYasmaGjMfuaB82N9YxGMIAEoXjQEH6RoGvo=
 github.com/jcburley/go-spew v1.3.0 h1:BEDwhba3G98zXLFjN4fIWaIQVhUr0Yb6fxJPtXP02yY=
 github.com/jcburley/go-spew v1.3.0/go.mod h1:IgTbFHsV1GytTFzdY5NkZP/M5Wq4bBWghboOjtbUCKM=
 github.com/mattn/go-runewidth v0.0.3 h1:a+kO+98RDGEfo6asOGMmpodZq4FNtnGP54yps8BzLR4=
