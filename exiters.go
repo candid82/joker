@@ -1,4 +1,5 @@
-// +build linux darwin openbsd freebsd netbsd
+// +build !windows
+// +build !plan9
 
 package main
 
