@@ -73,7 +73,7 @@ func saveReplHistory(rl *liner.State, filename string) {
 func repl(phase Phase) {
 	ProcessReplData()
 	GLOBAL_ENV.FindNamespace(MakeSymbol("user")).ReferAll(GLOBAL_ENV.FindNamespace(MakeSymbol("joker.repl")))
-	fmt.Printf("Welcome to joker %s. Use '(exit)', EOF (Ctrl-D) or SIGINT (Ctrl-C) to exit.\n", VERSION)
+	fmt.Printf("Welcome to joker %s. Use '(exit)', %s to exit.\n", VERSION, EXITERS)
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	replContext := NewReplContext(parseContext.GlobalEnv)
 
