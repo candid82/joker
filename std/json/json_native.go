@@ -17,13 +17,8 @@ func fromObject(obj Object) interface{} {
 		return obj.Double().D
 	case Nil:
 		return nil
-	case *Vector:
-		cnt := obj.Count()
-		res := make([]interface{}, cnt)
-		for i := 0; i < cnt; i++ {
-			res[i] = fromObject(obj.Nth(i))
-		}
-		return res
+	case String:
+		return obj.ToString(false)
 	case Map:
 		res := make(map[string]interface{})
 		for iter := obj.Iter(); iter.HasNext(); {
@@ -36,6 +31,14 @@ func fromObject(obj Object) interface{} {
 				k = p.Key.ToString(false)
 			}
 			res[k] = fromObject(p.Value)
+		}
+		return res
+	case Seqable:
+		s := obj.Seq()
+		var res []interface{}
+		for !s.IsEmpty() {
+			res = append(res, fromObject(s.First()))
+			s = s.Rest()
 		}
 		return res
 	default:
