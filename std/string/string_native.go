@@ -58,6 +58,22 @@ func split(s string, r *regexp.Regexp, n int) Object {
 	return result
 }
 
+func splitOnStringOrRegex(s string, sep Object, n int) Object {
+	switch sep := sep.(type) {
+	case String:
+		v := strings.Split(s, sep.S)
+		result := EmptyVector()
+		for _, el := range v {
+			result = result.Conjoin(String{S: el})
+		}
+		return result
+	case *Regex:
+		return split(s, sep.R, n)
+	default:
+		panic(RT.NewArgTypeError(1, sep, "String or Regex"))
+	}
+}
+
 func join(sep string, seqable Seqable) string {
 	seq := seqable.Seq()
 	var b bytes.Buffer
@@ -145,7 +161,7 @@ func replace(s string, match Object, repl string) string {
 	switch match := match.(type) {
 	case String:
 		return strings.Replace(s, match.S, repl, -1)
-	case Regex:
+	case *Regex:
 		return match.R.ReplaceAllString(s, repl)
 	default:
 		panic(RT.NewArgTypeError(1, match, "String or Regex"))
@@ -156,7 +172,7 @@ func replaceFirst(s string, match Object, repl string) string {
 	switch match := match.(type) {
 	case String:
 		return strings.Replace(s, match.S, repl, 1)
-	case Regex:
+	case *Regex:
 		m := match.R.FindStringIndex(s)
 		if m == nil {
 			return s

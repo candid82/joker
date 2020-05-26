@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bufio"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,9 +9,10 @@ import (
 )
 
 var (
-	Stdin  io.Reader = os.Stdin
-	Stdout io.Writer = os.Stdout
-	Stderr io.Writer = os.Stderr
+	Stdin          io.Reader = os.Stdin
+	Stdout         io.Writer = os.Stdout
+	Stderr         io.Writer = os.Stderr
+	VerbosityLevel           = 0
 )
 
 type (
@@ -24,10 +24,14 @@ type (
 		stderr        *Var
 		printReadably *Var
 		file          *Var
+		MainFile      *Var
 		args          *Var
 		classPath     *Var
 		ns            *Var
+		NS_VAR        *Var
+		IN_NS_VAR     *Var
 		version       *Var
+		libs          *Var
 		Features      Set
 	}
 )
@@ -56,6 +60,9 @@ func (env *Env) SetEnvArgs(newArgs []string) {
 	}
 }
 
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  NOTE: Any changes to the list of run-time
+   initializations must be reflected in gen_code/gen_code.go.  */
 func (env *Env) SetClassPath(cp string) {
 	cpArray := filepath.SplitList(cp)
 	cpVec := EmptyVector()
@@ -68,45 +75,42 @@ func (env *Env) SetClassPath(cp string) {
 	env.classPath.Value = cpVec
 }
 
-func NewEnv(currentNs Symbol, stdin io.Reader, stdout io.Writer, stderr io.Writer) *Env {
-	features := EmptySet()
-	features.Add(MakeKeyword("default"))
-	features.Add(MakeKeyword("joker"))
-	res := &Env{
-		Namespaces: make(map[*string]*Namespace),
-		Features:   features,
-	}
-	res.CoreNamespace = res.EnsureNamespace(SYMBOLS.joker_core)
-	res.CoreNamespace.meta = MakeMeta(nil, "Core library of Joker.", "1.0")
-	res.ns = res.CoreNamespace.Intern(MakeSymbol("*ns*"))
-	res.ns.Value = res.EnsureNamespace(currentNs)
-	res.stdin = res.CoreNamespace.Intern(MakeSymbol("*in*"))
-	res.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
-	res.stdout = res.CoreNamespace.Intern(MakeSymbol("*out*"))
-	res.stdout.Value = &IOWriter{stdout}
-	res.stderr = res.CoreNamespace.Intern(MakeSymbol("*err*"))
-	res.stderr.Value = &IOWriter{stderr}
-	res.file = res.CoreNamespace.Intern(MakeSymbol("*file*"))
-	res.version = res.CoreNamespace.InternVar("*joker-version*", versionMap(),
-		MakeMeta(nil, `The version info for Clojure core, as a map containing :major :minor
-			:incremental and :qualifier keys. Feature releases may increment
-			:minor and/or :major, bugfix releases will increment :incremental.`, "1.0"))
-	res.args = res.CoreNamespace.Intern(MakeSymbol("*command-line-args*"))
-	res.SetEnvArgs(os.Args[1:])
-	res.classPath = res.CoreNamespace.Intern(MakeSymbol("*classpath*"))
-	res.classPath.Value = NIL
-	res.classPath.isPrivate = true
-	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
-	res.printReadably.Value = Boolean{B: true}
-	res.CoreNamespace.Intern(MakeSymbol("*linter-mode*")).Value = Boolean{B: LINTER_MODE}
-	res.CoreNamespace.Intern(MakeSymbol("*linter-config*")).Value = EmptyArrayMap()
-	return res
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  NOTE: Any changes to the list of run-time
+   initializations must be reflected in gen_code/gen_code.go.  */
+func (env *Env) InitEnv(stdin io.Reader, stdout, stderr io.Writer, args []string) {
+	env.stdin.Value = MakeBufferedReader(stdin)
+	env.stdout.Value = MakeIOWriter(stdout)
+	env.stderr.Value = MakeIOWriter(stderr)
+	env.SetEnvArgs(args)
 }
 
-func (env *Env) SetStdIO(stdin io.Reader, stdout io.Writer, stderr io.Writer) {
-	env.stdin.Value = &BufferedReader{bufio.NewReader(stdin)}
-	env.stdout.Value = &IOWriter{stdout}
-	env.stderr.Value = &IOWriter{stderr}
+func (env *Env) SetStdIO(stdin, stdout, stderr Object) {
+	env.stdin.Value = stdin
+	env.stdout.Value = stdout
+	env.stderr.Value = stderr
+}
+
+func (env *Env) StdIO() (stdin, stdout, stderr Object) {
+	return env.stdin.Value, env.stdout.Value, env.stderr.Value
+}
+
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  NOTE: Any changes to the list of run-time
+   initializations must be reflected in gen_code/gen_code.go.  */
+func (env *Env) SetMainFilename(filename string) {
+	env.MainFile.Value = MakeString(filename)
+}
+
+/* This runs after invariant initialization, which includes calling
+   NewEnv().  NOTE: Any changes to the list of run-time
+   initializations must be reflected in gen_code/gen_code.go.  */
+func (env *Env) SetFilename(obj Object) {
+	env.file.Value = obj
+}
+
+func (env *Env) IsStdIn(obj Object) bool {
+	return env.stdin.Value == obj
 }
 
 func (env *Env) CurrentNamespace() *Namespace {
@@ -127,6 +131,12 @@ func (env *Env) EnsureNamespace(sym Symbol) *Namespace {
 	return env.Namespaces[sym.name]
 }
 
+func (env *Env) EnsureLib(sym Symbol) *Namespace {
+	ns := env.EnsureNamespace(sym)
+	env.libs.Value.(*MapSet).Add(sym)
+	return ns
+}
+
 func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 	var res *Namespace
 	if s.ns == nil {
@@ -137,6 +147,9 @@ func (env *Env) NamespaceFor(ns *Namespace, s Symbol) *Namespace {
 			res = env.Namespaces[s.ns]
 		}
 	}
+	if res != nil {
+		res.MaybeLazy("NamespaceFor")
+	}
 	return res
 }
 
@@ -145,8 +158,16 @@ func (env *Env) ResolveIn(n *Namespace, s Symbol) (*Var, bool) {
 	if ns == nil {
 		return nil, false
 	}
-	v, ok := ns.mappings[s.name]
-	return v, ok
+	if v, ok := ns.mappings[s.name]; ok {
+		return v, true
+	}
+	if s.Equals(env.IN_NS_VAR.name) {
+		return env.IN_NS_VAR, true
+	}
+	if s.Equals(env.NS_VAR.name) {
+		return env.NS_VAR, true
+	}
+	return nil, false
 }
 
 func (env *Env) Resolve(s Symbol) (*Var, bool) {
@@ -157,7 +178,11 @@ func (env *Env) FindNamespace(s Symbol) *Namespace {
 	if s.ns != nil {
 		return nil
 	}
-	return env.Namespaces[s.name]
+	ns := env.Namespaces[s.name]
+	if ns != nil {
+		ns.MaybeLazy("FindNameSpace")
+	}
+	return ns
 }
 
 func (env *Env) RemoveNamespace(s Symbol) *Namespace {
@@ -176,16 +201,21 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 	if strings.ContainsRune(*s.name, '.') {
 		return s
 	}
+	if s.ns == nil && TYPES[s.name] != nil {
+		return s
+	}
 	currentNs := env.CurrentNamespace()
 	if s.ns != nil {
 		ns := env.NamespaceFor(currentNs, s)
 		if ns == nil || ns.Name.name == s.ns {
 			if ns != nil {
 				ns.isUsed = true
+				ns.isGloballyUsed = true
 			}
 			return s
 		}
 		ns.isUsed = true
+		ns.isGloballyUsed = true
 		return Symbol{
 			name: s.name,
 			ns:   ns.Name.name,
@@ -199,9 +229,15 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 		}
 	}
 	vr.isUsed = true
+	vr.isGloballyUsed = true
 	vr.ns.isUsed = true
+	vr.ns.isGloballyUsed = true
 	return Symbol{
 		name: vr.name.name,
 		ns:   vr.ns.Name.name,
 	}
+}
+
+func init() {
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.EnsureNamespace(MakeSymbol("user")))
 }

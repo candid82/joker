@@ -6,11 +6,10 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-var httpNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.http"))
+var __send__P ProcFn = __send_
+var send_ Proc = Proc{Fn: __send__P, Name: "send_", Package: "std/http"}
 
-
-
-var send_ Proc = func(_args []Object) Object {
+func __send_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -24,7 +23,10 @@ var send_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var start_file_server_ Proc = func(_args []Object) Object {
+var __start_file_server__P ProcFn = __start_file_server_
+var start_file_server_ Proc = Proc{Fn: __start_file_server__P, Name: "start_file_server_", Package: "std/http"}
+
+func __start_file_server_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -39,7 +41,10 @@ var start_file_server_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var start_server_ Proc = func(_args []Object) Object {
+var __start_server__P ProcFn = __start_server_
+var start_server_ Proc = Proc{Fn: __start_server__P, Name: "start_server_", Package: "std/http"}
+
+func __start_server_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -54,37 +59,13 @@ var start_server_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var httpNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.http"))
+
 func init() {
-
-	httpNamespace.ResetMeta(MakeMeta(nil, "Provides HTTP client and server implementations", "1.0"))
-
-	
-	httpNamespace.InternVar("send", send_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
-			`Sends an HTTP request and returns an HTTP response.
-  request is a map with the following keys:
-  - url (string)
-  - method (string, keyword or symbol, defaults to :get)
-  - body (string)
-  - host (string, overrides Host header if provided)
-  - headers (map).
-  All keys except for url are optional.
-  response is a map with the following keys:
-  - status (int)
-  - body (string)
-  - headers (map)
-  - content-length (int)`, "1.0"))
-
-	httpNamespace.InternVar("start-file-server", start_file_server_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("root"))),
-			`Starts HTTP server on the TCP network address addr that
-  serves HTTP requests with the contents of the file system rooted at root.`, "1.0"))
-
-	httpNamespace.InternVar("start-server", start_server_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
-			`Starts HTTP server on the TCP network address addr.`, "1.0"))
-
+	httpNamespace.Lazy = Init
 }

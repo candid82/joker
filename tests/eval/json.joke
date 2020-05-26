@@ -1,0 +1,22 @@
+(ns joker.test-joker.json
+  (:require [joker.json :as json]
+            [joker.test :refer [deftest is]]))
+
+(deftest write-string
+  (is (= "1" (json/write-string 1)))
+  (is (= "1.2" (json/write-string 1.2)))
+  (is (= "0.2" (json/write-string 1/5)))
+  (is (= "1" (json/write-string 1.0)))
+  (is (= "false" (json/write-string false)))
+  (is (= "true" (json/write-string true)))
+  (is (= "\"keyword\"" (json/write-string :keyword)))
+  (is (= "null" (json/write-string nil)))
+  (is (= "\"string\"" (json/write-string "string")))
+  (is (= "{\"keyword\":\"string\"}" (json/write-string {:keyword "string"})))
+  (is (= "[1,true]" (json/write-string [1 true])))
+  (is (= "[\"string\",null]" (json/write-string (drop 2 [1 true "string" nil]))))
+  (is (= "[4,5]" (json/write-string (list 4 5))))
+  (is (= "{\"m\":{\"k\":\"foo\"},\"s\":[\"string\",null],\"v\":[3]}"
+         (json/write-string {:s (drop 2 [1 true "string" nil])
+                             :v [3]
+                             :m {:k "foo"}}))))

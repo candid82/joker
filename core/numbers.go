@@ -41,8 +41,6 @@ const (
 	RATIO_CATEGORY    = iota
 )
 
-const MAX_INT = int(^uint(0) >> 1)
-const MIN_INT = -MAX_INT - 1
 const MAX_RUNE = int(^uint32(0) >> 1)
 const MIN_RUNE = -MAX_RUNE - 1
 
@@ -56,7 +54,11 @@ var (
 
 func ratioOrInt(r *big.Rat) Number {
 	if r.IsInt() {
-		return MakeInt(int(r.Num().Int64()))
+		if r.Num().IsInt64() {
+			// TODO: 32-bit issue
+			return MakeInt(int(r.Num().Int64()))
+		}
+		return &BigInt{b: *r.Num()}
 	}
 	return &Ratio{r: *r}
 }
@@ -159,6 +161,7 @@ func (d Double) Ratio() *big.Rat {
 // BigInt conversions
 
 func (b *BigInt) Int() Int {
+	// TODO: 32-bit issue
 	return Int{I: int(b.BigInt().Int64())}
 }
 
@@ -183,8 +186,8 @@ func (b *BigInt) Ratio() *big.Rat {
 // BigFloat conversions
 
 func (b *BigFloat) Int() Int {
-	i, _ := b.BigFloat().Int64()
-	return Int{I: int(i)}
+	f, _ := b.BigFloat().Float64()
+	return Int{I: int(f)}
 }
 
 func (b *BigFloat) BigInt() *big.Int {
@@ -380,9 +383,6 @@ func (ops IntOps) Quotient(x, y Number) Number {
 func (ops DoubleOps) Quotient(x, y Number) Number {
 	panicOnZero(ops, y)
 	z := x.Double().D / y.Double().D
-	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
-		return Double{D: float64(int(z))}
-	}
 	return Double{D: float64(int64(z))}
 }
 
@@ -419,9 +419,6 @@ func (ops DoubleOps) Rem(x, y Number) Number {
 	n := x.Double().D
 	d := y.Double().D
 	z := n / d
-	if z <= float64(MAX_INT) && z >= float64(MIN_INT) {
-		return Double{D: n - float64(int(z))*d}
-	}
 	return Double{D: n - float64(int64(z))*d}
 }
 

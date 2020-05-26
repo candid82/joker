@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"sort"
@@ -42,10 +43,11 @@ type (
 	}
 	DefExpr struct {
 		Position
-		vr    *Var
-		name  Symbol
-		value Expr
-		meta  Expr
+		vr               *Var
+		name             Symbol
+		value            Expr
+		meta             Expr
+		isCreatedByMacro bool
 	}
 	CallExpr struct {
 		Position
@@ -77,7 +79,8 @@ type (
 	}
 	DoExpr struct {
 		Position
-		body []Expr
+		body             []Expr
+		isCreatedByMacro bool
 	}
 	FnArityExpr struct {
 		Position
@@ -155,6 +158,8 @@ type (
 		unusedFnParameters      bool
 		fnWithEmptyBody         bool
 		ignoredUnusedNamespaces Set
+		IgnoredFileRegexes      []*regexp.Regexp
+		entryPoints             Set
 	}
 	Keywords struct {
 		tag                Keyword
@@ -212,6 +217,7 @@ type (
 		recur              Symbol
 		setMacro_          Symbol
 		def                Symbol
+		defLinter          Symbol
 		_var               Symbol
 		do                 Symbol
 		throw              Symbol
@@ -231,123 +237,35 @@ type (
 		deref              Symbol
 	}
 	Str struct {
-		_if       *string
-		quote     *string
-		fn_       *string
-		let_      *string
-		letfn_    *string
-		loop_     *string
-		recur     *string
-		setMacro_ *string
-		def       *string
-		_var      *string
-		do        *string
-		throw     *string
-		try       *string
+		_if          *string
+		quote        *string
+		fn_          *string
+		let_         *string
+		letfn_       *string
+		loop_        *string
+		recur        *string
+		setMacro_    *string
+		def          *string
+		defLinter    *string
+		_var         *string
+		do           *string
+		throw        *string
+		try          *string
+		coreFilename *string
 	}
 )
 
 var (
-	GLOBAL_ENV                = NewEnv(MakeSymbol("user"), Stdin, Stdout, Stderr)
-	LOCAL_BINDINGS  *Bindings = nil
-	SPECIAL_SYMBOLS           = make(map[*string]bool)
-	KNOWN_MACROS    *Var
-	REQUIRE_VAR     *Var
-	ALIAS_VAR       *Var
-	REFER_VAR       *Var
-	CREATE_NS_VAR   *Var
-	IN_NS_VAR       *Var
-	WARNINGS        = Warnings{
+	LOCAL_BINDINGS *Bindings = nil
+	KNOWN_MACROS   *Var
+	REQUIRE_VAR    *Var
+	ALIAS_VAR      *Var
+	REFER_VAR      *Var
+	CREATE_NS_VAR  *Var
+	IN_NS_VAR      *Var
+	WARNINGS       = Warnings{
 		fnWithEmptyBody: true,
-	}
-	KEYWORDS = Keywords{
-		tag:                MakeKeyword("tag"),
-		skipUnused:         MakeKeyword("skip-unused"),
-		private:            MakeKeyword("private"),
-		line:               MakeKeyword("line"),
-		column:             MakeKeyword("column"),
-		file:               MakeKeyword("file"),
-		ns:                 MakeKeyword("ns"),
-		macro:              MakeKeyword("macro"),
-		message:            MakeKeyword("message"),
-		form:               MakeKeyword("form"),
-		data:               MakeKeyword("data"),
-		cause:              MakeKeyword("cause"),
-		arglist:            MakeKeyword("arglists"),
-		doc:                MakeKeyword("doc"),
-		added:              MakeKeyword("added"),
-		meta:               MakeKeyword("meta"),
-		knownMacros:        MakeKeyword("known-macros"),
-		rules:              MakeKeyword("rules"),
-		ifWithoutElse:      MakeKeyword("if-without-else"),
-		unusedFnParameters: MakeKeyword("unused-fn-parameters"),
-		fnWithEmptyBody:    MakeKeyword("fn-with-empty-body"),
-		_prefix:            MakeKeyword("_prefix"),
-		pos:                MakeKeyword("pos"),
-		startLine:          MakeKeyword("start-line"),
-		endLine:            MakeKeyword("end-line"),
-		startColumn:        MakeKeyword("start-column"),
-		endColumn:          MakeKeyword("end-column"),
-		filename:           MakeKeyword("filename"),
-		object:             MakeKeyword("object"),
-		type_:              MakeKeyword("type"),
-		var_:               MakeKeyword("var"),
-		value:              MakeKeyword("value"),
-		vector:             MakeKeyword("vector"),
-		name:               MakeKeyword("name"),
-		dynamic:            MakeKeyword("dynamic"),
-	}
-	SYMBOLS = Symbols{
-		joker_core:         MakeSymbol("joker.core"),
-		underscore:         MakeSymbol("_"),
-		catch:              MakeSymbol("catch"),
-		finally:            MakeSymbol("finally"),
-		amp:                MakeSymbol("&"),
-		_if:                MakeSymbol("if"),
-		quote:              MakeSymbol("quote"),
-		fn_:                MakeSymbol("fn*"),
-		fn:                 MakeSymbol("fn"),
-		let_:               MakeSymbol("let*"),
-		let:                MakeSymbol("let"),
-		letfn_:             MakeSymbol("letfn*"),
-		letfn:              MakeSymbol("letfn"),
-		loop_:              MakeSymbol("loop*"),
-		loop:               MakeSymbol("loop"),
-		recur:              MakeSymbol("recur"),
-		setMacro_:          MakeSymbol("set-macro__"),
-		def:                MakeSymbol("def"),
-		_var:               MakeSymbol("var"),
-		do:                 MakeSymbol("do"),
-		throw:              MakeSymbol("throw"),
-		try:                MakeSymbol("try"),
-		unquoteSplicing:    MakeSymbol("unquote-splicing"),
-		list:               MakeSymbol("list"),
-		concat:             MakeSymbol("concat"),
-		seq:                MakeSymbol("seq"),
-		apply:              MakeSymbol("apply"),
-		emptySymbol:        MakeSymbol(""),
-		unquote:            MakeSymbol("unquote"),
-		vector:             MakeSymbol("vector"),
-		hashMap:            MakeSymbol("hash-map"),
-		hashSet:            MakeSymbol("hash-set"),
-		defaultDataReaders: MakeSymbol("default-data-readers"),
-		backslash:          MakeSymbol("/"),
-		deref:              MakeSymbol("deref"),
-	}
-	STR = Str{
-		_if:       STRINGS.Intern("if"),
-		quote:     STRINGS.Intern("quote"),
-		fn_:       STRINGS.Intern("fn*"),
-		let_:      STRINGS.Intern("let*"),
-		letfn_:    STRINGS.Intern("letfn*"),
-		loop_:     STRINGS.Intern("loop*"),
-		recur:     STRINGS.Intern("recur"),
-		setMacro_: STRINGS.Intern("set-macro__"),
-		def:       STRINGS.Intern("def"),
-		_var:      STRINGS.Intern("var"),
-		do:        STRINGS.Intern("do"),
-		throw:     STRINGS.Intern("throw"),
-		try:       STRINGS.Intern("try"),
+		entryPoints:     EmptySet(),
 	}
 )
 
@@ -519,6 +437,44 @@ func isIgnoredUnusedNamespace(ns *Namespace) bool {
 	return ok
 }
 
+func ResetUsage() {
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		ns.isUsed = true
+		for _, vr := range ns.mappings {
+			vr.isUsed = true
+		}
+	}
+}
+
+func isEntryPointNs(ns *Namespace) bool {
+	ok, _ := WARNINGS.entryPoints.Get(ns.Name)
+	return ok
+}
+
+func WarnOnGloballyUnusedNamespaces() {
+	var names []string
+	positions := make(map[string]Position)
+
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if !ns.isGloballyUsed && !isIgnoredUnusedNamespace(ns) && !isEntryPointNs(ns) {
+			pos := ns.Name.GetInfo()
+			if pos != nil && pos.Filename() != "<joker.core>" && pos.Filename() != "<user>" {
+				name := ns.Name.ToString(false)
+				names = append(names, name)
+				positions[name] = pos.Position
+			}
+		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "globally unused namespace "+name)
+	}
+}
+
 func WarnOnUnusedNamespaces() {
 	var names []string
 	positions := make(map[string]Position)
@@ -537,6 +493,44 @@ func WarnOnUnusedNamespaces() {
 	sort.Strings(names)
 	for _, name := range names {
 		printParseWarning(positions[name], "unused namespace "+name)
+	}
+}
+
+func isEntryPointVar(vr *Var) bool {
+	if isEntryPointNs(vr.ns) {
+		return true
+	}
+	sym := Symbol{
+		ns:   vr.ns.Name.name,
+		name: vr.name.name,
+	}
+	ok, _ := WARNINGS.entryPoints.Get(sym)
+	return ok
+}
+
+func WarnOnGloballyUnusedVars() {
+	var names []string
+	positions := make(map[string]Position)
+
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		if ns == GLOBAL_ENV.CoreNamespace {
+			continue
+		}
+		for _, vr := range ns.mappings {
+			if vr.ns == ns && !vr.isGloballyUsed && !vr.isPrivate && !isRecordConstructor(vr.name) && !isEntryPointVar(vr) {
+				pos := vr.GetInfo()
+				if pos != nil {
+					varName := vr.Name()
+					names = append(names, varName)
+					positions[varName] = pos.Position
+				}
+			}
+		}
+	}
+
+	sort.Strings(names)
+	for _, name := range names {
+		printParseWarning(positions[name], "globally unused var "+name)
 	}
 }
 
@@ -688,16 +682,20 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	meta := sym.GetMeta()
 	if meta != nil {
 		if ok, p := meta.Get(KEYWORDS.private); ok {
-			vr.isPrivate = toBool(p)
+			vr.isPrivate = ToBool(p)
 		}
 		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
-			vr.isDynamic = toBool(p)
+			vr.isDynamic = ToBool(p)
 		}
 		vr.taggedType = getTaggedType(sym)
 	}
 }
 
-func parseDef(obj Object, ctx *ParseContext) *DefExpr {
+func isCreatedByMacro(formSeq Seq) bool {
+	return formSeq.First().GetInfo().Pos().filename == STR.coreFilename
+}
+
+func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 	count := checkForm(obj, 2, 4)
 	seq := obj.(Seq)
 	s := Second(seq)
@@ -713,11 +711,15 @@ func parseDef(obj Object, ctx *ParseContext) *DefExpr {
 		symWithoutNs := sym
 		symWithoutNs.ns = nil
 		vr := ctx.GlobalEnv.CurrentNamespace().Intern(symWithoutNs)
+		if isForLinter {
+			vr.isGloballyUsed = true
+		}
 		res := &DefExpr{
-			vr:       vr,
-			name:     sym,
-			value:    nil,
-			Position: GetPosition(obj),
+			vr:               vr,
+			name:             sym,
+			value:            nil,
+			Position:         GetPosition(obj),
+			isCreatedByMacro: isCreatedByMacro(seq),
 		}
 		meta = sym.GetMeta()
 		if count == 3 {
@@ -759,6 +761,13 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 			panic(&ParseError{obj: ro, msg: "Can only recur from tail position"})
 		}
 		res = append(res, expr)
+		if LINTER_MODE {
+			if defExpr, ok := expr.(*DefExpr); ok && !defExpr.isCreatedByMacro {
+				printParseWarning(defExpr.Pos(), "inline def")
+			} else if doExpr, ok := expr.(*DoExpr); ok && !doExpr.isCreatedByMacro {
+				printParseWarning(doExpr.Pos(), "redundant do form")
+			}
+		}
 	}
 	return res
 }
@@ -1005,6 +1014,17 @@ func parseTry(obj Object, ctx *ParseContext) *TryExpr {
 		}
 		seq = seq.Rest()
 	}
+	if LINTER_MODE {
+		if res.body == nil {
+			printParseWarning(res.Pos(), "try form with empty body")
+		}
+		if res.catches == nil && res.finallyExpr == nil {
+			printParseWarning(res.Pos(), "try form without catch or finally")
+		}
+		if res.finallyExpr != nil && len(res.finallyExpr) == 0 {
+			printParseWarning(GetPosition(obj), "finally form with empty body")
+		}
+	}
 	return res
 }
 
@@ -1023,7 +1043,7 @@ func parseLetfn(obj Object, ctx *ParseContext) *LoopExpr {
 func isSkipUnused(obj Meta) bool {
 	if m := obj.GetMeta(); m != nil {
 		if ok, v := m.Get(KEYWORDS.skipUnused); ok {
-			return toBool(v)
+			return ToBool(v)
 		}
 	}
 	return false
@@ -1149,7 +1169,19 @@ func resolveMacro(obj Object, ctx *ParseContext) *Var {
 			return nil
 		}
 		vr.isUsed = true
+		vr.isGloballyUsed = true
+		if vr.ns == nil {
+			// This very likely represents a Joker
+			// bug. E.g. often seen while developing the
+			// fast-init (fast-startup) version of
+			// Joker. But it's much easier to debug when
+			// presented as a parse error (so the
+			// "offending" .joke source info is provided)
+			// along with the problematic var name.
+			panic(&ParseError{obj: obj, msg: fmt.Sprintf("No namespace for %s", vr.name.ToString(false))})
+		}
 		vr.ns.isUsed = true
+		vr.ns.isGloballyUsed = true
 		return vr
 	default:
 		return nil
@@ -1235,14 +1267,58 @@ func getTaggedType(obj Meta) *Type {
 	return nil
 }
 
+func getTaggedTypes(obj Meta) []*Type {
+	var res []*Type
+	if m := obj.GetMeta(); m != nil {
+		if ok, typeName := m.Get(KEYWORDS.tag); ok {
+			switch typeDecl := typeName.(type) {
+			case Symbol:
+				if t := TYPES[typeDecl.name]; t != nil {
+					res = append(res, t)
+				}
+			case String:
+				parts := strings.Split(typeDecl.S, "|")
+				for _, p := range parts {
+					if t := TYPES[MakeSymbol(p).name]; t != nil {
+						res = append(res, t)
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
+func isTypeOneOf(abstractTypes []*Type, concreteType *Type) bool {
+	for _, t := range abstractTypes {
+		if IsEqualOrImplements(t, concreteType) {
+			return true
+		}
+	}
+	return false
+}
+
+func typesString(types []*Type) string {
+	var b bytes.Buffer
+	for i, t := range types {
+		b.WriteString(t.ToString(false))
+		if i < len(types)-1 {
+			b.WriteString(" or ")
+		}
+	}
+	return b.String()
+}
+
 func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
 	res := false
 	for i, da := range declaredArgs {
-		if declaredType := getTaggedType(da); declaredType != nil {
+		if declaredTypes := getTaggedTypes(da); len(declaredTypes) > 0 {
 			passedType := call.args[i].InferType()
-			if passedType != nil && !IsEqualOrImplements(declaredType, passedType) {
-				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), declaredType.ToString(false), passedType.ToString(false)))
-				res = true
+			if passedType != nil {
+				if !isTypeOneOf(declaredTypes, passedType) {
+					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), typesString(declaredTypes), passedType.ToString(false)))
+					res = true
+				}
 			}
 		}
 	}
@@ -1353,7 +1429,7 @@ func isUnknownCallable(expr Expr) (bool, Seq) {
 		if c.vr.expr != nil {
 			return false, nil
 		}
-		if sym.ns == nil && c.vr.ns != GLOBAL_ENV.CoreNamespace {
+		if sym.ns == nil && c.vr.isFake && c.vr.ns != GLOBAL_ENV.CoreNamespace {
 			return true, nil
 		}
 	}
@@ -1486,7 +1562,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			return parseSetMacro(obj, ctx)
 
 		case STR.def:
-			return parseDef(obj, ctx)
+			return parseDef(obj, ctx, false)
+		case STR.defLinter:
+			return parseDef(obj, ctx, true)
 		case STR._var:
 			checkForm(obj, 2, 2)
 			switch sym := Second(seq).(type) {
@@ -1505,7 +1583,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					vr = InternFakeSymbol(symNs, sym)
 				}
 				vr.isUsed = true
+				vr.isGloballyUsed = true
 				vr.ns.isUsed = true
+				vr.ns.isGloballyUsed = true
 				return &LiteralExpr{
 					obj:      vr,
 					Position: pos,
@@ -1514,10 +1594,19 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 				panic(&ParseError{obj: obj, msg: "var's argument must be a symbol"})
 			}
 		case STR.do:
-			return &DoExpr{
-				body:     parseBody(seq.Rest(), ctx),
-				Position: pos,
+			res := &DoExpr{
+				body:             parseBody(seq.Rest(), ctx),
+				Position:         pos,
+				isCreatedByMacro: isCreatedByMacro(seq),
 			}
+			if LINTER_MODE {
+				if len(res.body) == 0 {
+					printParseWarning(pos, "do form with empty body")
+				} else if len(res.body) == 1 {
+					printParseWarning(pos, "redundant do form")
+				}
+			}
+			return res
 		case STR.throw:
 			return &ThrowExpr{
 				Position: pos,
@@ -1604,13 +1693,13 @@ func InternFakeSymbol(ns *Namespace, sym Symbol) *Var {
 			ns:   nil,
 			name: sym.name,
 		}
-		return ns.Intern(fakeSym)
+		return ns.InternFake(fakeSym)
 	}
 	fakeSym := Symbol{
 		ns:   nil,
 		name: STRINGS.Intern(sym.ToString(false)),
 	}
-	return GLOBAL_ENV.CurrentNamespace().Intern(fakeSym)
+	return GLOBAL_ENV.CurrentNamespace().InternFake(fakeSym)
 }
 
 func isInteropSymbol(sym Symbol) bool {
@@ -1621,7 +1710,7 @@ func isRecordConstructor(sym Symbol) bool {
 	return sym.ns == nil && (strings.HasPrefix(*sym.name, "->") || strings.HasPrefix(*sym.name, "map->"))
 }
 
-var fullClassNameRe = regexp.MustCompile(`.+\..+\..+`)
+var fullClassNameRe = regexp.MustCompile(`.+\..+\.[A-Z].+`)
 
 func isJavaSymbol(sym Symbol) bool {
 	s := *sym.name
@@ -1629,6 +1718,17 @@ func isJavaSymbol(sym Symbol) bool {
 		s = *sym.ns
 	}
 	return fullClassNameRe.MatchString(s)
+}
+
+func MakeVarRefExpr(vr *Var, obj Object) *VarRefExpr {
+	vr.isUsed = true
+	vr.isGloballyUsed = true
+	vr.ns.isUsed = true
+	vr.ns.isGloballyUsed = true
+	return &VarRefExpr{
+		vr:       vr,
+		Position: GetPosition(obj),
+	}
 }
 
 func parseSymbol(obj Object, ctx *ParseContext) Expr {
@@ -1641,52 +1741,53 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 			Position: GetPosition(obj),
 		}
 	}
-	vr, ok := ctx.GlobalEnv.Resolve(sym)
-	if !ok {
-		if sym.ns == nil && TYPES[sym.name] != nil {
-			return &LiteralExpr{
-				Position: GetPosition(obj),
-				obj:      TYPES[sym.name],
-			}
-		}
-		if !LINTER_MODE {
-			panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
-		}
-		if DIALECT == CLJS && sym.ns == nil {
-			// Check if this is a "callable namespace"
-			ns := ctx.GlobalEnv.FindNamespace(sym)
-			if ns == nil {
-				ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
-			}
-			if ns != nil {
-				ns.isUsed = true
-				return NewSurrogateExpr(obj)
-			}
-			// See if this is a JS interop (i.e. Math.PI)
-			parts := strings.Split(sym.Name(), ".")
-			if len(parts) > 1 && parts[0] != "" && parts[len(parts)-1] != "" {
-				return parseSymbol(DeriveReadObject(obj, MakeSymbol(strings.Join(parts[:len(parts)-1], "."))), ctx)
-			}
-		}
-		symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
-		if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-			if isInteropSymbol(sym) || isJavaSymbol(sym) {
-				return NewSurrogateExpr(sym)
-			}
-			if !ctx.isUnknownCallableScope {
-				if ctx.linterBindings.GetBinding(sym) == nil {
-					printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
-				}
-			}
-		}
-		vr = InternFakeSymbol(symNs, sym)
+	if vr, ok := ctx.GlobalEnv.Resolve(sym); ok {
+		return MakeVarRefExpr(vr, obj)
 	}
-	vr.isUsed = true
-	vr.ns.isUsed = true
-	return &VarRefExpr{
-		vr:       vr,
-		Position: GetPosition(obj),
+	if sym.ns == nil && TYPES[sym.name] != nil {
+		return &LiteralExpr{
+			Position: GetPosition(obj),
+			obj:      TYPES[sym.name],
+		}
 	}
+	if !LINTER_MODE {
+		panic(&ParseError{obj: obj, msg: "Unable to resolve symbol: " + sym.ToString(false)})
+	}
+	if DIALECT == CLJS && sym.ns == nil {
+		// Check if this is a "callable namespace"
+		ns := ctx.GlobalEnv.FindNamespace(sym)
+		if ns == nil {
+			ns = ctx.GlobalEnv.CurrentNamespace().aliases[sym.name]
+		}
+		if ns != nil {
+			ns.isUsed = true
+			ns.isGloballyUsed = true
+			return NewSurrogateExpr(obj)
+		}
+		// See if this is a JS interop (i.e. Math.PI)
+		parts := strings.Split(sym.Name(), ".")
+		if len(parts) > 1 && parts[0] != "" && parts[len(parts)-1] != "" {
+			return parseSymbol(DeriveReadObject(obj, MakeSymbol(strings.Join(parts[:len(parts)-1], "."))), ctx)
+		}
+		// Check if this is a constructor call
+		if len(parts) == 2 && parts[0] != "" && parts[len(parts)-1] == "" {
+			if vr, ok := ctx.GlobalEnv.Resolve(MakeSymbol(parts[0])); ok {
+				return MakeVarRefExpr(vr, obj)
+			}
+		}
+	}
+	symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
+	if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
+		if isInteropSymbol(sym) || isJavaSymbol(sym) {
+			return NewSurrogateExpr(sym)
+		}
+		if !ctx.isUnknownCallableScope {
+			if ctx.linterBindings.GetBinding(sym) == nil {
+				printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
+			}
+		}
+	}
+	return MakeVarRefExpr(InternFakeSymbol(symNs, sym), obj)
 }
 
 func Parse(obj Object, ctx *ParseContext) Expr {
@@ -1694,7 +1795,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	var res Expr
 	canHaveMeta := false
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, Regex, *Type:
+	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, *Regex, *Type:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true
@@ -1742,22 +1843,4 @@ func TryParse(obj Object, ctx *ParseContext) (expr Expr, err error) {
 		}
 	}()
 	return Parse(obj, ctx), nil
-}
-
-func init() {
-	SPECIAL_SYMBOLS[SYMBOLS._if.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.quote.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.fn_.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.let_.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.letfn_.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.loop_.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.recur.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.setMacro_.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.def.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS._var.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.do.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.throw.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.try.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.catch.name] = true
-	SPECIAL_SYMBOLS[SYMBOLS.finally.name] = true
 }

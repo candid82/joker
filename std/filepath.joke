@@ -154,6 +154,7 @@ If the result of this process is an empty string, returns the string \".\"."
   ^{:doc "OS-specific path separator."
     :added "1.0"
     :tag String
+    :const true
     :go "string(filepath.Separator)"}
   separator)
 
@@ -161,5 +162,6 @@ If the result of this process is an empty string, returns the string \".\"."
   ^{:doc "OS-specific path list separator."
     :added "1.0"
     :tag String
+    :const true
     :go "string(filepath.ListSeparator)"}
   list-separator)

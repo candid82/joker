@@ -14,7 +14,7 @@ brew install candid82/brew/joker
 
 The same command can be used on Linux if you use [Linuxbrew](http://linuxbrew.sh/).
 
-If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker/).
+If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker-bin/).
 
 If you use [Nix](https://nixos.org/nix/), then you can install Joker with
 
@@ -28,13 +28,17 @@ You can also [build](#building) Joker from the source code.
 
 ## Usage
 
-`joker` - launch REPL
+`joker` - launch REPL. Exit via `(exit)`, **EOF** (such as `Ctrl-D`), or **SIGINT** (such as `Ctrl-C`).
 
-`joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`.
+`joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--file <filename>`
+in which case drops into the REPL after the script is (successfully) executed. (Note use of `--file` in this case, to ensure `<filename>` is not treated as a `<socket>` specification for the repl.)
 
-`joker -e <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`
+`joker --eval <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--eval`,
+in which case drops into the REPL after the expression is (successfully) executed.
 
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
+
+`joker --lint --working-dir <dirname>` - recursively lint all Clojure files in a directory.
 
 `joker -` - execute a script on standard input (os.Stdin).
 
@@ -42,7 +46,15 @@ You can also [build](#building) Joker from the source code.
 
 [Standard library reference](https://candid82.github.io/joker/)
 
+Dash docset: `dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fjoker%2Fmaster%2Fdocs%2Fjoker.xml`
+
+(either copy and paste this link to your browser's url bar or open it in a terminal with `open` command)
+
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
+
+[Organizing libraries (namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
+
+[Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
 
 ## Project goals
 
@@ -50,7 +62,7 @@ These are high level goals of the project that guide design and implementation d
 
 - Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
-- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. For those who don't use Cursive, this is probably already better than the status quo. Joker can also be used for pretty printing EDN data structures (very basic algorithm at the moment). For example, the following command can be used to pretty print EDN data structure (read from stdin):
+- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. Joker can also be used for pretty printing EDN data structures (very basic algorithm at the moment). For example, the following command can be used to pretty print EDN data structure (read from stdin):
 
 ```
 joker --hashmap-threshold -1 -e "(pprint (read))"
@@ -59,7 +71,7 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
  There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
-## Project non-goals
+## Project Non-goals
 
 - Performance. If you need it, use Clojure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
 - Have all Clojure features. Some features are impossible to implement due to a different host language (Go vs Java), others I don't find that important for the use cases I have in mind for Joker. But generally Clojure is a pretty large language at this point and it is simply unfeasible to reach feature parity with it, even with naive implementation.
@@ -97,15 +109,17 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
   | Vector     | PersistentVector           |
 
 1. Joker doesn't have the same level of interoperability with the host language (Go) as Clojure does with Java or ClojureScript does with JavaScript. It doesn't have access to arbitrary Go types and functions. There is only a small fixed set of built-in types and interfaces. Dot notation for calling methods is not supported (as there are no methods). All Java/JVM specific functionality of Clojure is not implemented for obvious reasons.
-1. Joker is single-threaded with no support for concurrency or parallelism. Therefore no refs, agents, futures, promises, locks, volatiles, transactions, `p*` functions that use multiple threads. Vars always have just one "root" binding.
+1. Joker is single-threaded with no support for parallelism. Therefore no refs, agents, futures, promises, locks, volatiles, transactions, `p*` functions that use multiple threads. Vars always have just one "root" binding. Joker does have core.async style support for concurrency. See `go` macro [documentation](https://candid82.github.io/joker/joker.core.html#go) for details.
 1. The following features are not implemented: protocols, records, structmaps, chunked seqs, transients, tagged literals, unchecked arithmetics, primitive arrays, custom data readers, transducers, validators and watch functions for vars and atoms, hierarchies, sorted maps and sets.
 1. Unrelated to the features listed above, the following function from clojure.core namespace are not currently implemented but will probably be implemented in some form in the future: `subseq`, `iterator-seq`, `reduced?`, `reduced`, `mix-collection-hash`, `definline`, `re-groups`, `hash-ordered-coll`, `enumeration-seq`, `compare-and-set!`, `rationalize`, `load-reader`, `find-keyword`, `comparator`, `resultset-seq`, `file-seq`, `sorted?`, `ensure-reduced`, `rsubseq`, `pr-on`, `seque`, `alter-var-root`, `hash-unordered-coll`, `re-matcher`, `unreduced`.
 1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other built-in namespaces include `joker.string`, `joker.json`, `joker.os`, `joker.base64` etc. See [standard library reference](https://candid82.github.io/joker/) for details.
+1. Joker doesn't support AOT compilation and `(-main)` entry point as Clojure does. It simply reads s-expressions from the file and executes them sequentially. If you want some code to be executed only if the file it's in is passed as `joker` argument but not if it's loaded from other files, use `(when (= *main-file* *file*) ...)` idiom. See https://github.com/candid82/joker/issues/277 for details.
 1. Miscellaneous:
   - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
   - `slurp` only takes one argument - a filename (string). No options are supported.
   - `ifn?` is called `callable?`
   - Map entry is represented as a two-element vector.
+  - resolving unbound var returns `nil`, not the value `Unbound`. You can still check if the var is bound with `bound?` function.
 
 ## Linter mode
 
@@ -119,7 +133,7 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
-### Intergration with editors
+### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
 - Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
@@ -148,7 +162,7 @@ Symbol `baz` is introduced inside `def-something` macro. The code is totally val
 
 Please note that the symbols are namespace qualified and unquoted. Also, Joker knows about some commonly used macros (outside of `clojure.core` namespace) like `clojure.test/deftest` or `clojure.core.async/go-loop`, so you won't have to add those to your config file.
 
-Joker also allows to specify symbols that are introduced by a macro:
+Joker also allows you to specify symbols that are introduced by a macro:
 
 ```clojure
 {:known-macros [[riemann.streams/where [service event]]]}
@@ -184,13 +198,38 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
  (t/deftest ...)
  ```
 
-3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
+3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only), or `.jokerd/linter.joke` (Joker only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
 
    *  :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
    * If you really want some symbols to be considered declared *in any namespace no matter what*, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
     (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
 
 I generally prefer first option for `clojure.test` namespace.
+
+### Linting directories
+
+To recursively lint all files in a directory pass `--working-dir <dirname>` parameter. Please note that if you also pass file argument (or `--file` parameter) Joker will lint that single file and will only use `--working-dir` to locate `.joker` config file. That is,
+
+```bash
+joker --lint --working-dir my-project
+```
+
+lints all Clojure files in `my-project` directory, whereas
+
+```bash
+joker --lint --working-dir my-project foo.clj
+```
+
+lints single file `foo.clj` but uses `.joker` config file from `my-project` directory.
+
+When linting directories Joker lints all files with the extension corresponding to the selected dialect (`*.clj`, `*.cljs`, `*.joke`, or `*.edn`). To exclude certain files specify regex patterns in `:ignored-file-regexes` vector in `.joker` file, e.g. `:ignored-file-regexes [#".*user\.clj" #".*/dev/profiling\.clj"]`.
+
+When linting directories Joker can report globally unused namespaces and public vars. This is turned off by default but can be enabled with `--report-globally-unused` flag, e.g. `joker --lint --working-dir my-project --report-globally-unused`. This is useful for finding "dead" code. Some namespaces or vars are intended to be used by external systems (e.g. public API of a library or main function of a program). To exclude such namespaces and vars from being reported as globally unused list them in `:entry-points` vector in `.joker` file, which may contain the names of namespaces or fully qualified names of vars. For example:
+
+```clojure
+:entry-points [my-project.public-api
+               my-project.core/-main]
+```
 
 ### Optional rules
 
@@ -216,7 +255,7 @@ Note that `unused binding` and `unused parameter` warnings are suppressed for na
 
 ## Building
 
-Joker requires Go v1.12 or later.
+Joker requires Go v1.13 or later.
 Below commands should get you up and running.
 
 ```
@@ -225,10 +264,24 @@ cd $GOPATH/src/github.com/candid82/joker
 ./run.sh --version && go install
 ```
 
+### Cross-platform Builds
+
+After building the native version (to autogenerate appropriate files, "vet" the source code, etc.), set the appropriate environment variables and invoke `go build`. E.g.:
+
+```
+$ GOOS=linux GOARCH=arm GOARM=6 go build
+```
+
+(The `run.sh` script does not support cross-platform building.)
+
 ## Coding Guidelines
 
 - Dashes (`-`) in namespaces are not converted to underscores (`_`) by Joker, so (unlike with Clojure) there's no need to name `.joke` files accordingly.
 - Avoid `:refer :all` and the `use` function, as that reduces the effectiveness of linting.
+
+## Developer Notes
+
+See [`DEVELOPER.md`](https://github.com/candid82/joker/blob/master/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
 ## Contributors
 

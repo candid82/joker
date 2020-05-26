@@ -6,16 +6,21 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-var jsonNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.json"))
+var __read_string__P ProcFn = __read_string_
+var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/json"}
 
-
-
-var read_string_ Proc = func(_args []Object) Object {
+func __read_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		s := ExtractString(_args, 0)
-		_res := readString(s)
+		_res := readString(s, nil)
+		return _res
+
+	case _c == 2:
+		s := ExtractString(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := readString(s, opts)
 		return _res
 
 	default:
@@ -24,7 +29,10 @@ var read_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc = func(_args []Object) Object {
+var __write_string__P ProcFn = __write_string_
+var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_", Package: "std/json"}
+
+func __write_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -38,19 +46,13 @@ var write_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var jsonNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.json"))
+
 func init() {
-
-	jsonNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of JSON as defined in RFC 4627.", "1.0"))
-
-	
-	jsonNamespace.InternVar("read-string", read_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Parses the JSON-encoded data and return the result as a Joker value.`, "1.0"))
-
-	jsonNamespace.InternVar("write-string", write_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-			`Returns the JSON encoding of v.`, "1.0"))
-
+	jsonNamespace.Lazy = Init
 }

@@ -4,15 +4,15 @@ package string
 
 import (
 	. "github.com/candid82/joker/core"
+	"regexp"
 	"strings"
 	"unicode"
 )
 
-var stringNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.string"))
+var __isblank__P ProcFn = __isblank_
+var isblank_ Proc = Proc{Fn: __isblank__P, Name: "isblank_", Package: "std/string"}
 
-
-
-var isblank_ Proc = func(_args []Object) Object {
+func __isblank_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -26,7 +26,10 @@ var isblank_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var capitalize_ Proc = func(_args []Object) Object {
+var __capitalize__P ProcFn = __capitalize_
+var capitalize_ Proc = Proc{Fn: __capitalize__P, Name: "capitalize_", Package: "std/string"}
+
+func __capitalize_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -40,7 +43,10 @@ var capitalize_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isends_with_ Proc = func(_args []Object) Object {
+var __isends_with__P ProcFn = __isends_with_
+var isends_with_ Proc = Proc{Fn: __isends_with__P, Name: "isends_with_", Package: "std/string"}
+
+func __isends_with_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -55,7 +61,10 @@ var isends_with_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var escape_ Proc = func(_args []Object) Object {
+var __escape__P ProcFn = __escape_
+var escape_ Proc = Proc{Fn: __escape__P, Name: "escape_", Package: "std/string"}
+
+func __escape_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -70,7 +79,10 @@ var escape_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isincludes_ Proc = func(_args []Object) Object {
+var __isincludes__P ProcFn = __isincludes_
+var isincludes_ Proc = Proc{Fn: __isincludes__P, Name: "isincludes_", Package: "std/string"}
+
+func __isincludes_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -85,7 +97,10 @@ var isincludes_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var index_of_ Proc = func(_args []Object) Object {
+var __index_of__P ProcFn = __index_of_
+var index_of_ Proc = Proc{Fn: __index_of__P, Name: "index_of_", Package: "std/string"}
+
+func __index_of_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -107,7 +122,10 @@ var index_of_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var join_ Proc = func(_args []Object) Object {
+var __join__P ProcFn = __join_
+var join_ Proc = Proc{Fn: __join__P, Name: "join_", Package: "std/string"}
+
+func __join_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -127,7 +145,10 @@ var join_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var last_index_of_ Proc = func(_args []Object) Object {
+var __last_index_of__P ProcFn = __last_index_of_
+var last_index_of_ Proc = Proc{Fn: __last_index_of__P, Name: "last_index_of_", Package: "std/string"}
+
+func __last_index_of_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -149,7 +170,10 @@ var last_index_of_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var lower_case_ Proc = func(_args []Object) Object {
+var __lower_case__P ProcFn = __lower_case_
+var lower_case_ Proc = Proc{Fn: __lower_case__P, Name: "lower_case_", Package: "std/string"}
+
+func __lower_case_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -163,7 +187,10 @@ var lower_case_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var pad_left_ Proc = func(_args []Object) Object {
+var __pad_left__P ProcFn = __pad_left_
+var pad_left_ Proc = Proc{Fn: __pad_left__P, Name: "pad_left_", Package: "std/string"}
+
+func __pad_left_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -179,7 +206,10 @@ var pad_left_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var pad_right_ Proc = func(_args []Object) Object {
+var __pad_right__P ProcFn = __pad_right_
+var pad_right_ Proc = Proc{Fn: __pad_right__P, Name: "pad_right_", Package: "std/string"}
+
+func __pad_right_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -195,7 +225,27 @@ var pad_right_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var replace_ Proc = func(_args []Object) Object {
+var __re_quote__P ProcFn = __re_quote_
+var re_quote_ Proc = Proc{Fn: __re_quote__P, Name: "re_quote_", Package: "std/string"}
+
+func __re_quote_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := regexp.MustCompile(regexp.QuoteMeta(s))
+		return MakeRegex(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __replace__P ProcFn = __replace_
+var replace_ Proc = Proc{Fn: __replace__P, Name: "replace_", Package: "std/string"}
+
+func __replace_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -211,7 +261,10 @@ var replace_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var replace_first_ Proc = func(_args []Object) Object {
+var __replace_first__P ProcFn = __replace_first_
+var replace_first_ Proc = Proc{Fn: __replace_first__P, Name: "replace_first_", Package: "std/string"}
+
+func __replace_first_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -227,7 +280,10 @@ var replace_first_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var reverse_ Proc = func(_args []Object) Object {
+var __reverse__P ProcFn = __reverse_
+var reverse_ Proc = Proc{Fn: __reverse__P, Name: "reverse_", Package: "std/string"}
+
+func __reverse_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -241,20 +297,23 @@ var reverse_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var split_ Proc = func(_args []Object) Object {
+var __split__P ProcFn = __split_
+var split_ Proc = Proc{Fn: __split__P, Name: "split_", Package: "std/string"}
+
+func __split_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
 		s := ExtractString(_args, 0)
-		re := ExtractRegex(_args, 1)
-		_res := split(s, re, 0)
+		sep := ExtractObject(_args, 1)
+		_res := splitOnStringOrRegex(s, sep, 0)
 		return _res
 
 	case _c == 3:
 		s := ExtractString(_args, 0)
-		re := ExtractRegex(_args, 1)
+		sep := ExtractObject(_args, 1)
 		n := ExtractInt(_args, 2)
-		_res := split(s, re, n)
+		_res := splitOnStringOrRegex(s, sep, n)
 		return _res
 
 	default:
@@ -263,7 +322,10 @@ var split_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var split_lines_ Proc = func(_args []Object) Object {
+var __split_lines__P ProcFn = __split_lines_
+var split_lines_ Proc = Proc{Fn: __split_lines__P, Name: "split_lines_", Package: "std/string"}
+
+func __split_lines_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -277,7 +339,10 @@ var split_lines_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isstarts_with_ Proc = func(_args []Object) Object {
+var __isstarts_with__P ProcFn = __isstarts_with_
+var isstarts_with_ Proc = Proc{Fn: __isstarts_with__P, Name: "isstarts_with_", Package: "std/string"}
+
+func __isstarts_with_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -292,7 +357,10 @@ var isstarts_with_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var trim_ Proc = func(_args []Object) Object {
+var __trim__P ProcFn = __trim_
+var trim_ Proc = Proc{Fn: __trim__P, Name: "trim_", Package: "std/string"}
+
+func __trim_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -306,7 +374,10 @@ var trim_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var trim_left_ Proc = func(_args []Object) Object {
+var __trim_left__P ProcFn = __trim_left_
+var trim_left_ Proc = Proc{Fn: __trim_left__P, Name: "trim_left_", Package: "std/string"}
+
+func __trim_left_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -320,7 +391,10 @@ var trim_left_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var trim_newline_ Proc = func(_args []Object) Object {
+var __trim_newline__P ProcFn = __trim_newline_
+var trim_newline_ Proc = Proc{Fn: __trim_newline__P, Name: "trim_newline_", Package: "std/string"}
+
+func __trim_newline_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -334,7 +408,10 @@ var trim_newline_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var trim_right_ Proc = func(_args []Object) Object {
+var __trim_right__P ProcFn = __trim_right_
+var trim_right_ Proc = Proc{Fn: __trim_right__P, Name: "trim_right_", Package: "std/string"}
+
+func __trim_right_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -348,7 +425,10 @@ var trim_right_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var triml_ Proc = func(_args []Object) Object {
+var __triml__P ProcFn = __triml_
+var triml_ Proc = Proc{Fn: __triml__P, Name: "triml_", Package: "std/string"}
+
+func __triml_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -362,7 +442,10 @@ var triml_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var trimr_ Proc = func(_args []Object) Object {
+var __trimr__P ProcFn = __trimr_
+var trimr_ Proc = Proc{Fn: __trimr__P, Name: "trimr_", Package: "std/string"}
+
+func __trimr_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -376,7 +459,10 @@ var trimr_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var upper_case_ Proc = func(_args []Object) Object {
+var __upper_case__P ProcFn = __upper_case_
+var upper_case_ Proc = Proc{Fn: __upper_case__P, Name: "upper_case_", Package: "std/string"}
+
+func __upper_case_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -390,146 +476,13 @@ var upper_case_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var stringNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.string"))
+
 func init() {
-
-	stringNamespace.ResetMeta(MakeMeta(nil, "Implements simple functions to manipulate strings.", "1.0"))
-
-	
-	stringNamespace.InternVar("blank?", isblank_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`True if s is nil, empty, or contains only whitespace.`, "1.0"))
-
-	stringNamespace.InternVar("capitalize", capitalize_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts first character of the string to upper-case, all other
-  characters to lower-case.`, "1.0"))
-
-	stringNamespace.InternVar("ends-with?", isends_with_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s ends with substr.`, "1.0"))
-
-	stringNamespace.InternVar("escape", escape_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("cmap"))),
-			`Return a new string, using cmap to escape each character ch
-  from s as follows:
-
-  If (cmap ch) is nil, append ch to the new string.
-  If (cmap ch) is non-nil, append (str (cmap ch)) instead.`, "1.0"))
-
-	stringNamespace.InternVar("includes?", isincludes_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s includes substr.`, "1.0"))
-
-	stringNamespace.InternVar("index-of", index_of_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("value")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("value"), MakeSymbol("from"))),
-			`Return index of value (string or char) in s, optionally searching
-  forward from from or nil if not found.`, "1.0"))
-
-	stringNamespace.InternVar("join", join_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("coll")), NewVectorFrom(MakeSymbol("separator"), MakeSymbol("coll"))),
-			`Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.`, "1.0"))
-
-	stringNamespace.InternVar("last-index-of", last_index_of_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("value")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("value"), MakeSymbol("from"))),
-			`Return last index of value (string or char) in s, optionally
-  searching backward from from or nil if not found.`, "1.0"))
-
-	stringNamespace.InternVar("lower-case", lower_case_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts string to all lower-case.`, "1.0"))
-
-	stringNamespace.InternVar("pad-left", pad_left_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the beginning to length n.`, "1.0"))
-
-	stringNamespace.InternVar("pad-right", pad_right_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the end to length n.`, "1.0"))
-
-	stringNamespace.InternVar("replace", replace_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),
-			`Replaces all instances of match (String or Regex) with string repl in string s.
-
-  If match is Regex, $1, $2, etc. in the replacement string repl are
-  substituted with the string that matched the corresponding
-  parenthesized group in the pattern.
-  `, "1.0"))
-
-	stringNamespace.InternVar("replace-first", replace_first_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),
-			`Replaces the first instance of match (String or Regex) with string repl in string s.
-
-  If match is Regex, $1, $2, etc. in the replacement string repl are
-  substituted with the string that matched the corresponding
-  parenthesized group in the pattern.
-  `, "1.0"))
-
-	stringNamespace.InternVar("reverse", reverse_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns s with its characters reversed.`, "1.0"))
-
-	stringNamespace.InternVar("split", split_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("re")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("re"), MakeSymbol("n"))),
-			`Splits string on a regular expression. Returns vector of the splits.`, "1.0"))
-
-	stringNamespace.InternVar("split-lines", split_lines_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Splits string on \n or \r\n. Returns vector of the splits.`, "1.0"))
-
-	stringNamespace.InternVar("starts-with?", isstarts_with_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
-			`True if s starts with substr.`, "1.0"))
-
-	stringNamespace.InternVar("trim", trim_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from both ends of string.`, "1.0"))
-
-	stringNamespace.InternVar("trim-left", trim_left_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the left side of string.`, "1.0"))
-
-	stringNamespace.InternVar("trim-newline", trim_newline_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes all trailing newline \n or return \r characters from string.`, "1.0"))
-
-	stringNamespace.InternVar("trim-right", trim_right_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the right side of string.`, "1.0"))
-
-	stringNamespace.InternVar("triml", triml_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the left side of string.`, "1.0"))
-
-	stringNamespace.InternVar("trimr", trimr_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Removes whitespace from the right side of string.`, "1.0"))
-
-	stringNamespace.InternVar("upper-case", upper_case_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts string to all upper-case.`, "1.0"))
-
+	stringNamespace.Lazy = Init
 }

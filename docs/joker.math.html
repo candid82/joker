@@ -6,61 +6,598 @@
   <div class="main">
     <h1>Namespace: joker.math</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Provides basic constants and mathematical functions.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
+  <a href="#abs">abs</a>
+</li>
+<li>
+  <a href="#ceil">ceil</a>
+</li>
+<li>
+  <a href="#copy-sign">copy-sign</a>
+</li>
+<li>
   <a href="#cos">cos</a>
+</li>
+<li>
+  <a href="#cube-root">cube-root</a>
+</li>
+<li>
+  <a href="#dim">dim</a>
+</li>
+<li>
+  <a href="#e">e</a>
+</li>
+<li>
+  <a href="#exp">exp</a>
+</li>
+<li>
+  <a href="#exp-2">exp-2</a>
+</li>
+<li>
+  <a href="#exp-minus-1">exp-minus-1</a>
+</li>
+<li>
+  <a href="#floor">floor</a>
 </li>
 <li>
   <a href="#hypot">hypot</a>
 </li>
 <li>
+  <a href="#inf">inf</a>
+</li>
+<li>
+  <a href="#inf?">inf?</a>
+</li>
+<li>
+  <a href="#ln-of-10">ln-of-10</a>
+</li>
+<li>
+  <a href="#ln-of-2">ln-of-2</a>
+</li>
+<li>
+  <a href="#log">log</a>
+</li>
+<li>
+  <a href="#log-10">log-10</a>
+</li>
+<li>
+  <a href="#log-10-of-e">log-10-of-e</a>
+</li>
+<li>
+  <a href="#log-2">log-2</a>
+</li>
+<li>
+  <a href="#log-2-of-e">log-2-of-e</a>
+</li>
+<li>
+  <a href="#log-binary">log-binary</a>
+</li>
+<li>
+  <a href="#log-plus-1">log-plus-1</a>
+</li>
+<li>
+  <a href="#max-double">max-double</a>
+</li>
+<li>
+  <a href="#modf">modf</a>
+</li>
+<li>
+  <a href="#nan">nan</a>
+</li>
+<li>
+  <a href="#nan?">nan?</a>
+</li>
+<li>
+  <a href="#next-after">next-after</a>
+</li>
+<li>
+  <a href="#phi">phi</a>
+</li>
+<li>
   <a href="#pi">pi</a>
+</li>
+<li>
+  <a href="#pow">pow</a>
+</li>
+<li>
+  <a href="#pow-10">pow-10</a>
+</li>
+<li>
+  <a href="#round">round</a>
+</li>
+<li>
+  <a href="#round-to-even">round-to-even</a>
+</li>
+<li>
+  <a href="#sign-bit">sign-bit</a>
 </li>
 <li>
   <a href="#sin">sin</a>
 </li>
+<li>
+  <a href="#smallest-nonzero-double">smallest-nonzero-double</a>
+</li>
+<li>
+  <a href="#sqrt">sqrt</a>
+</li>
+<li>
+  <a href="#sqrt-of-2">sqrt-of-2</a>
+</li>
+<li>
+  <a href="#sqrt-of-e">sqrt-of-e</a>
+</li>
+<li>
+  <a href="#sqrt-of-phi">sqrt-of-phi</a>
+</li>
+<li>
+  <a href="#sqrt-of-pi">sqrt-of-pi</a>
+</li>
+<li>
+  <a href="#trunc">trunc</a>
+</li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
     <ul>
       <li>
-  <h3 id="cos">cos</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Constant" id="e">e</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">e</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="ln-of-10">ln-of-10</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Natural logarithm of 10</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="ln-of-2">ln-of-2</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Natural logarithm of 2</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="log-10-of-e">log-10-of-e</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Base-10 logarithm of e</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="log-2-of-e">log-2-of-e</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Base-2 logarithm of e</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="max-double">max-double</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Largest finite value representable by Double</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="phi">phi</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Phi</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="pi">pi</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">pi</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="smallest-nonzero-double">smallest-nonzero-double</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Smallest positive, non-zero value representable by Double</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="sqrt-of-2">sqrt-of-2</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Square root of 2</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="sqrt-of-e">sqrt-of-e</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Square root of e</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="sqrt-of-phi">sqrt-of-phi</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Square root of phi</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="sqrt-of-pi">sqrt-of-pi</h3>
+  <span class="var-kind Constant">Double</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">Square root of pi</p>
+  
+  
+</li>
+
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="abs">abs</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(abs x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the absolute value of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="ceil">ceil</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(ceil x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the least integer value greater than or equal to x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="copy-sign">copy-sign</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(copy-sign x y)</code></div>
+</pre>
+  <p class="var-docstr">Returns value with the magnitude of x and the sign of y.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="cos">cos</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(cos x)</code></div>
 </pre>
   <p class="var-docstr">Returns the cosine of the radian argument x.</p>
   
+  
 </li>
 <li>
-  <h3 id="hypot">hypot</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="cube-root">cube-root</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(cube-root x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the cube root of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="dim">dim</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(dim x y)</code></div>
+</pre>
+  <p class="var-docstr">Returns the maximum of x-y and 0.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="exp">exp</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exp x)</code></div>
+</pre>
+  <p class="var-docstr">Returns e**x, the base-e exponential of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="exp-2">exp-2</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exp-2 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns 2**x, the base-2 exponential of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="exp-minus-1">exp-minus-1</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(exp-minus-1 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns e**x - 1, the base-e exponential of x minus 1.<br>
+<br>
+  This is more accurate than (- (exp x) 1.) when x is near zero.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="floor">floor</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(floor x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the greatest integer value greater than or equal to x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="hypot">hypot</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(hypot p q)</code></div>
 </pre>
   <p class="var-docstr">Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.</p>
   
-</li>
-<li>
-  <h3 id="pi">pi</h3>
-  <span class="var-type Double">Double</span>
-  <span class="var-added">v1.0</span>
-  <pre class="var-usage"></pre>
-  <p class="var-docstr">Pi</p>
   
 </li>
 <li>
-  <h3 id="sin">sin</h3>
-  <span class="var-type Function">Function</span>
+  <h3 class="Function" id="inf">inf</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(inf sign)</code></div>
+</pre>
+  <p class="var-docstr">Returns positive infinity if sign &gt;= 0, negative infinity if sign &lt; 0.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="inf?">inf?</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(inf? x sign)</code></div>
+</pre>
+  <p class="var-docstr">Returns whether x is an infinity.<br>
+<br>
+  If sign &gt; 0, returns whether x is positive infinity; if &lt; 0, whether negative infinity; if == 0, whether either infinity.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log">log</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(log x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the natural logarithm of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log-10">log-10</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(log-10 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the decimal logarithm of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log-2">log-2</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(log-2 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the binary logarithm of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log-binary">log-binary</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(log-binary x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the binary exponent of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log-plus-1">log-plus-1</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(log-plus-1 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the natural logarithm of 1 plus x.<br>
+<br>
+  This is more accurate than (log (+ 1 x)) when x is near zero.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="modf">modf</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(modf x)</code></div>
+</pre>
+  <p class="var-docstr">Returns a vector with the integer and fractional floating-point numbers that sum to x.<br>
+<br>
+  Both values have the same sign as x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="nan">nan</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(nan)</code></div>
+</pre>
+  <p class="var-docstr">Returns an IEEE 754 &#34;not-a-number&#34; value.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="nan?">nan?</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(nan? x)</code></div>
+</pre>
+  <p class="var-docstr">Returns whether x is an IEEE 754 &#34;not-a-number&#34; value.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="next-after">next-after</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(next-after x y)</code></div>
+</pre>
+  <p class="var-docstr">Returns the next representable Double value after x towards y.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="pow">pow</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(pow x y)</code></div>
+</pre>
+  <p class="var-docstr">Returns x**y, the base-x exponential of y.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="pow-10">pow-10</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(pow-10 x)</code></div>
+</pre>
+  <p class="var-docstr">Returns 10**x, the base-10 exponential of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="round">round</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(round x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the integer nearest to x, rounding half away from zero.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="round-to-even">round-to-even</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(round-to-even x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the integer nearest to x, rounding ties to the nearest even integer.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="sign-bit">sign-bit</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(sign-bit x)</code></div>
+</pre>
+  <p class="var-docstr">Returns whether x is negative or negative zero.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="sin">sin</h3>
+  <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sin x)</code></div>
 </pre>
   <p class="var-docstr">Returns the sine of the radian argument x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="sqrt">sqrt</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(sqrt x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the square root of x.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="trunc">trunc</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(trunc x)</code></div>
+</pre>
+  <p class="var-docstr">Returns the integer value of x.</p>
+  
   
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

@@ -13,9 +13,9 @@
                          (let [p (first spec) cs (rest spec)]
                            (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
                      [] specs)]
-    `(do
+    `(do nil nil
        ~@(map #(list 'joker.core/require (list 'quote %)) syms)
-       ~@(map #(list 'def %) (remove resolve syms)))))
+       ~@(map #(list 'def-linter__ %) (remove resolve syms)))))
 
 (def *known-macros*
   {'memfn nil
@@ -98,7 +98,7 @@
   (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
-       (def ~(symbol (str name)))
+       (def-linter__ ~(symbol (str name)))
        (defn ~(symbol (str  "map->" name)) [~(symbol "_")] nil)
        ~@(defimpls__ impls))))
 
@@ -108,13 +108,13 @@
   (let [impls (parse-opts+specs__ opts+specs)]
     `(defn ~(symbol (str  "->" name))
        ~fields
-       (def ~(symbol (str name)))
+       (def-linter__ ~(symbol (str name)))
        ~@(defimpls__ impls))))
 
 (defmacro reify
   [& opts+specs]
   (let [impls (parse-opts+specs__ opts+specs)]
-    `(do
+    `(do nil nil
        ~@(defimpls__ impls))))
 
 (defmacro defprotocol
@@ -145,7 +145,7 @@
                                                          arglists)
                                           :doc doc}))))
                        {} sigs))]
-    `(do
+    `(do nil
        (def ~name)
        ~@(defmethods__ sigs))))
 
@@ -383,3 +383,22 @@
 (ns-unmap 'user 'println-err)
 (ns-unmap 'joker.core 'ns-sources)
 (ns-unmap 'user 'ns-sources)
+(ns-unmap 'joker.core '*main-file*)
+(ns-unmap 'joker.core 'go)
+(ns-unmap 'user 'go)
+(ns-unmap 'joker.core '<!)
+(ns-unmap 'user '<!)
+(ns-unmap 'joker.core '>!)
+(ns-unmap 'user '>!)
+(ns-unmap 'joker.core 'close!)
+(ns-unmap 'user 'close!)
+(ns-unmap 'joker.core 'chan)
+(ns-unmap 'user 'chan)
+(ns-unmap 'joker.core 'exit)
+(ns-unmap 'user 'exit)
+
+(ns clojure.test)
+
+(defmacro deftest
+  [name & body]
+  `(defn ~name [] ~@body))

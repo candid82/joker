@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"sync"
 	"unsafe"
 )
 
@@ -13,9 +14,10 @@ type (
 		Pos() Position
 	}
 	EvalError struct {
-		msg string
-		pos Position
-		rt  *Runtime
+		msg  string
+		pos  Position
+		rt   *Runtime
+		hash uint32
 	}
 	Frame struct {
 		traceable Traceable
@@ -26,6 +28,7 @@ type (
 	Runtime struct {
 		callstack   *Callstack
 		currentExpr Expr
+		GIL         sync.Mutex
 	}
 )
 
@@ -133,6 +136,12 @@ func (s *Callstack) String() string {
 	return b.String()
 }
 
+func MakeEvalError(msg string, pos Position, rt *Runtime) *EvalError {
+	res := &EvalError{msg, pos, rt, 0}
+	res.hash = HashPtr(uintptr(unsafe.Pointer(res)))
+	return res
+}
+
 func (err *EvalError) ToString(escape bool) string {
 	return err.Error()
 }
@@ -150,7 +159,7 @@ func (err *EvalError) GetType() *Type {
 }
 
 func (err *EvalError) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(err)))
+	return err.hash
 }
 
 func (err *EvalError) WithInfo(info *ObjectInfo) Object {
@@ -174,7 +183,6 @@ func (err *EvalError) Error() string {
 }
 
 func (expr *VarRefExpr) Eval(env *LocalEnv) Object {
-	// TODO: Clojure returns clojure.lang.Var$Unbound object in this case.
 	return expr.vr.Resolve()
 }
 
@@ -372,19 +380,8 @@ func (doExpr *DoExpr) Eval(env *LocalEnv) Object {
 	return evalBody(doExpr.body, env)
 }
 
-func toBool(obj Object) bool {
-	switch obj := obj.(type) {
-	case Nil:
-		return false
-	case Boolean:
-		return obj.B
-	default:
-		return true
-	}
-}
-
 func (expr *IfExpr) Eval(env *LocalEnv) Object {
-	if toBool(Eval(expr.cond, env)) {
+	if ToBool(Eval(expr.cond, env)) {
 		return Eval(expr.positive, env)
 	}
 	return Eval(expr.negative, env)

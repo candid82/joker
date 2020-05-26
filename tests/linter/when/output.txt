@@ -1,0 +1,2 @@
+tests/linter/when/input.clj:1:1: Parse warning: when form with empty body
+tests/linter/when/input.clj:2:1: Parse warning: when-not form with empty body

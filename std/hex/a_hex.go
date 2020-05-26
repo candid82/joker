@@ -3,20 +3,19 @@
 package hex
 
 import (
-	. "github.com/candid82/joker/core"
 	"encoding/hex"
+	. "github.com/candid82/joker/core"
 )
 
-var hexNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.hex"))
+var __decode_string__P ProcFn = __decode_string_
+var decode_string_ Proc = Proc{Fn: __decode_string__P, Name: "decode_string_", Package: "std/hex"}
 
-
-
-var decode_string_ Proc = func(_args []Object) Object {
+func __decode_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		s := ExtractString(_args, 0)
-		 t, err := hex.DecodeString(s)
+		t, err := hex.DecodeString(s)
 		PanicOnErr(err)
 		_res := string(t)
 		return MakeString(_res)
@@ -27,7 +26,10 @@ var decode_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var encode_string_ Proc = func(_args []Object) Object {
+var __encode_string__P ProcFn = __encode_string_
+var encode_string_ Proc = Proc{Fn: __encode_string__P, Name: "encode_string_", Package: "std/hex"}
+
+func __encode_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -41,19 +43,13 @@ var encode_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var hexNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.hex"))
+
 func init() {
-
-	hexNamespace.ResetMeta(MakeMeta(nil, "Implements hexadecimal encoding and decoding.", "1.0"))
-
-	
-	hexNamespace.InternVar("decode-string", decode_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the bytes represented by the hexadecimal string s.`, "1.0"))
-
-	hexNamespace.InternVar("encode-string", encode_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the hexadecimal encoding of s.`, "1.0"))
-
+	hexNamespace.Lazy = Init
 }

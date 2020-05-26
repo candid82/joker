@@ -4,14 +4,14 @@ package os
 
 import (
 	. "github.com/candid82/joker/core"
+	"io/ioutil"
 	"os"
 )
 
-var osNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.os"))
+var __args__P ProcFn = __args_
+var args_ Proc = Proc{Fn: __args__P, Name: "args_", Package: "std/os"}
 
-
-
-var args_ Proc = func(_args []Object) Object {
+func __args_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -24,7 +24,10 @@ var args_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var chdir_ Proc = func(_args []Object) Object {
+var __chdir__P ProcFn = __chdir_
+var chdir_ Proc = Proc{Fn: __chdir__P, Name: "chdir_", Package: "std/os"}
+
+func __chdir_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -38,12 +41,15 @@ var chdir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var close_ Proc = func(_args []Object) Object {
+var __close__P ProcFn = __close_
+var close_ Proc = Proc{Fn: __close__P, Name: "close_", Package: "std/os"}
+
+func __close_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		f := ExtractFile(_args, 0)
-		 err := f.Close()
+		err := f.Close()
 		PanicOnErr(err)
 		_res := NIL
 		return _res
@@ -54,12 +60,15 @@ var close_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var create_ Proc = func(_args []Object) Object {
+var __create__P ProcFn = __create_
+var create_ Proc = Proc{Fn: __create__P, Name: "create_", Package: "std/os"}
+
+func __create_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 _res, err := os.Create(name)
+		_res, err := os.Create(name)
 		PanicOnErr(err)
 		return MakeFile(_res)
 
@@ -69,7 +78,29 @@ var create_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var cwd_ Proc = func(_args []Object) Object {
+var __create_temp__P ProcFn = __create_temp_
+var create_temp_ Proc = Proc{Fn: __create_temp__P, Name: "create_temp_", Package: "std/os"}
+
+func __create_temp_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		dir := ExtractString(_args, 0)
+		pattern := ExtractString(_args, 1)
+		_res, err := ioutil.TempFile(dir, pattern)
+		PanicOnErr(err)
+		return MakeFile(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __cwd__P ProcFn = __cwd_
+var cwd_ Proc = Proc{Fn: __cwd__P, Name: "cwd_", Package: "std/os"}
+
+func __cwd_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -82,7 +113,10 @@ var cwd_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var env_ Proc = func(_args []Object) Object {
+var __env__P ProcFn = __env_
+var env_ Proc = Proc{Fn: __env__P, Name: "env_", Package: "std/os"}
+
+func __env_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
@@ -95,7 +129,10 @@ var env_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var exec_ Proc = func(_args []Object) Object {
+var __exec__P ProcFn = __exec_
+var exec_ Proc = Proc{Fn: __exec__P, Name: "exec_", Package: "std/os"}
+
+func __exec_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -110,7 +147,10 @@ var exec_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isexists_ Proc = func(_args []Object) Object {
+var __isexists__P ProcFn = __isexists_
+var isexists_ Proc = Proc{Fn: __isexists__P, Name: "isexists_", Package: "std/os"}
+
+func __isexists_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -124,7 +164,10 @@ var isexists_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var exit_ Proc = func(_args []Object) Object {
+var __exit__P ProcFn = __exit_
+var exit_ Proc = Proc{Fn: __exit__P, Name: "exit_", Package: "std/os"}
+
+func __exit_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -133,13 +176,38 @@ var exit_ Proc = func(_args []Object) Object {
 		ExitJoker(code)
 		return _res
 
+	case _c == 0:
+		_res := NIL
+		ExitJoker(0)
+		return _res
+
 	default:
 		PanicArity(_c)
 	}
 	return NIL
 }
 
-var ls_ Proc = func(_args []Object) Object {
+var __get_env__P ProcFn = __get_env_
+var get_env_ Proc = Proc{Fn: __get_env__P, Name: "get_env_", Package: "std/os"}
+
+func __get_env_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		key := ExtractString(_args, 0)
+		_res := getEnv(key)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __ls__P ProcFn = __ls_
+var ls_ Proc = Proc{Fn: __ls__P, Name: "ls_", Package: "std/os"}
+
+func __ls_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -153,7 +221,10 @@ var ls_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var mkdir_ Proc = func(_args []Object) Object {
+var __mkdir__P ProcFn = __mkdir_
+var mkdir_ Proc = Proc{Fn: __mkdir__P, Name: "mkdir_", Package: "std/os"}
+
+func __mkdir_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -168,12 +239,34 @@ var mkdir_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var open_ Proc = func(_args []Object) Object {
+var __mkdir_temp__P ProcFn = __mkdir_temp_
+var mkdir_temp_ Proc = Proc{Fn: __mkdir_temp__P, Name: "mkdir_temp_", Package: "std/os"}
+
+func __mkdir_temp_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		dir := ExtractString(_args, 0)
+		pattern := ExtractString(_args, 1)
+		_res, err := ioutil.TempDir(dir, pattern)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __open__P ProcFn = __open_
+var open_ Proc = Proc{Fn: __open__P, Name: "open_", Package: "std/os"}
+
+func __open_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
 		name := ExtractString(_args, 0)
-		 _res, err := os.Open(name)
+		_res, err := os.Open(name)
 		PanicOnErr(err)
 		return MakeFile(_res)
 
@@ -183,7 +276,48 @@ var open_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var set_env_ Proc = func(_args []Object) Object {
+var __remove__P ProcFn = __remove_
+var remove_ Proc = Proc{Fn: __remove__P, Name: "remove_", Package: "std/os"}
+
+func __remove_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		err := os.Remove(name)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __remove_all__P ProcFn = __remove_all_
+var remove_all_ Proc = Proc{Fn: __remove_all__P, Name: "remove_all_", Package: "std/os"}
+
+func __remove_all_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		path := ExtractString(_args, 0)
+		err := os.RemoveAll(path)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __set_env__P ProcFn = __set_env_
+var set_env_ Proc = Proc{Fn: __set_env__P, Name: "set_env_", Package: "std/os"}
+
+func __set_env_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -198,14 +332,17 @@ var set_env_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sh_ Proc = func(_args []Object) Object {
+var __sh__P ProcFn = __sh_
+var sh_ Proc = Proc{Fn: __sh__P, Name: "sh_", Package: "std/os"}
+
+func __sh_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
 		CheckArity(_args, 1, 999)
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
-		_res := sh("", nil, name, arguments)
+		_res := sh("", nil, nil, nil, name, arguments)
 		return _res
 
 	default:
@@ -214,7 +351,10 @@ var sh_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var sh_from_ Proc = func(_args []Object) Object {
+var __sh_from__P ProcFn = __sh_from_
+var sh_from_ Proc = Proc{Fn: __sh_from__P, Name: "sh_from_", Package: "std/os"}
+
+func __sh_from_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
@@ -222,7 +362,7 @@ var sh_from_ Proc = func(_args []Object) Object {
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)
-		_res := sh(dir, nil, name, arguments)
+		_res := sh(dir, nil, nil, nil, name, arguments)
 		return _res
 
 	default:
@@ -231,7 +371,10 @@ var sh_from_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var stat_ Proc = func(_args []Object) Object {
+var __stat__P ProcFn = __stat_
+var stat_ Proc = Proc{Fn: __stat__P, Name: "stat_", Package: "std/os"}
+
+func __stat_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -245,118 +388,29 @@ var stat_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+var __temp_dir__P ProcFn = __temp_dir_
+var temp_dir_ Proc = Proc{Fn: __temp_dir__P, Name: "temp_dir_", Package: "std/os"}
+
+func __temp_dir_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.TempDir()
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+func Init() {
+
+	InternsOrThunks()
+}
+
+var osNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.os"))
+
 func init() {
-
-	osNamespace.ResetMeta(MakeMeta(nil, "Provides a platform-independent interface to operating system functionality.", "1.0"))
-
-	
-	osNamespace.InternVar("args", args_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
-
-	osNamespace.InternVar("chdir", chdir_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
-
-	osNamespace.InternVar("close", close_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
-			`Closes the file, rendering it unusable for I/O.`, "1.0"))
-
-	osNamespace.InternVar("create", create_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
-			`Creates the named file with mode 0666 (before umask), truncating it if it already exists.`, "1.0"))
-
-	osNamespace.InternVar("cwd", cwd_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a rooted path name corresponding to the current directory. If the current directory can
-  be reached via multiple paths (due to symbolic links), cwd may return any one of them.`, "1.0"))
-
-	osNamespace.InternVar("env", env_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom()),
-			`Returns a map representing the environment.`, "1.0"))
-
-	osNamespace.InternVar("exec", exec_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
-			`Executes the named program with the given arguments. opts is a map with the following keys (all optional):
-  :args - vector of arguments (all arguments must be strings),
-  :dir - if specified, working directory will be set to this value before executing the program,
-  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
-  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
-  Joker's stdin will be redirected to the program's stdin.
-  Returns a map with the following keys:
-  :success - whether or not the execution was successful,
-  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
-  :exit - exit code of program (or attempt to execute it),
-  :out - string capturing stdout of the program,
-  :err - string capturing stderr of the program.`, "1.0"))
-
-	osNamespace.InternVar("exists?", isexists_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
-			`Returns true if file or directory with the given path exists. Otherwise returns false.`, "1.0"))
-
-	osNamespace.InternVar("exit", exit_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("code"))),
-			`Causes the current program to exit with the given status code.`, "1.0"))
-
-	osNamespace.InternVar("ls", ls_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Reads the directory named by dirname and returns a list of directory entries sorted by filename.`, "1.0"))
-
-	osNamespace.InternVar("mkdir", mkdir_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
-			`Creates a new directory with the specified name and permission bits.`, "1.0"))
-
-	osNamespace.InternVar("open", open_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
-			`Opens the named file for reading. If successful, the file can be used for reading;
-  the associated file descriptor has mode O_RDONLY.`, "1.0"))
-
-	osNamespace.InternVar("set-env", set_env_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the specified key to the specified value in the environment.`, "1.0"))
-
-	osNamespace.InternVar("sh", sh_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments. Returns a map with the following keys:
-      :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
-      :exit - exit code of program (or attempt to execute it),
-      :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
-
-	osNamespace.InternVar("sh-from", sh_from_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments and working directory set to dir.
-  Returns a map with the following keys:
-      :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
-      :exit - exit code of program (or attempt to execute it),
-      :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
-
-	osNamespace.InternVar("stat", stat_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
-			`Returns a map describing the named file. The info map has the following attributes:
-  :name - base name of the file
-  :size - length in bytes for regular files; system-dependent for others
-  :mode - file mode bits
-  :modtime - modification time
-  :dir? - true if file is a directory`, "1.0"))
-
+	osNamespace.Lazy = Init
 }

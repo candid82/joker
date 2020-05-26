@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["strings" "unicode"]
+  ^{:go-imports ["regexp" "strings" "unicode"]
     :doc "Implements simple functions to manipulate strings."}
   string)
 
@@ -28,12 +28,13 @@
   [^String s ^Stringable pad ^Int n])
 
 (defn split
-  "Splits string on a regular expression. Returns vector of the splits."
+  "Splits string on a string or regular expression. Returns vector of the splits."
   {:added "1.0"
-  :go {2 "split(s, re, 0)"
-       3 "split(s, re, n)"}}
-  ([^String s ^Regex re])
-  ([^String s ^Regex re ^Int n]))
+  :go {2 "splitOnStringOrRegex(s, sep, 0)"
+       3 "splitOnStringOrRegex(s, sep, n)"}}
+  ;; TODO: ^"String|Regex" sep
+  ([^String s ^Object sep])
+  ([^String s ^Object sep ^Int n]))
 
 (defn split-lines
   "Splits string on \\n or \\r\\n. Returns vector of the splits."
@@ -170,4 +171,10 @@
   "Returns s with its characters reversed."
   {:added "1.0"
   :go "reverse(s)"}
+  [^String s])
+
+(defn ^Regex re-quote
+  "Returns an instance of Regex that matches the string exactly"
+  {:added "1.0"
+   :go "regexp.MustCompile(regexp.QuoteMeta(s))"}
   [^String s])

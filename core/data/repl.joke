@@ -24,13 +24,14 @@
   the bindings of the recursion point to the values of the exprs.
   Execution then jumps back to the recursion point, a loop or fn method."}
     throw {:forms [(throw expr)]
-           :doc "The expr is evaluated and thrown, therefore it should
-  yield an instance of some derivee of Throwable."}
+           :doc "The expr is evaluated and thrown, therefore it should yield an Error object.
+  User code should normally use (ex-info) function to create new Error objects."}
     try {:forms [(try expr* catch-clause* finally-clause?)]
-         :doc "catch-clause => (catch classname name expr*)
+         :doc "catch-clause => (catch type name expr*)
   finally-clause => (finally expr*)
 
-  Catches and handles exceptions and Go panics."}
+  Catches and handles errors.
+  User code should normally use (ex-info) function to create new Error objects."}
     var {:forms [(var symbol)]
          :doc "The symbol must resolve to a var, and the Var object
   itself (not its value) is returned. The reader macro #'x expands to (var x)."}})
@@ -39,6 +40,9 @@
   (assoc (or (special-doc-map name-symbol) (meta (resolve name-symbol)))
          :name name-symbol
          :special-form true))
+
+(defn- namespace-doc [nspace]
+  (assoc (meta nspace) :name (ns-name nspace)))
 
 (defn- print-doc [{n :ns
                    nm :name
@@ -68,7 +72,7 @@
   (when doc (println " " doc)))
 
 (defmacro doc
-  "Prints documentation for a var or special form given its name,
+  "Prints documentation for a var, type, or special form given its name,
   or for a spec if given a keyword"
   {:added "1.0"}
   [name]
@@ -76,10 +80,13 @@
     `(#'print-doc (#'special-doc '~special-name))
     (cond
       (special-doc-map name) `(#'print-doc (#'special-doc '~name))
-      ;      (keyword? name) `(#'print-doc {:spec '~name :doc '~(spec/describe name)})
-      ;      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
-      (resolve name) `(#'print-doc (meta (var ~name))))))
-
+      (keyword? name) (println "Keywords (spec) not yet supported")
+      (find-ns name) `(#'print-doc (#'namespace-doc (find-ns '~name)))
+      (resolve name) (let [x# (resolve name)
+                           v# (if (= (type x#) Type)
+                                name
+                                `(var ~name))]
+                       `(#'print-doc (meta ~v#))))))
 
 ;; ----------------------------------------------------------------------
 ;; Examine Clojure functions (Vars, really)
@@ -88,6 +95,7 @@
   "Given a regular expression or stringable thing, return a seq of all
 public definitions in all currently-loaded namespaces that match the
 str-or-pattern."
+  {:added "1.0"}
   [str-or-pattern]
   (let [matches? (if (instance? Regex str-or-pattern)
                    #(re-find str-or-pattern (str %))
@@ -101,11 +109,13 @@ str-or-pattern."
 (defn dir-fn
   "Returns a sorted seq of symbols naming public vars in
   a namespace or namespace alias. Looks for aliases in *ns*"
+  {:added "1.0"}
   [ns]
   (sort (map first (ns-publics (the-ns (get (ns-aliases *ns*) ns ns))))))
 
 (defmacro dir
   "Prints a sorted directory of public vars in a namespace"
+  {:added "1.0"}
   [nsname]
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))

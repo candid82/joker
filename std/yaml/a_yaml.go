@@ -6,11 +6,10 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-var yamlNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.yaml"))
+var __read_string__P ProcFn = __read_string_
+var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/yaml"}
 
-
-
-var read_string_ Proc = func(_args []Object) Object {
+func __read_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -24,7 +23,10 @@ var read_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var write_string_ Proc = func(_args []Object) Object {
+var __write_string__P ProcFn = __write_string_
+var write_string_ Proc = Proc{Fn: __write_string__P, Name: "write_string_", Package: "std/yaml"}
+
+func __write_string_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -38,19 +40,13 @@ var write_string_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var yamlNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.yaml"))
+
 func init() {
-
-	yamlNamespace.ResetMeta(MakeMeta(nil, "Implements encoding and decoding of YAML.", "1.0"))
-
-	
-	yamlNamespace.InternVar("read-string", read_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
-
-	yamlNamespace.InternVar("write-string", write_string_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-			`Returns the YAML encoding of v.`, "1.0"))
-
+	yamlNamespace.Lazy = Init
 }

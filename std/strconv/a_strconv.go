@@ -7,11 +7,10 @@ import (
 	"strconv"
 )
 
-var strconvNamespace = GLOBAL_ENV.EnsureNamespace(MakeSymbol("joker.strconv"))
+var __atoi__P ProcFn = __atoi_
+var atoi_ Proc = Proc{Fn: __atoi__P, Name: "atoi_", Package: "std/strconv"}
 
-
-
-var atoi_ Proc = func(_args []Object) Object {
+func __atoi_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -26,7 +25,10 @@ var atoi_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var iscan_backquote_ Proc = func(_args []Object) Object {
+var __iscan_backquote__P ProcFn = __iscan_backquote_
+var iscan_backquote_ Proc = Proc{Fn: __iscan_backquote__P, Name: "iscan_backquote_", Package: "std/strconv"}
+
+func __iscan_backquote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -40,7 +42,10 @@ var iscan_backquote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_bool_ Proc = func(_args []Object) Object {
+var __format_bool__P ProcFn = __format_bool_
+var format_bool_ Proc = Proc{Fn: __format_bool__P, Name: "format_bool_", Package: "std/strconv"}
+
+func __format_bool_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -54,7 +59,10 @@ var format_bool_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_double_ Proc = func(_args []Object) Object {
+var __format_double__P ProcFn = __format_double_
+var format_double_ Proc = Proc{Fn: __format_double__P, Name: "format_double_", Package: "std/strconv"}
+
+func __format_double_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 4:
@@ -71,7 +79,10 @@ var format_double_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var format_int_ Proc = func(_args []Object) Object {
+var __format_int__P ProcFn = __format_int_
+var format_int_ Proc = Proc{Fn: __format_int__P, Name: "format_int_", Package: "std/strconv"}
+
+func __format_int_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
@@ -86,7 +97,10 @@ var format_int_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isgraphic_ Proc = func(_args []Object) Object {
+var __isgraphic__P ProcFn = __isgraphic_
+var isgraphic_ Proc = Proc{Fn: __isgraphic__P, Name: "isgraphic_", Package: "std/strconv"}
+
+func __isgraphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -100,7 +114,10 @@ var isgraphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var itoa_ Proc = func(_args []Object) Object {
+var __itoa__P ProcFn = __itoa_
+var itoa_ Proc = Proc{Fn: __itoa__P, Name: "itoa_", Package: "std/strconv"}
+
+func __itoa_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -114,7 +131,10 @@ var itoa_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_bool_ Proc = func(_args []Object) Object {
+var __parse_bool__P ProcFn = __parse_bool_
+var parse_bool_ Proc = Proc{Fn: __parse_bool__P, Name: "parse_bool_", Package: "std/strconv"}
+
+func __parse_bool_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -129,7 +149,10 @@ var parse_bool_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_double_ Proc = func(_args []Object) Object {
+var __parse_double__P ProcFn = __parse_double_
+var parse_double_ Proc = Proc{Fn: __parse_double__P, Name: "parse_double_", Package: "std/strconv"}
+
+func __parse_double_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -144,7 +167,10 @@ var parse_double_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var parse_int_ Proc = func(_args []Object) Object {
+var __parse_int__P ProcFn = __parse_int_
+var parse_int_ Proc = Proc{Fn: __parse_int__P, Name: "parse_int_", Package: "std/strconv"}
+
+func __parse_int_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
@@ -162,7 +188,10 @@ var parse_int_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var isprintable_ Proc = func(_args []Object) Object {
+var __isprintable__P ProcFn = __isprintable_
+var isprintable_ Proc = Proc{Fn: __isprintable__P, Name: "isprintable_", Package: "std/strconv"}
+
+func __isprintable_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -176,7 +205,10 @@ var isprintable_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_ Proc = func(_args []Object) Object {
+var __quote__P ProcFn = __quote_
+var quote_ Proc = Proc{Fn: __quote__P, Name: "quote_", Package: "std/strconv"}
+
+func __quote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -190,7 +222,10 @@ var quote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_ Proc = func(_args []Object) Object {
+var __quote_char__P ProcFn = __quote_char_
+var quote_char_ Proc = Proc{Fn: __quote_char__P, Name: "quote_char_", Package: "std/strconv"}
+
+func __quote_char_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -204,7 +239,10 @@ var quote_char_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_ascii_ Proc = func(_args []Object) Object {
+var __quote_char_to_ascii__P ProcFn = __quote_char_to_ascii_
+var quote_char_to_ascii_ Proc = Proc{Fn: __quote_char_to_ascii__P, Name: "quote_char_to_ascii_", Package: "std/strconv"}
+
+func __quote_char_to_ascii_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -218,7 +256,10 @@ var quote_char_to_ascii_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_char_to_graphic_ Proc = func(_args []Object) Object {
+var __quote_char_to_graphic__P ProcFn = __quote_char_to_graphic_
+var quote_char_to_graphic_ Proc = Proc{Fn: __quote_char_to_graphic__P, Name: "quote_char_to_graphic_", Package: "std/strconv"}
+
+func __quote_char_to_graphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -232,7 +273,10 @@ var quote_char_to_graphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_ascii_ Proc = func(_args []Object) Object {
+var __quote_to_ascii__P ProcFn = __quote_to_ascii_
+var quote_to_ascii_ Proc = Proc{Fn: __quote_to_ascii__P, Name: "quote_to_ascii_", Package: "std/strconv"}
+
+func __quote_to_ascii_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -246,7 +290,10 @@ var quote_to_ascii_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var quote_to_graphic_ Proc = func(_args []Object) Object {
+var __quote_to_graphic__P ProcFn = __quote_to_graphic_
+var quote_to_graphic_ Proc = Proc{Fn: __quote_to_graphic__P, Name: "quote_to_graphic_", Package: "std/strconv"}
+
+func __quote_to_graphic_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -260,7 +307,10 @@ var quote_to_graphic_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
-var unquote_ Proc = func(_args []Object) Object {
+var __unquote__P ProcFn = __unquote_
+var unquote_ Proc = Proc{Fn: __unquote__P, Name: "unquote_", Package: "std/strconv"}
+
+func __unquote_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -275,110 +325,13 @@ var unquote_ Proc = func(_args []Object) Object {
 	return NIL
 }
 
+func Init() {
+
+	InternsOrThunks()
+}
+
+var strconvNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.strconv"))
+
 func init() {
-
-	strconvNamespace.ResetMeta(MakeMeta(nil, "Implements conversions to and from string representations of basic data types.", "1.0"))
-
-	
-	strconvNamespace.InternVar("atoi", atoi_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Equivalent to (parse-int s 10 0).`, "1.0"))
-
-	strconvNamespace.InternVar("can-backquote?", iscan_backquote_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Reports whether the string s can be represented unchanged as a single-line backquoted string without control characters other than tab.`, "1.0"))
-
-	strconvNamespace.InternVar("format-bool", format_bool_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("b"))),
-			`Returns "true" or "false" according to the value of b.`, "1.0"))
-
-	strconvNamespace.InternVar("format-double", format_double_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"), MakeSymbol("fmt"), MakeSymbol("prec"), MakeSymbol("bitSize"))),
-			`Converts the floating-point number f to a string, according to the format fmt and precision prec. It rounds the result assuming that the original was obtained from a floating-point value of bitSize bits (32 for float32, 64 for float64).
-  The format fmt is one of 'b' (-ddddp±ddd, a binary exponent), 'e' (-d.dddde±dd, a decimal exponent), 'E' (-d.ddddE±dd, a decimal exponent), 'f' (-ddd.dddd, no exponent), 'g' ('e' for large exponents, 'f' otherwise), or 'G' ('E' for large exponents, 'f' otherwise).
-  The precision prec controls the number of digits (excluding the exponent) printed by the 'e', 'E', 'f', 'g', and 'G' formats. For 'e', 'E', and 'f' it is the number of digits after the decimal point. For 'g' and 'G' it is the maximum number of significant digits (trailing zeros are removed). The special precision -1 uses the smallest number of digits necessary such that ParseFloat will return f exactly.`, "1.0"))
-
-	strconvNamespace.InternVar("format-int", format_int_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("i"), MakeSymbol("base"))),
-			`Returns the string representation of i in the given base, for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z' for digit values >= 10.`, "1.0"))
-
-	strconvNamespace.InternVar("graphic?", isgraphic_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
-			`Reports whether the char is defined as a Graphic by Unicode. Such characters include letters, marks, numbers, punctuation, symbols, and spaces, from categories L, M, N, P, S, and Zs.`, "1.0"))
-
-	strconvNamespace.InternVar("itoa", itoa_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("i"))),
-			`Equivalent to (format-int i 10).`, "1.0"))
-
-	strconvNamespace.InternVar("parse-bool", parse_bool_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the boolean value represented by the string. It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False. Any other value returns an error.`, "1.0"))
-
-	strconvNamespace.InternVar("parse-double", parse_double_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Converts the string s to a floating-point number.`, "1.0"))
-
-	strconvNamespace.InternVar("parse-int", parse_int_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("base"), MakeSymbol("bitSize"))),
-			`Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.
-  If base == 0, the base is implied by the string's prefix: base 16 for "0x", base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.
-  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. For a bitSize below 0 or above 64 an error is returned.`, "1.0"))
-
-	strconvNamespace.InternVar("printable?", isprintable_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
-			`Reports whether the char is defined as printable by Joker: letters, numbers, punctuation, symbols and ASCII space.`, "1.0"))
-
-	strconvNamespace.InternVar("quote", quote_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for control characters and non-printable characters as defined by printable?.`, "1.0"))
-
-	strconvNamespace.InternVar("quote-char", quote_char_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
-			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for control characters and non-printable characters as defined by printable?.`, "1.0"))
-
-	strconvNamespace.InternVar("quote-char-to-ascii", quote_char_to_ascii_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
-			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for non-ASCII characters and non-printable characters as defined by printable?.`, "1.0"))
-
-	strconvNamespace.InternVar("quote-char-to-graphic", quote_char_to_graphic_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
-			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for non-ASCII characters and non-printable characters as defined by graphic?.`, "1.0"))
-
-	strconvNamespace.InternVar("quote-to-ascii", quote_to_ascii_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for non-ASCII characters and non-printable characters as defined by printable?.`, "1.0"))
-
-	strconvNamespace.InternVar("quote-to-graphic", quote_to_graphic_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
-  for non-ASCII characters and non-printable characters as defined by graphic?.`, "1.0"))
-
-	strconvNamespace.InternVar("unquote", unquote_,
-		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.
-  (If s is single-quoted, it would be a Go character literal; Unquote returns the corresponding one-character string.)`, "1.0"))
-
+	strconvNamespace.Lazy = Init
 }

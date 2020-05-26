@@ -1,13 +1,15 @@
-(alias 'string 'joker.string)
-(require 'joker.walk)
-(require 'joker.tools.cli)
-(require 'joker.test)
-(require 'joker.template)
-(require 'joker.set)
-(require 'joker.repl)
+(doseq [ns (remove #(= % 'user) joker.core/*core-namespaces*)] (require ns))
+
+(alias 'cli 'joker.tools.cli)
+(alias 'os 'joker.os)
+(alias 's 'joker.string)
+(alias 'h 'joker.html)
 
 (def index-template
   (slurp "templates/index.html"))
+
+(def mainjs-template
+  (slurp "templates/main.js"))
 
 (def ns-template
   (slurp "templates/ns.html"))
@@ -15,14 +17,23 @@
 (def var-template
   (slurp "templates/var.html"))
 
+(def special-form-template
+  (slurp "templates/special-form.html"))
+
 (def namespace-template
   (slurp "templates/ns-summary.html"))
+
+(def type-template
+  (slurp "templates/type-summary.html"))
 
 (def link-item-template
   (slurp "templates/link-item.html"))
 
 (def usage-template
   (slurp "templates/usage.html"))
+
+(def usage-with-types-template
+  (slurp "templates/usage-with-types.html"))
 
 (defn type-name
   [v]
@@ -34,47 +45,131 @@
       (= Fn (type @v)) "Function"
       (= Proc (type @v)) "Function"
       (:tag m) (str (:tag m))
+      (:const m) (str "Constant " (type @v))
       :else (str (type @v)))))
 
+(defn ^Keyword sym-kind
+  [^Var v]
+  (let [m (meta v)]
+    (condp = (type (deref v))
+      Fn (cond
+           (:special-form m) :special
+           (:macro m) :macro
+           :else :function)
+      Proc :function
+      (cond
+        (not (bound? v)) :variable  ; E.g. joker.core/*1
+        (:special-form m) :special
+        (:const m) :constant
+        :else :variable))))
+
+(defn ^String sym-kind-name
+  [^Var v]
+  (condp = (sym-kind v)
+    :function "Function"
+    :special "Special form"
+    :macro "Macro"
+    :other "Other"
+    :constant "Constant"
+    :variable "Variable"))
+
 (defn link-item-doc
-  [k]
-  (string/replace link-item-template "{name}" k))
+  [n k]
+  (-> link-item-template
+      (s/replace "{name}" n)
+      (s/replace "{escaped-name}" (h/escape n))
+      (s/replace "{kind}" k)))
+
+(defn maybe-tag-prefix
+  [x]
+  (if-let [m (meta x)]
+    (if-let [t (:tag m)]
+      (str "^" t " ")
+      "")
+    ""))
+
+(defn tagged-arg
+  [a]
+  (str (maybe-tag-prefix a) a))
+
+(defn tagged-vector
+  [v]
+  (map tagged-arg v))
+
+(defn tagged-arglist
+  [k l]
+  (str (maybe-tag-prefix l) "(" (s/join " " (cons k (tagged-vector l))) ")"))
+
+(defn maybe-typed-usage
+  [u uwt]
+  (if (s/includes? uwt "^")
+    (-> usage-with-types-template
+        (s/replace "{usage}" (h/escape u))
+        (s/replace "{usage-with-types}" (h/escape uwt)))
+    (s/replace usage-template "{usage}" (h/escape u))))
 
 (defn usage
   [k m]
-  (if (:special-form m)
-    (let [examples (for [form (:forms m)]
-                     (string/replace usage-template "{usage}" (str form)))]
-      (string/join "" examples))
-    (let [examples (for [arglist (:arglists m)]
-                     (string/replace usage-template "{usage}" (str (apply list k arglist))))]
-      (string/join "" examples))))
+  (let [usages-with-types (if (:special-form m)
+                            (for [form (:forms m)]
+                              (str form))
+                            (for [arglist (:arglists m)]
+                              (tagged-arglist k arglist)))
+        usages (if (:special-form m)
+                 (for [form (:forms m)]
+                   (str form))
+                 (for [arglist (:arglists m)]
+                   (str (apply list k arglist))))]
+    (s/join "" (map maybe-typed-usage usages usages-with-types))))
 
 (defn- source-file
   [ns]
-  (string/join "_" (rest (string/split (str ns) #"\."))))
+  (s/join "_" (rest (s/split (str ns) #"\."))))
 
 (defn var-doc
   [k v]
-  (let [m (meta v)]
-    (when-not (:added m)
-      (println "WARNING: public var without added meta key: " k))
-    (when-not (:doc m)
-      (println "WARNING: public var without doc meta key: " k))
+  (let [m (meta v)
+        ns (get m :ns "<internal>")
+        full-name (str ns "/" (str k))
+        usage-str (usage k m)]
+    (when-not (or (:added m) (:private m))
+      (println "WARNING: public var without added meta key: " full-name))
+    (when-not (or (:doc m) (:private m))
+      (println "WARNING: public var without doc meta key: " full-name))
     (-> var-template
-        (string/replace "{id}" (str k))
-        (string/replace "{name}" (str k))
-        (string/replace "{type}" (type-name v))
-        (string/replace "{usage}" (usage k m))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
-        (string/replace "{added}" (str (:added m)))
-        (string/replace
+        (s/replace "{id}" (str k))
+        (s/replace "{name}" (h/escape (str k)))
+        (s/replace "{type}" (type-name v))
+        (s/replace "{kind}" (sym-kind-name v))
+        (s/replace "{usage}" usage-str)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (or (:doc m) "<<<MISSING DOCUMENTATION>>>")) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m)))
+        (s/replace
          "{source}"
          (if (:line m)
            (format "<a href=\"https://github.com/candid82/joker/blob/master/core/data/%s.joke#L%s\">source</a>"
                    (source-file (:ns m))
                    (str (:line m)))
-           "")))))
+           ""))
+        (s/replace "{show-types}"
+                   (if (s/includes? usage-str "^")
+                     "<a href=\"#\" class=\"types\">show types</a>"
+                     "")))))
+
+(defn- first-line
+  [s]
+  (first (s/split s #"\n")))
+
+(defn special-form-doc
+  [name meta]
+  (let [usage (let [examples (for [form (:forms meta)]
+                               (s/replace usage-template "{usage}" (str form)))]
+                (s/join "" examples))]
+    (-> special-form-template
+        (s/replace "{id}" name)
+        (s/replace "{name}" name)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc meta)) "\n" "<br>\n"))
+        (s/replace "{usage}" usage))))
 
 (defn namespace-doc
   [ns-sym]
@@ -86,57 +181,130 @@
     (when-not (:doc m)
       (println "WARNING: namespace without doc meta key: " k))
     (-> namespace-template
-        (string/replace "{id}" k)
-        (string/replace "{name}" k)
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
-        (string/replace "{added}" (str (:added m))))))
+        (s/replace "{id}" k)
+        (s/replace "{name}" k)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (first-line (:doc m))) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m))))))
+
+(defn type-doc
+  [k]
+  (let [m (meta (get (joker.core/types__) k))]
+    (when-not (:added m)
+      (println "WARNING: type without added meta key: " k))
+    (when-not (:doc m)
+      (println "WARNING: type without doc meta key: " k))
+    (-> type-template
+        (s/replace "{id}" k)
+        (s/replace "{name}" k)
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
+        (s/replace "{added}" (str (:added m))))))
+
+(defn ^Boolean sym-kind-is
+  [^Var s ^Keyword x]
+  (= x (sym-kind s)))
+
+(defn filter-vals
+  "Filters on values in a map using supplied function, returning map with only matching key/value pairs."
+  [f m]
+  (into {} (filter #(-> % val f) m)))
+
+(defn section-doc
+  [ns-sym ns-vars-fn match]
+  (s/replace (s/join
+    ""
+    (for [[k v] (sort (filter-vals match (ns-vars-fn ns-sym)))]
+      (var-doc k v))) #"^$" "(None.)"))
 
 (defn ns-doc
-  [ns-sym]
+  [ns-sym ns-vars-fn]
   (let [ns (find-ns ns-sym)
         m (meta ns)
-        vars-doc (string/join
-                  ""
-                  (for [[k v] (sort (ns-publics ns-sym))]
-                    (var-doc k v)))
-        var-links-doc (string/join
+        index (s/join
                        ""
-                       (for [k (sort (keys (ns-publics ns-sym)))]
-                         (link-item-doc (str k))))]
+                       (for [[k v] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns-sym))]
+                         (link-item-doc (str k) (sym-kind-name v))))
+        functions-doc (section-doc ns-sym ns-vars-fn #(or (sym-kind-is % :function) (sym-kind-is % :macro) (sym-kind-is % :special)))
+        constants-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :constant))
+        variables-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :variable))
+        types-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :type))
+        _ (when (not= "(None.)" types-doc) (throw (ex-info (str "non-null types: " types-doc) {})))
+        others-doc (section-doc ns-sym ns-vars-fn #(sym-kind-is % :other))
+        _ (when (not= "(None.)" others-doc) (throw (ex-info (str "non-null others: " others-doc) {})))]
     (-> ns-template
-        (string/replace "{name}" (name ns-sym))
-        (string/replace "{added}" (str (:added m)))
-        (string/replace "{docstring}" (string/replace (str (:doc m)) "\n" "<br>\n"))
-        (string/replace  "{vars}" vars-doc)
-        (string/replace "{index}" var-links-doc))))
+        (s/replace "{name}" (name ns-sym))
+        (s/replace "{added}" (str (:added m)))
+        (s/replace "{docstring}" (s/replace (joker.html/escape (:doc m)) "\n" "<br>\n"))
+        (s/replace "{constants}" constants-doc)
+        (s/replace "{variables}" variables-doc)
+        (s/replace "{functions}" functions-doc)
+        (s/replace "{types}" types-doc)
+        (s/replace "{others}" others-doc)
+        (s/replace "{index}" index))))
 
 (defn index-doc
-  [namespaces]
-  (let [namespaces-docs (string/join
+  [special-forms namespaces types]
+  (let [special-forms-docs (s/join
+                            ""
+                            (for [sf (sort (keys special-forms))]
+                              (special-form-doc (str sf) (special-forms sf))))
+        special-form-links-doc (s/join
+                                ""
+                                (->> (sort (keys special-forms))
+                                     (map #(link-item-doc (str %) "Special Form"))))
+
+        namespaces-docs (s/join
                          ""
                          (for [ns-sym namespaces]
                            (namespace-doc ns-sym)))
-        ns-links-doc (string/join
+        ns-links-doc (s/join
                       ""
                       (->> namespaces
-                           (map #(link-item-doc (str %)))))]
+                           (map #(link-item-doc (str %) "Namespace"))))
+        types-docs (s/join
+                    ""
+                    (for [t types]
+                      (type-doc t)))
+        type-links-doc (s/join
+                        ""
+                        (->> types
+                             (map #(link-item-doc (str %) "Type"))))]
     (-> index-template
-        (string/replace "{index}" ns-links-doc)
-        (string/replace "{namespaces}" namespaces-docs))))
+        (s/replace "{index-of-special-forms}" special-form-links-doc)
+        (s/replace "{special-forms}" special-forms-docs)
+        (s/replace "{index-of-namespaces}" ns-links-doc)
+        (s/replace "{namespaces}" namespaces-docs)
+        (s/replace "{index-of-types}" type-links-doc)
+        (s/replace "{types}" types-docs))))
 
 (defn full-doc
-  []
+  [ns-vars-fn]
   (let [namespaces (->> (all-ns)
                         (map ns-name)
                         (remove #(= 'user %))
-                        (sort))]
-    (spit "index.html" (index-doc namespaces))
+                        (sort))
+        types (->> (joker.core/types__)
+                   (map key)
+                   (sort))
+        special-forms joker.repl/special-doc-map
+        terms (for [ns namespaces
+                    [k _] (sort #(compare (key %1) (key %2)) (ns-vars-fn ns))]
+                (joker.strconv/quote (str (name ns) "/" k)))]
+    (spit "index.html" (index-doc special-forms namespaces types))
+    (spit "main.js" (s/replace mainjs-template "{search-terms}" (s/join "," terms)))
     (doseq [ns namespaces]
-      (spit (str ns ".html") (ns-doc ns)))))
+      (spit (str ns ".html") (ns-doc ns ns-vars-fn)))))
 
-(full-doc)
-
-
-
-
-
+(let [opts (cli/parse-opts *command-line-args*
+                           [
+                            [nil "--all" "Include private as well as public members in documentation"]
+                            ["-h" "--help"]
+                            ])]
+  (when-let [err (or (when (:help (:options opts)) "") (:errors opts))]
+    (println (s/join "\n" err))
+    (println "Usage:")
+    (println (:summary opts))
+    (os/exit 1))
+  (let [ns-vars-fn (if (:all (:options opts))
+                     ns-interns
+                     ns-publics)]
+    (full-doc ns-vars-fn)))

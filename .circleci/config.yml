@@ -2,13 +2,13 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.12.6
+      - image: circleci/golang:1.14.0
     working_directory: /go/src/github.com/candid82/joker
     steps:
       - checkout
       - run:
-          name: go get readline
-          command: go get -d -v github.com/chzyer/readline
+          name: go get liner
+          command: go get -d -v github.com/candid82/liner
       - run:
           name: go get profile
           command: go get -d -v github.com/pkg/profile

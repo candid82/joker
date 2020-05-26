@@ -27,11 +27,13 @@ type (
 
 const EOF = -1
 
-var LINTER_MODE bool = false
-var FORMAT_MODE bool = false
-var PROBLEM_COUNT = 0
-var DIALECT Dialect
-var LINTER_CONFIG *Var
+var (
+	LINTER_MODE   bool = false
+	FORMAT_MODE bool = false
+	PROBLEM_COUNT      = 0
+	DIALECT       Dialect
+	LINTER_CONFIG *Var
+)
 
 var (
 	ARGS   map[int]Symbol
@@ -136,10 +138,10 @@ func (err ReadError) Error() string {
 
 func isDelimiter(r rune) bool {
 	switch r {
-	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, ',', '\\':
+	case '(', ')', '[', ']', '{', '}', '"', ';', EOF, '\\':
 		return true
 	}
-	return unicode.IsSpace(r)
+	return isWhitespace(r)
 }
 
 func eatString(reader *Reader, str string) {
@@ -246,7 +248,7 @@ func readCharacter(reader *Reader) Object {
 		}
 	case 'o':
 		if !isDelimiter(reader.Peek()) {
-			readUnicodeCharacter(reader, 3, 8)
+			return readUnicodeCharacter(reader, 3, 8)
 		}
 	}
 	peekExpectedDelimiter(reader)
@@ -284,6 +286,7 @@ func scanInt(str string, base int, err error, reader *Reader) Object {
 	if e != nil {
 		return scanBigInt(str, base, err, reader)
 	}
+	// TODO: 32-bit issue
 	return MakeReadObject(reader, Int{I: int(i)})
 }
 
@@ -413,6 +416,7 @@ func readSymbol(reader *Reader, first rune) Object {
 				panic(MakeReadError(reader, msg))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			return MakeReadObject(reader, MakeKeyword(*ns.Name.name+"/"+*sym.name))
 		}
 		return MakeReadObject(reader, MakeKeyword(str))
@@ -447,11 +451,11 @@ func readRegex(reader *Reader) Object {
 	regex, err := regexp.Compile(b.String())
 	if err != nil {
 		if LINTER_MODE {
-			return MakeReadObject(reader, Regex{})
+			return MakeReadObject(reader, &Regex{})
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
 	}
-	return MakeReadObject(reader, Regex{R: regex})
+	return MakeReadObject(reader, &Regex{R: regex})
 }
 
 func readUnicodeCharacterInString(reader *Reader, initial rune, length, base int, exactLength bool) rune {
@@ -709,7 +713,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 
 func isTerminatingMacro(r rune) bool {
 	switch r {
-	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', '%':
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\':
 		return true
 	default:
 		return false
@@ -735,7 +739,7 @@ func registerArg(index int) Symbol {
 
 func readArgSymbol(reader *Reader) Object {
 	r := reader.Peek()
-	if unicode.IsSpace(r) || isTerminatingMacro(r) {
+	if isWhitespace(r) || isTerminatingMacro(r) {
 		return MakeReadObject(reader, registerArg(1))
 	}
 	obj := readFirst(reader)
@@ -993,6 +997,7 @@ func readNamespacedMap(reader *Reader) Object {
 				panic(MakeReadError(reader, "Unknown auto-resolved namespace alias: "+sym.ToString(false)))
 			}
 			ns.isUsed = true
+			ns.isGloballyUsed = true
 			nsname = ns.Name.Name()
 		}
 	} else {

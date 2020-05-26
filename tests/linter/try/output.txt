@@ -1,0 +1,3 @@
+tests/linter/try/input.clj:1:1: Parse warning: try form without catch or finally
+tests/linter/try/input.clj:3:1: Parse warning: try form with empty body
+tests/linter/try/input.clj:5:8: Parse warning: finally form with empty body

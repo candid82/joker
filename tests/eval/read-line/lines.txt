@@ -1,3 +1,2 @@
 This is test input.
-Would be cool to automate this for all tests.
-But sh/sh-from don't support the :in keyword yet.
+It is substituted for :stdin via with-in-str in the test itself.

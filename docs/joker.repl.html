@@ -6,8 +6,27 @@
   <div class="main">
     <h1>Namespace: joker.repl</h1>
     <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
     <p class="var-docstr">Utilities meant to be used interactively at the REPL.</p>
-    <h2>Index</h2>
+    <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
   <a href="#apropos">apropos</a>
@@ -23,49 +42,64 @@
 </li>
 
     </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
-  <h3 id="apropos">apropos</h3>
-  <span class="var-type Function">Function</span>
-  <span class="var-added">v</span>
+  <h3 class="Function" id="apropos">apropos</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(apropos str-or-pattern)</code></div>
 </pre>
   <p class="var-docstr">Given a regular expression or stringable thing, return a seq of all<br>
 public definitions in all currently-loaded namespaces that match the<br>
 str-or-pattern.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L87">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L94">source</a>
+  
 </li>
 <li>
-  <h3 id="dir">dir</h3>
-  <span class="var-type Macro">Macro</span>
-  <span class="var-added">v</span>
+  <h3 class="Macro" id="dir">dir</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dir nsname)</code></div>
 </pre>
   <p class="var-docstr">Prints a sorted directory of public vars in a namespace</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L107">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L116">source</a>
+  
 </li>
 <li>
-  <h3 id="dir-fn">dir-fn</h3>
-  <span class="var-type Function">Function</span>
-  <span class="var-added">v</span>
+  <h3 class="Function" id="dir-fn">dir-fn</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(dir-fn ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a sorted seq of symbols naming public vars in<br>
   a namespace or namespace alias. Looks for aliases in *ns*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L101">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L109">source</a>
+  
 </li>
 <li>
-  <h3 id="doc">doc</h3>
-  <span class="var-type Macro">Macro</span>
+  <h3 class="Macro" id="doc">doc</h3>
+  <span class="var-kind Macro">Macro</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(doc name)</code></div>
 </pre>
-  <p class="var-docstr">Prints documentation for a var or special form given its name,<br>
+  <p class="var-docstr">Prints documentation for a var, type, or special form given its name,<br>
   or for a spec if given a keyword</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L70">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/repl.joke#L74">source</a>
+  
 </li>
 
     </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

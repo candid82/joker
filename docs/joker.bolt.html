@@ -1,0 +1,207 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.bolt</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.<br>
+<br>
+         Example:<br>
+<br>
+         user=&gt; (def db (joker.bolt/open &#34;bolt.db&#34; 0600))<br>
+         #&#39;user/db<br>
+         user=&gt; (joker.bolt/create-bucket db &#34;users&#34;)<br>
+         nil<br>
+         user=&gt; (def id (joker.bolt/next-sequence db &#34;users&#34;))<br>
+         #&#39;user/id<br>
+         user=&gt; id<br>
+         1<br>
+         user=&gt; (joker.bolt/put db &#34;users&#34; (str id) (joker.json/write-string {:id id :name &#34;Joe Black&#34;}))<br>
+         nil<br>
+         user=&gt; (joker.json/read-string (joker.bolt/get db &#34;users&#34; (str id)))<br>
+         {&#34;id&#34; 1, &#34;name&#34; &#34;Joe Black&#34;}</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#by-prefix">by-prefix</a>
+</li>
+<li>
+  <a href="#close">close</a>
+</li>
+<li>
+  <a href="#create-bucket">create-bucket</a>
+</li>
+<li>
+  <a href="#create-bucket-if-not-exists">create-bucket-if-not-exists</a>
+</li>
+<li>
+  <a href="#delete">delete</a>
+</li>
+<li>
+  <a href="#delete-bucket">delete-bucket</a>
+</li>
+<li>
+  <a href="#get">get</a>
+</li>
+<li>
+  <a href="#next-sequence">next-sequence</a>
+</li>
+<li>
+  <a href="#open">open</a>
+</li>
+<li>
+  <a href="#put">put</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="by-prefix">by-prefix</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(by-prefix db bucket prefix)</code></div>
+</pre>
+  <p class="var-docstr">Retrives key/value pairs for all keys in bucket<br>
+  that start with prefix.<br>
+  Returns a vector of [key value] tuples. Passing empty prefix<br>
+  will return all key/values in bucket.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="close">close</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(close db)</code></div>
+</pre>
+  <p class="var-docstr">Releases all database resources.<br>
+  It will block waiting for any open transactions to finish<br>
+  before closing the database and returning.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="create-bucket">create-bucket</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(create-bucket db name)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new bucket. Throws an error if the bucket already exists,<br>
+  if the bucket name is blank, or if the bucket name is too long.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="create-bucket-if-not-exists">create-bucket-if-not-exists</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(create-bucket-if-not-exists db name)</code></div>
+</pre>
+  <p class="var-docstr">Creates a new bucket if it doesn&#39;t already exist.<br>
+   Throws an error if the bucket name is blank, or if the bucket name is too long.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="delete">delete</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(delete db bucket key)</code></div>
+</pre>
+  <p class="var-docstr">Removes a key from the bucket if it exists.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="delete-bucket">delete-bucket</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(delete-bucket db name)</code></div>
+</pre>
+  <p class="var-docstr">Deletes a bucket. Throws an error if the bucket doesn&#39;t exist.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="get">get</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(get db bucket key)</code></div>
+</pre>
+  <p class="var-docstr">Retrieves the value for a key in the bucket.<br>
+  Returns nil if the key does not exist.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="next-sequence">next-sequence</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(next-sequence db bucket)</code></div>
+</pre>
+  <p class="var-docstr">Returns an autoincrementing integer for the bucket.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="open">open</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(open filename mode)</code></div>
+</pre>
+  <p class="var-docstr">Creates and opens a database at the given path.<br>
+  If the file does not exist then it will be created automatically<br>
+  with mode perm (before umask).<br>
+  mode is normally passed as an octal literal, e.g. 0600</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="put">put</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(put db bucket key value)</code></div>
+</pre>
+  <p class="var-docstr">Sets the value for a key in the bucket.<br>
+  If the key exist then its previous value will be overwritten.<br>
+  Throws an error if the key is blank, if the key is too large, or if the value is too large.</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>

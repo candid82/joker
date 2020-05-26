@@ -17,13 +17,8 @@ func fromObject(obj Object) interface{} {
 		return obj.Double().D
 	case Nil:
 		return nil
-	case *Vector:
-		cnt := obj.Count()
-		res := make([]interface{}, cnt)
-		for i := 0; i < cnt; i++ {
-			res[i] = fromObject(obj.Nth(i))
-		}
-		return res
+	case String:
+		return obj.ToString(false)
 	case Map:
 		res := make(map[string]interface{})
 		for iter := obj.Iter(); iter.HasNext(); {
@@ -38,16 +33,27 @@ func fromObject(obj Object) interface{} {
 			res[k] = fromObject(p.Value)
 		}
 		return res
+	case Seqable:
+		s := obj.Seq()
+		var res []interface{}
+		for !s.IsEmpty() {
+			res = append(res, fromObject(s.First()))
+			s = s.Rest()
+		}
+		return res
 	default:
 		return obj.ToString(false)
 	}
 }
 
-func toObject(v interface{}) Object {
+func toObject(v interface{}, keywordize bool) Object {
 	switch v := v.(type) {
 	case string:
 		return MakeString(v)
 	case float64:
+		if v == float64(int(v)) {
+			return Int{I: int(v)}
+		}
 		return Double{D: v}
 	case bool:
 		return Boolean{B: v}
@@ -56,13 +62,19 @@ func toObject(v interface{}) Object {
 	case []interface{}:
 		res := EmptyVector()
 		for _, v := range v {
-			res = res.Conjoin(toObject(v))
+			res = res.Conjoin(toObject(v, keywordize))
 		}
 		return res
 	case map[string]interface{}:
 		res := EmptyArrayMap()
 		for k, v := range v {
-			res.Add(String{S: k}, toObject(v))
+			var key Object
+			if keywordize {
+				key = MakeKeyword(k)
+			} else {
+				key = MakeString(k)
+			}
+			res.Add(key, toObject(v, keywordize))
 		}
 		return res
 	default:
@@ -70,12 +82,18 @@ func toObject(v interface{}) Object {
 	}
 }
 
-func readString(s string) Object {
+func readString(s string, opts Map) Object {
 	var v interface{}
 	if err := json.Unmarshal([]byte(s), &v); err != nil {
 		panic(RT.NewError("Invalid json: " + err.Error()))
 	}
-	return toObject(v)
+	var keywordize bool
+	if opts != nil {
+		if ok, v := opts.Get(MakeKeyword("keywords?")); ok {
+			keywordize = ToBool(v)
+		}
+	}
+	return toObject(v, keywordize)
 }
 
 func writeString(obj Object) String {

@@ -1,6 +1,6 @@
-//go:generate go run gen_data/gen_data.go
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run -tags gen_code gen_code/gen_code.go
 
 package core
 
@@ -35,6 +35,7 @@ type (
 		Equals(interface{}) bool
 	}
 	Type struct {
+		MetaHolder
 		name        string
 		reflectType reflect.Type
 	}
@@ -136,18 +137,25 @@ type (
 	Var struct {
 		InfoHolder
 		MetaHolder
-		ns         *Namespace
-		name       Symbol
-		Value      Object
-		expr       Expr
-		isMacro    bool
-		isPrivate  bool
-		isDynamic  bool
-		isUsed     bool
-		taggedType *Type
+		ns             *Namespace
+		name           Symbol
+		Value          Object
+		expr           Expr
+		isMacro        bool
+		isPrivate      bool
+		isDynamic      bool
+		isUsed         bool
+		isGloballyUsed bool
+		isFake         bool
+		taggedType     *Type
 	}
-	Proc func([]Object) Object
-	Fn   struct {
+	ProcFn func([]Object) Object
+	Proc   struct {
+		Fn      ProcFn
+		Name    string
+		Package string // "" for core (this package), else e.g. "std/string"
+	}
+	Fn struct {
 		InfoHolder
 		MetaHolder
 		isMacro bool
@@ -239,6 +247,7 @@ type (
 		Comparator     *Type
 		Counted        *Type
 		Deref          *Type
+		Channel        *Type
 		Error          *Type
 		Gettable       *Type
 		Indexed        *Type
@@ -288,6 +297,7 @@ type (
 		NodeSeq        *Type
 		ParseError     *Type
 		Proc           *Type
+		ProcFn         *Type
 		Ratio          *Type
 		RecurBindings  *Type
 		Regex          *Type
@@ -300,98 +310,6 @@ type (
 		VectorSeq      *Type
 	}
 )
-
-var TYPES = map[*string]*Type{}
-var TYPE Types
-
-func RegRefType(name string, inst interface{}) *Type {
-	t := &Type{name: name, reflectType: reflect.TypeOf(inst)}
-	TYPES[STRINGS.Intern(name)] = t
-	return t
-}
-
-func regType(name string, inst interface{}) *Type {
-	t := &Type{name: name, reflectType: reflect.TypeOf(inst).Elem()}
-	TYPES[STRINGS.Intern(name)] = t
-	return t
-}
-
-func regInterface(name string, inst interface{}) *Type {
-	t := &Type{name: name, reflectType: reflect.TypeOf(inst).Elem()}
-	TYPES[STRINGS.Intern(name)] = t
-	return t
-}
-
-func init() {
-	TYPE = Types{
-		Associative:    regInterface("Associative", (*Associative)(nil)),
-		Callable:       regInterface("Callable", (*Callable)(nil)),
-		Collection:     regInterface("Collection", (*Collection)(nil)),
-		Comparable:     regInterface("Comparable", (*Comparable)(nil)),
-		Comparator:     regInterface("Comparator", (*Comparator)(nil)),
-		Counted:        regInterface("Counted", (*Counted)(nil)),
-		Deref:          regInterface("Deref", (*Deref)(nil)),
-		Error:          regInterface("Error", (*Error)(nil)),
-		Gettable:       regInterface("Gettable", (*Gettable)(nil)),
-		Indexed:        regInterface("Indexed", (*Indexed)(nil)),
-		IOReader:       regInterface("IOReader", (*io.Reader)(nil)),
-		IOWriter:       regInterface("IOWriter", (*io.Writer)(nil)),
-		KVReduce:       regInterface("KVReduce", (*KVReduce)(nil)),
-		Map:            regInterface("Map", (*Map)(nil)),
-		Meta:           regInterface("Meta", (*Meta)(nil)),
-		Named:          regInterface("Named", (*Named)(nil)),
-		Number:         regInterface("Number", (*Number)(nil)),
-		Pending:        regInterface("Pending", (*Pending)(nil)),
-		Ref:            regInterface("Ref", (*Ref)(nil)),
-		Reversible:     regInterface("Reversible", (*Reversible)(nil)),
-		Seq:            regInterface("Seq", (*Seq)(nil)),
-		Seqable:        regInterface("Seqable", (*Seqable)(nil)),
-		Sequential:     regInterface("Sequential", (*Sequential)(nil)),
-		Set:            regInterface("Set", (*Set)(nil)),
-		Stack:          regInterface("Stack", (*Stack)(nil)),
-		ArrayMap:       RegRefType("ArrayMap", (*ArrayMap)(nil)),
-		ArrayMapSeq:    RegRefType("ArrayMapSeq", (*ArrayMapSeq)(nil)),
-		ArrayNodeSeq:   RegRefType("ArrayNodeSeq", (*ArrayNodeSeq)(nil)),
-		ArraySeq:       RegRefType("ArraySeq", (*ArraySeq)(nil)),
-		MapSet:         RegRefType("MapSet", (*MapSet)(nil)),
-		Atom:           RegRefType("Atom", (*Atom)(nil)),
-		BigFloat:       RegRefType("BigFloat", (*BigFloat)(nil)),
-		BigInt:         RegRefType("BigInt", (*BigInt)(nil)),
-		Boolean:        regType("Boolean", (*Boolean)(nil)),
-		Time:           regType("Time", (*Time)(nil)),
-		Buffer:         RegRefType("Buffer", (*Buffer)(nil)),
-		Char:           regType("Char", (*Char)(nil)),
-		ConsSeq:        RegRefType("ConsSeq", (*ConsSeq)(nil)),
-		Delay:          RegRefType("Delay", (*Delay)(nil)),
-		Double:         regType("Double", (*Double)(nil)),
-		EvalError:      RegRefType("EvalError", (*EvalError)(nil)),
-		ExInfo:         RegRefType("ExInfo", (*ExInfo)(nil)),
-		Fn:             RegRefType("Fn", (*Fn)(nil)),
-		File:           RegRefType("File", (*File)(nil)),
-		BufferedReader: RegRefType("BufferedReader", (*BufferedReader)(nil)),
-		HashMap:        RegRefType("HashMap", (*HashMap)(nil)),
-		Int:            regType("Int", (*Int)(nil)),
-		Keyword:        regType("Keyword", (*Keyword)(nil)),
-		LazySeq:        RegRefType("LazySeq", (*LazySeq)(nil)),
-		List:           RegRefType("List", (*List)(nil)),
-		MappingSeq:     RegRefType("MappingSeq", (*MappingSeq)(nil)),
-		Namespace:      RegRefType("Namespace", (*Namespace)(nil)),
-		Nil:            regType("Nil", (*Nil)(nil)),
-		NodeSeq:        RegRefType("NodeSeq", (*NodeSeq)(nil)),
-		ParseError:     RegRefType("ParseError", (*ParseError)(nil)),
-		Proc:           RegRefType("Proc", (*Proc)(nil)),
-		Ratio:          RegRefType("Ratio", (*Ratio)(nil)),
-		RecurBindings:  RegRefType("RecurBindings", (*RecurBindings)(nil)),
-		Regex:          regType("Regex", (*Regex)(nil)),
-		String:         regType("String", (*String)(nil)),
-		Symbol:         regType("Symbol", (*Symbol)(nil)),
-		Type:           RegRefType("Type", (*Type)(nil)),
-		Var:            RegRefType("Var", (*Var)(nil)),
-		Vector:         RegRefType("Vector", (*Vector)(nil)),
-		VectorRSeq:     RegRefType("VectorRSeq", (*VectorRSeq)(nil)),
-		VectorSeq:      RegRefType("VectorSeq", (*VectorSeq)(nil)),
-	}
-}
 
 func (pos Position) Filename() string {
 	if pos.filename == nil {
@@ -419,10 +337,10 @@ func getHash() hash.Hash32 {
 
 func hashSymbol(ns, name *string) uint32 {
 	h := getHash()
-	b := make([]byte, 16)
-	binary.LittleEndian.PutUint64(b, uint64(uintptr(unsafe.Pointer(name))))
-	binary.LittleEndian.PutUint64(b[8:], uint64(uintptr(unsafe.Pointer(ns))))
-	h.Write(b)
+	if ns != nil {
+		h.Write([]byte(*ns))
+	}
+	h.Write([]byte("/" + *name))
 	return h.Sum32()
 }
 
@@ -452,6 +370,8 @@ func (s BySymbolName) Less(i, j int) bool {
 	return s[i].ToString(false) < s[j].ToString(false)
 }
 
+const KeywordHashMask uint32 = 0x7334c790
+
 func MakeKeyword(nsname string) Keyword {
 	index := strings.IndexRune(nsname, '/')
 	if index == -1 || nsname == "/" {
@@ -459,7 +379,7 @@ func MakeKeyword(nsname string) Keyword {
 		return Keyword{
 			ns:   nil,
 			name: name,
-			hash: hashSymbol(nil, name),
+			hash: hashSymbol(nil, name) ^ KeywordHashMask,
 		}
 	}
 	ns := STRINGS.Intern(nsname[0:index])
@@ -467,7 +387,7 @@ func MakeKeyword(nsname string) Keyword {
 	return Keyword{
 		ns:   ns,
 		name: name,
-		hash: hashSymbol(ns, name),
+		hash: hashSymbol(ns, name) ^ KeywordHashMask,
 	}
 }
 
@@ -759,20 +679,37 @@ func (fn *Fn) Hash() uint32 {
 }
 
 func (fn *Fn) Call(args []Object) Object {
+	min := math.MaxInt32
+	max := -1
 	for _, arity := range fn.fnExpr.arities {
-		if len(arity.args) == len(args) {
+		a := len(arity.args)
+		if a == len(args) {
 			RT.pushFrame()
 			defer RT.popFrame()
 			return evalLoop(arity.body, fn.env.addFrame(args))
 		}
+		if min > a {
+			min = a
+		}
+		if max < a {
+			max = a
+		}
 	}
 	v := fn.fnExpr.variadic
 	if v == nil || len(args) < len(v.args)-1 {
+		if v != nil {
+			min = len(v.args)
+			max = math.MaxInt32
+		}
 		c := len(args)
 		if fn.isMacro {
 			c -= 2
+			min -= 2
+			if max != math.MaxInt32 {
+				max -= 2
+			}
 		}
-		PanicArity(c)
+		PanicArityMinMax(c, min, max)
 	}
 	var restArgs Object = NIL
 	if len(v.args)-1 < len(args) {
@@ -808,7 +745,7 @@ func (fn *Fn) Compare(a, b Object) int {
 }
 
 func (p Proc) Call(args []Object) Object {
-	return p(args)
+	return p.Fn(args)
 }
 
 func (p Proc) Compare(a, b Object) int {
@@ -816,11 +753,19 @@ func (p Proc) Compare(a, b Object) int {
 }
 
 func (p Proc) ToString(escape bool) string {
-	return "#object[Proc]"
+	pkg := p.Package
+	if pkg != "" {
+		pkg += "."
+	}
+	return fmt.Sprintf("#object[Proc:%s%s]", pkg, p.Name)
 }
 
 func (p Proc) Equals(other interface{}) bool {
-	return reflect.ValueOf(p).Pointer() == reflect.ValueOf(other).Pointer()
+	switch other := other.(type) {
+	case Proc:
+		return reflect.ValueOf(p.Fn).Pointer() == reflect.ValueOf(other.Fn).Pointer()
+	}
+	return false
 }
 
 func (p Proc) GetInfo() *ObjectInfo {
@@ -836,7 +781,7 @@ func (p Proc) GetType() *Type {
 }
 
 func (p Proc) Hash() uint32 {
-	return HashPtr(reflect.ValueOf(p).Pointer())
+	return HashPtr(reflect.ValueOf(p.Fn).Pointer())
 }
 
 func (i InfoHolder) GetInfo() *ObjectInfo {
@@ -863,8 +808,12 @@ func (sym Symbol) WithMeta(meta Map) Object {
 	return res
 }
 
+func (v *Var) Name() string {
+	return v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+}
+
 func (v *Var) ToString(escape bool) string {
-	return "#'" + v.ns.Name.ToString(false) + "/" + v.name.ToString(false)
+	return "#'" + v.Name()
 }
 
 func (v *Var) Equals(other interface{}) bool {
@@ -897,7 +846,7 @@ func (v *Var) Hash() uint32 {
 
 func (v *Var) Resolve() Object {
 	if v.Value == nil {
-		panic(RT.NewError("Unbound var: " + v.ToString(false)))
+		return NIL
 	}
 	return v.Value
 }
@@ -1018,6 +967,10 @@ func (rat *Ratio) Compare(other Object) int {
 	return CompareNumbers(rat, AssertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
 }
 
+func MakeBigInt(bi int64) *BigInt {
+	return &BigInt{b: *big.NewInt(bi)}
+}
+
 func (bi *BigInt) ToString(escape bool) string {
 	return bi.b.String() + "N"
 }
@@ -1039,7 +992,7 @@ func (bi *BigInt) Compare(other Object) int {
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
-	return bf.b.Text('g', 256) + "M"
+	return bf.b.Text('g', -1) + "M"
 }
 
 func (bf *BigFloat) Equals(other interface{}) bool {
@@ -1112,7 +1065,11 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	return fmt.Sprintf("%g", d.D)
+	res := fmt.Sprintf("%g", d.D)
+	if !strings.ContainsRune(res, '.') {
+		res += ".0"
+	}
+	return res
 }
 
 func (d Double) Equals(other interface{}) bool {
@@ -1295,31 +1252,35 @@ func (k Keyword) Call(args []Object) Object {
 	return getMap(k, args)
 }
 
-func (rx Regex) ToString(escape bool) string {
+func MakeRegex(r *regexp.Regexp) *Regex {
+	return &Regex{R: r}
+}
+
+func (rx *Regex) ToString(escape bool) string {
 	if escape {
 		return "#\"" + rx.R.String() + "\""
 	}
 	return rx.R.String()
 }
 
-func (rx Regex) Print(w io.Writer, printReadably bool) {
+func (rx *Regex) Print(w io.Writer, printReadably bool) {
 	fmt.Fprint(w, rx.ToString(true))
 }
 
-func (rx Regex) Equals(other interface{}) bool {
+func (rx *Regex) Equals(other interface{}) bool {
 	switch other := other.(type) {
-	case Regex:
+	case *Regex:
 		return rx.R == other.R
 	default:
 		return false
 	}
 }
 
-func (rx Regex) GetType() *Type {
+func (rx *Regex) GetType() *Type {
 	return TYPE.Regex
 }
 
-func (rx Regex) Hash() uint32 {
+func (rx *Regex) Hash() uint32 {
 	return HashPtr(uintptr(unsafe.Pointer(rx.R)))
 }
 
@@ -1518,4 +1479,37 @@ func MakeMeta(arglists Seq, docstring string, added string) *ArrayMap {
 	res.Add(KEYWORDS.doc, String{S: docstring})
 	res.Add(KEYWORDS.added, String{S: added})
 	return res
+}
+
+func RegRefType(name string, inst interface{}, doc string) *Type {
+	if doc != "" {
+		doc = "\n  " + doc
+	}
+	meta := MakeMeta(nil, "(Concrete reference type)"+doc, "1.0")
+	meta.Add(KEYWORDS.name, MakeString(name))
+	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst)}
+	TYPES[STRINGS.Intern(name)] = t
+	return t
+}
+
+func RegType(name string, inst interface{}, doc string) *Type {
+	if doc != "" {
+		doc = "\n  " + doc
+	}
+	meta := MakeMeta(nil, "(Concrete type)"+doc, "1.0")
+	meta.Add(KEYWORDS.name, MakeString(name))
+	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst).Elem()}
+	TYPES[STRINGS.Intern(name)] = t
+	return t
+}
+
+func RegInterface(name string, inst interface{}, doc string) *Type {
+	if doc != "" {
+		doc = "\n  " + doc
+	}
+	meta := MakeMeta(nil, "(Interface type)"+doc, "1.0")
+	meta.Add(KEYWORDS.name, MakeString(name))
+	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst).Elem()}
+	TYPES[STRINGS.Intern(name)] = t
+	return t
 }

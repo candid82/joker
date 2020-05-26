@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unsafe"
 )
 
 type (
 	Namespace struct {
 		MetaHolder
-		Name     Symbol
-		mappings map[*string]*Var
-		aliases  map[*string]*Namespace
-		isUsed   bool
+		Name           Symbol
+		Lazy           func()
+		mappings       map[*string]*Var
+		aliases        map[*string]*Namespace
+		isUsed         bool
+		isGloballyUsed bool
+		hash           uint32
 	}
 )
 
@@ -57,14 +59,28 @@ func (ns *Namespace) AlterMeta(fn *Fn, args []Object) Map {
 }
 
 func (ns *Namespace) Hash() uint32 {
-	return HashPtr(uintptr(unsafe.Pointer(ns)))
+	return ns.hash
 }
+
+func (ns *Namespace) MaybeLazy(doc string) {
+	if ns.Lazy != nil {
+		lazyFn := ns.Lazy
+		ns.Lazy = nil
+		lazyFn()
+		if VerbosityLevel > 0 {
+			fmt.Fprintf(Stderr, "NamespaceFor: Lazily initialized %s for %s\n", *ns.Name.name, doc)
+		}
+	}
+}
+
+const nsHashMask uint32 = 0x90569f6f
 
 func NewNamespace(sym Symbol) *Namespace {
 	return &Namespace{
 		Name:     sym,
 		mappings: make(map[*string]*Var),
 		aliases:  make(map[*string]*Namespace),
+		hash:     sym.Hash() ^ nsHashMask,
 	}
 }
 
@@ -82,6 +98,12 @@ func (ns *Namespace) ReferAll(other *Namespace) {
 			ns.mappings[name] = vr
 		}
 	}
+}
+
+func (ns *Namespace) InternFake(sym Symbol) *Var {
+	vr := ns.Intern(sym)
+	vr.isFake = true
+	return vr
 }
 
 func (ns *Namespace) Intern(sym Symbol) *Var {
@@ -115,9 +137,27 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			sym.ToString(false), existingVar.ToString(false), ns.ToString(false)), sym.GetInfo().Pos()))
 	}
 	if LINTER_MODE && existingVar.expr != nil && !existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
-		printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+		if !isDeclaredInConfig(existingVar) {
+			printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+		}
 	}
 	return existingVar
+}
+
+func isDeclaredInConfig(vr *Var) bool {
+	m := vr.GetMeta()
+	if m == nil {
+		return false
+	}
+	ok, v := m.Get(KEYWORDS.file)
+	if !ok {
+		return false
+	}
+	s, ok := v.(String)
+	if !ok {
+		return false
+	}
+	return strings.Contains(s.S, ".jokerd")
 }
 
 func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
@@ -147,4 +187,12 @@ func (ns *Namespace) AddAlias(alias Symbol, namespace *Namespace) {
 
 func (ns *Namespace) Resolve(name string) *Var {
 	return ns.mappings[STRINGS.Intern(name)]
+}
+
+func (ns *Namespace) Mappings() map[*string]*Var {
+	return ns.mappings
+}
+
+func (ns *Namespace) Aliases() map[*string]*Namespace {
+	return ns.aliases
 }

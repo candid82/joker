@@ -5,3 +5,8 @@ core/a_*.go
 *.exe
 *~
 *.zip
+*.docset
+.DS_Store
+docs/dash/*.html
+docs/dash/*.css
+docs/dash/*.js

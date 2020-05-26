@@ -9,7 +9,7 @@ import (
 )
 
 func csvLazySeq(rdr *csv.Reader) *LazySeq {
-	var c Proc = func(args []Object) Object {
+	var c = func(args []Object) Object {
 		t, err := rdr.Read()
 		if err == io.EOF {
 			return EmptyList
@@ -17,7 +17,7 @@ func csvLazySeq(rdr *csv.Reader) *LazySeq {
 		PanicOnErr(err)
 		return NewConsSeq(MakeStringVector(t), csvLazySeq(rdr))
 	}
-	return NewLazySeq(c)
+	return NewLazySeq(Proc{Fn: c})
 }
 
 func csvSeqOpts(src Object, opts Map) Object {

@@ -1,0 +1,6 @@
+(ns joker.test-joker.csv
+  (:require [joker.csv :as csv]
+            [joker.test :refer [deftest is]]))
+
+(deftest test-csv-seq
+  (is (= (csv/csv-seq "a,b,c\nd,e,f") '(["a" "b" "c"] ["d" "e" "f"]))))

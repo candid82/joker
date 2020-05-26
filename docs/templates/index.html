@@ -4,14 +4,38 @@
 </head>
 <body>
   <div class="main">
-    <h1>Joker Standard Namespaces</h1>
-    <h2>Index</h2>
+    <title>Joker Standard Namespaces and Types</title>
+    <div id="search">
+      <input type="text" id="search-input" placeholder="Search" autofocus>
+      <ul id="search-suggestions" class="hide"></ul>
+    </div>
+    <h1>Indexes of Joker Standard Namespaces and Types</h1>
+    <h2>Index of <a href="#joker-special-forms">Special Forms</a></h2>
     <ul class="index">
-      {index}
+      {index-of-special-forms}
     </ul>
+    <h2>Index of <a href="#joker-std-ns">Namespaces</a></h2>
+    <ul class="index">
+      {index-of-namespaces}
+    </ul>
+    <h2>Index of <a href="#joker-std-types">Types</a></h2>
+    <ul class="index">
+      {index-of-types}
+    </ul>
+    <h1 id="joker-special-forms">Joker Special Forms</h1>
+    <ul>
+      {special-forms}
+    </ul>
+    <h1 id="joker-std-ns">Joker Standard Namespaces</h1>
     <ul>
       {namespaces}
     </ul>
+    <h1 id="joker-std-types">Joker Standard Types</h1>
+    <p><em>Note:</em> These types are "omnipresent", in that they're not members of any particular namespace, but are available for resolution regardless of the current value of <tt>*ns*</tt> (the current namespace).</p>
+    <ul>
+      {types}
+    </ul>
   </div>
 </body>
+<script src="main.js"></script>
 </html>

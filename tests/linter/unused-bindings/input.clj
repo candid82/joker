@@ -21,3 +21,6 @@
 (let [{:keys [a b]} {}] (println a))
 
 (let [_ 1 _ 2 a 1 a 2] a)
+
+(defn f [{}] 1)
+(defn f1 [[]] 1)

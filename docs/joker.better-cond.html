@@ -1,0 +1,128 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.better-cond</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">A collection of variations on Clojure&#39;s core macros.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#cond">cond</a>
+</li>
+<li>
+  <a href="#if-let">if-let</a>
+</li>
+<li>
+  <a href="#if-some">if-some</a>
+</li>
+<li>
+  <a href="#when-let">when-let</a>
+</li>
+<li>
+  <a href="#when-some">when-some</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Macro" id="cond">cond</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(cond &amp; clauses)</code></div>
+</pre>
+  <p class="var-docstr">A variation on cond which sports let bindings, do and implicit else:<br>
+     (cond <br>
+       (odd? a) 1<br>
+       :do (println a)<br>
+       :let [a (quot a 2)]<br>
+       (odd? a) 2<br>
+       3).<br>
+   Also supports :when-let and :when-some. <br>
+   :let, :when-let, :when-some and :do do not need to be written as keywords.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L57">source</a>
+  
+</li>
+<li>
+  <h3 class="Macro" id="if-let">if-let</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(if-let bindings then)</code></div>
+<div><code>(if-let bindings then else)</code></div>
+</pre>
+  <p class="var-docstr">A variation on if-let where all the exprs in the bindings vector must be true.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L7">source</a>
+  
+</li>
+<li>
+  <h3 class="Macro" id="if-some">if-some</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(if-some bindings then)</code></div>
+<div><code>(if-some bindings then else)</code></div>
+</pre>
+  <p class="var-docstr">A variation on if-some where all the exprs in the bindings vector must be non-nil.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L32">source</a>
+  
+</li>
+<li>
+  <h3 class="Macro" id="when-let">when-let</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(when-let bindings &amp; body)</code></div>
+</pre>
+  <p class="var-docstr">A variation on when-let where all the exprs in the bindings vector must be true.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L25">source</a>
+  
+</li>
+<li>
+  <h3 class="Macro" id="when-some">when-some</h3>
+  <span class="var-kind Macro">Macro</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(when-some bindings &amp; body)</code></div>
+</pre>
+  <p class="var-docstr">A variation on when-some where all the exprs in the bindings vector must be non-nil.<br>
+   Also supports :let.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/better-cond.joke#L50">source</a>
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>

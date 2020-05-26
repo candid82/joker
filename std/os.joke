@@ -1,5 +1,5 @@
 (ns
-  ^{:go-imports ["os"]
+  ^{:go-imports ["os" "io/ioutil"]
     :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
@@ -15,6 +15,12 @@
    :go "setEnv(key, value)"}
   [^String key ^String value])
 
+(defn get-env
+  "Returns the value of the environment variable named by the key or nil if the variable is not present in the environment."
+  {:added "1.0"
+   :go "getEnv(key)"}
+  [^String key])
+
 (defn args
   "Returns a sequence of the command line arguments, starting with the program name (normally, joker)."
   {:added "1.0"
@@ -22,10 +28,12 @@
   [])
 
 (defn exit
-  "Causes the current program to exit with the given status code."
+  "Causes the current program to exit with the given status code (defaults to 0)."
   {:added "1.0"
-  :go "NIL; ExitJoker(code)"}
-  [^Int code])
+  :go {1 "NIL; ExitJoker(code)"
+       0 "NIL; ExitJoker(0)"}}
+  ([^Int code])
+  ([]))
 
 (defn sh
   "Executes the named program with the given arguments. Returns a map with the following keys:
@@ -35,7 +43,7 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(\"\", nil, name, arguments)"}
+  :go "sh(\"\", nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
 (defn sh-from
@@ -47,22 +55,25 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-  :go "sh(dir, nil, name, arguments)"}
+  :go "sh(dir, nil, nil, nil, name, arguments)"}
   [^String dir ^String name & ^String arguments])
 
 (defn exec
   "Executes the named program with the given arguments. opts is a map with the following keys (all optional):
   :args - vector of arguments (all arguments must be strings),
   :dir - if specified, working directory will be set to this value before executing the program,
-  :stdin - if specified, provides stdin for the program. Can be either a string or :pipe keyword.
-  If it's a string, the string's content will serve as stdin for the program. If it's :pipe,
-  Joker's stdin will be redirected to the program's stdin.
+  :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.
+  If it's a string, the string's content will serve as stdin for the program. IOReader can be, for example,
+  *in* (in which case Joker's stdin will be redirected to the program's stdin) or the value returned by (joker.os/open).
+  :stdout - if specified, must be an IOWriter. It can be, for example, *out* (in which case the program's stdout will be redirected
+  to Joker's stdout) or the value returned by (joker.os/create).
+  :stderr - the same as :stdout, but for stderr.
   Returns a map with the following keys:
   :success - whether or not the execution was successful,
   :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
-  :out - string capturing stdout of the program,
-  :err - string capturing stderr of the program."
+  :out - string capturing stdout of the program (unless :stdout option was passed)
+  :err - string capturing stderr of the program (unless :stderr option was passed)."
   {:added "1.0"
   :go "execute(name, opts)"}
   [^String name ^Map opts])
@@ -74,7 +85,13 @@
   [^String name ^Int perm])
 
 (defn ls
-  "Reads the directory named by dirname and returns a list of directory entries sorted by filename."
+  "Reads the directory named by dirname and returns a list of directory entries sorted by filename.
+  Each entry is a map with the following keys:
+  :name - name (String)
+  :size - size in bytes (Int)
+  :mode - mode (Int)
+  :dir? - true if the file is a directory (Boolean)
+  :modtime - modification time (unix timestamp) (Int)"
   {:added "1.0"
   :go "readDir(dirname)"}
   [^String dirname])
@@ -127,3 +144,52 @@
   {:added "1.0"
   :go "! err := f.Close(); PanicOnErr(err); _res := NIL"}
   [^File f])
+
+(defn remove
+  "Removes the named file or (empty) directory."
+  {:added "1.0"
+   :go "! err := os.Remove(name); PanicOnErr(err); _res := NIL"}
+  [^String name])
+
+(defn remove-all
+  "Removes path and any children it contains.
+
+  It removes everything it can, then panics with the first error (if
+  any) it encountered."
+  {:added "1.0"
+   :go "! err := os.RemoveAll(path); PanicOnErr(err); _res := NIL"}
+  [^String path])
+
+(defn ^String temp-dir
+  "Returns the default directory to use for temporary files.
+  On Unix systems, it returns $TMPDIR if non-empty, else /tmp.
+  On Windows, it uses GetTempPath, returning the first non-empty
+  value from %TMP%, %TEMP%, %USERPROFILE%, or the Windows directory.
+  The directory is neither guaranteed to exist nor have accessible permissions."
+  {:added "1.0"
+   :go "os.TempDir()"}
+  [])
+
+(defn ^String mkdir-temp
+  "Creates a new temporary directory in the directory dir.
+  The directory name is generated by taking pattern and applying a random string to the end.
+  If pattern includes a \"*\", the random string replaces the last \"*\".
+  Returns the name of the new directory. If dir is the empty string,
+  uses the default directory for temporary files (see joker.os/temp-dir).
+  Multiple programs calling joker.os/make-temp-dir simultaneously will not choose the same directory.
+  It is the caller's responsibility to remove the directory when no longer needed."
+  {:added "1.0"
+   :go "! _res, err := ioutil.TempDir(dir, pattern); PanicOnErr(err);"}
+  [^String dir ^String pattern])
+
+(defn ^File create-temp
+  "Creates a new temporary file in the directory dir, opens the file for reading and writing,
+  and returns the resulting File. The filename is generated by taking pattern and adding a
+  random string to the end. If pattern includes a \"*\", the random string replaces the last \"*\".
+  If dir is the empty string, uses the default directory for temporary files (see joker.os/temp-dir).
+  Multiple programs calling joker.os/make-temp-file simultaneously will not choose the same file.
+  The caller can use (name f) to find the pathname of the file.
+  It is the caller's responsibility to remove the file when no longer needed."
+  {:added "1.0"
+   :go "! _res, err := ioutil.TempFile(dir, pattern); PanicOnErr(err);"}
+  [^String dir ^String pattern])
