@@ -6,6 +6,7 @@
         "h3.ns": "Namespace",
         "h3.type": "Type",
         "h3.Function": "Function",
+        "h3.Macro": "Macro",
         "h3.Variable": "Variable",
         "h3.Constant": "Constant"
     },
