@@ -1326,8 +1326,9 @@
      `(let [temp# ~tst]
         (if (nil? temp#)
           ~else
-          (let [~form temp#]
-            ~then))))))
+          (let [~form temp#
+                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+            t#))))))
 
 (defmacro when-some
   "bindings => binding-form test
