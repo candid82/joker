@@ -43,8 +43,12 @@ func formatBindings(v *Vector, w io.Writer, indent int) int {
 			newIndent = formatObject(v.at(i+1), newIndent+1, w)
 		}
 		if i+2 < v.count {
-			fmt.Fprint(w, "\n")
-			writeIndent(w, indent+1)
+			if isNewLine(v.at(i+1), v.at(i+2)) {
+				fmt.Fprint(w, "\n")
+				writeIndent(w, indent+1)
+			} else {
+				fmt.Fprint(w, " ")
+			}
 		}
 	}
 	fmt.Fprint(w, "]")
@@ -65,7 +69,7 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 	return newIndent + 1
 }
 
-var defRegex *regexp.Regexp = regexp.MustCompile("def.+")
+var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
 var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
 var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
 
@@ -85,6 +89,7 @@ func isNewLine(obj, nextObj Object) bool {
 
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	i := indent + 1
+	restIndent := indent + 2
 	fmt.Fprint(w, "(")
 	obj := seq.First()
 	seq, i = seqFirst(seq, w, i)
@@ -128,29 +133,18 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
-		// fmt.Fprint(w, "\n")
 	} else {
-		newIndent := indent + 1
+		// Indent function call arguments
+		restIndent = indent + 1
 		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
-			newIndent = i + 1
+			restIndent = i + 1
 		}
-		for !seq.IsEmpty() {
-			nextObj := seq.First()
-			if isNewLine(obj, nextObj) {
-				seq, i = seqFirstAfterBreak(seq, w, newIndent)
-			} else {
-				seq, i = seqFirstAfterSpace(seq, w, i)
-			}
-			obj = nextObj
-		}
-		fmt.Fprint(w, ")")
-		return i + 1
 	}
 
 	for !seq.IsEmpty() {
 		nextObj := seq.First()
 		if isNewLine(obj, nextObj) {
-			seq, i = seqFirstAfterBreak(seq, w, indent+2)
+			seq, i = seqFirstAfterBreak(seq, w, restIndent)
 		} else {
 			seq, i = seqFirstAfterSpace(seq, w, i)
 		}

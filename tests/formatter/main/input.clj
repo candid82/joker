@@ -34,21 +34,61 @@
 
 (let [] 1)
 
+(let []
+  1)
+
 (let [a 1] 1 2)
+
+(let [a 1]
+  1
+  2)
+
+(let [a]
+  1
+  2)
 
 (let [a] 1 2)
 
 (loop [a 1 b 1] (if (> a 10) [a b] (recur (inc a) (dec b))))
 
+(loop [a 1
+       b 1]
+  (if (> a 10)
+    [a b]
+    (recur (inc a) (dec b))))
+
 (letfn [(neven? [n] (if (zero? n) true (nodd? (dec n))))
         (nodd? [n] (if (zero? n) false (neven? (dec n))))]
   (neven? 10))
 
+(letfn [(neven? [n] (if (zero? n)
+                      true
+                      (nodd? (dec n))))
+        (nodd? [n] (if (zero? n)
+                     false
+                     (neven? (dec n))))]
+  (neven? 10))
+
 (do 1 2)
+
+(do
+  1
+  2)
 
 (try 1 (catch Exception e 2) (finally 3))
 
+(try
+  1
+  (catch Exception e
+    2)
+  (finally
+    3))
+
 (defn plus [x y] (+ x y))
+
+(defn plus
+  [x y]
+  (+ x y))
 
 (defn cast
   "Throws an error if x is not of a type t, else returns x."
@@ -58,7 +98,13 @@
 
 (deftest t (is (= 1 2)))
 
+(deftest t
+  (is (= 1 2)))
+
 (def PI 3.14)
+
+(def PI
+  3.14)
 
 (ns my.test
   (:require my.test1
@@ -142,37 +188,42 @@
   3 4 5}
 
 [#?(:cljs 1)]
+
 (#?(:cljs 1))
+
 #?(:clj 1)
+
 #?@(:cljs 3)
+
 (def regexp #?(:clj re-pattern :cljs js/XRegExp))
 
-
-;; Should FAIL
-
 #?(:cljs)
+
 #?(:cljs (let [] 1) :default (let [] 1))
+
 [#?@(:clj 1)]
 
 #:t{:g 1}
+
 #::{:g 1}
+
 #:t{:_/g 1}
+
 #:t{:h/g 1}
+
 #::s{:g 1}
 
-;; Should FAIL
 #::{g 1}
 
 #inst 1
+
 #uuid 2
 
-;; Should FAIL
-
 #t 4
+
 #g [a]
 
 (defn ^:private line-seq*
   [rdr]
   (when-let [line (reader-read-line__ rdr)]
     (cons line (lazy-seq (line-seq* rdr)))))
-
