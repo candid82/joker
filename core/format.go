@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"unicode/utf8"
 )
 
 func seqFirst(seq Seq, w io.Writer, indent int) (Seq, int) {
@@ -14,20 +15,40 @@ func seqFirst(seq Seq, w io.Writer, indent int) (Seq, int) {
 	return seq, indent
 }
 
-func seqFirstAfterSpace(seq Seq, w io.Writer, indent int) (Seq, int) {
+// TODO: maybe merge it with seqFirstAfterBreak
+// or extract common part into a separate function
+func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, int) {
 	if !seq.IsEmpty() {
 		fmt.Fprint(w, " ")
-		indent = formatObject(seq.First(), indent+1, w)
+		obj := seq.First()
+		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
+			if info := obj.GetInfo(); info != nil {
+				fmt.Fprint(w, info.prefix)
+				indent += utf8.RuneCountInString(info.prefix)
+			}
+			indent = formatSeqEx(s, w, indent+1, insideDefRecord)
+		} else {
+			indent = formatObject(obj, indent+1, w)
+		}
 		seq = seq.Rest()
 	}
 	return seq, indent
 }
 
-func seqFirstAfterBreak(seq Seq, w io.Writer, indent int) (Seq, int) {
+func seqFirstAfterBreak(seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, int) {
 	if !seq.IsEmpty() {
 		fmt.Fprint(w, "\n")
 		writeIndent(w, indent)
-		indent = formatObject(seq.First(), indent, w)
+		obj := seq.First()
+		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
+			if info := obj.GetInfo(); info != nil {
+				fmt.Fprint(w, info.prefix)
+				indent += utf8.RuneCountInString(info.prefix)
+			}
+			indent = formatSeqEx(s, w, indent, insideDefRecord)
+		} else {
+			indent = formatObject(obj, indent, w)
+		}
 		seq = seq.Rest()
 	}
 	return seq, indent
@@ -88,13 +109,21 @@ func isNewLine(obj, nextObj Object) bool {
 }
 
 func formatSeq(seq Seq, w io.Writer, indent int) int {
+	return formatSeqEx(seq, w, indent, false)
+}
+
+func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	i := indent + 1
 	restIndent := indent + 2
 	fmt.Fprint(w, "(")
 	obj := seq.First()
 	seq, i = seqFirst(seq, w, i)
+	isDefRecord := false
+	if obj.Equals(MakeSymbol("defrecord")) {
+		isDefRecord = true
+	}
 	if obj.Equals(MakeSymbol("ns")) || isOneAndBodyExpr(obj) {
-		seq, i = seqFirstAfterSpace(seq, w, i)
+		seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 
 		// TODO: this should only apply to def*
 		if docString, ok := seq.First().(String); ok {
@@ -106,18 +135,18 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(MakeKeyword("require")) || obj.Equals(MakeKeyword("import")) {
-		seq, _ = seqFirstAfterSpace(seq, w, i)
+		seq, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		for !seq.IsEmpty() {
-			seq, _ = seqFirstAfterBreak(seq, w, i+1)
+			seq, _ = seqFirstAfterBreak(seq, w, i+1, isDefRecord)
 		}
 	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
 			case *Vector:
-				seq, i = seqFirstAfterSpace(seq, w, i)
+				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			default:
-				seq, i = seqFirstAfterSpace(seq, w, i)
-				seq, i = seqFirstAfterSpace(seq, w, i)
+				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			}
 		}
 	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
@@ -133,8 +162,9 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
+	} else if formatAsDef {
 	} else {
-		// Indent function call arguments
+		// Indent function call arguments.
 		restIndent = indent + 1
 		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
 			restIndent = i + 1
@@ -144,9 +174,9 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	for !seq.IsEmpty() {
 		nextObj := seq.First()
 		if isNewLine(obj, nextObj) {
-			seq, i = seqFirstAfterBreak(seq, w, restIndent)
+			seq, i = seqFirstAfterBreak(seq, w, restIndent, isDefRecord)
 		} else {
-			seq, i = seqFirstAfterSpace(seq, w, i)
+			seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		}
 		obj = nextObj
 	}

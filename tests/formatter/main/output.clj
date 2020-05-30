@@ -225,3 +225,10 @@
   [rdr]
   (when-let [line (reader-read-line__ rdr)]
     (cons line (lazy-seq (line-seq* rdr)))))
+
+(defrecord StandardInterceptor [name request response]
+  Interceptor
+  (-process-request [{:keys [request]} opts]
+    (request opts))
+  (-process-response [{:keys [response]} xhrio]
+    (response xhrio)))
