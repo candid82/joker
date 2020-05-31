@@ -197,6 +197,8 @@ type (
 		vector             Keyword
 		name               Keyword
 		dynamic            Keyword
+		require            Keyword
+		_import            Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -235,6 +237,11 @@ type (
 		defaultDataReaders Symbol
 		backslash          Symbol
 		deref              Symbol
+		ns                 Symbol
+		defrecord          Symbol
+		defprotocol        Symbol
+		extendProtocol     Symbol
+		extendType         Symbol
 	}
 	Str struct {
 		_if          *string

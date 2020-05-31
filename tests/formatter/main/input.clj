@@ -234,3 +234,39 @@
     (request opts))
   (-process-response [{:keys [response]} xhrio]
     (response xhrio)))
+
+(defprotocol AjaxRequest
+  "An abstraction for a running ajax request."
+  (-abort [this]
+    "Aborts a running ajax request, if possible."))
+
+(extend-protocol IComparable
+  Symbol
+  (-compare [x y]
+    (if (symbol? y)
+      (compare-symbols x y)
+      (throw (js/Error. (str "Cannot compare " x " to " y)))))
+
+  Keyword
+  (-compare [x y]
+    (if (keyword? y)
+      (compare-keywords x y)
+      (throw (js/Error. (str "Cannot compare " x " to " y))))))
+
+(defmulti ^:private render-at-rule
+  "Render a CSS at-rule"
+  :identifier)
+
+(defmethod render-at-rule :default [_] nil)
+
+(defmethod render-at-rule :import
+  [{:keys [value]}]
+  (let [{:keys [url media-queries]} value
+        url (if (string? url)
+              (util/wrap-quotes url)
+              (render-css url))
+        queries (when media-queries
+                  (render-media-expr media-queries))]
+    (str "@import "
+         (if queries (str url " " queries) url)
+         semicolon)))

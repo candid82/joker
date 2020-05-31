@@ -40,6 +40,8 @@ var (
 		vector:             MakeKeyword("vector"),
 		name:               MakeKeyword("name"),
 		dynamic:            MakeKeyword("dynamic"),
+		require:            MakeKeyword("require"),
+		_import:            MakeKeyword("import"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
@@ -78,6 +80,11 @@ var (
 		defaultDataReaders: MakeSymbol("default-data-readers"),
 		backslash:          MakeSymbol("/"),
 		deref:              MakeSymbol("deref"),
+		ns:                 MakeSymbol("ns"),
+		defrecord:          MakeSymbol("defrecord"),
+		defprotocol:        MakeSymbol("defprotocol"),
+		extendProtocol:     MakeSymbol("extend-protocol"),
+		extendType:         MakeSymbol("extend-type"),
 	}
 	STR = Str{
 		_if:          STRINGS.Intern("if"),

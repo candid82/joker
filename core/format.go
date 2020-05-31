@@ -93,11 +93,15 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
 var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
 var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
+var extendRegex *regexp.Regexp = regexp.MustCompile("extend(-.+)?")
 
 func isOneAndBodyExpr(obj Object) bool {
 	switch s := obj.(type) {
 	case Symbol:
-		return defRegex.MatchString(*s.name) || ifRegex.MatchString(*s.name) || whenRegex.MatchString(*s.name)
+		return defRegex.MatchString(*s.name) ||
+			ifRegex.MatchString(*s.name) ||
+			whenRegex.MatchString(*s.name) ||
+			extendRegex.MatchString(*s.name)
 	default:
 		return false
 	}
@@ -119,10 +123,13 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	obj := seq.First()
 	seq, i = seqFirst(seq, w, i)
 	isDefRecord := false
-	if obj.Equals(MakeSymbol("defrecord")) {
+	if obj.Equals(SYMBOLS.defrecord) ||
+		obj.Equals(SYMBOLS.defprotocol) ||
+		obj.Equals(SYMBOLS.extendProtocol) ||
+		obj.Equals(SYMBOLS.extendType) {
 		isDefRecord = true
 	}
-	if obj.Equals(MakeSymbol("ns")) || isOneAndBodyExpr(obj) {
+	if obj.Equals(SYMBOLS.ns) || isOneAndBodyExpr(obj) {
 		seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 
 		// TODO: this should only apply to def*
@@ -134,7 +141,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			fmt.Fprint(w, "\"")
 			seq = seq.Rest()
 		}
-	} else if obj.Equals(MakeKeyword("require")) || obj.Equals(MakeKeyword("import")) {
+	} else if obj.Equals(KEYWORDS.require) || obj.Equals(KEYWORDS._import) {
 		seq, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		for !seq.IsEmpty() {
 			seq, _ = seqFirstAfterBreak(seq, w, i+1, isDefRecord)
