@@ -244,6 +244,7 @@
     (if (symbol? y)
       (compare-symbols x y)
       (throw (js/Error. (str "Cannot compare " x " to " y)))))
+
   Keyword
   (-compare [x y]
     (if (keyword? y)

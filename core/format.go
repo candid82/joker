@@ -17,10 +17,11 @@ func seqFirst(seq Seq, w io.Writer, indent int) (Seq, int) {
 
 // TODO: maybe merge it with seqFirstAfterBreak
 // or extract common part into a separate function
-func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, int) {
+func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, Object, int) {
+	var obj Object
 	if !seq.IsEmpty() {
 		fmt.Fprint(w, " ")
-		obj := seq.First()
+		obj = seq.First()
 		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
 			if info := obj.GetInfo(); info != nil {
 				fmt.Fprint(w, info.prefix)
@@ -32,14 +33,18 @@ func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) 
 		}
 		seq = seq.Rest()
 	}
-	return seq, indent
+	return seq, obj, indent
 }
 
-func seqFirstAfterBreak(seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, int) {
+func seqFirstAfterBreak(prevObj Object, seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, Object, int) {
+	var obj Object
 	if !seq.IsEmpty() {
-		fmt.Fprint(w, "\n")
+		obj = seq.First()
+		cnt := newLineCount(prevObj, obj)
+		for i := 0; i < cnt; i++ {
+			fmt.Fprint(w, "\n")
+		}
 		writeIndent(w, indent)
-		obj := seq.First()
 		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
 			if info := obj.GetInfo(); info != nil {
 				fmt.Fprint(w, info.prefix)
@@ -51,7 +56,7 @@ func seqFirstAfterBreak(seq Seq, w io.Writer, indent int, insideDefRecord bool) 
 		}
 		seq = seq.Rest()
 	}
-	return seq, indent
+	return seq, obj, indent
 }
 
 func formatBindings(v *Vector, w io.Writer, indent int) int {
@@ -112,6 +117,14 @@ func isNewLine(obj, nextObj Object) bool {
 	return !(info == nil || nextInfo == nil || info.endLine == nextInfo.startLine)
 }
 
+func newLineCount(obj, nextObj Object) int {
+	info, nextInfo := obj.GetInfo(), nextObj.GetInfo()
+	if info == nil || nextInfo == nil {
+		return 0
+	}
+	return nextInfo.startLine - info.endLine
+}
+
 func formatSeq(seq Seq, w io.Writer, indent int) int {
 	return formatSeqEx(seq, w, indent, false)
 }
@@ -121,6 +134,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	restIndent := indent + 2
 	fmt.Fprint(w, "(")
 	obj := seq.First()
+	prevObj := obj
 	seq, i = seqFirst(seq, w, i)
 	isDefRecord := false
 	if obj.Equals(SYMBOLS.defrecord) ||
@@ -130,7 +144,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 		isDefRecord = true
 	}
 	if obj.Equals(SYMBOLS.ns) || isOneAndBodyExpr(obj) {
-		seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+		seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 
 		// TODO: this should only apply to def*
 		if docString, ok := seq.First().(String); ok {
@@ -139,33 +153,38 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			fmt.Fprint(w, "\"")
 			fmt.Fprint(w, docString.ToString(false))
 			fmt.Fprint(w, "\"")
+			prevObj = seq.First()
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(KEYWORDS.require) || obj.Equals(KEYWORDS._import) {
-		seq, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
+		obj = seq.First()
+		seq, prevObj, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		for !seq.IsEmpty() {
-			seq, _ = seqFirstAfterBreak(seq, w, i+1, isDefRecord)
+			seq, prevObj, _ = seqFirstAfterBreak(obj, seq, w, i+1, isDefRecord)
+			obj = prevObj
 		}
 	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
 			case *Vector:
-				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			default:
-				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
-				seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			}
 		}
 	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
 		if v, ok := seq.First().(*Vector); ok {
 			fmt.Fprint(w, " ")
 			i = formatBindings(v, w, i+1)
+			prevObj = seq.First()
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.letfn) {
 		if v, ok := seq.First().(*Vector); ok {
 			fmt.Fprint(w, " ")
 			i = formatVectorVertically(v, w, i+1)
+			prevObj = seq.First()
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
@@ -181,9 +200,9 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	for !seq.IsEmpty() {
 		nextObj := seq.First()
 		if isNewLine(obj, nextObj) {
-			seq, i = seqFirstAfterBreak(seq, w, restIndent, isDefRecord)
+			seq, prevObj, i = seqFirstAfterBreak(prevObj, seq, w, restIndent, isDefRecord)
 		} else {
-			seq, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+			seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		}
 		obj = nextObj
 	}
