@@ -270,3 +270,10 @@
     (str "@import "
          (if queries (str url " " queries) url)
          semicolon)))
+
+; test comment
+
+;; another one
+
+; multiline comment
+; test

@@ -29,7 +29,7 @@ const EOF = -1
 
 var (
 	LINTER_MODE   bool = false
-	FORMAT_MODE bool = false
+	FORMAT_MODE   bool = false
 	PROBLEM_COUNT      = 0
 	DIALECT       Dialect
 	LINTER_CONFIG *Var
@@ -169,6 +169,17 @@ func isWhitespace(r rune) bool {
 	return unicode.IsSpace(r) || r == ','
 }
 
+func readComment(reader *Reader) Object {
+	var b bytes.Buffer
+	r := reader.Peek()
+	for r != '\n' && r != EOF {
+		b.WriteRune(r)
+		reader.Get()
+		r = reader.Peek()
+	}
+	return MakeReadObject(reader, Comment{C: b.String()})
+}
+
 func eatWhitespace(reader *Reader) {
 	r := reader.Get()
 	for r != EOF {
@@ -176,7 +187,7 @@ func eatWhitespace(reader *Reader) {
 			r = reader.Get()
 			continue
 		}
-		if r == ';' || (r == '#' && reader.Peek() == '!') {
+		if (r == ';' || (r == '#' && reader.Peek() == '!')) && !FORMAT_MODE {
 			for r != '\n' && r != EOF {
 				r = reader.Get()
 			}
@@ -1086,6 +1097,12 @@ func Read(reader *Reader) (Object, bool) {
 	eatWhitespace(reader)
 	r := reader.Get()
 	pushPos(reader)
+	// This is only possible in format mode, otherwise
+	// eatWhitespace eats comments.
+	if r == ';' || (r == '#' && reader.Peek() == '!') {
+		reader.Unget()
+		return readComment(reader), false
+	}
 	switch {
 	case r == '\\':
 		return readCharacter(reader), false

@@ -1728,9 +1728,11 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		}
 		if phase == FORMAT {
 			if prevObj != nil {
-				if isNewLine(prevObj, obj) {
-					fmt.Fprint(Stdout, "\n\n")
-				} else {
+				cnt := newLineCount(prevObj, obj)
+				for i := 0; i < cnt; i++ {
+					fmt.Fprint(Stdout, "\n")
+				}
+				if cnt == 0 {
 					fmt.Fprint(Stdout, " ")
 				}
 			}

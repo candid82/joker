@@ -1,5 +1,5 @@
 //go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
 package core
@@ -125,6 +125,10 @@ type (
 	String struct {
 		InfoHolder
 		S string
+	}
+	Comment struct {
+		InfoHolder
+		C string
 	}
 	Regex struct {
 		InfoHolder
@@ -1326,6 +1330,31 @@ func (s Symbol) Compare(other Object) int {
 
 func (s Symbol) Call(args []Object) Object {
 	return getMap(s, args)
+}
+
+func (c Comment) ToString(escape bool) string {
+	return c.C
+}
+
+func (c Comment) Equals(other interface{}) bool {
+	switch other := other.(type) {
+	case Comment:
+		return c.C == other.C
+	default:
+		return false
+	}
+}
+
+func (c Comment) GetType() *Type {
+	// Comments don't deserve their own type
+	// since they are only used in FORMAT mode.
+	return TYPE.String
+}
+
+func (c Comment) Hash() uint32 {
+	h := getHash()
+	h.Write([]byte(c.C))
+	return h.Sum32()
 }
 
 func (s String) ToString(escape bool) string {
