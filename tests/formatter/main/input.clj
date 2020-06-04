@@ -277,3 +277,19 @@
 
 ; multiline comment
 ; test
+
+(def s
+  "foo
+  bar")
+
+;; TODO: something
+(defn ^:private foo
+  "Some useful
+  docstring." ; random comment
+  ;; Another random comment
+  []
+  ; Comment inside function body
+  (+ 1 2) ; end of line comment
+
+  ;; Return nil
+  nil)

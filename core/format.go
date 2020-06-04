@@ -145,17 +145,6 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	}
 	if obj.Equals(SYMBOLS.ns) || isOneAndBodyExpr(obj) {
 		seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
-
-		// TODO: this should only apply to def*
-		if docString, ok := seq.First().(String); ok {
-			fmt.Fprint(w, "\n")
-			writeIndent(w, indent+2)
-			fmt.Fprint(w, "\"")
-			fmt.Fprint(w, docString.ToString(false))
-			fmt.Fprint(w, "\"")
-			prevObj = seq.First()
-			seq = seq.Rest()
-		}
 	} else if obj.Equals(KEYWORDS.require) || obj.Equals(KEYWORDS._import) {
 		obj = seq.First()
 		seq, prevObj, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)

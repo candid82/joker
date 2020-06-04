@@ -118,7 +118,8 @@
   that would apply to that value, or nil if none apply and no default"
   {:added "1.0"}
   [t]
-  (print "ha\n         ha"))
+  (print "ha
+         ha"))
 
 (test-call 1 2 3)
 
@@ -275,3 +276,19 @@
 
 ; multiline comment
 ; test
+
+(def s
+  "foo
+  bar")
+
+;; TODO: something
+(defn ^:private foo
+  "Some useful
+  docstring." ; random comment
+  ;; Another random comment
+  []
+  ; Comment inside function body
+  (+ 1 2) ; end of line comment
+
+  ;; Return nil
+  nil)

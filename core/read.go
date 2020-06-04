@@ -492,7 +492,7 @@ func readString(reader *Reader) Object {
 	var b bytes.Buffer
 	r := reader.Get()
 	for r != '"' {
-		if r == '\\' {
+		if r == '\\' && !FORMAT_MODE {
 			r = reader.Get()
 			switch r {
 			case '\\':

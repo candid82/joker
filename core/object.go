@@ -1364,6 +1364,11 @@ func (s String) ToString(escape bool) string {
 	return s.S
 }
 
+func (s String) Format(w io.Writer, indent int) int {
+	fmt.Fprint(w, "\"", s.S, "\"")
+	return indent + utf8.RuneCountInString(s.S)
+}
+
 func MakeString(s string) String {
 	return String{S: s}
 }
