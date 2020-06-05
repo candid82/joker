@@ -194,7 +194,7 @@ func eatWhitespace(reader *Reader) {
 			r = reader.Get()
 			continue
 		}
-		if r == '#' && reader.Peek() == '_' {
+		if r == '#' && reader.Peek() == '_' && !FORMAT_MODE {
 			reader.Get()
 			Read(reader)
 			r = reader.Get()
@@ -1037,6 +1037,13 @@ func readDispatch(reader *Reader) (Object, bool) {
 			return nextObj, false
 		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj)), false
+	case '_':
+		// Only possible in FORMAT mode, otherwise
+		// eatWhitespaces eats #_
+		popPos()
+		nextObj := readFirst(reader)
+		nextObj.GetInfo().prefix = "#_"
+		return nextObj, false
 	case '^':
 		popPos()
 		if FORMAT_MODE {
