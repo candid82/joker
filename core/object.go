@@ -1337,12 +1337,7 @@ func (c Comment) ToString(escape bool) string {
 }
 
 func (c Comment) Equals(other interface{}) bool {
-	switch other := other.(type) {
-	case Comment:
-		return c.C == other.C
-	default:
-		return false
-	}
+	return false
 }
 
 func (c Comment) GetType() *Type {
@@ -1366,7 +1361,7 @@ func (s String) ToString(escape bool) string {
 
 func (s String) Format(w io.Writer, indent int) int {
 	fmt.Fprint(w, "\"", s.S, "\"")
-	return indent + utf8.RuneCountInString(s.S)
+	return indent + utf8.RuneCountInString(s.S) + 2
 }
 
 func MakeString(s string) String {

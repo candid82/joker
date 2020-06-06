@@ -603,6 +603,16 @@ func readMap(reader *Reader) Object {
 	return readMapWithNamespace(reader, "")
 }
 
+func appendMapElement(objs []Object, obj Object) []Object {
+	objs = append(objs, obj)
+	if FORMAT_MODE {
+		if _, ok := obj.(Comment); ok {
+			objs = append(objs, NIL)
+		}
+	}
+	return objs
+}
+
 func readMapWithNamespace(reader *Reader, nsname string) Object {
 	eatWhitespace(reader)
 	r := reader.Peek()
@@ -610,11 +620,11 @@ func readMapWithNamespace(reader *Reader, nsname string) Object {
 	for r != '}' {
 		obj, multi := Read(reader)
 		if !multi {
-			objs = append(objs, obj)
+			objs = appendMapElement(objs, obj)
 		} else {
 			v := obj.(*Vector)
 			for i := 0; i < v.Count(); i++ {
-				objs = append(objs, v.at(i))
+				objs = appendMapElement(objs, v.at(i))
 			}
 		}
 		eatWhitespace(reader)

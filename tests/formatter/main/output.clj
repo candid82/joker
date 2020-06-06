@@ -296,3 +296,17 @@
 #_(+ 1 2)
 
 (comment (+ 1 2))
+
+(= "sadf" {:foo "sadf"
+           :bar "qewr"})
+
+{:foo "sdfsdf"
+ ;;some comment
+ :bar "1234"}
+
+{:foo "sdfsdf" ;;some comment
+ ;; test
+ :bar 1234
+ ;;some comment
+ ; :bar "1234"
+ }

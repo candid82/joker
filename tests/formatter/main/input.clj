@@ -4,7 +4,7 @@
   2
   3)
 
-(if 1 2 )
+(if 1 2)
 
 (if 1
   2)
@@ -169,11 +169,10 @@
    `(let [and# ~x]
       (if and# (and ~@next) and#))))
 
-(def
-  ^{:arglists '([& items])
-    :doc "Creates a new list containing the items."
-    :added "1.0"
-    :tag List}
+(def ^{:arglists '([& items])
+       :doc "Creates a new list containing the items."
+       :added "1.0"
+       :tag List}
   list list__)
 
 {1 2 3 4}
@@ -297,3 +296,13 @@
 #_(+ 1 2)
 
 (comment (+ 1 2))
+
+(= "sadf" {:foo "sadf"
+           :bar "qewr"})
+
+{:foo "sdfsdf" ;;some comment
+ ;; test
+ :bar 1234
+ ;;some comment
+ ; :bar "1234"
+ }
