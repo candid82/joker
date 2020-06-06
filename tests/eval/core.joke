@@ -1,0 +1,5 @@
+(ns joker.test-joker.core
+  (:require [joker.test :refer [deftest is]]))
+
+(deftest test-meta
+  (is (= (try (meta) (catch Error e "caught error")) "caught error")))

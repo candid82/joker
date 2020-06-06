@@ -129,6 +129,7 @@ func ExtractIOWriter(args []Object, index int) io.Writer {
 }
 
 var procMeta = func(args []Object) Object {
+	CheckArity(args, 1, 1)
 	switch obj := args[0].(type) {
 	case Meta:
 		meta := obj.GetMeta()
