@@ -310,3 +310,10 @@
  ;;some comment
  ; :bar "1234"
  }
+
+(cond
+  (= 1 2) 1
+  (= 2 2) 3
+
+  :else
+  (println "ha"))

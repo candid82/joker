@@ -306,3 +306,21 @@
  ;;some comment
  ; :bar "1234"
  }
+
+(cond
+  (= 1 2) 1
+  (= 2 2) 3
+
+  :else
+  (println "ha"))
+
+(defn- print-char [c]
+  (-write *out* (condp = c
+                   \backspace "\\backspace"
+                  \tab "\\tab"
+                  \newline "\\newline"
+                  \formfeed "\\formfeed"
+                  \return "\\return"
+                  \" "\\\""
+                  \\ "\\\\"
+                  (str "\\" c))))

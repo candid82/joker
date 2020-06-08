@@ -99,6 +99,7 @@ var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
 var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
 var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
 var extendRegex *regexp.Regexp = regexp.MustCompile("extend(-.+)?")
+var condRegex *regexp.Regexp = regexp.MustCompile("cond")
 
 func isOneAndBodyExpr(obj Object) bool {
 	switch s := obj.(type) {
@@ -107,6 +108,15 @@ func isOneAndBodyExpr(obj Object) bool {
 			ifRegex.MatchString(*s.name) ||
 			whenRegex.MatchString(*s.name) ||
 			extendRegex.MatchString(*s.name)
+	default:
+		return false
+	}
+}
+
+func isBodyIndent(obj Object) bool {
+	switch s := obj.(type) {
+	case Symbol:
+		return condRegex.MatchString(*s.name)
 	default:
 		return false
 	}
@@ -178,6 +188,8 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
 	} else if formatAsDef {
+	} else if isBodyIndent(obj) {
+		restIndent = indent + 2
 	} else {
 		// Indent function call arguments.
 		restIndent = indent + 1
