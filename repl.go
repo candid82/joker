@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -57,6 +58,7 @@ func completer(line string, pos int) (head string, c []string, tail string) {
 	if len(c) > 0 {
 		head = head[:len(head)-len(prefix)]
 	}
+	sort.Strings(c)
 	return
 }
 
