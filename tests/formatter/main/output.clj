@@ -317,3 +317,18 @@
 
   :else
   (println "ha"))
+
+(cond1-> t
+  (= 1 2) (assoc :t 1)
+  true identity)
+
+(defn- print-char [c]
+  (-write *out* (condp = c
+                  \backspace "\\backspace"
+                  \tab "\\tab"
+                  \newline "\\newline"
+                  \formfeed "\\formfeed"
+                  \return "\\return"
+                  \" "\\\""
+                  \\ "\\\\"
+                  (str "\\" c))))

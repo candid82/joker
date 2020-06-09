@@ -300,6 +300,10 @@
 (= "sadf" {:foo "sadf"
            :bar "qewr"})
 
+{:foo "sdfsdf"
+ ;;some comment
+ :bar "1234"}
+
 {:foo "sdfsdf" ;;some comment
  ;; test
  :bar 1234
@@ -314,9 +318,13 @@
   :else
   (println "ha"))
 
+(cond1-> t
+  (= 1 2) (assoc :t 1)
+  true identity)
+
 (defn- print-char [c]
   (-write *out* (condp = c
-                   \backspace "\\backspace"
+                  \backspace "\\backspace"
                   \tab "\\tab"
                   \newline "\\newline"
                   \formfeed "\\formfeed"
