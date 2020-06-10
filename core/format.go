@@ -99,7 +99,14 @@ var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
 var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
 var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
 var extendRegex *regexp.Regexp = regexp.MustCompile("extend(-.+)?")
-var condRegex *regexp.Regexp = regexp.MustCompile("cond")
+var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
+	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|go|condp|when|while|when-not|when-first|do|future)$"),
+	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
+	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop)$"),
+	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|deftest|context|use-fixtures)$"),
+	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
+	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace)$"),
+}
 
 func isOneAndBodyExpr(obj Object) bool {
 	switch s := obj.(type) {
@@ -116,7 +123,12 @@ func isOneAndBodyExpr(obj Object) bool {
 func isBodyIndent(obj Object) bool {
 	switch s := obj.(type) {
 	case Symbol:
-		return condRegex.MatchString(*s.name)
+		for _, re := range bodyIndentRegexes {
+			if re.MatchString(*s.name) {
+				return true
+			}
+		}
+		return false
 	default:
 		return false
 	}

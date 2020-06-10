@@ -319,8 +319,8 @@
   (println "ha"))
 
 (cond1-> t
-  (= 1 2) (assoc :t 1)
-  true identity)
+         (= 1 2) (assoc :t 1)
+         true identity)
 
 (defn- print-char [c]
   (-write *out* (condp = c
@@ -332,3 +332,9 @@
                   \" "\\\""
                   \\ "\\\\"
                   (str "\\" c))))
+
+(use-fixtures :once
+  my-fixture)
+
+(with-something
+  do-something)
