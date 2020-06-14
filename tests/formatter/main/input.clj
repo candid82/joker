@@ -338,3 +338,26 @@
 
 (with-something
   do-something)
+
+(foor (test-call
+       a
+       ;;asdfds
+       )
+      1)
+
+[1
+
+ ;;sdf
+ 2
+ ;;test
+ ]
+
+#{1
+  ;sdf
+  2
+  ;;test
+  }
+
+{:t 1
+ #_1
+ }

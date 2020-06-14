@@ -53,9 +53,15 @@ func formatObject(obj Object, indent int, w io.Writer) int {
 	}
 }
 
+func isComment(obj Object) bool {
+	if _, ok := obj.(Comment); ok {
+		return true
+	}
+	return obj.GetInfo() != nil && obj.GetInfo().prefix == "#_"
+}
+
 func maybeNewLine(w io.Writer, obj, nextObj Object, baseIndent, currentIndent int) int {
-	if isNewLine(obj, nextObj) {
-		fmt.Fprint(w, "\n")
+	if writeNewLines(w, obj, nextObj) > 0 {
 		writeIndent(w, baseIndent)
 		return baseIndent
 	}

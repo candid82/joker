@@ -242,6 +242,7 @@ type (
 		defprotocol        Symbol
 		extendProtocol     Symbol
 		extendType         Symbol
+		reify              Symbol
 	}
 	Str struct {
 		_if          *string

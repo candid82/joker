@@ -416,6 +416,9 @@ func readSymbol(reader *Reader, first rune) Object {
 			panic(MakeReadError(reader, "Blank namespaces are not allowed"))
 		}
 		if str[0] == ':' {
+			if FORMAT_MODE {
+				return MakeReadObject(reader, MakeKeyword(str))
+			}
 			sym := MakeSymbol(str[1:])
 			ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), sym)
 			if ns == nil {
@@ -610,7 +613,7 @@ func readMap(reader *Reader) Object {
 func appendMapElement(objs []Object, obj Object) []Object {
 	objs = append(objs, obj)
 	if FORMAT_MODE {
-		if _, ok := obj.(Comment); ok {
+		if isComment(obj) {
 			objs = append(objs, NIL)
 		}
 	}

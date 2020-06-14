@@ -36,14 +36,19 @@ func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) 
 	return seq, obj, indent
 }
 
+func writeNewLines(w io.Writer, prevObj Object, obj Object) int {
+	cnt := newLineCount(prevObj, obj)
+	for i := 0; i < cnt; i++ {
+		fmt.Fprint(w, "\n")
+	}
+	return cnt
+}
+
 func seqFirstAfterBreak(prevObj Object, seq Seq, w io.Writer, indent int, insideDefRecord bool) (Seq, Object, int) {
 	var obj Object
 	if !seq.IsEmpty() {
 		obj = seq.First()
-		cnt := newLineCount(prevObj, obj)
-		for i := 0; i < cnt; i++ {
-			fmt.Fprint(w, "\n")
-		}
+		writeNewLines(w, prevObj, obj)
 		writeIndent(w, indent)
 		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
 			if info := obj.GetInfo(); info != nil {
@@ -60,25 +65,7 @@ func seqFirstAfterBreak(prevObj Object, seq Seq, w io.Writer, indent int, inside
 }
 
 func formatBindings(v *Vector, w io.Writer, indent int) int {
-	fmt.Fprint(w, "[")
-	newIndent := indent + 1
-	for i := 0; i < v.count; i += 2 {
-		newIndent = formatObject(v.at(i), indent+1, w)
-		if i+1 < v.count {
-			fmt.Fprint(w, " ")
-			newIndent = formatObject(v.at(i+1), newIndent+1, w)
-		}
-		if i+2 < v.count {
-			if isNewLine(v.at(i+1), v.at(i+2)) {
-				fmt.Fprint(w, "\n")
-				writeIndent(w, indent+1)
-			} else {
-				fmt.Fprint(w, " ")
-			}
-		}
-	}
-	fmt.Fprint(w, "]")
-	return newIndent + 1
+	return v.Format(w, indent)
 }
 
 func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
@@ -89,6 +76,13 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 		if i+1 < v.count {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+1)
+		}
+	}
+	if v.count > 0 {
+		if isComment(v.at(v.count - 1)) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			newIndent = indent + 1
 		}
 	}
 	fmt.Fprint(w, "]")
@@ -103,7 +97,7 @@ var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
 	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|go|condp|when|while|when-not|when-first|do|future)$"),
 	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
 	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop)$"),
-	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|deftest|context|use-fixtures)$"),
+	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
 	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
 	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace)$"),
 }
@@ -162,6 +156,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	if obj.Equals(SYMBOLS.defrecord) ||
 		obj.Equals(SYMBOLS.defprotocol) ||
 		obj.Equals(SYMBOLS.extendProtocol) ||
+		obj.Equals(SYMBOLS.reify) ||
 		obj.Equals(SYMBOLS.extendType) {
 		isDefRecord = true
 	}
@@ -218,6 +213,12 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		}
 		obj = nextObj
+	}
+
+	if isComment(obj) {
+		fmt.Fprint(w, "\n")
+		writeIndent(w, restIndent)
+		i = restIndent
 	}
 
 	fmt.Fprint(w, ")")

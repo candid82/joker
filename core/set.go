@@ -144,6 +144,13 @@ func (set *MapSet) Format(w io.Writer, indent int) int {
 		i = formatObject(obj, i, w)
 		prevObj = obj
 	}
+	if prevObj != nil {
+		if isComment(prevObj) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+2)
+			i = indent + 2
+		}
+	}
 	fmt.Fprint(w, "}")
 	return i + 1
 }

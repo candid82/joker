@@ -85,6 +85,7 @@ var (
 		defprotocol:        MakeSymbol("defprotocol"),
 		extendProtocol:     MakeSymbol("extend-protocol"),
 		extendType:         MakeSymbol("extend-type"),
+		reify:              MakeSymbol("reify"),
 	}
 	STR = Str{
 		_if:          STRINGS.Intern("if"),

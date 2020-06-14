@@ -492,9 +492,17 @@ func (v *Vector) Format(w io.Writer, indent int) int {
 	if v.count > 0 {
 		for i := 0; i < v.count-1; i++ {
 			ind = formatObject(v.at(i), ind, w)
+
 			ind = maybeNewLine(w, v.at(i), v.at(i+1), indent+1, ind)
 		}
 		ind = formatObject(v.at(v.count-1), ind, w)
+	}
+	if v.count > 0 {
+		if isComment(v.at(v.count - 1)) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			ind = indent + 1
+		}
 	}
 	fmt.Fprint(w, "]")
 	return ind + 1

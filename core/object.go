@@ -1069,11 +1069,14 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	res := fmt.Sprintf("%g", d.D)
-	if !strings.ContainsRune(res, '.') {
-		res += ".0"
+	res := fmt.Sprintf("%f", d.D)
+	var i int
+	for i = len(res) - 1; res[i] == '0'; i-- {
 	}
-	return res
+	if res[i] == '.' {
+		return res[0 : i+2]
+	}
+	return res[0 : i+1]
 }
 
 func (d Double) Equals(other interface{}) bool {
