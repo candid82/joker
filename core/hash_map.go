@@ -856,7 +856,3 @@ func (m *HashMap) Empty() Collection {
 func (m *HashMap) Pprint(w io.Writer, indent int) int {
 	return pprintMap(m, w, indent)
 }
-
-func (m *HashMap) Format(w io.Writer, indent int) int {
-	return formatMap(m, w, indent)
-}

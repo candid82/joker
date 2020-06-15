@@ -57,7 +57,11 @@ func isComment(obj Object) bool {
 	if _, ok := obj.(Comment); ok {
 		return true
 	}
-	return obj.GetInfo() != nil && obj.GetInfo().prefix == "#_"
+	info := obj.GetInfo()
+	if info == nil {
+		return false
+	}
+	return info.prefix == "^" || info.prefix == "#^" || info.prefix == "#_"
 }
 
 func maybeNewLine(w io.Writer, obj, nextObj Object, baseIndent, currentIndent int) int {

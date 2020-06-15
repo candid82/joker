@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -462,10 +463,16 @@ func readRegex(reader *Reader) Object {
 		}
 		r = reader.Get()
 	}
-	regex, err := regexp.Compile(b.String())
+	s := b.String()
+	regex, err := regexp.Compile(s)
 	if err != nil {
 		if LINTER_MODE {
 			return MakeReadObject(reader, &Regex{})
+		}
+		if FORMAT_MODE {
+			res := MakeReadObject(reader, MakeString(s))
+			res.GetInfo().prefix = "#"
+			return res
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
 	}
@@ -614,7 +621,9 @@ func appendMapElement(objs []Object, obj Object) []Object {
 	objs = append(objs, obj)
 	if FORMAT_MODE {
 		if isComment(obj) {
-			objs = append(objs, NIL)
+			// Add surrogate object to always have even number of elements in the map.
+			// Use rand to avoid duplicate keys.
+			objs = append(objs, MakeDouble(rand.Float64()))
 		}
 	}
 	return objs

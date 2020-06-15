@@ -1,6 +1,9 @@
 package core
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 type (
 	ArrayMap struct {
@@ -294,5 +297,30 @@ func (m *ArrayMap) Pprint(w io.Writer, indent int) int {
 }
 
 func (m *ArrayMap) Format(w io.Writer, indent int) int {
-	return formatMap(m, w, indent)
+	var arr []Object
+	for i := 0; i < len(m.arr); i++ {
+		arr = append(arr, m.arr[i])
+		if isComment(m.arr[i]) {
+			i++
+		}
+	}
+	ind := indent + 1
+	fmt.Fprint(w, "{")
+	if len(arr) > 0 {
+		for i := 0; i < len(arr)-1; i++ {
+			ind = formatObject(arr[i], ind, w)
+			ind = maybeNewLine(w, arr[i], arr[i+1], indent+1, ind)
+		}
+		ind = formatObject(arr[len(arr)-1], ind, w)
+	}
+	if len(arr) > 0 {
+		if isComment(arr[len(arr)-1]) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			ind = indent + 1
+		}
+	}
+
+	fmt.Fprint(w, "}")
+	return ind + 1
 }

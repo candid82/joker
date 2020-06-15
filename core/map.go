@@ -130,34 +130,3 @@ func pprintMap(m Map, w io.Writer, indent int) int {
 	fmt.Fprint(w, "}")
 	return i + 1
 }
-
-func formatMap(m Map, w io.Writer, indent int) int {
-	i := indent + 1
-	fmt.Fprint(w, "{")
-	var prevPair *Pair
-	for iter := m.Iter(); iter.HasNext(); {
-		p := iter.Next()
-		if prevPair != nil {
-			if isComment(prevPair.Key) {
-				i = maybeNewLine(w, prevPair.Key, p.Key, indent+1, i)
-			} else {
-				i = maybeNewLine(w, prevPair.Value, p.Key, indent+1, i)
-			}
-		}
-		i = formatObject(p.Key, i, w)
-		if !isComment(p.Key) {
-			i = maybeNewLine(w, p.Key, p.Value, indent+1, i)
-			i = formatObject(p.Value, i, w)
-		}
-		prevPair = p
-	}
-	if prevPair != nil {
-		if isComment(prevPair.Key) {
-			fmt.Fprint(w, "\n")
-			writeIndent(w, indent+1)
-			i = indent + 1
-		}
-	}
-	fmt.Fprint(w, "}")
-	return i + 1
-}
