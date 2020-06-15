@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/candid82/joker.svg?style=svg)](https://circleci.com/gh/candid82/joker)
 
-Joker is a small Clojure interpreter, linter, and formatter written in Go.
+Joker is a small Clojure interpreter, linter and formatter written in Go.
 
 ## Installation
 
