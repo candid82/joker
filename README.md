@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/candid82/joker.svg?style=svg)](https://circleci.com/gh/candid82/joker)
 
-Joker is a small Clojure interpreter and linter written in Go.
+Joker is a small Clojure interpreter, linter, and formatter written in Go.
 
 ## Installation
 
@@ -36,11 +36,16 @@ in which case drops into the REPL after the script is (successfully) executed. (
 `joker --eval <expression>` - execute an expression. For example: `joker -e '(println "Hello, world!")'`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--eval`,
 in which case drops into the REPL after the expression is (successfully) executed.
 
+`joker -` - execute a script on standard input (os.Stdin).
+
 `joker --lint <filename>` - lint a source file. See [Linter mode](#linter-mode) for more details.
 
 `joker --lint --working-dir <dirname>` - recursively lint all Clojure files in a directory.
 
-`joker -` - execute a script on standard input (os.Stdin).
+`joker --format <filename>` - format a source file and write the result to standard output. See [Format mode](#format-mode) for more details.
+
+`joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
+
 
 ## Documentation
 
@@ -62,13 +67,14 @@ These are high level goals of the project that guide design and implementation d
 
 - Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
-- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors. Joker can also be used for pretty printing EDN data structures (very basic algorithm at the moment). For example, the following command can be used to pretty print EDN data structure (read from stdin):
+- Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors.
+Joker can also format (pretty print) Clojure code (see [format mode](#format-mode)) or EDN data structures. For example, the following command can be used to pretty print EDN data structure (read from stdin):
 
 ```
 joker --hashmap-threshold -1 -e "(pprint (read))"
 ```
 
- There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious. Tooling is one of the primary Joker use cases for me, so I intend to improve and expand it.
+ There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious.
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
 ## Project Non-goals
@@ -252,6 +258,18 @@ Below is the list of all configurable rules.
 | `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
 
 Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
+
+## Format mode
+
+To run Joker in format mode pass `--format` flag. For example:
+
+`joker --format <filename>` - format a source file and write the result to standard output.
+
+`joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
+
+### Integration with editors
+
+- Sublime Text: [sublime-pretty-clojure](https://github.com/candid82/sublime-pretty-clojure) - formats Clojure code when saving the file.
 
 ## Building
 
