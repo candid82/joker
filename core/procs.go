@@ -38,7 +38,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v0.15.4"
+const VERSION = "v0.15.5"
 
 const (
 	CLJ Dialect = iota
