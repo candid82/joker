@@ -375,6 +375,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Print version number and exit.")
 	fmt.Fprintln(out, "  --read")
 	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
+	fmt.Fprintln(out, "  --format")
+	fmt.Fprintln(out, "    Format the source code and print it to standard output.")
 	fmt.Fprintln(out, "  --parse")
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
@@ -504,6 +506,8 @@ func parseArgs(args []string) {
 			return // don't bother parsing anything else
 		case "--version", "-v":
 			versionFlag = true
+		case "--format":
+			phase = FORMAT
 		case "--read":
 			phase = READ
 		case "--parse":

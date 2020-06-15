@@ -197,6 +197,8 @@ type (
 		vector             Keyword
 		name               Keyword
 		dynamic            Keyword
+		require            Keyword
+		_import            Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
@@ -209,8 +211,11 @@ type (
 		fn_                Symbol
 		fn                 Symbol
 		let_               Symbol
+		let                Symbol
 		letfn_             Symbol
+		letfn              Symbol
 		loop_              Symbol
+		loop               Symbol
 		recur              Symbol
 		setMacro_          Symbol
 		def                Symbol
@@ -232,6 +237,12 @@ type (
 		defaultDataReaders Symbol
 		backslash          Symbol
 		deref              Symbol
+		ns                 Symbol
+		defrecord          Symbol
+		defprotocol        Symbol
+		extendProtocol     Symbol
+		extendType         Symbol
+		reify              Symbol
 	}
 	Str struct {
 		_if          *string

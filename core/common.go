@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unicode/utf8"
 )
 
 var exitCallbacks []func()
@@ -35,6 +36,41 @@ func pprintObject(obj Object, indent int, w io.Writer) int {
 		fmt.Fprint(w, s)
 		return indent + len(s)
 	}
+}
+
+func formatObject(obj Object, indent int, w io.Writer) int {
+	if info := obj.GetInfo(); info != nil {
+		fmt.Fprint(w, info.prefix)
+		indent += utf8.RuneCountInString(info.prefix)
+	}
+	switch obj := obj.(type) {
+	case Formatter:
+		return obj.Format(w, indent)
+	default:
+		s := obj.ToString(true)
+		fmt.Fprint(w, s)
+		return indent + utf8.RuneCountInString(s)
+	}
+}
+
+func isComment(obj Object) bool {
+	if _, ok := obj.(Comment); ok {
+		return true
+	}
+	info := obj.GetInfo()
+	if info == nil {
+		return false
+	}
+	return info.prefix == "^" || info.prefix == "#^" || info.prefix == "#_"
+}
+
+func maybeNewLine(w io.Writer, obj, nextObj Object, baseIndent, currentIndent int) int {
+	if writeNewLines(w, obj, nextObj) > 0 {
+		writeIndent(w, baseIndent)
+		return baseIndent
+	}
+	fmt.Fprint(w, " ")
+	return currentIndent + 1
 }
 
 func FileInfoMap(name string, info os.FileInfo) Map {

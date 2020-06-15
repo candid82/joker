@@ -32,6 +32,7 @@ type (
 
 const (
 	READ Phase = iota
+	FORMAT
 	PARSE
 	EVAL
 	PRINT_IF_NOT_NIL
@@ -1697,6 +1698,10 @@ var procIncProblemCount = func(args []Object) Object {
 }
 
 func ProcessReader(reader *Reader, filename string, phase Phase) error {
+	if phase == FORMAT {
+		FORMAT_MODE = true
+		HASHMAP_THRESHOLD = 100000
+	}
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
@@ -1707,9 +1712,13 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
+	var prevObj Object
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
+			if FORMAT_MODE && prevObj != nil {
+				fmt.Fprint(Stdout, "\n")
+			}
 			return nil
 		}
 		if err != nil {
@@ -1717,6 +1726,20 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			return err
 		}
 		if phase == READ {
+			continue
+		}
+		if phase == FORMAT {
+			if prevObj != nil {
+				cnt := newLineCount(prevObj, obj)
+				for i := 0; i < cnt; i++ {
+					fmt.Fprint(Stdout, "\n")
+				}
+				if cnt == 0 {
+					fmt.Fprint(Stdout, " ")
+				}
+			}
+			formatObject(obj, 0, Stdout)
+			prevObj = obj
 			continue
 		}
 		expr, err := TryParse(obj, parseContext)

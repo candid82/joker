@@ -1,5 +1,5 @@
 //go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
 package core
@@ -71,6 +71,7 @@ type (
 		meta Map
 	}
 	ObjectInfo struct {
+		prefix string
 		Position
 	}
 	InfoHolder struct {
@@ -124,6 +125,10 @@ type (
 	String struct {
 		InfoHolder
 		S string
+	}
+	Comment struct {
+		InfoHolder
+		C string
 	}
 	Regex struct {
 		InfoHolder
@@ -212,6 +217,9 @@ type (
 	}
 	Pprinter interface {
 		Pprint(writer io.Writer, indent int) int
+	}
+	Formatter interface {
+		Format(writer io.Writer, indent int) int
 	}
 	Collection interface {
 		Object
@@ -1061,11 +1069,14 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	res := fmt.Sprintf("%g", d.D)
-	if !strings.ContainsRune(res, '.') {
-		res += ".0"
+	res := fmt.Sprintf("%f", d.D)
+	var i int
+	for i = len(res) - 1; res[i] == '0'; i-- {
 	}
-	return res
+	if res[i] == '.' {
+		return res[0 : i+2]
+	}
+	return res[0 : i+1]
 }
 
 func (d Double) Equals(other interface{}) bool {
@@ -1324,11 +1335,36 @@ func (s Symbol) Call(args []Object) Object {
 	return getMap(s, args)
 }
 
+func (c Comment) ToString(escape bool) string {
+	return c.C
+}
+
+func (c Comment) Equals(other interface{}) bool {
+	return false
+}
+
+func (c Comment) GetType() *Type {
+	// Comments don't deserve their own type
+	// since they are only used in FORMAT mode.
+	return TYPE.String
+}
+
+func (c Comment) Hash() uint32 {
+	h := getHash()
+	h.Write([]byte(c.C))
+	return h.Sum32()
+}
+
 func (s String) ToString(escape bool) string {
 	if escape {
 		return escapeString(s.S)
 	}
 	return s.S
+}
+
+func (s String) Format(w io.Writer, indent int) int {
+	fmt.Fprint(w, "\"", s.S, "\"")
+	return indent + utf8.RuneCountInString(s.S) + 2
 }
 
 func MakeString(s string) String {

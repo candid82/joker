@@ -102,6 +102,11 @@ func (x String) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
+func (x Comment) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
 func (x *LazySeq) WithInfo(info *ObjectInfo) Object {
 	x.info = info
 	return x

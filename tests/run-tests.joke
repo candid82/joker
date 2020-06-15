@@ -1,0 +1,62 @@
+(defn file-exists?
+  [path]
+  (try
+    (slurp path)
+    true
+    (catch Error e
+      false)))
+
+(def exit-code 0)
+
+(defn first-diff-index
+  [s1 s2]
+  (let [c1 (count s1)
+        c2 (count s2)]
+    (loop [i 0]
+      (if (or (= i c1)
+              (= i c2))
+        (if (= c1 c2)
+          -1
+          i)
+        (if (= (nth s1 i) (nth s2 i))
+          (recur (inc i))
+          i)))))
+
+(let [[cmd root-dir output-k output-file-name] *command-line-args*
+      output-k (keyword output-k)
+      test-dirs (->> (joker.os/ls root-dir)
+                     (filter :dir?)
+                     (map :name))
+      pwd (get (joker.os/env) "PWD")
+      exe (str pwd "/joker")]
+  (doseq [test-dir test-dirs]
+    (let [dir (str root-dir "/" test-dir "/")
+          filename (if (file-exists? (str dir "input.clj"))
+                     (str dir "input.clj")
+                     (str dir "input.cljs"))
+          res (joker.os/sh exe cmd filename)
+          output (output-k res)
+          expected (slurp (str dir output-file-name))]
+      (when (and (= :err output-k)
+                 (not= "" output)
+                 (:success res))
+        (println "FAILED:" test-dir "(zero exit code, yet stderr written to)")
+        (var-set #'exit-code 1))
+      (when (and (= :err output-k)
+                 (= "" output)
+                 (not (:success res)))
+        (println "FAILED:" test-dir "(nonzero exit code, yet no stderr output)")
+        (var-set #'exit-code 1))
+      (when-not (= expected output)
+        (println "FAILED:" test-dir)
+        (println "EXPECTED:")
+        (println expected)
+        (println "ACTUAL:")
+        (let [diff-i (first-diff-index expected output)
+              output' (if (= -1 diff-i)
+                        output
+                        (str (subs output 0 diff-i) "❌" (subs output diff-i)))]
+          (println output'))
+        (var-set #'exit-code 1)))))
+
+(joker.os/exit exit-code)

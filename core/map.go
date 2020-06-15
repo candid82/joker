@@ -120,7 +120,7 @@ func pprintMap(m Map, w io.Writer, indent int) int {
 			fmt.Fprint(w, " ")
 			i = pprintObject(p.Value, i+1, w)
 			if iter.HasNext() {
-				fmt.Fprint(w, ",\n")
+				fmt.Fprint(w, "\n")
 				writeIndent(w, indent+1)
 			} else {
 				break

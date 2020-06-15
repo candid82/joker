@@ -131,3 +131,26 @@ func (set *MapSet) Pprint(w io.Writer, indent int) int {
 	fmt.Fprint(w, "}")
 	return i + 1
 }
+
+func (set *MapSet) Format(w io.Writer, indent int) int {
+	i := indent + 2
+	fmt.Fprint(w, "#{")
+	var prevObj Object
+	for iter := iter(set.m.Keys()); iter.HasNext(); {
+		obj := iter.Next()
+		if prevObj != nil {
+			i = maybeNewLine(w, prevObj, obj, indent+2, i)
+		}
+		i = formatObject(obj, i, w)
+		prevObj = obj
+	}
+	if prevObj != nil {
+		if isComment(prevObj) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+2)
+			i = indent + 2
+		}
+	}
+	fmt.Fprint(w, "}")
+	return i + 1
+}

@@ -51,6 +51,10 @@ func (seq *List) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *List) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (list *List) Equals(other interface{}) bool {
 	return IsSeqEqual(list, other)
 }

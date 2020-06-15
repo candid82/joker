@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-./joker tests/run-linter-tests.joke
+./joker tests/run-tests.joke --lint tests/linter err output.txt

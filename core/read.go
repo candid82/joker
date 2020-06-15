@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -29,6 +30,7 @@ const EOF = -1
 
 var (
 	LINTER_MODE   bool = false
+	FORMAT_MODE   bool = false
 	PROBLEM_COUNT      = 0
 	DIALECT       Dialect
 	LINTER_CONFIG *Var
@@ -168,6 +170,17 @@ func isWhitespace(r rune) bool {
 	return unicode.IsSpace(r) || r == ','
 }
 
+func readComment(reader *Reader) Object {
+	var b bytes.Buffer
+	r := reader.Peek()
+	for r != '\n' && r != EOF {
+		b.WriteRune(r)
+		reader.Get()
+		r = reader.Peek()
+	}
+	return MakeReadObject(reader, Comment{C: b.String()})
+}
+
 func eatWhitespace(reader *Reader) {
 	r := reader.Get()
 	for r != EOF {
@@ -175,14 +188,14 @@ func eatWhitespace(reader *Reader) {
 			r = reader.Get()
 			continue
 		}
-		if r == ';' || (r == '#' && reader.Peek() == '!') {
+		if (r == ';' || (r == '#' && reader.Peek() == '!')) && !FORMAT_MODE {
 			for r != '\n' && r != EOF {
 				r = reader.Get()
 			}
 			r = reader.Get()
 			continue
 		}
-		if r == '#' && reader.Peek() == '_' {
+		if r == '#' && reader.Peek() == '_' && !FORMAT_MODE {
 			reader.Get()
 			Read(reader)
 			r = reader.Get()
@@ -404,6 +417,9 @@ func readSymbol(reader *Reader, first rune) Object {
 			panic(MakeReadError(reader, "Blank namespaces are not allowed"))
 		}
 		if str[0] == ':' {
+			if FORMAT_MODE {
+				return MakeReadObject(reader, MakeKeyword(str))
+			}
 			sym := MakeSymbol(str[1:])
 			ns := GLOBAL_ENV.NamespaceFor(GLOBAL_ENV.CurrentNamespace(), sym)
 			if ns == nil {
@@ -447,10 +463,16 @@ func readRegex(reader *Reader) Object {
 		}
 		r = reader.Get()
 	}
-	regex, err := regexp.Compile(b.String())
+	s := b.String()
+	regex, err := regexp.Compile(s)
 	if err != nil {
 		if LINTER_MODE {
 			return MakeReadObject(reader, &Regex{})
+		}
+		if FORMAT_MODE {
+			res := MakeReadObject(reader, MakeString(s))
+			res.GetInfo().prefix = "#"
+			return res
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
 	}
@@ -482,29 +504,33 @@ func readString(reader *Reader) Object {
 	for r != '"' {
 		if r == '\\' {
 			r = reader.Get()
-			switch r {
-			case '\\':
-				r = '\\'
-			case '"':
-				r = '"'
-			case 'n':
-				r = '\n'
-			case 't':
-				r = '\t'
-			case 'r':
-				r = '\r'
-			case 'b':
-				r = '\b'
-			case 'f':
-				r = '\f'
-			case 'u':
-				n := reader.Get()
-				r = readUnicodeCharacterInString(reader, n, 4, 16, true)
-			default:
-				if unicode.IsDigit(r) {
-					r = readUnicodeCharacterInString(reader, r, 3, 8, false)
-				} else {
-					panic(MakeReadError(reader, "Unsupported escape character: \\"+string(r)))
+			if FORMAT_MODE {
+				b.WriteRune('\\')
+			} else {
+				switch r {
+				case '\\':
+					r = '\\'
+				case '"':
+					r = '"'
+				case 'n':
+					r = '\n'
+				case 't':
+					r = '\t'
+				case 'r':
+					r = '\r'
+				case 'b':
+					r = '\b'
+				case 'f':
+					r = '\f'
+				case 'u':
+					n := reader.Get()
+					r = readUnicodeCharacterInString(reader, n, 4, 16, true)
+				default:
+					if unicode.IsDigit(r) {
+						r = readUnicodeCharacterInString(reader, r, 3, 8, false)
+					} else {
+						panic(MakeReadError(reader, "Unsupported escape character: \\"+string(r)))
+					}
 				}
 			}
 		}
@@ -591,6 +617,18 @@ func readMap(reader *Reader) Object {
 	return readMapWithNamespace(reader, "")
 }
 
+func appendMapElement(objs []Object, obj Object) []Object {
+	objs = append(objs, obj)
+	if FORMAT_MODE {
+		if isComment(obj) {
+			// Add surrogate object to always have even number of elements in the map.
+			// Use rand to avoid duplicate keys.
+			objs = append(objs, MakeDouble(rand.Float64()))
+		}
+	}
+	return objs
+}
+
 func readMapWithNamespace(reader *Reader, nsname string) Object {
 	eatWhitespace(reader)
 	r := reader.Peek()
@@ -598,11 +636,11 @@ func readMapWithNamespace(reader *Reader, nsname string) Object {
 	for r != '}' {
 		obj, multi := Read(reader)
 		if !multi {
-			objs = append(objs, obj)
+			objs = appendMapElement(objs, obj)
 		} else {
 			v := obj.(*Vector)
 			for i := 0; i < v.Count(); i++ {
-				objs = append(objs, v.at(i))
+				objs = appendMapElement(objs, v.at(i))
 			}
 		}
 		eatWhitespace(reader)
@@ -859,6 +897,10 @@ func handleNoReaderError(reader *Reader, s Symbol) Object {
 
 func readTagged(reader *Reader) Object {
 	obj := readFirst(reader)
+	if FORMAT_MODE {
+		obj.GetInfo().prefix = "#"
+		return obj
+	}
 	switch s := obj.(type) {
 	case Symbol:
 		readersVar, ok := GLOBAL_ENV.CoreNamespace.mappings[SYMBOLS.defaultDataReaders.name]
@@ -891,6 +933,14 @@ func readConditional(reader *Reader) (Object, bool) {
 		panic(MakeReadError(reader, "Reader conditional body must be a list"))
 	}
 	cond := readList(reader).(*List)
+	if FORMAT_MODE {
+		if isSplicing {
+			cond.GetInfo().prefix = "#?@"
+		} else {
+			cond.GetInfo().prefix = "#?"
+		}
+		return cond, false
+	}
 	if cond.count%2 != 0 {
 		if LINTER_MODE {
 			printReadError(reader, "Reader conditional requires an even number of forms")
@@ -919,6 +969,17 @@ func readConditional(reader *Reader) (Object, bool) {
 		cond = cond.rest.rest
 	}
 	return EmptyVector(), true
+}
+
+func namespacedMapPrefix(auto bool, nsSym Object) string {
+	res := "#:"
+	if auto {
+		res += ":"
+	}
+	if nsSym != nil {
+		res += nsSym.ToString(false)
+	}
+	return res
 }
 
 func readNamespacedMap(reader *Reader) Object {
@@ -950,6 +1011,11 @@ func readNamespacedMap(reader *Reader) Object {
 	}
 	if r != '{' {
 		panic(MakeReadError(reader, "Namespaced map must specify a map"))
+	}
+	if FORMAT_MODE {
+		obj := readMap(reader)
+		obj.GetInfo().prefix = namespacedMapPrefix(auto, sym)
+		return obj
 	}
 	var nsname string
 	if auto {
@@ -992,15 +1058,36 @@ func readDispatch(reader *Reader) (Object, bool) {
 	case '\'':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "#'"
+			return nextObj, false
+		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj)), false
+	case '_':
+		// Only possible in FORMAT mode, otherwise
+		// eatWhitespaces eats #_
+		popPos()
+		nextObj := readFirst(reader)
+		nextObj.GetInfo().prefix = "#_"
+		return nextObj, false
 	case '^':
 		popPos()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "#^"
+			return nextObj, false
+		}
 		return readWithMeta(reader), false
 	case '{':
 		return readSet(reader), false
 	case '(':
 		popPos()
 		reader.Unget()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "#"
+			return nextObj, false
+		}
 		ARGS = make(map[int]Symbol)
 		fn := readFirst(reader)
 		res := makeFnForm(ARGS, fn)
@@ -1043,6 +1130,12 @@ func Read(reader *Reader) (Object, bool) {
 	eatWhitespace(reader)
 	r := reader.Get()
 	pushPos(reader)
+	// This is only possible in format mode, otherwise
+	// eatWhitespace eats comments.
+	if r == ';' || (r == '#' && reader.Peek() == '!') {
+		reader.Unget()
+		return readComment(reader), false
+	}
 	switch {
 	case r == '\\':
 		return readCharacter(reader), false
@@ -1056,6 +1149,9 @@ func Read(reader *Reader) (Object, bool) {
 		}
 		return readSymbol(reader, r), false
 	case r == '%' && ARGS != nil:
+		if FORMAT_MODE {
+			return readSymbol(reader, r), false
+		}
 		return readArgSymbol(reader), false
 	case isSymbolInitial(r):
 		return readSymbol(reader, r), false
@@ -1072,26 +1168,51 @@ func Read(reader *Reader) (Object, bool) {
 	case r == '\'':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "'"
+			return nextObj, false
+		}
 		return makeQuote(nextObj, SYMBOLS.quote), false
 	case r == '@':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "@"
+			return nextObj, false
+		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj)), false
 	case r == '~':
 		popPos()
 		if reader.Peek() == '@' {
 			reader.Get()
 			nextObj := readFirst(reader)
+			if FORMAT_MODE {
+				nextObj.GetInfo().prefix = "~@"
+				return nextObj, false
+			}
 			return makeQuote(nextObj, SYMBOLS.unquoteSplicing), false
 		}
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "~"
+			return nextObj, false
+		}
 		return makeQuote(nextObj, SYMBOLS.unquote), false
 	case r == '`':
 		popPos()
 		nextObj := readFirst(reader)
+		if FORMAT_MODE {
+			nextObj.GetInfo().prefix = "`"
+			return nextObj, false
+		}
 		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader), false
 	case r == '^':
 		popPos()
+		if FORMAT_MODE {
+			nextObj := readFirst(reader)
+			nextObj.GetInfo().prefix = "^"
+			return nextObj, false
+		}
 		return readWithMeta(reader), false
 	case r == '#':
 		return readDispatch(reader)

@@ -87,6 +87,10 @@ func (seq *MappingSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *MappingSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (seq *MappingSeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -148,6 +152,10 @@ func (seq *LazySeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *LazySeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (seq *LazySeq) WithMeta(meta Map) Object {
 	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
@@ -201,6 +209,10 @@ func (seq *ArraySeq) ToString(escape bool) string {
 
 func (seq *ArraySeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
+}
+
+func (seq *ArraySeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
 }
 
 func (seq *ArraySeq) WithMeta(meta Map) Object {
@@ -274,6 +286,10 @@ func (seq *ConsSeq) ToString(escape bool) string {
 
 func (seq *ConsSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
+}
+
+func (seq *ConsSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
 }
 
 func (seq *ConsSeq) GetType() *Type {

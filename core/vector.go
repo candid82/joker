@@ -160,6 +160,10 @@ func (seq *VectorSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
 }
 
+func (seq *VectorSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
 func (vseq *VectorSeq) WithMeta(meta Map) Object {
 	res := *vseq
 	res.meta = SafeMerge(res.meta, meta)
@@ -212,6 +216,10 @@ func (vseq *VectorRSeq) ToString(escape bool) string {
 
 func (seq *VectorRSeq) Pprint(w io.Writer, indent int) int {
 	return pprintSeq(seq, w, indent)
+}
+
+func (seq *VectorRSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
 }
 
 func (vseq *VectorRSeq) WithMeta(meta Map) Object {
@@ -473,6 +481,28 @@ func (v *Vector) Pprint(w io.Writer, indent int) int {
 			writeIndent(w, indent+1)
 		}
 		ind = pprintObject(v.at(v.count-1), indent+1, w)
+	}
+	fmt.Fprint(w, "]")
+	return ind + 1
+}
+
+func (v *Vector) Format(w io.Writer, indent int) int {
+	ind := indent + 1
+	fmt.Fprint(w, "[")
+	if v.count > 0 {
+		for i := 0; i < v.count-1; i++ {
+			ind = formatObject(v.at(i), ind, w)
+
+			ind = maybeNewLine(w, v.at(i), v.at(i+1), indent+1, ind)
+		}
+		ind = formatObject(v.at(v.count-1), ind, w)
+	}
+	if v.count > 0 {
+		if isComment(v.at(v.count - 1)) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			ind = indent + 1
+		}
 	}
 	fmt.Fprint(w, "]")
 	return ind + 1
