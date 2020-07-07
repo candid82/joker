@@ -92,9 +92,8 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
 var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
 var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
-var extendRegex *regexp.Regexp = regexp.MustCompile("extend(-.+)?")
 var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
-	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|go|condp|when|while|when-not|when-first|do|future)$"),
+	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|go|condp|when|while|when-not|when-first|do|future|thread)$"),
 	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
 	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop)$"),
 	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
@@ -107,8 +106,7 @@ func isOneAndBodyExpr(obj Object) bool {
 	case Symbol:
 		return defRegex.MatchString(*s.name) ||
 			ifRegex.MatchString(*s.name) ||
-			whenRegex.MatchString(*s.name) ||
-			extendRegex.MatchString(*s.name)
+			whenRegex.MatchString(*s.name)
 	default:
 		return false
 	}
