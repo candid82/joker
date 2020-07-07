@@ -192,6 +192,9 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
+		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
+			restIndent = i + 1
+		}
 	} else if formatAsDef {
 	} else if isBodyIndent(obj) {
 		restIndent = indent + 2
