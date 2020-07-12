@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"unicode/utf8"
 )
 
@@ -22,6 +23,8 @@ func seqFirstAfterSpace(seq Seq, w io.Writer, indent int, insideDefRecord bool) 
 	if !seq.IsEmpty() {
 		fmt.Fprint(w, " ")
 		obj = seq.First()
+		// Seq handling here is needed to properly format methods
+		// inside defrecord
 		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
 			if info := obj.GetInfo(); info != nil {
 				fmt.Fprint(w, info.prefix)
@@ -50,6 +53,8 @@ func seqFirstAfterBreak(prevObj Object, seq Seq, w io.Writer, indent int, inside
 		obj = seq.First()
 		writeNewLines(w, prevObj, obj)
 		writeIndent(w, indent)
+		// Seq handling here is needed to properly format methods
+		// inside defrecord
 		if s, ok := obj.(Seq); ok && !obj.Equals(NIL) {
 			if info := obj.GetInfo(); info != nil {
 				fmt.Fprint(w, info.prefix)
@@ -59,6 +64,18 @@ func seqFirstAfterBreak(prevObj Object, seq Seq, w io.Writer, indent int, inside
 		} else {
 			indent = formatObject(obj, indent, w)
 		}
+		seq = seq.Rest()
+	}
+	return seq, obj, indent
+}
+
+func seqFirstAfterForcedBreak(seq Seq, w io.Writer, indent int) (Seq, Object, int) {
+	var obj Object
+	if !seq.IsEmpty() {
+		obj = seq.First()
+		fmt.Fprint(w, "\n")
+		writeIndent(w, indent)
+		indent = formatObject(obj, indent, w)
 		seq = seq.Rest()
 	}
 	return seq, obj, indent
@@ -95,7 +112,7 @@ var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
 var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
 	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|go|condp|when|while|when-not|when-first|do|future|thread)$"),
 	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
-	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop)$"),
+	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop|alt!|alt!!)$"),
 	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
 	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
 	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace)$"),
@@ -143,6 +160,28 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	return formatSeqEx(seq, w, indent, false)
 }
 
+type RequireSort []Object
+
+func (rs RequireSort) Len() int      { return len(rs) }
+func (rs RequireSort) Swap(i, j int) { rs[i], rs[j] = rs[j], rs[i] }
+func (rs RequireSort) Less(i, j int) bool {
+	a := rs[i]
+	if s, ok := a.(Seqable); ok {
+		a = s.Seq().First()
+	}
+	b := rs[j]
+	if s, ok := b.(Seqable); ok {
+		b = s.Seq().First()
+	}
+	return a.ToString(false) < b.ToString(false)
+}
+
+func sortRequire(seq Seq) Seq {
+	s := RequireSort(ToSlice(seq))
+	sort.Sort(s)
+	return &ArraySeq{arr: s}
+}
+
 func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	i := indent + 1
 	restIndent := indent + 2
@@ -161,11 +200,10 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	if obj.Equals(SYMBOLS.ns) || isOneAndBodyExpr(obj) {
 		seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 	} else if obj.Equals(KEYWORDS.require) || obj.Equals(KEYWORDS._import) {
-		obj = seq.First()
-		seq, prevObj, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
+		seq = sortRequire(seq)
+		seq, obj, _ = seqFirstAfterSpace(seq, w, i, isDefRecord)
 		for !seq.IsEmpty() {
-			seq, prevObj, _ = seqFirstAfterBreak(obj, seq, w, i+1, isDefRecord)
-			obj = prevObj
+			seq, obj, _ = seqFirstAfterForcedBreak(seq, w, i+1)
 		}
 	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
 		if !seq.IsEmpty() {
