@@ -756,6 +756,19 @@ func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 	}
 }
 
+func skipRedundantDo(obj Object) bool {
+	println(obj.ToString(false))
+	if meta, ok := obj.(Meta); ok {
+		if m := meta.GetMeta(); m != nil {
+			println(m.ToString(false))
+			if ok, res := m.Get(MakeKeyword("skip-redundant-do")); ok {
+				return res.Equals(Boolean{B: true})
+			}
+		}
+	}
+	return false
+}
+
 func parseBody(seq Seq, ctx *ParseContext) []Expr {
 	recur := ctx.recur
 	ctx.recur = false
@@ -772,7 +785,7 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 		if LINTER_MODE {
 			if defExpr, ok := expr.(*DefExpr); ok && !defExpr.isCreatedByMacro {
 				printParseWarning(defExpr.Pos(), "inline def")
-			} else if doExpr, ok := expr.(*DoExpr); ok && !doExpr.isCreatedByMacro {
+			} else if doExpr, ok := expr.(*DoExpr); ok && !doExpr.isCreatedByMacro && !skipRedundantDo(ro) {
 				printParseWarning(doExpr.Pos(), "redundant do form")
 			}
 		}
