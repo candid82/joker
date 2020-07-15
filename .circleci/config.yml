@@ -30,3 +30,6 @@ jobs:
       - run:
           name: eval tests
           command: ./eval-tests.sh
+      - run:
+          name: formatter tests
+          command: ./formatter-tests.sh
