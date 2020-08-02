@@ -749,9 +749,6 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 		if meta, ok := body.(Meta); ok {
 			m := EmptyArrayMap().Plus(MakeKeyword("skip-redundant-do"), Boolean{B: true})
 			body = meta.WithMeta(m)
-			println("haha:")
-			println(body.ToString(false))
-			println(body.(Meta).GetMeta().ToString(false))
 		}
 	}
 	return DeriveReadObject(body, NewListFrom(MakeSymbol("joker.core/fn"), argVector, body))

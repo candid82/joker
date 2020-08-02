@@ -757,10 +757,8 @@ func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 }
 
 func skipRedundantDo(obj Object) bool {
-	println(obj.ToString(false))
 	if meta, ok := obj.(Meta); ok {
 		if m := meta.GetMeta(); m != nil {
-			println(m.ToString(false))
 			if ok, res := m.Get(MakeKeyword("skip-redundant-do")); ok {
 				return res.Equals(Boolean{B: true})
 			}
@@ -1221,6 +1219,9 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			s = s.Rest()
 		}
 		res := NewListFrom(objs...)
+		if s, ok := obj.(Meta); ok {
+			res.meta = s.GetMeta()
+		}
 		if objInfo := obj.GetInfo(); objInfo != nil {
 			return res.WithInfo(objInfo)
 		}
