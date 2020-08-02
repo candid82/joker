@@ -25,3 +25,5 @@
   (do 1 a))
 
 #(do (println 1) (println 2))
+
+#(do (println 1))

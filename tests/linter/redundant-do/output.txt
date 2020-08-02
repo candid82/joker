@@ -2,3 +2,4 @@ tests/linter/redundant-do/input.clj:3:3: Parse warning: redundant do form
 tests/linter/redundant-do/input.clj:8:3: Parse warning: redundant do form
 tests/linter/redundant-do/input.clj:14:3: Parse warning: redundant do form
 tests/linter/redundant-do/input.clj:25:3: Parse warning: redundant do form
+tests/linter/redundant-do/input.clj:29:2: Parse warning: redundant do form
