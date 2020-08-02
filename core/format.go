@@ -115,7 +115,7 @@ var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
 	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop|alt!|alt!!)$"),
 	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
 	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
-	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace)$"),
+	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace|match)$"),
 }
 
 func isOneAndBodyExpr(obj Object) bool {
