@@ -1225,7 +1225,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the most recent value printed</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3670">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3671">source</a>
   
 </li>
 <li>
@@ -1234,7 +1234,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the second most recent value printed</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3675">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3676">source</a>
   
 </li>
 <li>
@@ -1243,7 +1243,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the third most recent value printed</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3680">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3681">source</a>
   
 </li>
 <li>
@@ -1271,7 +1271,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"></pre>
   <p class="var-docstr">bound in a repl to the most recent exception caught by the repl</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3685">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3686">source</a>
   
 </li>
 <li>
@@ -1304,7 +1304,7 @@
   <p class="var-docstr">When set to true, output will be flushed whenever a newline is printed.<br>
 <br>
     Defaults to true.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2145">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2146">source</a>
   
 </li>
 <li>
@@ -1397,7 +1397,7 @@
   <pre class="var-usage"></pre>
   <p class="var-docstr">Default map of data reader functions provided by Joker. May be<br>
   overridden by binding *data-readers*.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4341">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4342">source</a>
   
 </li>
 
@@ -1549,7 +1549,7 @@
   <p class="var-docstr">Takes a value from ch.<br>
   Returns nil if ch is closed and nothing is available on ch.<br>
   Blocks if nothing is available on ch and ch is not closed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4530">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4531">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1616,7 +1616,7 @@
   Throws an exception if val is nil.<br>
   Blocks if ch is full (no buffer space is available).<br>
   Returns true unless ch is already closed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4538">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4539">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1642,7 +1642,7 @@
   namespace. Arguments are two symbols: the alias to be used, and<br>
   the symbolic name of the target namespace. Use :as in the ns macro in preference<br>
   to calling this directly.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2437">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2438">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1652,7 +1652,7 @@
   <pre class="var-usage"><div><code>(all-ns)</code><code class="hide">^Seq (all-ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a sequence of all namespaces.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2296">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2297">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1666,7 +1666,7 @@
   (apply f its-current-meta args)<br>
 <br>
   f must be free of side-effects</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1504">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1505">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1716,7 +1716,7 @@
 </pre>
   <p class="var-docstr">Constructs an array-map. If any keys are equal, they are handled as<br>
          if by repeated uses of assoc.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2505">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2506">source</a>
   
 </li>
 <li>
@@ -1728,7 +1728,7 @@
   <p class="var-docstr">Binds name to expr, evaluates the first form in the lexical context<br>
   of that binding, then binds name to that result, repeating for each<br>
   successive form, returning the result of the last form.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4271">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4272">source</a>
   
 </li>
 <li>
@@ -1740,7 +1740,7 @@
 </pre>
   <p class="var-docstr">Evaluates expr and throws an exception if it does not evaluate to<br>
   logical true.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2937">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2938">source</a>
   
 </li>
 <li>
@@ -1766,7 +1766,7 @@
   <p class="var-docstr">Associates a value in a nested associative structure, where ks is a<br>
   sequence of keys and v is the new value and returns a new nested structure.<br>
   If any levels do not exist, hash-maps will be created.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3576">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3577">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1776,7 +1776,7 @@
   <pre class="var-usage"><div><code>(associative? coll)</code><code class="hide">^Boolean (associative? coll)</code></div>
 </pre>
   <p class="var-docstr">Returns true if coll implements Associative</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3645">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3646">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1792,7 +1792,7 @@
 <br>
   If metadata-map is supplied, it will become the metadata on the<br>
   atom.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1461">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1462">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1802,7 +1802,7 @@
   <pre class="var-usage"><div><code>(bigfloat x)</code><code class="hide">^BigFloat (bigfloat x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to BigFloat</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2108">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2109">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1812,7 +1812,7 @@
   <pre class="var-usage"><div><code>(bigfloat? n)</code><code class="hide">^Boolean (bigfloat? n)</code></div>
 </pre>
   <p class="var-docstr">Returns true if n is a BigFloat</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2084">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2085">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1822,7 +1822,7 @@
   <pre class="var-usage"><div><code>(bigint x)</code><code class="hide">^BigInt (bigint x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to BigInt</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2101">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2102">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1838,7 +1838,7 @@
   re-establishes the bindings that existed before.  The new bindings<br>
   are made in parallel (unlike let); all init-exprs are evaluated<br>
   before the vars are bound to their new values.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1426">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1427">source</a>
   
 </li>
 <li>
@@ -1962,7 +1962,7 @@
   <pre class="var-usage"><div><code>(boolean x)</code><code class="hide">^Boolean (boolean x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to boolean</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2047">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2048">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1983,7 +1983,7 @@
 </pre>
   <p class="var-docstr">Returns true if all of the vars provided as arguments have any bound value.<br>
   Implies that deref&#39;ing the provided vars will succeed. Returns true if no vars are provided.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3128">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3129">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1994,7 +1994,7 @@
 </pre>
   <p class="var-docstr">If coll is counted? returns its count, else will count at most the first n<br>
   elements of coll using its seq</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4107">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4108">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2015,7 +2015,7 @@
 </pre>
   <p class="var-docstr">Returns true if x implements Callable. Note that many data structures<br>
   (e.g. sets and maps) implement Callable.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3634">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3635">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2037,7 +2037,7 @@
   default expression can follow the clauses, and its value will be<br>
   returned if no clause matches. If no default expression is provided<br>
   and no clause matches, an exception is thrown.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3917">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3918">source</a>
   
 </li>
 <li>
@@ -2058,7 +2058,7 @@
 <div><code>(chan n)</code><code class="hide">^Channel (chan ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Returns a new channel with an optional buffer of size n.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4524">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4525">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2068,7 +2068,7 @@
   <pre class="var-usage"><div><code>(char x)</code><code class="hide">^Char (char x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to char</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2041">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2042">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2098,7 +2098,7 @@
   <pre class="var-usage"><div><code>(class x)</code><code class="hide">^Type (class x)</code></div>
 </pre>
   <p class="var-docstr">Returns the Type of x.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1349">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1350">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2115,7 +2115,7 @@
 <br>
   Logically closing happens after all puts have been delivered. Therefore, any<br>
   blocked puts will remain blocked until a taker releases them.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4547">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4548">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2125,7 +2125,7 @@
   <pre class="var-usage"><div><code>(coll? x)</code><code class="hide">^Boolean (coll? x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if x implements Collection</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3617">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3618">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2135,7 +2135,7 @@
   <pre class="var-usage"><div><code>(comment &amp; body)</code></div>
 </pre>
   <p class="var-docstr">Ignores body, yields nil</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2824">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2825">source</a>
   
 </li>
 <li>
@@ -2152,7 +2152,7 @@
   of those fns.  The returned fn takes a variable number of args,<br>
   applies the rightmost of fns to the args, the next<br>
   fn (right-to-left) to the result, etc.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1525">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1526">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2215,7 +2215,7 @@
   through each form for which the corresponding test<br>
   expression is true. Note that, unlike cond branching, cond-&gt; threading does<br>
   not short circuit after the first true test expression.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4227">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4228">source</a>
   
 </li>
 <li>
@@ -2228,7 +2228,7 @@
   through each form for which the corresponding test expression<br>
   is true.  Note that, unlike cond branching, cond-&gt;&gt; threading does not short circuit<br>
   after the first true test expression.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4249">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4250">source</a>
   
 </li>
 <li>
@@ -2255,7 +2255,7 @@
   and its value will be returned if no clause matches. If no default<br>
   expression is provided and no clause matches, an<br>
   exception is thrown.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3738">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3739">source</a>
   
 </li>
 <li>
@@ -2324,7 +2324,7 @@
   <pre class="var-usage"><div><code>(counted? coll)</code><code class="hide">^Boolean (counted? coll)</code></div>
 </pre>
   <p class="var-docstr">Returns true if coll implements count in constant time</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3655">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3656">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2336,7 +2336,7 @@
   <p class="var-docstr">Create a new namespace named by the symbol if one doesn&#39;t already<br>
   exist, returns it or the already-existing namespace of the same<br>
   name.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2283">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2284">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2346,7 +2346,7 @@
   <pre class="var-usage"><div><code>(cycle coll)</code><code class="hide">^Seq (cycle ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy (infinite!) sequence of repetitions of the items in coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1769">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1770">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2378,7 +2378,7 @@
   <pre class="var-usage"><div><code>(declare &amp; names)</code></div>
 </pre>
   <p class="var-docstr">defs the supplied var names with no bindings, useful for making forward declarations.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1875">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1876">source</a>
   
 </li>
 <li>
@@ -2388,7 +2388,7 @@
   <pre class="var-usage"><div><code>(dedupe coll)</code><code class="hide">^Seq (dedupe ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy sequence removing consecutive duplicates in coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4317">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4318">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2411,7 +2411,7 @@
   <pre class="var-usage"><div><code>(defmethod multifn dispatch-val &amp; fn-tail)</code></div>
 </pre>
   <p class="var-docstr">Creates and installs a new method of multimethod associated with dispatch-value. </p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4444">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4445">source</a>
   
 </li>
 <li>
@@ -2442,7 +2442,7 @@
   Multimethods expect the value of the hierarchy option to be supplied as<br>
   a reference type e.g. a var (i.e. via the Var-quote dispatch macro #&#39;<br>
   or the var special form).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4384">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4385">source</a>
   
 </li>
 <li>
@@ -2466,7 +2466,7 @@
   <pre class="var-usage"><div><code>(defn- name &amp; decls)</code></div>
 </pre>
   <p class="var-docstr">same as defn, yielding non-public def</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3004">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3005">source</a>
   
 </li>
 <li>
@@ -2477,7 +2477,7 @@
 </pre>
   <p class="var-docstr">defs name to have the value of the expr if the named var is not bound,<br>
   else expr is unevaluated</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3216">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3217">source</a>
   
 </li>
 <li>
@@ -2510,7 +2510,7 @@
   <pre class="var-usage"><div><code>(denominator r)</code><code class="hide">^Number (denominator ^Ratio r)</code></div>
 </pre>
   <p class="var-docstr">Returns the denominator part of a Ratio.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2078">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2079">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2522,7 +2522,7 @@
   <p class="var-docstr">Also reader macro: @var/@atom/@delay. When applied to a var or atom,<br>
   returns its current state. When applied to a delay, forces<br>
   it if not already forced.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1453">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1454">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2558,7 +2558,7 @@
   <pre class="var-usage"><div><code>(distinct coll)</code><code class="hide">^Seq (distinct ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy sequence of the elements of coll with duplicates removed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3079">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3080">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2570,7 +2570,7 @@
 <div><code>(distinct? x y &amp; more)</code><code class="hide">^Boolean (distinct? x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns true if no two of the arguments are =</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3140">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3141">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2586,7 +2586,7 @@
   be used to force any effects. Walks through the successive nexts of<br>
   the seq, retains the head and returns it, thus causing the entire<br>
   seq to reside in memory at one time.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1913">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1914">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2601,7 +2601,7 @@
   element in the seq do not occur until the seq is consumed. dorun can<br>
   be used to force any effects. Walks through the successive nexts of<br>
   the seq, does not retain the head and returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1899">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1900">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2613,7 +2613,7 @@
   <p class="var-docstr">Repeatedly executes body (presumably for side-effects) with<br>
   bindings and filtering as provided by &#34;for&#34;.  Does not retain<br>
   the head of the sequence. Returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1974">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1975">source</a>
   
 </li>
 <li>
@@ -2626,7 +2626,7 @@
 <br>
   Repeatedly executes body (presumably for side-effects) with name<br>
   bound to integers from 0 through n-1.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2013">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2014">source</a>
   
 </li>
 <li>
@@ -2638,7 +2638,7 @@
   <p class="var-docstr">Evaluates x then calls all of the methods and functions with the<br>
   value of x supplied at the front of the given arguments.  The forms<br>
   are evaluated in order.  Returns x.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2208">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2209">source</a>
   
 </li>
 <li>
@@ -2648,7 +2648,7 @@
   <pre class="var-usage"><div><code>(double x)</code><code class="hide">^Double (double ^Number x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to double</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2036">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2037">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2668,7 +2668,7 @@
   <pre class="var-usage"><div><code>(drop n coll)</code><code class="hide">^Seq (drop ^Number n ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy sequence of all but the first n items in coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1730">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1731">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2679,7 +2679,7 @@
 <div><code>(drop-last n s)</code><code class="hide">^Seq (drop-last ^Number n ^Seqable s)</code></div>
 </pre>
   <p class="var-docstr">Return a lazy sequence of all but the last n (default 1) items in coll</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1741">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1742">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2690,7 +2690,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of the items in coll starting from the first<br>
   item for which (pred item) returns logical false.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1757">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1758">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2700,7 +2700,7 @@
   <pre class="var-usage"><div><code>(empty coll)</code><code class="hide">^Collection (empty coll)</code></div>
 </pre>
   <p class="var-docstr">Returns an empty collection of the same category as coll, or nil</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3122">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3123">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2711,7 +2711,7 @@
 </pre>
   <p class="var-docstr">Returns true if coll has no items - same as (not (seq coll)).<br>
   Please use the idiom (seq x) rather than (not (empty? x))</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3732">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3733">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2721,7 +2721,7 @@
   <pre class="var-usage"><div><code>(eval form)</code></div>
 </pre>
   <p class="var-docstr">Evaluates the form data structure (not text!) and returns the result.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1969">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1970">source</a>
   
 </li>
 <li>
@@ -2747,7 +2747,7 @@
   composing predicates return a logical true value against all of its arguments, else it returns<br>
   false. Note that f is short-circuiting in that it will stop execution on the first<br>
   argument that triggers a logical false result against the original predicates.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4119">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4120">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2758,7 +2758,7 @@
 </pre>
   <p class="var-docstr">Returns true if (pred x) is logical true for every x in coll, else<br>
   false.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1617">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1618">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2769,7 +2769,7 @@
 </pre>
   <p class="var-docstr">Returns the cause of ex if ex is an ExInfo.<br>
   Otherwise returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2916">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2917">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2780,7 +2780,7 @@
 </pre>
   <p class="var-docstr">Returns exception data (a map) if ex is an ExInfo.<br>
   Otherwise returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2908">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2909">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2802,7 +2802,7 @@
 </pre>
   <p class="var-docstr">Returns the message attached to ex if ex is an ExInfo.<br>
   Otherwise returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2924">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2925">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2813,7 +2813,7 @@
 <div><code>(exit code)</code><code class="hide">(exit ^Int code)</code></div>
 </pre>
   <p class="var-docstr">Causes the current program to exit with the given status code (defaults to 0).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4590">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4591">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2844,7 +2844,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of the items in coll for which<br>
   (pred item) returns true. pred must be free of side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1691">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1692">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2855,7 +2855,7 @@
 </pre>
   <p class="var-docstr">Returns a vector of the items in coll for which<br>
   (pred item) returns true. pred must be free of side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3969">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3970">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2875,7 +2875,7 @@
   <pre class="var-usage"><div><code>(find-ns sym)</code><code class="hide">^Namespace (find-ns ^Symbol sym)</code></div>
 </pre>
   <p class="var-docstr">Returns the namespace named by the symbol or nil if it doesn&#39;t exist.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2278">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2279">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2886,7 +2886,7 @@
 </pre>
   <p class="var-docstr">Returns the global var named by the namespace-qualified symbol, or<br>
   nil if no var with that name.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1519">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1520">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2909,7 +2909,7 @@
   <p class="var-docstr">Takes any nested combination of sequential things (lists, vectors,<br>
   etc.) and returns their contents as a single, flat sequence.<br>
   (flatten nil) returns an empty sequence.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3995">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3996">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2919,7 +2919,7 @@
   <pre class="var-usage"><div><code>(float? n)</code><code class="hide">^Boolean (float? n)</code></div>
 </pre>
   <p class="var-docstr">Returns true if n is a floating point number</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2089">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2090">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2930,7 +2930,7 @@
 </pre>
   <p class="var-docstr">Flushes the output stream that is the current value of<br>
   *out*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2137">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2138">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2946,7 +2946,7 @@
   name =&gt; symbol<br>
 <br>
   Defines a function</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2659">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2660">source</a>
   
 </li>
 <li>
@@ -2956,7 +2956,7 @@
   <pre class="var-usage"><div><code>(fn? x)</code><code class="hide">^Boolean (fn? x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if x is Fn, i.e. is an object created via fn.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3640">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3641">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2982,7 +2982,7 @@
   versions can replace arguments in the second and third<br>
   positions (y, z). Note that the function f can take any number of<br>
   arguments, not just the one(s) being nil-patched.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3874">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3875">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3000,7 +3000,7 @@
   :while test, :when test.<br>
 <br>
   (take 100 (for [x (range 100000000) y (range 1000000) :while (&lt; y x)]  [x y]))</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2775">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2776">source</a>
   
 </li>
 <li>
@@ -3020,7 +3020,7 @@
   <pre class="var-usage"><div><code>(format fmt &amp; args)</code><code class="hide">^String (format ^String fmt &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Formats a string using fmt.Sprintf</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3155">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3156">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3031,7 +3031,7 @@
 </pre>
   <p class="var-docstr">Returns a map from distinct items in coll to the number of times<br>
   they appear.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4028">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4029">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3068,7 +3068,7 @@
   <p class="var-docstr">Returns the value in a nested associative structure,<br>
   where ks is a sequence of keys. Returns nil if the key<br>
   is not present, or the not-found value if supplied.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3558">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3559">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3079,7 +3079,7 @@
 </pre>
   <p class="var-docstr">Given a multimethod and a dispatch value, returns the dispatch fn<br>
   that would apply to that value, or nil if none apply and no default</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4482">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4483">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3101,7 +3101,7 @@
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)<br>
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine<br>
   (or another goroutine) doesn&#39;t do any I/O or channel operations (&lt;! or &gt;!).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4506">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4507">source</a>
   
 </li>
 <li>
@@ -3113,7 +3113,7 @@
   <p class="var-docstr">Returns a map of the elements of coll keyed by the result of<br>
   f on each element. The value at each key will be a vector of the<br>
   corresponding elements, in the order they appeared in coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4004">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4005">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3123,7 +3123,7 @@
   <pre class="var-usage"><div><code>(hash x)</code><code class="hide">^Int (hash x)</code></div>
 </pre>
   <p class="var-docstr">Returns the hash code of its argument.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2932">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2933">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3226,7 +3226,7 @@
   <pre class="var-usage"><div><code>(in-ns name)</code><code class="hide">^Namespace (in-ns ^Symbol name)</code></div>
 </pre>
   <p class="var-docstr">Sets *ns* to the namespace named by the symbol, creating it if needed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3230">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3231">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3258,7 +3258,7 @@
   <pre class="var-usage"><div><code>(indexed? coll)</code><code class="hide">^Boolean (indexed? coll)</code></div>
 </pre>
   <p class="var-docstr">Return true if coll implements Indexed, indicating efficient lookup by index</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3665">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3666">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3312,7 +3312,7 @@
 <div><code>(interleave c1 c2 &amp; colls)</code><code class="hide">^Seq (interleave ^Seqable c1 ^Seqable c2 &amp; colls)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy seq of the first item in each coll, then the second etc.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2469">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2470">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3326,7 +3326,7 @@
   ns (which can be a symbol or a namespace), setting its root binding<br>
   to val if supplied. The namespace must exist. The var will adopt any<br>
   metadata from the name symbol.  Returns the var.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2368">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2369">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3337,7 +3337,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy seq of the elements of coll separated by sep.<br>
   Returns a stateful transducer when no collection is provided.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3115">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3116">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3348,7 +3348,7 @@
 </pre>
   <p class="var-docstr">Returns a new coll consisting of to-coll with all of the items of<br>
   from-coll conjoined.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3910">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3911">source</a>
   
 </li>
 <li>
@@ -3358,7 +3358,7 @@
   <pre class="var-usage"><div><code>(iterate f x)</code><code class="hide">^Seq (iterate ^Callable f x)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1795">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1796">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3368,7 +3368,7 @@
   <pre class="var-usage"><div><code>(joker-version)</code><code class="hide">^String (joker-version)</code></div>
 </pre>
   <p class="var-docstr">Returns joker version as a printable string.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4346">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4347">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3385,7 +3385,7 @@
   returns a vector containing the result of applying each fn to the<br>
   args (left-to-right).<br>
   ((juxt a b c) x) =&gt; [(a x) (b x) (c x)]</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1555">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1556">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3397,7 +3397,7 @@
   <p class="var-docstr">Returns a lazy sequence of the non-nil results of (f item). Note,<br>
   this means false return values will be included.  f must be free of<br>
   side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4079">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4080">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3409,7 +3409,7 @@
   <p class="var-docstr">Returns a lazy sequence of the non-nil results of (f index item). Note,<br>
   this means false return values will be included.  f must be free of<br>
   side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4092">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4093">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3475,7 +3475,7 @@
   needed.<br>
 <br>
   (lazy-cat xs ys zs) === (concat (lazy-seq xs) (lazy-seq ys) (lazy-seq zs))</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2765">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2766">source</a>
   
 </li>
 <li>
@@ -3502,7 +3502,7 @@
   Evaluates the exprs in a lexical context in which the symbols in<br>
   the binding-forms are bound to their respective init-exprs or parts<br>
   therein.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2627">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2628">source</a>
   
 </li>
 <li>
@@ -3516,7 +3516,7 @@
   Takes a vector of function specs and a body, and generates a set of<br>
   bindings of functions to their names. All of the names are available<br>
   in all of the definitions of the functions, as well as the body.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3860">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3861">source</a>
   
 </li>
 <li>
@@ -3527,7 +3527,7 @@
 </pre>
   <p class="var-docstr">Returns the lines of text from rdr as a lazy sequence of strings.<br>
   rdr must be File or BufferedReader.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1863">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1864">source</a>
   
 </li>
 <li>
@@ -3562,7 +3562,7 @@
   <pre class="var-usage"><div><code>(list? x)</code><code class="hide">^Boolean (list? x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if x is a List</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3622">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3623">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3573,7 +3573,7 @@
 </pre>
   <p class="var-docstr">Loads code from libs, throwing error if cyclic dependency detected,<br>
   and ignoring libs already being loaded.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3540">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3541">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3583,7 +3583,7 @@
   <pre class="var-usage"><div><code>(load-file f)</code><code class="hide">^Nil (load-file ^String f)</code></div>
 </pre>
   <p class="var-docstr">Loads code from file f. Does not protect against recursion.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3534">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3535">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3594,7 +3594,7 @@
 </pre>
   <p class="var-docstr">Sequentially read and evaluate the set of forms contained in the<br>
   string</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2249">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2250">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3604,7 +3604,7 @@
   <pre class="var-usage"><div><code>(loaded-libs)</code><code class="hide">^MapSet (loaded-libs)</code></div>
 </pre>
   <p class="var-docstr">Returns an UNSORTED set of symbols naming the currently loaded libs</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3528">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3529">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3616,7 +3616,7 @@
   <p class="var-docstr">Evaluates the exprs in a lexical context in which the symbols in<br>
   the binding-forms are bound to their respective init-exprs or parts<br>
   therein. Acts as a recur target.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2724">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2725">source</a>
   
 </li>
 <li>
@@ -3628,7 +3628,7 @@
   <p class="var-docstr">Repeatedly calls macroexpand-1 on form until it no longer<br>
   represents a macro form, then returns it.  Note neither<br>
   macroexpand-1 nor macroexpand expand macros in subforms.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2238">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2239">source</a>
   
 </li>
 <li>
@@ -3638,7 +3638,7 @@
   <pre class="var-usage"><div><code>(macroexpand-1 form)</code></div>
 </pre>
   <p class="var-docstr">If form represents a macro form, returns its expansion, else returns form.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2232">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2233">source</a>
   
 </li>
 <li>
@@ -3655,7 +3655,7 @@
   of second items in each coll, until any one of the colls is<br>
   exhausted.  Any remaining items in other colls are ignored. Function<br>
   f should accept number-of-colls arguments.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1653">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1654">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3668,7 +3668,7 @@
   and the first item of coll, followed by applying f to 1 and the second<br>
   item in coll, etc, until coll is exhausted. Thus function f should<br>
   accept 2 arguments, index and item.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4066">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4067">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3689,7 +3689,7 @@
 </pre>
   <p class="var-docstr">Returns the result of applying concat to the result of applying map<br>
   to f and colls.  Thus function f should return a collection.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1684">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1685">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3706,7 +3706,7 @@
   of second items in each coll, until any one of the colls is<br>
   exhausted.  Any remaining items in other colls are ignored. Function<br>
   f should accept number-of-colls arguments.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3953">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3954">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3730,7 +3730,7 @@
 <div><code>(max-key k x y &amp; more)</code><code class="hide">(max-key ^Callable k x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the x for which (k x), a number, is greatest.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3063">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3064">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3743,7 +3743,7 @@
   memoized version of the function keeps a cache of the mapping from arguments<br>
   to results and, when calls with the same arguments are repeated often, has<br>
   higher performance at the expense of higher memory use.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3717">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3718">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3755,7 +3755,7 @@
   <p class="var-docstr">Returns a map that consists of the rest of the maps conj-ed onto<br>
   the first.  If a key occurs in more than one map, the mapping from<br>
   the latter (left-to-right) will be the mapping in the result.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1819">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1820">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3768,7 +3768,7 @@
   the first.  If a key occurs in more than one map, the mapping(s)<br>
   from the latter (left-to-right) will be combined with the mapping in<br>
   the result by calling (f val-in-result val-in-latter).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1828">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1829">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3788,7 +3788,7 @@
   <pre class="var-usage"><div><code>(methods multifn)</code><code class="hide">^Map (methods multifn)</code></div>
 </pre>
   <p class="var-docstr">Given a multimethod, returns a map of dispatch values -&gt; dispatch fns</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4474">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4475">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3812,7 +3812,7 @@
 <div><code>(min-key k x y &amp; more)</code><code class="hide">(min-key ^Callable k x y &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Returns the x for which (k x), a number, is least.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3071">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3072">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3822,7 +3822,7 @@
   <pre class="var-usage"><div><code>(mod num div)</code><code class="hide">^Number (mod ^Number num ^Number div)</code></div>
 </pre>
   <p class="var-docstr">Modulus of num and div. Truncates toward negative infinity.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2058">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2059">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3882,7 +3882,7 @@
   <pre class="var-usage"><div><code>(newline)</code><code class="hide">^Nil (newline)</code></div>
 </pre>
   <p class="var-docstr">Writes a platform-specific newline to *out*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2131">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2132">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3944,7 +3944,7 @@
 </pre>
   <p class="var-docstr">Returns false if (pred x) is logical true for any x in coll,<br>
          else true.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1645">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1646">source</a>
   
 </li>
 <li>
@@ -3954,7 +3954,7 @@
   <pre class="var-usage"><div><code>(not-empty coll)</code><code class="hide">^Seqable (not-empty ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">If coll is empty, returns nil, else coll</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3135">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3136">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3965,7 +3965,7 @@
 </pre>
   <p class="var-docstr">Returns false if (pred x) is logical true for every x in<br>
          coll, else true.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1627">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1628">source</a>
   
 </li>
 <li>
@@ -3997,7 +3997,7 @@
   (ns foo.bar<br>
     (:require [my.lib1 :as lib1])<br>
     (:use [my.lib2]))</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3167">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3168">source</a>
   
 </li>
 <li>
@@ -4007,7 +4007,7 @@
   <pre class="var-usage"><div><code>(ns-aliases ns)</code><code class="hide">^Map (ns-aliases ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of the aliases for the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2447">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2448">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4017,7 +4017,7 @@
   <pre class="var-usage"><div><code>(ns-interns ns)</code><code class="hide">^Map (ns-interns ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of the intern mappings for the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2354">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2355">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4027,7 +4027,7 @@
   <pre class="var-usage"><div><code>(ns-map ns)</code><code class="hide">^Map (ns-map ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of all the mappings for the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2325">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2326">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4037,7 +4037,7 @@
   <pre class="var-usage"><div><code>(ns-name ns)</code><code class="hide">^Symbol (ns-name ns)</code></div>
 </pre>
   <p class="var-docstr">Returns the name of the namespace, a symbol.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2318">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2319">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4047,7 +4047,7 @@
   <pre class="var-usage"><div><code>(ns-publics ns)</code><code class="hide">^Map (ns-publics ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of the public intern mappings for the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2343">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2344">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4057,7 +4057,7 @@
   <pre class="var-usage"><div><code>(ns-refers ns)</code><code class="hide">^Map (ns-refers ns)</code></div>
 </pre>
   <p class="var-docstr">Returns a map of the refer mappings for the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2427">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2428">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4071,7 +4071,7 @@
   namespace (unless found in the environment), else nil.  Note that<br>
   if the symbol is fully qualified, the var/Type to which it resolves<br>
   need not be present in the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2486">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2487">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4091,7 +4091,7 @@
   value is the URL of the resource. Only http:// and https:// are<br>
   currently supported; everything else is treated as a local<br>
   pathname. HTTP URLs are cached in $HOME/.jokerd/deps/.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3286">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3287">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4101,7 +4101,7 @@
   <pre class="var-usage"><div><code>(ns-unalias ns sym)</code><code class="hide">^Nil (ns-unalias ns ^Symbol sym)</code></div>
 </pre>
   <p class="var-docstr">Removes the alias for the symbol from the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2454">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2455">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4111,7 +4111,7 @@
   <pre class="var-usage"><div><code>(ns-unmap ns sym)</code><code class="hide">^Nil (ns-unmap ns ^Symbol sym)</code></div>
 </pre>
   <p class="var-docstr">Removes the mappings for the symbol from the namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2332">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2333">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4134,7 +4134,7 @@
   <pre class="var-usage"><div><code>(nthnext coll n)</code><code class="hide">^Seq (nthnext ^Seqable coll ^Number n)</code></div>
 </pre>
   <p class="var-docstr">Returns the nth next of coll, (seq coll) when n is 0.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1928">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1929">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4144,7 +4144,7 @@
   <pre class="var-usage"><div><code>(nthrest coll n)</code><code class="hide">^Seq (nthrest ^Seqable coll ^Number n)</code></div>
 </pre>
   <p class="var-docstr">Returns the nth rest of coll, coll when n is 0.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1937">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1938">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4154,7 +4154,7 @@
   <pre class="var-usage"><div><code>(num x)</code><code class="hide">^Number (num ^Number x)</code></div>
 </pre>
   <p class="var-docstr">Coerce to Number</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2031">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2032">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4164,7 +4164,7 @@
   <pre class="var-usage"><div><code>(number? x)</code><code class="hide">^Boolean (number? x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if x is a Number</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2052">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2053">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4174,7 +4174,7 @@
   <pre class="var-usage"><div><code>(numerator r)</code><code class="hide">^Number (numerator ^Ratio r)</code></div>
 </pre>
   <p class="var-docstr">Returns the numerator part of a Ratio.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2072">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2073">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4215,7 +4215,7 @@
   <p class="var-docstr">Takes a function f and fewer than the normal arguments to f, and<br>
   returns a fn that takes a variable number of additional args. When<br>
   called, the returned function calls f with args + additional args.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1592">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1593">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4231,7 +4231,7 @@
   do not overlap. If a pad collection is supplied, use its elements as<br>
   necessary to complete last partition upto n items. In case there are<br>
   not enough padding elements, return a partition with less than n items.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1946">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1947">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4243,7 +4243,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of lists like partition, but may include<br>
   partitions with fewer than n items at the end.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3898">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3899">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4254,7 +4254,7 @@
 </pre>
   <p class="var-docstr">Applies f to each value in coll, splitting it each time f returns a<br>
   new value.  Returns a lazy seq of partitions.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4016">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4017">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4308,7 +4308,7 @@
   <pre class="var-usage"><div><code>(pprint x)</code><code class="hide">^Nil (pprint x)</code></div>
 </pre>
   <p class="var-docstr">Pretty prints x to the output stream that is the current value of *out*.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2125">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2126">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4321,7 +4321,7 @@
          of *out*.  Prints the object(s), separated by spaces if there is<br>
          more than one.  By default, pr and prn print in a way that objects<br>
          can be read by the reader</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2115">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2116">source</a>
   
 </li>
 <li>
@@ -4331,7 +4331,7 @@
   <pre class="var-usage"><div><code>(pr-err &amp; xs)</code><code class="hide">^Nil (pr-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">pr to *err*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2875">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2876">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4341,7 +4341,7 @@
   <pre class="var-usage"><div><code>(pr-str &amp; xs)</code><code class="hide">^String (pr-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">pr to a string, returning it</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2847">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2848">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4352,7 +4352,7 @@
 </pre>
   <p class="var-docstr">Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y<br>
    when there is a conflict</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4467">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4468">source</a>
   
 </li>
 <li>
@@ -4362,7 +4362,7 @@
   <pre class="var-usage"><div><code>(prefers multifn)</code><code class="hide">^Map (prefers multifn)</code></div>
 </pre>
   <p class="var-docstr">Given a multimethod, returns a map of preferred value -&gt; set of other values</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4494">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4495">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4373,7 +4373,7 @@
 </pre>
   <p class="var-docstr">Prints the object(s) to the output stream that is the current value<br>
   of *out*.  print and println produce output for human consumption.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2162">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2163">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4383,7 +4383,7 @@
   <pre class="var-usage"><div><code>(print-err &amp; xs)</code><code class="hide">^Nil (print-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">print to *err*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2889">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2890">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4393,7 +4393,7 @@
   <pre class="var-usage"><div><code>(print-str &amp; xs)</code><code class="hide">^String (print-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">print to a string, returning it</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2861">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2862">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4403,7 +4403,7 @@
   <pre class="var-usage"><div><code>(printf fmt &amp; args)</code><code class="hide">^Nil (printf ^String fmt &amp; args)</code></div>
 </pre>
   <p class="var-docstr">Prints formatted output, as per format</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3161">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3162">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4413,7 +4413,7 @@
   <pre class="var-usage"><div><code>(println &amp; more)</code><code class="hide">^Nil (println &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Same as print followed by (newline)</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2170">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2171">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4423,7 +4423,7 @@
   <pre class="var-usage"><div><code>(println-err &amp; xs)</code><code class="hide">^Nil (println-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">println to *err*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2896">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2897">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4433,7 +4433,7 @@
   <pre class="var-usage"><div><code>(println-str &amp; xs)</code><code class="hide">^String (println-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">println to a string, returning it</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2868">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2869">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4443,7 +4443,7 @@
   <pre class="var-usage"><div><code>(prn &amp; more)</code><code class="hide">^Nil (prn &amp; more)</code></div>
 </pre>
   <p class="var-docstr">Same as pr followed by (newline). Observes *flush-on-newline*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2153">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2154">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4453,7 +4453,7 @@
   <pre class="var-usage"><div><code>(prn-err &amp; xs)</code><code class="hide">^Nil (prn-err &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">prn to *err*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2882">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2883">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4463,7 +4463,7 @@
   <pre class="var-usage"><div><code>(prn-str &amp; xs)</code><code class="hide">^String (prn-str &amp; xs)</code></div>
 </pre>
   <p class="var-docstr">prn to a string, returning it</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2854">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2855">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4515,7 +4515,7 @@
 </pre>
   <p class="var-docstr">Returns a random floating point number between 0 (inclusive) and<br>
   n (default 1) (exclusive).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2992">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2993">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4525,7 +4525,7 @@
   <pre class="var-usage"><div><code>(rand-int n)</code><code class="hide">^Int (rand-int ^Number n)</code></div>
 </pre>
   <p class="var-docstr">Returns a random integer between 0 (inclusive) and n (exclusive).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2999">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3000">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4537,7 +4537,7 @@
   <p class="var-docstr">Return a random element of the (sequential) collection. Will have<br>
   the same performance characteristics as nth for the given<br>
   collection.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4052">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4053">source</a>
   
 </li>
 <li>
@@ -4548,7 +4548,7 @@
 </pre>
   <p class="var-docstr">Returns items from coll with random probability of prob (0.0 -<br>
   1.0).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4326">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4327">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4564,7 +4564,7 @@
   (exclusive), by step, where start defaults to 0, step to 1, and end to<br>
   infinity. When step is equal to 0, returns an infinite sequence of<br>
   start. When start is equal to end, returns empty list.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1800">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1801">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4574,7 +4574,7 @@
   <pre class="var-usage"><div><code>(ratio? n)</code><code class="hide">^Boolean (ratio? n)</code></div>
 </pre>
   <p class="var-docstr">Returns true if n is a Ratio</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2067">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2068">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4584,7 +4584,7 @@
   <pre class="var-usage"><div><code>(rational? n)</code><code class="hide">^Boolean (rational? n)</code></div>
 </pre>
   <p class="var-docstr">Returns true if n is a rational number</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2095">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2096">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4594,7 +4594,7 @@
   <pre class="var-usage"><div><code>(re-find re s)</code><code class="hide">(re-find ^Regex re ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns the leftmost regex match, if any, of string to pattern.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2975">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2976">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4604,7 +4604,7 @@
   <pre class="var-usage"><div><code>(re-matches re s)</code><code class="hide">(re-matches ^Regex re ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns the match, if any, of string to pattern.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2981">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2982">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4614,7 +4614,7 @@
   <pre class="var-usage"><div><code>(re-pattern s)</code><code class="hide">^Regex (re-pattern s)</code></div>
 </pre>
   <p class="var-docstr">Returns an instance of Regex</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2960">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2961">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4624,7 +4624,7 @@
   <pre class="var-usage"><div><code>(re-seq re s)</code><code class="hide">^Seq (re-seq ^Regex re ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns a sequence of successive matches of pattern in string</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2969">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2970">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4635,7 +4635,7 @@
 <div><code>(read reader)</code></div>
 </pre>
   <p class="var-docstr">Reads the next object from reader (defaults to *in*)</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2177">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2178">source</a>
   
 </li>
 <li>
@@ -4645,7 +4645,7 @@
   <pre class="var-usage"><div><code>(read-line)</code></div>
 </pre>
   <p class="var-docstr">Reads the next line from *in*. Returns nil if an error (such as EOF) is detected.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2183">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2184">source</a>
   
 </li>
 <li>
@@ -4655,7 +4655,7 @@
   <pre class="var-usage"><div><code>(read-string s)</code></div>
 </pre>
   <p class="var-docstr">Reads one object from the string s.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2190">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2191">source</a>
   
 </li>
 <li>
@@ -4665,7 +4665,7 @@
   <pre class="var-usage"><div><code>(realized? x)</code><code class="hide">^Boolean (realized? ^Pending x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if a value has been produced for a delay or lazy sequence.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4222">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4223">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4699,7 +4699,7 @@
   2nd key and value, etc. If coll contains no entries, returns init<br>
   and f is not called. Note that reduce-kv is supported on vectors,<br>
   where the keys will be the ordinals.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1361">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1362">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4711,7 +4711,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy seq of the intermediate values of the reduction (as<br>
   per reduce) of coll by f, starting with init.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4037">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4038">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4734,7 +4734,7 @@
   select a subset, via inclusion or exclusion, or to provide a mapping<br>
   to a symbol different from the var&#39;s name, in order to prevent<br>
   clashes. Use :use in the ns macro in preference to calling this directly.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2385">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2386">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4744,7 +4744,7 @@
   <pre class="var-usage"><div><code>(refer-clojure &amp; filters)</code></div>
 </pre>
   <p class="var-docstr">Same as (refer &#39;joker.core &lt;filters&gt;)</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3210">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3211">source</a>
   
 </li>
 <li>
@@ -4765,7 +4765,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of the items in coll for which<br>
   (pred item) returns false. pred must be free of side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1703">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1704">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4775,7 +4775,7 @@
   <pre class="var-usage"><div><code>(remove-all-methods multifn)</code></div>
 </pre>
   <p class="var-docstr">Removes all of the methods of multimethod.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4452">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4453">source</a>
   
 </li>
 <li>
@@ -4785,7 +4785,7 @@
   <pre class="var-usage"><div><code>(remove-method multifn dispatch-val)</code></div>
 </pre>
   <p class="var-docstr">Removes the method of multimethod associated with dispatch-value.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4461">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4462">source</a>
   
 </li>
 <li>
@@ -4796,7 +4796,7 @@
 </pre>
   <p class="var-docstr">Removes the namespace named by the symbol. Use with caution.<br>
   Cannot be used to remove the clojure namespace.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2290">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2291">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4807,7 +4807,7 @@
 <div><code>(repeat n x)</code><code class="hide">^Seq (repeat ^Number n x)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy (infinite!, or length n if supplied) sequence of xs.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1789">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1790">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4820,7 +4820,7 @@
   <p class="var-docstr">Takes a function of no args, presumably with side effects, and<br>
   returns an infinite (or length n if supplied) lazy sequence of calls<br>
   to it</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3107">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3108">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4832,7 +4832,7 @@
   <p class="var-docstr">Given a map of replacement pairs and a vector/collection, returns a<br>
   vector/seq with any elements = a key in smap replaced with the<br>
   corresponding val in smap.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3093">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3094">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4902,7 +4902,7 @@
   abbreviated as &#39;s&#39;.<br>
 <br>
   (require &#39;(clojure zip [set :as s]))</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3439">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3440">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4913,7 +4913,7 @@
 </pre>
   <p class="var-docstr">Resolves namespace-qualified sym per &#39;resolve&#39;. If initial resolve<br>
   fails, attempts to require sym&#39;s namespace and retries.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3506">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3507">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4924,7 +4924,7 @@
 </pre>
   <p class="var-docstr">Sets the value of atom to newval without regard for the<br>
   current value. Returns newval.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1490">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1491">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4934,7 +4934,7 @@
   <pre class="var-usage"><div><code>(reset-meta! ref metadata-map)</code><code class="hide">(reset-meta! ^Ref ref ^Map metadata-map)</code></div>
 </pre>
   <p class="var-docstr">Atomically resets the metadata for a namespace/var/atom</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1514">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1515">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4945,7 +4945,7 @@
 </pre>
   <p class="var-docstr">Sets the value of atom to newval. Returns [old new], the value of the<br>
   atom before and after the reset.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1497">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1498">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4956,7 +4956,7 @@
 <div><code>(resolve env sym)</code><code class="hide">^Var (resolve ^Gettable env ^Symbol sym)</code></div>
 </pre>
   <p class="var-docstr">Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2499">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2500">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4987,7 +4987,7 @@
   <pre class="var-usage"><div><code>(reversible? coll)</code><code class="hide">^Boolean (reversible? coll)</code></div>
 </pre>
   <p class="var-docstr">Returns true if coll implements Reversible</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3660">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3661">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5009,7 +5009,7 @@
 </pre>
   <p class="var-docstr">Runs the supplied procedure (via reduce), for purposes of side<br>
   effects, on successive items in the collection. Returns nil.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4333">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4334">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5060,7 +5060,7 @@
   <pre class="var-usage"><div><code>(seqable? x)</code><code class="hide">^Boolean (seqable? x)</code></div>
 </pre>
   <p class="var-docstr">Return true if the seq function is supported for x</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3627">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3628">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5071,7 +5071,7 @@
 </pre>
   <p class="var-docstr">Coerces coll to a (possibly empty) sequence, if it is not already<br>
   one. Will not force a lazy seq. (sequence nil) yields ()</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1607">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1608">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5081,7 +5081,7 @@
   <pre class="var-usage"><div><code>(sequential? coll)</code><code class="hide">^Boolean (sequential? coll)</code></div>
 </pre>
   <p class="var-docstr">Returns true if coll implements Sequential</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3650">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3651">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5091,7 +5091,7 @@
   <pre class="var-usage"><div><code>(set coll)</code><code class="hide">^MapSet (set ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a set of the distinct elements of coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2261">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2262">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5101,7 +5101,7 @@
   <pre class="var-usage"><div><code>(set? x)</code><code class="hide">^Boolean (set? x)</code></div>
 </pre>
   <p class="var-docstr">Returns true if x implements Set</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2256">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2257">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5111,7 +5111,7 @@
   <pre class="var-usage"><div><code>(shuffle coll)</code><code class="hide">^Vector (shuffle coll)</code></div>
 </pre>
   <p class="var-docstr">Return a random permutation of coll</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4060">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4061">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5153,7 +5153,7 @@
   <p class="var-docstr">Opens file f and reads all its contents, returning a string.<br>
   f can be a string (filename) or a reader object like *in* or<br>
   the one returned by joker.os/open.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3978">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3979">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5166,7 +5166,7 @@
   else nil.  One common idiom is to use a set as pred, for example<br>
   this will return :fred if :fred is in the sequence, otherwise nil:<br>
   (some #{:fred} coll)</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1635">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1636">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5177,7 +5177,7 @@
 </pre>
   <p class="var-docstr">When expr is not nil, threads it into the first form (via -&gt;),<br>
   and when that result is not nil, through the next etc.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4285">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4286">source</a>
   
 </li>
 <li>
@@ -5188,7 +5188,7 @@
 </pre>
   <p class="var-docstr">When expr is not nil, threads it into the first form (via -&gt;&gt;),<br>
   and when that result is not nil, through the next etc.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4301">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4302">source</a>
   
 </li>
 <li>
@@ -5204,7 +5204,7 @@
   returned by one of its composing predicates against any of its arguments, else it returns<br>
   logical false. Note that f is short-circuiting in that it will stop execution on the first<br>
   argument that triggers a logical true result against the original predicates.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4159">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4160">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5226,7 +5226,7 @@
 </pre>
   <p class="var-docstr">Returns a sorted sequence of the items in coll. If no comparator is<br>
   supplied, uses compare.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1880">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1881">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5239,7 +5239,7 @@
   <p class="var-docstr">Returns a sorted sequence of the items in coll, where the sort<br>
   order is determined by comparing (keyfn item).  If no comparator is<br>
   supplied, uses compare.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1889">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1890">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5249,7 +5249,7 @@
   <pre class="var-usage"><div><code>(special-symbol? s)</code><code class="hide">^Boolean (special-symbol? s)</code></div>
 </pre>
   <p class="var-docstr">Returns true if s names a special form</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3045">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3046">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5262,7 +5262,7 @@
   closes f.<br>
   f can be a string (filename) or a writer object like *out* or<br>
   the one returned by joker.os/create.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3986">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3987">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5272,7 +5272,7 @@
   <pre class="var-usage"><div><code>(split-at n coll)</code><code class="hide">^Vector (split-at ^Number n ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a vector of [(take n coll) (drop n coll)]</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1777">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1778">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5282,7 +5282,7 @@
   <pre class="var-usage"><div><code>(split-with pred coll)</code><code class="hide">^Vector (split-with ^Callable pred ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a vector of [(take-while pred coll) (drop-while pred coll)]</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1783">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1784">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5316,7 +5316,7 @@
 </pre>
   <p class="var-docstr">Returns the substring of s beginning at start inclusive, and ending<br>
   at end (defaults to length of string), exclusive.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3056">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3057">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5331,7 +5331,7 @@
   defaults to (count vector). This operation is O(1) and very fast, as<br>
   the resulting vector shares structure with the original and no<br>
   trimming is done.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2196">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2197">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5343,7 +5343,7 @@
   <p class="var-docstr">Atomically swaps the value of atom to be:<br>
   (apply f current-value-of-atom args).<br>
   Returns the value that was swapped in.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1473">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1474">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5356,7 +5356,7 @@
   (apply f current-value-of-atom args). Note that f may be called<br>
   multiple times, and thus should be free of side effects.<br>
   Returns [old new], the value of the atom before and after the swap.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1481">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1482">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5388,7 +5388,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of the first n items in coll, or all items if<br>
   there are fewer than n.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1710">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1711">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5399,7 +5399,7 @@
 </pre>
   <p class="var-docstr">Returns a seq of the last n items in coll.  Depending on the type<br>
   of coll may be no better than linear time.  For vectors, see also subvec.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1747">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1748">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5409,7 +5409,7 @@
   <pre class="var-usage"><div><code>(take-nth n coll)</code><code class="hide">^Seq (take-nth ^Number n ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns a lazy seq of every nth item in coll.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2461">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2462">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5420,7 +5420,7 @@
 </pre>
   <p class="var-docstr">Returns a lazy sequence of successive items from coll while<br>
   (pred item) returns true. pred must be free of side-effects.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1720">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1721">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5431,7 +5431,7 @@
 </pre>
   <p class="var-docstr">test [v] finds fn at key :test in var metadata and calls it,<br>
   presuming failure will throw exception</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2950">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2951">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5443,7 +5443,7 @@
   <p class="var-docstr">If passed a namespace, returns it. Else, when passed a symbol,<br>
   returns the namespace named by it, throwing an exception if not<br>
   found.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2301">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2302">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5453,7 +5453,7 @@
   <pre class="var-usage"><div><code>(time expr)</code></div>
 </pre>
   <p class="var-docstr">Evaluates expr and prints the time it took.  Returns the value of expr.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2223">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2224">source</a>
   
 </li>
 <li>
@@ -5470,7 +5470,7 @@
   returns that non-fn value. Note that if you want to return a fn as a<br>
   final value, you must wrap it in some data structure and unpack it<br>
   after trampoline returns.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3690">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3691">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5485,7 +5485,7 @@
   arg that returns a sequence of the children. Will only be called on<br>
   nodes for which branch? returns true. Root is the root node of the<br>
   tree.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3010">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3011">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5505,7 +5505,7 @@
   <pre class="var-usage"><div><code>(type x)</code><code class="hide">^Type (type x)</code></div>
 </pre>
   <p class="var-docstr">Returns the :type metadata of x, or its Type if none</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1355">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1356">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5532,7 +5532,7 @@
   key and f is a function that will take the old value<br>
   and any supplied args and return the new value, and returns a new<br>
   structure.  If the key does not exist, nil is passed as the old value.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3600">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3601">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5546,7 +5546,7 @@
   and any supplied args and return the new value, and returns a new<br>
   nested structure.  If any levels do not exist, hash-maps will be<br>
   created.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3587">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3588">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5562,7 +5562,7 @@
   &#39;use accepts additional options in libspecs: :exclude, :only, :rename.<br>
   The arguments and semantics for :exclude, :only, and :rename are the same<br>
   as those documented for joker.core/refer.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3517">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3518">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5592,7 +5592,7 @@
   <pre class="var-usage"><div><code>(var-get x)</code><code class="hide">(var-get ^Var x)</code></div>
 </pre>
   <p class="var-docstr">Gets the value in the var object</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1381">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1382">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5602,7 +5602,7 @@
   <pre class="var-usage"><div><code>(var-set x val)</code><code class="hide">(var-set ^Var x val)</code></div>
 </pre>
   <p class="var-docstr">Sets the value in the var object to val.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1386">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1387">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5612,7 +5612,7 @@
   <pre class="var-usage"><div><code>(var? v)</code><code class="hide">^Boolean (var? v)</code></div>
 </pre>
   <p class="var-docstr">Returns true if v is of type Var</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3051">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3052">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5675,7 +5675,7 @@
   <p class="var-docstr">bindings =&gt; x xs<br>
 <br>
   Roughly the same as (when (seq xs) (let [x (first xs)] body)) but xs is evaluated only once</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2751">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2752">source</a>
   
 </li>
 <li>
@@ -5710,7 +5710,7 @@
 <br>
   When test is not nil, evaluates body with binding-form bound to the<br>
   value of test</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1332">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1333">source</a>
   
 </li>
 <li>
@@ -5721,7 +5721,7 @@
 </pre>
   <p class="var-docstr">Repeatedly executes body while test expression is true. Presumes<br>
   some side-effect will cause test to become false/nil. Returns nil</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3707">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3708">source</a>
   
 </li>
 <li>
@@ -5733,7 +5733,7 @@
   <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>
   Then executes body. Resets the vars back to the original<br>
   values after body was evaluated. Returns the value of body.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1418">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1419">source</a>
   
 </li>
 <li>
@@ -5745,7 +5745,7 @@
   <p class="var-docstr">Takes a map of Var/value pairs. Sets the vars to the corresponding values.<br>
   Then calls f with the supplied arguments. Resets the vars back to the original<br>
   values after f returned. Returns whatever f returns.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1400">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1401">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5756,7 +5756,7 @@
 </pre>
   <p class="var-docstr">Evaluates body in a context in which *in* is bound to a fresh<br>
   Buffer initialized with the string s.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2839">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2840">source</a>
   
 </li>
 <li>
@@ -5779,7 +5779,7 @@
   <p class="var-docstr">Evaluates exprs in a context in which *out* is bound to a fresh<br>
   Buffer.  Returns the string created by any nested printing<br>
   calls.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2829">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L2830">source</a>
   
 </li>
 <li>
@@ -5789,7 +5789,7 @@
   <pre class="var-usage"><div><code>(with-redefs bindings &amp; body)</code></div>
 </pre>
   <p class="var-docstr">The same as binding</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1447">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1448">source</a>
   
 </li>
 <li>
@@ -5799,7 +5799,7 @@
   <pre class="var-usage"><div><code>(with-redefs-fn binding-map f &amp; args)</code></div>
 </pre>
   <p class="var-docstr">The same as with-bindings*</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1412">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1413">source</a>
   
 </li>
 <li>
@@ -5809,7 +5809,7 @@
   <pre class="var-usage"><div><code>(xml-seq root)</code><code class="hide">^Seq (xml-seq root)</code></div>
 </pre>
   <p class="var-docstr">A tree seq on the xml elements as per xml/parse</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3036">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3037">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -5829,7 +5829,7 @@
   <pre class="var-usage"><div><code>(zipmap keys vals)</code><code class="hide">^Map (zipmap ^Seqable keys ^Seqable vals)</code></div>
 </pre>
   <p class="var-docstr">Returns a map with the keys mapped to the corresponding vals.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1845">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L1846">source</a>
   <a href="#" class="types">show types</a>
 </li>
 
