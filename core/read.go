@@ -471,7 +471,7 @@ func readRegex(reader *Reader) Object {
 		}
 		if FORMAT_MODE {
 			res := MakeReadObject(reader, MakeString(s))
-			res.GetInfo().prefix = "#"
+			addPrefix(res, "#")
 			return res
 		}
 		panic(MakeReadError(reader, "Invalid regex: "+err.Error()))
@@ -904,7 +904,7 @@ func handleNoReaderError(reader *Reader, s Symbol) Object {
 func readTagged(reader *Reader) Object {
 	obj := readFirst(reader)
 	if FORMAT_MODE {
-		obj.GetInfo().prefix = "#"
+		addPrefix(obj, "#")
 		return obj
 	}
 	switch s := obj.(type) {
@@ -941,9 +941,9 @@ func readConditional(reader *Reader) (Object, bool) {
 	cond := readList(reader).(*List)
 	if FORMAT_MODE {
 		if isSplicing {
-			cond.GetInfo().prefix = "#?@"
+			addPrefix(cond, "#?@")
 		} else {
-			cond.GetInfo().prefix = "#?"
+			addPrefix(cond, "#?")
 		}
 		return cond, false
 	}
@@ -1020,7 +1020,7 @@ func readNamespacedMap(reader *Reader) Object {
 	}
 	if FORMAT_MODE {
 		obj := readMap(reader)
-		obj.GetInfo().prefix = namespacedMapPrefix(auto, sym)
+		addPrefix(obj, namespacedMapPrefix(auto, sym))
 		return obj
 	}
 	var nsname string
@@ -1065,7 +1065,7 @@ func readDispatch(reader *Reader) (Object, bool) {
 		popPos()
 		nextObj := readFirst(reader)
 		if FORMAT_MODE {
-			nextObj.GetInfo().prefix = "#'"
+			addPrefix(nextObj, "#'")
 			return nextObj, false
 		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS._var), nextObj)), false
@@ -1074,13 +1074,13 @@ func readDispatch(reader *Reader) (Object, bool) {
 		// eatWhitespaces eats #_
 		popPos()
 		nextObj := readFirst(reader)
-		nextObj.GetInfo().prefix = "#_"
+		addPrefix(nextObj, "#_")
 		return nextObj, false
 	case '^':
 		popPos()
 		if FORMAT_MODE {
 			nextObj := readFirst(reader)
-			nextObj.GetInfo().prefix = "#^"
+			addPrefix(nextObj, "#^")
 			return nextObj, false
 		}
 		return readWithMeta(reader), false
@@ -1091,7 +1091,7 @@ func readDispatch(reader *Reader) (Object, bool) {
 		reader.Unget()
 		if FORMAT_MODE {
 			nextObj := readFirst(reader)
-			nextObj.GetInfo().prefix = "#"
+			addPrefix(nextObj, "#")
 			return nextObj, false
 		}
 		ARGS = make(map[int]Symbol)
@@ -1130,6 +1130,10 @@ func readFirst(reader *Reader) Object {
 		return readFirst(reader)
 	}
 	return v.at(0)
+}
+
+func addPrefix(obj Object, prefix string) {
+	obj.GetInfo().prefix = prefix + obj.GetInfo().prefix
 }
 
 func Read(reader *Reader) (Object, bool) {
@@ -1175,7 +1179,7 @@ func Read(reader *Reader) (Object, bool) {
 		popPos()
 		nextObj := readFirst(reader)
 		if FORMAT_MODE {
-			nextObj.GetInfo().prefix = "'"
+			addPrefix(nextObj, "'")
 			return nextObj, false
 		}
 		return makeQuote(nextObj, SYMBOLS.quote), false
@@ -1183,7 +1187,7 @@ func Read(reader *Reader) (Object, bool) {
 		popPos()
 		nextObj := readFirst(reader)
 		if FORMAT_MODE {
-			nextObj.GetInfo().prefix = "@"
+			addPrefix(nextObj, "@")
 			return nextObj, false
 		}
 		return DeriveReadObject(nextObj, NewListFrom(DeriveReadObject(nextObj, SYMBOLS.deref), nextObj)), false
@@ -1193,14 +1197,14 @@ func Read(reader *Reader) (Object, bool) {
 			reader.Get()
 			nextObj := readFirst(reader)
 			if FORMAT_MODE {
-				nextObj.GetInfo().prefix = "~@"
+				addPrefix(nextObj, "~@")
 				return nextObj, false
 			}
 			return makeQuote(nextObj, SYMBOLS.unquoteSplicing), false
 		}
 		nextObj := readFirst(reader)
 		if FORMAT_MODE {
-			nextObj.GetInfo().prefix = "~"
+			addPrefix(nextObj, "~")
 			return nextObj, false
 		}
 		return makeQuote(nextObj, SYMBOLS.unquote), false
@@ -1208,7 +1212,7 @@ func Read(reader *Reader) (Object, bool) {
 		popPos()
 		nextObj := readFirst(reader)
 		if FORMAT_MODE {
-			nextObj.GetInfo().prefix = "`"
+			addPrefix(nextObj, "`")
 			return nextObj, false
 		}
 		return makeSyntaxQuote(nextObj, make(map[*string]Symbol), reader), false
@@ -1216,7 +1220,7 @@ func Read(reader *Reader) (Object, bool) {
 		popPos()
 		if FORMAT_MODE {
 			nextObj := readFirst(reader)
-			nextObj.GetInfo().prefix = "^"
+			addPrefix(nextObj, "^")
 			return nextObj, false
 		}
 		return readWithMeta(reader), false

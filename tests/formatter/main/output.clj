@@ -161,6 +161,8 @@
 
 `(if-not ~test ~then nil)
 
+`(~'t)
+
 (defmacro and
   "Evaluates exprs one at a time, from left to right. If a form
   returns logical false (nil or false), and returns that value and

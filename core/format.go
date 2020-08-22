@@ -106,9 +106,9 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 	return newIndent + 1
 }
 
-var defRegex *regexp.Regexp = regexp.MustCompile("def.*")
-var ifRegex *regexp.Regexp = regexp.MustCompile("if(-.+)?")
-var whenRegex *regexp.Regexp = regexp.MustCompile("when(-.+)?")
+var defRegex *regexp.Regexp = regexp.MustCompile("^def.*$")
+var ifRegex *regexp.Regexp = regexp.MustCompile("^if(-.+)?$")
+var whenRegex *regexp.Regexp = regexp.MustCompile("^when(-.+)?$")
 var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
 	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|go|condp|when|while|when-not|when-first|do|future|thread)$"),
 	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
