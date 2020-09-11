@@ -1599,7 +1599,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 					symNs := ctx.GlobalEnv.NamespaceFor(ctx.GlobalEnv.CurrentNamespace(), sym)
 					if !ctx.isUnknownCallableScope {
 						if symNs == nil || symNs == ctx.GlobalEnv.CurrentNamespace() {
-							printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
+							printParseError(GetPosition(obj), "Unable to resolve symbol: "+sym.ToString(false))
 						}
 					}
 					vr = InternFakeSymbol(symNs, sym)
@@ -1805,7 +1805,7 @@ func parseSymbol(obj Object, ctx *ParseContext) Expr {
 		}
 		if !ctx.isUnknownCallableScope {
 			if ctx.linterBindings.GetBinding(sym) == nil {
-				printParseError(obj.GetInfo().Pos(), "Unable to resolve symbol: "+sym.ToString(false))
+				printParseError(GetPosition(obj), "Unable to resolve symbol: "+sym.ToString(false))
 			}
 		}
 	}
