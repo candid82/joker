@@ -2,7 +2,7 @@
 
 # Library Loader Behavior
 
-Joker's library (namespace) loader (`joker.core/load`), used by `(ns ... :require ...)` and related macros and functions, normally assumes that namespaces' names correspond to their location in the filesystem. (See [Organizing Libraries (Namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md) for how to change this behavior.)
+Joker's library (namespace) loader (`joker.core/load`), used by `(ns ... :require ...)` and related macros and functions, normally assumes that namespaces' names correspond to their location in the filesystem. (See [Organizing Libraries (Namespaces)](../../LIBRARIES.md) for how to change this behavior.)
 
 Specifically, the last part of the namespace (after the last dot) should match the file name (without the `.joke` extension), and the preceding parts correspond to the path to the file (with dots separating directories).
 

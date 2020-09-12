@@ -22,7 +22,7 @@ Joker also keeps track of the pathname for the file currently being read and eva
 
 So, if `/Users/somebody/mylibs/a/b/c.joke` is currently running as namespace `a.b.c`, and seeks to load the namespace `d.e`, the last three components (corresponding to `a`, `b`, and `c` of the current namespace) are removed from the current pathname, and the new subpath (`d/e.joke`) is appended, yielding `/Users/somebody/mylibs/d/e.joke`.
 
-For more information on this default behavior, see [Library Loader Behavior](https://github.com/candid82/joker/blob/master/docs/misc/lib-loader.md).
+For more information on this default behavior, see [Library Loader Behavior](docs/misc/lib-loader.md).
 
 ## The \*classpath\* Variable
 
@@ -142,6 +142,6 @@ TBD.
 
 `(doc joker.core/*classpath*)`
 
-[Library Loader Behavior](https://github.com/candid82/joker/blob/master/docs/misc/lib-loader.md)
+[Library Loader Behavior](docs/misc/lib-loader.md)
 
 [Dependency Management](https://github.com/candid82/joker/issues/208)
