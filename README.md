@@ -57,9 +57,9 @@ Dash docset: `dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fj
 
 [Joker slack channel](https://clojurians.slack.com/messages/C9VURUUNL/)
 
-[Organizing libraries (namespaces)](https://github.com/candid82/joker/blob/master/LIBRARIES.md)
+[Organizing libraries (namespaces)](LIBRARIES.md)
 
-[Developer notes](https://github.com/candid82/joker/blob/master/DEVELOPER.md)
+[Developer notes](DEVELOPER.md)
 
 ## Project goals
 
@@ -313,7 +313,7 @@ Since Linux (on **amd64**) supports building _and running_ 32-bit (**386**) exec
 
 ## Developer Notes
 
-See [`DEVELOPER.md`](https://github.com/candid82/joker/blob/master/DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
+See [`DEVELOPER.md`](DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
 ## Contributors
 
