@@ -1,0 +1,195 @@
+;   Copyright (c) Rich Hickey. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+; Author: Stephen C. Gilardi
+
+(ns joker.test-joker.reader
+  (:require [joker.test :refer [deftest is are]]))
+
+;; Symbols
+
+(deftest Symbols
+  (is (= 'abc (symbol "abc")))
+  (is (= '*+!-_? (symbol "*+!-_?")))
+  (is (= 'abc:def:ghi (symbol "abc:def:ghi")))
+  (is (= 'abc/def (symbol "abc" "def")))
+  (is (= 'abc.def/ghi (symbol "abc.def" "ghi")))
+  (is (= 'abc/def.ghi (symbol "abc" "def.ghi")))
+  (is (= 'abc:def/ghi:jkl.mno (symbol "abc:def" "ghi:jkl.mno")))
+  (is (instance? Symbol 'alphabet))
+  )
+
+;; Literals
+
+(deftest Literals
+  ; 'nil 'false 'true are reserved by Clojure and are not symbols
+  (is (= 'nil nil))
+  (is (= 'false false))
+  (is (= 'true true)) )
+
+;; Numbers
+
+(deftest Numbers
+
+  ; Read Integer
+  (is (instance? Int 2147483647))
+  (is (instance? Int +1))
+  (is (instance? Int 1))
+  (is (instance? Int +0))
+  (is (instance? Int 0))
+  (is (instance? Int -0))
+  (is (instance? Int -1))
+  (is (instance? Int -2147483648))
+
+  ;; Numeric constants of different types don't wash out. Regression fixed in
+  ;; r1157. Previously the compiler saw 0 and 0.0 as the same constant and
+  ;; caused the sequence to be built of Doubles.
+  (let [x 0.0]
+    (let [sequence (loop [i 0 l '()]
+                     (if (< i 5)
+                       (recur (inc i) (conj l i))
+                       l))]
+      (is (= [4 3 2 1 0] sequence))
+      (is (every? #(instance? Int %)
+                  sequence))))
+
+  ; Read BigInteger
+  (is (instance? BigInt 9223372036854775808))
+  (is (instance? BigInt -9223372036854775809))
+  (is (instance? BigInt 10000000000000000000000000000000000000000000000000))
+  (is (instance? BigInt -10000000000000000000000000000000000000000000000000))
+
+  ; Read Double
+  (is (instance? Double +1.0e+1))
+  (is (instance? Double +1.e+1))
+  (is (instance? Double +1e+1))
+
+  (is (instance? Double +1.0e1))
+  (is (instance? Double +1.e1))
+  (is (instance? Double +1e1))
+
+  (is (instance? Double +1.0e-1))
+  (is (instance? Double +1.e-1))
+  (is (instance? Double +1e-1))
+
+  (is (instance? Double 1.0e+1))
+  (is (instance? Double 1.e+1))
+  (is (instance? Double 1e+1))
+
+  (is (instance? Double 1.0e1))
+  (is (instance? Double 1.e1))
+  (is (instance? Double 1e1))
+
+  (is (instance? Double 1.0e-1))
+  (is (instance? Double 1.e-1))
+  (is (instance? Double 1e-1))
+
+  (is (instance? Double -1.0e+1))
+  (is (instance? Double -1.e+1))
+  (is (instance? Double -1e+1))
+
+  (is (instance? Double -1.0e1))
+  (is (instance? Double -1.e1))
+  (is (instance? Double -1e1))
+
+  (is (instance? Double -1.0e-1))
+  (is (instance? Double -1.e-1))
+  (is (instance? Double -1e-1))
+
+  (is (instance? Double +1.0))
+  (is (instance? Double +1.))
+
+  (is (instance? Double 1.0))
+  (is (instance? Double 1.))
+
+  (is (instance? Double +0.0))
+  (is (instance? Double +0.))
+
+  (is (instance? Double 0.0))
+  (is (instance? Double 0.))
+
+  (is (instance? Double -0.0))
+  (is (instance? Double -0.))
+
+  (is (instance? Double -1.0))
+  (is (instance? Double -1.))
+
+  (is (= (joker.math/inf 1) ##Inf))
+  (is (= (joker.math/inf -1) ##-Inf))
+  (is (and (instance? Double ##NaN) (joker.math/nan? ##NaN)))
+
+  ; Read BigDecimal
+  (is (instance? BigFloat 9223372036854775808M))
+  (is (instance? BigFloat -9223372036854775809M))
+  (is (instance? BigFloat 2147483647M))
+  (is (instance? BigFloat +1M))
+  (is (instance? BigFloat 1M))
+  (is (instance? BigFloat +0M))
+  (is (instance? BigFloat 0M))
+  (is (instance? BigFloat -0M))
+  (is (instance? BigFloat -1M))
+  (is (instance? BigFloat -2147483648M))
+
+  (is (instance? BigFloat +1.0e+1M))
+  (is (instance? BigFloat +1.e+1M))
+  (is (instance? BigFloat +1e+1M))
+
+  (is (instance? BigFloat +1.0e1M))
+  (is (instance? BigFloat +1.e1M))
+  (is (instance? BigFloat +1e1M))
+
+  (is (instance? BigFloat +1.0e-1M))
+  (is (instance? BigFloat +1.e-1M))
+  (is (instance? BigFloat +1e-1M))
+
+  (is (instance? BigFloat 1.0e+1M))
+  (is (instance? BigFloat 1.e+1M))
+  (is (instance? BigFloat 1e+1M))
+
+  (is (instance? BigFloat 1.0e1M))
+  (is (instance? BigFloat 1.e1M))
+  (is (instance? BigFloat 1e1M))
+
+  (is (instance? BigFloat 1.0e-1M))
+  (is (instance? BigFloat 1.e-1M))
+  (is (instance? BigFloat 1e-1M))
+
+  (is (instance? BigFloat -1.0e+1M))
+  (is (instance? BigFloat -1.e+1M))
+  (is (instance? BigFloat -1e+1M))
+
+  (is (instance? BigFloat -1.0e1M))
+  (is (instance? BigFloat -1.e1M))
+  (is (instance? BigFloat -1e1M))
+
+  (is (instance? BigFloat -1.0e-1M))
+  (is (instance? BigFloat -1.e-1M))
+  (is (instance? BigFloat -1e-1M))
+
+  (is (instance? BigFloat +1.0M))
+  (is (instance? BigFloat +1.M))
+
+  (is (instance? BigFloat 1.0M))
+  (is (instance? BigFloat 1.M))
+
+  (is (instance? BigFloat +0.0M))
+  (is (instance? BigFloat +0.M))
+
+  (is (instance? BigFloat 0.0M))
+  (is (instance? BigFloat 0.M))
+
+  (is (instance? BigFloat -0.0M))
+  (is (instance? BigFloat -0.M))
+
+  (is (instance? BigFloat -1.0M))
+  (is (instance? BigFloat -1.M))
+
+  (is (instance? Ratio 1/2))
+  (is (instance? Ratio -1/2))
+  (is (instance? Ratio +1/2))
+)

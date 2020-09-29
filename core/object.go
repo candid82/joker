@@ -996,7 +996,14 @@ func (bi *BigInt) Compare(other Object) int {
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
-	return bf.b.Text('g', -1) + "M"
+	b := bf.b
+	if b.IsInf() {
+		if b.Signbit() {
+			return "##-Inf"
+		}
+		return "##Inf"
+	}
+	return b.Text('g', -1) + "M"
 }
 
 func (bf *BigFloat) Equals(other interface{}) bool {
@@ -1069,7 +1076,17 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
-	res := fmt.Sprintf("%f", d.D)
+	dbl := d.D
+	if math.IsInf(dbl, 1) {
+		return "##Inf"
+	}
+	if math.IsInf(dbl, -1) {
+		return "##-Inf"
+	}
+	if math.IsNaN(dbl) {
+		return "##NaN"
+	}
+	res := fmt.Sprintf("%f", dbl)
 	var i int
 	for i = len(res) - 1; res[i] == '0'; i-- {
 	}
