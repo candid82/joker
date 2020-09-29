@@ -64,12 +64,21 @@ func isComment(obj Object) bool {
 	return info.prefix == "^" || info.prefix == "#^" || info.prefix == "#_"
 }
 
+func isComma(obj Object) bool {
+	if c, ok := obj.(Comment); ok && c.C == "," {
+		return true
+	}
+	return false
+}
+
 func maybeNewLine(w io.Writer, obj, nextObj Object, baseIndent, currentIndent int) int {
 	if writeNewLines(w, obj, nextObj) > 0 {
 		writeIndent(w, baseIndent)
 		return baseIndent
 	}
-	fmt.Fprint(w, " ")
+	if !isComma(nextObj) {
+		fmt.Fprint(w, " ")
+	}
 	return currentIndent + 1
 }
 

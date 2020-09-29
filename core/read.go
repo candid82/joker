@@ -184,6 +184,10 @@ func readComment(reader *Reader) Object {
 func eatWhitespace(reader *Reader) {
 	r := reader.Get()
 	for r != EOF {
+		if FORMAT_MODE && r == ',' {
+			reader.Unget()
+			break
+		}
 		if isWhitespace(r) {
 			r = reader.Get()
 			continue
@@ -1142,10 +1146,14 @@ func Read(reader *Reader) (Object, bool) {
 	pushPos(reader)
 	// This is only possible in format mode, otherwise
 	// eatWhitespace eats comments.
+	if r == ',' {
+		return MakeReadObject(reader, Comment{C: ","}), false
+	}
 	if r == ';' || (r == '#' && reader.Peek() == '!') {
 		reader.Unget()
 		return readComment(reader), false
 	}
+
 	switch {
 	case r == '\\':
 		return readCharacter(reader), false
