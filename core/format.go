@@ -205,14 +205,23 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 		for !seq.IsEmpty() {
 			seq, obj, _ = seqFirstAfterForcedBreak(seq, w, i+1)
 		}
-	} else if obj.Equals(SYMBOLS.fn) || obj.Equals(SYMBOLS.catch) {
+	} else if obj.Equals(SYMBOLS.catch) {
+		if !seq.IsEmpty() {
+			seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+			seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+		}
+	} else if obj.Equals(SYMBOLS.fn) {
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
 			case *Vector:
 				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+			case Symbol:
+				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			default:
-				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
-				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
+				if !isNewLine(obj, seq.First()) {
+					restIndent = i + 1
+				}
 			}
 		}
 	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
