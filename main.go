@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"math"
@@ -97,9 +98,26 @@ func processFile(filename string, phase Phase) error {
 		filename = ""
 	} else {
 		var err error
-		reader, err = NewReaderFromFile(filename)
+		f, err := os.Open(filename)
 		if err != nil {
+			fmt.Fprintln(Stderr, "Error: ", err)
 			return err
+		}
+		reader = NewReader(bufio.NewReader(f), filename)
+		if phase == FORMAT && writeFlag {
+			var b bytes.Buffer
+			oldStdout := Stdout
+			Stdout = &b
+			defer func() {
+				Stdout = oldStdout
+				f.Close()
+				f, err := os.Create(filename)
+				if err != nil {
+					fmt.Fprintln(Stderr, "Error: ", err)
+				}
+				f.WriteString(b.String())
+				f.Close()
+			}()
 		}
 	}
 	if filename != "" {
@@ -377,6 +395,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Read, but do not parse nor evaluate, the input.")
 	fmt.Fprintln(out, "  --format")
 	fmt.Fprintln(out, "    Format the source code and print it to standard output.")
+	fmt.Fprintln(out, "  --write")
+	fmt.Fprintln(out, "    Replace the file with the formatted source code. Must be used in conjunction with --format.")
 	fmt.Fprintln(out, "  --parse")
 	fmt.Fprintln(out, "    Read and parse, but do not evaluate, the input.")
 	fmt.Fprintln(out, "  --evaluate")
@@ -436,6 +456,7 @@ var (
 	noReplHistory            bool
 	exitToRepl               bool
 	errorToRepl              bool
+	writeFlag                bool
 )
 
 func isNumber(s string) bool {
@@ -508,6 +529,8 @@ func parseArgs(args []string) {
 			versionFlag = true
 		case "--format":
 			phase = FORMAT
+		case "--write":
+			writeFlag = true
 		case "--read":
 			phase = READ
 		case "--parse":
