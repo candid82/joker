@@ -1817,7 +1817,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	var res Expr
 	canHaveMeta := false
 	switch v := obj.(type) {
-	case Int, String, Char, Double, *BigInt, *BigFloat, Boolean, Nil, *Ratio, Keyword, *Regex, *Type:
+	case Nil:
 		res = NewLiteralExpr(obj)
 	case *Vector:
 		canHaveMeta = true
@@ -1833,7 +1833,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	case Symbol:
 		res = parseSymbol(obj, ctx)
 	default:
-		panic(&ParseError{obj: obj, msg: "Cannot parse form: " + obj.ToString(false)})
+		res = NewLiteralExpr(obj)
 	}
 	if canHaveMeta {
 		meta := obj.(Meta).GetMeta()
