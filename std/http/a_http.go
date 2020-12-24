@@ -64,7 +64,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var httpNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.http"))
+var httpNamespace = GLOBAL_ENV.EnsureSymbolIsLib(MakeSymbol("joker.http"))
 
 func init() {
 	httpNamespace.Lazy = Init

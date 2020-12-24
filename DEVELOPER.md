@@ -360,7 +360,7 @@ initialized to a global Clojure namespace with `NSFULLNAME`
 to the set `joker.core/*loaded-libs*`:
 
 ```Go
-var fooNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.foo"))
+var fooNamespace = GLOBAL_ENV.EnsureSymbolIsLib(MakeSymbol("joker.foo"))
 ```
 
 `a_foo.go` finishes with:

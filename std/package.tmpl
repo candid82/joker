@@ -13,7 +13,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var {nsName}Namespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.{nsFullName}"))
+var {nsName}Namespace = GLOBAL_ENV.EnsureSymbolIsLib(MakeSymbol("joker.{nsFullName}"))
 
 func init() {
 	{nsName}Namespace.Lazy = Init

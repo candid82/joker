@@ -65,7 +65,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var ioNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.io"))
+var ioNamespace = GLOBAL_ENV.EnsureSymbolIsLib(MakeSymbol("joker.io"))
 
 func init() {
 	ioNamespace.Lazy = Init

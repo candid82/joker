@@ -131,7 +131,7 @@ func (env *Env) EnsureSymbolIsNamespace(sym Symbol) *Namespace {
 	return env.Namespaces[sym.name]
 }
 
-func (env *Env) EnsureLib(sym Symbol) *Namespace {
+func (env *Env) EnsureSymbolIsLib(sym Symbol) *Namespace {
 	ns := env.EnsureSymbolIsNamespace(sym)
 	env.libs.Value.(*MapSet).Add(sym)
 	return ns
