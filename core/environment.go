@@ -121,7 +121,7 @@ func (env *Env) SetCurrentNamespace(ns *Namespace) {
 	env.ns.Value = ns
 }
 
-func (env *Env) EnsureObjectIsNamespace(sym Symbol) *Namespace {
+func (env *Env) EnsureSymbolIsNamespace(sym Symbol) *Namespace {
 	if sym.ns != nil {
 		panic(RT.NewError("Namespace's name cannot be qualified: " + sym.ToString(false)))
 	}
@@ -132,7 +132,7 @@ func (env *Env) EnsureObjectIsNamespace(sym Symbol) *Namespace {
 }
 
 func (env *Env) EnsureLib(sym Symbol) *Namespace {
-	ns := env.EnsureObjectIsNamespace(sym)
+	ns := env.EnsureSymbolIsNamespace(sym)
 	env.libs.Value.(*MapSet).Add(sym)
 	return ns
 }
@@ -239,5 +239,5 @@ func (env *Env) ResolveSymbol(s Symbol) Symbol {
 }
 
 func init() {
-	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.EnsureObjectIsNamespace(MakeSymbol("user")))
+	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.EnsureSymbolIsNamespace(MakeSymbol("user")))
 }

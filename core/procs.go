@@ -1194,7 +1194,7 @@ var procFindNamespace = func(args []Object) Object {
 
 var procCreateNamespace = func(args []Object) Object {
 	sym := EnsureArgIsSymbol(args, 0)
-	res := GLOBAL_ENV.EnsureObjectIsNamespace(sym)
+	res := GLOBAL_ENV.EnsureSymbolIsNamespace(sym)
 	// In linter mode the latest create-ns call overrides position info.
 	// This is for the cases when (ns ...) is called in .jokerd/linter.clj file and alike.
 	// Also, isUsed needs to be reset in this case.
@@ -1207,7 +1207,7 @@ var procCreateNamespace = func(args []Object) Object {
 
 var procInjectNamespace = func(args []Object) Object {
 	sym := EnsureArgIsSymbol(args, 0)
-	ns := GLOBAL_ENV.EnsureObjectIsNamespace(sym)
+	ns := GLOBAL_ENV.EnsureSymbolIsNamespace(sym)
 	ns.isUsed = true
 	ns.isGloballyUsed = true
 	return ns
