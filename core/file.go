@@ -45,5 +45,5 @@ func MakeFile(f *os.File) *File {
 }
 
 func ExtractFile(args []Object, index int) *File {
-	return EnsureFile(args, index)
+	return EnsureArgIsFile(args, index)
 }

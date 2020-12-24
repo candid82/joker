@@ -286,7 +286,7 @@ func (v *Vector) TryNth(i int, d Object) Object {
 func (v *Vector) sequential() {}
 
 func (v *Vector) Compare(other Object) int {
-	v2 := AssertVector(other, "Cannot compare Vector and "+other.GetType().ToString(false))
+	v2 := EnsureObjectIsVector(other, "Cannot compare Vector: %s")
 	if v.Count() > v2.Count() {
 		return 1
 	}
@@ -294,7 +294,7 @@ func (v *Vector) Compare(other Object) int {
 		return -1
 	}
 	for i := 0; i < v.Count(); i++ {
-		c := AssertComparable(v.at(i), "").Compare(v2.at(i))
+		c := EnsureObjectIsComparable(v.at(i), "").Compare(v2.at(i))
 		if c != 0 {
 			return c
 		}

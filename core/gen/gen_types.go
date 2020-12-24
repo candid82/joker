@@ -27,22 +27,23 @@ import (
 )
 `
 
-var assertTemplate string = `
-func Assert{{.Name}}(obj Object, msg string) {{.TypeName}} {
+var ensureObjectIsTemplate string = `
+func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
 	switch c := obj.(type) {
 	case {{.TypeName}}:
 		return c
 	default:
-		if msg == "" {
-			msg = fmt.Sprintf("Expected %s, got %s", "{{.ShowName}}", obj.GetType().ToString(false))
+		if pattern == "" {
+			pattern = "%s"
 		}
-		panic(RT.NewError(msg))
+		msg := fmt.Sprintf("Expected %s, got %s", "{{.ShowName}}", obj.GetType().ToString(false))
+		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
 }
 `
 
-var ensureTemplate string = `
-func Ensure{{.Name}}(args []Object, index int) {{.TypeName}} {
+var ensureArgIsTemplate string = `
+func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
 	switch c := args[index].(type) {
 	case {{.TypeName}}:
 		return c
@@ -71,8 +72,8 @@ func generateAssertions(types []string) {
 	checkError(err)
 	defer f.Close()
 
-	var assert = template.Must(template.New("assert").Parse(assertTemplate))
-	var ensure = template.Must(template.New("ensure").Parse(ensureTemplate))
+	var ensureObjectIs = template.Must(template.New("assert").Parse(ensureObjectIsTemplate))
+	var ensureArgIs = template.Must(template.New("ensure").Parse(ensureArgIsTemplate))
 	f.WriteString(header)
 	f.WriteString(importFmt)
 	for _, t := range types {
@@ -87,8 +88,8 @@ func generateAssertions(types []string) {
 		} else if strings.ContainsRune(t, '.') {
 			typeInfo.Name = strings.ReplaceAll(t, ".", "_")
 		}
-		assert.Execute(f, typeInfo)
-		ensure.Execute(f, typeInfo)
+		ensureObjectIs.Execute(f, typeInfo)
+		ensureArgIs.Execute(f, typeInfo)
 	}
 }
 
