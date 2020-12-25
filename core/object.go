@@ -735,12 +735,12 @@ func compare(c Callable, a, b Object) int {
 		if r.B {
 			return -1
 		}
-		if AssertBoolean(c.Call([]Object{b, a}), "").B {
+		if EnsureObjectIsBoolean(c.Call([]Object{b, a}), "").B {
 			return 1
 		}
 		return 0
 	default:
-		return AssertNumber(r, "Function is not a comparator since it returned a non-integer value").Int().I
+		return EnsureObjectIsNumber(r, "Function is not a comparator since it returned a non-integer value%.s").Int().I
 	}
 }
 
@@ -802,7 +802,7 @@ func AlterMeta(m *MetaHolder, fn *Fn, args []Object) Map {
 		meta = NIL
 	}
 	fargs := append([]Object{meta}, args...)
-	m.meta = AssertMap(fn.Call(fargs), "")
+	m.meta = EnsureObjectIsMap(fn.Call(fargs), "")
 	return m.meta
 }
 
@@ -857,7 +857,7 @@ func (v *Var) Resolve() Object {
 
 func (v *Var) Call(args []Object) Object {
 	vl := v.Resolve()
-	return AssertCallable(
+	return EnsureObjectIsCallable(
 		vl,
 		"Var "+v.ToString(false)+" resolves to "+vl.ToString(false)+", which is not a Fn").Call(args)
 }
@@ -968,7 +968,7 @@ func (rat *Ratio) Hash() uint32 {
 }
 
 func (rat *Ratio) Compare(other Object) int {
-	return CompareNumbers(rat, AssertNumber(other, "Cannot compare Ratio and "+other.GetType().ToString(false)))
+	return CompareNumbers(rat, EnsureObjectIsNumber(other, "Cannot compare Ratio: %s"))
 }
 
 func MakeBigInt(bi int64) *BigInt {
@@ -992,7 +992,7 @@ func (bi *BigInt) Hash() uint32 {
 }
 
 func (bi *BigInt) Compare(other Object) int {
-	return CompareNumbers(bi, AssertNumber(other, "Cannot compare BigInt and "+other.GetType().ToString(false)))
+	return CompareNumbers(bi, EnsureObjectIsNumber(other, "Cannot compare BigInt: %s"))
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
@@ -1019,7 +1019,7 @@ func (bf *BigFloat) Hash() uint32 {
 }
 
 func (bf *BigFloat) Compare(other Object) int {
-	return CompareNumbers(bf, AssertNumber(other, "Cannot compare BigFloat and "+other.GetType().ToString(false)))
+	return CompareNumbers(bf, EnsureObjectIsNumber(other, "Cannot compare BigFloat: %s"))
 }
 
 func (c Char) ToString(escape bool) string {
@@ -1053,7 +1053,7 @@ func (c Char) Hash() uint32 {
 }
 
 func (c Char) Compare(other Object) int {
-	c2 := AssertChar(other, "Cannot compare Char and "+other.GetType().ToString(false))
+	c2 := EnsureObjectIsChar(other, "Cannot compare Char: %s")
 	if c.Ch < c2.Ch {
 		return -1
 	}
@@ -1117,7 +1117,7 @@ func (d Double) Hash() uint32 {
 }
 
 func (d Double) Compare(other Object) int {
-	return CompareNumbers(d, AssertNumber(other, "Cannot compare Double and "+other.GetType().ToString(false)))
+	return CompareNumbers(d, EnsureObjectIsNumber(other, "Cannot compare Double: %s"))
 }
 
 func (i Int) ToString(escape bool) string {
@@ -1149,7 +1149,7 @@ func (i Int) Hash() uint32 {
 }
 
 func (i Int) Compare(other Object) int {
-	return CompareNumbers(i, AssertNumber(other, "Cannot compare Int and "+other.GetType().ToString(false)))
+	return CompareNumbers(i, EnsureObjectIsNumber(other, "Cannot compare Int: %s"))
 }
 
 func (b Boolean) ToString(escape bool) string {
@@ -1186,7 +1186,7 @@ func (b Boolean) Hash() uint32 {
 }
 
 func (b Boolean) Compare(other Object) int {
-	b2 := AssertBoolean(other, "Cannot compare Boolean and "+other.GetType().ToString(false))
+	b2 := EnsureObjectIsBoolean(other, "Cannot compare Boolean and "+other.GetType().ToString(false))
 	if b.B == b2.B {
 		return 0
 	}
@@ -1222,7 +1222,7 @@ func (t Time) Hash() uint32 {
 }
 
 func (t Time) Compare(other Object) int {
-	t2 := AssertTime(other, "Cannot compare Time and "+other.GetType().ToString(false))
+	t2 := EnsureObjectIsTime(other, "Cannot compare Time: %s")
 	if t.T.Equal(t2.T) {
 		return 0
 	}
@@ -1268,7 +1268,7 @@ func (k Keyword) Hash() uint32 {
 }
 
 func (k Keyword) Compare(other Object) int {
-	k2 := AssertKeyword(other, "Cannot compare Keyword and "+other.GetType().ToString(false))
+	k2 := EnsureObjectIsKeyword(other, "Cannot compare Keyword: %s")
 	return strings.Compare(k.ToString(false), k2.ToString(false))
 }
 
@@ -1344,7 +1344,7 @@ func (s Symbol) Hash() uint32 {
 }
 
 func (s Symbol) Compare(other Object) int {
-	s2 := AssertSymbol(other, "Cannot compare Symbol and "+other.GetType().ToString(false))
+	s2 := EnsureObjectIsSymbol(other, "Cannot compare Symbol: %s")
 	return strings.Compare(s.ToString(false), s2.ToString(false))
 }
 
@@ -1457,7 +1457,7 @@ func (s String) TryNth(i int, d Object) Object {
 }
 
 func (s String) Compare(other Object) int {
-	s2 := AssertString(other, "Cannot compare String and "+other.GetType().ToString(false))
+	s2 := EnsureObjectIsString(other, "Cannot compare String: %s")
 	return strings.Compare(s.S, s2.S)
 }
 

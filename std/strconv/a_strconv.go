@@ -330,7 +330,7 @@ func Init() {
 	InternsOrThunks()
 }
 
-var strconvNamespace = GLOBAL_ENV.EnsureLib(MakeSymbol("joker.strconv"))
+var strconvNamespace = GLOBAL_ENV.EnsureSymbolIsLib(MakeSymbol("joker.strconv"))
 
 func init() {
 	strconvNamespace.Lazy = Init

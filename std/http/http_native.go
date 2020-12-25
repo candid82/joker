@@ -38,22 +38,22 @@ func getOrPanic(m Map, k Object, errMsg string) Object {
 
 func mapToReq(request Map) *http.Request {
 	method := strings.ToUpper(extractMethod(request))
-	url := AssertString(getOrPanic(request, MakeKeyword("url"), ":url key must be present in request map"), "url must be a string").S
+	url := EnsureObjectIsString(getOrPanic(request, MakeKeyword("url"), ":url key must be present in request map"), "url: %s").S
 	var reqBody io.Reader
 	if ok, b := request.Get(MakeKeyword("body")); ok {
-		reqBody = strings.NewReader(AssertString(b, "body must be a string").S)
+		reqBody = strings.NewReader(EnsureObjectIsString(b, "body: %s").S)
 	}
 	req, err := http.NewRequest(method, url, reqBody)
 	PanicOnErr(err)
 	if ok, headers := request.Get(MakeKeyword("headers")); ok {
-		h := AssertMap(headers, "headers must be a map")
+		h := EnsureObjectIsMap(headers, "headers: %s")
 		for iter := h.Iter(); iter.HasNext(); {
 			p := iter.Next()
-			req.Header.Add(AssertString(p.Key, "header name must be a string").S, AssertString(p.Value, "header value must be a string").S)
+			req.Header.Add(EnsureObjectIsString(p.Key, "header name: %s").S, EnsureObjectIsString(p.Value, "header value: %s").S)
 		}
 	}
 	if ok, host := request.Get(MakeKeyword("host")); ok {
-		req.Host = AssertString(host, "host must be a string").S
+		req.Host = EnsureObjectIsString(host, "host: %s").S
 	}
 	return req
 }
@@ -100,25 +100,25 @@ func respToMap(resp *http.Response) Map {
 func mapToResp(response Map, w http.ResponseWriter) {
 	status := 0
 	if ok, s := response.Get(MakeKeyword("status")); ok {
-		status = AssertInt(s, "HTTP response status must be an integer").I
+		status = EnsureObjectIsInt(s, "HTTP response status: %s").I
 	}
 	body := ""
 	if ok, b := response.Get(MakeKeyword("body")); ok {
-		body = AssertString(b, "HTTP response body must be a string").S
+		body = EnsureObjectIsString(b, "HTTP response body: %s").S
 	}
 	if ok, headers := response.Get(MakeKeyword("headers")); ok {
 		header := w.Header()
-		h := AssertMap(headers, "HTTP response headers must be a map")
+		h := EnsureObjectIsMap(headers, "HTTP response headers: %s")
 		for iter := h.Iter(); iter.HasNext(); {
 			p := iter.Next()
-			hname := AssertString(p.Key, "HTTP response header name must be a string").S
+			hname := EnsureObjectIsString(p.Key, "HTTP response header name %s").S
 			switch pvalue := p.Value.(type) {
 			case String:
 				header.Add(hname, pvalue.S)
 			case Seqable:
 				s := pvalue.Seq()
 				for !s.IsEmpty() {
-					header.Add(hname, AssertString(s.First(), "HTTP response header value must be a string").S)
+					header.Add(hname, EnsureObjectIsString(s.First(), "HTTP response header value: %s").S)
 					s = s.Rest()
 				}
 			default:
@@ -161,7 +161,7 @@ func startServer(addr string, handler Callable) Object {
 			}
 		}()
 		response := handler.Call([]Object{reqToMap(host, port, req)})
-		mapToResp(AssertMap(response, "HTTP response must be a map"), w)
+		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w)
 	}))
 	PanicOnErr(err)
 	return NIL

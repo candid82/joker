@@ -51,7 +51,7 @@ func (db BoltDB) WithInfo(info *ObjectInfo) Object {
 	return db
 }
 
-func EnsureBoltDB(args []Object, index int) BoltDB {
+func EnsureArgIsBoltDB(args []Object, index int) BoltDB {
 	switch c := args[index].(type) {
 	case BoltDB:
 		return c
@@ -61,7 +61,7 @@ func EnsureBoltDB(args []Object, index int) BoltDB {
 }
 
 func ExtractBoltDB(args []Object, index int) *bolt.DB {
-	return EnsureBoltDB(args, index).DB
+	return EnsureArgIsBoltDB(args, index).DB
 }
 
 func open(filename string, mode int) *bolt.DB {

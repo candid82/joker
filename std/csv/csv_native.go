@@ -33,25 +33,25 @@ func csvSeqOpts(src Object, opts Map) Object {
 	csvReader := csv.NewReader(rdr)
 	csvReader.ReuseRecord = true
 	if ok, c := opts.Get(MakeKeyword("comma")); ok {
-		csvReader.Comma = AssertChar(c, "comma must be a char").Ch
+		csvReader.Comma = EnsureObjectIsChar(c, "comma: %s").Ch
 	}
 	if ok, c := opts.Get(MakeKeyword("comment")); ok {
-		csvReader.Comment = AssertChar(c, "comment must be a char").Ch
+		csvReader.Comment = EnsureObjectIsChar(c, "comment: %s").Ch
 	}
 	if ok, c := opts.Get(MakeKeyword("fields-per-record")); ok {
-		csvReader.FieldsPerRecord = AssertInt(c, "fields-per-record must be an integer").I
+		csvReader.FieldsPerRecord = EnsureObjectIsInt(c, "fields-per-record: %s").I
 	}
 	if ok, c := opts.Get(MakeKeyword("lazy-quotes")); ok {
-		csvReader.LazyQuotes = AssertBoolean(c, "lazy-quotes must be a boolean").B
+		csvReader.LazyQuotes = EnsureObjectIsBoolean(c, "lazy-quotes: %s").B
 	}
 	if ok, c := opts.Get(MakeKeyword("trim-leading-space")); ok {
-		csvReader.TrimLeadingSpace = AssertBoolean(c, "trim-leading-space must be a boolean").B
+		csvReader.TrimLeadingSpace = EnsureObjectIsBoolean(c, "trim-leading-space: %s").B
 	}
 	return csvLazySeq(csvReader)
 }
 
 func sliceOfStrings(obj Object) (res []string) {
-	s := AssertSeqable(obj, "CSV record must be Seqable").Seq()
+	s := EnsureObjectIsSeqable(obj, "CSV record: %s").Seq()
 	for !s.IsEmpty() {
 		res = append(res, s.First().ToString(false))
 		s = s.Rest()
@@ -62,10 +62,10 @@ func sliceOfStrings(obj Object) (res []string) {
 func writeWriter(wr io.Writer, data Seqable, opts Map) {
 	csvWriter := csv.NewWriter(wr)
 	if ok, c := opts.Get(MakeKeyword("comma")); ok {
-		csvWriter.Comma = AssertChar(c, "comma must be a char").Ch
+		csvWriter.Comma = EnsureObjectIsChar(c, "comma: %s").Ch
 	}
 	if ok, c := opts.Get(MakeKeyword("use-crlf")); ok {
-		csvWriter.UseCRLF = AssertBoolean(c, "use-crlf must be a boolean").B
+		csvWriter.UseCRLF = EnsureObjectIsBoolean(c, "use-crlf: %s").B
 	}
 	s := data.Seq()
 	for !s.IsEmpty() {

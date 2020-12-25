@@ -91,7 +91,7 @@ func isBlank(s Object) bool {
 	if s.Equals(NIL) {
 		return true
 	}
-	str := AssertString(s, "").S
+	str := EnsureObjectIsString(s, "").S
 	for _, r := range str {
 		if !unicode.IsSpace(r) {
 			return false

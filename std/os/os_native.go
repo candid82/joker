@@ -47,12 +47,12 @@ func execute(name string, opts Map) Object {
 	var stdin io.Reader
 	var stdout, stderr io.Writer
 	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok {
-		dir = AssertString(dirObj, "dir must be a string").S
+		dir = EnsureObjectIsString(dirObj, "dir: %s").S
 	}
 	if ok, argsObj := opts.Get(MakeKeyword("args")); ok {
-		s := AssertSeqable(argsObj, "args must be Seqable").Seq()
+		s := EnsureObjectIsSeqable(argsObj, "args: %s").Seq()
 		for !s.IsEmpty() {
-			args = append(args, AssertString(s.First(), "args must be strings").S)
+			args = append(args, EnsureObjectIsString(s.First(), "args: %s").S)
 			s = s.Rest()
 		}
 	}
