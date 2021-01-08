@@ -22,34 +22,30 @@ package core
 
 var importFmt string = `
 import (
-	"fmt"
 	"io"
 )
 `
 
-var ensureObjectIsTemplate string = `
-func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
+var ensureIsTemplate string = `
+func EnsureIs{{.Name}}(obj Object, failFn FailFn, failArgs ...interface{}) {{.TypeName}} {
 	switch c := obj.(type) {
 	case {{.TypeName}}:
 		return c
 	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "{{.ShowName}}", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
+		panic(failFn(obj, failArgs...))
 	}
+}
+`
+
+var ensureObjectIsTemplate string = `
+func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
+	return EnsureIs{{.Name}}(obj, FailObject, pattern)
 }
 `
 
 var ensureArgIsTemplate string = `
 func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
-	switch c := args[index].(type) {
-	case {{.TypeName}}:
-		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "{{.ShowName}}"))
-	}
+	return EnsureIs{{.Name}}(args[index], FailExtract, index)
 }
 `
 
@@ -72,6 +68,7 @@ func generateAssertions(types []string) {
 	checkError(err)
 	defer f.Close()
 
+	var ensureIs = template.Must(template.New("is").Parse(ensureIsTemplate))
 	var ensureObjectIs = template.Must(template.New("assert").Parse(ensureObjectIsTemplate))
 	var ensureArgIs = template.Must(template.New("ensure").Parse(ensureArgIsTemplate))
 	f.WriteString(header)
@@ -88,6 +85,7 @@ func generateAssertions(types []string) {
 		} else if strings.ContainsRune(t, '.') {
 			typeInfo.Name = strings.ReplaceAll(t, ".", "_")
 		}
+		ensureIs.Execute(f, typeInfo)
 		ensureObjectIs.Execute(f, typeInfo)
 		ensureArgIs.Execute(f, typeInfo)
 	}

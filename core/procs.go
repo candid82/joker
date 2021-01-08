@@ -93,15 +93,6 @@ func ExtractBoolean(args []Object, index int) bool {
 	return EnsureArgIsBoolean(args, index).B
 }
 
-func EnsureIsBoolean(obj Object, failFn FailFn, failArgs ...interface{}) Boolean {
-	switch c := obj.(type) {
-	case Boolean:
-		return c
-	default:
-		panic(failFn(obj, failArgs...))
-	}
-}
-
 type FailFn func(obj Object, args ...interface{}) interface{}
 
 func FailExtract(obj Object, args ...interface{}) interface{} {
