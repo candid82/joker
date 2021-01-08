@@ -93,15 +93,15 @@ func ExtractBoolean(args []Object, index int) bool {
 	return EnsureArgIsBoolean(args, index).B
 }
 
-func FailExtract(obj Object, index int) *EvalError {
-	return RT.NewArgTypeError(index, obj, "Boolean")
+func FailArg(obj Object, typeName string, index int) *EvalError {
+	return RT.NewArgTypeError(index, obj, typeName)
 }
 
-func FailObject(obj Object, pattern string) *EvalError {
+func FailObject(obj Object, typeName, pattern string) *EvalError {
 	if pattern == "" {
 		pattern = "%s"
 	}
-	msg := fmt.Sprintf("Expected Boolean, got %s", obj.GetType().ToString(false))
+	msg := fmt.Sprintf("Expected %s, got %s", typeName, obj.GetType().ToString(false))
 	return RT.NewError(fmt.Sprintf(pattern, msg))
 }
 

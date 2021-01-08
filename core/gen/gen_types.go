@@ -12,7 +12,6 @@ type (
 		Name     string
 		TypeName string
 		ShowName string
-		NilValue string
 	}
 )
 
@@ -27,33 +26,22 @@ import (
 )
 `
 
-var ensureIsTemplate string = `
-func EnsureIs{{.Name}}(obj Object) ({{.TypeName}}, bool) {
-	switch c := obj.(type) {
-	case {{.TypeName}}:
-		return c, true
-	default:
-		return {{.NilValue}}, false
-	}
-}
-`
-
 var ensureObjectIsTemplate string = `
 func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
-	if c, yes := EnsureIs{{.Name}}(obj); yes {
+	if c, yes := obj.({{.TypeName}}); yes {
 		return c
 	}
-	panic(FailObject(obj, pattern))
+	panic(FailObject(obj, "{{.TypeName}}", pattern))
 }
 `
 
 var ensureArgIsTemplate string = `
 func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
 	obj := args[index]
-	if c, yes := EnsureIs{{.Name}}(obj); yes {
+	if c, yes := obj.({{.TypeName}}); yes {
 		return c
 	}
-	panic(FailExtract(obj, index))
+	panic(FailArg(obj, "{{.TypeName}}", index))
 }
 `
 
@@ -76,31 +64,22 @@ func generateAssertions(types []string) {
 	checkError(err)
 	defer f.Close()
 
-	var ensureIs = template.Must(template.New("is").Parse(ensureIsTemplate))
 	var ensureObjectIs = template.Must(template.New("assert").Parse(ensureObjectIsTemplate))
 	var ensureArgIs = template.Must(template.New("ensure").Parse(ensureArgIsTemplate))
 	f.WriteString(header)
 	f.WriteString(importFmt)
 	for _, t := range types {
-		nilValue := "nil"
-		if t[0] == '=' {
-			t = t[1:]
-			nilValue = t + "{}"
-		}
 		typeInfo := TypeInfo{
 			Name:     t,
 			TypeName: t,
 			ShowName: t,
-			NilValue: nilValue,
 		}
 		if t[0] == '*' {
 			typeInfo.Name = t[1:]
 			typeInfo.ShowName = typeInfo.Name
-			typeInfo.NilValue = "nil"
 		} else if strings.ContainsRune(t, '.') {
 			typeInfo.Name = strings.ReplaceAll(t, ".", "_")
 		}
-		ensureIs.Execute(f, typeInfo)
 		ensureObjectIs.Execute(f, typeInfo)
 		ensureArgIs.Execute(f, typeInfo)
 	}
