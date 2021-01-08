@@ -162,25 +162,11 @@ func EnsureArgIsRegex(args []Object, index int) *Regex {
 }
 
 func EnsureObjectIsBoolean(obj Object, pattern string) Boolean {
-	switch c := obj.(type) {
-	case Boolean:
-		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Boolean", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
-	}
+	return EnsureIsBoolean(obj, FailObject, pattern)
 }
 
 func EnsureArgIsBoolean(args []Object, index int) Boolean {
-	switch c := args[index].(type) {
-	case Boolean:
-		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Boolean"))
-	}
+	return EnsureIsBoolean(args[index], FailExtract, index)
 }
 
 func EnsureObjectIsTime(obj Object, pattern string) Time {

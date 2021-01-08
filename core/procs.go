@@ -93,6 +93,31 @@ func ExtractBoolean(args []Object, index int) bool {
 	return EnsureArgIsBoolean(args, index).B
 }
 
+func EnsureIsBoolean(obj Object, failFn FailFn, failArgs ...interface{}) Boolean {
+	switch c := obj.(type) {
+	case Boolean:
+		return c
+	default:
+		panic(failFn(obj, failArgs...))
+	}
+}
+
+type FailFn func(obj Object, args ...interface{}) interface{}
+
+func FailExtract(obj Object, args ...interface{}) interface{} {
+	index := args[0].(int)
+	return RT.NewArgTypeError(index, obj, "Boolean")
+}
+
+func FailObject(obj Object, args ...interface{}) interface{} {
+	pattern := args[0].(string)
+	if pattern == "" {
+		pattern = "%s"
+	}
+	msg := fmt.Sprintf("Expected Boolean, got %s", obj.GetType().ToString(false))
+	return RT.NewError(fmt.Sprintf(pattern, msg))
+}
+
 func ExtractChar(args []Object, index int) rune {
 	return EnsureArgIsChar(args, index).Ch
 }
