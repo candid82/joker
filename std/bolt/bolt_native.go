@@ -52,12 +52,11 @@ func (db BoltDB) WithInfo(info *ObjectInfo) Object {
 }
 
 func EnsureArgIsBoltDB(args []Object, index int) BoltDB {
-	switch c := args[index].(type) {
-	case BoltDB:
+	obj := args[index]
+	if c, yes := obj.(BoltDB); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "BoltDB"))
 	}
+	panic(FailArg(obj, "BoltDB", index))
 }
 
 func ExtractBoltDB(args []Object, index int) *bolt.DB {
