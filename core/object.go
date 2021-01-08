@@ -1186,7 +1186,7 @@ func (b Boolean) Hash() uint32 {
 }
 
 func (b Boolean) Compare(other Object) int {
-	b2 := EnsureObjectIsBoolean(other, "Cannot compare Boolean and "+other.GetType().ToString(false))
+	b2 := EnsureObjectIsBoolean(other, "Cannot compare Boolean: %s")
 	if b.B == b2.B {
 		return 0
 	}
