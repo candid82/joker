@@ -93,15 +93,11 @@ func ExtractBoolean(args []Object, index int) bool {
 	return EnsureArgIsBoolean(args, index).B
 }
 
-type FailFn func(obj Object, args ...interface{}) interface{}
-
-func FailExtract(obj Object, args ...interface{}) interface{} {
-	index := args[0].(int)
+func FailExtract(obj Object, index int) *EvalError {
 	return RT.NewArgTypeError(index, obj, "Boolean")
 }
 
-func FailObject(obj Object, args ...interface{}) interface{} {
-	pattern := args[0].(string)
+func FailObject(obj Object, pattern string) *EvalError {
 	if pattern == "" {
 		pattern = "%s"
 	}

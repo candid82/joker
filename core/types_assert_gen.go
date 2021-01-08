@@ -6,665 +6,938 @@ import (
 	"io"
 )
 
-func EnsureIsComparable(obj Object, failFn FailFn, failArgs ...interface{}) Comparable {
+func EnsureIsComparable(obj Object) (Comparable, bool) {
 	switch c := obj.(type) {
 	case Comparable:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsComparable(obj Object, pattern string) Comparable {
-	return EnsureIsComparable(obj, FailObject, pattern)
+	if c, yes := EnsureIsComparable(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsComparable(args []Object, index int) Comparable {
-	return EnsureIsComparable(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsComparable(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsVector(obj Object, failFn FailFn, failArgs ...interface{}) *Vector {
+func EnsureIsVector(obj Object) (*Vector, bool) {
 	switch c := obj.(type) {
 	case *Vector:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsVector(obj Object, pattern string) *Vector {
-	return EnsureIsVector(obj, FailObject, pattern)
+	if c, yes := EnsureIsVector(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsVector(args []Object, index int) *Vector {
-	return EnsureIsVector(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsVector(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsChar(obj Object, failFn FailFn, failArgs ...interface{}) Char {
+func EnsureIsChar(obj Object) (Char, bool) {
 	switch c := obj.(type) {
 	case Char:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Char{}, false
 	}
 }
 
 func EnsureObjectIsChar(obj Object, pattern string) Char {
-	return EnsureIsChar(obj, FailObject, pattern)
+	if c, yes := EnsureIsChar(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsChar(args []Object, index int) Char {
-	return EnsureIsChar(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsChar(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsString(obj Object, failFn FailFn, failArgs ...interface{}) String {
+func EnsureIsString(obj Object) (String, bool) {
 	switch c := obj.(type) {
 	case String:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return String{}, false
 	}
 }
 
 func EnsureObjectIsString(obj Object, pattern string) String {
-	return EnsureIsString(obj, FailObject, pattern)
+	if c, yes := EnsureIsString(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsString(args []Object, index int) String {
-	return EnsureIsString(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsString(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsSymbol(obj Object, failFn FailFn, failArgs ...interface{}) Symbol {
+func EnsureIsSymbol(obj Object) (Symbol, bool) {
 	switch c := obj.(type) {
 	case Symbol:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Symbol{}, false
 	}
 }
 
 func EnsureObjectIsSymbol(obj Object, pattern string) Symbol {
-	return EnsureIsSymbol(obj, FailObject, pattern)
+	if c, yes := EnsureIsSymbol(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsSymbol(args []Object, index int) Symbol {
-	return EnsureIsSymbol(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsSymbol(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsKeyword(obj Object, failFn FailFn, failArgs ...interface{}) Keyword {
+func EnsureIsKeyword(obj Object) (Keyword, bool) {
 	switch c := obj.(type) {
 	case Keyword:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Keyword{}, false
 	}
 }
 
 func EnsureObjectIsKeyword(obj Object, pattern string) Keyword {
-	return EnsureIsKeyword(obj, FailObject, pattern)
+	if c, yes := EnsureIsKeyword(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsKeyword(args []Object, index int) Keyword {
-	return EnsureIsKeyword(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsKeyword(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsRegex(obj Object, failFn FailFn, failArgs ...interface{}) *Regex {
+func EnsureIsRegex(obj Object) (*Regex, bool) {
 	switch c := obj.(type) {
 	case *Regex:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsRegex(obj Object, pattern string) *Regex {
-	return EnsureIsRegex(obj, FailObject, pattern)
+	if c, yes := EnsureIsRegex(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsRegex(args []Object, index int) *Regex {
-	return EnsureIsRegex(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsRegex(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsBoolean(obj Object, failFn FailFn, failArgs ...interface{}) Boolean {
+func EnsureIsBoolean(obj Object) (Boolean, bool) {
 	switch c := obj.(type) {
 	case Boolean:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Boolean{}, false
 	}
 }
 
 func EnsureObjectIsBoolean(obj Object, pattern string) Boolean {
-	return EnsureIsBoolean(obj, FailObject, pattern)
+	if c, yes := EnsureIsBoolean(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsBoolean(args []Object, index int) Boolean {
-	return EnsureIsBoolean(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsBoolean(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsTime(obj Object, failFn FailFn, failArgs ...interface{}) Time {
+func EnsureIsTime(obj Object) (Time, bool) {
 	switch c := obj.(type) {
 	case Time:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Time{}, false
 	}
 }
 
 func EnsureObjectIsTime(obj Object, pattern string) Time {
-	return EnsureIsTime(obj, FailObject, pattern)
+	if c, yes := EnsureIsTime(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsTime(args []Object, index int) Time {
-	return EnsureIsTime(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsTime(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsNumber(obj Object, failFn FailFn, failArgs ...interface{}) Number {
+func EnsureIsNumber(obj Object) (Number, bool) {
 	switch c := obj.(type) {
 	case Number:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsNumber(obj Object, pattern string) Number {
-	return EnsureIsNumber(obj, FailObject, pattern)
+	if c, yes := EnsureIsNumber(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsNumber(args []Object, index int) Number {
-	return EnsureIsNumber(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsNumber(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsSeqable(obj Object, failFn FailFn, failArgs ...interface{}) Seqable {
+func EnsureIsSeqable(obj Object) (Seqable, bool) {
 	switch c := obj.(type) {
 	case Seqable:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsSeqable(obj Object, pattern string) Seqable {
-	return EnsureIsSeqable(obj, FailObject, pattern)
+	if c, yes := EnsureIsSeqable(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsSeqable(args []Object, index int) Seqable {
-	return EnsureIsSeqable(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsSeqable(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsCallable(obj Object, failFn FailFn, failArgs ...interface{}) Callable {
+func EnsureIsCallable(obj Object) (Callable, bool) {
 	switch c := obj.(type) {
 	case Callable:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsCallable(obj Object, pattern string) Callable {
-	return EnsureIsCallable(obj, FailObject, pattern)
+	if c, yes := EnsureIsCallable(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsCallable(args []Object, index int) Callable {
-	return EnsureIsCallable(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsCallable(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsType(obj Object, failFn FailFn, failArgs ...interface{}) *Type {
+func EnsureIsType(obj Object) (*Type, bool) {
 	switch c := obj.(type) {
 	case *Type:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsType(obj Object, pattern string) *Type {
-	return EnsureIsType(obj, FailObject, pattern)
+	if c, yes := EnsureIsType(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsType(args []Object, index int) *Type {
-	return EnsureIsType(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsType(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsMeta(obj Object, failFn FailFn, failArgs ...interface{}) Meta {
+func EnsureIsMeta(obj Object) (Meta, bool) {
 	switch c := obj.(type) {
 	case Meta:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsMeta(obj Object, pattern string) Meta {
-	return EnsureIsMeta(obj, FailObject, pattern)
+	if c, yes := EnsureIsMeta(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsMeta(args []Object, index int) Meta {
-	return EnsureIsMeta(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsMeta(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsInt(obj Object, failFn FailFn, failArgs ...interface{}) Int {
+func EnsureIsInt(obj Object) (Int, bool) {
 	switch c := obj.(type) {
 	case Int:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Int{}, false
 	}
 }
 
 func EnsureObjectIsInt(obj Object, pattern string) Int {
-	return EnsureIsInt(obj, FailObject, pattern)
+	if c, yes := EnsureIsInt(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsInt(args []Object, index int) Int {
-	return EnsureIsInt(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsInt(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsDouble(obj Object, failFn FailFn, failArgs ...interface{}) Double {
+func EnsureIsDouble(obj Object) (Double, bool) {
 	switch c := obj.(type) {
 	case Double:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return Double{}, false
 	}
 }
 
 func EnsureObjectIsDouble(obj Object, pattern string) Double {
-	return EnsureIsDouble(obj, FailObject, pattern)
+	if c, yes := EnsureIsDouble(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsDouble(args []Object, index int) Double {
-	return EnsureIsDouble(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsDouble(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsStack(obj Object, failFn FailFn, failArgs ...interface{}) Stack {
+func EnsureIsStack(obj Object) (Stack, bool) {
 	switch c := obj.(type) {
 	case Stack:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsStack(obj Object, pattern string) Stack {
-	return EnsureIsStack(obj, FailObject, pattern)
+	if c, yes := EnsureIsStack(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsStack(args []Object, index int) Stack {
-	return EnsureIsStack(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsStack(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsMap(obj Object, failFn FailFn, failArgs ...interface{}) Map {
+func EnsureIsMap(obj Object) (Map, bool) {
 	switch c := obj.(type) {
 	case Map:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsMap(obj Object, pattern string) Map {
-	return EnsureIsMap(obj, FailObject, pattern)
+	if c, yes := EnsureIsMap(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsMap(args []Object, index int) Map {
-	return EnsureIsMap(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsMap(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsSet(obj Object, failFn FailFn, failArgs ...interface{}) Set {
+func EnsureIsSet(obj Object) (Set, bool) {
 	switch c := obj.(type) {
 	case Set:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsSet(obj Object, pattern string) Set {
-	return EnsureIsSet(obj, FailObject, pattern)
+	if c, yes := EnsureIsSet(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsSet(args []Object, index int) Set {
-	return EnsureIsSet(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsSet(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsAssociative(obj Object, failFn FailFn, failArgs ...interface{}) Associative {
+func EnsureIsAssociative(obj Object) (Associative, bool) {
 	switch c := obj.(type) {
 	case Associative:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsAssociative(obj Object, pattern string) Associative {
-	return EnsureIsAssociative(obj, FailObject, pattern)
+	if c, yes := EnsureIsAssociative(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsAssociative(args []Object, index int) Associative {
-	return EnsureIsAssociative(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsAssociative(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsReversible(obj Object, failFn FailFn, failArgs ...interface{}) Reversible {
+func EnsureIsReversible(obj Object) (Reversible, bool) {
 	switch c := obj.(type) {
 	case Reversible:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsReversible(obj Object, pattern string) Reversible {
-	return EnsureIsReversible(obj, FailObject, pattern)
+	if c, yes := EnsureIsReversible(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsReversible(args []Object, index int) Reversible {
-	return EnsureIsReversible(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsReversible(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsNamed(obj Object, failFn FailFn, failArgs ...interface{}) Named {
+func EnsureIsNamed(obj Object) (Named, bool) {
 	switch c := obj.(type) {
 	case Named:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsNamed(obj Object, pattern string) Named {
-	return EnsureIsNamed(obj, FailObject, pattern)
+	if c, yes := EnsureIsNamed(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsNamed(args []Object, index int) Named {
-	return EnsureIsNamed(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsNamed(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsComparator(obj Object, failFn FailFn, failArgs ...interface{}) Comparator {
+func EnsureIsComparator(obj Object) (Comparator, bool) {
 	switch c := obj.(type) {
 	case Comparator:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsComparator(obj Object, pattern string) Comparator {
-	return EnsureIsComparator(obj, FailObject, pattern)
+	if c, yes := EnsureIsComparator(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsComparator(args []Object, index int) Comparator {
-	return EnsureIsComparator(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsComparator(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsRatio(obj Object, failFn FailFn, failArgs ...interface{}) *Ratio {
+func EnsureIsRatio(obj Object) (*Ratio, bool) {
 	switch c := obj.(type) {
 	case *Ratio:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsRatio(obj Object, pattern string) *Ratio {
-	return EnsureIsRatio(obj, FailObject, pattern)
+	if c, yes := EnsureIsRatio(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsRatio(args []Object, index int) *Ratio {
-	return EnsureIsRatio(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsRatio(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsNamespace(obj Object, failFn FailFn, failArgs ...interface{}) *Namespace {
+func EnsureIsNamespace(obj Object) (*Namespace, bool) {
 	switch c := obj.(type) {
 	case *Namespace:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsNamespace(obj Object, pattern string) *Namespace {
-	return EnsureIsNamespace(obj, FailObject, pattern)
+	if c, yes := EnsureIsNamespace(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsNamespace(args []Object, index int) *Namespace {
-	return EnsureIsNamespace(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsNamespace(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsVar(obj Object, failFn FailFn, failArgs ...interface{}) *Var {
+func EnsureIsVar(obj Object) (*Var, bool) {
 	switch c := obj.(type) {
 	case *Var:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsVar(obj Object, pattern string) *Var {
-	return EnsureIsVar(obj, FailObject, pattern)
+	if c, yes := EnsureIsVar(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsVar(args []Object, index int) *Var {
-	return EnsureIsVar(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsVar(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsError(obj Object, failFn FailFn, failArgs ...interface{}) Error {
+func EnsureIsError(obj Object) (Error, bool) {
 	switch c := obj.(type) {
 	case Error:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsError(obj Object, pattern string) Error {
-	return EnsureIsError(obj, FailObject, pattern)
+	if c, yes := EnsureIsError(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsError(args []Object, index int) Error {
-	return EnsureIsError(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsError(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsFn(obj Object, failFn FailFn, failArgs ...interface{}) *Fn {
+func EnsureIsFn(obj Object) (*Fn, bool) {
 	switch c := obj.(type) {
 	case *Fn:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsFn(obj Object, pattern string) *Fn {
-	return EnsureIsFn(obj, FailObject, pattern)
+	if c, yes := EnsureIsFn(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsFn(args []Object, index int) *Fn {
-	return EnsureIsFn(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsFn(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsDeref(obj Object, failFn FailFn, failArgs ...interface{}) Deref {
+func EnsureIsDeref(obj Object) (Deref, bool) {
 	switch c := obj.(type) {
 	case Deref:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsDeref(obj Object, pattern string) Deref {
-	return EnsureIsDeref(obj, FailObject, pattern)
+	if c, yes := EnsureIsDeref(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsDeref(args []Object, index int) Deref {
-	return EnsureIsDeref(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsDeref(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsAtom(obj Object, failFn FailFn, failArgs ...interface{}) *Atom {
+func EnsureIsAtom(obj Object) (*Atom, bool) {
 	switch c := obj.(type) {
 	case *Atom:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsAtom(obj Object, pattern string) *Atom {
-	return EnsureIsAtom(obj, FailObject, pattern)
+	if c, yes := EnsureIsAtom(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsAtom(args []Object, index int) *Atom {
-	return EnsureIsAtom(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsAtom(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsRef(obj Object, failFn FailFn, failArgs ...interface{}) Ref {
+func EnsureIsRef(obj Object) (Ref, bool) {
 	switch c := obj.(type) {
 	case Ref:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsRef(obj Object, pattern string) Ref {
-	return EnsureIsRef(obj, FailObject, pattern)
+	if c, yes := EnsureIsRef(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsRef(args []Object, index int) Ref {
-	return EnsureIsRef(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsRef(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsKVReduce(obj Object, failFn FailFn, failArgs ...interface{}) KVReduce {
+func EnsureIsKVReduce(obj Object) (KVReduce, bool) {
 	switch c := obj.(type) {
 	case KVReduce:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsKVReduce(obj Object, pattern string) KVReduce {
-	return EnsureIsKVReduce(obj, FailObject, pattern)
+	if c, yes := EnsureIsKVReduce(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsKVReduce(args []Object, index int) KVReduce {
-	return EnsureIsKVReduce(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsKVReduce(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsPending(obj Object, failFn FailFn, failArgs ...interface{}) Pending {
+func EnsureIsPending(obj Object) (Pending, bool) {
 	switch c := obj.(type) {
 	case Pending:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsPending(obj Object, pattern string) Pending {
-	return EnsureIsPending(obj, FailObject, pattern)
+	if c, yes := EnsureIsPending(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsPending(args []Object, index int) Pending {
-	return EnsureIsPending(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsPending(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsFile(obj Object, failFn FailFn, failArgs ...interface{}) *File {
+func EnsureIsFile(obj Object) (*File, bool) {
 	switch c := obj.(type) {
 	case *File:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsFile(obj Object, pattern string) *File {
-	return EnsureIsFile(obj, FailObject, pattern)
+	if c, yes := EnsureIsFile(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsFile(args []Object, index int) *File {
-	return EnsureIsFile(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsFile(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsio_Reader(obj Object, failFn FailFn, failArgs ...interface{}) io.Reader {
+func EnsureIsio_Reader(obj Object) (io.Reader, bool) {
 	switch c := obj.(type) {
 	case io.Reader:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsio_Reader(obj Object, pattern string) io.Reader {
-	return EnsureIsio_Reader(obj, FailObject, pattern)
+	if c, yes := EnsureIsio_Reader(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsio_Reader(args []Object, index int) io.Reader {
-	return EnsureIsio_Reader(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsio_Reader(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsio_Writer(obj Object, failFn FailFn, failArgs ...interface{}) io.Writer {
+func EnsureIsio_Writer(obj Object) (io.Writer, bool) {
 	switch c := obj.(type) {
 	case io.Writer:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsio_Writer(obj Object, pattern string) io.Writer {
-	return EnsureIsio_Writer(obj, FailObject, pattern)
+	if c, yes := EnsureIsio_Writer(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsio_Writer(args []Object, index int) io.Writer {
-	return EnsureIsio_Writer(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsio_Writer(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsStringReader(obj Object, failFn FailFn, failArgs ...interface{}) StringReader {
+func EnsureIsStringReader(obj Object) (StringReader, bool) {
 	switch c := obj.(type) {
 	case StringReader:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsStringReader(obj Object, pattern string) StringReader {
-	return EnsureIsStringReader(obj, FailObject, pattern)
+	if c, yes := EnsureIsStringReader(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsStringReader(args []Object, index int) StringReader {
-	return EnsureIsStringReader(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsStringReader(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsio_RuneReader(obj Object, failFn FailFn, failArgs ...interface{}) io.RuneReader {
+func EnsureIsio_RuneReader(obj Object) (io.RuneReader, bool) {
 	switch c := obj.(type) {
 	case io.RuneReader:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsio_RuneReader(obj Object, pattern string) io.RuneReader {
-	return EnsureIsio_RuneReader(obj, FailObject, pattern)
+	if c, yes := EnsureIsio_RuneReader(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsio_RuneReader(args []Object, index int) io.RuneReader {
-	return EnsureIsio_RuneReader(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsio_RuneReader(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 
-func EnsureIsChannel(obj Object, failFn FailFn, failArgs ...interface{}) *Channel {
+func EnsureIsChannel(obj Object) (*Channel, bool) {
 	switch c := obj.(type) {
 	case *Channel:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return nil, false
 	}
 }
 
 func EnsureObjectIsChannel(obj Object, pattern string) *Channel {
-	return EnsureIsChannel(obj, FailObject, pattern)
+	if c, yes := EnsureIsChannel(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 
 func EnsureArgIsChannel(args []Object, index int) *Channel {
-	return EnsureIsChannel(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIsChannel(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }

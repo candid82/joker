@@ -12,6 +12,7 @@ type (
 		Name     string
 		TypeName string
 		ShowName string
+		NilValue string
 	}
 )
 
@@ -27,25 +28,32 @@ import (
 `
 
 var ensureIsTemplate string = `
-func EnsureIs{{.Name}}(obj Object, failFn FailFn, failArgs ...interface{}) {{.TypeName}} {
+func EnsureIs{{.Name}}(obj Object) ({{.TypeName}}, bool) {
 	switch c := obj.(type) {
 	case {{.TypeName}}:
-		return c
+		return c, true
 	default:
-		panic(failFn(obj, failArgs...))
+		return {{.NilValue}}, false
 	}
 }
 `
 
 var ensureObjectIsTemplate string = `
 func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
-	return EnsureIs{{.Name}}(obj, FailObject, pattern)
+	if c, yes := EnsureIs{{.Name}}(obj); yes {
+		return c
+	}
+	panic(FailObject(obj, pattern))
 }
 `
 
 var ensureArgIsTemplate string = `
 func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
-	return EnsureIs{{.Name}}(args[index], FailExtract, index)
+	obj := args[index]
+	if c, yes := EnsureIs{{.Name}}(obj); yes {
+		return c
+	}
+	panic(FailExtract(obj, index))
 }
 `
 
@@ -74,14 +82,21 @@ func generateAssertions(types []string) {
 	f.WriteString(header)
 	f.WriteString(importFmt)
 	for _, t := range types {
+		nilValue := "nil"
+		if t[0] == '=' {
+			t = t[1:]
+			nilValue = t + "{}"
+		}
 		typeInfo := TypeInfo{
 			Name:     t,
 			TypeName: t,
 			ShowName: t,
+			NilValue: nilValue,
 		}
 		if t[0] == '*' {
 			typeInfo.Name = t[1:]
 			typeInfo.ShowName = typeInfo.Name
+			typeInfo.NilValue = "nil"
 		} else if strings.ContainsRune(t, '.') {
 			typeInfo.Name = strings.ReplaceAll(t, ".", "_")
 		}
