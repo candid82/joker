@@ -31,7 +31,7 @@ func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
 	if c, yes := obj.({{.TypeName}}); yes {
 		return c
 	}
-	panic(FailObject(obj, "{{.TypeName}}", pattern))
+	panic(FailObject(obj, "{{.ShowName}}", pattern))
 }
 `
 
@@ -41,7 +41,7 @@ func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
 	if c, yes := obj.({{.TypeName}}); yes {
 		return c
 	}
-	panic(FailArg(obj, "{{.TypeName}}", index))
+	panic(FailArg(obj, "{{.ShowName}}", index))
 }
 `
 

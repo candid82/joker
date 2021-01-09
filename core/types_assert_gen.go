@@ -25,7 +25,7 @@ func EnsureObjectIsVector(obj Object, pattern string) *Vector {
 	if c, yes := obj.(*Vector); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Vector", pattern))
+	panic(FailObject(obj, "Vector", pattern))
 }
 
 func EnsureArgIsVector(args []Object, index int) *Vector {
@@ -33,7 +33,7 @@ func EnsureArgIsVector(args []Object, index int) *Vector {
 	if c, yes := obj.(*Vector); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Vector", index))
+	panic(FailArg(obj, "Vector", index))
 }
 
 func EnsureObjectIsChar(obj Object, pattern string) Char {
@@ -100,7 +100,7 @@ func EnsureObjectIsRegex(obj Object, pattern string) *Regex {
 	if c, yes := obj.(*Regex); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Regex", pattern))
+	panic(FailObject(obj, "Regex", pattern))
 }
 
 func EnsureArgIsRegex(args []Object, index int) *Regex {
@@ -108,7 +108,7 @@ func EnsureArgIsRegex(args []Object, index int) *Regex {
 	if c, yes := obj.(*Regex); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Regex", index))
+	panic(FailArg(obj, "Regex", index))
 }
 
 func EnsureObjectIsBoolean(obj Object, pattern string) Boolean {
@@ -190,7 +190,7 @@ func EnsureObjectIsType(obj Object, pattern string) *Type {
 	if c, yes := obj.(*Type); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Type", pattern))
+	panic(FailObject(obj, "Type", pattern))
 }
 
 func EnsureArgIsType(args []Object, index int) *Type {
@@ -198,7 +198,7 @@ func EnsureArgIsType(args []Object, index int) *Type {
 	if c, yes := obj.(*Type); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Type", index))
+	panic(FailArg(obj, "Type", index))
 }
 
 func EnsureObjectIsMeta(obj Object, pattern string) Meta {
@@ -355,7 +355,7 @@ func EnsureObjectIsRatio(obj Object, pattern string) *Ratio {
 	if c, yes := obj.(*Ratio); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Ratio", pattern))
+	panic(FailObject(obj, "Ratio", pattern))
 }
 
 func EnsureArgIsRatio(args []Object, index int) *Ratio {
@@ -363,14 +363,14 @@ func EnsureArgIsRatio(args []Object, index int) *Ratio {
 	if c, yes := obj.(*Ratio); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Ratio", index))
+	panic(FailArg(obj, "Ratio", index))
 }
 
 func EnsureObjectIsNamespace(obj Object, pattern string) *Namespace {
 	if c, yes := obj.(*Namespace); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Namespace", pattern))
+	panic(FailObject(obj, "Namespace", pattern))
 }
 
 func EnsureArgIsNamespace(args []Object, index int) *Namespace {
@@ -378,14 +378,14 @@ func EnsureArgIsNamespace(args []Object, index int) *Namespace {
 	if c, yes := obj.(*Namespace); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Namespace", index))
+	panic(FailArg(obj, "Namespace", index))
 }
 
 func EnsureObjectIsVar(obj Object, pattern string) *Var {
 	if c, yes := obj.(*Var); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Var", pattern))
+	panic(FailObject(obj, "Var", pattern))
 }
 
 func EnsureArgIsVar(args []Object, index int) *Var {
@@ -393,7 +393,7 @@ func EnsureArgIsVar(args []Object, index int) *Var {
 	if c, yes := obj.(*Var); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Var", index))
+	panic(FailArg(obj, "Var", index))
 }
 
 func EnsureObjectIsError(obj Object, pattern string) Error {
@@ -415,7 +415,7 @@ func EnsureObjectIsFn(obj Object, pattern string) *Fn {
 	if c, yes := obj.(*Fn); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Fn", pattern))
+	panic(FailObject(obj, "Fn", pattern))
 }
 
 func EnsureArgIsFn(args []Object, index int) *Fn {
@@ -423,7 +423,7 @@ func EnsureArgIsFn(args []Object, index int) *Fn {
 	if c, yes := obj.(*Fn); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Fn", index))
+	panic(FailArg(obj, "Fn", index))
 }
 
 func EnsureObjectIsDeref(obj Object, pattern string) Deref {
@@ -445,7 +445,7 @@ func EnsureObjectIsAtom(obj Object, pattern string) *Atom {
 	if c, yes := obj.(*Atom); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Atom", pattern))
+	panic(FailObject(obj, "Atom", pattern))
 }
 
 func EnsureArgIsAtom(args []Object, index int) *Atom {
@@ -453,7 +453,7 @@ func EnsureArgIsAtom(args []Object, index int) *Atom {
 	if c, yes := obj.(*Atom); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Atom", index))
+	panic(FailArg(obj, "Atom", index))
 }
 
 func EnsureObjectIsRef(obj Object, pattern string) Ref {
@@ -505,7 +505,7 @@ func EnsureObjectIsFile(obj Object, pattern string) *File {
 	if c, yes := obj.(*File); yes {
 		return c
 	}
-	panic(FailObject(obj, "*File", pattern))
+	panic(FailObject(obj, "File", pattern))
 }
 
 func EnsureArgIsFile(args []Object, index int) *File {
@@ -513,7 +513,7 @@ func EnsureArgIsFile(args []Object, index int) *File {
 	if c, yes := obj.(*File); yes {
 		return c
 	}
-	panic(FailArg(obj, "*File", index))
+	panic(FailArg(obj, "File", index))
 }
 
 func EnsureObjectIsio_Reader(obj Object, pattern string) io.Reader {
@@ -580,7 +580,7 @@ func EnsureObjectIsChannel(obj Object, pattern string) *Channel {
 	if c, yes := obj.(*Channel); yes {
 		return c
 	}
-	panic(FailObject(obj, "*Channel", pattern))
+	panic(FailObject(obj, "Channel", pattern))
 }
 
 func EnsureArgIsChannel(args []Object, index int) *Channel {
@@ -588,5 +588,5 @@ func EnsureArgIsChannel(args []Object, index int) *Channel {
 	if c, yes := obj.(*Channel); yes {
 		return c
 	}
-	panic(FailArg(obj, "*Channel", index))
+	panic(FailArg(obj, "Channel", index))
 }
