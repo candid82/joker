@@ -128,7 +128,7 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 			}
 			ns.mappings[sym.name] = newVar
 			if !strings.HasPrefix(ns.Name.Name(), "joker.") {
-				printParseWarning(sym.GetInfo().Pos(), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
+				printParseWarning(GetPosition(sym), fmt.Sprintf("WARNING: %s already refers to: %s in namespace %s, being replaced by: %s\n",
 					sym.ToString(false), existingVar.ToString(false), ns.Name.ToString(false), newVar.ToString(false)))
 			}
 			return newVar

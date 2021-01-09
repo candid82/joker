@@ -14,8 +14,8 @@
                            (reduce conj-import* v (map #(symbol (str p "." %)) cs)))))
                      [] specs)]
     `(do nil nil
-       ~@(map #(list 'joker.core/require (list 'quote %)) syms)
-       ~@(map #(list 'def-linter__ %) (remove resolve syms)))))
+         ~@(map #(list 'joker.core/require (list 'quote %)) syms)
+         ~@(map #(list 'def-linter__ %) (remove resolve syms)))))
 
 (def *known-macros*
   {'memfn nil
@@ -27,9 +27,9 @@
 
 (def default-data-readers
   (apply merge
-   {'inst #'joker.core/identity
-    'uuid #'joker.core/identity}
-   (map (fn [sym] {sym #'joker.core/taggify__}) (:known-tags joker.core/*linter-config*))))
+         {'inst #'joker.core/identity
+          'uuid #'joker.core/identity}
+         (map (fn [sym] {sym #'joker.core/taggify__}) (:known-tags joker.core/*linter-config*))))
 
 
 (defn ^:private validate-fields__
@@ -96,17 +96,17 @@
   [name fields & opts+specs]
   (validate-fields__ fields name)
   (let [impls (parse-opts+specs__ opts+specs)]
-    `(defn ~(symbol (str  "->" name))
+    `(defn ~(symbol (str "->" name))
        ~fields
        (def-linter__ ~(symbol (str name)))
-       (defn ~(symbol (str  "map->" name)) [~(symbol "_")] nil)
+       (defn ~(symbol (str "map->" name)) [~(symbol "_")] nil)
        ~@(defimpls__ impls))))
 
 (defmacro deftype
   [name fields & opts+specs]
   (validate-fields__ fields name)
   (let [impls (parse-opts+specs__ opts+specs)]
-    `(defn ~(symbol (str  "->" name))
+    `(defn ~(symbol (str "->" name))
        ~fields
        (def-linter__ ~(symbol (str name)))
        ~@(defimpls__ impls))))
@@ -115,7 +115,7 @@
   [& opts+specs]
   (let [impls (parse-opts+specs__ opts+specs)]
     `(do nil nil
-       ~@(defimpls__ impls))))
+         ~@(defimpls__ impls))))
 
 (defmacro defprotocol
   [name & opts+sigs]
@@ -146,8 +146,8 @@
                                           :doc doc}))))
                        {} sigs))]
     `(do nil
-       (def ~name)
-       ~@(defmethods__ sigs))))
+         (def ~name)
+         ~@(defmethods__ sigs))))
 
 (defn- emit-hinted-impl [c [p fs]]
   (let [hint (fn [specs]
@@ -235,63 +235,63 @@
 (defn map
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__map__ x coll))
+        (__map__ x coll))
   (^Seq [^Callable x c & colls]
-   (apply __map__ x c colls)))
+        (apply __map__ x c colls)))
 
 (def __mapcat__ mapcat)
 (defn mapcat
   ([^Callable x])
   (^Seq [^Callable x & colls]
-   (apply __mapcat__ x colls)))
+        (apply __mapcat__ x colls)))
 
 (def __filter__ filter)
 (defn filter
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__filter__ x coll)))
+        (__filter__ x coll)))
 
 (def __remove__ remove)
 (defn remove
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__remove__ x coll)))
+        (__remove__ x coll)))
 
 (def __take__ take)
 (defn take
   ([^Number x])
   (^Seq [^Number x ^Seqable coll]
-   (__take__ x coll)))
+        (__take__ x coll)))
 
 (def __take-while__ take-while)
 (defn take-while
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__take-while__ x coll)))
+        (__take-while__ x coll)))
 
 (def __drop__ drop)
 (defn drop
   ([^Number x])
   (^Seq [^Number x ^Seqable coll]
-   (__drop__ x coll)))
+        (__drop__ x coll)))
 
 (def __drop-while__ drop-while)
 (defn drop-while
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__drop-while__ x coll)))
+        (__drop-while__ x coll)))
 
 (def __take-nth__ take-nth)
 (defn take-nth
   ([^Number x])
   (^Seq [^Number x ^Seqable coll]
-   (__take-nth__ x coll)))
+        (__take-nth__ x coll)))
 
 (def __distinct__ distinct)
 (defn distinct
   ([])
   (^Seq [^Seqable coll]
-   (__distinct__ coll)))
+        (__distinct__ coll)))
 
 (def __replace__ replace)
 (defn replace
@@ -303,7 +303,7 @@
 (defn interpose
   ([x])
   (^Seq [x ^Seqable coll]
-   (__interpose__ x coll)))
+        (__interpose__ x coll)))
 
 (def __into__ into)
 (defn into
@@ -315,33 +315,33 @@
 (defn partition-by
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__partition-by__ x coll)))
+        (__partition-by__ x coll)))
 
 (def __partition-all__ partition-all)
 (defn partition-all
   ([^Number n])
   (^Seq [^Number n ^Seqable coll]
-   (__partition-all__ n coll))
+        (__partition-all__ n coll))
   (^Seq [^Number n ^Number step ^Seqable coll]
-   (__partition-all__ n step coll)))
+        (__partition-all__ n step coll)))
 
 (def __map-indexed__ map-indexed)
 (defn map-indexed
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__map-indexed__ x coll)))
+        (__map-indexed__ x coll)))
 
 (def __keep__ keep)
 (defn keep
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__keep__ x coll)))
+        (__keep__ x coll)))
 
 (def __keep-indexed__ keep-indexed)
 (defn keep-indexed
   ([^Callable x])
   (^Seq [^Callable x ^Seqable coll]
-   (__keep-indexed__ x coll)))
+        (__keep-indexed__ x coll)))
 
 (defn cat
   [^Callable x])
@@ -350,18 +350,18 @@
 (defn dedupe
   ([])
   (^Seq [^Seqable coll]
-   (__dedupe__ coll)))
+        (__dedupe__ coll)))
 
 (def __random-sample__ random-sample)
 (defn random-sample
   ([^Number x])
   (^Seq [^Number x ^Seqable coll]
-   (__random-sample__ x coll)))
+        (__random-sample__ x coll)))
 
 (def __sequence__ sequence)
 (defn sequence
   (^Seq [coll]
-   (__sequence__ coll))
+        (__sequence__ coll))
   (^Seq [xform coll])
   (^Seq [xform coll & colls]))
 
@@ -402,3 +402,15 @@
 (defmacro deftest
   [name & body]
   `(defn ~name [] ~@body))
+
+
+(ns clojure.core.async)
+
+(defmacro go-loop
+  [bindings & body]
+  `(go (loop ~bindings ~@body)))
+
+;; Don't want core's merge mapped in clojure.core.async
+;; to avoid incorrect type checking (core's merge, unline
+;; async's merge, requires Maps as arguments).
+(ns-unmap 'clojure.core.async 'merge)

@@ -1162,12 +1162,12 @@ func parseRecur(obj Object, ctx *ParseContext) *RecurExpr {
 		panic(&ParseError{obj: obj, msg: "Cannot recur across try"})
 	}
 	loopBindings := ctx.GetLoopBindings()
-	if loopBindings == nil && !LINTER_MODE {
+	if loopBindings == nil {
 		panic(&ParseError{obj: obj, msg: "No recursion point for recur"})
 	}
 	seq := obj.(Seq)
 	args := parseSeq(seq.Rest(), ctx)
-	if len(loopBindings) != len(args) && !LINTER_MODE {
+	if len(loopBindings) != len(args) {
 		panic(&ParseError{obj: obj, msg: fmt.Sprintf("Mismatched argument count to recur, expected: %d args, got: %d", len(loopBindings), len(args))})
 	}
 	ctx.recur = true
