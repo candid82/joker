@@ -401,7 +401,10 @@
 
 (defmacro deftest
   [name & body]
-  `(defn ~name [] ~@body))
+  `(do
+     (defn ~name [] ~@body)
+     ;; To silence "globally unused"" warning.
+     (~name)))
 
 
 (ns clojure.core.async)
