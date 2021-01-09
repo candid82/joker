@@ -1,0 +1,1 @@
+tests/linter/recur/input.clj:6:3: Parse error: Mismatched argument count to recur, expected: 1 args, got: 2
