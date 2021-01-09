@@ -22,34 +22,26 @@ package core
 
 var importFmt string = `
 import (
-	"fmt"
 	"io"
 )
 `
 
 var ensureObjectIsTemplate string = `
 func EnsureObjectIs{{.Name}}(obj Object, pattern string) {{.TypeName}} {
-	switch c := obj.(type) {
-	case {{.TypeName}}:
+	if c, yes := obj.({{.TypeName}}); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "{{.ShowName}}", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "{{.ShowName}}", pattern))
 }
 `
 
 var ensureArgIsTemplate string = `
 func EnsureArgIs{{.Name}}(args []Object, index int) {{.TypeName}} {
-	switch c := args[index].(type) {
-	case {{.TypeName}}:
+	obj := args[index]
+	if c, yes := obj.({{.TypeName}}); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "{{.ShowName}}"))
 	}
+	panic(FailArg(obj, "{{.ShowName}}", index))
 }
 `
 

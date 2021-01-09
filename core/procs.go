@@ -93,6 +93,18 @@ func ExtractBoolean(args []Object, index int) bool {
 	return EnsureArgIsBoolean(args, index).B
 }
 
+func FailArg(obj Object, typeName string, index int) *EvalError {
+	return RT.NewArgTypeError(index, obj, typeName)
+}
+
+func FailObject(obj Object, typeName, pattern string) *EvalError {
+	if pattern == "" {
+		pattern = "%s"
+	}
+	msg := fmt.Sprintf("Expected %s, got %s", typeName, obj.GetType().ToString(false))
+	return RT.NewError(fmt.Sprintf(pattern, msg))
+}
+
 func ExtractChar(args []Object, index int) rune {
 	return EnsureArgIsChar(args, index).Ch
 }

@@ -3,864 +3,590 @@
 package core
 
 import (
-	"fmt"
 	"io"
 )
 
 func EnsureObjectIsComparable(obj Object, pattern string) Comparable {
-	switch c := obj.(type) {
-	case Comparable:
+	if c, yes := obj.(Comparable); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Comparable", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Comparable", pattern))
 }
 
 func EnsureArgIsComparable(args []Object, index int) Comparable {
-	switch c := args[index].(type) {
-	case Comparable:
+	obj := args[index]
+	if c, yes := obj.(Comparable); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Comparable"))
 	}
+	panic(FailArg(obj, "Comparable", index))
 }
 
 func EnsureObjectIsVector(obj Object, pattern string) *Vector {
-	switch c := obj.(type) {
-	case *Vector:
+	if c, yes := obj.(*Vector); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Vector", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Vector", pattern))
 }
 
 func EnsureArgIsVector(args []Object, index int) *Vector {
-	switch c := args[index].(type) {
-	case *Vector:
+	obj := args[index]
+	if c, yes := obj.(*Vector); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Vector"))
 	}
+	panic(FailArg(obj, "Vector", index))
 }
 
 func EnsureObjectIsChar(obj Object, pattern string) Char {
-	switch c := obj.(type) {
-	case Char:
+	if c, yes := obj.(Char); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Char", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Char", pattern))
 }
 
 func EnsureArgIsChar(args []Object, index int) Char {
-	switch c := args[index].(type) {
-	case Char:
+	obj := args[index]
+	if c, yes := obj.(Char); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Char"))
 	}
+	panic(FailArg(obj, "Char", index))
 }
 
 func EnsureObjectIsString(obj Object, pattern string) String {
-	switch c := obj.(type) {
-	case String:
+	if c, yes := obj.(String); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "String", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "String", pattern))
 }
 
 func EnsureArgIsString(args []Object, index int) String {
-	switch c := args[index].(type) {
-	case String:
+	obj := args[index]
+	if c, yes := obj.(String); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "String"))
 	}
+	panic(FailArg(obj, "String", index))
 }
 
 func EnsureObjectIsSymbol(obj Object, pattern string) Symbol {
-	switch c := obj.(type) {
-	case Symbol:
+	if c, yes := obj.(Symbol); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Symbol", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Symbol", pattern))
 }
 
 func EnsureArgIsSymbol(args []Object, index int) Symbol {
-	switch c := args[index].(type) {
-	case Symbol:
+	obj := args[index]
+	if c, yes := obj.(Symbol); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Symbol"))
 	}
+	panic(FailArg(obj, "Symbol", index))
 }
 
 func EnsureObjectIsKeyword(obj Object, pattern string) Keyword {
-	switch c := obj.(type) {
-	case Keyword:
+	if c, yes := obj.(Keyword); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Keyword", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Keyword", pattern))
 }
 
 func EnsureArgIsKeyword(args []Object, index int) Keyword {
-	switch c := args[index].(type) {
-	case Keyword:
+	obj := args[index]
+	if c, yes := obj.(Keyword); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Keyword"))
 	}
+	panic(FailArg(obj, "Keyword", index))
 }
 
 func EnsureObjectIsRegex(obj Object, pattern string) *Regex {
-	switch c := obj.(type) {
-	case *Regex:
+	if c, yes := obj.(*Regex); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Regex", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Regex", pattern))
 }
 
 func EnsureArgIsRegex(args []Object, index int) *Regex {
-	switch c := args[index].(type) {
-	case *Regex:
+	obj := args[index]
+	if c, yes := obj.(*Regex); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Regex"))
 	}
+	panic(FailArg(obj, "Regex", index))
 }
 
 func EnsureObjectIsBoolean(obj Object, pattern string) Boolean {
-	switch c := obj.(type) {
-	case Boolean:
+	if c, yes := obj.(Boolean); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Boolean", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Boolean", pattern))
 }
 
 func EnsureArgIsBoolean(args []Object, index int) Boolean {
-	switch c := args[index].(type) {
-	case Boolean:
+	obj := args[index]
+	if c, yes := obj.(Boolean); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Boolean"))
 	}
+	panic(FailArg(obj, "Boolean", index))
 }
 
 func EnsureObjectIsTime(obj Object, pattern string) Time {
-	switch c := obj.(type) {
-	case Time:
+	if c, yes := obj.(Time); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Time", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Time", pattern))
 }
 
 func EnsureArgIsTime(args []Object, index int) Time {
-	switch c := args[index].(type) {
-	case Time:
+	obj := args[index]
+	if c, yes := obj.(Time); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Time"))
 	}
+	panic(FailArg(obj, "Time", index))
 }
 
 func EnsureObjectIsNumber(obj Object, pattern string) Number {
-	switch c := obj.(type) {
-	case Number:
+	if c, yes := obj.(Number); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Number", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Number", pattern))
 }
 
 func EnsureArgIsNumber(args []Object, index int) Number {
-	switch c := args[index].(type) {
-	case Number:
+	obj := args[index]
+	if c, yes := obj.(Number); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Number"))
 	}
+	panic(FailArg(obj, "Number", index))
 }
 
 func EnsureObjectIsSeqable(obj Object, pattern string) Seqable {
-	switch c := obj.(type) {
-	case Seqable:
+	if c, yes := obj.(Seqable); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Seqable", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Seqable", pattern))
 }
 
 func EnsureArgIsSeqable(args []Object, index int) Seqable {
-	switch c := args[index].(type) {
-	case Seqable:
+	obj := args[index]
+	if c, yes := obj.(Seqable); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Seqable"))
 	}
+	panic(FailArg(obj, "Seqable", index))
 }
 
 func EnsureObjectIsCallable(obj Object, pattern string) Callable {
-	switch c := obj.(type) {
-	case Callable:
+	if c, yes := obj.(Callable); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Callable", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Callable", pattern))
 }
 
 func EnsureArgIsCallable(args []Object, index int) Callable {
-	switch c := args[index].(type) {
-	case Callable:
+	obj := args[index]
+	if c, yes := obj.(Callable); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Callable"))
 	}
+	panic(FailArg(obj, "Callable", index))
 }
 
 func EnsureObjectIsType(obj Object, pattern string) *Type {
-	switch c := obj.(type) {
-	case *Type:
+	if c, yes := obj.(*Type); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Type", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Type", pattern))
 }
 
 func EnsureArgIsType(args []Object, index int) *Type {
-	switch c := args[index].(type) {
-	case *Type:
+	obj := args[index]
+	if c, yes := obj.(*Type); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Type"))
 	}
+	panic(FailArg(obj, "Type", index))
 }
 
 func EnsureObjectIsMeta(obj Object, pattern string) Meta {
-	switch c := obj.(type) {
-	case Meta:
+	if c, yes := obj.(Meta); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Meta", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Meta", pattern))
 }
 
 func EnsureArgIsMeta(args []Object, index int) Meta {
-	switch c := args[index].(type) {
-	case Meta:
+	obj := args[index]
+	if c, yes := obj.(Meta); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Meta"))
 	}
+	panic(FailArg(obj, "Meta", index))
 }
 
 func EnsureObjectIsInt(obj Object, pattern string) Int {
-	switch c := obj.(type) {
-	case Int:
+	if c, yes := obj.(Int); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Int", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Int", pattern))
 }
 
 func EnsureArgIsInt(args []Object, index int) Int {
-	switch c := args[index].(type) {
-	case Int:
+	obj := args[index]
+	if c, yes := obj.(Int); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Int"))
 	}
+	panic(FailArg(obj, "Int", index))
 }
 
 func EnsureObjectIsDouble(obj Object, pattern string) Double {
-	switch c := obj.(type) {
-	case Double:
+	if c, yes := obj.(Double); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Double", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Double", pattern))
 }
 
 func EnsureArgIsDouble(args []Object, index int) Double {
-	switch c := args[index].(type) {
-	case Double:
+	obj := args[index]
+	if c, yes := obj.(Double); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Double"))
 	}
+	panic(FailArg(obj, "Double", index))
 }
 
 func EnsureObjectIsStack(obj Object, pattern string) Stack {
-	switch c := obj.(type) {
-	case Stack:
+	if c, yes := obj.(Stack); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Stack", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Stack", pattern))
 }
 
 func EnsureArgIsStack(args []Object, index int) Stack {
-	switch c := args[index].(type) {
-	case Stack:
+	obj := args[index]
+	if c, yes := obj.(Stack); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Stack"))
 	}
+	panic(FailArg(obj, "Stack", index))
 }
 
 func EnsureObjectIsMap(obj Object, pattern string) Map {
-	switch c := obj.(type) {
-	case Map:
+	if c, yes := obj.(Map); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Map", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Map", pattern))
 }
 
 func EnsureArgIsMap(args []Object, index int) Map {
-	switch c := args[index].(type) {
-	case Map:
+	obj := args[index]
+	if c, yes := obj.(Map); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Map"))
 	}
+	panic(FailArg(obj, "Map", index))
 }
 
 func EnsureObjectIsSet(obj Object, pattern string) Set {
-	switch c := obj.(type) {
-	case Set:
+	if c, yes := obj.(Set); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Set", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Set", pattern))
 }
 
 func EnsureArgIsSet(args []Object, index int) Set {
-	switch c := args[index].(type) {
-	case Set:
+	obj := args[index]
+	if c, yes := obj.(Set); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Set"))
 	}
+	panic(FailArg(obj, "Set", index))
 }
 
 func EnsureObjectIsAssociative(obj Object, pattern string) Associative {
-	switch c := obj.(type) {
-	case Associative:
+	if c, yes := obj.(Associative); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Associative", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Associative", pattern))
 }
 
 func EnsureArgIsAssociative(args []Object, index int) Associative {
-	switch c := args[index].(type) {
-	case Associative:
+	obj := args[index]
+	if c, yes := obj.(Associative); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Associative"))
 	}
+	panic(FailArg(obj, "Associative", index))
 }
 
 func EnsureObjectIsReversible(obj Object, pattern string) Reversible {
-	switch c := obj.(type) {
-	case Reversible:
+	if c, yes := obj.(Reversible); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Reversible", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Reversible", pattern))
 }
 
 func EnsureArgIsReversible(args []Object, index int) Reversible {
-	switch c := args[index].(type) {
-	case Reversible:
+	obj := args[index]
+	if c, yes := obj.(Reversible); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Reversible"))
 	}
+	panic(FailArg(obj, "Reversible", index))
 }
 
 func EnsureObjectIsNamed(obj Object, pattern string) Named {
-	switch c := obj.(type) {
-	case Named:
+	if c, yes := obj.(Named); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Named", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Named", pattern))
 }
 
 func EnsureArgIsNamed(args []Object, index int) Named {
-	switch c := args[index].(type) {
-	case Named:
+	obj := args[index]
+	if c, yes := obj.(Named); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Named"))
 	}
+	panic(FailArg(obj, "Named", index))
 }
 
 func EnsureObjectIsComparator(obj Object, pattern string) Comparator {
-	switch c := obj.(type) {
-	case Comparator:
+	if c, yes := obj.(Comparator); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Comparator", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Comparator", pattern))
 }
 
 func EnsureArgIsComparator(args []Object, index int) Comparator {
-	switch c := args[index].(type) {
-	case Comparator:
+	obj := args[index]
+	if c, yes := obj.(Comparator); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Comparator"))
 	}
+	panic(FailArg(obj, "Comparator", index))
 }
 
 func EnsureObjectIsRatio(obj Object, pattern string) *Ratio {
-	switch c := obj.(type) {
-	case *Ratio:
+	if c, yes := obj.(*Ratio); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Ratio", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Ratio", pattern))
 }
 
 func EnsureArgIsRatio(args []Object, index int) *Ratio {
-	switch c := args[index].(type) {
-	case *Ratio:
+	obj := args[index]
+	if c, yes := obj.(*Ratio); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Ratio"))
 	}
+	panic(FailArg(obj, "Ratio", index))
 }
 
 func EnsureObjectIsNamespace(obj Object, pattern string) *Namespace {
-	switch c := obj.(type) {
-	case *Namespace:
+	if c, yes := obj.(*Namespace); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Namespace", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Namespace", pattern))
 }
 
 func EnsureArgIsNamespace(args []Object, index int) *Namespace {
-	switch c := args[index].(type) {
-	case *Namespace:
+	obj := args[index]
+	if c, yes := obj.(*Namespace); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Namespace"))
 	}
+	panic(FailArg(obj, "Namespace", index))
 }
 
 func EnsureObjectIsVar(obj Object, pattern string) *Var {
-	switch c := obj.(type) {
-	case *Var:
+	if c, yes := obj.(*Var); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Var", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Var", pattern))
 }
 
 func EnsureArgIsVar(args []Object, index int) *Var {
-	switch c := args[index].(type) {
-	case *Var:
+	obj := args[index]
+	if c, yes := obj.(*Var); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Var"))
 	}
+	panic(FailArg(obj, "Var", index))
 }
 
 func EnsureObjectIsError(obj Object, pattern string) Error {
-	switch c := obj.(type) {
-	case Error:
+	if c, yes := obj.(Error); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Error", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Error", pattern))
 }
 
 func EnsureArgIsError(args []Object, index int) Error {
-	switch c := args[index].(type) {
-	case Error:
+	obj := args[index]
+	if c, yes := obj.(Error); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Error"))
 	}
+	panic(FailArg(obj, "Error", index))
 }
 
 func EnsureObjectIsFn(obj Object, pattern string) *Fn {
-	switch c := obj.(type) {
-	case *Fn:
+	if c, yes := obj.(*Fn); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Fn", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Fn", pattern))
 }
 
 func EnsureArgIsFn(args []Object, index int) *Fn {
-	switch c := args[index].(type) {
-	case *Fn:
+	obj := args[index]
+	if c, yes := obj.(*Fn); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Fn"))
 	}
+	panic(FailArg(obj, "Fn", index))
 }
 
 func EnsureObjectIsDeref(obj Object, pattern string) Deref {
-	switch c := obj.(type) {
-	case Deref:
+	if c, yes := obj.(Deref); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Deref", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Deref", pattern))
 }
 
 func EnsureArgIsDeref(args []Object, index int) Deref {
-	switch c := args[index].(type) {
-	case Deref:
+	obj := args[index]
+	if c, yes := obj.(Deref); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Deref"))
 	}
+	panic(FailArg(obj, "Deref", index))
 }
 
 func EnsureObjectIsAtom(obj Object, pattern string) *Atom {
-	switch c := obj.(type) {
-	case *Atom:
+	if c, yes := obj.(*Atom); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Atom", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Atom", pattern))
 }
 
 func EnsureArgIsAtom(args []Object, index int) *Atom {
-	switch c := args[index].(type) {
-	case *Atom:
+	obj := args[index]
+	if c, yes := obj.(*Atom); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Atom"))
 	}
+	panic(FailArg(obj, "Atom", index))
 }
 
 func EnsureObjectIsRef(obj Object, pattern string) Ref {
-	switch c := obj.(type) {
-	case Ref:
+	if c, yes := obj.(Ref); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Ref", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Ref", pattern))
 }
 
 func EnsureArgIsRef(args []Object, index int) Ref {
-	switch c := args[index].(type) {
-	case Ref:
+	obj := args[index]
+	if c, yes := obj.(Ref); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Ref"))
 	}
+	panic(FailArg(obj, "Ref", index))
 }
 
 func EnsureObjectIsKVReduce(obj Object, pattern string) KVReduce {
-	switch c := obj.(type) {
-	case KVReduce:
+	if c, yes := obj.(KVReduce); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "KVReduce", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "KVReduce", pattern))
 }
 
 func EnsureArgIsKVReduce(args []Object, index int) KVReduce {
-	switch c := args[index].(type) {
-	case KVReduce:
+	obj := args[index]
+	if c, yes := obj.(KVReduce); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "KVReduce"))
 	}
+	panic(FailArg(obj, "KVReduce", index))
 }
 
 func EnsureObjectIsPending(obj Object, pattern string) Pending {
-	switch c := obj.(type) {
-	case Pending:
+	if c, yes := obj.(Pending); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Pending", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Pending", pattern))
 }
 
 func EnsureArgIsPending(args []Object, index int) Pending {
-	switch c := args[index].(type) {
-	case Pending:
+	obj := args[index]
+	if c, yes := obj.(Pending); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Pending"))
 	}
+	panic(FailArg(obj, "Pending", index))
 }
 
 func EnsureObjectIsFile(obj Object, pattern string) *File {
-	switch c := obj.(type) {
-	case *File:
+	if c, yes := obj.(*File); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "File", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "File", pattern))
 }
 
 func EnsureArgIsFile(args []Object, index int) *File {
-	switch c := args[index].(type) {
-	case *File:
+	obj := args[index]
+	if c, yes := obj.(*File); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "File"))
 	}
+	panic(FailArg(obj, "File", index))
 }
 
 func EnsureObjectIsio_Reader(obj Object, pattern string) io.Reader {
-	switch c := obj.(type) {
-	case io.Reader:
+	if c, yes := obj.(io.Reader); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "io.Reader", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "io.Reader", pattern))
 }
 
 func EnsureArgIsio_Reader(args []Object, index int) io.Reader {
-	switch c := args[index].(type) {
-	case io.Reader:
+	obj := args[index]
+	if c, yes := obj.(io.Reader); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "io.Reader"))
 	}
+	panic(FailArg(obj, "io.Reader", index))
 }
 
 func EnsureObjectIsio_Writer(obj Object, pattern string) io.Writer {
-	switch c := obj.(type) {
-	case io.Writer:
+	if c, yes := obj.(io.Writer); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "io.Writer", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "io.Writer", pattern))
 }
 
 func EnsureArgIsio_Writer(args []Object, index int) io.Writer {
-	switch c := args[index].(type) {
-	case io.Writer:
+	obj := args[index]
+	if c, yes := obj.(io.Writer); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "io.Writer"))
 	}
+	panic(FailArg(obj, "io.Writer", index))
 }
 
 func EnsureObjectIsStringReader(obj Object, pattern string) StringReader {
-	switch c := obj.(type) {
-	case StringReader:
+	if c, yes := obj.(StringReader); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "StringReader", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "StringReader", pattern))
 }
 
 func EnsureArgIsStringReader(args []Object, index int) StringReader {
-	switch c := args[index].(type) {
-	case StringReader:
+	obj := args[index]
+	if c, yes := obj.(StringReader); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "StringReader"))
 	}
+	panic(FailArg(obj, "StringReader", index))
 }
 
 func EnsureObjectIsio_RuneReader(obj Object, pattern string) io.RuneReader {
-	switch c := obj.(type) {
-	case io.RuneReader:
+	if c, yes := obj.(io.RuneReader); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "io.RuneReader", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "io.RuneReader", pattern))
 }
 
 func EnsureArgIsio_RuneReader(args []Object, index int) io.RuneReader {
-	switch c := args[index].(type) {
-	case io.RuneReader:
+	obj := args[index]
+	if c, yes := obj.(io.RuneReader); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "io.RuneReader"))
 	}
+	panic(FailArg(obj, "io.RuneReader", index))
 }
 
 func EnsureObjectIsChannel(obj Object, pattern string) *Channel {
-	switch c := obj.(type) {
-	case *Channel:
+	if c, yes := obj.(*Channel); yes {
 		return c
-	default:
-		if pattern == "" {
-			pattern = "%s"
-		}
-		msg := fmt.Sprintf("Expected %s, got %s", "Channel", obj.GetType().ToString(false))
-		panic(RT.NewError(fmt.Sprintf(pattern, msg)))
 	}
+	panic(FailObject(obj, "Channel", pattern))
 }
 
 func EnsureArgIsChannel(args []Object, index int) *Channel {
-	switch c := args[index].(type) {
-	case *Channel:
+	obj := args[index]
+	if c, yes := obj.(*Channel); yes {
 		return c
-	default:
-		panic(RT.NewArgTypeError(index, c, "Channel"))
 	}
+	panic(FailArg(obj, "Channel", index))
 }
