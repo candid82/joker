@@ -11,36 +11,31 @@
 ;   You must not remove this notice, or any other, from this software.
 
 
-(def
-  ^{:arglists '([& items])
-    :doc "Creates a new list containing the items."
-    :added "1.0"
-    :tag List}
+(def ^{:arglists '([& items])
+       :doc "Creates a new list containing the items."
+       :added "1.0"
+       :tag List}
   list list__)
 
-(def
-  ^{:arglists '([x seq])
-    :doc "Returns a new seq where x is the first element and seq is
+(def ^{:arglists '([x seq])
+       :doc "Returns a new seq where x is the first element and seq is
          the rest."
-         :added "1.0"
-         :tag Seq}
+       :added "1.0"
+       :tag Seq}
   cons cons__)
 
 ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
-(def
-  ^{:added "1.0"}
+(def ^{:added "1.0"}
   let (fn* let [&form &env & decl] (cons 'let* decl)))
 
 (set-macro__ #'let)
 
-(def
-  ^{:added "1.0"}
+(def ^{:added "1.0"}
   loop (fn* loop [&form &env & decl] (cons 'loop* decl)))
 
 (set-macro__ #'loop)
 
-(def
-  ^{:added "1.0"}
+(def ^{:added "1.0"}
   fn (fn* fn [&form &env & decl]
           (with-meta__
             (cons 'fn* decl)
@@ -48,165 +43,142 @@
 
 (set-macro__ #'fn)
 
-(def
-  ^{:arglists '([coll])
-    :doc "Returns the first item in the collection. Calls seq on its
+(def ^{:arglists '([coll])
+       :doc "Returns the first item in the collection. Calls seq on its
          argument. If coll is nil, returns nil."
-         :added "1.0"}
+       :added "1.0"}
   first first__)
 
-(def
-  ^{:arglists '([coll])
-    :doc "Returns a seq of the items after the first. Calls seq on its
+(def ^{:arglists '([coll])
+       :doc "Returns a seq of the items after the first. Calls seq on its
          argument.  If there are no more items, returns nil."
-         :added "1.0"
-         :tag Seq}
+       :added "1.0"
+       :tag Seq}
   next next__)
 
-(def
-  ^{:arglists '([coll])
-    :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
+(def ^{:arglists '([coll])
+       :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
          argument."
-         :added "1.0"
-         :tag Seq}
+       :added "1.0"
+       :tag Seq}
   rest rest__)
 
-(def
-  ^{:arglists '([coll x] [coll x & xs])
-    :doc "conj[oin]. Returns a new collection with the xs
+(def ^{:arglists '([coll x] [coll x & xs])
+       :doc "conj[oin]. Returns a new collection with the xs
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
-         :added "1.0"}
+       :added "1.0"}
   ; TODO: types
-  conj (fn conj
-         (^Collection [coll x] (conj__ coll x))
+  conj (fn conj (^Collection [coll x] (conj__ coll x))
          (^Collection [coll x & xs]
-          (if xs
-            (recur (conj__ coll x) (first xs) (next xs))
-            (conj__ coll x)))))
+                      (if xs
+                        (recur (conj__ coll x) (first xs) (next xs))
+                        (conj__ coll x)))))
 
-(def
-  ^{:doc "Same as (first (next x))"
-    :arglists '([x])
-    :added "1.0"}
+(def ^{:doc "Same as (first (next x))"
+       :arglists '([x])
+       :added "1.0"}
   second (fn second [^Seqable x] (first (next x))))
 
-(def
-  ^{:doc "Same as (first (first x))"
-    :arglists '([x])
-    :added "1.0"}
+(def ^{:doc "Same as (first (first x))"
+       :arglists '([x])
+       :added "1.0"}
   ffirst (fn ffirst [^Seqable x] (first (first x))))
 
-(def
-  ^{:doc "Same as (next (first x))"
-    :arglists '([x])
-    :added "1.0"
-    :tag Seq}
+(def ^{:doc "Same as (next (first x))"
+       :arglists '([x])
+       :added "1.0"
+       :tag Seq}
   nfirst (fn nfirst [^Seqable x] (next (first x))))
 
-(def
-  ^{:doc "Same as (first (next x))"
-    :arglists '([x])
-    :added "1.0"}
+(def ^{:doc "Same as (first (next x))"
+       :arglists '([x])
+       :added "1.0"}
   fnext (fn fnext [^Seqable x] (first (next x))))
 
-(def
-  ^{:doc "Same as (next (next x))"
-    :arglists '([x])
-    :added "1.0"
-    :tag Seq}
+(def ^{:doc "Same as (next (next x))"
+       :arglists '([x])
+       :added "1.0"
+       :tag Seq}
   nnext (fn nnext [^Seqable x] (next (next x))))
 
-(def
-  ^{:arglists '([coll])
-    :doc "Returns a seq on the collection. If the collection is
+(def ^{:arglists '([coll])
+       :doc "Returns a seq on the collection. If the collection is
          empty, returns nil.  (seq nil) returns nil."
-         :added "1.0"
-         :tag Seq}
+       :added "1.0"
+       :tag Seq}
   seq seq__)
 
-(def
-  ^{:arglists '([c x])
-    :doc "Evaluates x and tests if it is an instance of type
+(def ^{:arglists '([c x])
+       :doc "Evaluates x and tests if it is an instance of type
          c. Returns true or false"
-         :added "1.0"
-         :tag Boolean}
+       :added "1.0"
+       :tag Boolean}
   instance? instance?__)
 
-(def
-  ^{:arglists '([x])
-    :doc "Returns true if x is a sequence"
-    :added "1.0"}
+(def ^{:arglists '([x])
+       :doc "Returns true if x is a sequence"
+       :added "1.0"}
   seq? (fn seq? ^Boolean [x] (instance? Seq x)))
 
-(def
-  ^{:arglists '([x])
-    :doc "Returns true if x is a Char"
-    :added "1.0"}
+(def ^{:arglists '([x])
+       :doc "Returns true if x is a Char"
+       :added "1.0"}
   char? (fn char? ^Boolean [x] (instance? Char x)))
 
-(def
-  ^{:arglists '([x])
-    :doc "Returns true if x is a String"
-    :added "1.0"}
+(def ^{:arglists '([x])
+       :doc "Returns true if x is a String"
+       :added "1.0"}
   string? (fn string? ^Boolean [x] (instance? String x)))
 
-(def
-  ^{:arglists '([x])
-    :doc "Returns true if x is a map"
-    :added "1.0"}
+(def ^{:arglists '([x])
+       :doc "Returns true if x is a map"
+       :added "1.0"}
   map? (fn map? ^Boolean [x] (instance? Map x)))
 
-(def
-  ^{:arglists '([x])
-    :doc "Returns true if x is a vector"
-    :added "1.0"}
+(def ^{:arglists '([x])
+       :doc "Returns true if x is a vector"
+       :added "1.0"}
   vector? (fn vector? ^Boolean [x] (instance? Vector x)))
 
-(def
-  ^{:arglists '([msg map] [msg map cause])
-    :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
-    :added "1.0"
-    :tag ExInfo}
+(def ^{:arglists '([msg map] [msg map cause])
+       :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
+       :added "1.0"
+       :tag ExInfo}
   ex-info ex-info__)
 
-(def
-  ^{:arglists '([map key val] [map key val & kvs])
-    :doc "`assoc[iate]. When applied to a map, returns a new map of the
+(def ^{:arglists '([map key val] [map key val & kvs])
+       :doc "`assoc[iate]. When applied to a map, returns a new map of the
          same (hashed/sorted) type, that contains the mapping of key(s) to
          val(s). When applied to a vector, returns a new vector that
          contains val at index. Note - index must be <= (count vector)."
-         :added "1.0"}
+       :added "1.0"}
   assoc
-  (fn assoc
-    (^Map [^Associative map key val] (assoc__ map key val))
+  (fn assoc (^Map [^Associative map key val] (assoc__ map key val))
     (^Map [^Associative map key val & kvs]
-     (let [ret (assoc__ map key val)]
-       (if kvs
-         (if (next kvs)
-           (recur ret (first kvs) (second kvs) (nnext kvs))
-           (throw (ex-info "assoc expects even number of arguments after map/vector, found odd number" {})))
-         ret)))))
+          (let [ret (assoc__ map key val)]
+            (if kvs
+              (if (next kvs)
+                (recur ret (first kvs) (second kvs) (nnext kvs))
+                (throw (ex-info "assoc expects even number of arguments after map/vector, found odd number" {})))
+              ret)))))
 
-(def
-  ^{:arglists '([obj])
-    :doc "Returns the metadata of obj, returns nil if there is no metadata."
-    :added "1.0"
-    :tag Map}
+(def ^{:arglists '([obj])
+       :doc "Returns the metadata of obj, returns nil if there is no metadata."
+       :added "1.0"
+       :tag Map}
   meta meta__)
 
-(def
-  ^{:arglists '([obj m])
-    :doc "Returns an object of the same type and value as obj, with
+(def ^{:arglists '([obj m])
+       :doc "Returns an object of the same type and value as obj, with
          map m as its metadata."
-         :added "1.0"}
+       :added "1.0"}
   with-meta with-meta__)
 
 (def ^{:private true :dynamic true}
   assert-valid-fdecl (fn [form fdecl]))
 
-(def
-  ^{:private true}
+(def ^{:private true}
   sigs
   (fn [form fdecl]
     (assert-valid-fdecl form fdecl)
@@ -230,34 +202,30 @@
             (seq ret)))
         (list (asig fdecl))))))
 
-(def
-  ^{:arglists '([coll])
-    :doc "Return the last item in coll, in linear time."
-    :added "1.0"}
+(def ^{:arglists '([coll])
+       :doc "Return the last item in coll, in linear time."
+       :added "1.0"}
   last (fn last [^Seqable s]
          (if (next s)
            (recur (next s))
            (first s))))
 
-(def
-  ^{:arglists '([coll])
-    :doc "Return a seq of all but the last item in coll, in linear time."
-    :added "1.0"}
+(def ^{:arglists '([coll])
+       :doc "Return a seq of all but the last item in coll, in linear time."
+       :added "1.0"}
   butlast (fn butlast ^Seq [^Seqable s]
             (loop [ret [] s s]
               (if (next s)
                 (recur (conj ret (first s)) (next s))
                 (seq ret)))))
 
-(def
-
-  ^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
+(def ^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
          name (fn ([params* ] exprs*)+)) with any doc-string or attrs added
          to the var metadata. prepost-map defines a map with optional keys
          :pre and :post that contain collections of pre or post conditions."
-         :arglists '([name doc-string? attr-map? [params*] prepost-map? body]
-                     [name doc-string? attr-map? ([params*] prepost-map? body)+ attr-map?])
-         :added "1.0"}
+       :arglists '([name doc-string? attr-map? [params*] prepost-map? body]
+                   [name doc-string? attr-map? ([params*] prepost-map? body) + attr-map?])
+       :added "1.0"}
   defn (fn defn [&form &env name & fdecl]
          ;; Note: Cannot delegate this check to def because of the call to (with-meta name ..)
          (if (instance? Symbol name)
@@ -297,11 +265,10 @@
   [^Type t x]
   (cast__ t x))
 
-(def
-  ^{:arglists '([coll])
-    :doc "Creates a new vector containing the contents of coll."
-    :added "1.0"
-    :tag Vector}
+(def ^{:arglists '([coll])
+       :doc "Creates a new vector containing the contents of coll."
+       :added "1.0"
+       :tag Vector}
   vec vec__)
 
 (defn vector
@@ -310,37 +277,33 @@
   ^Vector [& args]
   (vec args))
 
-(def
-  ^{:arglists '([& keyvals])
-    :doc "keyval => key val
+(def ^{:arglists '([& keyvals])
+       :doc "keyval => key val
          Returns a new hash map with supplied mappings.  If any keys are
          equal, they are handled as if by repeated uses of assoc."
-         :added "1.0"
-         :tag HashMap}
+       :added "1.0"
+       :tag HashMap}
   hash-map hash-map__)
 
-(def
-  ^{:arglists '([& keys])
-    :doc "Returns a new hash set with supplied keys.  Any equal keys are
+(def ^{:arglists '([& keys])
+       :doc "Returns a new hash set with supplied keys.  Any equal keys are
          handled as if by repeated uses of conj."
-         :added "1.0"
-         :tag MapSet}
+       :added "1.0"
+       :tag MapSet}
   hash-set hash-set__)
 
 (defn nil?
   "Returns true if x is nil, false otherwise."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] (=__ x nil))
 
-(def
-
-  ^{:doc "Like defn, but the resulting function name is declared as a
+(def ^{:doc "Like defn, but the resulting function name is declared as a
          macro and will be used as a macro by the compiler when it is
          called."
-         :arglists '([name doc-string? attr-map? [params*] body]
-                     [name doc-string? attr-map? ([params*] body)+ attr-map?])
-         :added "1.0"}
+       :arglists '([name doc-string? attr-map? [params*] body]
+                   [name doc-string? attr-map? ([params*] body) + attr-map?])
+       :added "1.0"}
   defmacro (fn [&form &env
                 name & args]
              (let [prefix (loop [p (list name) args args]
@@ -394,53 +357,52 @@
   {:added "1.0"}
   [test & body]
   (let [b (if (>__ (count__ body) 1)
-              (cons 'do body)
-              (first body))]
-      (list 'if test nil b)))
+            (cons 'do body)
+            (first body))]
+    (list 'if test nil b)))
 
 (defn false?
   "Returns true if x is the value false, false otherwise."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] (=__ x false))
 
 (defn true?
   "Returns true if x is the value true, false otherwise."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] (=__ x true))
 
 (defn boolean?
   "Return true if x is a Boolean"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] (instance? Boolean x))
 
 (defn any?
   "Returns true given any argument."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] true)
 
 (defn not
   "Returns true if x is logical false, false otherwise."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (if x false true))
 
 (defn some?
   "Returns true if x is not nil, false otherwise."
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   [x] (not (nil? x)))
 
-(def
-  ^{:arglists '([& xs])
-    :doc "With no args, returns the empty string. With one arg x, returns
+(def ^{:arglists '([& xs])
+       :doc "With no args, returns the empty string. With one arg x, returns
          string representation of x. (str nil) returns the empty string. With more than
          one arg, returns the concatenation of the str values of the args."
-         :added "1.0"
-         :tag String}
+       :added "1.0"
+       :tag String}
   str str__)
 
 (defn symbol?
@@ -492,7 +454,7 @@
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
   {:tag Keyword
-  :added "1.0"}
+   :added "1.0"}
   ;; TODO: types
   (^Keyword [name] (cond (keyword? name) name
                      (symbol? name) (keyword__ name)
@@ -516,7 +478,7 @@
   (^Seq [a b ^Seqable args] (cons a (cons b args)))
   (^Seq [a b c ^Seqable args] (cons a (cons b (cons c args))))
   (^Seq [a b c d & more]
-   (cons a (cons b (cons c (cons d (spread more)))))))
+        (cons a (cons b (cons c (cons d (spread more)))))))
 
 (defn apply
   "Applies fn f to the argument list formed by prepending intervening arguments to args."
@@ -560,20 +522,20 @@
   (^Seq [] (lazy-seq nil))
   (^Seq [^Seqable x] (lazy-seq x))
   (^Seq [^Seqable x ^Seqable y]
-   (lazy-seq
-    (let [s (seq x)]
-      (if s
-        (cons (first s) (concat (rest s) y))
-        y))))
+        (lazy-seq
+         (let [s (seq x)]
+           (if s
+             (cons (first s) (concat (rest s) y))
+             y))))
   (^Seq [^Seqable x ^Seqable y & zs]
-   (let [cat (fn cat [xys zs]
-               (lazy-seq
-                (let [xys (seq xys)]
-                  (if xys
-                    (cons (first xys) (cat (rest xys) zs))
-                    (when zs
-                      (cat (first zs) (next zs)))))))]
-     (cat (concat x y) zs))))
+        (let [cat (fn cat [xys zs]
+                    (lazy-seq
+                     (let [xys (seq xys)]
+                       (if xys
+                         (cons (first xys) (cat (rest xys) zs))
+                         (when zs
+                           (cat (first zs) (next zs)))))))]
+          (cat (concat x y) zs))))
 
 
 (defmacro delay
@@ -620,11 +582,11 @@
   (^Boolean [x] true)
   (^Boolean [x y] (=__ x y))
   (^Boolean [x y & more]
-   (if (=__ x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (=__ y (first more)))
-     false)))
+            (if (=__ x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (=__ y (first more)))
+              false)))
 
 (defn not=
   "Same as (not (= obj1 obj2))"
@@ -632,7 +594,7 @@
   (^Boolean [x] false)
   (^Boolean [x y] (not (= x y)))
   (^Boolean [x y & more]
-   (not (apply = x y more))))
+            (not (apply = x y more))))
 
 (defn compare
   "Comparator. Returns a negative number, zero, or a positive number
@@ -700,11 +662,11 @@
   (^Boolean [^Number x] true)
   (^Boolean [^Number x ^Number y] (<__ x y))
   (^Boolean [^Number x ^Number y & more]
-   (if (< x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (< y (first more)))
-     false)))
+            (if (< x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (< y (first more)))
+              false)))
 
 (defn inc'
   "Returns a number one greater than num. Supports arbitrary precision.
@@ -754,7 +716,7 @@
   (^Number [^Number x] (cast Number x))
   (^Number [^Number x ^Number y] (add'__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce +' (+' x y) more)))
+           (reduce +' (+' x y) more)))
 
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
@@ -764,7 +726,7 @@
   (^Number [^Number x] (cast Number x))
   (^Number [^Number x ^Number y] (add__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce + (+ x y) more)))
+           (reduce + (+ x y) more)))
 
 (defn *'
   "Returns the product of nums. (*) returns 1. Supports arbitrary precision.
@@ -774,7 +736,7 @@
   (^Number [^Number x] (cast Number x))
   (^Number [^Number x ^Number y] (multiply'__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce *' (*' x y) more)))
+           (reduce *' (*' x y) more)))
 
 (defn *
   "Returns the product of nums. (*) returns 1. Does not auto-promote
@@ -784,7 +746,7 @@
   (^Number [^Number x] (cast Number x))
   (^Number [^Number x ^Number y] (multiply__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce * (* x y) more)))
+           (reduce * (* x y) more)))
 
 (defn /
   "If no denominators are supplied, returns 1/numerator,
@@ -793,7 +755,7 @@
   (^Number [^Number x] (/ 1 x))
   (^Number [^Number x ^Number y] (divide__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce / (/ x y) more)))
+           (reduce / (/ x y) more)))
 
 (defn -'
   "If no ys are supplied, returns the negation of x, else subtracts
@@ -803,7 +765,7 @@
   (^Number [^Number x] (subtract'__ x))
   (^Number [^Number x ^Number y] (subtract'__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce -' (-' x y) more)))
+           (reduce -' (-' x y) more)))
 
 (defn -
   "If no ys are supplied, returns the negation of x, else subtracts
@@ -813,7 +775,7 @@
   (^Number [^Number x] (subtract__ x))
   (^Number [^Number x ^Number y] (subtract__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce - (- x y) more)))
+           (reduce - (- x y) more)))
 
 (defn <=
   "Returns non-nil if nums are in monotonically non-decreasing order,
@@ -822,11 +784,11 @@
   (^Boolean [^Number x] true)
   (^Boolean [^Number x ^Number y] (<=__ x y))
   (^Boolean [^Number x ^Number y & more]
-   (if (<= x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (<= y (first more)))
-     false)))
+            (if (<= x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (<= y (first more)))
+              false)))
 
 (defn >
   "Returns non-nil if nums are in monotonically decreasing order,
@@ -835,11 +797,11 @@
   (^Boolean [^Number x] true)
   (^Boolean [^Number x ^Number y] (>__ x y))
   (^Boolean [^Number x ^Number y & more]
-   (if (> x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (> y (first more)))
-     false)))
+            (if (> x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (> y (first more)))
+              false)))
 
 (defn >=
   "Returns non-nil if nums are in monotonically non-increasing order,
@@ -848,11 +810,11 @@
   (^Boolean [^Number x] true)
   (^Boolean [^Number x ^Number y] (>=__ x y))
   (^Boolean [^Number x ^Number y & more]
-   (if (>= x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (>= y (first more)))
-     false)))
+            (if (>= x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (>= y (first more)))
+              false)))
 
 (defn ==
   "Returns non-nil if nums all have the equivalent
@@ -861,11 +823,11 @@
   (^Boolean [^Number x] true)
   (^Boolean [^Number x ^Number y] (==__ x y))
   (^Boolean [^Number x ^Number y & more]
-   (if (== x y)
-     (if (next more)
-       (recur y (first more) (next more))
-       (== y (first more)))
-     false)))
+            (if (== x y)
+              (if (next more)
+                (recur y (first more) (next more))
+                (== y (first more)))
+              false)))
 
 (defn max
   "Returns the greatest of the nums."
@@ -873,7 +835,7 @@
   (^Number [^Number x] x)
   (^Number [^Number x ^Number y] (max__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce max (max x y) more)))
+           (reduce max (max x y) more)))
 
 (defn min
   "Returns the least of the nums."
@@ -881,7 +843,7 @@
   (^Number [^Number x] x)
   (^Number [^Number x ^Number y] (min__ x y))
   (^Number [^Number x ^Number y & more]
-   (reduce min (min x y) more)))
+           (reduce min (min x y) more)))
 
 (defn dec'
   "Returns a number one less than num. Supports arbitrary precision.
@@ -927,28 +889,28 @@
   {:added "1.0"}
   (^Int [^Int x ^Int y] (bit-and__ x y))
   (^Int [^Int x ^Int y & more]
-   (reduce bit-and (bit-and x y) more)))
+        (reduce bit-and (bit-and x y) more)))
 
 (defn bit-or
   "Bitwise or"
   {:added "1.0"}
   (^Int [^Int x ^Int y] (bit-or__ x y))
   (^Int [^Int x ^Int y & more]
-   (reduce bit-or (bit-or x y) more)))
+        (reduce bit-or (bit-or x y) more)))
 
 (defn bit-xor
   "Bitwise exclusive or"
   {:added "1.0"}
   (^Int [^Int x ^Int y] (bit-xor_ x y))
   (^Int [^Int x ^Int y & more]
-   (reduce bit-xor (bit-xor x y) more)))
+        (reduce bit-xor (bit-xor x y) more)))
 
 (defn bit-and-not
   "Bitwise and with complement"
   {:added "1.0"}
   (^Int [^Int x ^Int y] (bit-and-not__ x y))
   (^Int [^Int x ^Int y & more]
-   (reduce bit-and-not (bit-and-not x y) more)))
+        (reduce bit-and-not (bit-and-not x y) more)))
 
 (defn bit-clear
   "Clear bit at index n"
@@ -1010,34 +972,34 @@
 (defn int?
   "Return true if x is a fixed precision integer"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (instance? Int x))
 
 (defn pos-int?
   "Return true if x is a positive fixed precision integer"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (and (int? x)
                     (pos? x)))
 
 (defn neg-int?
   "Return true if x is a negative fixed precision integer"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (and (int? x)
                     (neg? x)))
 
 (defn nat-int?
   "Return true if x is a non-negative fixed precision integer"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (and (int? x)
                     (not (neg? x))))
 
 (defn double?
   "Return true if x is a Double"
   {:tag Boolean
-  :added "1.0"}
+   :added "1.0"}
   ^Boolean [x] (instance? Double x))
 
 (defn complement
@@ -1099,12 +1061,12 @@
   {:added "1.0"}
   (^Map [^Map map] map)
   (^Map [^Map map key]
-   (dissoc__ map key))
+        (dissoc__ map key))
   (^Map [^Map map key & ks]
-   (let [ret (dissoc__ map key)]
-     (if ks
-       (recur ret (first ks) (next ks))
-       ret))))
+        (let [ret (dissoc__ map key)]
+          (if ks
+            (recur ret (first ks) (next ks))
+            ret))))
 
 (defn disj
   "disj[oin]. Returns a new set of the same (hashed/sorted) type, that
@@ -1112,13 +1074,13 @@
   {:added "1.0"}
   (^MapSet [^Set set] set)
   (^MapSet [^Set set key]
-   (disj__ set key))
+           (disj__ set key))
   (^MapSet [^Set set key & ks]
-   (when set
-     (let [ret (disj__ set key)]
-       (if ks
-         (recur ret (first ks) (next ks))
-         ret)))))
+           (when set
+             (let [ret (disj__ set key)]
+               (if ks
+                 (recur ret (first ks) (next ks))
+                 ret)))))
 
 (defn find
   "Returns the map entry for key, or nil if key not present."
@@ -1171,7 +1133,7 @@
 (defn name
   "Returns the name String of a string, symbol, keyword or any Named object (e.g. File)."
   {:tag String
-  :added "1.0"}
+   :added "1.0"}
   ;; TODO: types
   ^String [x]
   (if (string? x) x (name__ x)))
@@ -1179,7 +1141,7 @@
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."
   {:tag String
-  :added "1.0"}
+   :added "1.0"}
   ^String [^Named x]
   (namespace__ x))
 
@@ -1250,7 +1212,7 @@
     (if forms
       (let [form (first forms)
             threaded (if (seq? form)
-                       (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
+                       (with-meta `(~(first form) ~@(next form) ~x) (meta form))
                        (list form x))]
         (recur threaded (next forms)))
       x)))
@@ -1261,9 +1223,9 @@
          (throw (ex-info
                  (str (first ~'&form) " requires " ~(second pairs))
                  {:form ~'&form})))
-     ~(let [more (nnext pairs)]
-        (when more
-          (list* `assert-args more)))))
+       ~(let [more (nnext pairs)]
+          (when more
+            (list* `assert-args more)))))
 
 (defmacro if-let
   "bindings => binding-form test
@@ -1279,7 +1241,7 @@
      `(let [temp# ~tst]
         (if temp#
           (let [~form temp#
-                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+                t# ~then]            ; to avoid "redundant do form" warning from linter if ~then is (do...)
             t#)))))
   ([bindings then else & oldform]
    (assert-args
@@ -1290,7 +1252,7 @@
      `(let [temp# ~tst]
         (if temp#
           (let [~form temp#
-                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+                t# ~then]            ; to avoid "redundant do form" warning from linter if ~then is (do...)
             t#)
           ~else)))))
 
@@ -1327,7 +1289,7 @@
         (if (nil? temp#)
           ~else
           (let [~form temp#
-                t# ~then] ; to avoid "redundant do form" warning from linter if ~then is (do...)
+                t# ~then]            ; to avoid "redundant do form" warning from linter if ~then is (do...)
             t#))))))
 
 (defmacro when-some
@@ -1410,10 +1372,9 @@
       (finally
         (replace-bindings existing-bindings)))))
 
-(def
-  ^{:doc "The same as with-bindings*"
-    :arglists '([binding-map f & args])
-    :added "1.0"}
+(def ^{:doc "The same as with-bindings*"
+       :arglists '([binding-map f & args])
+       :added "1.0"}
   with-redefs-fn with-bindings*)
 
 (defmacro with-bindings
@@ -1435,12 +1396,12 @@
   {:added "1.0"}
   [bindings & body]
   (assert-args
-    (vector? bindings) "a vector for its binding"
-    (even? (count bindings)) "an even number of forms in binding vector")
+   (vector? bindings) "a vector for its binding"
+   (even? (count bindings)) "an even number of forms in binding vector")
   (let [var-ize (fn [var-vals]
                   (loop [ret [] vvs (seq var-vals)]
                     (if vvs
-                      (recur  (conj (conj ret `(var ~(first vvs))) (second vvs))
+                      (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
                              (next (next vvs)))
                       (seq ret))))]
     `(with-bindings (hash-map ~@(var-ize bindings)) ~@body)))
@@ -1532,26 +1493,26 @@
   (^Fn [] identity)
   (^Fn [^Callable f] f)
   (^Fn [^Callable f ^Callable g]
-   (fn
-     ([] (f (g)))
-     ([x] (f (g x)))
-     ([x y] (f (g x y)))
-     ([x y z] (f (g x y z)))
-     ([x y z & args] (f (apply g x y z args)))))
+       (fn
+         ([] (f (g)))
+         ([x] (f (g x)))
+         ([x y] (f (g x y)))
+         ([x y z] (f (g x y z)))
+         ([x y z & args] (f (apply g x y z args)))))
   (^Fn [^Callable f ^Callable g ^Callable h]
-   (fn
-     ([] (f (g (h))))
-     ([x] (f (g (h x))))
-     ([x y] (f (g (h x y))))
-     ([x y z] (f (g (h x y z))))
-     ([x y z & args] (f (g (apply h x y z args))))))
+       (fn
+         ([] (f (g (h))))
+         ([x] (f (g (h x))))
+         ([x y] (f (g (h x y))))
+         ([x y z] (f (g (h x y z))))
+         ([x y z & args] (f (g (apply h x y z args))))))
   (^Fn [^Callable f1 ^Callable f2 ^Callable f3 & fs]
-   (let [fs (reverse (list* f1 f2 f3 fs))]
-     (fn [& args]
-       (loop [ret (apply (first fs) args) fs (next fs)]
-         (if fs
-           (recur ((first fs) ret) (next fs))
-           ret))))))
+       (let [fs (reverse (list* f1 f2 f3 fs))]
+         (fn [& args]
+           (loop [ret (apply (first fs) args) fs (next fs)]
+             (if fs
+               (recur ((first fs) ret) (next fs))
+               ret))))))
 
 (defn juxt
   "Takes a set of functions and returns a fn that is the juxtaposition
@@ -1561,34 +1522,34 @@
   ((juxt a b c) x) => [(a x) (b x) (c x)]"
   {:added "1.0"}
   (^Fn [^Callable f]
-   (fn
-     ([] [(f)])
-     ([x] [(f x)])
-     ([x y] [(f x y)])
-     ([x y z] [(f x y z)])
-     ([x y z & args] [(apply f x y z args)])))
+       (fn
+         ([] [(f)])
+         ([x] [(f x)])
+         ([x y] [(f x y)])
+         ([x y z] [(f x y z)])
+         ([x y z & args] [(apply f x y z args)])))
   (^Fn [^Callable f ^Callable g]
-   (fn
-     ([] [(f) (g)])
-     ([x] [(f x) (g x)])
-     ([x y] [(f x y) (g x y)])
-     ([x y z] [(f x y z) (g x y z)])
-     ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
+       (fn
+         ([] [(f) (g)])
+         ([x] [(f x) (g x)])
+         ([x y] [(f x y) (g x y)])
+         ([x y z] [(f x y z) (g x y z)])
+         ([x y z & args] [(apply f x y z args) (apply g x y z args)])))
   (^Fn [^Callable f ^Callable g ^Callable h]
-   (fn
-     ([] [(f) (g) (h)])
-     ([x] [(f x) (g x) (h x)])
-     ([x y] [(f x y) (g x y) (h x y)])
-     ([x y z] [(f x y z) (g x y z) (h x y z)])
-     ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
+       (fn
+         ([] [(f) (g) (h)])
+         ([x] [(f x) (g x) (h x)])
+         ([x y] [(f x y) (g x y) (h x y)])
+         ([x y z] [(f x y z) (g x y z) (h x y z)])
+         ([x y z & args] [(apply f x y z args) (apply g x y z args) (apply h x y z args)])))
   (^Fn [^Callable f ^Callable g ^Callable h & fs]
-   (let [fs (list* f g h fs)]
-     (fn
-       ([] (reduce #(conj %1 (%2)) [] fs))
-       ([x] (reduce #(conj %1 (%2 x)) [] fs))
-       ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
-       ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
-       ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
+       (let [fs (list* f g h fs)]
+         (fn
+           ([] (reduce #(conj %1 (%2)) [] fs))
+           ([x] (reduce #(conj %1 (%2 x)) [] fs))
+           ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
+           ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
+           ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
 
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
@@ -1597,13 +1558,13 @@
   {:added "1.0"}
   (^Fn [^Callable f] f)
   (^Fn [^Callable f arg1]
-   (fn [& args] (apply f arg1 args)))
+       (fn [& args] (apply f arg1 args)))
   (^Fn [^Callable f arg1 arg2]
-   (fn [& args] (apply f arg1 arg2 args)))
+       (fn [& args] (apply f arg1 arg2 args)))
   (^Fn [^Callable f arg1 arg2 arg3]
-   (fn [& args] (apply f arg1 arg2 arg3 args)))
+       (fn [& args] (apply f arg1 arg2 arg3 args)))
   (^Fn [^Callable f arg1 arg2 arg3 & more]
-   (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
+       (fn [& args] (apply f arg1 arg2 arg3 (concat more args)))))
 
 (defn sequence
   "Coerces coll to a (possibly empty) sequence, if it is not already
@@ -1625,12 +1586,11 @@
     (pred (first coll)) (recur pred (next coll))
     :else false))
 
-(def
-  ^{:tag Boolean
-    :doc "Returns false if (pred x) is logical true for every x in
+(def ^{:tag Boolean
+       :doc "Returns false if (pred x) is logical true for every x in
          coll, else true."
-         :arglists '([pred coll])
-         :added "1.0"}
+       :arglists '([pred coll])
+       :added "1.0"}
   not-every? (comp not every?))
 
 (defn some
@@ -1643,12 +1603,11 @@
   (when (seq coll)
     (or (pred (first coll)) (recur pred (next coll)))))
 
-(def
-  ^{:tag Boolean
-    :doc "Returns false if (pred x) is logical true for any x in coll,
+(def ^{:tag Boolean
+       :doc "Returns false if (pred x) is logical true for any x in coll,
          else true."
-         :arglists '([pred coll])
-         :added "1.0"}
+       :arglists '([pred coll])
+       :added "1.0"}
   not-any? (comp not some))
 
 (defn map
@@ -1659,28 +1618,28 @@
   f should accept number-of-colls arguments."
   {:added "1.0"}
   (^Seq [^Callable f ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (cons (f (first s)) (map f (rest s))))))
+        (lazy-seq
+         (when-let [s (seq coll)]
+           (cons (f (first s)) (map f (rest s))))))
   (^Seq [^Callable f ^Seqable c1 ^Seqable c2]
-   (lazy-seq
-    (let [s1 (seq c1) s2 (seq c2)]
-      (when (and s1 s2)
-        (cons (f (first s1) (first s2))
-              (map f (rest s1) (rest s2)))))))
+        (lazy-seq
+         (let [s1 (seq c1) s2 (seq c2)]
+           (when (and s1 s2)
+             (cons (f (first s1) (first s2))
+                   (map f (rest s1) (rest s2)))))))
   (^Seq [^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3]
-   (lazy-seq
-    (let [s1 (seq c1) s2 (seq c2) s3 (seq c3)]
-      (when (and  s1 s2 s3)
-        (cons (f (first s1) (first s2) (first s3))
-              (map f (rest s1) (rest s2) (rest s3)))))))
+        (lazy-seq
+         (let [s1 (seq c1) s2 (seq c2) s3 (seq c3)]
+           (when (and s1 s2 s3)
+             (cons (f (first s1) (first s2) (first s3))
+                   (map f (rest s1) (rest s2) (rest s3)))))))
   (^Seq [^Callable f ^Seqable c1 ^Seqable c2 ^Seqable c3 & colls]
-   (let [step (fn step [cs]
-                (lazy-seq
-                 (let [ss (map seq cs)]
-                   (when (every? identity ss)
-                     (cons (map first ss) (step (map rest ss)))))))]
-     (map #(apply f %) (step (conj colls c3 c2 c1))))))
+        (let [step (fn step [cs]
+                     (lazy-seq
+                      (let [ss (map seq cs)]
+                        (when (every? identity ss)
+                          (cons (map first ss) (step (map rest ss)))))))]
+          (map #(apply f %) (step (conj colls c3 c2 c1))))))
 
 (defn mapcat
   "Returns the result of applying concat to the result of applying map
@@ -1694,12 +1653,12 @@
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
   (^Seq [^Callable pred ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (let [f (first s) r (rest s)]
-        (if (pred f)
-          (cons f (filter pred r))
-          (filter pred r)))))))
+        (lazy-seq
+         (when-let [s (seq coll)]
+           (let [f (first s) r (rest s)]
+             (if (pred f)
+               (cons f (filter pred r))
+               (filter pred r)))))))
 
 (defn remove
   "Returns a lazy sequence of the items in coll for which
@@ -1808,14 +1767,14 @@
   (^Seq [^Number end] (range 0 end 1))
   (^Seq [^Number start ^Number end] (range start end 1))
   (^Seq [^Number start ^Number end ^Number step]
-   (lazy-seq
-    (let [comp (cond
-                 (or (zero? step) (= start end)) not=
-                 (pos? step) <
-                 (neg? step) >)]
-      (if (comp start end)
-        (cons start (range (+ start step) end step))
-        ())))))
+        (lazy-seq
+         (let [comp (cond
+                      (or (zero? step) (= start end)) not=
+                      (pos? step) <
+                      (neg? step) >)]
+           (if (comp start end)
+             (cons start (range (+ start step) end step))
+             ())))))
 
 (defn merge
   "Returns a map that consists of the rest of the maps conj-ed onto
@@ -1883,9 +1842,9 @@
   supplied, uses compare."
   {:added "1.0"}
   (^Seq [^Seqable coll]
-   (sort compare coll))
+        (sort compare coll))
   (^Seq [^Comparator comp ^Seqable coll]
-   (sort__ comp coll)))
+        (sort__ comp coll)))
 
 (defn sort-by
   "Returns a sorted sequence of the items in coll, where the sort
@@ -1893,9 +1852,9 @@
   supplied, uses compare."
   {:added "1.0"}
   (^Seq [^Callable keyfn ^Seqable coll]
-   (sort-by keyfn compare coll))
+        (sort-by keyfn compare coll))
   (^Seq [^Callable keyfn ^Comparator comp ^Seqable coll]
-   (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))
+        (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))
 
 (defn dorun
   "When lazy sequences are produced via functions that have side
@@ -1905,11 +1864,11 @@
   the seq, does not retain the head and returns nil."
   {:added "1.0"}
   (^Nil [^Seqable coll]
-   (when (seq coll)
-     (recur (next coll))))
+        (when (seq coll)
+          (recur (next coll))))
   (^Nil [^Number n ^Seqable coll]
-   (when (and (seq coll) (pos? n))
-     (recur (dec n) (next coll)))))
+        (when (and (seq coll) (pos? n))
+          (recur (dec n) (next coll)))))
 
 (defn doall
   "When lazy sequences are produced via functions that have side
@@ -1920,11 +1879,11 @@
   seq to reside in memory at one time."
   {:added "1.0"}
   (^Seq [^Seqable coll]
-   (dorun coll)
-   coll)
+        (dorun coll)
+        coll)
   (^Seq [^Number n ^Seqable coll]
-   (dorun n coll)
-   coll))
+        (dorun n coll)
+        coll))
 
 (defn nthnext
   "Returns the nth next of coll, (seq coll) when n is 0."
@@ -1952,20 +1911,20 @@
   not enough padding elements, return a partition with less than n items."
   {:added "1.0"}
   (^Seq [^Number n ^Seqable coll]
-   (partition n n coll))
+        (partition n n coll))
   (^Seq [^Number n ^Number step ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (let [p (doall (take n s))]
-        (when (= n (count p))
-          (cons p (partition n step (nthrest s step))))))))
+        (lazy-seq
+         (when-let [s (seq coll)]
+           (let [p (doall (take n s))]
+             (when (= n (count p))
+               (cons p (partition n step (nthrest s step))))))))
   (^Seq [^Number n ^Number step ^Seqable pad ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (let [p (doall (take n s))]
-        (if (= n (count p))
-          (cons p (partition n step pad (nthrest s step)))
-          (list (take n (concat p pad)))))))))
+        (lazy-seq
+         (when-let [s (seq coll)]
+           (let [p (doall (take n s))]
+             (if (= n (count p))
+               (cons p (partition n step pad (nthrest s step)))
+               (list (take n (concat p pad)))))))))
 
 (defn eval
   "Evaluates the form data structure (not text!) and returns the result."
@@ -2001,8 +1960,8 @@
                                             ~@(when needrec [recform]))]
                      (= k :when) [false `(if ~v
                                            (do nil
-                                             ~subform
-                                             ~@(when needrec [recform]))
+                                               ~subform
+                                               ~@(when needrec [recform]))
                                            ~recform)]
                      :else [true `(loop [~seqsym (seq ~v)]
                                     (when ~seqsym
@@ -2113,14 +2072,13 @@
   ;; TODO: types (Number or String)
   (bigfloat__ x))
 
-(def
-  ^{:arglists '([& args])
-    :tag Nil
-    :doc "Prints the object(s) to the output stream that is the current value
+(def ^{:arglists '([& args])
+       :tag Nil
+       :doc "Prints the object(s) to the output stream that is the current value
          of *out*.  Prints the object(s), separated by spaces if there is
          more than one.  By default, pr and prn print in a way that objects
          can be read by the reader"
-         :added "1.0"}
+       :added "1.0"}
   pr pr__)
 
 (defn pprint
@@ -2143,12 +2101,11 @@
   (flush__ *out*)
   nil)
 
-(def
-  ^{:doc
-    "When set to true, output will be flushed whenever a newline is printed.
+(def ^{:doc
+       "When set to true, output will be flushed whenever a newline is printed.
 
     Defaults to true."
-    :added "1.0"}
+       :added "1.0"}
   *flush-on-newline* true)
 
 (defn prn
@@ -2181,17 +2138,15 @@
   ([] (read *in*))
   ([reader] (read__ reader)))
 
-(def
-  ^{:arglists '([])
-    :doc "Reads the next line from *in*. Returns nil if an error (such as EOF) is detected."
-    :added "1.0"
-    :tag String}
+(def ^{:arglists '([])
+       :doc "Reads the next line from *in*. Returns nil if an error (such as EOF) is detected."
+       :added "1.0"
+       :tag String}
   read-line read-line__)
 
-(def
-  ^{:arglists '([s])
-    :doc "Reads one object from the string s."
-    :added "1.0"}
+(def ^{:arglists '([s])
+       :doc "Reads one object from the string s."
+       :added "1.0"}
   read-string read-string__)
 
 (defn subvec
@@ -2202,9 +2157,9 @@
   trimming is done."
   {:added "1.0"}
   (^Vector [^Vector v ^Number start]
-   (subvec v start (count v)))
+           (subvec v start (count v)))
   (^Vector [^Vector v ^Number start ^Number end]
-   (subvec__ v start end)))
+           (subvec__ v start end)))
 
 (defmacro doto
   "Evaluates x then calls all of the methods and functions with the
@@ -2312,7 +2267,7 @@
         (if *linter-mode*
           (do
             (println-linter__ (ex-info (str "No namespace: " x " found")
-                                  {:form x :_prefix "Parse warning"}))
+                                       {:form x :_prefix "Parse warning"}))
             (create-ns__ x))
           (throw (ex-info (str "No namespace: " x " found") {:form x}))))))
 
@@ -2373,15 +2328,15 @@
   metadata from the name symbol.  Returns the var."
   {:added "1.0"}
   (^Var [ns ^Symbol name]
-   ;; TODO: types (Namespace or Symbol)
-   (let [v (intern__ (the-ns ns) name)]
-     (when (meta name) (set-meta__ v (meta name)))
-     v))
+        ;; TODO: types (Namespace or Symbol)
+        (let [v (intern__ (the-ns ns) name)]
+          (when (meta name) (set-meta__ v (meta name)))
+          v))
   (^Var [ns ^Symbol name val]
-    ;; TODO: types (Namespace or Symbol)
-   (let [v (intern__ (the-ns ns) name val)]
-     (when (meta name) (set-meta__ v (meta name)))
-     v)))
+        ;; TODO: types (Namespace or Symbol)
+        (let [v (intern__ (the-ns ns) name val)]
+          (when (meta name) (set-meta__ v (meta name)))
+          v)))
 
 (defn refer
   "refers to all public vars of ns, subject to filters.
@@ -2473,16 +2428,16 @@
   (^Seq [] ())
   (^Seq [^Seqable c1] (lazy-seq c1))
   (^Seq [^Seqable c1 ^Seqable c2]
-   (lazy-seq
-    (let [s1 (seq c1) s2 (seq c2)]
-      (when (and s1 s2)
-        (cons (first s1) (cons (first s2)
-                               (interleave (rest s1) (rest s2))))))))
+        (lazy-seq
+         (let [s1 (seq c1) s2 (seq c2)]
+           (when (and s1 s2)
+             (cons (first s1) (cons (first s2)
+                                    (interleave (rest s1) (rest s2))))))))
   (^Seq [^Seqable c1 ^Seqable c2 & colls]
-   (lazy-seq
-    (let [ss (map seq (conj colls c2 c1))]
-      (when (every? identity ss)
-        (concat (map first ss) (apply interleave (map rest ss))))))))
+        (lazy-seq
+         (let [ss (map seq (conj colls c2 c1))]
+           (when (every? identity ss)
+             (concat (map first ss) (apply interleave (map rest ss))))))))
 
 (defn ns-resolve
   "Returns the var or type to which a symbol will be resolved in the
@@ -2492,10 +2447,10 @@
   {:added "1.0"}
   ;; TODO: ns is namespace or symbol
   (^Var [ns ^Symbol sym]
-    (ns-resolve ns nil sym))
+        (ns-resolve ns nil sym))
   (^Var [ns ^Gettable env ^Symbol sym]
-    (when-not (contains? env sym)
-      (ns-resolve__ (the-ns ns) sym))))
+        (when-not (contains? env sym)
+          (ns-resolve__ (the-ns ns) sym))))
 
 (defn resolve
   "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
@@ -2503,12 +2458,11 @@
   (^Var [^Symbol sym] (ns-resolve *ns* sym))
   (^Var [^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
 
-(def
-  ^{:arglists '([& keyvals])
-    :doc "Constructs an array-map. If any keys are equal, they are handled as
+(def ^{:arglists '([& keyvals])
+       :doc "Constructs an array-map. If any keys are equal, they are handled as
          if by repeated uses of assoc."
-         :added "1.0"
-         :tag ArrayMap}
+       :added "1.0"
+       :tag ArrayMap}
   array-map array-map__)
 
 (defn ^:private make-mark-skip-unused__
@@ -2665,7 +2619,7 @@
 
   Defines a function"
   {:added "1.0", :special-form true,
-  :forms '[(fn name? [params* ] exprs*) (fn name? ([params* ] exprs*)+)]}
+   :forms '[(fn name? [params*] exprs*) (fn name? ([params*] exprs*) +)]}
   [& sigs]
   (let [name (if (symbol? (first sigs)) (first sigs) nil)
         sigs (if name (next sigs) sigs)
@@ -3099,10 +3053,10 @@
   [^Associative smap ^Seqable coll]
   (if (vector? coll)
     (reduce (fn [v i]
-               (if-let [e (find smap (nth v i))]
-                 (assoc v i (val e))
-                 v))
-             coll (range (count coll)))
+              (if-let [e (find smap (nth v i))]
+                (assoc v i (val e))
+                v))
+            coll (range (count coll)))
     (map #(if-let [e (find smap %)] (val e) %) coll)))
 
 (defn repeatedly
@@ -3144,14 +3098,14 @@
   (^Boolean [x] true)
   (^Boolean [x y] (not (= x y)))
   (^Boolean [x y & more]
-   (if (not= x y)
-     (loop [s #{x y} [x & etc :as xs] more]
-       (if xs
-         (if (contains? s x)
-           false
-           (recur (conj s x) etc))
-         true))
-     false)))
+            (if (not= x y)
+              (loop [s #{x y} [x & etc :as xs] more]
+                (if xs
+                  (if (contains? s x)
+                    false
+                    (recur (conj s x) etc))
+                  true))
+              false)))
 
 (defn format
   "Formats a string using fmt.Sprintf"
@@ -3178,18 +3132,18 @@
     (:require [my.lib1 :as lib1])
     (:use [my.lib2]))"
   {:arglists '([name docstring? attr-map? references*])
-  :added "1.0"}
+   :added "1.0"}
   [name & references]
   (let [process-reference
         (fn [[kname & args]]
           `(~(symbol "joker.core" (joker.core/name kname))
-              ~@(map #(list 'quote %) args)))
-        docstring  (when (string? (first references)) (first references))
+            ~@(map #(list 'quote %) args)))
+        docstring (when (string? (first references)) (first references))
         references (if docstring (next references) references)
         name (if docstring
                (vary-meta name assoc :doc docstring)
                name)
-        metadata   (when (map? (first references)) (first references))
+        metadata (when (map? (first references)) (first references))
         references (if metadata (next references) references)
         name (if metadata
                (vary-meta name merge metadata)
@@ -3254,8 +3208,7 @@
   Each such mapping is a two-element key/value vector. The key is a
   regular expression, matched against the namespace name; the value is
   a map specifying the source from which to load the external
-  dependency's root file (currently only the :url key is supported)."
-    }
+  dependency's root file (currently only the :url key is supported)."}
   *ns-sources* [])
 
 (defn- throw-if
@@ -3371,7 +3324,7 @@
         undefined-on-entry (not (find-ns lib))]
     (when (and *linter-mode* loaded)
       (println-linter__ (ex-info (str "duplicate require for " lib)
-                            {:form lib :_prefix "Parse warning"})))
+                                 {:form lib :_prefix "Parse warning"})))
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
       (if load
         (try
@@ -3414,7 +3367,7 @@
       (throw-if unsupported
                 (first unsupported)
                 (apply str "Unsupported option(s) supplied: "
-                     (interpose \, unsupported))))
+                       (interpose \, unsupported))))
     ; check a load target was specified
     (throw-if (not (seq args)) args "Nothing specified to load")
     (doseq [arg args]
@@ -3435,7 +3388,7 @@
     (let [pending (map #(if (= % path) (str "[ " % " ]") %)
                        (cons path *pending-paths*))
           chain (apply str (interpose "->" pending))]
-      (throw-if true  lib "Cyclic load dependency: %s" chain))))
+      (throw-if true lib "Cyclic load dependency: %s" chain))))
 
 (defn require
   "Loads libs, skipping any that are already loaded. Each argument is
@@ -3512,7 +3465,7 @@
   (if (qualified-symbol? sym)
     (or (resolve sym)
         (do (-> sym namespace symbol require)
-          (resolve sym)))
+            (resolve sym)))
     (throw (ex-info (str "Not a qualified symbol: " sym) {}))))
 
 (defn use
@@ -3593,10 +3546,10 @@
   created."
   {:added "1.0"}
   (^Map [^Associative m ^Seqable ks ^Callable f & args]
-   (let [[k & ks] ks]
-     (if ks
-       (assoc m k (apply update-in (get m k) ks f args))
-       (assoc m k (apply f (get m k) args))))))
+        (let [[k & ks] ks]
+          (if ks
+            (assoc m k (apply update-in (get m k) ks f args))
+            (assoc m k (apply f (get m k) args))))))
 
 (defn update
   "'Updates' a value in an associative structure, where k is a
@@ -3605,15 +3558,15 @@
   structure.  If the key does not exist, nil is passed as the old value."
   {:added "1.0"}
   (^Map [^Associative m k ^Callable f]
-   (assoc m k (f (get m k))))
+        (assoc m k (f (get m k))))
   (^Map [^Associative m k ^Callable f x]
-   (assoc m k (f (get m k) x)))
+        (assoc m k (f (get m k) x)))
   (^Map [^Associative m k ^Callable f x y]
-   (assoc m k (f (get m k) x y)))
+        (assoc m k (f (get m k) x y)))
   (^Map [^Associative m k ^Callable f x y z]
-   (assoc m k (f (get m k) x y z)))
+        (assoc m k (f (get m k) x y z)))
   (^Map [^Associative m k ^Callable f x y z & more]
-   (assoc m k (apply f (get m k) x y z more))))
+        (assoc m k (apply f (get m k) x y z more))))
 
 (defn coll?
   "Returns true if x implements Collection"
@@ -3668,24 +3621,20 @@
   {:added "1.0"}
   ^Boolean [coll] (instance? Indexed coll))
 
-(def
-  ^{:doc "bound in a repl to the most recent value printed"
-    :added "1.0"}
+(def ^{:doc "bound in a repl to the most recent value printed"
+       :added "1.0"}
   *1)
 
-(def
-  ^{:doc "bound in a repl to the second most recent value printed"
-    :added "1.0"}
+(def ^{:doc "bound in a repl to the second most recent value printed"
+       :added "1.0"}
   *2)
 
-(def
-  ^{:doc "bound in a repl to the third most recent value printed"
-    :added "1.0"}
+(def ^{:doc "bound in a repl to the third most recent value printed"
+       :added "1.0"}
   *3)
 
-(def
-  ^{:doc "bound in a repl to the most recent exception caught by the repl"
-    :added "1.0"}
+(def ^{:doc "bound in a repl to the most recent exception caught by the repl"
+       :added "1.0"}
   *e)
 
 (defn trampoline
@@ -3786,25 +3735,25 @@
   `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring :ns *ns* :name '~name)))
 
 (add-doc-and-meta *file*
-  "The path of the file being evaluated, as a String.
+                  "The path of the file being evaluated, as a String.
 
   When there is no file, e.g. in the REPL, the value is not defined."
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *main-file*
-  "The absolute path of <filename> on the command line, as a String.
+                  "The absolute path of <filename> on the command line, as a String.
 
   When there is no file, e.g. in the REPL, the value is not defined."
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *command-line-args*
-  "A sequence of the supplied command line arguments, or nil if
+                  "A sequence of the supplied command line arguments, or nil if
   none were supplied"
-  {:added "1.0"
-   :tag Seq})
+                  {:added "1.0"
+                   :tag Seq})
 
 (add-doc-and-meta *classpath*
-  "A vector of the classpath elements as configured by --classpath or
+                  "A vector of the classpath elements as configured by --classpath or
   the JOKER_CLASSPATH environment variable.
 
   Use colon-delimited <cp> (semicolon-delimited on Windows) for source
@@ -3820,43 +3769,43 @@
   resulting classpath is stored herein, and this variable is used (in
   lieu of command-line arguments or environment variables) for all
   pertinent subsequent operations."
-  {:added "1.0"
-   :private true})
+                  {:added "1.0"
+                   :private true})
 
 (add-doc-and-meta *ns*
-  "A Namespace object representing the current namespace."
-  {:added "1.0"})
+                  "A Namespace object representing the current namespace."
+                  {:added "1.0"})
 
 (add-doc-and-meta *in*
-  "A BufferedReader object representing standard input for read operations.
+                  "A BufferedReader object representing standard input for read operations.
 
   Defaults to stdin."
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *out*
-  "A IOWriter object representing standard output for print operations.
+                  "A IOWriter object representing standard output for print operations.
 
   Defaults to stdout."
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *err*
-  "A IOWriter object representing standard error for print operations.
+                  "A IOWriter object representing standard error for print operations.
 
   Defaults to stderr."
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *print-readably*
-  "When set to logical false, strings and characters will be printed with
+                  "When set to logical false, strings and characters will be printed with
   non-alphanumeric characters converted to the appropriate escape sequences.
 
   Defaults to true"
-  {:added "1.0"})
+                  {:added "1.0"})
 
 (add-doc-and-meta *loaded-libs*
-  "A set of symbols representing currently loaded libs"
-  {:added "1.0"
-   :dynamic true
-   :private true})
+                  "A set of symbols representing currently loaded libs"
+                  {:added "1.0"
+                   :dynamic true
+                   :private true})
 
 (defmacro letfn
   "fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)
@@ -3865,8 +3814,8 @@
   bindings of functions to their names. All of the names are available
   in all of the definitions of the functions, as well as the body."
   {:added "1.0",
-  :forms '[(letfn [fnspecs*] exprs*)],
-  :special-form true}
+   :forms '[(letfn [fnspecs*] exprs*)],
+   :special-form true}
   [fnspecs & body]
   `(letfn* ~(vec (interleave (map first fnspecs)
                              (map #(cons `fn %) fnspecs)))
@@ -3880,33 +3829,33 @@
   arguments, not just the one(s) being nil-patched."
   {:added "1.0"}
   (^Fn [^Callable f x]
-   (fn
-     ([a] (f (if (nil? a) x a)))
-     ([a b] (f (if (nil? a) x a) b))
-     ([a b c] (f (if (nil? a) x a) b c))
-     ([a b c & ds] (apply f (if (nil? a) x a) b c ds))))
+       (fn
+         ([a] (f (if (nil? a) x a)))
+         ([a b] (f (if (nil? a) x a) b))
+         ([a b c] (f (if (nil? a) x a) b c))
+         ([a b c & ds] (apply f (if (nil? a) x a) b c ds))))
   (^Fn [^Callable f x y]
-   (fn
-     ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
-     ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) c))
-     ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
+       (fn
+         ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
+         ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) c))
+         ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
   (^Fn [^Callable f x y z]
-   (fn
-     ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
-     ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
-     ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
+       (fn
+         ([a b] (f (if (nil? a) x a) (if (nil? b) y b)))
+         ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
+         ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
 (defn partition-all
   "Returns a lazy sequence of lists like partition, but may include
   partitions with fewer than n items at the end."
   {:added "1.0"}
   (^Seq [^Number n ^Seqable coll]
-   (partition-all n n coll))
+        (partition-all n n coll))
   (^Seq [^Number n ^Number step ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (let [seg (doall (take n s))]
-        (cons seg (partition-all n step (nthrest s step))))))))
+        (lazy-seq
+         (when-let [s (seq coll)]
+           (let [seg (doall (take n s))]
+             (cons seg (partition-all n step (nthrest s step))))))))
 
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of
@@ -3959,13 +3908,13 @@
   f should accept number-of-colls arguments."
   {:added "1.0"}
   (^Vector [^Callable f coll]
-   (reduce (fn [v o] (conj v (f o))) [] coll))
+           (reduce (fn [v o] (conj v (f o))) [] coll))
   (^Vector [^Callable f c1 c2]
-   (into [] (map f c1 c2)))
+           (into [] (map f c1 c2)))
   (^Vector [^Callable f c1 c2 c3]
-   (into [] (map f c1 c2 c3)))
+           (into [] (map f c1 c2 c3)))
   (^Vector [^Callable f c1 c2 c3 & colls]
-   (into [] (apply map f c1 c2 c3 colls))))
+           (into [] (apply map f c1 c2 c3 colls))))
 
 (defn filterv
   "Returns a vector of the items in coll for which
@@ -4040,15 +3989,15 @@
   per reduce) of coll by f, starting with init."
   {:added "1.0"}
   (^Seq [^Callable f ^Seqable coll]
-   (lazy-seq
-    (if-let [s (seq coll)]
-      (reductions f (first s) (rest s))
-      (list (f)))))
+        (lazy-seq
+         (if-let [s (seq coll)]
+           (reductions f (first s) (rest s))
+           (list (f)))))
   (^Seq [^Callable f init ^Seqable coll]
-   (cons init
-         (lazy-seq
-          (when-let [s (seq coll)]
-            (reductions f (f init (first s)) (rest s)))))))
+        (cons init
+              (lazy-seq
+               (when-let [s (seq coll)]
+                 (reductions f (f init (first s)) (rest s)))))))
 
 (defn rand-nth
   "Return a random element of the (sequential) collection. Will have
@@ -4124,38 +4073,34 @@
   argument that triggers a logical false result against the original predicates."
   {:added "1.0"}
   (^Fn [^Callable p]
-   (fn ep1
-     ([] true)
-     ([x] (boolean (p x)))
-     ([x y] (boolean (and (p x) (p y))))
-     ([x y z] (boolean (and (p x) (p y) (p z))))
-     ([x y z & args] (boolean (and (ep1 x y z)
-                                   (every? p args))))))
+       (fn ep1 ([] true)
+         ([x] (boolean (p x)))
+         ([x y] (boolean (and (p x) (p y))))
+         ([x y z] (boolean (and (p x) (p y) (p z))))
+         ([x y z & args] (boolean (and (ep1 x y z)
+                                       (every? p args))))))
   (^Fn [^Callable p1 ^Callable p2]
-   (fn ep2
-     ([] true)
-     ([x] (boolean (and (p1 x) (p2 x))))
-     ([x y] (boolean (and (p1 x) (p1 y) (p2 x) (p2 y))))
-     ([x y z] (boolean (and (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z))))
-     ([x y z & args] (boolean (and (ep2 x y z)
-                                   (every? #(and (p1 %) (p2 %)) args))))))
+       (fn ep2 ([] true)
+         ([x] (boolean (and (p1 x) (p2 x))))
+         ([x y] (boolean (and (p1 x) (p1 y) (p2 x) (p2 y))))
+         ([x y z] (boolean (and (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z))))
+         ([x y z & args] (boolean (and (ep2 x y z)
+                                       (every? #(and (p1 %) (p2 %)) args))))))
   (^Fn [^Callable p1 ^Callable p2 ^Callable p3]
-   (fn ep3
-     ([] true)
-     ([x] (boolean (and (p1 x) (p2 x) (p3 x))))
-     ([x y] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y))))
-     ([x y z] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z))))
-     ([x y z & args] (boolean (and (ep3 x y z)
-                                   (every? #(and (p1 %) (p2 %) (p3 %)) args))))))
+       (fn ep3 ([] true)
+         ([x] (boolean (and (p1 x) (p2 x) (p3 x))))
+         ([x y] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y))))
+         ([x y z] (boolean (and (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z))))
+         ([x y z & args] (boolean (and (ep3 x y z)
+                                       (every? #(and (p1 %) (p2 %) (p3 %)) args))))))
   (^Fn [^Callable p1 ^Callable p2 ^Callable p3 & ps]
-   (let [ps (list* p1 p2 p3 ps)]
-     (fn epn
-       ([] true)
-       ([x] (every? #(% x) ps))
-       ([x y] (every? #(and (% x) (% y)) ps))
-       ([x y z] (every? #(and (% x) (% y) (% z)) ps))
-       ([x y z & args] (boolean (and (epn x y z)
-                                     (every? #(every? % args) ps))))))))
+       (let [ps (list* p1 p2 p3 ps)]
+         (fn epn ([] true)
+           ([x] (every? #(% x) ps))
+           ([x y] (every? #(and (% x) (% y)) ps))
+           ([x y z] (every? #(and (% x) (% y) (% z)) ps))
+           ([x y z & args] (boolean (and (epn x y z)
+                                         (every? #(every? % args) ps))))))))
 
 (defn some-fn
   "Takes a set of predicates and returns a function f that returns the first logical true value
@@ -4164,38 +4109,34 @@
   argument that triggers a logical true result against the original predicates."
   {:added "1.0"}
   (^Fn [^Callable p]
-   (fn sp1
-     ([] nil)
-     ([x] (p x))
-     ([x y] (or (p x) (p y)))
-     ([x y z] (or (p x) (p y) (p z)))
-     ([x y z & args] (or (sp1 x y z)
-                         (some p args)))))
+       (fn sp1 ([] nil)
+         ([x] (p x))
+         ([x y] (or (p x) (p y)))
+         ([x y z] (or (p x) (p y) (p z)))
+         ([x y z & args] (or (sp1 x y z)
+                             (some p args)))))
   (^Fn [^Callable p1 ^Callable p2]
-   (fn sp2
-     ([] nil)
-     ([x] (or (p1 x) (p2 x)))
-     ([x y] (or (p1 x) (p1 y) (p2 x) (p2 y)))
-     ([x y z] (or (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z)))
-     ([x y z & args] (or (sp2 x y z)
-                         (some #(or (p1 %) (p2 %)) args)))))
+       (fn sp2 ([] nil)
+         ([x] (or (p1 x) (p2 x)))
+         ([x y] (or (p1 x) (p1 y) (p2 x) (p2 y)))
+         ([x y z] (or (p1 x) (p1 y) (p1 z) (p2 x) (p2 y) (p2 z)))
+         ([x y z & args] (or (sp2 x y z)
+                             (some #(or (p1 %) (p2 %)) args)))))
   (^Fn [^Callable p1 ^Callable p2 ^Callable p3]
-   (fn sp3
-     ([] nil)
-     ([x] (or (p1 x) (p2 x) (p3 x)))
-     ([x y] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y)))
-     ([x y z] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z)))
-     ([x y z & args] (or (sp3 x y z)
-                         (some #(or (p1 %) (p2 %) (p3 %)) args)))))
+       (fn sp3 ([] nil)
+         ([x] (or (p1 x) (p2 x) (p3 x)))
+         ([x y] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y)))
+         ([x y z] (or (p1 x) (p2 x) (p3 x) (p1 y) (p2 y) (p3 y) (p1 z) (p2 z) (p3 z)))
+         ([x y z & args] (or (sp3 x y z)
+                             (some #(or (p1 %) (p2 %) (p3 %)) args)))))
   (^Fn [^Callable p1 ^Callable p2 ^Callable p3 & ps]
-   (let [ps (list* p1 p2 p3 ps)]
-     (fn spn
-       ([] nil)
-       ([x] (some #(% x) ps))
-       ([x y] (some #(or (% x) (% y)) ps))
-       ([x y z] (some #(or (% x) (% y) (% z)) ps))
-       ([x y z & args] (or (spn x y z)
-                           (some #(some % args) ps)))))))
+       (let [ps (list* p1 p2 p3 ps)]
+         (fn spn ([] nil)
+           ([x] (some #(% x) ps))
+           ([x y] (some #(or (% x) (% y)) ps))
+           ([x y z] (some #(or (% x) (% y) (% z)) ps))
+           ([x y z & args] (or (spn x y z)
+                               (some #(some % args) ps)))))))
 
 (defn- ^{:dynamic true} assert-valid-fdecl
   "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
@@ -4356,10 +4297,10 @@
   [options & valid-keys]
   (when (seq (apply disj (apply hash-set (keys options)) valid-keys))
     (throw
-      (ex-info
-        (apply str "Only these options are valid: "
-          (first valid-keys)
-          (map #(str ", " %) (rest valid-keys))) {}))))
+     (ex-info
+      (apply str "Only these options are valid: "
+             (first valid-keys)
+             (map #(str ", " %) (rest valid-keys))) {}))))
 
 ;;multimethods
 
@@ -4408,31 +4349,31 @@
   {:arglists '([name docstring? attr-map? dispatch-fn & options])
    :added "1.0"}
   [mm-name & options]
-  (let [docstring   (if (string? (first options))
-                      (first options)
-                      nil)
-        options     (if (string? (first options))
-                      (next options)
-                      options)
-        m           (if (map? (first options))
-                      (first options)
-                      {})
-        options     (if (map? (first options))
-                      (next options)
-                      options)
+  (let [docstring (if (string? (first options))
+                    (first options)
+                    nil)
+        options (if (string? (first options))
+                  (next options)
+                  options)
+        m (if (map? (first options))
+            (first options)
+            {})
+        options (if (map? (first options))
+                  (next options)
+                  options)
         dispatch-fn (first options)
-        options     (next options)
-        m           (if docstring
-                      (assoc m :doc docstring)
-                      m)
-        m           (if (meta mm-name)
-                      (conj (meta mm-name) m)
-                      m)
+        options (next options)
+        m (if docstring
+            (assoc m :doc docstring)
+            m)
+        m (if (meta mm-name)
+            (conj (meta mm-name) m)
+            m)
         mm-name (with-meta mm-name m)]
     (when (= (count options) 1)
       (throw (ex-info "The syntax for defmulti has changed. Example: (defmulti name dispatch-fn :default dispatch-value)" {})))
-    (let [options   (apply hash-map options)
-          default   (get options :default :default)
+    (let [options (apply hash-map options)
+          default (get options :default :default)
           hierarchy (get options :hierarchy nil)]
       (check-valid-options options :default :hierarchy)
       `(let [v# (def ~mm-name)]
@@ -4440,7 +4381,7 @@
                         (fn? (deref v#))
                         (:method-table (meta (deref v#))))
            (let [fndef# (multimethod__ ~(name mm-name) ~dispatch-fn ~default ~hierarchy)]
-                 (def ~mm-name fndef#)))))))
+             (def ~mm-name fndef#)))))))
 
 (defmacro defmethod
   "Creates and installs a new method of multimethod associated with dispatch-value. "
@@ -4572,9 +4513,9 @@
   For more info, see: https://github.com/jcburley/go-spew"
   {:added "1.0"}
   (^Boolean [o]
-   (go-spew__ o))
+            (go-spew__ o))
   (^Boolean [o ^Map cfg]
-   (go-spew__ o cfg)))
+            (go-spew__ o cfg)))
 
 (defn- verbosity-level
   "Verbosity level as specified via the --verbose option to Joker."
