@@ -1,0 +1,1 @@
+tests/linter/doseq/input.clj:5:8: Parse warning: doseq with empty body

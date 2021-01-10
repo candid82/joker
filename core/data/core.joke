@@ -1940,6 +1940,9 @@
   (assert-args
    (vector? seq-exprs) "a vector for its binding"
    (even? (count seq-exprs)) "an even number of forms in binding vector")
+  (when (and *linter-mode* (not (seq body)))
+    (println-linter__ (ex-info "doseq with empty body"
+                               {:form seq-exprs :_prefix "Parse warning"})))
   (let [b (if (> (count body) 1)
             `(do ~@body)
             (first body))
