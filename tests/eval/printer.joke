@@ -16,3 +16,11 @@
     "##Inf" (joker.math/inf 1)
     "##-Inf" (joker.math/inf -1)
     "##NaN" (joker.math/nan)))
+
+(deftest print-double-values
+  (are [s v] (= s (pr-str v))
+    "1.9999999" 1.9999999
+    "1e-09" 1e-9
+    "1e-07" 1e-7
+    "0.001" 1e-3
+    "1.0" 1e0))
