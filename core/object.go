@@ -1086,14 +1086,11 @@ func (d Double) ToString(escape bool) string {
 	if math.IsNaN(dbl) {
 		return "##NaN"
 	}
-	res := fmt.Sprintf("%f", dbl)
-	var i int
-	for i = len(res) - 1; res[i] == '0'; i-- {
+	res := fmt.Sprintf("%g", dbl)
+	if strings.ContainsAny(res, ".e") {
+		return res
 	}
-	if res[i] == '.' {
-		return res[0 : i+2]
-	}
-	return res[0 : i+1]
+	return res + ".0"
 }
 
 func (d Double) Equals(other interface{}) bool {
