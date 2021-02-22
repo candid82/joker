@@ -298,13 +298,13 @@ func scanBigFloat(orig, str string, err error, reader *Reader) Object {
 	return MakeReadObject(reader, &res)
 }
 
-func scanInt(str string, base int, err error, reader *Reader) Object {
+func scanInt(orig, str string, base int, err error, reader *Reader) Object {
 	i, e := strconv.ParseInt(str, base, 0)
 	if e != nil {
-		return scanBigInt(str, str, base, err, reader)
+		return scanBigInt(orig, str, base, err, reader)
 	}
 	// TODO: 32-bit issue
-	return MakeReadObject(reader, Int{I: int(i)})
+	return MakeReadObject(reader, Int{I: int(i), Original: orig})
 }
 
 func scanFloat(str string, err error, reader *Reader) Object {
@@ -317,7 +317,7 @@ func scanFloat(str string, err error, reader *Reader) Object {
 
 func readNumber(reader *Reader) Object {
 	var b bytes.Buffer
-	isDouble, isHex, isExp, isRatio, base, nonDigits := false, false, false, false, "", 0
+	isDouble, isHex, isExp, isRatio, baseLen, nonDigits := false, false, false, false, 0, 0
 	d := reader.Get()
 	last := d
 	for !isDelimiter(d) {
@@ -331,12 +331,8 @@ func readNumber(reader *Reader) Object {
 		case 'e', 'E':
 			isExp = true
 		case 'r', 'R':
-			if base == "" {
-				base = b.String()
-				b.Reset()
-				last = d
-				d = reader.Get()
-				continue
+			if baseLen == 0 {
+				baseLen = b.Len()
 			}
 		}
 		if !unicode.IsDigit(d) {
@@ -348,20 +344,27 @@ func readNumber(reader *Reader) Object {
 	}
 	reader.Unget()
 	str := b.String()
-	if base != "" {
-		invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", base+"r"+str))
-		baseInt, err := strconv.ParseInt(base, 0, 0)
+	if baseLen != 0 {
+		invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
+		baseInt, err := strconv.ParseInt(str[0:baseLen], 0, 0)
 		if err != nil {
 			panic(invalidNumberError)
 		}
-		if base[0] == '-' {
+		negative := false
+		if baseInt < 0 {
 			baseInt = -baseInt
-			str = "-" + str
+			negative = true
 		}
 		if baseInt < 2 || baseInt > 36 {
 			panic(invalidNumberError)
 		}
-		return scanInt(str, int(baseInt), invalidNumberError, reader)
+		var number string
+		if negative {
+			number = "-" + str[baseLen+1:]
+		} else {
+			number = str[baseLen+1:] // Avoid an expensive catenation in positive/zero case
+		}
+		return scanInt(str, number, int(baseInt), invalidNumberError, reader)
 	}
 	invalidNumberError := MakeReadError(reader, fmt.Sprintf("Invalid number: %s", str))
 	if isRatio {
@@ -379,7 +382,7 @@ func readNumber(reader *Reader) Object {
 	if isDouble || (!isHex && isExp) {
 		return scanFloat(str, invalidNumberError, reader)
 	}
-	return scanInt(str, 0, invalidNumberError, reader)
+	return scanInt(str, str, 0, invalidNumberError, reader)
 }
 
 func isSymbolInitial(r rune) bool {
