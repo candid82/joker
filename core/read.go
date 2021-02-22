@@ -382,14 +382,16 @@ func readNumber(reader *Reader) Object {
 
 func isSymbolInitial(r rune) bool {
 	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '.', '%', '$', '|':
+	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '%', '$', '|':
 		return true
+	case '.':
+		return DIALECT != CLJS
 	}
 	return unicode.IsLetter(r) || r > 255
 }
 
 func isSymbolRune(r rune) bool {
-	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\''
+	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\'' || r == '.'
 }
 
 func readSymbol(reader *Reader, first rune) Object {
@@ -1182,6 +1184,12 @@ func Read(reader *Reader) (Object, bool) {
 	case unicode.IsDigit(r):
 		reader.Unget()
 		return readNumber(reader), false
+	case r == '.':
+		if DIALECT == CLJS && unicode.IsDigit(reader.Peek()) {
+			reader.Unget()
+			return readNumber(reader), false
+		}
+		return readSymbol(reader, r), false
 	case r == '-' || r == '+':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
