@@ -24,3 +24,16 @@
     "1e-07" 1e-7
     "0.001" 1e-3
     "1.0" 1e0))
+
+(deftest print-and-confirm-double-values
+  (are [v] (= v (read-string (pr-str v)))
+    1.9999999
+    1e-9
+    1e-7
+    1e-3
+    1e0
+    99999999.0
+    1.0e-100
+    1.0e+100
+    -2.5
+    -2.5e-3))
