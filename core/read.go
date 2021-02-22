@@ -371,12 +371,10 @@ func readNumber(reader *Reader) Object {
 		return scanRatio(str, invalidNumberError, reader)
 	}
 	if last == 'N' {
-		b.Truncate(b.Len() - 1)
-		return scanBigInt(b.String(), 0, invalidNumberError, reader)
+		return scanBigInt(str[:b.Len()-1], 0, invalidNumberError, reader)
 	}
 	if last == 'M' {
-		b.Truncate(b.Len() - 1)
-		return scanBigFloat(b.String(), invalidNumberError, reader)
+		return scanBigFloat(str[:b.Len()-1], invalidNumberError, reader)
 	}
 	if isDouble || (!isHex && isExp) {
 		return scanFloat(str, invalidNumberError, reader)
