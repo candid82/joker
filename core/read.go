@@ -312,7 +312,7 @@ func scanFloat(str string, err error, reader *Reader) Object {
 	if e != nil {
 		panic(err)
 	}
-	return MakeReadObject(reader, Double{D: dbl})
+	return MakeReadObject(reader, Double{D: dbl, Original: str})
 }
 
 func readNumber(reader *Reader) Object {
