@@ -83,7 +83,8 @@ type (
 	}
 	Double struct {
 		InfoHolder
-		D float64
+		D        float64
+		Original string
 	}
 	Int struct {
 		InfoHolder
@@ -1076,6 +1077,9 @@ func MakeDouble(d float64) Double {
 }
 
 func (d Double) ToString(escape bool) string {
+	if FORMAT_MODE && d.Original != "" {
+		return d.Original
+	}
 	dbl := d.D
 	if math.IsInf(dbl, 1) {
 		return "##Inf"
