@@ -307,6 +307,14 @@ func scanInt(str string, base int, err error, reader *Reader) Object {
 	return MakeReadObject(reader, Int{I: int(i)})
 }
 
+func scanFloat(str string, err error, reader *Reader) Object {
+	dbl, e := strconv.ParseFloat(str, 64)
+	if e != nil {
+		panic(err)
+	}
+	return MakeReadObject(reader, Double{D: dbl})
+}
+
 func readNumber(reader *Reader) Object {
 	var b bytes.Buffer
 	isDouble, isHex, isExp, isRatio, base, nonDigits := false, false, false, false, "", 0
@@ -371,11 +379,7 @@ func readNumber(reader *Reader) Object {
 		return scanBigFloat(b.String(), invalidNumberError, reader)
 	}
 	if isDouble || (!isHex && isExp) {
-		dbl, err := strconv.ParseFloat(str, 64)
-		if err != nil {
-			panic(invalidNumberError)
-		}
-		return MakeReadObject(reader, Double{D: dbl})
+		return scanFloat(str, invalidNumberError, reader)
 	}
 	return scanInt(str, 0, invalidNumberError, reader)
 }
