@@ -63,6 +63,17 @@ func ratioOrInt(r *big.Rat) Number {
 	return &Ratio{r: *r}
 }
 
+func ratioOrIntWithOriginal(orig string, r *big.Rat) Number {
+	if r.IsInt() {
+		if r.Num().IsInt64() {
+			// TODO: 32-bit issue
+			return MakeIntWithOriginal(orig, int(r.Num().Int64()))
+		}
+		return &BigInt{b: *r.Num(), Original: orig}
+	}
+	return &Ratio{r: *r, Original: orig}
+}
+
 func (ops IntOps) Combine(other Ops) Ops {
 	return other
 }

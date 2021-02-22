@@ -272,12 +272,12 @@ func readCharacter(reader *Reader) Object {
 	return MakeReadObject(reader, Char{Ch: r})
 }
 
-func scanBigInt(str string, base int, err error, reader *Reader) Object {
+func scanBigInt(orig, str string, base int, err error, reader *Reader) Object {
 	var bi big.Int
 	if _, ok := bi.SetString(str, base); !ok {
 		panic(err)
 	}
-	res := BigInt{b: bi}
+	res := BigInt{b: bi, Original: orig}
 	return MakeReadObject(reader, &res)
 }
 
@@ -286,22 +286,22 @@ func scanRatio(str string, err error, reader *Reader) Object {
 	if _, ok := rat.SetString(str); !ok {
 		panic(err)
 	}
-	return MakeReadObject(reader, ratioOrInt(&rat))
+	return MakeReadObject(reader, ratioOrIntWithOriginal(str, &rat))
 }
 
-func scanBigFloat(str string, err error, reader *Reader) Object {
+func scanBigFloat(orig, str string, err error, reader *Reader) Object {
 	var bf big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
 		panic(err)
 	}
-	res := BigFloat{b: bf}
+	res := BigFloat{b: bf, Original: orig}
 	return MakeReadObject(reader, &res)
 }
 
 func scanInt(str string, base int, err error, reader *Reader) Object {
 	i, e := strconv.ParseInt(str, base, 0)
 	if e != nil {
-		return scanBigInt(str, base, err, reader)
+		return scanBigInt(str, str, base, err, reader)
 	}
 	// TODO: 32-bit issue
 	return MakeReadObject(reader, Int{I: int(i)})
@@ -371,10 +371,10 @@ func readNumber(reader *Reader) Object {
 		return scanRatio(str, invalidNumberError, reader)
 	}
 	if last == 'N' {
-		return scanBigInt(str[:b.Len()-1], 0, invalidNumberError, reader)
+		return scanBigInt(str, str[:b.Len()-1], 0, invalidNumberError, reader)
 	}
 	if last == 'M' {
-		return scanBigFloat(str[:b.Len()-1], invalidNumberError, reader)
+		return scanBigFloat(str, str[:b.Len()-1], invalidNumberError, reader)
 	}
 	if isDouble || (!isHex && isExp) {
 		return scanFloat(str, invalidNumberError, reader)

@@ -1142,6 +1142,10 @@ func MakeInt(i int) Int {
 	return Int{I: i}
 }
 
+func MakeIntWithOriginal(orig string, i int) Int {
+	return Int{I: i, Original: orig}
+}
+
 func (i Int) Equals(other interface{}) bool {
 	return equalsNumbers(i, other)
 }
