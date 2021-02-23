@@ -88,19 +88,23 @@ type (
 	}
 	Int struct {
 		InfoHolder
-		I int
+		I        int
+		Original string
 	}
 	BigInt struct {
 		InfoHolder
-		b big.Int
+		b        big.Int
+		Original string
 	}
 	BigFloat struct {
 		InfoHolder
-		b big.Float
+		b        big.Float
+		Original string
 	}
 	Ratio struct {
 		InfoHolder
-		r big.Rat
+		r        big.Rat
+		Original string
 	}
 	Boolean struct {
 		InfoHolder
@@ -977,6 +981,9 @@ func MakeBigInt(bi int64) *BigInt {
 }
 
 func (bi *BigInt) ToString(escape bool) string {
+	if FORMAT_MODE && bi.Original != "" {
+		return bi.Original
+	}
 	return bi.b.String() + "N"
 }
 
@@ -997,6 +1004,9 @@ func (bi *BigInt) Compare(other Object) int {
 }
 
 func (bf *BigFloat) ToString(escape bool) string {
+	if FORMAT_MODE && bf.Original != "" {
+		return bf.Original
+	}
 	b := bf.b
 	if b.IsInf() {
 		if b.Signbit() {
@@ -1122,11 +1132,18 @@ func (d Double) Compare(other Object) int {
 }
 
 func (i Int) ToString(escape bool) string {
+	if FORMAT_MODE && i.Original != "" {
+		return i.Original
+	}
 	return fmt.Sprintf("%d", i.I)
 }
 
 func MakeInt(i int) Int {
 	return Int{I: i}
+}
+
+func MakeIntWithOriginal(orig string, i int) Int {
+	return Int{I: i, Original: orig}
 }
 
 func (i Int) Equals(other interface{}) bool {
