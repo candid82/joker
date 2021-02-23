@@ -61,7 +61,10 @@ func split(s string, r *regexp.Regexp, n int) Object {
 func splitOnStringOrRegex(s string, sep Object, n int) Object {
 	switch sep := sep.(type) {
 	case String:
-		v := strings.Split(s, sep.S)
+		if n == 0 {
+			n = -1
+		}
+		v := strings.SplitN(s, sep.S, n)
 		result := EmptyVector()
 		for _, el := range v {
 			result = result.Conjoin(String{S: el})
