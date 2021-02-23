@@ -17,3 +17,9 @@
 (deftest split-of-string
   (is (= ["ab" "def"] (str/split "abcdef" "c")))
   (is (= ["abcdef"] (str/split "abcdef" "(b|d)"))))
+
+(deftest split-N-of-regex
+  (is (= ["a" "b/c/d"] (str/split "a/b/c/d" #"/" 2))))
+
+(deftest split-N-of-string
+  (is (= ["a" "b/c/d"] (str/split "a/b/c/d" "/" 2))))
