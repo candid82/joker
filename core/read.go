@@ -387,6 +387,24 @@ func readNumber(reader *Reader) Object {
 	return scanInt(str, str, 0, reader)
 }
 
+func AnyRuneIsValid(r rune) bool {
+	return !isDelimiter(r)
+}
+
+func AnyUnicodeIsValid(r rune) bool {
+	return unicode.IsLetter(r) || r > unicode.MaxLatin1
+}
+
+func AnyUnicodeLetterIsValid(r rune) bool {
+	return unicode.IsLetter(r)
+}
+
+func AnyASCIILetterIsValid(r rune) bool {
+	return r <= unicode.MaxASCII && unicode.IsLetter(r)
+}
+
+var IsValidLetterFn = AnyUnicodeLetterIsValid
+
 func isSymbolInitial(r rune) bool {
 	switch r {
 	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '%', '$', '|':
@@ -394,7 +412,7 @@ func isSymbolInitial(r rune) bool {
 	case '.':
 		return DIALECT != CLJS
 	}
-	return unicode.IsLetter(r) || r > 255
+	return IsValidLetterFn(r)
 }
 
 func isSymbolRune(r rune) bool {
@@ -1208,8 +1226,6 @@ func Read(reader *Reader) (Object, bool) {
 			return readSymbol(reader, r), false
 		}
 		return readArgSymbol(reader), false
-	case isSymbolInitial(r):
-		return readSymbol(reader, r), false
 	case r == '"':
 		return readString(reader), false
 	case r == '(':
@@ -1271,6 +1287,8 @@ func Read(reader *Reader) (Object, bool) {
 		return readWithMeta(reader), false
 	case r == '#':
 		return readDispatch(reader)
+	case isSymbolInitial(r):
+		return readSymbol(reader, r), false
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
 	}

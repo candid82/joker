@@ -139,6 +139,24 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
+### Valid Symbol (and Keyword) Characters
+
+The `--valid-letters` option specifies valid characters for symbol and keyword "letters", which are the non-special, non-digit characters that make up symbol names.
+
+While Clojure 1.10 allows, for example, em dashes in symbol names (which can lead to confusion), Joker does not; by default, it allows only Unicode letters (category L). E.g. `(def é "hey")` works as expected. `--valid-letters letters` specifies this explicitly.
+
+Earlier versions of Joker allowed any Unicode code points beyond MaxLatin1 (255, aka `0xff`) in addition to the ASCII letters (`[A-Z][a-z]`). This is more consistent with Clojure, in that it allows em dashes; e.g. `(def a–b "wow")`. Specify `--valid-letters unicode` for this behavior.
+
+Some developers prefer "strict ASCII". Joker supports this for symbol letters (though not for digits, which may be any Unicode digits) via `--valid-letters ascii`.
+
+On the other hand, `--valid-letters any` allows any character (not otherwise special, such as delimeters), including ASCII control characters.
+
+Note that `--valid-letters` affects only how symbols are parsed; `joker.core/symbol` is able to form a symbol from any string, regardless of content.
+
+Also note that, though most closely associated with linting, `--valid-letters` governs how symbols are parsed regardless of mode of operation (linting, running scripts, formatting, etc).
+
+Finally, the environment variable `JOKER_VALID_LETTERS` may be used to specify the default for `--valid-letters`.
+
 ### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
