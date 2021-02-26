@@ -369,22 +369,6 @@ func dialectFromArg(arg string) Dialect {
 	return UNKNOWN
 }
 
-func setValidLetters(arg, what string) {
-	switch strings.ToLower(arg) {
-	case "ascii":
-		IsValidLetterFn = AnyASCIILetterIsValid
-	case "letters":
-		IsValidLetterFn = AnyUnicodeLetterIsValid
-	case "unicode":
-		IsValidLetterFn = AnyUnicodeIsValid
-	case "any":
-		IsValidLetterFn = AnyRuneIsValid
-	default:
-		fmt.Fprintf(Stderr, "Error: Unrecognized %s '%s'.\n", what, arg)
-		ExitJoker(18)
-	}
-}
-
 func usage(out io.Writer) {
 	fmt.Fprintf(out, "Joker - %s\n\n", VERSION)
 	fmt.Fprintln(out, "Usage: joker [args] [-- <repl-args>]                starts a repl")
@@ -432,12 +416,6 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "  --dialect <dialect>")
 	fmt.Fprintln(out, "    Set input dialect (\"clj\", \"cljs\", \"joker\", \"edn\") for linting;")
 	fmt.Fprintln(out, "    default is inferred from <filename> suffix, if any.")
-	fmt.Fprintln(out, "  --valid-letters <runes>")
-	fmt.Fprintln(out, "    Set valid runes for non-special/non-digit characters in symbol names; <runes> is:")
-	fmt.Fprintln(out, "      \"ascii\", denoting only [A-Za-z]")
-	fmt.Fprintln(out, "      \"letters\" (default), any Unicode Letter (category L)")
-	fmt.Fprintln(out, "      \"unicode\", [A-Za-z] or any Unicode code point beyond ASCII/Latin1 (255)")
-	fmt.Fprintln(out, "      \"any\", any character (that has no other specific meaning in Joker)")
 	fmt.Fprintln(out, "  --hashmap-threshold <n>")
 	fmt.Fprintln(out, "    Set HASHMAP_THRESHOLD accordingly (internal magic of some sort).")
 	fmt.Fprintln(out, "  --profiler <type>")
@@ -509,9 +487,6 @@ func parseArgs(args []string) {
 		classPath = v
 	} else {
 		classPath = ""
-	}
-	if v, ok := os.LookupEnv("JOKER_VALID_LETTERS"); ok {
-		setValidLetters(v, "JOKER_VALID_LETTERS environment-variable value")
 	}
 	var i int
 	for i = 1; i < length; i++ { // shift
@@ -589,13 +564,6 @@ func parseArgs(args []string) {
 			if i < length-1 && notOption(args[i+1]) {
 				i += 1 // shift
 				dialect = dialectFromArg(args[i])
-			} else {
-				missing = true
-			}
-		case "--valid-letters":
-			if i < length-1 && notOption(args[i+1]) {
-				i += 1 // shift
-				setValidLetters(args[i], "--valid-letters argument")
 			} else {
 				missing = true
 			}

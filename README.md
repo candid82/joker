@@ -139,24 +139,6 @@ test.clj:1:1: Parse warning: let form with empty body
 ```
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
-### Valid Symbol (and Keyword) Characters
-
-The `--valid-letters` option specifies valid characters for symbol and keyword "letters", which are the non-special, non-digit characters that make up symbol names.
-
-While Clojure 1.10 allows, for example, em dashes in symbol names (which can lead to confusion), Joker does not; by default, it allows only Unicode letters (category L). E.g. `(def é "hey")` works as expected. `--valid-letters letters` specifies this explicitly.
-
-Earlier versions of Joker allowed any Unicode code points beyond MaxLatin1 (255, aka `0xff`) in addition to the ASCII letters (`[A-Z][a-z]`). This is more consistent with Clojure, in that it allows em dashes; e.g. `(def a–b "wow")`. Specify `--valid-letters unicode` for this behavior.
-
-Some developers prefer "strict ASCII". Joker supports this for symbol letters (though not for digits, which may be any Unicode digits) via `--valid-letters ascii`.
-
-On the other hand, `--valid-letters any` allows any character (not otherwise special, such as delimeters), including ASCII control characters.
-
-Note that `--valid-letters` affects only how symbols are parsed; `joker.core/symbol` is able to form a symbol from any string, regardless of content.
-
-Also note that, though most closely associated with linting, `--valid-letters` governs how symbols are parsed regardless of mode of operation (linting, running scripts, formatting, etc).
-
-Finally, the environment variable `JOKER_VALID_LETTERS` may be used to specify the default for `--valid-letters`.
-
 ### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
@@ -251,8 +233,8 @@ When linting directories Joker lints all files with the extension corresponding 
 When linting directories Joker can report globally unused namespaces and public vars. This is turned off by default but can be enabled with `--report-globally-unused` flag, e.g. `joker --lint --working-dir my-project --report-globally-unused`. This is useful for finding "dead" code. Some namespaces or vars are intended to be used by external systems (e.g. public API of a library or main function of a program). To exclude such namespaces and vars from being reported as globally unused list them in `:entry-points` vector in `.joker` file, which may contain the names of namespaces or fully qualified names of vars. For example:
 
 ```clojure
-:entry-points [my-project.public-api
-               my-project.core/-main]
+{:entry-points [my-project.public-api
+                my-project.core/-main]}
 ```
 
 ### Optional rules
@@ -260,13 +242,13 @@ When linting directories Joker can report globally unused namespaces and public 
 Joker supports a few configurable linting rules. To turn them on or off set their values to `true` or `false` in `:rules` map in `.joker` file. For example:
 
 ```clojure
-:rules {:if-without-else true
-        :no-forms-threading false}
+{:rules {:if-without-else true
+         :no-forms-threading false}}
 ```
 
 Below is the list of all configurable rules.
 
-|          Rule          |                      Description                      | Default value |
+| Rule                   | Description                                           | Default value |
 |------------------------|-------------------------------------------------------|---------------|
 | `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
 | `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
@@ -274,6 +256,10 @@ Below is the list of all configurable rules.
 | `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings | `true`        |
 | `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
 | `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
+| `invalid-letters`      | warn on symbols/keywords with non-special/non-digit   | `:letters`    |
+|                        | characters (normally letters) that are not `:unicode` |               |
+|                        | code points or letters; not `:letters` (category L);  |               |
+|                        | or not `:ascii` letters (`[A-Z][a-z]` as a regexp)    |               |
 
 Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
 
