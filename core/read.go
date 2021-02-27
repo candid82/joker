@@ -403,7 +403,7 @@ func AnyASCIILetterIsValid(r rune) bool {
 	return r <= unicode.MaxASCII && unicode.IsLetter(r)
 }
 
-var IsValidLetterFn = AnyUnicodeLetterIsValid
+var IsValidLetterFn = AnyUnicodeIsValid
 
 func isSymbolInitial(r rune) bool {
 	switch r {
