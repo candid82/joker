@@ -42,10 +42,11 @@ var (
 		dynamic:            MakeKeyword("dynamic"),
 		require:            MakeKeyword("require"),
 		_import:            MakeKeyword("import"),
-		invalidLetters:     MakeKeyword("invalid-letters"),
+		validLetters:       MakeKeyword("valid-letters"),
 		unicode:            MakeKeyword("unicode"),
 		letters:            MakeKeyword("letters"),
 		ascii:              MakeKeyword("ascii"),
+		all:                MakeKeyword("all"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
