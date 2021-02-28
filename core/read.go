@@ -466,26 +466,9 @@ func readSymbol(reader *Reader, first rune) Object {
    ones (if new rules are desired), and c) hope for reasonably good
    performance. */
 
-/* Like isSymbolRune(), but returns false for other than special chars
-/* and digits (i.e. "letters" in the generic sense), so validation can
-/* check whether the chars that remain meet the criteria specified by
-/* LINTER_MODE :rules :invalid-letters. Parsing, already done by now,
-/* takes care of the initial and unique (e.g. '.') cases. */
-func isSymbolValidNonCharacter(r rune) bool {
-	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '%', '$', '|', '#', '/', '\'', '.':
-		return true
-	default:
-		if unicode.IsDigit(r) {
-			return true
-		}
-		return false
-	}
-}
-
 func isValidUnicode(s string) (bool, int) {
 	for i, r := range s {
-		if r <= unicode.MaxLatin1 && !unicode.IsLetter(r) && !isSymbolValidNonCharacter(r) {
+		if unicode.MaxASCII < r && r <= unicode.MaxLatin1 {
 			return false, i
 		}
 	}
@@ -494,7 +477,7 @@ func isValidUnicode(s string) (bool, int) {
 
 func isValidLetters(s string) (bool, int) {
 	for i, r := range s {
-		if !unicode.IsLetter(r) && !isSymbolValidNonCharacter(r) {
+		if unicode.MaxASCII < r && !unicode.IsLetter(r) {
 			return false, i
 		}
 	}
@@ -503,7 +486,7 @@ func isValidLetters(s string) (bool, int) {
 
 func isValidASCII(s string) (bool, int) {
 	for i, r := range s {
-		if (r > unicode.MaxASCII || !unicode.IsLetter(r)) && !isSymbolValidNonCharacter(r) {
+		if unicode.MaxASCII < r {
 			return false, i
 		}
 	}
