@@ -256,7 +256,7 @@ Below is the list of all configurable rules.
 | `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings | `true`        |
 | `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
 | `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
-| `invalid-letters`      | warn on symbols/keywords with non-special/non-digit   | `:letters`    |
+| `invalid-letters`      | warn on symbols/keywords with non-special/non-digit   | `:unicode`    |
 |                        | characters (normally letters) that are not `:unicode` |               |
 |                        | code points or letters; not `:letters` (category L);  |               |
 |                        | or not `:ascii` letters (`[A-Z][a-z]` as a regexp)    |               |
