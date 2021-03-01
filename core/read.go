@@ -168,7 +168,7 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 }
 
 func isWhitespace(r rune) bool {
-	return r == ' ' || r == '\t' || r == '\n' || r == ','
+	return unicode.IsSpace(r) || r == ','
 }
 
 func readComment(reader *Reader) Object {
@@ -387,28 +387,14 @@ func readNumber(reader *Reader) Object {
 	return scanInt(str, str, 0, reader)
 }
 
-/* Returns whether the rune, which must not be one of the characters
-/* specifically designated to start other sorts of tokens (such as
-/* comments, maps, and so on), may start a symbol. */
-func isSymbolInitial(r rune) bool {
-	if DIALECT != JOKER {
-		return r != EOF
-	}
-	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '%', '$', '|':
-		return true
-	}
-	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z')
-}
-
-/* Returns whether the rune, an arbitrary character, may be a
-/* non-initial character in a symbol name. */
+/* Returns whether the rune may be a non-initial character in a symbol
+/* name. */
 func isSymbolRune(r rune) bool {
 	switch r {
 	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', EOF:
 		return false
 	}
-	return isSymbolInitial(r) || unicode.IsDigit(r) || unicode.IsLetter(r) || r == '#' || r == '/' || r == '\'' || r == '.'
+	return !unicode.IsSpace(r)
 }
 
 func readSymbol(reader *Reader, first rune) Object {
@@ -1281,10 +1267,9 @@ func Read(reader *Reader) (Object, bool) {
 		return readDispatch(reader)
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
-	case isSymbolInitial(r):
+	default:
 		return readSymbol(reader, r), false
 	}
-	panic(MakeReadError(reader, fmt.Sprintf("Unexpected character %q (0x%x)", r, r)))
 }
 
 func TryRead(reader *Reader) (obj Object, err error) {
