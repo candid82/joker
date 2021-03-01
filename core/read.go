@@ -167,8 +167,24 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 	return MakeReadObject(reader, Char{Ch: r})
 }
 
+func isJavaSpace(r rune) bool {
+	switch r {
+	case ' ', '\t', '\n', '\r': // Listed here purely for speed of common cases
+		return true
+	case 0xa0 /*&nbsp;*/, 0x85 /*NEL*/, 0x2007 /*&numsp;*/, 0x202f /*narrow non-break space*/ :
+		return false
+	case 0x1c /*FS*/, 0x1d /*GS*/, 0x1e /*RS*/, 0x1f /*US*/ :
+		return true
+	default:
+		if r > unicode.MaxLatin1 && unicode.In(r, unicode.Zl, unicode.Zp, unicode.Zs) {
+			return true
+		}
+	}
+	return unicode.IsSpace(r)
+}
+
 func isWhitespace(r rune) bool {
-	return unicode.IsSpace(r) || r == ','
+	return isJavaSpace(r) || r == ','
 }
 
 func readComment(reader *Reader) Object {
@@ -387,18 +403,16 @@ func readNumber(reader *Reader) Object {
 	return scanInt(str, str, 0, reader)
 }
 
-func isSymbolInitial(r rune) bool {
-	switch r {
-	case '*', '+', '!', '-', '_', '?', ':', '=', '<', '>', '&', '%', '$', '|':
-		return true
-	case '.':
-		return DIALECT != CLJS
-	}
-	return unicode.IsLetter(r) || r > 255
-}
-
+/* Returns whether the rune may be a non-initial character in a symbol
+/* name. */
 func isSymbolRune(r rune) bool {
-	return isSymbolInitial(r) || unicode.IsDigit(r) || r == '#' || r == '/' || r == '\'' || r == '.'
+	switch r {
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
+		// Whitespace listed above (' ', '\t', '\n', '\r') purely for speed of common cases
+
+		return false
+	}
+	return !isJavaSpace(r)
 }
 
 func readSymbol(reader *Reader, first rune) Object {
@@ -1208,8 +1222,6 @@ func Read(reader *Reader) (Object, bool) {
 			return readSymbol(reader, r), false
 		}
 		return readArgSymbol(reader), false
-	case isSymbolInitial(r):
-		return readSymbol(reader, r), false
 	case r == '"':
 		return readString(reader), false
 	case r == '(':
@@ -1273,8 +1285,9 @@ func Read(reader *Reader) (Object, bool) {
 		return readDispatch(reader)
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
+	default:
+		return readSymbol(reader, r), false
 	}
-	panic(MakeReadError(reader, fmt.Sprintf("Unexpected %c", r)))
 }
 
 func TryRead(reader *Reader) (obj Object, err error) {
