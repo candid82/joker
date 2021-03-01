@@ -408,6 +408,8 @@ func readNumber(reader *Reader) Object {
 func isSymbolRune(r rune) bool {
 	switch r {
 	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
+		// Whitespace listed above (' ', '\t', '\n', '\r') purely for speed of common cases
+
 		return false
 	}
 	return !isJavaSpace(r)
