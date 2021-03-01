@@ -199,11 +199,15 @@ type (
 		dynamic            Keyword
 		require            Keyword
 		_import            Keyword
-		validLetters       Keyword
-		unicode            Keyword
-		letters            Keyword
-		ascii              Keyword
-		all                Keyword
+		validIdent         Keyword
+		inValidIdent       Keyword
+		notASCII           Keyword
+		notUnicode         Keyword
+		visible            Keyword
+		symbol             Keyword
+		alnum              Keyword
+		any                Keyword
+		none               Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol

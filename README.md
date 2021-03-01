@@ -248,18 +248,25 @@ Joker supports a few configurable linting rules. To turn them on or off set thei
 
 Below is the list of all configurable rules.
 
-| Rule                   | Description                                           | Default value |
-|------------------------|-------------------------------------------------------|---------------|
-| `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
-| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
-| `unused-as`            | warn on unused `:as` binding                          | `true`        |
-| `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings | `true`        |
-| `unused-fn-parameters` | warn on unused fn parameters                          | `false`       |
-| `fn-with-empty-body`   | warn on fn form with empty body                       | `true`        |
-| `valid-letters`        | warn on symbols/keywords with non-special/non-digit   | `:unicode`    |
-|                        | characters (normally letters) that are not `:unicode` |               |
-|                        | code points or letters; not `:letters` (category L);  |               |
-|                        | or not `:ascii` letters (`[A-Z][a-z]` as a regexp)    |               |
+| Rule                   | Description                                             | Default value |
+|------------------------|---------------------------------------------------------|---------------|
+| `if-without-else`      | warn on `if` without the `else` branch                  | `false`       |
+| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)`   | `true`        |
+| `unused-as`            | warn on unused `:as` binding                            | `true`        |
+| `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings   | `true`        |
+| `unused-fn-parameters` | warn on unused fn parameters                            | `false`       |
+| `fn-with-empty-body`   | warn on fn form with empty body                         | `true`        |
+| `valid-ident`          | warn on symbols/keywords with non-special characters    | `:alnum`      |
+|                        | (i.e. other than `*`, `+`, `?`, etc) that are not:      |               |
+|                        |   `:alnum` - letters or digits                          |               |
+|                        |   `:symbol` - `:alnum` or symbols                       |               |
+|                        |   `:visible` - `:symbol`, punctuation, or marks         |               |
+|                        |   `:any` - no warnings                                  |               |
+| `invalid-ident`        | warn on symbols/keywords beyond encoding range:         | `:ascii`      |
+|                        |   `:non-ascii` - not 7-bit ASCII (`> unicode.MaxASCII`) |               |
+|                        |   `:non-unicode` - not Unicode (`> unicode.MaxRune`)    |               |
+|                        |   `:none` - no warnings                                 |               |
+
 
 Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
 
