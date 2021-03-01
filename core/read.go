@@ -167,8 +167,24 @@ func readSpecialCharacter(reader *Reader, ending string, r rune) Object {
 	return MakeReadObject(reader, Char{Ch: r})
 }
 
+func isJavaSpace(r rune) bool {
+	switch r {
+	case ' ', '\t', '\n', '\r': // Listed here purely for speed of common cases
+		return true
+	case 0xa0 /*&nbsp;*/, 0x85 /*NEL*/, 0x2007 /*&numsp;*/, 0x202f /*narrow non-break space*/ :
+		return false
+	case 0x1c /*FS*/, 0x1d /*GS*/, 0x1e /*RS*/, 0x1f /*US*/ :
+		return true
+	default:
+		if r > unicode.MaxLatin1 && unicode.In(r, unicode.Zl, unicode.Zp, unicode.Zs) {
+			return true
+		}
+	}
+	return unicode.IsSpace(r)
+}
+
 func isWhitespace(r rune) bool {
-	return unicode.IsSpace(r) || r == ','
+	return isJavaSpace(r) || r == ','
 }
 
 func readComment(reader *Reader) Object {
@@ -391,10 +407,10 @@ func readNumber(reader *Reader) Object {
 /* name. */
 func isSymbolRune(r rune) bool {
 	switch r {
-	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', EOF:
+	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
 		return false
 	}
-	return !unicode.IsSpace(r)
+	return !isJavaSpace(r)
 }
 
 func readSymbol(reader *Reader, first rune) Object {
