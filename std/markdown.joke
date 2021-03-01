@@ -1,0 +1,10 @@
+(ns
+  ^{:go-imports []
+    :doc "Implements GitHub Flavored Markdown rendering."}
+  markdown)
+
+(defn ^String convert-string
+  "Returns the HTML rendering of Markdown string s"
+  {:added "1.0"
+  :go "convertString(s)"}
+  [^String s])

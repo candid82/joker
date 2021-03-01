@@ -9,4 +9,5 @@ require (
 	go.etcd.io/bbolt v1.3.3
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 	gopkg.in/yaml.v2 v2.2.2
+	github.com/yuin/goldmark v1.3.2
 )
