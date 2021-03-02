@@ -2021,19 +2021,19 @@ func ReadConfig(filename string, workingDir string) {
 		if ok, v := m.Get(KEYWORDS.fnWithEmptyBody); ok {
 			WARNINGS.fnWithEmptyBody = ToBool(v)
 		}
-		// if ok, v := m.Get(KEYWORDS.validLetters); ok {
-		// 	switch {
-		// 	case v.Equals(KEYWORDS.unicode):
-		// 		SetSymbolValidationUnicode()
-		// 	case v.Equals(KEYWORDS.letters):
-		// 		SetSymbolValidationLetters()
-		// 	case v.Equals(KEYWORDS.ascii):
-		// 		SetSymbolValidationASCII()
-		// 	case v.Equals(KEYWORDS.all):
-		// 	default:
-		// 		printConfigError(configFileName, ":invalid-letters value (in :rules) must be :unicode, :letters, :ascii, or :all; got "+v.GetType().ToString(false)+" "+v.ToString(false))
-		// 		return
-		// 	}
+		// if ok, _ := m.Get(KEYWORDS.validIdent); ok {
+		// 		switch {
+		// 		case v.Equals(KEYWORDS.unicode):
+		// 			SetSymbolValidationUnicode()
+		// 		case v.Equals(KEYWORDS.letters):
+		// 			SetSymbolValidationLetters()
+		// 		case v.Equals(KEYWORDS.ascii):
+		// 			SetSymbolValidationASCII()
+		// 		case v.Equals(KEYWORDS.all):
+		// 		default:
+		// 			printConfigError(configFileName, ":invalid-letters value (in :rules) must be :unicode, :letters, :ascii, or :all; got "+v.GetType().ToString(false)+" "+v.ToString(false))
+		// 			return
+		// 		}
 		// }
 	}
 	LINTER_CONFIG.Value = configMap

@@ -480,75 +480,110 @@ func readSymbol(reader *Reader, first rune) Object {
    ones (if new rules are desired), and c) hope for reasonably good
    performance. */
 
-func isValidUnicode(s string) (bool, int) {
+func isInvalidNonUnicode(s string) (bool, int, string) {
 	for i, r := range s {
-		if unicode.MaxASCII < r && r <= unicode.MaxLatin1 {
-			return false, i
+		if unicode.MaxRune < r {
+			return false, i, "not a Unicode character"
 		}
 	}
-	return true, 0
+	return true, 0, ""
 }
 
-func isValidLetters(s string) (bool, int) {
-	for i, r := range s {
-		if unicode.MaxASCII < r && !unicode.IsLetter(r) {
-			return false, i
-		}
-	}
-	return true, 0
-}
-
-func isValidASCII(s string) (bool, int) {
+func isInvalidNonASCII(s string) (bool, int, string) {
 	for i, r := range s {
 		if unicode.MaxASCII < r {
-			return false, i
+			return false, i, "not an ASCII character"
 		}
 	}
-	return true, 0
+	return true, 0, ""
 }
 
-func warnInvalidString(reader *Reader, validFn func(s string) (bool, int), s *string) {
+func isSymbolSpecificRune(r rune) bool {
+	switch r {
+	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'': // Used in clojure.core, joker.core, etc.
+		return true
+	}
+	return false
+}
+
+func isValidAlnum(s string) (bool, int, string) {
+	for i, r := range s {
+		if !isSymbolSpecificRune(r) && !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false, i, "not a Letter nor Digit"
+		}
+	}
+	return true, 0, ""
+}
+
+func warnInvalidString(reader *Reader, validFn, invalidFn func(s string) (bool, int, string), s *string) {
 	if s == nil {
 		return
 	}
-	if ok, i := validFn(*s); !ok {
-		runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
-		msg := fmt.Sprintf("Impermissible character `%c' at %d in `%s'", runeValue, i, *s)
-		printReadWarning(reader, msg)
+
+	okValid, iValid, explainValid := validFn(*s)
+	okInvalid, iInvalid, explainInvalid := invalidFn(*s)
+
+	var i int
+	var explain string
+	if okValid {
+		if okInvalid {
+			return
+		}
+		i = iInvalid
+		explain = explainInvalid
+	} else {
+		if okInvalid || (iValid < iInvalid) {
+			i = iValid
+			explain = explainValid
+		} else if iValid > iInvalid {
+			i = iInvalid
+			explain = explainInvalid
+		} else { // iValid == iInvalid
+			i = iValid
+			explain = explainValid + "; " + explainInvalid
+		}
 	}
+	runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
+	msg := fmt.Sprintf("Impermissible character %q at %d in `%s' (%s)", runeValue, i, *s, explain)
+	printReadWarning(reader, msg)
 }
 
-var symbolValidationFn func(s string) (bool, int)
+var symbolValidationFn = isInvalidNonASCII
+var symbolInvalidationFn = isValidAlnum
 
 func readValidSymbol(reader *Reader, first rune) Object {
 	obj := readSymbol(reader, first)
 	switch o := obj.(type) {
 	case Keyword:
-		warnInvalidString(reader, symbolValidationFn, o.ns)
-		warnInvalidString(reader, symbolValidationFn, o.name)
+		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.ns)
+		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.name)
 	case Symbol:
-		warnInvalidString(reader, symbolValidationFn, o.ns)
-		warnInvalidString(reader, symbolValidationFn, o.name)
+		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.ns)
+		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.name)
 	}
 	return obj
 }
 
 var readSymbolFn = readSymbol
 
-func SetSymbolValidationUnicode() {
+func EnableIdentValidation() {
 	readSymbolFn = readValidSymbol
-	symbolValidationFn = isValidUnicode
 }
 
-func SetSymbolValidationLetters() {
-	readSymbolFn = readValidSymbol
-	symbolValidationFn = isValidLetters
-}
+// func SetSymbolValidationUnicode() {
+// 	readSymbolFn = readValidSymbol
+// 	symbolValidationFn = isValidUnicode
+// }
 
-func SetSymbolValidationASCII() {
-	readSymbolFn = readValidSymbol
-	symbolValidationFn = isValidASCII
-}
+// func SetSymbolValidationLetters() {
+// 	readSymbolFn = readValidSymbol
+// 	symbolValidationFn = isValidLetters
+// }
+
+// func SetSymbolValidationASCII() {
+// 	readSymbolFn = readValidSymbol
+// 	symbolValidationFn = isValidASCII
+// }
 
 func readRegex(reader *Reader) Object {
 	var b bytes.Buffer
@@ -1295,7 +1330,7 @@ func Read(reader *Reader) (Object, bool) {
 		return readSymbolFn(reader, r), false
 	case r == '%' && ARGS != nil:
 		if FORMAT_MODE {
-			return readSymbol(reader, r), false
+			return readSymbolFn(reader, r), false
 		}
 		return readArgSymbol(reader), false
 	case r == '"':
@@ -1362,7 +1397,7 @@ func Read(reader *Reader) (Object, bool) {
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
 	default:
-		return readSymbol(reader, r), false
+		return readSymbolFn(reader, r), false
 	}
 }
 
