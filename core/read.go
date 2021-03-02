@@ -552,7 +552,7 @@ func warnInvalidString(reader *Reader, validFn, invalidFn func(s string) (bool, 
 		}
 	}
 	runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
-	msg := fmt.Sprintf("Impermissible character %q at %d in `%s' (%s)", runeValue, i, *s, explain)
+	msg := fmt.Sprintf("Impermissible character %q at %d in %q (%s)", runeValue, i, *s, explain)
 	printReadWarning(reader, msg)
 }
 
