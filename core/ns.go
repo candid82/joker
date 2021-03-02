@@ -138,7 +138,11 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 	}
 	if LINTER_MODE && existingVar.expr != nil && !existingVar.ns.Name.Equals(SYMBOLS.joker_core) {
 		if !isDeclaredInConfig(existingVar) {
-			printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+			if sym.GetInfo() == nil {
+				printParseWarning(existingVar.GetInfo().Pos(), "Subsequent duplicate def of "+existingVar.ToString(false))
+			} else {
+				printParseWarning(sym.GetInfo().Pos(), "Duplicate def of "+existingVar.ToString(false))
+			}
 		}
 	}
 	return existingVar
