@@ -404,8 +404,8 @@ func readNumber(reader *Reader) Object {
 }
 
 /* Returns whether the rune may be a non-initial character in a symbol
-/* name. */
-func isSymbolRune(r rune) bool {
+/* or keyword name. */
+func isIdentifierRune(r rune) bool {
 	switch r {
 	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
 		// Whitespace listed above (' ', '\t', '\n', '\r') purely for speed of common cases
@@ -415,14 +415,15 @@ func isSymbolRune(r rune) bool {
 	return !isJavaSpace(r)
 }
 
-func readSymbol(reader *Reader, first rune) Object {
+/* Reads (lexes) a token and returns either a Symbol or Keyword. */
+func readIdentifier(reader *Reader, first rune) Object {
 	var b bytes.Buffer
 	if first != ':' {
 		b.WriteRune(first)
 	}
 	var lastAdded rune
 	r := reader.Get()
-	for isSymbolRune(r) {
+	for isIdentifierRune(r) {
 		if r == ':' {
 			if lastAdded == ':' {
 				panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
@@ -498,7 +499,14 @@ func isInvalidNonASCII(s string) (bool, int, string) {
 	return true, 0, ""
 }
 
-func isSymbolSpecificRune(r rune) bool {
+/* Returns whether a rune is a character that is inherently allowed in
+/* identifiers (symbols, keywords) by dint of the fact that
+/* clojure.core and other core packages define identifiers with these
+/* characters. While not important for parsing (Clojure is extremely
+/* permissive regarding which characters can be lexed into an
+/* identifier), linting can helpfully find and warn characters outside
+/* of this set (as extended via configuration). */
+func isIdentifierSpecificRune(r rune) bool {
 	switch r {
 	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'': // Used in clojure.core, joker.core, etc.
 		return true
@@ -508,7 +516,7 @@ func isSymbolSpecificRune(r rune) bool {
 
 func isValidAlnum(s string) (bool, int, string) {
 	for i, r := range s {
-		if !isSymbolSpecificRune(r) && !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+		if !isIdentifierSpecificRune(r) && !unicode.IsLetter(r) && !unicode.IsDigit(r) {
 			return false, i, "not a Letter nor Digit"
 		}
 	}
@@ -548,41 +556,41 @@ func warnInvalidString(reader *Reader, validFn, invalidFn func(s string) (bool, 
 	printReadWarning(reader, msg)
 }
 
-var symbolValidationFn = isInvalidNonASCII
-var symbolInvalidationFn = isValidAlnum
+var identifierValidationFn = isInvalidNonASCII
+var identifierInvalidationFn = isValidAlnum
 
-func readValidSymbol(reader *Reader, first rune) Object {
-	obj := readSymbol(reader, first)
+func readValidIdentifier(reader *Reader, first rune) Object {
+	obj := readIdentifier(reader, first)
 	switch o := obj.(type) {
 	case Keyword:
-		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.ns)
-		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.name)
+		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.ns)
+		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.name)
 	case Symbol:
-		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.ns)
-		warnInvalidString(reader, symbolValidationFn, symbolInvalidationFn, o.name)
+		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.ns)
+		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.name)
 	}
 	return obj
 }
 
-var readSymbolFn = readSymbol
+var readIdentifierFn = readIdentifier
 
 func EnableIdentValidation() {
-	readSymbolFn = readValidSymbol
+	readIdentifierFn = readValidIdentifier
 }
 
-// func SetSymbolValidationUnicode() {
-// 	readSymbolFn = readValidSymbol
-// 	symbolValidationFn = isValidUnicode
+// func SetIdentifierValidationUnicode() {
+// 	readIdentifierFn = readValidIdentifier
+// 	identifierValidationFn = isValidUnicode
 // }
 
-// func SetSymbolValidationLetters() {
-// 	readSymbolFn = readValidSymbol
-// 	symbolValidationFn = isValidLetters
+// func SetIdentifierValidationLetters() {
+// 	readIdentifierFn = readValidIdentifier
+// 	identifierValidationFn = isValidLetters
 // }
 
-// func SetSymbolValidationASCII() {
-// 	readSymbolFn = readValidSymbol
-// 	symbolValidationFn = isValidASCII
+// func SetIdentifierValidationASCII() {
+// 	readIdentifierFn = readValidIdentifier
+// 	identifierValidationFn = isValidASCII
 // }
 
 func readRegex(reader *Reader) Object {
@@ -1321,16 +1329,16 @@ func Read(reader *Reader) (Object, bool) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readSymbolFn(reader, r), false
+		return readIdentifierFn(reader, r), false
 	case r == '-' || r == '+':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readSymbolFn(reader, r), false
+		return readIdentifierFn(reader, r), false
 	case r == '%' && ARGS != nil:
 		if FORMAT_MODE {
-			return readSymbolFn(reader, r), false
+			return readIdentifierFn(reader, r), false
 		}
 		return readArgSymbol(reader), false
 	case r == '"':
@@ -1397,7 +1405,7 @@ func Read(reader *Reader) (Object, bool) {
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
 	default:
-		return readSymbolFn(reader, r), false
+		return readIdentifierFn(reader, r), false
 	}
 }
 

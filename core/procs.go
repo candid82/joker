@@ -2024,14 +2024,14 @@ func ReadConfig(filename string, workingDir string) {
 		// if ok, _ := m.Get(KEYWORDS.validIdent); ok {
 		// 		switch {
 		// 		case v.Equals(KEYWORDS.unicode):
-		// 			SetSymbolValidationUnicode()
+		// 			SetIdentifierValidationUnicode()
 		// 		case v.Equals(KEYWORDS.letters):
-		// 			SetSymbolValidationLetters()
+		// 			SetIdentifierValidationLetters()
 		// 		case v.Equals(KEYWORDS.ascii):
-		// 			SetSymbolValidationASCII()
+		// 			SetIdentifierValidationASCII()
 		// 		case v.Equals(KEYWORDS.all):
 		// 		default:
-		// 			printConfigError(configFileName, ":invalid-letters value (in :rules) must be :unicode, :letters, :ascii, or :all; got "+v.GetType().ToString(false)+" "+v.ToString(false))
+		// 			printConfigError(configFileName, ":invalid-ident value (in :rules) must be :not-unicode, :not-ascii, or :none; got "+v.GetType().ToString(false)+" "+v.ToString(false))
 		// 			return
 		// 		}
 		// }
