@@ -504,14 +504,14 @@ func isInvalidNonASCII(s string) (bool, int, string) {
 /* clojure.core and other core packages define identifiers with these
 /* characters. While not important for parsing (Clojure is extremely
 /* permissive regarding which characters can be lexed into an
-/* identifier), linting can helpfully find and warn characters outside
-/* of this set (as extended via configuration). */
+/* identifier), linting can helpfully find and warn about characters
+/* outside of this set (as extended via configuration). */
 func isIdentifierSpecificRune(r rune) bool {
 	switch r {
 	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'': // Used in clojure.core, joker.core, etc.
 		return true
 	}
-	return false
+	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || ('0' <= r && r <= '9')
 }
 
 func isValidAlnum(s string) (bool, int, string) {
