@@ -199,6 +199,8 @@ type (
 		dynamic            Keyword
 		require            Keyword
 		_import            Keyword
+		else_              Keyword
+		none               Keyword
 		validIdent         Keyword
 		inValidIdent       Keyword
 		notASCII           Keyword
@@ -207,7 +209,6 @@ type (
 		symbol             Keyword
 		alnum              Keyword
 		any                Keyword
-		none               Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol

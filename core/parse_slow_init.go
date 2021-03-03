@@ -42,6 +42,8 @@ var (
 		dynamic:            MakeKeyword("dynamic"),
 		require:            MakeKeyword("require"),
 		_import:            MakeKeyword("import"),
+		else_:              MakeKeyword("else"),
+		none:               MakeKeyword("none"),
 		validIdent:         MakeKeyword("valid-ident"),
 		inValidIdent:       MakeKeyword("invalid-ident"),
 		notASCII:           MakeKeyword("not-ASCII"),
@@ -50,7 +52,6 @@ var (
 		symbol:             MakeKeyword("symbol"),
 		alnum:              MakeKeyword("alnum"),
 		any:                MakeKeyword("any"),
-		none:               MakeKeyword("none"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),
