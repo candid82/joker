@@ -14,10 +14,9 @@
 ;; Thanks to Chas Emerick, Allen Rohner, and Stuart Halloway for
 ;; contributions and suggestions.
 
-(ns
-  ^{:author "Stuart Sierra, with contributions and suggestions by
+(ns ^{:author "Stuart Sierra, with contributions and suggestions by
   Chas Emerick, Allen Rohner, and Stuart Halloway",
-     :doc "A unit testing framework.
+      :doc "A unit testing framework.
 
    ASSERTIONS
 
@@ -231,7 +230,7 @@
 
    For additional event types, see the examples in the code.
 "
-:added "1.0"}
+      :added "1.0"}
   joker.test
   (:require [joker.template :as temp]
             [joker.walk :as walk]))
@@ -244,12 +243,12 @@
   *load-tests* true)
 
 (def ^:dynamic
- ^{:doc "The maximum depth of stack traces to print when an Exception
+  ^{:doc "The maximum depth of stack traces to print when an Exception
   is thrown during a test.  Defaults to nil, which means print the
   complete stack trace."
-   :added "1.0"
-   :tag Int}
- *stack-trace-depth* nil)
+    :added "1.0"
+    :tag Int}
+  *stack-trace-depth* nil)
 
 
 ;;; GLOBALS USED BY THE REPORTING FUNCTIONS
@@ -320,15 +319,14 @@
 
 ;;; TEST RESULT REPORTING
 
-(defmulti
-  ^{:doc "Generic reporting function, may be overridden to plug in
+(defmulti ^{:doc "Generic reporting function, may be overridden to plug in
    different report formats (e.g., TAP, JUnit).  Assertions such as
    'is' call 'report' to indicate results.  The argument given to
    'report' will be a map with a :type key.  See the documentation at
    the top of test_is.clj for more information on the types of
    arguments for 'report'."
-     :dynamic true
-     :added "1.0"}
+            :dynamic true
+            :added "1.0"}
   report :type)
 
 ;; 2018-12-25 jcburley: Haven't investigated what Joker might already
@@ -338,7 +336,7 @@
   ;; (if (seq stacktrace)
   ;;   (let [^StackTraceElement s (first stacktrace)]
   ;;     {:file (.getFileName s) :line (.getLineNumber s)})
-    {:file nil :line nil})
+  {:file nil :line nil})
 
 (defn do-report
   "Add file and line information to a test result and call report.
@@ -375,26 +373,26 @@
 
 (defmethod report :error [m]
   (with-test-out
-   (inc-report-counter :error)
-   (println "\nERROR in" (testing-vars-str m))
-   (when (seq *testing-contexts*) (println (testing-contexts-str)))
-   (when-let [message (:message m)] (println message))
-   (println "expected:" (pr-str (:expected m)))
-   (print "  actual: ")
-   (let [actual (:actual m)]
-     ;; (if (instance? Throwable actual)
-     ;;   (stack/print-cause-trace actual *stack-trace-depth*)
-     (prn actual))))
+    (inc-report-counter :error)
+    (println "\nERROR in" (testing-vars-str m))
+    (when (seq *testing-contexts*) (println (testing-contexts-str)))
+    (when-let [message (:message m)] (println message))
+    (println "expected:" (pr-str (:expected m)))
+    (print "  actual: ")
+    (let [actual (:actual m)]
+      ;; (if (instance? Throwable actual)
+      ;;   (stack/print-cause-trace actual *stack-trace-depth*)
+      (prn actual))))
 
 (defmethod report :summary [m]
   (with-test-out
-   (println "\nRan" (:test m) "tests containing"
-            (+ (:pass m) (:fail m) (:error m)) "assertions.")
-   (println (:fail m) "failures," (:error m) "errors.")))
+    (println "\nRan" (:test m) "tests containing"
+             (+ (:pass m) (:fail m) (:error m)) "assertions.")
+    (println (:fail m) "failures," (:error m) "errors.")))
 
 (defmethod report :begin-test-ns [m]
   (with-test-out
-   (println "\nTesting" (ns-name (:ns m)))))
+    (println "\nTesting" (ns-name (:ns m)))))
 
 ;; Ignore these message types:
 (defmethod report :end-test-ns [m])
@@ -439,9 +437,9 @@
            result# (apply ~pred values#)]
        (if result#
          (do-report {:type :pass, :message ~msg,
-                  :expected '~form, :actual (cons ~pred values#)})
+                     :expected '~form, :actual (cons ~pred values#)})
          (do-report {:type :fail, :message ~msg,
-                  :expected '~form, :actual (list '~'not (cons '~pred values#))}))
+                     :expected '~form, :actual (list '~'not (cons '~pred values#))}))
        result#)))
 
 (defn assert-any
@@ -452,9 +450,9 @@
   `(let [value# ~form]
      (if value#
        (do-report {:type :pass, :message ~msg,
-                :expected '~form, :actual value#})
+                   :expected '~form, :actual value#})
        (do-report {:type :fail, :message ~msg,
-                :expected '~form, :actual value#}))
+                   :expected '~form, :actual value#}))
      value#))
 
 
@@ -490,9 +488,9 @@
      (let [result# (instance? klass# object#)]
        (if result#
          (do-report {:type :pass, :message ~msg,
-                  :expected '~form, :actual (class object#)})
+                     :expected '~form, :actual (class object#)})
          (do-report {:type :fail, :message ~msg,
-                  :expected '~form, :actual (class object#)}))
+                     :expected '~form, :actual (class object#)}))
        result#)))
 
 (defmethod assert-expr 'thrown? [msg form]
@@ -503,10 +501,10 @@
         body (nthnext form 2)]
     `(try ~@body
           (do-report {:type :fail, :message ~msg,
-                   :expected '~form, :actual nil})
+                      :expected '~form, :actual nil})
           (catch ~klass e#
             (do-report {:type :pass, :message ~msg,
-                     :expected '~form, :actual e#})
+                        :expected '~form, :actual e#})
             e#))))
 
 (defmethod assert-expr 'thrown-with-msg? [msg form]
@@ -520,12 +518,12 @@
     `(try ~@body
           (do-report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
-            (let [m# (:message e#)]
+            (let [m# (ex-message e#)]
               (if (re-find ~re m#)
                 (do-report {:type :pass, :message ~msg,
-                         :expected '~form, :actual e#})
+                            :expected '~form, :actual e#})
                 (do-report {:type :fail, :message ~msg,
-                         :expected '~form, :actual e#})))
+                            :expected '~form, :actual e#})))
             e#))))
 
 
@@ -628,7 +626,7 @@
   [name & body]
   (when *load-tests*
     `(def ~(vary-meta name assoc :test `(fn [] ~@body))
-          (fn [] (test-var (var ~name))))))
+       (fn [] (test-var (var ~name))))))
 
 (defmacro deftest-
   "Like deftest but creates a private var."
@@ -636,7 +634,7 @@
   [name & body]
   (when *load-tests*
     `(def ~(vary-meta name assoc :test `(fn [] ~@body) :private true)
-          (fn [] (test-var (var ~name))))))
+       (fn [] (test-var (var ~name))))))
 
 
 (defmacro set-test
@@ -711,7 +709,7 @@
       (try (t)
            (catch Error e
              (do-report {:type :error, :message "Uncaught exception, not in assertion."
-                      :expected nil, :actual e})))
+                         :expected nil, :actual e})))
       (do-report {:type :end-test-var, :var v}))))
 
 (defn test-vars
@@ -766,10 +764,10 @@
   {:added "1.0"}
   ([] (run-tests *ns*))
   ([& namespaces]
-     (let [summary (assoc (apply merge-with + (map test-ns namespaces))
-                     :type :summary)]
-       (do-report summary)
-       summary)))
+   (let [summary (assoc (apply merge-with + (map test-ns namespaces))
+                        :type :summary)]
+     (do-report summary)
+     summary)))
 
 (defn run-all-tests
   "Runs all tests in all namespaces; prints results.

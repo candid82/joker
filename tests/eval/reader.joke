@@ -191,12 +191,11 @@
 
   (is (instance? Ratio 1/2))
   (is (instance? Ratio -1/2))
-  (is (instance? Ratio +1/2))
+  (is (instance? Ratio 1/2))
 
   (is (= -2 -8r2))
   (is (= -2 -8/4))
   (is (= 3 9/3))
   (is (= -2 -8r0002))
   (is (= -2 -8/0004))
-  (is (= 3 9/0003))
-)
+  (is (= 3 9/0003)))

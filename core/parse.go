@@ -199,6 +199,8 @@ type (
 		dynamic            Keyword
 		require            Keyword
 		_import            Keyword
+		else_              Keyword
+		none               Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol

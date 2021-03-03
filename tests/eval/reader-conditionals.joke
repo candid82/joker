@@ -1,0 +1,70 @@
+;; Ported from Clojure source.
+
+(ns joker.test-joker.reader-conditionals
+  (:require [joker.test :refer [deftest is are testing]]))
+
+(deftest basic-read-cond
+  (is (= '[foo-form]
+         (read-string "[#?(:joker foo-form :bar bar-form)]")))
+  (is (= '[bar-form]
+         (read-string "[#?(:foo foo-form :joker bar-form)]")))
+  (is (= '[foo-form]
+         (read-string "[#?(:joker foo-form :joker bar-form)]")))
+  (is (= '[]
+         (read-string "[#?( :foo foo-form :bar bar-form)]")))
+  (is (= 1
+         (read-string "#?(:foo foo-form :bar bar-form) 1"))))
+
+(deftest environmental-features
+  (is (= "joker" #?(:joker "joker" :cljs "clojurescript" :default "default"))))
+
+(deftest default-features
+  (is (= "default" #?(:clj-clr "clr" :cljs "cljs" :default "default"))))
+
+(deftest splicing
+  (is (= [] [#?@(:joker [])]))
+  (is (= [:a] [#?@(:joker [:a])]))
+  (is (= [:a :b] [#?@(:joker [:a :b])]))
+  (is (= [:a :b :c] [#?@(:joker [:a :b :c])]))
+  (is (= [:a :b :c] [#?@(:joker [:a :b :c])])))
+
+(deftest nested-splicing
+  (is (= [:a :b :c :d :e]
+         [#?@(:joker [:a #?@(:joker [:b #?@(:joker [:c]) :d]) :e])]))
+  (is (= '(+ 1 (+ 2 3))
+         '(+ #?@(:joker [1 (+ #?@(:joker [2 3]))]))))
+  (is (= '(+ (+ 2 3) 1)
+         '(+ #?@(:joker [(+ #?@(:joker [2 3])) 1]))))
+  (is (= [:a [:b [:c] :d] :e]
+         [#?@(:joker [:a [#?@(:joker [:b #?@(:joker [[:c]]) :d])] :e])])))
+
+(deftest bypass-unknown-tagged-literals
+  (is (= [1 2 3] #?(:cljs #js [1 2 3] :joker [1 2 3])))
+  (is (= :clojure #?(:foo #some.nonexistent.Record {:x 1} :joker :clojure))))
+
+(deftest error-cases
+  (is (thrown-with-msg? Error #"Feature should be a keyword" (read-string "#?((+ 1 2) :a)")))
+  (is (thrown-with-msg? Error #"even number of forms" (read-string "#?(:cljs :a :joker)")))
+  (is (thrown-with-msg? Error #"Spliced form in reader conditional must be Seqable, got Keyword" (read-string "#?@(:joker :a)")))
+  (is (thrown-with-msg? Error #"is reserved" (read-string "#?@(:foo :a :else :b)")))
+  (is (thrown-with-msg? Error #"must be a list" (read-string "#?[:foo :a :else :b]")))
+  (is (thrown-with-msg? Error #"Reader conditional splicing not allowed at the top level" (read-string "#?@(:joker [1 2])")))
+  (is (thrown-with-msg? Error #"Reader conditional splicing not allowed at the top level" (read-string "#?@(:joker [1])")))
+  (is (thrown-with-msg? Error #"Reader conditional splicing not allowed at the top level" (read-string "#?@(:joker []) 1"))))
+
+(deftest clj-1698-regression
+  (is (= 1 (read-string "#?(:cljs {'a 1 'b 2} :joker 1)")))
+  (is (= 1 (read-string "#?(:cljs (let [{{b :b} :a {d :d} :c} {}]) :joker 1)")))
+  (is (= '(def m {}) (read-string "(def m #?(:cljs ^{:a :b} {} :joker  ^{:a :b} {}))")))
+  (is (= '(def m {}) (read-string "(def m #?(:cljs ^{:a :b} {} :joker ^{:a :b} {}))")))
+  (is (= 1 (read-string "#?(:cljs {:a #_:b :c} :joker 1)"))))
+
+(deftest nil-expressions
+  (is (nil? #?(:default nil)))
+  (is (nil? #?(:foo :bar :joker nil)))
+  (is (nil? #?(:joker nil :foo :bar)))
+  (is (nil? #?(:foo :bar :default nil))))
+
+
+(when (= *main-file* *file*)
+  (joker.test/run-tests))

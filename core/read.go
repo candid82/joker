@@ -35,6 +35,7 @@ var (
 	PROBLEM_COUNT      = 0
 	DIALECT       Dialect
 	LINTER_CONFIG *Var
+	SUPPRESS_READ bool = false
 )
 
 var (
@@ -571,6 +572,75 @@ func readString(reader *Reader) Object {
 	return MakeReadObject(reader, String{S: b.String()})
 }
 
+func readMulti(reader *Reader, previouslyRead []Object) (Object, []Object) {
+	if len(previouslyRead) == 0 {
+		obj, multi := Read(reader)
+		if multi {
+			v := obj.(*Vector)
+			for i := 0; i < v.Count(); i++ {
+				previouslyRead = append(previouslyRead, v.at(i))
+			}
+		} else {
+			return obj, previouslyRead
+		}
+	}
+	obj := previouslyRead[len(previouslyRead)-1]
+	previouslyRead = previouslyRead[0 : len(previouslyRead)-1]
+	return obj, previouslyRead
+}
+
+func readError(reader *Reader, msg string) {
+	if LINTER_MODE {
+		printReadError(reader, msg)
+	} else {
+		panic(MakeReadError(reader, msg))
+	}
+}
+
+func readCondList(reader *Reader) Object {
+	previousSuppressRead := SUPPRESS_READ
+	defer func() {
+		SUPPRESS_READ = previousSuppressRead
+	}()
+
+	var forms []Object
+	eatWhitespace(reader)
+	r := reader.Peek()
+	var res Object = nil
+	for r != ')' || len(forms) != 0 {
+		if res == nil {
+			feature, forms := readMulti(reader, forms)
+			if feature.Equals(KEYWORDS.none) || feature.Equals(KEYWORDS.else_) {
+				panic(MakeReadError(reader, "Feature name "+feature.ToString(false)+" is reserved"))
+			}
+			if !IsKeyword(feature) {
+				panic(MakeReadError(reader, "Feature should be a keyword"))
+			}
+			eatWhitespace(reader)
+			if len(forms) == 0 && reader.Peek() == ')' {
+				reader.Get()
+				readError(reader, "Reader conditional requires an even number of forms")
+				return feature
+			}
+			if ok, _ := GLOBAL_ENV.Features.Get(feature); ok {
+				res, forms = readMulti(reader, forms)
+			} else {
+				SUPPRESS_READ = true
+				_, forms = readMulti(reader, forms)
+				SUPPRESS_READ = false
+			}
+		} else {
+			SUPPRESS_READ = true
+			_, forms = readMulti(reader, forms)
+			SUPPRESS_READ = false
+		}
+		eatWhitespace(reader)
+		r = reader.Peek()
+	}
+	reader.Get()
+	return res
+}
+
 func readList(reader *Reader) Object {
 	s := make([]Object, 0, 10)
 	eatWhitespace(reader)
@@ -920,6 +990,9 @@ func filename(f *string) string {
 }
 
 func handleNoReaderError(reader *Reader, s Symbol) Object {
+	if SUPPRESS_READ {
+		return readFirst(reader)
+	}
 	if LINTER_MODE {
 		if DIALECT != EDN {
 			printReadWarning(reader, "No reader function for tag "+s.ToString(false))
@@ -966,8 +1039,8 @@ func readConditional(reader *Reader) (Object, bool) {
 	if r != '(' {
 		panic(MakeReadError(reader, "Reader conditional body must be a list"))
 	}
-	cond := readList(reader).(*List)
 	if FORMAT_MODE {
+		cond := readList(reader).(*List)
 		if isSplicing {
 			addPrefix(cond, "#?@")
 		} else {
@@ -975,34 +1048,19 @@ func readConditional(reader *Reader) (Object, bool) {
 		}
 		return cond, false
 	}
-	if cond.count%2 != 0 {
-		if LINTER_MODE {
-			printReadError(reader, "Reader conditional requires an even number of forms")
-		} else {
-			panic(MakeReadError(reader, "Reader conditional requires an even number of forms"))
-		}
+	v := readCondList(reader)
+	if v == nil {
+		return EmptyVector(), true
 	}
-	for cond.count > 0 {
-		if ok, _ := GLOBAL_ENV.Features.Get(cond.first); ok {
-			v := Second(cond)
-			if isSplicing {
-				s, ok := v.(Seqable)
-				if !ok {
-					msg := "Spliced form in reader conditional must be Seqable, got " + v.GetType().ToString(false)
-					if LINTER_MODE {
-						printReadError(reader, msg)
-						return EmptyVector(), true
-					} else {
-						panic(MakeReadError(reader, msg))
-					}
-				}
-				return NewVectorFromSeq(s.Seq()), true
-			}
-			return v, false
+	if isSplicing {
+		s, ok := v.(Seqable)
+		if !ok {
+			readError(reader, "Spliced form in reader conditional must be Seqable, got "+v.GetType().ToString(false))
+			return EmptyVector(), true
 		}
-		cond = cond.rest.rest
+		return DeriveReadObject(v, NewVectorFromSeq(s.Seq())), true
 	}
-	return EmptyVector(), true
+	return v, false
 }
 
 func namespacedMapPrefix(auto bool, nsSym Object) string {
@@ -1306,7 +1364,10 @@ func TryRead(reader *Reader) (obj Object, err error) {
 		if !multi {
 			return obj, nil
 		}
-		if obj.(*Vector).Count() > 0 {
+		// Check for obj's info to distinguish between
+		// legitimate empty vector as read from the source
+		// and surrogate value that means "no object was read".
+		if obj.GetInfo() != nil {
 			PROBLEM_COUNT++
 			return NIL, MakeReadError(reader, "Reader conditional splicing not allowed at the top level.")
 		}
