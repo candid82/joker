@@ -274,7 +274,7 @@ When _linting_ an identifier (versus composing one at runtime), Joker ensures it
 
 This "core set" of characters, as a Regex, is `#"[a-zA-Z0-9*+!?<=>&_.'-]"`. It represents the intersection of a limited set of letters, digits, symbols, and punctuation within the (7-bit) ASCII encoding range. The letters are the ASCII-range members of Unicode category L, while the digits are the ASCII-range members of category Nd.
 
-Thus, Joker will warn about using an em dash (instead of an ASCII hyphen-minus (0x2D), a non-breaking space, an accented letter (e.g. `é`), or a control character (even `NUL`), in an identifier.
+Thus, Joker will warn about using an em dash (instead of an ASCII hyphen-minus (`0x2D`)), a non-breaking space (`&nbsp;` in HTML), an accented letter (e.g. `é`), or a control character (even `NUL`), in an identifier.
 
 The `.joker` file may specify key/value pairs that change this default:
 
