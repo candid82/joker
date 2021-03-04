@@ -46,7 +46,6 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 `joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
 
-
 ## Documentation
 
 [Standard library reference](https://candid82.github.io/joker/)
@@ -68,13 +67,14 @@ These are high level goals of the project that guide design and implementation d
 - Be suitable for scripting (lightweight, fast startup). This is something that Clojure is not good at and my personal itch I am trying to scratch.
 - Be user friendly. Good error messages and stack traces are absolutely critical for programmer's happiness and productivity.
 - Provide some tooling for Clojure and its dialects. Joker has [linter mode](#linter-mode) which can be used for linting Joker, Clojure and ClojureScript code. It catches some basic errors.
-Joker can also format (pretty print) Clojure code (see [format mode](#format-mode)) or EDN data structures. For example, the following command can be used to pretty print EDN data structure (read from stdin):
+  Joker can also format (pretty print) Clojure code (see [format mode](#format-mode)) or EDN data structures. For example, the following command can be used to pretty print EDN data structure (read from stdin):
 
 ```
 joker --hashmap-threshold -1 -e "(pprint (read))"
 ```
 
- There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious.
+There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) that uses Joker for pretty printing EDN files. [Here](https://github.com/candid82/joker/releases/tag/v0.8.8) you can find the description of `--hashmap-threshold` parameter, if curious.
+
 - Be as close (syntactically and semantically) to Clojure as possible. Joker should truly be a dialect of Clojure, not a language inspired by Clojure. That said, there is a lot of Clojure features that Joker doesn't and will never have. Being close to Clojure only applies to features that Joker does have.
 
 ## Project Non-goals
@@ -86,33 +86,33 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 
 1. Primitive types are different due to a different host language and desire to simplify things. Scripting doesn't normally require all the integer and float types, for example. Here is a list of Joker's primitive types:
 
-  | Joker type | Corresponding Go type |
-  |------------|-----------------------|
-  | BigFloat   | big.Float             |
-  | BigInt     | big.Int               |
-  | Boolean    | bool                  |
-  | Char       | rune                  |
-  | Double     | float64               |
-  | Int        | int                   |
-  | Keyword    | n/a                   |
-  | Nil        | n/a                   |
-  | Ratio      | big.Rat               |
-  | Regex      | regexp.Regexp         |
-  | String     | string                |
-  | Symbol     | n/a                   |
-  | Time       | time.Time             |
+| Joker type | Corresponding Go type |
+| ---------- | --------------------- |
+| BigFloat   | big.Float             |
+| BigInt     | big.Int               |
+| Boolean    | bool                  |
+| Char       | rune                  |
+| Double     | float64               |
+| Int        | int                   |
+| Keyword    | n/a                   |
+| Nil        | n/a                   |
+| Ratio      | big.Rat               |
+| Regex      | regexp.Regexp         |
+| String     | string                |
+| Symbol     | n/a                   |
+| Time       | time.Time             |
 
-  Note that `Nil` is a type that has one value `nil`.
+Note that `Nil` is a type that has one value `nil`.
 
 1. The set of persistent data structures is much smaller:
 
-  | Joker type | Corresponding Clojure type |
-  | ---------- | -------------------------- |
-  | ArrayMap   | PersistentArrayMap         |
-  | MapSet     | PersistentHashSet (or hypothetical PersistentArraySet, depending on which kind of underlying map is used) |
-  | HashMap    | PersistentHashMap          |
-  | List       | PersistentList             |
-  | Vector     | PersistentVector           |
+| Joker type | Corresponding Clojure type                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| ArrayMap   | PersistentArrayMap                                                                                        |
+| MapSet     | PersistentHashSet (or hypothetical PersistentArraySet, depending on which kind of underlying map is used) |
+| HashMap    | PersistentHashMap                                                                                         |
+| List       | PersistentList                                                                                            |
+| Vector     | PersistentVector                                                                                          |
 
 1. Joker doesn't have the same level of interoperability with the host language (Go) as Clojure does with Java or ClojureScript does with JavaScript. It doesn't have access to arbitrary Go types and functions. There is only a small fixed set of built-in types and interfaces. Dot notation for calling methods is not supported (as there are no methods). All Java/JVM specific functionality of Clojure is not implemented for obvious reasons.
 1. Joker is single-threaded with no support for parallelism. Therefore no refs, agents, futures, promises, locks, volatiles, transactions, `p*` functions that use multiple threads. Vars always have just one "root" binding. Joker does have core.async style support for concurrency. See `go` macro [documentation](https://candid82.github.io/joker/joker.core.html#go) for details.
@@ -121,22 +121,27 @@ joker --hashmap-threshold -1 -e "(pprint (read))"
 1. Built-in namespaces have `joker` prefix. The core namespace is called `joker.core`. Other built-in namespaces include `joker.string`, `joker.json`, `joker.os`, `joker.base64` etc. See [standard library reference](https://candid82.github.io/joker/) for details.
 1. Joker doesn't support AOT compilation and `(-main)` entry point as Clojure does. It simply reads s-expressions from the file and executes them sequentially. If you want some code to be executed only if the file it's in is passed as `joker` argument but not if it's loaded from other files, use `(when (= *main-file* *file*) ...)` idiom. See https://github.com/candid82/joker/issues/277 for details.
 1. Miscellaneous:
-  - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
-  - `slurp` only takes one argument - a filename (string). No options are supported.
-  - `ifn?` is called `callable?`
-  - Map entry is represented as a two-element vector.
-  - resolving unbound var returns `nil`, not the value `Unbound`. You can still check if the var is bound with `bound?` function.
+
+- `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
+- `slurp` only takes one argument - a filename (string). No options are supported.
+- `ifn?` is called `callable?`
+- Map entry is represented as a two-element vector.
+- resolving unbound var returns `nil`, not the value `Unbound`. You can still check if the var is bound with `bound?` function.
 
 ## Linter mode
 
 To run Joker in linter mode pass `--lint --dialect <dialect>` flag, where `<dialect>` can be `clj`, `cljs`, `joker` or `edn`. If `--dialect <dialect>` is omitted, it will be set based on file extension. For example, `joker --lint foo.clj` will run linter for the file `foo.clj` using Clojure (as opposed to ClojureScript or Joker) dialect. `joker --lint --dialect cljs -` will run linter for standard input using ClojureScript dialect. Linter will read and parse all forms in the provided file (or read them from standard input) and output errors and warnings (if any) to standard output (for `edn` dialect it will only run read phase and won't parse anything). Let's say you have file `test.clj` with the following content:
+
 ```clojure
 (let [a 1])
 ```
+
 Executing the following command `joker --lint test.clj` will produce the following output:
+
 ```
 test.clj:1:1: Parse warning: let form with empty body
 ```
+
 The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
 
 ### Integration with editors
@@ -199,16 +204,16 @@ If you use `:refer :all` Joker won't be able to properly resolve symbols because
 1. Refer specific symbols. For example: `[clojure.test :refer [deftest testing is are]]`. This is usually not too tedious, and you only need to do it once per file.
 2. Use alias and qualified symbols:
 
- ```clojure
- (:require [clojure.test :as t])
- (t/deftest ...)
- ```
+```clojure
+(:require [clojure.test :as t])
+(t/deftest ...)
+```
 
 3. "Teach" Joker declarations from referred namespace. Joker executes the following files (if they exist) before linting your file: `.jokerd/linter.cljc` (for both Clojure and ClojureScript), `.jokerd/linter.clj` (Clojure only), `.jokerd/linter.cljs` (ClojureScript only), or `.jokerd/linter.joke` (Joker only). The rules for locating `.jokerd` directory are the same as for locating `.joker` file.
 
-   *  :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
-   * If you really want some symbols to be considered declared *in any namespace no matter what*, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
-    (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
+   - :warning: Joker can be made aware of any additional declarations (like `deftest` and `is`) by providing them in `.jokerd/linter.clj[s|c]` files. However, this means Joker cannot check that the symbols really are declared in your namespace, so this feature should be used sparingly.
+   - If you really want some symbols to be considered declared _in any namespace no matter what_, you can add `(in-ns 'joker.core)` to your `linter.clj[s|c]` and then declare those symbols.
+     (see issues [52](https://github.com/candid82/joker/issues/52) and [50](https://github.com/candid82/joker/issues/50) for discussion).
 
 I generally prefer first option for `clojure.test` namespace.
 
@@ -248,8 +253,8 @@ Joker supports a few configurable linting rules. To turn them on or off set thei
 
 Below is the list of all configurable rules.
 
-|          Rule          |                      Description                      | Default value |
-|------------------------|-------------------------------------------------------|---------------|
+| Rule                   | Description                                           | Default value |
+| ---------------------- | ----------------------------------------------------- | ------------- |
 | `if-without-else`      | warn on `if` without the `else` branch                | `false`       |
 | `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)` | `true`        |
 | `unused-as`            | warn on unused `:as` binding                          | `true`        |
@@ -315,12 +320,6 @@ Since Linux (on **amd64**) supports building _and running_ 32-bit (**386**) exec
 
 See [`DEVELOPER.md`](DEVELOPER.md) for information on Joker internals, such as adding new namespaces to the Joker executable.
 
-## Contributors
-
-(Generated by [Hall-Of-Fame](https://github.com/sourcerer-io/hall-of-fame))
-
-[![](https://sourcerer.io/fame/candid82/candid82/joker/images/0)](https://sourcerer.io/fame/candid82/candid82/joker/links/0)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/1)](https://sourcerer.io/fame/candid82/candid82/joker/links/1)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/2)](https://sourcerer.io/fame/candid82/candid82/joker/links/2)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/3)](https://sourcerer.io/fame/candid82/candid82/joker/links/3)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/4)](https://sourcerer.io/fame/candid82/candid82/joker/links/4)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/5)](https://sourcerer.io/fame/candid82/candid82/joker/links/5)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/6)](https://sourcerer.io/fame/candid82/candid82/joker/links/6)[![](https://sourcerer.io/fame/candid82/candid82/joker/images/7)](https://sourcerer.io/fame/candid82/candid82/joker/links/7)
-
 ## License
 
 ```
@@ -341,5 +340,3 @@ By using this software in any fashion, you are agreeing to be bound by
 the terms of this license.
 You must not remove this notice, or any other, from this software.
 ```
-
-
