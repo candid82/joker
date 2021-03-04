@@ -257,11 +257,11 @@ Below is the list of all configurable rules.
 | `unused-fn-parameters` | warn on unused fn parameters                              | `false`       |
 | `fn-with-empty-body`   | warn on fn form with empty body                           | `true`        |
 | `valid-ident {}`       | warn on symbol/keyword characters based on map values:    |               |
-|   `:character-class`   |   `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]` | `:core`       |
+| `  :character-class`   |   `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]` | `:core`       |
 |                        |   `:symbol` - not `:core` plus all symbols (category S)   |               |
-|                        |   `:visible` - not `:symbol` plus punctuation and marks   |               |
-|                        |   `:any` - no warnings               (categories P and M) |               |
-|   `:encoding-range`    | warn on symbols/keywords beyond encoding range:           | `:ascii`      |
+|                        |   `:visible` - not `:symbol` plus punctuation (P) and marks (M)   |               |
+|                        |   `:any` - no warnings                                    |               |
+| `  :encoding-range`    | warn on symbols/keywords beyond encoding range:           | `:ascii`      |
 |                        |   `:ascii` - not 7-bit ASCII (`> unicode.MaxASCII`)       |               |
 |                        |   `:unicode` - not Unicode (`> unicode.MaxRune`)          |               |
 |                        |   `:any` - no warnings                                    |               |
