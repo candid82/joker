@@ -248,23 +248,23 @@ Joker supports a few configurable linting rules. To turn them on or off set thei
 
 Below is the list of all configurable rules.
 
-| Rule                   | Description                                               | Default value |
-|------------------------|-----------------------------------------------------------|---------------|
-| `if-without-else`      | warn on `if` without the `else` branch                    | `false`       |
-| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)`     | `true`        |
-| `unused-as`            | warn on unused `:as` binding                              | `true`        |
-| `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings     | `true`        |
-| `unused-fn-parameters` | warn on unused fn parameters                              | `false`       |
-| `fn-with-empty-body`   | warn on fn form with empty body                           | `true`        |
-| `valid-ident {}`       | warn on symbol/keyword characters based on map values:    |               |
-| `  :character-class`   |   `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]` | `:core`       |
-|                        |   `:symbol` - not `:core` plus all symbols (category S)   |               |
-|                        |   `:visible` - not `:symbol` plus punctuation (P) and marks (M)   |               |
-|                        |   `:any` - no warnings                                    |               |
-| `  :encoding-range`    | warn on symbols/keywords beyond encoding range:           | `:ascii`      |
-|                        |   `:ascii` - not 7-bit ASCII (`> unicode.MaxASCII`)       |               |
-|                        |   `:unicode` - not Unicode (`> unicode.MaxRune`)          |               |
-|                        |   `:any` - no warnings                                    |               |
+| Rule                   | Description                                                   | Default value |
+|------------------------|---------------------------------------------------------------|---------------|
+| `if-without-else`      | warn on `if` without the `else` branch                        | `false`       |
+| `no-forms-threading`   | warn on threading macros with no forms, i.e. `(-> a)`         | `true`        |
+| `unused-as`            | warn on unused `:as` binding                                  | `true`        |
+| `unused-keys`          | warn on unused `:keys`, `:strs`, and `:syms` bindings         | `true`        |
+| `unused-fn-parameters` | warn on unused fn parameters                                  | `false`       |
+| `fn-with-empty-body`   | warn on fn form with empty body                               | `true`        |
+| `valid-ident {}`       | warn on symbol/keyword characters based on map values:        |               |
+| `  :character-class`   | `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]`       | `:core`       |
+|                        | `:symbol` - not `:core` plus all symbols (category S)         |               |
+|                        | `:visible` - not `:symbol` plus punctuation (P) and marks (M) |               |
+|                        | `:any` - no warnings                                          |               |
+| `  :encoding-range`    | warn on symbols/keywords beyond encoding range:               | `:ascii`      |
+|                        | `:ascii` - not 7-bit ASCII (`> unicode.MaxASCII`)             |               |
+|                        | `:unicode` - not Unicode (`> unicode.MaxRune`)                |               |
+|                        | `:any` - no warnings                                          |               |
 
 As shown in the above table, if `:valid-ident` is not fully specified, the defaults are equivalent to the character set used by core Clojure and Joker libraries (namespaces) in the ASCII range, explicitly expressed via:
 
