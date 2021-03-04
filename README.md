@@ -257,19 +257,18 @@ Below is the list of all configurable rules.
 | `unused-fn-parameters` | warn on unused fn parameters                                  | `false`       |
 | `fn-with-empty-body`   | warn on fn form with empty body                               | `true`        |
 | `valid-ident {}`       | warn on symbol/keyword characters based on map values:        |               |
-| `  :character-class`   | `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]`       | `:core`       |
+| `  :character-set`     | `:core` - not core characters `[a-zA-Z0-9*+!?<=>&_.'-]`       | `:core`       |
 |                        | `:symbol` - not `:core` plus all symbols (category S)         |               |
 |                        | `:visible` - not `:symbol` plus punctuation (P) and marks (M) |               |
 |                        | `:any` - no warnings                                          |               |
-| `  :encoding-range`    | warn on symbols/keywords beyond encoding range:               | `:ascii`      |
-|                        | `:ascii` - not 7-bit ASCII (`> unicode.MaxASCII`)             |               |
+| `  :encoding-range`    | `:ascii` - not 7-bit ASCII (`> unicode.MaxASCII`)             | `:ascii`      |
 |                        | `:unicode` - not Unicode (`> unicode.MaxRune`)                |               |
 |                        | `:any` - no warnings                                          |               |
 
-As shown in the above table, if `:valid-ident` is not fully specified, the defaults are equivalent to the character set used by core Clojure and Joker libraries (namespaces) in the ASCII range, explicitly expressed via:
+As shown in the above table, if `:valid-ident` is not fully specified, the defaults are the character set used by core Clojure and Joker libraries (namespaces) in the ASCII range, explicitly expressed via:
 
 ```clojure
-{:valid-ident {:character-class :core
+{:valid-ident {:character-set :core
                :encoding-range :ascii}}
 ```
 
