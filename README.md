@@ -233,8 +233,8 @@ When linting directories Joker lints all files with the extension corresponding 
 When linting directories Joker can report globally unused namespaces and public vars. This is turned off by default but can be enabled with `--report-globally-unused` flag, e.g. `joker --lint --working-dir my-project --report-globally-unused`. This is useful for finding "dead" code. Some namespaces or vars are intended to be used by external systems (e.g. public API of a library or main function of a program). To exclude such namespaces and vars from being reported as globally unused list them in `:entry-points` vector in `.joker` file, which may contain the names of namespaces or fully qualified names of vars. For example:
 
 ```clojure
-:entry-points [my-project.public-api
-               my-project.core/-main]
+{:entry-points [my-project.public-api
+                my-project.core/-main]}
 ```
 
 ### Optional rules
@@ -242,8 +242,8 @@ When linting directories Joker can report globally unused namespaces and public 
 Joker supports a few configurable linting rules. To turn them on or off set their values to `true` or `false` in `:rules` map in `.joker` file. For example:
 
 ```clojure
-:rules {:if-without-else true
-        :no-forms-threading false}
+{:rules {:if-without-else true
+         :no-forms-threading false}}
 ```
 
 Below is the list of all configurable rules.
