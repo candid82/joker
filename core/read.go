@@ -406,25 +406,24 @@ func readNumber(reader *Reader) Object {
 
 /* Returns whether the rune may be a non-initial character in a symbol
 /* or keyword name. */
-func isIdentifierRune(r rune) bool {
+func isIdentRune(r rune) bool {
 	switch r {
 	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
 		// Whitespace listed above (' ', '\t', '\n', '\r') purely for speed of common cases
-
 		return false
 	}
 	return !isJavaSpace(r)
 }
 
 /* Reads (lexes) a token and returns either a Symbol or Keyword. */
-func readIdentifier(reader *Reader, first rune) Object {
+func readIdent(reader *Reader, first rune) Object {
 	var b bytes.Buffer
 	if first != ':' {
 		b.WriteRune(first)
 	}
 	var lastAdded rune
 	r := reader.Get()
-	for isIdentifierRune(r) {
+	for isIdentRune(r) {
 		if r == ':' {
 			if lastAdded == ':' {
 				panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
@@ -482,24 +481,6 @@ func readIdentifier(reader *Reader, first rune) Object {
    ones (if new rules are desired), and c) hope for reasonably good
    performance. */
 
-func isInvalidNonUnicode(s string) (bool, int, string) {
-	for i, r := range s {
-		if unicode.MaxRune < r {
-			return false, i, "not a Unicode character"
-		}
-	}
-	return true, 0, ""
-}
-
-func isInvalidNonASCII(s string) (bool, int, string) {
-	for i, r := range s {
-		if unicode.MaxASCII < r {
-			return false, i, "not an ASCII character"
-		}
-	}
-	return true, 0, ""
-}
-
 /* Returns whether a rune is a character that is inherently allowed in
 /* identifiers (symbols, keywords) by dint of the fact that
 /* clojure.core and other core packages define identifiers with these
@@ -507,7 +488,7 @@ func isInvalidNonASCII(s string) (bool, int, string) {
 /* permissive regarding which characters can be lexed into an
 /* identifier), linting can helpfully find and warn about characters
 /* outside of this set (as extended via configuration). */
-func isIdentifierSpecificRune(r rune) bool {
+func isCoreIdentRune(r rune) bool {
 	switch r {
 	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'': // Used in clojure.core, joker.core, etc.
 		return true
@@ -515,84 +496,122 @@ func isIdentifierSpecificRune(r rune) bool {
 	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || ('0' <= r && r <= '9')
 }
 
-func isValidAlnum(s string) (bool, int, string) {
-	for i, r := range s {
-		if !isIdentifierSpecificRune(r) && !unicode.IsLetter(r) && !unicode.IsDigit(r) {
-			return false, i, "not a Letter nor Digit"
-		}
-	}
-	return true, 0, ""
+const isValidCoreReason = "not a Letter nor (Decimal) Digit (category L nor Nd)"
+
+func isValidCore(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
-func warnInvalidString(reader *Reader, validFn, invalidFn func(s string) (bool, int, string), s *string) {
+const isValidSymbolReason = "not a Letter, (Decimal) Digit, nor Symbol (category L, Nd, nor S)"
+
+func isValidSymbol(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsSymbol(r)
+}
+
+const isValidVisibleReason = "not a Letter, (Decimal) Digit, Symbol, Punctuation, nor Mark (category L, Nd, S, P, nor M)"
+
+func isValidVisible(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) || unicode.IsMark(r)
+}
+
+const isValidUnicodeReason = "not a Unicode character"
+
+func isValidUnicode(r rune) bool {
+	return r <= unicode.MaxRune
+}
+
+const isValidASCIIReason = "not a (7-bit) ASCII character"
+
+func isValidASCII(r rune) bool {
+	return r <= unicode.MaxASCII
+}
+
+const isValidAnyReason = "not anything!?"
+
+func isValidAny(r rune) bool {
+	return true
+}
+
+var identValidationSetFn = isValidCore
+var identValidationSetWhy = isValidCoreReason
+var identValidationRangeFn = isValidASCII
+var identValidationRangeWhy = isValidASCIIReason
+
+func warnInvalidIdent(reader *Reader, s *string) {
 	if s == nil {
 		return
 	}
 
-	okValid, iValid, explainValid := validFn(*s)
-	okInvalid, iInvalid, explainInvalid := invalidFn(*s)
-
-	var i int
-	var explain string
-	if okValid {
-		if okInvalid {
-			return
-		}
-		i = iInvalid
-		explain = explainInvalid
-	} else {
-		if okInvalid || (iValid < iInvalid) {
-			i = iValid
-			explain = explainValid
-		} else if iValid > iInvalid {
-			i = iInvalid
-			explain = explainInvalid
-		} else { // iValid == iInvalid
-			i = iValid
-			explain = explainValid + "; " + explainInvalid
+	for i, r := range *s {
+		if !isCoreIdentRune(r) && (!identValidationSetFn(r) || !identValidationRangeFn(r)) {
+			var explain string
+			if identValidationSetFn(r) {
+				explain = identValidationRangeWhy
+			} else if identValidationRangeFn(r) {
+				explain = identValidationSetWhy
+			} else {
+				explain = identValidationSetWhy + "; " + identValidationRangeWhy
+			}
+			runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
+			msg := fmt.Sprintf("Impermissible character %q at %d in %q (%s)", runeValue, i, *s, explain)
+			printReadWarning(reader, msg)
 		}
 	}
-	runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
-	msg := fmt.Sprintf("Impermissible character %q at %d in %q (%s)", runeValue, i, *s, explain)
-	printReadWarning(reader, msg)
 }
 
-var identifierValidationFn = isInvalidNonASCII
-var identifierInvalidationFn = isValidAlnum
-
-func readValidIdentifier(reader *Reader, first rune) Object {
-	obj := readIdentifier(reader, first)
+func readValidatedIdent(reader *Reader, first rune) Object {
+	obj := readIdent(reader, first)
 	switch o := obj.(type) {
 	case Keyword:
-		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.ns)
-		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.name)
+		warnInvalidIdent(reader, o.ns)
+		warnInvalidIdent(reader, o.name)
 	case Symbol:
-		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.ns)
-		warnInvalidString(reader, identifierValidationFn, identifierInvalidationFn, o.name)
+		warnInvalidIdent(reader, o.ns)
+		warnInvalidIdent(reader, o.name)
 	}
 	return obj
 }
 
-var readIdentifierFn = readIdentifier
+var readIdentFn = readIdent
 
 func EnableIdentValidation() {
-	readIdentifierFn = readValidIdentifier
+	readIdentFn = readValidatedIdent
 }
 
-// func SetIdentifierValidationUnicode() {
-// 	readIdentifierFn = readValidIdentifier
-// 	identifierValidationFn = isValidUnicode
-// }
+func SetIdentSetCore() {
+	identValidationSetFn = isValidCore
+	identValidationSetWhy = isValidCoreReason
+}
 
-// func SetIdentifierValidationLetters() {
-// 	readIdentifierFn = readValidIdentifier
-// 	identifierValidationFn = isValidLetters
-// }
+func SetIdentSetSymbol() {
+	identValidationSetFn = isValidSymbol
+	identValidationSetWhy = isValidSymbolReason
+}
 
-// func SetIdentifierValidationASCII() {
-// 	readIdentifierFn = readValidIdentifier
-// 	identifierValidationFn = isValidASCII
-// }
+func SetIdentSetVisible() {
+	identValidationSetFn = isValidVisible
+	identValidationSetWhy = isValidVisibleReason
+}
+
+func SetIdentSetAny() {
+	identValidationSetFn = isValidAny
+	identValidationSetWhy = isValidAnyReason
+}
+
+func SetIdentRangeUnicode() {
+	identValidationRangeFn = isValidUnicode
+	identValidationRangeWhy = isValidUnicodeReason
+}
+
+func SetIdentRangeASCII() {
+	identValidationRangeFn = isValidASCII
+	identValidationRangeWhy = isValidASCIIReason
+}
+
+func SetIdentRangeAny() {
+	identValidationRangeFn = isValidAny
+	identValidationRangeWhy = isValidAnyReason
+}
 
 func readRegex(reader *Reader) Object {
 	var b bytes.Buffer
@@ -1387,16 +1406,16 @@ func Read(reader *Reader) (Object, bool) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readIdentifierFn(reader, r), false
+		return readIdentFn(reader, r), false
 	case r == '-' || r == '+':
 		if unicode.IsDigit(reader.Peek()) {
 			reader.Unget()
 			return readNumber(reader), false
 		}
-		return readIdentifierFn(reader, r), false
+		return readIdentFn(reader, r), false
 	case r == '%' && ARGS != nil:
 		if FORMAT_MODE {
-			return readIdentifierFn(reader, r), false
+			return readIdentFn(reader, r), false
 		}
 		return readArgSymbol(reader), false
 	case r == '"':
@@ -1463,7 +1482,7 @@ func Read(reader *Reader) (Object, bool) {
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
 	default:
-		return readIdentifierFn(reader, r), false
+		return readIdentFn(reader, r), false
 	}
 }
 
