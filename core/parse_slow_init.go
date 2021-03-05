@@ -45,12 +45,13 @@ var (
 		else_:              MakeKeyword("else"),
 		none:               MakeKeyword("none"),
 		validIdent:         MakeKeyword("valid-ident"),
-		inValidIdent:       MakeKeyword("invalid-ident"),
-		notASCII:           MakeKeyword("not-ASCII"),
-		notUnicode:         MakeKeyword("not-unicode"),
-		visible:            MakeKeyword("visible"),
+		characterSet:       MakeKeyword("character-set"),
+		encodingRange:      MakeKeyword("encoding-range"),
+		core:               MakeKeyword("core"),
 		symbol:             MakeKeyword("symbol"),
-		alnum:              MakeKeyword("alnum"),
+		visible:            MakeKeyword("visible"),
+		ascii:              MakeKeyword("ascii"),
+		unicode:            MakeKeyword("unicode"),
 		any:                MakeKeyword("any"),
 	}
 	SYMBOLS = Symbols{

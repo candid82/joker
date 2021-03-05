@@ -202,12 +202,13 @@ type (
 		else_              Keyword
 		none               Keyword
 		validIdent         Keyword
-		inValidIdent       Keyword
-		notASCII           Keyword
-		notUnicode         Keyword
-		visible            Keyword
+		characterSet       Keyword
+		encodingRange      Keyword
+		core               Keyword
 		symbol             Keyword
-		alnum              Keyword
+		visible            Keyword
+		ascii              Keyword
+		unicode            Keyword
 		any                Keyword
 	}
 	Symbols struct {
