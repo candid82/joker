@@ -1,11 +1,3 @@
-(defn file-exists?
-  [path]
-  (try
-    (slurp path)
-    true
-    (catch Error e
-      false)))
-
 (def exit-code 0)
 
 (defn first-diff-index
@@ -31,7 +23,7 @@
       exe (str pwd "/joker")]
   (doseq [test-dir test-dirs]
     (let [dir (str root-dir "/" test-dir "/")
-          filename (if (file-exists? (str dir "input.clj"))
+          filename (if (joker.os/exists? (str dir "input.clj"))
                      (str dir "input.clj")
                      (str dir "input.cljs"))
           res (joker.os/sh exe cmd filename)
