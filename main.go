@@ -292,6 +292,7 @@ func lintFile(filename string, dialect Dialect, workingDir string) {
 	}
 	ReadConfig(filename, workingDir)
 	configureLinterMode(dialect, filename, workingDir)
+	EnableIdentValidation()
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
 		WarnOnUnusedVars()

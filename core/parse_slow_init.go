@@ -44,6 +44,15 @@ var (
 		_import:            MakeKeyword("import"),
 		else_:              MakeKeyword("else"),
 		none:               MakeKeyword("none"),
+		validIdent:         MakeKeyword("valid-ident"),
+		characterSet:       MakeKeyword("character-set"),
+		encodingRange:      MakeKeyword("encoding-range"),
+		core:               MakeKeyword("core"),
+		symbol:             MakeKeyword("symbol"),
+		visible:            MakeKeyword("visible"),
+		ascii:              MakeKeyword("ascii"),
+		unicode:            MakeKeyword("unicode"),
+		any:                MakeKeyword("any"),
 	}
 	SYMBOLS = Symbols{
 		joker_core:         MakeSymbol("joker.core"),

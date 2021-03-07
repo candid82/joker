@@ -264,6 +264,41 @@ Below is the list of all configurable rules.
 
 Note that `unused binding` and `unused parameter` warnings are suppressed for names starting with underscore.
 
+### Valid Identifiers
+
+Symbols and keywords (collectively referred to herein as "identifiers") can be comprised of nearly any encodable character ("rune" in Go), especially when composed from a `String` via e.g. `(symbol "arbitrary-string")`.
+
+Unlike most popular programming languages, Clojure allows "extreme flexibility" (as does Joker) in choosing characters for identifiers in source code, permitting many control and other invisible characters, even as the first character. In short, any character not specifically allocated to another purpose (another lexeme) by the Clojure language defaults to starting or continuing an identifier lexeme: `(def ^@ "test")`, where `^@` denotes the ASCII `NUL` (`0x00`) character, works.
+
+When _linting_ an identifier (versus composing one at runtime), Joker ensures its characters are members of a more "reasonable" set, aligned with those used by the core libraries of Clojure (as well as Joker).
+
+This "core set" of characters, as a Regex, is `#"[a-zA-Z0-9*+!?<=>&_.'-]"`. It represents the intersection of a limited set of letters, digits, symbols, and punctuation within the (7-bit) ASCII encoding range. The letters are the ASCII-range members of Unicode category L, while the digits are the ASCII-range members of category Nd.
+
+Thus, Joker will warn about using an em dash (instead of an ASCII hyphen-minus (`0x2D`)), a non-breaking space (`&nbsp;` in HTML), an accented letter (e.g. `é`), or a control character (even `NUL`), in an identifier.
+
+The `.joker` file may specify key/value pairs that change this default:
+
+| Key                  | Value      | Meaning                                      |
+| -------------------- | ---------- | -------------------------------------------- |
+| `:character-set`     | `:core`    | `#"[*+!?<=>&_.'-]"` plus categories L and Nd |
+|                      | `:symbol`  | `:core` plus symbols (category S)            |
+|                      | `:visible` | `:symbol` plus punctuation (P) and marks (M) |
+|                      | `:any`     | any category                                 |
+| `:encoding-range`    | `:ascii`   | only 7-bit ASCII (`<= unicode.MaxASCII`)     |
+|                      | `:unicode` | only Unicode (`<= unicode.MaxRune`)          |
+|                      | `:any`     | any encodable character                      |
+
+The intersection of these specifications governs how identifiers are linted; any character outside the resulting set yields a linter warning.
+
+If `:valid-ident` is not fully specified, the defaults are the core character set in the ASCII range, as if `.joker` contained:
+
+```clojure
+{:valid-ident {:character-set :core
+               :encoding-range :ascii}}
+```
+
+Changing `:core` to `:symbol` would allow, for example, `$` in identifiers; whereas changing `:ascii` to `:unicode` would allow `é`.
+
 ## Format mode
 
 To run Joker in format mode pass `--format` flag. For example:

@@ -2022,6 +2022,41 @@ func ReadConfig(filename string, workingDir string) {
 			WARNINGS.fnWithEmptyBody = ToBool(v)
 		}
 	}
+	if ok, valid := configMap.Get(KEYWORDS.validIdent); ok {
+		m, ok := valid.(Map)
+		if !ok {
+			printConfigError(configFileName, ":valid-ident value must be a map, got "+valid.GetType().ToString(false))
+			return
+		}
+		if ok, v := m.Get(KEYWORDS.characterSet); ok {
+			switch {
+			case v.Equals(KEYWORDS.core):
+				SetIdentSetCore()
+			case v.Equals(KEYWORDS.symbol):
+				SetIdentSetSymbol()
+			case v.Equals(KEYWORDS.visible):
+				SetIdentSetVisible()
+			case v.Equals(KEYWORDS.any):
+				SetIdentSetAny()
+			default:
+				printConfigError(configFileName, ":character-set value (in :valid-ident) value must be :core, :symbol, :visible, or :any; got "+v.GetType().ToString(false)+" "+v.ToString(false))
+				return
+			}
+		}
+		if ok, v := m.Get(KEYWORDS.encodingRange); ok {
+			switch {
+			case v.Equals(KEYWORDS.unicode):
+				SetIdentRangeUnicode()
+			case v.Equals(KEYWORDS.ascii):
+				SetIdentRangeASCII()
+			case v.Equals(KEYWORDS.any):
+				SetIdentRangeAny()
+			default:
+				printConfigError(configFileName, ":encoding-range value (in :valid-ident) value must be :unicode, :ascii, or :any; got "+v.GetType().ToString(false)+" "+v.ToString(false))
+				return
+			}
+		}
+	}
 	LINTER_CONFIG.Value = configMap
 }
 

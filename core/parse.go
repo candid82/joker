@@ -201,6 +201,15 @@ type (
 		_import            Keyword
 		else_              Keyword
 		none               Keyword
+		validIdent         Keyword
+		characterSet       Keyword
+		encodingRange      Keyword
+		core               Keyword
+		symbol             Keyword
+		visible            Keyword
+		ascii              Keyword
+		unicode            Keyword
+		any                Keyword
 	}
 	Symbols struct {
 		joker_core         Symbol
