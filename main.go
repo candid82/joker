@@ -271,6 +271,7 @@ func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	lm, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*linter-mode*"))
 	lm.Value = Boolean{B: true}
 	GLOBAL_ENV.Features = GLOBAL_ENV.Features.Disjoin(MakeKeyword("joker")).Conj(makeDialectKeyword(dialect)).(Set)
+	EnableIdentValidation()
 }
 
 func detectDialect(filename string) Dialect {
@@ -292,7 +293,6 @@ func lintFile(filename string, dialect Dialect, workingDir string) {
 	}
 	ReadConfig(filename, workingDir)
 	configureLinterMode(dialect, filename, workingDir)
-	EnableIdentValidation()
 	if processFile(filename, phase) == nil {
 		WarnOnUnusedNamespaces()
 		WarnOnUnusedVars()

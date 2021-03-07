@@ -1,0 +1,3 @@
+tests/linter/valid-indent/input.clj:3:17: Read warning: Impermissible character 'д' at 10 in "non-ascii-да" (not a (7-bit) ASCII character)
+tests/linter/valid-indent/input.clj:3:17: Read warning: Impermissible character 'а' at 11 in "non-ascii-да" (not a (7-bit) ASCII character)
+tests/linter/valid-indent/input.clj:5:19: Read warning: Impermissible character '|' at 13 in "non-core-#$:%|" (not a Letter nor (Decimal) Digit (category L nor Nd))

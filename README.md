@@ -278,15 +278,15 @@ Thus, Joker will warn about using an em dash (instead of an ASCII hyphen-minus (
 
 The `.joker` file may specify key/value pairs that change this default:
 
-| Key                  | Value      | Meaning                                      |
-| -------------------- | ---------- | -------------------------------------------- |
-| `:character-set`     | `:core`    | `#"[*+!?<=>&_.'-]"` plus categories L and Nd |
-|                      | `:symbol`  | `:core` plus symbols (category S)            |
-|                      | `:visible` | `:symbol` plus punctuation (P) and marks (M) |
-|                      | `:any`     | any category                                 |
-| `:encoding-range`    | `:ascii`   | only 7-bit ASCII (`<= unicode.MaxASCII`)     |
-|                      | `:unicode` | only Unicode (`<= unicode.MaxRune`)          |
-|                      | `:any`     | any encodable character                      |
+| Key               | Value      | Meaning                                           |
+| ----------------- | ---------- | ------------------------------------------------- |
+| `:character-set`  | `:core`    | `#"[*+!?<=>&_.'\-$:#%]"` plus categories L and Nd |
+|                   | `:symbol`  | `:core` plus symbols (category S)                 |
+|                   | `:visible` | `:symbol` plus punctuation (P) and marks (M)      |
+|                   | `:any`     | any category                                      |
+| `:encoding-range` | `:ascii`   | only 7-bit ASCII (`<= unicode.MaxASCII`)          |
+|                   | `:unicode` | only Unicode (`<= unicode.MaxRune`)               |
+|                   | `:any`     | any encodable character                           |
 
 The intersection of these specifications governs how identifiers are linted; any character outside the resulting set yields a linter warning.
 
@@ -297,7 +297,7 @@ If `:valid-ident` is not fully specified, the defaults are the core character se
                :encoding-range :ascii}}
 ```
 
-Changing `:core` to `:symbol` would allow, for example, `$` in identifiers; whereas changing `:ascii` to `:unicode` would allow `é`.
+Changing `:core` to `:symbol` would allow, for example, `|` in identifiers; whereas changing `:ascii` to `:unicode` would allow `é`.
 
 ## Format mode
 

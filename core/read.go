@@ -490,7 +490,7 @@ func readIdent(reader *Reader, first rune) Object {
 /* outside of this set (as extended via configuration). */
 func isCoreIdentRune(r rune) bool {
 	switch r {
-	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'': // Used in clojure.core, joker.core, etc.
+	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'', '#', '$', ':', '%': // Used in clojure.core, joker.core, etc.
 		return true
 	}
 	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || ('0' <= r && r <= '9')
@@ -542,7 +542,8 @@ func warnInvalidIdent(reader *Reader, s *string) {
 		return
 	}
 
-	for i, r := range *s {
+	k := 0
+	for _, r := range *s {
 		if !isCoreIdentRune(r) && (!identValidationSetFn(r) || !identValidationRangeFn(r)) {
 			var explain string
 			if identValidationSetFn(r) {
@@ -552,10 +553,10 @@ func warnInvalidIdent(reader *Reader, s *string) {
 			} else {
 				explain = identValidationSetWhy + "; " + identValidationRangeWhy
 			}
-			runeValue, _ := utf8.DecodeRuneInString((*s)[i:])
-			msg := fmt.Sprintf("Impermissible character %q at %d in %q (%s)", runeValue, i, *s, explain)
+			msg := fmt.Sprintf("Impermissible character %q at %d in %q (%s)", r, k, *s, explain)
 			printReadWarning(reader, msg)
 		}
+		k++
 	}
 }
 
