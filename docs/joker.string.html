@@ -293,7 +293,11 @@
   <pre class="var-usage"><div><code>(split s sep)</code></div>
 <div><code>(split s sep n)</code></div>
 </pre>
-  <p class="var-docstr">Splits string on a string or regular expression. Returns vector of the splits.</p>
+  <p class="var-docstr">Splits string on a string or regular expression. Returns vector of the splits.<br>
+<br>
+  No more than n elements will be returned in the vector; the last element will<br>
+  be the unsplit remainder. If n is &lt;= 0, no limit is in effect (all substrings<br>
+  are returned in the vector).</p>
   
   
 </li>

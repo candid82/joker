@@ -72,6 +72,7 @@ func reqToMap(host String, port String, req *http.Request) Map {
 	res.Add(MakeKeyword("remote-addr"), MakeString(req.RemoteAddr[:strings.LastIndexByte(req.RemoteAddr, byte(':'))]))
 	res.Add(MakeKeyword("protocol"), MakeString(req.Proto))
 	res.Add(MakeKeyword("scheme"), MakeKeyword("http"))
+	res.Add(MakeKeyword("host"), MakeString(req.Host))
 	headers := EmptyArrayMap()
 	for k, v := range req.Header {
 		headers.Add(MakeString(strings.ToLower(k)), MakeString(strings.Join(v, ",")))

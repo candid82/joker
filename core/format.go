@@ -109,10 +109,11 @@ func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
 var defRegex *regexp.Regexp = regexp.MustCompile("^def.*$")
 var ifRegex *regexp.Regexp = regexp.MustCompile("^if(-.+)?$")
 var whenRegex *regexp.Regexp = regexp.MustCompile("^when(-.+)?$")
+var doIndentRegex *regexp.Regexp = regexp.MustCompile("^(do|try|finally|go|alt!|alt!!)$")
 var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
-	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|go|condp|when|while|when-not|when-first|do|future|thread)$"),
+	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|condp|when|while|when-not|when-first|do|future|thread)$"),
 	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
-	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|try|catch|finally|let|letfn|binding|loop|for|go-loop|alt!|alt!!)$"),
+	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|catch|let|letfn|binding|loop|for|go-loop)$"),
 	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
 	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
 	regexp.MustCompile("^(handler-case|handle|dotrace|deftrace|match)$"),
@@ -124,6 +125,15 @@ func isOneAndBodyExpr(obj Object) bool {
 		return defRegex.MatchString(*s.name) ||
 			ifRegex.MatchString(*s.name) ||
 			whenRegex.MatchString(*s.name)
+	default:
+		return false
+	}
+}
+
+func isDoIndent(obj Object) bool {
+	switch s := obj.(type) {
+	case Symbol:
+		return doIndentRegex.MatchString(*s.name)
 	default:
 		return false
 	}
@@ -238,7 +248,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			prevObj = seq.First()
 			seq = seq.Rest()
 		}
-	} else if obj.Equals(SYMBOLS.do) || obj.Equals(SYMBOLS.try) || obj.Equals(SYMBOLS.finally) {
+	} else if isDoIndent(obj) {
 		if !seq.IsEmpty() && !isNewLine(obj, seq.First()) {
 			restIndent = i + 1
 		}
