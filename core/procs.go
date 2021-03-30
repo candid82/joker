@@ -524,13 +524,38 @@ var procIsBound = func(args []Object) Object {
 	return Boolean{B: vr.Value != nil}
 }
 
+// Convert Joker object to native Go object. For those satisfying the
+// Native type, that's straightforward. For other Joker objects, try
+// converting them to suitable native Go objects. E.g. a BigInt might
+// hold a value > MaxInt64 but < MaxUint64, in which case conversion
+// to a uint64 makes more sense than returning the stringized version,
+// for use cases such as `(format "%x" value)`. Even for BigFloat and
+// BigRat, try to (accurately) convert them to native types so they
+// can be formatted via the usual ways.
 func toNative(obj Object) interface{} {
 	switch obj := obj.(type) {
 	case Native:
 		return obj.Native()
-	default:
-		return obj.ToString(false)
+	case *BigInt:
+		b := obj.BigInt()
+		if b.IsInt64() {
+			return b.Int64()
+		}
+		if b.IsUint64() {
+			return b.Uint64()
+		}
+	case *BigFloat:
+		b := obj.BigFloat()
+		if f, acc := b.Float64(); acc == big.Exact {
+			return f
+		}
+	case *Ratio:
+		b := obj.Ratio()
+		if f, exact := b.Float64(); exact {
+			return f
+		}
 	}
+	return obj.ToString(false)
 }
 
 var procFormat = func(args []Object) Object {
