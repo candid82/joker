@@ -532,7 +532,7 @@ var procIsBound = func(args []Object) Object {
 // for use cases such as `(format "%x" value)`. Even for BigFloat and
 // BigRat, try to (accurately) convert them to native types so they
 // can be formatted via the usual ways.
-func toNative(obj Object) interface{} {
+func ToNative(obj Object) interface{} {
 	switch obj := obj.(type) {
 	case Native:
 		return obj.Native()
@@ -563,7 +563,7 @@ var procFormat = func(args []Object) Object {
 	objs := args[1:]
 	fargs := make([]interface{}, len(objs))
 	for i, v := range objs {
-		fargs[i] = toNative(v)
+		fargs[i] = ToNative(v)
 	}
 	res := fmt.Sprintf(s.S, fargs...)
 	return String{S: res}
