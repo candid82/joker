@@ -58,9 +58,9 @@ func ratioOrInt(r *big.Rat) Number {
 			// TODO: 32-bit issue
 			return MakeInt(int(r.Num().Int64()))
 		}
-		return &BigInt{b: *r.Num()}
+		return &BigInt{b: r.Num()}
 	}
-	return &Ratio{r: *r}
+	return &Ratio{r: r}
 }
 
 func ratioOrIntWithOriginal(orig string, r *big.Rat) Number {
@@ -69,9 +69,9 @@ func ratioOrIntWithOriginal(orig string, r *big.Rat) Number {
 			// TODO: 32-bit issue
 			return MakeIntWithOriginal(orig, int(r.Num().Int64()))
 		}
-		return &BigInt{b: *r.Num(), Original: orig}
+		return &BigInt{b: r.Num(), Original: orig}
 	}
-	return &Ratio{r: *r, Original: orig}
+	return &Ratio{r: r, Original: orig}
 }
 
 func (ops IntOps) Combine(other Ops) Ops {
@@ -177,7 +177,7 @@ func (b *BigInt) Int() Int {
 }
 
 func (b *BigInt) BigInt() *big.Int {
-	return &b.b
+	return b.b
 }
 
 func (b *BigInt) Double() Double {
@@ -212,7 +212,7 @@ func (b *BigFloat) Double() Double {
 }
 
 func (b *BigFloat) BigFloat() *big.Float {
-	return &b.b
+	return b.b
 }
 
 func (b *BigFloat) Ratio() *big.Rat {
@@ -243,7 +243,7 @@ func (r *Ratio) BigFloat() *big.Float {
 }
 
 func (r *Ratio) Ratio() *big.Rat {
-	return &r.r
+	return r.r
 }
 
 // Ops
@@ -259,14 +259,14 @@ func (ops DoubleOps) Add(x, y Number) Number {
 }
 
 func (ops BigIntOps) Add(x, y Number) Number {
-	b := big.Int{}
+	b := &big.Int{}
 	b.Add(x.BigInt(), y.BigInt())
 	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Add(x, y Number) Number {
-	b := big.Float{}
+	b := &big.Float{}
 	b.Add(x.BigFloat(), y.BigFloat())
 	res := BigFloat{b: b}
 	return &res
@@ -289,23 +289,23 @@ func (ops DoubleOps) Subtract(x, y Number) Number {
 }
 
 func (ops BigIntOps) Subtract(x, y Number) Number {
-	b := big.Int{}
+	b := &big.Int{}
 	b.Sub(x.BigInt(), y.BigInt())
 	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Subtract(x, y Number) Number {
-	b := big.Float{}
+	b := &big.Float{}
 	b.Sub(x.BigFloat(), y.BigFloat())
 	res := BigFloat{b: b}
 	return &res
 }
 
 func (ops RatioOps) Subtract(x, y Number) Number {
-	r := big.Rat{}
+	r := &big.Rat{}
 	r.Sub(x.Ratio(), y.Ratio())
-	return ratioOrInt(&r)
+	return ratioOrInt(r)
 }
 
 // Multiply
@@ -319,14 +319,14 @@ func (ops DoubleOps) Multiply(x, y Number) Number {
 }
 
 func (ops BigIntOps) Multiply(x, y Number) Number {
-	b := big.Int{}
+	b := &big.Int{}
 	b.Mul(x.BigInt(), y.BigInt())
 	res := BigInt{b: b}
 	return &res
 }
 
 func (ops BigFloatOps) Multiply(x, y Number) Number {
-	b := big.Float{}
+	b := &big.Float{}
 	b.Mul(x.BigFloat(), y.BigFloat())
 	res := BigFloat{b: b}
 	return &res
@@ -358,10 +358,10 @@ func (ops DoubleOps) Divide(x, y Number) Number {
 
 func (ops BigIntOps) Divide(x, y Number) Number {
 	panicOnZero(ops, y)
-	b := big.Rat{}
+	b := &big.Rat{}
 	b.Quo(x.Ratio(), y.Ratio())
 	if b.IsInt() {
-		res := BigInt{b: *b.Num()}
+		res := BigInt{b: b.Num()}
 		return &res
 	}
 	res := Ratio{r: b}
@@ -369,7 +369,7 @@ func (ops BigIntOps) Divide(x, y Number) Number {
 }
 
 func (ops BigFloatOps) Divide(x, y Number) Number {
-	b := big.Float{}
+	b := &big.Float{}
 	b.Quo(x.BigFloat(), y.BigFloat())
 	res := BigFloat{b: b}
 	return &res
@@ -399,23 +399,23 @@ func (ops DoubleOps) Quotient(x, y Number) Number {
 
 func (ops BigIntOps) Quotient(x, y Number) Number {
 	panicOnZero(ops, y)
-	z := big.Int{}
+	z := &big.Int{}
 	z.Quo(x.BigInt(), y.BigInt())
 	return &BigInt{b: z}
 }
 
 func (ops BigFloatOps) Quotient(x, y Number) Number {
 	panicOnZero(ops, y)
-	z := big.Float{}
+	z := &big.Float{}
 	i, _ := z.Quo(x.BigFloat(), y.BigFloat()).Int64()
-	return &BigFloat{b: *z.SetInt64(i)}
+	return &BigFloat{b: z.SetInt64(i)}
 }
 
 func (ops RatioOps) Quotient(x, y Number) Number {
 	panicOnZero(ops, y)
-	z := big.Rat{}
+	z := &big.Rat{}
 	f, _ := z.Quo(x.Ratio(), y.Ratio()).Float64()
-	return &BigInt{b: *big.NewInt(int64(f))}
+	return &BigInt{b: big.NewInt(int64(f))}
 }
 
 // Remainder
@@ -435,7 +435,7 @@ func (ops DoubleOps) Rem(x, y Number) Number {
 
 func (ops BigIntOps) Rem(x, y Number) Number {
 	panicOnZero(ops, y)
-	z := big.Int{}
+	z := &big.Int{}
 	z.Rem(x.BigInt(), y.BigInt())
 	return &BigInt{b: z}
 }
@@ -444,7 +444,7 @@ func (ops BigFloatOps) Rem(x, y Number) Number {
 	panicOnZero(ops, y)
 	n := x.BigFloat()
 	d := y.BigFloat()
-	z := big.Float{}
+	z := &big.Float{}
 	i, _ := z.Quo(n, d).Int64()
 	d.Mul(d, big.NewFloat(float64(i)))
 	z.Sub(n, d)

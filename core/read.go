@@ -294,7 +294,7 @@ func invalidNumberError(reader *Reader, str string) error {
 }
 
 func scanBigInt(orig, str string, base int, reader *Reader) Object {
-	var bi big.Int
+	var bi *big.Int
 	if _, ok := bi.SetString(str, base); !ok {
 		panic(invalidNumberError(reader, str))
 	}
@@ -311,7 +311,7 @@ func scanRatio(str string, reader *Reader) Object {
 }
 
 func scanBigFloat(orig, str string, reader *Reader) Object {
-	var bf big.Float
+	var bf *big.Float
 	if _, ok := bf.SetPrec(256).SetString(str); !ok {
 		panic(invalidNumberError(reader, str))
 	}

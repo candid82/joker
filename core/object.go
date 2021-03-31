@@ -93,17 +93,17 @@ type (
 	}
 	BigInt struct {
 		InfoHolder
-		b        big.Int
+		b        *big.Int
 		Original string
 	}
 	BigFloat struct {
 		InfoHolder
-		b        big.Float
+		b        *big.Float
 		Original string
 	}
 	Ratio struct {
 		InfoHolder
-		r        big.Rat
+		r        *big.Rat
 		Original string
 	}
 	Boolean struct {
@@ -969,7 +969,7 @@ func (rat *Ratio) GetType() *Type {
 }
 
 func (rat *Ratio) Hash() uint32 {
-	return hashGobEncoder(&rat.r)
+	return hashGobEncoder(rat.r)
 }
 
 func (rat *Ratio) Compare(other Object) int {
@@ -977,7 +977,7 @@ func (rat *Ratio) Compare(other Object) int {
 }
 
 func MakeBigInt(bi int64) *BigInt {
-	return &BigInt{b: *big.NewInt(bi)}
+	return &BigInt{b: big.NewInt(bi)}
 }
 
 func (bi *BigInt) ToString(escape bool) string {
@@ -996,7 +996,7 @@ func (bi *BigInt) GetType() *Type {
 }
 
 func (bi *BigInt) Hash() uint32 {
-	return hashGobEncoder(&bi.b)
+	return hashGobEncoder(bi.b)
 }
 
 func (bi *BigInt) Compare(other Object) int {
@@ -1026,7 +1026,7 @@ func (bf *BigFloat) GetType() *Type {
 }
 
 func (bf *BigFloat) Hash() uint32 {
-	return hashGobEncoder(&bf.b)
+	return hashGobEncoder(bf.b)
 }
 
 func (bf *BigFloat) Compare(other Object) int {
