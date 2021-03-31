@@ -1,0 +1,10 @@
+(ns joker.test-joker.format
+  (:require [joker.test :refer [deftest is are]]))
+
+(defonce FF 1.23299299999999999999999999999999999999M)
+
+(deftest test-native
+  (are [x y] (= x y)
+    (format "%x" 0xFFFFFFFFFFFFFFFF) "ffffffffffffffff"
+    (format "%g" (- FF FF)) "0"
+    (format "%g" 1/2) "0.5" ))
