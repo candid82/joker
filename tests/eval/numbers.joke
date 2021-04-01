@@ -319,3 +319,13 @@
 
 (deftest test-int-promotion
   (is (= 20000000000000000000 (/ 10000000000000000000 (/ 1 2)))))
+
+(deftest test-precision
+  (are [x y] (= x y)
+    53 (precision 1.0)
+    53 (precision 1.0M)
+    99 (precision 0000000000000000001.00000000000M)
+    16 (precision 65535N)
+    17 (precision 65536N)
+    -1 (precision 1/2))
+  (is (or (= 31 (precision 1)) (= 63 (precision 1)))))
