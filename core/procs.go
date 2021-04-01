@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math/big"
+	"math/bits"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -1871,8 +1872,21 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 }
 
 var procPrecision = func(args []Object) Object {
-	f := EnsureArgIsBigFloat(args, 0)
-	return MakeInt(int(f.b.Prec()))
+	prec := -1
+	switch n := args[0].(type) {
+	case Number:
+		switch n := n.(type) {
+		case *BigInt:
+			prec = n.b.BitLen()
+		case *BigFloat:
+			prec = int(n.b.Prec())
+		case Int:
+			prec = bits.UintSize - 1
+		case Double:
+			prec = 53
+		}
+	}
+	return MakeInt(prec)
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {
