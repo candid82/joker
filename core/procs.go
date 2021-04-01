@@ -1870,6 +1870,11 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	return MakeBoolean(found && ns.Lazy == nil)
 }
 
+var procPrecision = func(args []Object) Object {
+	f := EnsureArgIsBigFloat(args, 0)
+	return MakeInt(int(f.b.Prec()))
+}
+
 func findConfigFile(filename string, workingDir string, findDir bool) string {
 	var err error
 	configName := ".joker"
