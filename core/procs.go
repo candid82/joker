@@ -843,20 +843,20 @@ var procBoolean = func(args []Object) Object {
 
 var procNumerator = func(args []Object) Object {
 	bi := EnsureArgIsRatio(args, 0).r.Num()
-	return &BigInt{b: *bi}
+	return &BigInt{b: bi}
 }
 
 var procDenominator = func(args []Object) Object {
 	bi := EnsureArgIsRatio(args, 0).r.Denom()
-	return &BigInt{b: *bi}
+	return &BigInt{b: bi}
 }
 
 var procBigInt = func(args []Object) Object {
 	switch n := args[0].(type) {
 	case Number:
-		return &BigInt{b: *n.BigInt()}
+		return &BigInt{b: n.BigInt()}
 	case String:
-		bi := big.Int{}
+		bi := &big.Int{}
 		if _, ok := bi.SetString(n.S, 10); ok {
 			return &BigInt{b: bi}
 		}
@@ -869,9 +869,9 @@ var procBigInt = func(args []Object) Object {
 var procBigFloat = func(args []Object) Object {
 	switch n := args[0].(type) {
 	case Number:
-		return &BigFloat{b: *n.BigFloat()}
+		return &BigFloat{b: n.BigFloat()}
 	case String:
-		b := big.Float{}
+		b := &big.Float{}
 		if _, ok := b.SetString(n.S); ok {
 			return &BigFloat{b: b}
 		}
@@ -1177,7 +1177,7 @@ var procReaderReadLine = func(args []Object) Object {
 }
 
 var procNanoTime = func(args []Object) Object {
-	return &BigInt{b: *big.NewInt(time.Now().UnixNano())}
+	return &BigInt{b: big.NewInt(time.Now().UnixNano())}
 }
 
 var procMacroexpand1 = func(args []Object) Object {
