@@ -1006,7 +1006,7 @@ func (bi *BigInt) Compare(other Object) int {
 // Determine the precision for a float-point constant, with float64
 // precision (53) being the minimum value. No need to be as strict
 // when parsing it as is math/big.(Float).Parse().
-func computePrecision(s string) (prec int) {
+func computePrecision(s string) (prec uint) {
 	prec = 53 // Default to precision for float64
 	if s == "" {
 		return
@@ -1047,16 +1047,24 @@ func computePrecision(s string) (prec int) {
 	}
 
 	bitsNeeded = math.Max(float64(prec), math.Ceil(bitsNeeded)) // Round up, then return >= 53
-	return int(bitsNeeded)
+	return uint(bitsNeeded)
 }
 
-func MakeBigFloat(s string) *BigFloat {
+func MakeBigFloatWithOrig(s, orig string) (*BigFloat, bool) {
 	prec := computePrecision(s)
 	f := new(big.Float)
 	f.SetPrec(uint(prec))
 
 	if _, ok := f.SetString(s); ok {
-		return &BigFloat{b: *f} // TODO: Docs say use f.Copy(), so b should be *big.Float?
+		return &BigFloat{b: *f, Original: orig}, true // TODO: Docs say use f.Copy(), so b should be *big.Float?
+	}
+
+	return nil, false
+}
+
+func MakeBigFloat(s string) *BigFloat {
+	if f, ok := MakeBigFloatWithOrig(s, ""); ok {
+		return f
 	}
 
 	panic(RT.NewError(fmt.Sprintf("Invalid BigFloat: %s", s)))

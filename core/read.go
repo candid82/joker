@@ -311,12 +311,10 @@ func scanRatio(str string, reader *Reader) Object {
 }
 
 func scanBigFloat(orig, str string, reader *Reader) Object {
-	var bf = &big.Float{}
-	if _, ok := bf.SetPrec(256).SetString(str); !ok {
-		panic(invalidNumberError(reader, str))
+	if f, ok := MakeBigFloatWithOrig(str, orig); ok {
+		return MakeReadObject(reader, f)
 	}
-	res := BigFloat{b: bf, Original: orig}
-	return MakeReadObject(reader, &res)
+	panic(invalidNumberError(reader, str))
 }
 
 func scanInt(orig, str string, base int, reader *Reader) Object {
