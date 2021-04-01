@@ -4538,3 +4538,9 @@
   ([] (exit 0))
   ([^Int code]
    (exit__ code)))
+
+(defn ^Int precision
+  "Returns the precision of a BigFloat."
+  {:added "1.0"}
+  [^BigFloat f]
+  (precision__ f))
