@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"math/rand"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -109,6 +110,10 @@ func MakeReadError(reader *Reader, msg string) ReadError {
 		filename: reader.filename,
 		msg:      msg,
 	}
+}
+
+func MakePanicString(r interface{}) string {
+	return fmt.Sprintf("Unexpected panic %q at:\n%s", r.(error), debug.Stack())
 }
 
 func MakeReadObject(reader *Reader, obj Object) Object {
@@ -1491,7 +1496,12 @@ func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			PROBLEM_COUNT++
-			err = r.(error)
+			switch r.(type) {
+			case ReadError:
+				err = r.(error)
+			default:
+				err = MakeReadError(reader, MakePanicString(r))
+			}
 		}
 	}()
 	for {
