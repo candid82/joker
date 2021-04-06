@@ -1491,7 +1491,18 @@ func TryRead(reader *Reader) (obj Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			PROBLEM_COUNT++
-			err = r.(error)
+			switch r.(type) {
+			case ReadError:
+				err = r.(error)
+			case *ParseError:
+				err = r.(error)
+			case *EvalError:
+				err = r.(error)
+			case *ExInfo:
+				err = r.(error)
+			default:
+				panic(r)
+			}
 		}
 	}()
 	for {
