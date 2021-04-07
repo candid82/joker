@@ -1482,6 +1482,8 @@ func Read(reader *Reader) (Object, bool) {
 		return readDispatch(reader)
 	case r == EOF:
 		panic(MakeReadError(reader, "Unexpected end of file"))
+	case r == ')' || r == ']' || r == '}':
+		panic(MakeReadError(reader, "Unmatched delimiter: "+string(r)))
 	default:
 		return readIdentFn(reader, r), false
 	}
