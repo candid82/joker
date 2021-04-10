@@ -140,6 +140,10 @@ func chdir(dirname string) Object {
 	return NIL
 }
 
+// func chmod(name string, mode int) Object {
+// 	err := os.Chmod(name, os.FileMode(mode))
+// }
+
 func stat(filename string) Object {
 	info, err := os.Stat(filename)
 	PanicOnErr(err)

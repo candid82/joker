@@ -24,6 +24,11 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
 			`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
 
+	osNamespace.InternVar("chmod", chmod_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("mode"))),
+			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0"))
+
 	osNamespace.InternVar("close", close_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
@@ -89,6 +94,11 @@ func InternsOrThunks() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
 			`Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.`, "1.0"))
+
+	osNamespace.InternVar("hostname", hostname_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the host name reported by the kernel.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(

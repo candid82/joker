@@ -41,6 +41,26 @@ func __chdir_(_args []Object) Object {
 	return NIL
 }
 
+var __chmod__P ProcFn = __chmod_
+var chmod_ Proc = Proc{Fn: __chmod__P, Name: "chmod_", Package: "std/os"}
+
+func __chmod_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		name := ExtractString(_args, 0)
+		mode := ExtractInt(_args, 1)
+		err := os.Chmod(name, os.FileMode(mode))
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __close__P ProcFn = __close_
 var close_ Proc = Proc{Fn: __close__P, Name: "close_", Package: "std/os"}
 
@@ -197,6 +217,23 @@ func __get_env_(_args []Object) Object {
 		key := ExtractString(_args, 0)
 		_res := getEnv(key)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __hostname__P ProcFn = __hostname_
+var hostname_ Proc = Proc{Fn: __hostname__P, Name: "hostname_", Package: "std/os"}
+
+func __hostname_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.Hostname()
+		PanicOnErr(err)
+		return MakeString(_res)
 
 	default:
 		PanicArity(_c)
