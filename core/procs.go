@@ -1782,10 +1782,12 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		expr, err := TryParse(obj, parseContext)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
-			return err
 		}
 		if phase == PARSE {
 			continue
+		}
+		if err != nil {
+			return err
 		}
 		obj, err = TryEval(expr)
 		if err != nil {

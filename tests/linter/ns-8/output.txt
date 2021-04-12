@@ -1,1 +1,2 @@
 tests/linter/ns-8/input.clj:2:18: Exception: Unsupported option(s) supplied: :default
+tests/linter/ns-8/input.clj:4:1: Parse error: Unable to resolve symbol: RaisedButton/t

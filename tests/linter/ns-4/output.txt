@@ -1,1 +1,2 @@
 tests/linter/ns-4/input.clj:2:14: Exception: :only/:refer value must be a sequential collection of symbols
+tests/linter/ns-4/input.clj:2:14: Parse warning: unused namespace tt

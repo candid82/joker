@@ -1,3 +1,4 @@
 tests/linter/ns-6/input.clj:4:7: Parse warning: WARNING: map already refers to: #'joker.core/map in namespace test, being replaced by: #'test/map
 
 tests/linter/ns-6/input.clj:5:6: Eval error: WARNING: f already refers to: #'other.ns/f in namespace test
+tests/linter/ns-6/input.clj:2:14: Parse warning: unused namespace other.ns

@@ -6,5 +6,5 @@
 (definterface)
 (proxy-super)
 (with-open)
+(deftype)
 (defrecord)
-
