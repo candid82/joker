@@ -18,12 +18,6 @@ func env() Object {
 	return res
 }
 
-func setEnv(key string, value string) Object {
-	err := os.Setenv(key, value)
-	PanicOnErr(err)
-	return NIL
-}
-
 func getEnv(key string) Object {
 	if v, ok := os.LookupEnv(key); ok {
 		return MakeString(v)
@@ -101,12 +95,6 @@ func execute(name string, opts Map) Object {
 	return sh(dir, stdin, stdout, stderr, name, args)
 }
 
-func mkdir(name string, perm int) Object {
-	err := os.Mkdir(name, os.FileMode(perm))
-	PanicOnErr(err)
-	return NIL
-}
-
 func readDir(dirname string) Object {
 	files, err := ioutil.ReadDir(dirname)
 	PanicOnErr(err)
@@ -126,28 +114,6 @@ func readDir(dirname string) Object {
 		res = res.Conjoin(m)
 	}
 	return res
-}
-
-func getwd() string {
-	res, err := os.Getwd()
-	PanicOnErr(err)
-	return res
-}
-
-func chdir(dirname string) Object {
-	err := os.Chdir(dirname)
-	PanicOnErr(err)
-	return NIL
-}
-
-// func chmod(name string, mode int) Object {
-// 	err := os.Chmod(name, os.FileMode(mode))
-// }
-
-func stat(filename string) Object {
-	info, err := os.Stat(filename)
-	PanicOnErr(err)
-	return FileInfoMap(info.Name(), info)
 }
 
 func exists(path string) bool {

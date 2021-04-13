@@ -22,12 +22,28 @@ func InternsOrThunks() {
 	osNamespace.InternVar("chdir", chdir_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.`, "1.0"))
+			`Changes the current working directory to the named directory.`, "1.0"))
 
 	osNamespace.InternVar("chmod", chmod_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("mode"))),
 			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0"))
+
+	osNamespace.InternVar("chown", chown_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
+			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
+  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value.`, "1.0"))
+
+	osNamespace.InternVar("chtimes", chtimes_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("atime"), MakeSymbol("mtime"))),
+			`Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.`, "1.0"))
+
+	osNamespace.InternVar("clearenv", clearenv_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Deletes all environment variables.`, "1.0"))
 
 	osNamespace.InternVar("close", close_,
 		MakeMeta(
@@ -56,10 +72,20 @@ func InternsOrThunks() {
 			`Returns a rooted path name corresponding to the current directory. If the current directory can
   be reached via multiple paths (due to symbolic links), cwd may return any one of them.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
+	osNamespace.InternVar("egid", egid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the numeric effective group id of the caller.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
 	osNamespace.InternVar("env", env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
 			`Returns a map representing the environment.`, "1.0"))
+
+	osNamespace.InternVar("euid", euid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the numeric effective user id of the caller.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("exec", exec_,
 		MakeMeta(
@@ -80,6 +106,11 @@ func InternsOrThunks() {
   :out - string capturing stdout of the program (unless :stdout option was passed)
   :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0"))
 
+	osNamespace.InternVar("executable", executable_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the path name for the executable that started the current process.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
 	osNamespace.InternVar("exists?", isexists_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
@@ -90,15 +121,42 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("code")), NewVectorFrom()),
 			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0"))
 
+	osNamespace.InternVar("expand-env", expand_env_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Replaces ${var} or $var in the string according to the values of the current environment variables.
+  References to undefined variables are replaced by the empty string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
 	osNamespace.InternVar("get-env", get_env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
 			`Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.`, "1.0"))
 
+	osNamespace.InternVar("gid", gid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the numeric group id of the caller.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("groups", groups_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns a list of the numeric ids of groups that the caller belongs to.`, "1.0").Plus(MakeKeyword("tag"), String{S: "[Int]"}))
+
 	osNamespace.InternVar("hostname", hostname_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
 			`Returns the host name reported by the kernel.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	osNamespace.InternVar("lchown", lchown_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
+			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
+  it changes the uid and gid of the link itself.`, "1.0"))
+
+	osNamespace.InternVar("link", link_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
+			`Creates newname as a hard link to the oldname file.`, "1.0"))
 
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(
@@ -111,10 +169,22 @@ func InternsOrThunks() {
   :dir? - true if the file is a directory (Boolean)
   :modtime - modification time (unix timestamp) (Int)`, "1.0"))
 
+	osNamespace.InternVar("lstat", lstat_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
+			`Like stat, but if the file is a symbolic link, the result describes the symbolic link.`, "1.0"))
+
 	osNamespace.InternVar("mkdir", mkdir_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
 			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+
+	osNamespace.InternVar("mkdir-all", mkdir_all_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
+			`Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.
+  The permission bits perm (before umask) are used for all directories that mkdir-all creates.
+  If path is already a directory, mkdir-all does nothing and returns nil.`, "1.0"))
 
 	osNamespace.InternVar("mkdir-temp", mkdir_temp_,
 		MakeMeta(
@@ -124,7 +194,7 @@ func InternsOrThunks() {
   If pattern includes a "*", the random string replaces the last "*".
   Returns the name of the new directory. If dir is the empty string,
   uses the default directory for temporary files (see joker.os/temp-dir).
-  Multiple programs calling joker.os/make-temp-dir simultaneously will not choose the same directory.
+  Multiple programs calling joker.os/mkdir-temp simultaneously will not choose the same directory.
   It is the caller's responsibility to remove the directory when no longer needed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	osNamespace.InternVar("open", open_,
@@ -132,6 +202,31 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
 			`Opens the named file for reading. If successful, the file can be used for reading;
   the associated file descriptor has mode O_RDONLY.`, "1.0").Plus(MakeKeyword("tag"), String{S: "File"}))
+
+	osNamespace.InternVar("pagesize", pagesize_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the underlying system's memory page size.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("path-separator?", ispath_separator_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			`Reports whether c is a directory separator character.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
+
+	osNamespace.InternVar("pid", pid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the process id of the caller.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("ppid", ppid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the process id of the caller's parent.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("read-link", read_link_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			`Returns the destination of the named symbolic link.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	osNamespace.InternVar("remove", remove_,
 		MakeMeta(
@@ -146,10 +241,15 @@ func InternsOrThunks() {
   It removes everything it can, then panics with the first error (if
   any) it encountered.`, "1.0"))
 
+	osNamespace.InternVar("rename", rename_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("oldpath"), MakeSymbol("newpath"))),
+			`Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.`, "1.0"))
+
 	osNamespace.InternVar("set-env", set_env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the specified key to the specified value in the environment.`, "1.0"))
+			`Sets the value of the environment variable named by the key.`, "1.0"))
 
 	osNamespace.InternVar("sh", sh_,
 		MakeMeta(
@@ -182,6 +282,11 @@ func InternsOrThunks() {
   :modtime - modification time
   :dir? - true if file is a directory`, "1.0"))
 
+	osNamespace.InternVar("symlink", symlink_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
+			`Creates newname as a symbolic link to oldname.`, "1.0"))
+
 	osNamespace.InternVar("temp-dir", temp_dir_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
@@ -190,5 +295,52 @@ func InternsOrThunks() {
   On Windows, it uses GetTempPath, returning the first non-empty
   value from %TMP%, %TEMP%, %USERPROFILE%, or the Windows directory.
   The directory is neither guaranteed to exist nor have accessible permissions.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	osNamespace.InternVar("truncate", truncate_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("size"))),
+			`Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target.`, "1.0"))
+
+	osNamespace.InternVar("uid", uid_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the numeric user id of the caller.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("unset-env", unset_env_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
+			`Unsets a single environment variable.`, "1.0"))
+
+	osNamespace.InternVar("user-cache-dir", user_cache_dir_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the default root directory to use for user-specific cached data.
+  Users should create their own application-specific subdirectory within this one and use that.
+
+  On Unix systems, it returns $XDG_CACHE_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  if non-empty, else $HOME/.cache. On Darwin, it returns $HOME/Library/Caches. On Windows, it returns %LocalAppData%.
+  On Plan 9, it returns $home/lib/cache.
+
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	osNamespace.InternVar("user-config-dir", user_config_dir_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the default root directory to use for user-specific configuration data.
+  Users should create their own application-specific subdirectory within this one and use that.
+
+  On Unix systems, it returns $XDG_CONFIG_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  if non-empty, else $HOME/.config. On Darwin, it returns $HOME/Library/Application Support. On Windows, it returns %AppData%.
+  On Plan 9, it returns $home/lib.
+
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	osNamespace.InternVar("user-home-dir", user_home_dir_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom()),
+			`Returns the current user's home directory.
+
+  On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.
+  On Plan 9, it returns the $home environment variable.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

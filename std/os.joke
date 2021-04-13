@@ -8,11 +8,110 @@
    :go "! err := os.Chmod(name, os.FileMode(mode)); PanicOnErr(err); _res := NIL"}
   [^String name, ^Int mode])
 
+(defn chown
+  "Changes the numeric uid and gid of the named file. If the file is a symbolic link,
+  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value."
+  {:added "1.0"
+   :go "! err := os.Chown(name, uid, gid); PanicOnErr(err); _res := NIL"}
+  [^String name, ^Int uid, ^Int gid])
+
+(defn chtimes
+  "Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions."
+  {:added "1.0"
+   :go "! err := os.Chtimes(name, atime, mtime); PanicOnErr(err); _res := NIL"}
+  [^String name, ^Time atime, ^Time mtime])
+
+(defn clearenv
+  "Deletes all environment variables."
+  {:added "1.0"
+   :go "! os.Clearenv(); _res := NIL"}
+  [])
+
 (defn env
   "Returns a map representing the environment."
   {:added "1.0"
    :go "env()"}
   [])
+
+(defn ^String executable
+  "Returns the path name for the executable that started the current process."
+  {:added "1.0"
+   :go "! _res, err := os.Executable(); PanicOnErr(err)"}
+  [])
+
+(defn ^String expand-env
+  "Replaces ${var} or $var in the string according to the values of the current environment variables.
+  References to undefined variables are replaced by the empty string."
+  {:added "1.0"
+   :go "os.ExpandEnv(s)"}
+  [^String s])
+
+(defn ^Int egid
+  "Returns the numeric effective group id of the caller."
+  {:added "1.0"
+   :go "os.Getegid()"}
+  [])
+
+(defn ^Int gid
+  "Returns the numeric group id of the caller."
+  {:added "1.0"
+   :go "os.Getgid()"}
+  [])
+
+(defn ^Int euid
+  "Returns the numeric effective user id of the caller."
+  {:added "1.0"
+   :go "os.Geteuid()"}
+  [])
+
+(defn ^Int uid
+  "Returns the numeric user id of the caller."
+  {:added "1.0"
+   :go "os.Getuid()"}
+  [])
+
+(defn ^Int pid
+  "Returns the process id of the caller."
+  {:added "1.0"
+   :go "os.Getpid()"}
+  [])
+
+(defn ^Int ppid
+  "Returns the process id of the caller's parent."
+  {:added "1.0"
+   :go "os.Getppid()"}
+  [])
+
+(defn ^{:tag [Int]} groups
+  "Returns a list of the numeric ids of groups that the caller belongs to."
+  {:added "1.0"
+   :go "! _res, err := os.Getgroups(); PanicOnErr(err)"}
+  [])
+
+(defn ^Int pagesize
+  "Returns the underlying system's memory page size."
+  {:added "1.0"
+   :go "os.Getpagesize()"}
+  [])
+
+(defn ^Boolean path-separator?
+  "Reports whether c is a directory separator character."
+  {:added "1.0"
+   :go "os.IsPathSeparator(uint8(c))"}
+  [^Char c])
+
+(defn lchown
+  "Changes the numeric uid and gid of the named file. If the file is a symbolic link,
+  it changes the uid and gid of the link itself."
+  {:added "1.0"
+   :go "! err := os.Lchown(name, uid, gid); PanicOnErr(err); _res := NIL"}
+  [^String name, ^Int uid, ^Int gid])
+
+(defn link
+  "Creates newname as a hard link to the oldname file."
+  {:added "1.0"
+   :go "! err := os.Link(oldname, newname); PanicOnErr(err); _res := NIL"}
+  [^String oldname, ^String newname])
 
 (defn ^String hostname
   "Returns the host name reported by the kernel."
@@ -21,10 +120,16 @@
   [])
 
 (defn set-env
-  "Sets the specified key to the specified value in the environment."
+  "Sets the value of the environment variable named by the key."
   {:added "1.0"
-   :go "setEnv(key, value)"}
+   :go "! err := os.Setenv(key, value); PanicOnErr(err); _res := NIL"}
   [^String key ^String value])
+
+(defn unset-env
+  "Unsets a single environment variable."
+  {:added "1.0"
+   :go "! err := os.Unsetenv(key); PanicOnErr(err); _res := NIL"}
+  [^String key])
 
 (defn get-env
   "Returns the value of the environment variable named by the key or nil if the variable is not present in the environment."
@@ -92,8 +197,75 @@
 (defn mkdir
   "Creates a new directory with the specified name and permission bits."
   {:added "1.0"
-   :go "mkdir(name, perm)"}
+   :go "! err := os.Mkdir(name, os.FileMode(perm)); PanicOnErr(err); _res := NIL"}
   [^String name ^Int perm])
+
+(defn mkdir-all
+  "Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.
+  The permission bits perm (before umask) are used for all directories that mkdir-all creates.
+  If path is already a directory, mkdir-all does nothing and returns nil."
+  {:added "1.0"
+   :go "! err := os.MkdirAll(name, os.FileMode(perm)); PanicOnErr(err); _res := NIL"}
+  [^String name ^Int perm])
+
+(defn ^String read-link
+  "Returns the destination of the named symbolic link."
+  {:added "1.0"
+   :go "! _res, err := os.Readlink(name); PanicOnErr(err)"}
+  [^String name])
+
+(defn symlink
+  "Creates newname as a symbolic link to oldname."
+  {:added "1.0"
+   :go "! err := os.Symlink(oldname, newname); PanicOnErr(err); _res := NIL"}
+  [^String oldname, ^String newname])
+
+(defn rename
+  "Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it."
+  {:added "1.0"
+   :go "! err := os.Rename(oldpath, newpath); PanicOnErr(err); _res := NIL"}
+  [^String oldpath, ^String newpath])
+
+(defn truncate
+  "Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target."
+  {:added "1.0"
+   :go "! err := os.Truncate(name, int64(size)); PanicOnErr(err); _res := NIL"}
+  [^String name, ^Int size])
+
+(defn ^String user-cache-dir
+  "Returns the default root directory to use for user-specific cached data.
+  Users should create their own application-specific subdirectory within this one and use that.
+
+  On Unix systems, it returns $XDG_CACHE_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  if non-empty, else $HOME/.cache. On Darwin, it returns $HOME/Library/Caches. On Windows, it returns %LocalAppData%.
+  On Plan 9, it returns $home/lib/cache.
+
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error."
+  {:added "1.0"
+   :go "! _res, err := os.UserCacheDir(); PanicOnErr(err)"}
+  [])
+
+(defn ^String user-config-dir
+  "Returns the default root directory to use for user-specific configuration data.
+  Users should create their own application-specific subdirectory within this one and use that.
+
+  On Unix systems, it returns $XDG_CONFIG_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+  if non-empty, else $HOME/.config. On Darwin, it returns $HOME/Library/Application Support. On Windows, it returns %AppData%.
+  On Plan 9, it returns $home/lib.
+
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error."
+  {:added "1.0"
+   :go "! _res, err := os.UserConfigDir(); PanicOnErr(err)"}
+  [])
+
+(defn ^String user-home-dir
+  "Returns the current user's home directory.
+
+  On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.
+  On Plan 9, it returns the $home environment variable."
+  {:added "1.0"
+   :go "! _res, err := os.UserHomeDir(); PanicOnErr(err)"}
+  [])
 
 (defn ls
   "Reads the directory named by dirname and returns a list of directory entries sorted by filename.
@@ -111,13 +283,13 @@
   "Returns a rooted path name corresponding to the current directory. If the current directory can
   be reached via multiple paths (due to symbolic links), cwd may return any one of them."
   {:added "1.0"
-   :go "getwd()"}
+   :go "! _res, err := os.Getwd(); PanicOnErr(err)"}
   [])
 
 (defn chdir
-  "Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil."
+  "Changes the current working directory to the named directory."
   {:added "1.0"
-   :go "chdir(dirname)"}
+   :go "! err := os.Chdir(dirname); PanicOnErr(err); _res := NIL"}
   [^String dirname])
 
 (defn stat
@@ -128,7 +300,13 @@
   :modtime - modification time
   :dir? - true if file is a directory"
   {:added "1.0"
-   :go "stat(filename)"}
+   :go "! _info, err := os.Stat(filename); PanicOnErr(err); _res := FileInfoMap(_info.Name(), _info)"}
+  [^String filename])
+
+(defn lstat
+  "Like stat, but if the file is a symbolic link, the result describes the symbolic link."
+  {:added "1.0"
+   :go "! _info, err := os.Lstat(filename); PanicOnErr(err); _res := FileInfoMap(_info.Name(), _info)"}
   [^String filename])
 
 (defn ^Boolean exists?
@@ -187,7 +365,7 @@
   If pattern includes a \"*\", the random string replaces the last \"*\".
   Returns the name of the new directory. If dir is the empty string,
   uses the default directory for temporary files (see joker.os/temp-dir).
-  Multiple programs calling joker.os/make-temp-dir simultaneously will not choose the same directory.
+  Multiple programs calling joker.os/mkdir-temp simultaneously will not choose the same directory.
   It is the caller's responsibility to remove the directory when no longer needed."
   {:added "1.0"
    :go "! _res, err := ioutil.TempDir(dir, pattern); PanicOnErr(err);"}

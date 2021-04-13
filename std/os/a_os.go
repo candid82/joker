@@ -32,7 +32,9 @@ func __chdir_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		dirname := ExtractString(_args, 0)
-		_res := chdir(dirname)
+		err := os.Chdir(dirname)
+		PanicOnErr(err)
+		_res := NIL
 		return _res
 
 	default:
@@ -52,6 +54,65 @@ func __chmod_(_args []Object) Object {
 		mode := ExtractInt(_args, 1)
 		err := os.Chmod(name, os.FileMode(mode))
 		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __chown__P ProcFn = __chown_
+var chown_ Proc = Proc{Fn: __chown__P, Name: "chown_", Package: "std/os"}
+
+func __chown_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		name := ExtractString(_args, 0)
+		uid := ExtractInt(_args, 1)
+		gid := ExtractInt(_args, 2)
+		err := os.Chown(name, uid, gid)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __chtimes__P ProcFn = __chtimes_
+var chtimes_ Proc = Proc{Fn: __chtimes__P, Name: "chtimes_", Package: "std/os"}
+
+func __chtimes_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		name := ExtractString(_args, 0)
+		atime := ExtractTime(_args, 1)
+		mtime := ExtractTime(_args, 2)
+		err := os.Chtimes(name, atime, mtime)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __clearenv__P ProcFn = __clearenv_
+var clearenv_ Proc = Proc{Fn: __clearenv__P, Name: "clearenv_", Package: "std/os"}
+
+func __clearenv_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		os.Clearenv()
 		_res := NIL
 		return _res
 
@@ -124,8 +185,25 @@ func __cwd_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 0:
-		_res := getwd()
+		_res, err := os.Getwd()
+		PanicOnErr(err)
 		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __egid__P ProcFn = __egid_
+var egid_ Proc = Proc{Fn: __egid__P, Name: "egid_", Package: "std/os"}
+
+func __egid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getegid()
+		return MakeInt(_res)
 
 	default:
 		PanicArity(_c)
@@ -149,6 +227,22 @@ func __env_(_args []Object) Object {
 	return NIL
 }
 
+var __euid__P ProcFn = __euid_
+var euid_ Proc = Proc{Fn: __euid__P, Name: "euid_", Package: "std/os"}
+
+func __euid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Geteuid()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __exec__P ProcFn = __exec_
 var exec_ Proc = Proc{Fn: __exec__P, Name: "exec_", Package: "std/os"}
 
@@ -160,6 +254,23 @@ func __exec_(_args []Object) Object {
 		opts := ExtractMap(_args, 1)
 		_res := execute(name, opts)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __executable__P ProcFn = __executable_
+var executable_ Proc = Proc{Fn: __executable__P, Name: "executable_", Package: "std/os"}
+
+func __executable_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.Executable()
+		PanicOnErr(err)
+		return MakeString(_res)
 
 	default:
 		PanicArity(_c)
@@ -207,6 +318,23 @@ func __exit_(_args []Object) Object {
 	return NIL
 }
 
+var __expand_env__P ProcFn = __expand_env_
+var expand_env_ Proc = Proc{Fn: __expand_env__P, Name: "expand_env_", Package: "std/os"}
+
+func __expand_env_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := os.ExpandEnv(s)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __get_env__P ProcFn = __get_env_
 var get_env_ Proc = Proc{Fn: __get_env__P, Name: "get_env_", Package: "std/os"}
 
@@ -217,6 +345,39 @@ func __get_env_(_args []Object) Object {
 		key := ExtractString(_args, 0)
 		_res := getEnv(key)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __gid__P ProcFn = __gid_
+var gid_ Proc = Proc{Fn: __gid__P, Name: "gid_", Package: "std/os"}
+
+func __gid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getgid()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __groups__P ProcFn = __groups_
+var groups_ Proc = Proc{Fn: __groups__P, Name: "groups_", Package: "std/os"}
+
+func __groups_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.Getgroups()
+		PanicOnErr(err)
+		return MakeIntVector(_res)
 
 	default:
 		PanicArity(_c)
@@ -241,6 +402,47 @@ func __hostname_(_args []Object) Object {
 	return NIL
 }
 
+var __lchown__P ProcFn = __lchown_
+var lchown_ Proc = Proc{Fn: __lchown__P, Name: "lchown_", Package: "std/os"}
+
+func __lchown_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		name := ExtractString(_args, 0)
+		uid := ExtractInt(_args, 1)
+		gid := ExtractInt(_args, 2)
+		err := os.Lchown(name, uid, gid)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __link__P ProcFn = __link_
+var link_ Proc = Proc{Fn: __link__P, Name: "link_", Package: "std/os"}
+
+func __link_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		oldname := ExtractString(_args, 0)
+		newname := ExtractString(_args, 1)
+		err := os.Link(oldname, newname)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __ls__P ProcFn = __ls_
 var ls_ Proc = Proc{Fn: __ls__P, Name: "ls_", Package: "std/os"}
 
@@ -258,6 +460,25 @@ func __ls_(_args []Object) Object {
 	return NIL
 }
 
+var __lstat__P ProcFn = __lstat_
+var lstat_ Proc = Proc{Fn: __lstat__P, Name: "lstat_", Package: "std/os"}
+
+func __lstat_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		filename := ExtractString(_args, 0)
+		_info, err := os.Lstat(filename)
+		PanicOnErr(err)
+		_res := FileInfoMap(_info.Name(), _info)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __mkdir__P ProcFn = __mkdir_
 var mkdir_ Proc = Proc{Fn: __mkdir__P, Name: "mkdir_", Package: "std/os"}
 
@@ -267,7 +488,29 @@ func __mkdir_(_args []Object) Object {
 	case _c == 2:
 		name := ExtractString(_args, 0)
 		perm := ExtractInt(_args, 1)
-		_res := mkdir(name, perm)
+		err := os.Mkdir(name, os.FileMode(perm))
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __mkdir_all__P ProcFn = __mkdir_all_
+var mkdir_all_ Proc = Proc{Fn: __mkdir_all__P, Name: "mkdir_all_", Package: "std/os"}
+
+func __mkdir_all_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		name := ExtractString(_args, 0)
+		perm := ExtractInt(_args, 1)
+		err := os.MkdirAll(name, os.FileMode(perm))
+		PanicOnErr(err)
+		_res := NIL
 		return _res
 
 	default:
@@ -313,6 +556,89 @@ func __open_(_args []Object) Object {
 	return NIL
 }
 
+var __pagesize__P ProcFn = __pagesize_
+var pagesize_ Proc = Proc{Fn: __pagesize__P, Name: "pagesize_", Package: "std/os"}
+
+func __pagesize_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getpagesize()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __ispath_separator__P ProcFn = __ispath_separator_
+var ispath_separator_ Proc = Proc{Fn: __ispath_separator__P, Name: "ispath_separator_", Package: "std/os"}
+
+func __ispath_separator_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		c := ExtractChar(_args, 0)
+		_res := os.IsPathSeparator(uint8(c))
+		return MakeBoolean(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __pid__P ProcFn = __pid_
+var pid_ Proc = Proc{Fn: __pid__P, Name: "pid_", Package: "std/os"}
+
+func __pid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getpid()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __ppid__P ProcFn = __ppid_
+var ppid_ Proc = Proc{Fn: __ppid__P, Name: "ppid_", Package: "std/os"}
+
+func __ppid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getppid()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __read_link__P ProcFn = __read_link_
+var read_link_ Proc = Proc{Fn: __read_link__P, Name: "read_link_", Package: "std/os"}
+
+func __read_link_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		name := ExtractString(_args, 0)
+		_res, err := os.Readlink(name)
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __remove__P ProcFn = __remove_
 var remove_ Proc = Proc{Fn: __remove__P, Name: "remove_", Package: "std/os"}
 
@@ -351,6 +677,26 @@ func __remove_all_(_args []Object) Object {
 	return NIL
 }
 
+var __rename__P ProcFn = __rename_
+var rename_ Proc = Proc{Fn: __rename__P, Name: "rename_", Package: "std/os"}
+
+func __rename_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		oldpath := ExtractString(_args, 0)
+		newpath := ExtractString(_args, 1)
+		err := os.Rename(oldpath, newpath)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __set_env__P ProcFn = __set_env_
 var set_env_ Proc = Proc{Fn: __set_env__P, Name: "set_env_", Package: "std/os"}
 
@@ -360,7 +706,9 @@ func __set_env_(_args []Object) Object {
 	case _c == 2:
 		key := ExtractString(_args, 0)
 		value := ExtractString(_args, 1)
-		_res := setEnv(key, value)
+		err := os.Setenv(key, value)
+		PanicOnErr(err)
+		_res := NIL
 		return _res
 
 	default:
@@ -416,7 +764,29 @@ func __stat_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		filename := ExtractString(_args, 0)
-		_res := stat(filename)
+		_info, err := os.Stat(filename)
+		PanicOnErr(err)
+		_res := FileInfoMap(_info.Name(), _info)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __symlink__P ProcFn = __symlink_
+var symlink_ Proc = Proc{Fn: __symlink__P, Name: "symlink_", Package: "std/os"}
+
+func __symlink_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		oldname := ExtractString(_args, 0)
+		newname := ExtractString(_args, 1)
+		err := os.Symlink(oldname, newname)
+		PanicOnErr(err)
+		_res := NIL
 		return _res
 
 	default:
@@ -433,6 +803,112 @@ func __temp_dir_(_args []Object) Object {
 	switch {
 	case _c == 0:
 		_res := os.TempDir()
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __truncate__P ProcFn = __truncate_
+var truncate_ Proc = Proc{Fn: __truncate__P, Name: "truncate_", Package: "std/os"}
+
+func __truncate_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		name := ExtractString(_args, 0)
+		size := ExtractInt(_args, 1)
+		err := os.Truncate(name, int64(size))
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __uid__P ProcFn = __uid_
+var uid_ Proc = Proc{Fn: __uid__P, Name: "uid_", Package: "std/os"}
+
+func __uid_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res := os.Getuid()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __unset_env__P ProcFn = __unset_env_
+var unset_env_ Proc = Proc{Fn: __unset_env__P, Name: "unset_env_", Package: "std/os"}
+
+func __unset_env_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		key := ExtractString(_args, 0)
+		err := os.Unsetenv(key)
+		PanicOnErr(err)
+		_res := NIL
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __user_cache_dir__P ProcFn = __user_cache_dir_
+var user_cache_dir_ Proc = Proc{Fn: __user_cache_dir__P, Name: "user_cache_dir_", Package: "std/os"}
+
+func __user_cache_dir_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.UserCacheDir()
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __user_config_dir__P ProcFn = __user_config_dir_
+var user_config_dir_ Proc = Proc{Fn: __user_config_dir__P, Name: "user_config_dir_", Package: "std/os"}
+
+func __user_config_dir_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.UserConfigDir()
+		PanicOnErr(err)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __user_home_dir__P ProcFn = __user_home_dir_
+var user_home_dir_ Proc = Proc{Fn: __user_home_dir__P, Name: "user_home_dir_", Package: "std/os"}
+
+func __user_home_dir_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 0:
+		_res, err := os.UserHomeDir()
+		PanicOnErr(err)
 		return MakeString(_res)
 
 	default:
