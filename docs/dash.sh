@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 rm -f ./joker.xml
-../joker generate-xml.joke
+../joker generate-xml.joke || exit
 
 pushd dash
   rm -f ./*.html
