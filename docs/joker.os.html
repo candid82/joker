@@ -35,6 +35,18 @@
   <a href="#chdir">chdir</a>
 </li>
 <li>
+  <a href="#chmod">chmod</a>
+</li>
+<li>
+  <a href="#chown">chown</a>
+</li>
+<li>
+  <a href="#chtimes">chtimes</a>
+</li>
+<li>
+  <a href="#clearenv">clearenv</a>
+</li>
+<li>
   <a href="#close">close</a>
 </li>
 <li>
@@ -47,10 +59,19 @@
   <a href="#cwd">cwd</a>
 </li>
 <li>
+  <a href="#egid">egid</a>
+</li>
+<li>
   <a href="#env">env</a>
 </li>
 <li>
+  <a href="#euid">euid</a>
+</li>
+<li>
   <a href="#exec">exec</a>
+</li>
+<li>
+  <a href="#executable">executable</a>
 </li>
 <li>
   <a href="#exists?">exists?</a>
@@ -59,13 +80,37 @@
   <a href="#exit">exit</a>
 </li>
 <li>
+  <a href="#expand-env">expand-env</a>
+</li>
+<li>
   <a href="#get-env">get-env</a>
+</li>
+<li>
+  <a href="#gid">gid</a>
+</li>
+<li>
+  <a href="#groups">groups</a>
+</li>
+<li>
+  <a href="#hostname">hostname</a>
+</li>
+<li>
+  <a href="#lchown">lchown</a>
+</li>
+<li>
+  <a href="#link">link</a>
 </li>
 <li>
   <a href="#ls">ls</a>
 </li>
 <li>
+  <a href="#lstat">lstat</a>
+</li>
+<li>
   <a href="#mkdir">mkdir</a>
+</li>
+<li>
+  <a href="#mkdir-all">mkdir-all</a>
 </li>
 <li>
   <a href="#mkdir-temp">mkdir-temp</a>
@@ -74,10 +119,28 @@
   <a href="#open">open</a>
 </li>
 <li>
+  <a href="#pagesize">pagesize</a>
+</li>
+<li>
+  <a href="#path-separator?">path-separator?</a>
+</li>
+<li>
+  <a href="#pid">pid</a>
+</li>
+<li>
+  <a href="#ppid">ppid</a>
+</li>
+<li>
+  <a href="#read-link">read-link</a>
+</li>
+<li>
   <a href="#remove">remove</a>
 </li>
 <li>
   <a href="#remove-all">remove-all</a>
+</li>
+<li>
+  <a href="#rename">rename</a>
 </li>
 <li>
   <a href="#set-env">set-env</a>
@@ -92,7 +155,28 @@
   <a href="#stat">stat</a>
 </li>
 <li>
+  <a href="#symlink">symlink</a>
+</li>
+<li>
   <a href="#temp-dir">temp-dir</a>
+</li>
+<li>
+  <a href="#truncate">truncate</a>
+</li>
+<li>
+  <a href="#uid">uid</a>
+</li>
+<li>
+  <a href="#unset-env">unset-env</a>
+</li>
+<li>
+  <a href="#user-cache-dir">user-cache-dir</a>
+</li>
+<li>
+  <a href="#user-config-dir">user-config-dir</a>
+</li>
+<li>
+  <a href="#user-home-dir">user-home-dir</a>
 </li>
 
     </ul>
@@ -123,7 +207,48 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(chdir dirname)</code></div>
 </pre>
-  <p class="var-docstr">Chdir changes the current working directory to the named directory. If there is an error, an exception will be thrown. Returns nil.</p>
+  <p class="var-docstr">Changes the current working directory to the named directory.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="chmod">chmod</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(chmod name mode)</code></div>
+</pre>
+  <p class="var-docstr">Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link&#39;s target.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="chown">chown</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(chown name uid gid)</code></div>
+</pre>
+  <p class="var-docstr">Changes the numeric uid and gid of the named file. If the file is a symbolic link,<br>
+  it changes the uid and gid of the link&#39;s target. A uid or gid of -1 means to not change that value.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="chtimes">chtimes</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(chtimes name atime mtime)</code></div>
+</pre>
+  <p class="var-docstr">Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="clearenv">clearenv</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(clearenv)</code></div>
+</pre>
+  <p class="var-docstr">Deletes all environment variables.</p>
   
   
 </li>
@@ -175,12 +300,32 @@
   
 </li>
 <li>
+  <h3 class="Function" id="egid">egid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(egid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the numeric effective group id of the caller.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="env">env</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(env)</code></div>
 </pre>
   <p class="var-docstr">Returns a map representing the environment.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="euid">euid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(euid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the numeric effective user id of the caller.</p>
   
   
 </li>
@@ -209,6 +354,16 @@
   
 </li>
 <li>
+  <h3 class="Function" id="executable">executable</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(executable)</code></div>
+</pre>
+  <p class="var-docstr">Returns the path name for the executable that started the current process.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="exists?">exists?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -230,12 +385,74 @@
   
 </li>
 <li>
+  <h3 class="Function" id="expand-env">expand-env</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(expand-env s)</code></div>
+</pre>
+  <p class="var-docstr">Replaces ${var} or $var in the string according to the values of the current environment variables.<br>
+  References to undefined variables are replaced by the empty string.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="get-env">get-env</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get-env key)</code></div>
 </pre>
   <p class="var-docstr">Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="gid">gid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(gid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the numeric group id of the caller.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="groups">groups</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(groups)</code></div>
+</pre>
+  <p class="var-docstr">Returns a list of the numeric ids of groups that the caller belongs to.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="hostname">hostname</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(hostname)</code></div>
+</pre>
+  <p class="var-docstr">Returns the host name reported by the kernel.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="lchown">lchown</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(lchown name uid gid)</code></div>
+</pre>
+  <p class="var-docstr">Changes the numeric uid and gid of the named file. If the file is a symbolic link,<br>
+  it changes the uid and gid of the link itself.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="link">link</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(link oldname newname)</code></div>
+</pre>
+  <p class="var-docstr">Creates newname as a hard link to the oldname file.</p>
   
   
 </li>
@@ -256,12 +473,34 @@
   
 </li>
 <li>
+  <h3 class="Function" id="lstat">lstat</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(lstat filename)</code></div>
+</pre>
+  <p class="var-docstr">Like stat, but if the file is a symbolic link, the result describes the symbolic link.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="mkdir">mkdir</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(mkdir name perm)</code></div>
 </pre>
   <p class="var-docstr">Creates a new directory with the specified name and permission bits.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="mkdir-all">mkdir-all</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(mkdir-all name perm)</code></div>
+</pre>
+  <p class="var-docstr">Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.<br>
+  The permission bits perm (before umask) are used for all directories that mkdir-all creates.<br>
+  If path is already a directory, mkdir-all does nothing and returns nil.</p>
   
   
 </li>
@@ -276,7 +515,7 @@
   If pattern includes a &#34;*&#34;, the random string replaces the last &#34;*&#34;.<br>
   Returns the name of the new directory. If dir is the empty string,<br>
   uses the default directory for temporary files (see joker.os/temp-dir).<br>
-  Multiple programs calling joker.os/make-temp-dir simultaneously will not choose the same directory.<br>
+  Multiple programs calling joker.os/mkdir-temp simultaneously will not choose the same directory.<br>
   It is the caller&#39;s responsibility to remove the directory when no longer needed.</p>
   
   
@@ -289,6 +528,56 @@
 </pre>
   <p class="var-docstr">Opens the named file for reading. If successful, the file can be used for reading;<br>
   the associated file descriptor has mode O_RDONLY.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="pagesize">pagesize</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(pagesize)</code></div>
+</pre>
+  <p class="var-docstr">Returns the underlying system&#39;s memory page size.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="path-separator?">path-separator?</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(path-separator? c)</code></div>
+</pre>
+  <p class="var-docstr">Reports whether c is a directory separator character.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="pid">pid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(pid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the process id of the caller.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="ppid">ppid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(ppid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the process id of the caller&#39;s parent.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="read-link">read-link</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(read-link name)</code></div>
+</pre>
+  <p class="var-docstr">Returns the destination of the named symbolic link.</p>
   
   
 </li>
@@ -316,12 +605,22 @@
   
 </li>
 <li>
+  <h3 class="Function" id="rename">rename</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(rename oldpath newpath)</code></div>
+</pre>
+  <p class="var-docstr">Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="set-env">set-env</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(set-env key value)</code></div>
 </pre>
-  <p class="var-docstr">Sets the specified key to the specified value in the environment.</p>
+  <p class="var-docstr">Sets the value of the environment variable named by the key.</p>
   
   
 </li>
@@ -372,6 +671,16 @@
   
 </li>
 <li>
+  <h3 class="Function" id="symlink">symlink</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(symlink oldname newname)</code></div>
+</pre>
+  <p class="var-docstr">Creates newname as a symbolic link to oldname.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="temp-dir">temp-dir</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -382,6 +691,83 @@
   On Windows, it uses GetTempPath, returning the first non-empty<br>
   value from %TMP%, %TEMP%, %USERPROFILE%, or the Windows directory.<br>
   The directory is neither guaranteed to exist nor have accessible permissions.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="truncate">truncate</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(truncate name size)</code></div>
+</pre>
+  <p class="var-docstr">Changes the size of the named file. If the file is a symbolic link, it changes the size of the link&#39;s target.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="uid">uid</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(uid)</code></div>
+</pre>
+  <p class="var-docstr">Returns the numeric user id of the caller.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="unset-env">unset-env</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(unset-env key)</code></div>
+</pre>
+  <p class="var-docstr">Unsets a single environment variable.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="user-cache-dir">user-cache-dir</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(user-cache-dir)</code></div>
+</pre>
+  <p class="var-docstr">Returns the default root directory to use for user-specific cached data.<br>
+  Users should create their own application-specific subdirectory within this one and use that.<br>
+<br>
+  On Unix systems, it returns $XDG_CACHE_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html<br>
+  if non-empty, else $HOME/.cache. On Darwin, it returns $HOME/Library/Caches. On Windows, it returns %LocalAppData%.<br>
+  On Plan 9, it returns $home/lib/cache.<br>
+<br>
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="user-config-dir">user-config-dir</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(user-config-dir)</code></div>
+</pre>
+  <p class="var-docstr">Returns the default root directory to use for user-specific configuration data.<br>
+  Users should create their own application-specific subdirectory within this one and use that.<br>
+<br>
+  On Unix systems, it returns $XDG_CONFIG_HOME as specified by https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html<br>
+  if non-empty, else $HOME/.config. On Darwin, it returns $HOME/Library/Application Support. On Windows, it returns %AppData%.<br>
+  On Plan 9, it returns $home/lib.<br>
+<br>
+  If the location cannot be determined (for example, $HOME is not defined), then it will throw an error.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="user-home-dir">user-home-dir</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(user-home-dir)</code></div>
+</pre>
+  <p class="var-docstr">Returns the current user&#39;s home directory.<br>
+<br>
+  On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.<br>
+  On Plan 9, it returns the $home environment variable.</p>
   
   
 </li>
