@@ -40,7 +40,7 @@ func execute(name string, opts Map) Object {
 	var args []string
 	var stdin io.Reader
 	var stdout, stderr io.Writer
-	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok {
+	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok && !dirObj.Equals(NIL) {
 		dir = EnsureObjectIsString(dirObj, "dir: %s").S
 	}
 	if ok, argsObj := opts.Get(MakeKeyword("args")); ok {
