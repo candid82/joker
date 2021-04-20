@@ -4553,8 +4553,7 @@
   reported.
 
   If f is not a type supported by this operation (such as Ratio), -1
-  is returned. (For GoObjects, invoke the appropriate methods
-  directly instead of using this function.)"
+  is returned."
   {:added "1.0"}
   [^Number f]
   (precision__ f))
