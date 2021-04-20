@@ -1058,7 +1058,7 @@ func MakeBigFloatWithOrig(s, orig string) (*BigFloat, bool) {
 	f.SetPrec(uint(prec))
 
 	if _, ok := f.SetString(s); ok {
-		return &BigFloat{b: *f, Original: orig}, true // TODO: Docs say use f.Copy(), so b should be *big.Float?
+		return &BigFloat{b: f, Original: orig}, true
 	}
 
 	return nil, false
