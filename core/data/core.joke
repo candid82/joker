@@ -4539,7 +4539,7 @@
   ([^Int code]
    (exit__ code)))
 
-(defn ^Int precision
+(defn ^BigInt precision
   "Returns the precision of a Number.
 
   The precision excludes any sign or exponent. For a BigInt, it's the

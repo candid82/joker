@@ -1872,21 +1872,21 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 }
 
 var procPrecision = func(args []Object) Object {
-	prec := -1
+	prec := int64(-1)
 	switch n := args[0].(type) {
 	case Number:
 		switch n := n.(type) {
 		case *BigInt:
-			prec = n.b.BitLen()
+			prec = int64(n.b.BitLen())
 		case *BigFloat:
-			prec = int(n.b.Prec())
+			prec = int64(n.b.Prec())
 		case Int:
-			prec = bits.UintSize - 1
+			prec = int64(bits.UintSize - 1)
 		case Double:
 			prec = 53
 		}
 	}
-	return MakeInt(prec)
+	return MakeBigInt(prec)
 }
 
 var procSetPrecision = func(args []Object) Object {
