@@ -366,6 +366,21 @@ func EnsureArgIsRatio(args []Object, index int) *Ratio {
 	panic(FailArg(obj, "Ratio", index))
 }
 
+func EnsureObjectIsBigFloat(obj Object, pattern string) *BigFloat {
+	if c, yes := obj.(*BigFloat); yes {
+		return c
+	}
+	panic(FailObject(obj, "BigFloat", pattern))
+}
+
+func EnsureArgIsBigFloat(args []Object, index int) *BigFloat {
+	obj := args[index]
+	if c, yes := obj.(*BigFloat); yes {
+		return c
+	}
+	panic(FailArg(obj, "BigFloat", index))
+}
+
 func EnsureObjectIsNamespace(obj Object, pattern string) *Namespace {
 	if c, yes := obj.(*Namespace); yes {
 		return c
