@@ -1889,6 +1889,22 @@ var procPrecision = func(args []Object) Object {
 	return MakeInt(prec)
 }
 
+var procSetPrecision = func(args []Object) Object {
+	p := EnsureArgIsNumber(args, 0).Int().I
+	if p < 0 {
+		panic(RT.NewArgTypeError(0, args[0], "non-negative Int"))
+	}
+	prec := uint(p)
+	switch n := args[1].(type) {
+	case Number:
+		switch n := n.(type) {
+		case *BigFloat:
+			return &BigFloat{b: big.NewFloat(0).Copy(n.b).SetPrec(prec)}
+		}
+	}
+	panic(RT.NewArgTypeError(1, args[1], "BigFloat"))
+}
+
 func findConfigFile(filename string, workingDir string, findDir bool) string {
 	var err error
 	configName := ".joker"

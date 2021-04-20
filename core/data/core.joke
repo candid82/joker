@@ -4557,3 +4557,12 @@
   {:added "1.0"}
   [^Number f]
   (precision__ f))
+
+(defn ^BigFloat set-precision
+  "Returns a copy of a BigFloat with the specified precision.
+
+  Calls Go's math/big.(*Float)SetPrec(prec) on a copy of f. prec must
+  evaluate to a non-negative integer. Returns the resulting BigFloat."
+  {:added "1.0"}
+  [^Number prec ^BigFloat f]
+  (set-precision__ prec f))
