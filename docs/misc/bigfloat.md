@@ -12,7 +12,7 @@ user=> 2.71828182845904523536028747135266249775724709369995957496696763M
 user=>
 ```
 
-Further, `BigFloat`s created from strings (when a constant such as `1.3M` is parsed by Joker) are given a _minimum_ precision of 53 (the same precision as a `Double`, aka `float64`) and a _maximum_ precision based on the number of digits and the number of bits each digit represents (3.3 for decimal; 1, 3, or 4 for binary, octal, and hex).
+Further, `BigFloat`s created from strings (when a constant such as `1.3M` is parsed by Joker) are given a _minimum_ precision of 53 (the same precision as a `Double`, aka `float64`) and a _maximum_ precision based on the number of digits and the number of bits each digit represents (3.33 for decimal; 1, 3, or 4 for binary, octal, and hex).
 
 The `joker.core/precision` function returns the precision for a `BigFloat` type, though it supports a few others (e.g. `(precision 1)` returns `63N` on 64-bit systems, `31N` on 32-bit).
 

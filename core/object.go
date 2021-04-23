@@ -1021,7 +1021,7 @@ func computePrecision(s string) (prec uint) {
 	bitsNeeded := 0.
 
 	// Assume base 10 at first.
-	bitsPerDigit := 3.3 // (joker.math/log-2 10) => 3.32192809488736
+	bitsPerDigit := 3.33 // (joker.math/log-2 10) => 3.32192809488736
 	exponentUpper, exponentLower := 'E', 'e'
 
 	if len(s) > 2 && s[0] == '0' && strings.ContainsAny(s[1:2], "bBoOxX") {
