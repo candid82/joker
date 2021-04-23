@@ -1873,18 +1873,17 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 
 var procPrecision = func(args []Object) Object {
 	prec := int64(-1)
-	switch n := args[0].(type) {
-	case Number:
-		switch n := n.(type) {
-		case *BigInt:
-			prec = int64(n.b.BitLen())
-		case *BigFloat:
-			prec = int64(n.b.Prec())
-		case Int:
-			prec = int64(bits.UintSize - 1)
-		case Double:
-			prec = 53
-		}
+	switch n := EnsureArgIsNumber(args, 0); n := n.(type) {
+	case *BigInt:
+		prec = int64(n.b.BitLen())
+	case *BigFloat:
+		prec = int64(n.b.Prec())
+	case Int:
+		prec = int64(bits.UintSize - 1)
+	case Double:
+		prec = 53
+	default:
+		panic(RT.NewArgTypeError(0, args[0], "BigInt, BigFloat, Int, or Double"))
 	}
 	return MakeBigInt(prec)
 }
@@ -1895,14 +1894,8 @@ var procSetPrecision = func(args []Object) Object {
 		panic(RT.NewArgTypeError(0, args[0], "non-negative Int"))
 	}
 	prec := uint(p)
-	switch n := args[1].(type) {
-	case Number:
-		switch n := n.(type) {
-		case *BigFloat:
-			return &BigFloat{b: big.NewFloat(0).Copy(n.b).SetPrec(prec)}
-		}
-	}
-	panic(RT.NewArgTypeError(1, args[1], "BigFloat"))
+	n := EnsureArgIsBigFloat(args, 1)
+	return &BigFloat{b: big.NewFloat(0).Copy(n.b).SetPrec(prec)}
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {

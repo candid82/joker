@@ -4552,8 +4552,8 @@
   enough 0 digits will result in a BigFloat with more precision
   reported.
 
-  If f is not a type supported by this operation (such as Ratio), -1
-  is returned."
+  If f is not a supported Number type (such as Ratio), a panic
+  results."
   {:added "1.0"}
   [^Number f]
   (precision__ f))

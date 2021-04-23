@@ -327,8 +327,7 @@
     53 (precision 1.0M)
     99 (precision 0000000000000000001.00000000000M)
     16 (precision 65535N)
-    17 (precision 65536N)
-    -1 (precision 1/2))
+    17 (precision 65536N))
   (is (or (= 31 (precision 1)) (= 63 (precision 1))))
   (let [f 123.456M
         g f
