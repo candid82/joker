@@ -88,7 +88,7 @@ There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) t
 
 | Joker type | Corresponding Go type |
 | ---------- | --------------------- |
-| BigFloat   | big.Float             |
+| BigFloat   | big.Float (see below) |
 | BigInt     | big.Int               |
 | Boolean    | bool                  |
 | Char       | rune                  |
@@ -102,7 +102,9 @@ There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) t
 | Symbol     | n/a                   |
 | Time       | time.Time             |
 
-Note that `Nil` is a type that has one value `nil`.
+See [Floating-point Constants and the BigFloat Type](docs/misc/bigfloat.md) for more on `BigFloat` (`M`-suffixed) constants.
+
+Note that `Nil` is a type that has one value: `nil`.
 
 1. The set of persistent data structures is much smaller:
 

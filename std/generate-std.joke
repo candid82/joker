@@ -184,6 +184,7 @@
   (condp = t
     "BigInt" "*BigInt"
     "BigIntU" "*BigInt"
+    "BigFloat" "*BigFloat"
     "Number" "*BigInt"
     "StringVector" "*Vector"
     "Error" "String"

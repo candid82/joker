@@ -121,6 +121,14 @@ func ExtractNumber(args []Object, index int) Number {
 	return EnsureArgIsNumber(args, index)
 }
 
+func ExtractBigInt(args []Object, index int) *big.Int {
+	return EnsureArgIsBigInt(args, index).b
+}
+
+func ExtractBigFloat(args []Object, index int) *big.Float {
+	return EnsureArgIsBigFloat(args, index).b
+}
+
 func ExtractRegex(args []Object, index int) *regexp.Regexp {
 	return EnsureArgIsRegex(args, index).R
 }

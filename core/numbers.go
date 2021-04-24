@@ -2,6 +2,7 @@ package core
 
 import (
 	"math/big"
+	"math/bits"
 )
 
 type (
@@ -12,6 +13,9 @@ type (
 		BigInt() *big.Int
 		BigFloat() *big.Float
 		Ratio() *big.Rat
+	}
+	Precision interface {
+		Precision() *big.Int
 	}
 	Ops interface {
 		Combine(ops Ops) Ops
@@ -623,6 +627,24 @@ func Min(x Number, y Number) Number {
 		return x
 	}
 	return y
+}
+
+// Precision
+
+func (n *BigInt) Precision() *big.Int {
+	return MakeMathBigIntFromInt(n.b.BitLen())
+}
+
+func (n *BigFloat) Precision() *big.Int {
+	return MakeMathBigIntFromUint(n.b.Prec())
+}
+
+func (n Int) Precision() *big.Int {
+	return MakeMathBigIntFromInt64(bits.UintSize - 1)
+}
+
+func (n Double) Precision() *big.Int {
+	return MakeMathBigIntFromInt(53)
 }
 
 func category(x Number) int {
