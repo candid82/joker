@@ -125,10 +125,16 @@
   <a href="#pow-10">pow-10</a>
 </li>
 <li>
+  <a href="#precision">precision</a>
+</li>
+<li>
   <a href="#round">round</a>
 </li>
 <li>
   <a href="#round-to-even">round-to-even</a>
+</li>
+<li>
+  <a href="#set-precision">set-precision</a>
 </li>
 <li>
   <a href="#sign-bit">sign-bit</a>
@@ -536,6 +542,29 @@
   
 </li>
 <li>
+  <h3 class="Function" id="precision">precision</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(precision f)</code></div>
+</pre>
+  <p class="var-docstr">Returns the precision of a Number.<br>
+<br>
+  The precision excludes any sign or exponent. For a BigInt, it&#39;s the<br>
+  number of bits needed to represent the number; for a BigFloat, Int,<br>
+  or Double, it&#39;s the number of bits available in that instance or<br>
+  type. E.g. (precision 1) returns either 31 or 63, depending on<br>
+  whether the Joker executable is 32-bit or 64-bit (for integers);<br>
+  (precision 1.0) returns 53 (as Double is always a float64); and<br>
+  (precision 1.0M) returns 53 as well, though prepending or appending<br>
+  enough 0 digits will result in a BigFloat with more precision<br>
+  reported.<br>
+<br>
+  If f is not a supported Number type (such as Ratio), a panic<br>
+  results.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="round">round</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -552,6 +581,19 @@
   <pre class="var-usage"><div><code>(round-to-even x)</code></div>
 </pre>
   <p class="var-docstr">Returns the integer nearest to x, rounding ties to the nearest even integer.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="set-precision">set-precision</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(set-precision prec f)</code></div>
+</pre>
+  <p class="var-docstr">Returns a copy of a BigFloat with the specified precision.<br>
+<br>
+  Calls Go&#39;s math/big.(*Float)SetPrec(prec) on a copy of f. prec must<br>
+  evaluate to a non-negative integer. Returns the resulting BigFloat.</p>
   
   
 </li>
