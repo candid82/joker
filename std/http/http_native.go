@@ -90,7 +90,7 @@ func respToMap(resp *http.Response) Map {
 	res.Add(MakeKeyword("status"), MakeInt(resp.StatusCode))
 	respHeaders := EmptyArrayMap()
 	for k, v := range resp.Header {
-		respHeaders.Add(MakeString(k), MakeString(strings.Join(v, ",")))
+		respHeaders.Add(MakeString(k), MakeStringVector(v))
 	}
 	res.Add(MakeKeyword("headers"), respHeaders)
 	// TODO: 32-bit issue
