@@ -1258,6 +1258,12 @@ var procInjectNamespace = func(args []Object) Object {
 	return ns
 }
 
+var procInjectLinterType = func(args []Object) Object {
+	sym := EnsureArgIsSymbol(args, 0)
+	LINTER_TYPES[sym.name] = true
+	return NIL
+}
+
 var procRemoveNamespace = func(args []Object) Object {
 	ns := GLOBAL_ENV.RemoveNamespace(EnsureArgIsSymbol(args, 0))
 	if ns == nil {

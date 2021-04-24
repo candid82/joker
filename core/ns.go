@@ -110,6 +110,13 @@ func (ns *Namespace) Intern(sym Symbol) *Var {
 	if sym.ns != nil {
 		panic(RT.NewError("Can't intern namespace-qualified symbol " + sym.ToString(false)))
 	}
+	if LINTER_MODE {
+		if LINTER_TYPES[sym.name] {
+			msg := fmt.Sprintf("Expecting var, but %s is a type", *sym.name)
+			pos := sym.GetInfo().Pos()
+			printParseWarning(pos, msg)
+		}
+	}
 	sym.meta = nil
 	existingVar, ok := ns.mappings[sym.name]
 	if !ok {

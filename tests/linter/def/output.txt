@@ -1,0 +1,2 @@
+tests/linter/def/input.clj:1:6: Parse warning: Expecting var, but String is a type
+tests/linter/def/input.clj:2:6: Parse warning: Expecting var, but Comparable is a type

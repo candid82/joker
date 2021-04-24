@@ -8,6 +8,7 @@ import (
 
 var TYPES = map[*string]*Type{}
 var TYPE Types
+var LINTER_TYPES = map[*string]bool{}
 
 func init() {
 	TYPE = Types{

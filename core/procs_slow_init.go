@@ -118,6 +118,7 @@ func init() {
 	intern("find-ns__", procFindNamespace, "procFindNamespace")
 	intern("create-ns__", procCreateNamespace, "procCreateNamespace")
 	intern("inject-ns__", procInjectNamespace, "procInjectNamespace")
+	intern("inject-linter-type__", procInjectLinterType, "procInjectLinterType")
 	intern("remove-ns__", procRemoveNamespace, "procRemoveNamespace")
 	intern("all-ns__", procAllNamespaces, "procAllNamespaces")
 	intern("ns-name__", procNamespaceName, "procNamespaceName")

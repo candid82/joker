@@ -412,6 +412,7 @@ func main() {
 	genGo.Var("KEYWORDS", false, KEYWORDS)
 	genGo.Var("TYPE", false, TYPE)
 	genGo.Var("TYPES", false, TYPES)
+	genGo.Var("LINTER_TYPES", false, LINTER_TYPES)
 	genGo.Var("GLOBAL_ENV", true, GLOBAL_ENV) // init var at runtime to avoid cycles
 
 	// Emit the per-namespace files (a_*_code.go).

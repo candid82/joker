@@ -4,50 +4,50 @@
 
 (doseq
   [sym
-   '(
-     AbstractMethodError                           AbstractStringBuilder                         Appendable
-     ApplicationShutdownHooks                      ArithmeticException                           ArrayIndexOutOfBoundsException
-     ArrayStoreException                           AssertionError                                AssertionStatusDirectives
-     AutoCloseable                                 Boolean                                       BootstrapMethodError
-     BigDecimal                                    BigInteger
-     Byte                                          CharSequence                                  Character
-     CharacterData                                 CharacterData00                               CharacterData01
-     CharacterData02                               CharacterData0E                               CharacterDataLatin1
-     CharacterDataPrivateUse                       CharacterDataUndefined                        CharacterName
-     Class                                         ClassCastException                            ClassCircularityError
-     ClassFormatError                              ClassLoader                                   ClassLoaderHelper
-     ClassNotFoundException                        ClassValue                                    CloneNotSupportedException
-     Cloneable                                     Comparable                                    Compiler
-     ConditionalSpecialCasing                      Deprecated                                    Double
-     Enum                                          EnumConstantNotPresentException               Error
-     Exception                                     ExceptionInInitializerError                   Float
-     FunctionalInterface                           IllegalAccessError                            IllegalAccessException
-     IllegalArgumentException                      IllegalMonitorStateException                  IllegalStateException
-     IllegalThreadStateException                   IncompatibleClassChangeError                  IndexOutOfBoundsException
-     InheritableThreadLocal                        InstantiationError                            InstantiationException
-     Integer                                       InternalError                                 InterruptedException
-     Iterable                                      LinkageError                                  Long
-     Math                                          NegativeArraySizeException                    NoClassDefFoundError
-     NoSuchFieldError                              NoSuchFieldException                          NoSuchMethodError
-     NoSuchMethodException                         NullPointerException                          Number
-     NumberFormatException                         Object                                        OutOfMemoryError
-     Override                                      Package                                       Process
-     ProcessBuilder                                ProcessEnvironment                            ProcessImpl
-     Readable                                      ReflectiveOperationException                  Runnable
-     Runtime                                       RuntimeException                              RuntimePermission
-     SafeVarargs                                   SecurityException                             SecurityManager
-     Short                                         Shutdown                                      StackOverflowError
-     StackTraceElement                             StrictMath                                    String
-     StringBuffer                                  StringBuilder                                 StringCoding
-     StringIndexOutOfBoundsException               SuppressWarnings                              System
-     SystemClassLoaderAction                       Terminator                                    Thread
-     Thread$State                                  Thread$UncaughtExceptionHandler
-     ThreadDeath                                   ThreadGroup                                   ThreadLocal
-     Throwable                                     TypeNotPresentException                       UNIXProcess
-     UnknownError                                  UnsatisfiedLinkError                          UnsupportedClassVersionError
-     UnsupportedOperationException                 VerifyError                                   VirtualMachineError
-     Void)]
+   '[AbstractMethodError AbstractStringBuilder Appendable
+     ApplicationShutdownHooks ArithmeticException ArrayIndexOutOfBoundsException
+     ArrayStoreException AssertionError AssertionStatusDirectives
+     AutoCloseable Boolean BootstrapMethodError
+     BigDecimal BigInteger
+     Byte CharSequence Character
+     CharacterData CharacterData00 CharacterData01
+     CharacterData02 CharacterData0E CharacterDataLatin1
+     CharacterDataPrivateUse CharacterDataUndefined CharacterName
+     Class ClassCastException ClassCircularityError
+     ClassFormatError ClassLoader ClassLoaderHelper
+     ClassNotFoundException ClassValue CloneNotSupportedException
+     Cloneable Comparable Compiler
+     ConditionalSpecialCasing Deprecated Double
+     Enum EnumConstantNotPresentException Error
+     Exception ExceptionInInitializerError Float
+     FunctionalInterface IllegalAccessError IllegalAccessException
+     IllegalArgumentException IllegalMonitorStateException IllegalStateException
+     IllegalThreadStateException IncompatibleClassChangeError IndexOutOfBoundsException
+     InheritableThreadLocal InstantiationError InstantiationException
+     Integer InternalError InterruptedException
+     Iterable LinkageError Long
+     Math NegativeArraySizeException NoClassDefFoundError
+     NoSuchFieldError NoSuchFieldException NoSuchMethodError
+     NoSuchMethodException NullPointerException Number
+     NumberFormatException Object OutOfMemoryError
+     Override Package Process
+     ProcessBuilder ProcessEnvironment ProcessImpl
+     Readable ReflectiveOperationException Runnable
+     Runtime RuntimeException RuntimePermission
+     SafeVarargs SecurityException SecurityManager
+     Short Shutdown StackOverflowError
+     StackTraceElement StrictMath String
+     StringBuffer StringBuilder StringCoding
+     StringIndexOutOfBoundsException SuppressWarnings System
+     SystemClassLoaderAction Terminator Thread
+     Thread$State Thread$UncaughtExceptionHandler
+     ThreadDeath ThreadGroup ThreadLocal
+     Throwable TypeNotPresentException UNIXProcess
+     UnknownError UnsatisfiedLinkError UnsupportedClassVersionError
+     UnsupportedOperationException VerifyError VirtualMachineError
+     Void]]
   (inject-ns__ sym)
+  (inject-linter-type__ sym)
   (when-not (resolve sym)
     (intern__ *ns* sym)))
 
@@ -378,4 +378,3 @@
 
 (in-ns 'user)
 (joker.core/refer 'joker.core)
-
