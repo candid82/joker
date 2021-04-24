@@ -13,7 +13,7 @@
 
 (ns joker.test-joker.numbers
   (:require [joker.test :refer [deftest is are]]
-            [joker.math :refer [exp-2]]))
+            [joker.math :refer [exp-2 precision set-precision]]))
 
 ;; *** Functions ***
 

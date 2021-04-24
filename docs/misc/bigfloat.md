@@ -14,20 +14,20 @@ user=>
 
 Further, `BigFloat`s created from strings (when a constant such as `1.3M` is parsed by Joker) are given a _minimum_ precision of 53 (the same precision as a `Double`, aka `float64`) and a _maximum_ precision based on the number of digits and the number of bits each digit represents (3.33 for decimal; 1, 3, or 4 for binary, octal, and hex).
 
-The `joker.core/precision` function returns the precision for a `BigFloat` type, though it supports a few others (e.g. `(precision 1)` returns `63N` on 64-bit systems, `31N` on 32-bit).
+The `joker.math/precision` function returns the precision for a `BigFloat` type, though it supports a few others (e.g. `(joker.math/precision 1)` returns `63N` on 64-bit systems, `31N` on 32-bit).
 
 This combines to produce a fairly useful set of default behaviors:
 
 ```
-user=> (precision 2.71828182845904523536028747135266249775724709369995957496696763M)
+user=> (joker.math/precision 2.71828182845904523536028747135266249775724709369995957496696763M)
 208N
 user=> (def c1 1.3M)
 #'user/c1
 user=> (def c2 0000000000001.3000000000000M)
 #'user/c2
-user=> (precision c1)
+user=> (joker.math/precision c1)
 53
-user=> (precision c2)
+user=> (joker.math/precision c2)
 86
 user=> (= c1 c2)
 false
@@ -46,20 +46,20 @@ true
 user=>
 ```
 
-Finally, `joker.core/set-precision` can be used to make a copy of a `BigFloat` with the specified precision, _a la_ Go's `math/big.(*Float).SetPrec()` method:
+Finally, `joker.math/set-precision` can be used to make a copy of a `BigFloat` with the specified precision, _a la_ Go's `math/big.(*Float).SetPrec()` method:
 
 ```
 user=> (def big-e 2.71828182845904523536028747135266249775724709369995957496696763M)
 #'user/big-e
-user=> (precision big-e)
+user=> (joker.math/precision big-e)
 208N
-user=> (def truncated-e (set-precision 53 big-e))
+user=> (def truncated-e (joker.math/set-precision 53 big-e))
 #'user/truncated-e
 user=> truncated-e
 2.718281828459045M
-user=> (precision truncated-e)
+user=> (joker.math/precision truncated-e)
 53N
-user=> (precision joker.math/e)
+user=> (joker.math/precision joker.math/e)
 53N
 user=>
 ```

@@ -185,6 +185,4 @@ func init() {
 	intern("go-spew__", procGoSpew, "procGoSpew")
 	intern("verbosity-level__", procVerbosityLevel, "procVerbosityLevel")
 	intern("exit__", procExit, "procExit")
-	intern("precision__", procPrecision, "procPrecision")
-	intern("set-precision__", procSetPrecision, "procSetPrecision")
 }

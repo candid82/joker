@@ -207,6 +207,24 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns 10**x, the base-10 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
+	mathNamespace.InternVar("precision", precision_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
+			`Returns the precision of a Number.
+
+  The precision excludes any sign or exponent. For a BigInt, it's the
+  number of bits needed to represent the number; for a BigFloat, Int,
+  or Double, it's the number of bits available in that instance or
+  type. E.g. (precision 1) returns either 31 or 63, depending on
+  whether the Joker executable is 32-bit or 64-bit (for integers);
+  (precision 1.0) returns 53 (as Double is always a float64); and
+  (precision 1.0M) returns 53 as well, though prepending or appending
+  enough 0 digits will result in a BigFloat with more precision
+  reported.
+
+  If f is not a supported Number type (such as Ratio), a panic
+  results.`, "1.0").Plus(MakeKeyword("tag"), String{S: "BigInt"}))
+
 	mathNamespace.InternVar("round", round_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
@@ -216,6 +234,14 @@ func InternsOrThunks() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns the integer nearest to x, rounding ties to the nearest even integer.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+
+	mathNamespace.InternVar("set-precision", set_precision_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("prec"), MakeSymbol("f"))),
+			`Returns a copy of a BigFloat with the specified precision.
+
+  Calls Go's math/big.(*Float)SetPrec(prec) on a copy of f. prec must
+  evaluate to a non-negative integer. Returns the resulting BigFloat.`, "1.0").Plus(MakeKeyword("tag"), String{S: "BigFloat"}))
 
 	mathNamespace.InternVar("sign-bit", sign_bit_,
 		MakeMeta(

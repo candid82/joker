@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"math/big"
-	"math/bits"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -120,6 +119,14 @@ func ExtractDouble(args []Object, index int) float64 {
 
 func ExtractNumber(args []Object, index int) Number {
 	return EnsureArgIsNumber(args, index)
+}
+
+func ExtractBigInt(args []Object, index int) *big.Int {
+	return EnsureArgIsBigInt(args, index).b
+}
+
+func ExtractBigFloat(args []Object, index int) *big.Float {
+	return EnsureArgIsBigFloat(args, index).b
 }
 
 func ExtractRegex(args []Object, index int) *regexp.Regexp {
@@ -1869,33 +1876,6 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	// First look for registered (e.g. std) libs
 	ns, found := GLOBAL_ENV.Namespaces[sym.name]
 	return MakeBoolean(found && ns.Lazy == nil)
-}
-
-var procPrecision = func(args []Object) Object {
-	prec := int64(-1)
-	switch n := EnsureArgIsNumber(args, 0); n := n.(type) {
-	case *BigInt:
-		prec = int64(n.b.BitLen())
-	case *BigFloat:
-		prec = int64(n.b.Prec())
-	case Int:
-		prec = int64(bits.UintSize - 1)
-	case Double:
-		prec = 53
-	default:
-		panic(RT.NewArgTypeError(0, args[0], "BigInt, BigFloat, Int, or Double"))
-	}
-	return MakeBigInt(prec)
-}
-
-var procSetPrecision = func(args []Object) Object {
-	p := EnsureArgIsNumber(args, 0).Int().I
-	if p < 0 {
-		panic(RT.NewArgTypeError(0, args[0], "non-negative Int"))
-	}
-	prec := uint(p)
-	n := EnsureArgIsBigFloat(args, 1)
-	return &BigFloat{b: big.NewFloat(0).Copy(n.b).SetPrec(prec)}
 }
 
 func findConfigFile(filename string, workingDir string, findDir bool) string {

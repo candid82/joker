@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
+//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
@@ -976,8 +976,30 @@ func (rat *Ratio) Compare(other Object) int {
 	return CompareNumbers(rat, EnsureObjectIsNumber(other, "Cannot compare Ratio: %s"))
 }
 
-func MakeBigInt(bi int64) *BigInt {
-	return &BigInt{b: big.NewInt(bi)}
+func MakeBigInt(b *big.Int) *BigInt {
+	return &BigInt{b: b}
+}
+
+// Helper function that returns a math/big.Int given an int.
+func MakeMathBigIntFromInt(i int) *big.Int {
+	return MakeMathBigIntFromInt64(int64(i))
+}
+
+// Helper function that returns a math/big.Int given an int64.
+func MakeMathBigIntFromInt64(i int64) *big.Int {
+	return big.NewInt(i)
+}
+
+// Helper function that returns a math/big.Int given a uint.
+func MakeMathBigIntFromUint(b uint) *big.Int {
+	return MakeMathBigIntFromUint64(uint64(b))
+}
+
+// Helper function that returns a math/big.Int given a uint64.
+func MakeMathBigIntFromUint64(b uint64) *big.Int {
+	bigint := big.NewInt(0)
+	bigint.SetUint64(b)
+	return bigint
 }
 
 func (bi *BigInt) ToString(escape bool) string {
@@ -1052,6 +1074,13 @@ func computePrecision(s string) (prec uint) {
 	return uint(bitsNeeded)
 }
 
+func MakeBigFloat(b *big.Float) *BigFloat {
+	return &BigFloat{b: b}
+}
+
+// Helper function that returns a BigFloat given a string, remembering
+// any original string provided, and true if the string had the proper
+// format; nil and false otherwise.
 func MakeBigFloatWithOrig(s, orig string) (*BigFloat, bool) {
 	prec := computePrecision(s)
 	f := new(big.Float)
@@ -1062,14 +1091,6 @@ func MakeBigFloatWithOrig(s, orig string) (*BigFloat, bool) {
 	}
 
 	return nil, false
-}
-
-func MakeBigFloat(s string) *BigFloat {
-	if f, ok := MakeBigFloatWithOrig(s, ""); ok {
-		return f
-	}
-
-	panic(RT.NewError(fmt.Sprintf("Invalid BigFloat: %s", s)))
 }
 
 func (bf *BigFloat) ToString(escape bool) string {

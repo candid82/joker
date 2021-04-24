@@ -433,6 +433,23 @@ func __pow_10_(_args []Object) Object {
 	return NIL
 }
 
+var __precision__P ProcFn = __precision_
+var precision_ Proc = Proc{Fn: __precision__P, Name: "precision_", Package: "std/math"}
+
+func __precision_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		f := ExtractNumber(_args, 0)
+		_res := precision(f)
+		return MakeBigInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __round__P ProcFn = __round_
 var round_ Proc = Proc{Fn: __round__P, Name: "round_", Package: "std/math"}
 
@@ -460,6 +477,24 @@ func __round_to_even_(_args []Object) Object {
 		x := ExtractNumber(_args, 0)
 		_res := math.RoundToEven(x.Double().D)
 		return MakeDouble(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __set_precision__P ProcFn = __set_precision_
+var set_precision_ Proc = Proc{Fn: __set_precision__P, Name: "set_precision_", Package: "std/math"}
+
+func __set_precision_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		prec := ExtractNumber(_args, 0)
+		f := ExtractBigFloat(_args, 1)
+		_res := setPrecision(prec, f)
+		return MakeBigFloat(_res)
 
 	default:
 		PanicArity(_c)

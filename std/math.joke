@@ -302,3 +302,31 @@
     :const true
     :go "math.SmallestNonzeroFloat64"}
   smallest-nonzero-double)
+
+(defn ^BigInt precision
+  "Returns the precision of a Number.
+
+  The precision excludes any sign or exponent. For a BigInt, it's the
+  number of bits needed to represent the number; for a BigFloat, Int,
+  or Double, it's the number of bits available in that instance or
+  type. E.g. (precision 1) returns either 31 or 63, depending on
+  whether the Joker executable is 32-bit or 64-bit (for integers);
+  (precision 1.0) returns 53 (as Double is always a float64); and
+  (precision 1.0M) returns 53 as well, though prepending or appending
+  enough 0 digits will result in a BigFloat with more precision
+  reported.
+
+  If f is not a supported Number type (such as Ratio), a panic
+  results."
+  {:added "1.0"
+   :go "precision(f)"}
+  [^Number f])
+
+(defn ^BigFloat set-precision
+  "Returns a copy of a BigFloat with the specified precision.
+
+  Calls Go's math/big.(*Float)SetPrec(prec) on a copy of f. prec must
+  evaluate to a non-negative integer. Returns the resulting BigFloat."
+  {:added "1.0"
+   :go "setPrecision(prec, f)"}
+  [^Number prec ^BigFloat f])

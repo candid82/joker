@@ -369,11 +369,11 @@ func __until_(_args []Object) Object {
 
 func Init() {
 	ansi_c_ = MakeString(time.ANSIC)
-	hour_ = MakeBigInt(int64(time.Hour))
+	hour_ = MakeBigInt(MakeMathBigIntFromInt64(int64(time.Hour)))
 	kitchen_ = MakeString(time.Kitchen)
 	microsecond_ = MakeInt(int(time.Microsecond))
 	millisecond_ = MakeInt(int(time.Millisecond))
-	minute_ = MakeBigInt(int64(time.Minute))
+	minute_ = MakeBigInt(MakeMathBigIntFromInt64(int64(time.Minute)))
 	nanosecond_ = MakeInt(int(time.Nanosecond))
 	rfc1123_ = MakeString(time.RFC1123)
 	rfc1123_z_ = MakeString(time.RFC1123Z)

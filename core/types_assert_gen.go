@@ -381,6 +381,21 @@ func EnsureArgIsBigFloat(args []Object, index int) *BigFloat {
 	panic(FailArg(obj, "BigFloat", index))
 }
 
+func EnsureObjectIsBigInt(obj Object, pattern string) *BigInt {
+	if c, yes := obj.(*BigInt); yes {
+		return c
+	}
+	panic(FailObject(obj, "BigInt", pattern))
+}
+
+func EnsureArgIsBigInt(args []Object, index int) *BigInt {
+	obj := args[index]
+	if c, yes := obj.(*BigInt); yes {
+		return c
+	}
+	panic(FailArg(obj, "BigInt", index))
+}
+
 func EnsureObjectIsNamespace(obj Object, pattern string) *Namespace {
 	if c, yes := obj.(*Namespace); yes {
 		return c

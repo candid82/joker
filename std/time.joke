@@ -169,7 +169,7 @@
     :added "1.0"
     :tag BigInt
     :const true
-    :go "int64(time.Minute)"}
+    :go "MakeMathBigIntFromInt64(int64(time.Minute))"}
   minute)
 
 (def
@@ -177,7 +177,7 @@
     :added "1.0"
     :tag BigInt
     :const true
-    :go "int64(time.Hour)"}
+    :go "MakeMathBigIntFromInt64(int64(time.Hour))"}
   hour)
 
 (def
