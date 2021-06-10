@@ -1,3 +1,4 @@
+//go:build !go_spew
 // +build !go_spew
 
 package core

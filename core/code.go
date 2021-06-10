@@ -1,3 +1,4 @@
+//go:build gen_code
 // +build gen_code
 
 // Helpers for gen_code.
