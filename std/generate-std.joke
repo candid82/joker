@@ -318,7 +318,7 @@
         non-fn-inits (for [[k v] go-non-fns]
                        (generate-non-fn-init ns-name-final k v))
         res (-> package-slow-template
-                (rpl "{maybeSlowOnly}" (if pre "// +build gen_code\n" ""))
+                (rpl "{maybeSlowOnly}" (if pre "//go:build gen_code\n// +build gen_code\n" ""))
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
                 (rpl "{imports}" ". \"github.com/candid82/joker/core\"")
