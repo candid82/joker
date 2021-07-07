@@ -1138,7 +1138,15 @@ func readFromReader(reader io.RuneReader) Object {
 }
 
 var procRead = func(args []Object) Object {
-	f := EnsureArgIsio_RuneReader(args, 0)
+	var r io.RuneReader
+	switch f := args[0].(type) {
+	case io.RuneReader:
+		r = f
+	case io.Reader:
+		r = bufio.NewReader(f)
+	default:
+		panic(RT.NewArgTypeError(0, args[0], "io.RuneReader or io.Reader"))
+	}
 	return readFromReader(f)
 }
 
