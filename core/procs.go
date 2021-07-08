@@ -1147,7 +1147,7 @@ var procRead = func(args []Object) Object {
 	default:
 		panic(RT.NewArgTypeError(0, args[0], "io.RuneReader or io.Reader"))
 	}
-	return readFromReader(f)
+	return readFromReader(r)
 }
 
 var procReadString = func(args []Object) Object {
