@@ -2109,7 +2109,7 @@ func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG.Value = configMap
 }
 
-func removeJokerNamespaces() {
+func RemoveJokerNamespaces() {
 	for k, ns := range GLOBAL_ENV.Namespaces {
 		if ns != GLOBAL_ENV.CoreNamespace && strings.HasPrefix(*k, "joker.") {
 			delete(GLOBAL_ENV.Namespaces, k)

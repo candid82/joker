@@ -35,5 +35,4 @@ func ProcessLinterData(dialect Dialect) {
 	case CLJS:
 		processData(linter_cljsData)
 	}
-	removeJokerNamespaces()
 }
