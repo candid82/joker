@@ -126,10 +126,11 @@ func repl(phase Phase) {
 	reader := NewReader(runeReader, "<repl>")
 
 	for {
+		namespace := GLOBAL_ENV.CurrentNamespace().Name.ToString(false)
 		if noReadline {
-			print(GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+			print(namespace + "=> ")
 		} else {
-			runeReader.(*LineRuneReader).Prompt = (GLOBAL_ENV.CurrentNamespace().Name.ToString(false) + "=> ")
+			runeReader.(*LineRuneReader).Prompt = (namespace + "=> ")
 		}
 		if processReplCommand(reader, phase, parseContext, replContext) {
 			saveReplHistory(rl, historyFilename)
