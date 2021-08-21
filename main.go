@@ -266,7 +266,9 @@ func makeDialectKeyword(dialect Dialect) Keyword {
 func configureLinterMode(dialect Dialect, filename string, workingDir string) {
 	ProcessLinterData(dialect)
 	ProcessLinterFiles(dialect, filename, workingDir)
-	RemoveJokerNamespaces()
+	if dialect != JOKER {
+		RemoveJokerNamespaces()
+	}
 	GLOBAL_ENV.CoreNamespace.Resolve("*loaded-libs*").Value = EmptySet()
 	LINTER_MODE = true
 	DIALECT = dialect
