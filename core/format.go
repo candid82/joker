@@ -112,7 +112,7 @@ var whenRegex *regexp.Regexp = regexp.MustCompile("^when(-.+)?$")
 var doIndentRegex *regexp.Regexp = regexp.MustCompile("^(do|try|finally|go|alt!|alt!!)$")
 var bodyIndentRegexes []*regexp.Regexp = []*regexp.Regexp{
 	regexp.MustCompile("^(bound-fn|if|if-not|case|cond|cond->|cond->>|as->|condp|when|while|when-not|when-first|do|future|thread)$"),
-	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify)$"),
+	regexp.MustCompile("^(comment|doto|locking|proxy|with-[^\\s]*|reify|fdef)$"),
 	regexp.MustCompile("^(defprotocol|extend|extend-protocol|extend-type|catch|let|letfn|binding|loop|for|go-loop)$"),
 	regexp.MustCompile("^(doseq|dotimes|when-let|if-let|defstruct|struct-map|defmethod|testing|are|deftest|context|use-fixtures)$"),
 	regexp.MustCompile("^(POST|GET|PUT|DELETE)"),
