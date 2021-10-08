@@ -1,0 +1,89 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.runtime</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Provides access to Go and Joker runtime information.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#go-root">go-root</a>
+</li>
+<li>
+  <a href="#go-version">go-version</a>
+</li>
+<li>
+  <a href="#joker-version">joker-version</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="go-root">go-root</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(go-root)</code></div>
+</pre>
+  <p class="var-docstr">Returns the GOROOT string (as returned by runtime/GOROOT()).</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="go-version">go-version</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(go-version)</code></div>
+</pre>
+  <p class="var-docstr">Returns the Go version string (as returned by runtime/Version()).</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="joker-version">joker-version</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(joker-version)</code></div>
+</pre>
+  <p class="var-docstr">Returns the raw Joker version string (including the leading &#39;v&#39;,<br>
+  which joker.core/joker-version omits).</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>

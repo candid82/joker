@@ -1,0 +1,22 @@
+(ns ^{:go-imports ["runtime"]
+      :doc "Provides access to Go and Joker runtime information."}
+  runtime)
+
+(defn ^String go-root
+  "Returns the GOROOT string (as returned by runtime/GOROOT())."
+  {:added "1.0"
+   :go "runtime.GOROOT()"}
+  [])
+
+(defn ^String go-version
+  "Returns the Go version string (as returned by runtime/Version())."
+  {:added "1.0"
+   :go "runtime.Version()"}
+  [])
+
+(defn ^String joker-version
+  "Returns the raw Joker version string (including the leading 'v',
+  which joker.core/joker-version omits)."
+  {:added "1.0"
+   :go "VERSION"}
+  [])
