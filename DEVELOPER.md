@@ -283,7 +283,8 @@ If the hashes are identical, `run.sh` assumes nothing has changed in the `std/*.
 Besides creating `std/foo.joke` with appropriate metadata (such as `:go`) for each public member (in `joker.foo`), one must:
 
 * `mkdir -p std/foo`
-* `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo.go`
+* `(cd std; ../joker generate-std.joke)` to create `std/foo/a_foo*.go`
+** NOTE: If `../joker` does not exist (due to a failed build while iterating through this process), any recent version (such as the installed, official, version you might have in `$PATH`) may be used
 * If necessary, write supporting Go code, which goes in `std/foo/foo_native.go` and other Go files in `std/foo/*.go`
 * Add the resulting set of Go files (in `std/foo`), as well as `std/foo.joke`, to the repository
 * Add the appropriate line to the `import` block at the top of `main.go`
@@ -406,6 +407,16 @@ This is where Joker looks up `bar` in `(bar ...)`, using the
 applicable namespace in effect, and knows to call `bar_` (the
 `GOFN` for `bar`) with the array of `Object`'s comprising the
 arguments in `...`.
+
+### Generating Documentation
+
+Once a `joker` executable has been built with the desired new and changed namespaces, online documentation is generated via:
+
+```
+$ (cd docs; ../joker generate-docs.joke)
+```
+
+Joker distributions currently include `core` and `std` libraries' documentation in their repositories, so new and changed `.html` files should be added to the changeset(s) along with the corresponding library code.
 
 ### Beware Circular Dependencies
 
