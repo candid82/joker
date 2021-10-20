@@ -80,7 +80,7 @@
 
 (defn ensure [ref])
 (defn unchecked-remainder-int [x y])
-(defn eduction [xform* coll])
+(defn eduction [& xforms])
 (defn aset ([array idx val]) ([array idx idx2 & idxv]))
 (defn aset-float ([array idx val]) ([array idx idx2 & idxv]))
 (defn ->VecNode [edit arr])
