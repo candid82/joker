@@ -204,6 +204,8 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 		obj.Equals(SYMBOLS.defprotocol) ||
 		obj.Equals(SYMBOLS.extendProtocol) ||
 		obj.Equals(SYMBOLS.reify) ||
+		obj.Equals(SYMBOLS.deftype) ||
+		obj.Equals(SYMBOLS.proxy) ||
 		obj.Equals(SYMBOLS.extendType) {
 		isDefRecord = true
 	}

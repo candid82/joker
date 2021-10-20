@@ -97,6 +97,8 @@ var (
 		defprotocol:        MakeSymbol("defprotocol"),
 		extendProtocol:     MakeSymbol("extend-protocol"),
 		extendType:         MakeSymbol("extend-type"),
+		deftype:            MakeSymbol("deftype"),
+		proxy:              MakeSymbol("proxy"),
 		reify:              MakeSymbol("reify"),
 	}
 	STR = Str{
