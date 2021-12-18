@@ -3,8 +3,9 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-
 	. "github.com/candid82/joker/core"
+	"io"
+	"strings"
 )
 
 func fromObject(obj Object) interface{} {
@@ -94,6 +95,33 @@ func readString(s string, opts Map) Object {
 		}
 	}
 	return toObject(v, keywordize)
+}
+
+func jsonLazySeq(dec *json.Decoder) *LazySeq {
+	var c = func(args []Object) Object {
+		var o interface{}
+		err := dec.Decode(&o)
+		if err == io.EOF {
+			return EmptyList
+		}
+		PanicOnErr(err)
+		obj := toObject(o, false)
+		return NewConsSeq(obj, jsonLazySeq(dec))
+	}
+	return NewLazySeq(Proc{Fn: c})
+}
+
+func jsonSeqOpts(src Object) Object {
+	var dec *json.Decoder
+	switch src := src.(type) {
+	case String:
+		dec = json.NewDecoder(strings.NewReader(src.S))
+	case io.Reader:
+		dec = json.NewDecoder(src)
+	default:
+		panic(RT.NewError("src must be a string or io.Reader"))
+	}
+	return jsonLazySeq(dec)
 }
 
 func writeString(obj Object) String {

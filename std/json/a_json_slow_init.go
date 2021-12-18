@@ -14,6 +14,12 @@ func InternsOrThunks() {
 	}
 	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
 
+	jsonNamespace.InternVar("json-seq", json_seq_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("rdr"))),
+			`Returns the json records from rdr as a lazy sequence.
+  rdr must be a string or implement io.Reader.`, "1.0"))
+
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),

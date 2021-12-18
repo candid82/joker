@@ -6,6 +6,23 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
+var __json_seq__P ProcFn = __json_seq_
+var json_seq_ Proc = Proc{Fn: __json_seq__P, Name: "json_seq_", Package: "std/json"}
+
+func __json_seq_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		rdr := ExtractObject(_args, 0)
+		_res := jsonSeqOpts(rdr)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __read_string__P ProcFn = __read_string_
 var read_string_ Proc = Proc{Fn: __read_string__P, Name: "read_string_", Package: "std/json"}
 

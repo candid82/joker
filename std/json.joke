@@ -19,4 +19,9 @@
   :go "writeString(v)"}
   [^Object v])
 
-
+(defn json-seq
+  "Returns the json records from rdr as a lazy sequence.
+  rdr must be a string or implement io.Reader."
+  {:added "1.0"
+  :go "jsonSeqOpts(rdr)"}
+  [^Object rdr])
