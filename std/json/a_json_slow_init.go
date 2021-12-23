@@ -16,9 +16,11 @@ func InternsOrThunks() {
 
 	jsonNamespace.InternVar("json-seq", json_seq_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("rdr"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
 			`Returns the json records from rdr as a lazy sequence.
-  rdr must be a string or implement io.Reader.`, "1.0"))
+  rdr must be a string or implement io.Reader.
+  Optional opts map may have the following keys:
+  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
 
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(

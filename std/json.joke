@@ -21,7 +21,11 @@
 
 (defn json-seq
   "Returns the json records from rdr as a lazy sequence.
-  rdr must be a string or implement io.Reader."
+  rdr must be a string or implement io.Reader.
+  Optional opts map may have the following keys:
+  :keywords? - if true, JSON keys will be converted from strings to keywords."
   {:added "1.0"
-  :go "jsonSeqOpts(rdr)"}
-  [^Object rdr])
+  :go {1 "jsonSeqOpts(rdr, EmptyArrayMap())"
+       2 "jsonSeqOpts(rdr, opts)"}}
+  ([^Object rdr])
+  ([^Object rdr ^Map opts]))

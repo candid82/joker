@@ -14,7 +14,13 @@ func __json_seq_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		rdr := ExtractObject(_args, 0)
-		_res := jsonSeqOpts(rdr)
+		_res := jsonSeqOpts(rdr, EmptyArrayMap())
+		return _res
+
+	case _c == 2:
+		rdr := ExtractObject(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := jsonSeqOpts(rdr, opts)
 		return _res
 
 	default:
