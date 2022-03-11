@@ -170,6 +170,32 @@ func formatSeq(seq Seq, w io.Writer, indent int) int {
 	return formatSeqEx(seq, w, indent, false)
 }
 
+func formatSeqSimple(seq Seq, w io.Writer, indent int) int {
+	ind := indent + 1
+	fmt.Fprint(w, "(")
+	var prevObj Object
+	for !seq.IsEmpty() {
+		obj := seq.First()
+		if prevObj != nil {
+			ind = maybeNewLine(w, prevObj, obj, indent+1, ind)
+		}
+		ind = formatObject(obj, ind, w)
+		prevObj = obj
+		seq = seq.Rest()
+	}
+
+	if prevObj != nil {
+		if isComment(prevObj) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			ind = indent + 1
+		}
+	}
+
+	fmt.Fprint(w, ")")
+	return ind + 1
+}
+
 type RequireSort []Object
 
 func (rs RequireSort) Len() int      { return len(rs) }
@@ -193,6 +219,12 @@ func sortRequire(seq Seq) Seq {
 }
 
 func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
+	if info := seq.GetInfo(); info != nil {
+		if info.prefix == "#?" || info.prefix == "#?@" {
+			return formatSeqSimple(seq, w, indent)
+		}
+	}
+
 	i := indent + 1
 	restIndent := indent + 2
 	fmt.Fprint(w, "(")

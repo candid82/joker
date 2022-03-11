@@ -204,7 +204,8 @@
 
 #?@(:cljs 3)
 
-(def regexp #?(:clj re-pattern :cljs js/XRegExp))
+(def regexp #?(:clj re-pattern
+               :cljs js/XRegExp))
 
 #?(:cljs)
 
