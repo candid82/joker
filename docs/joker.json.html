@@ -55,9 +55,12 @@
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(json-seq rdr)</code></div>
+<div><code>(json-seq rdr opts)</code></div>
 </pre>
   <p class="var-docstr">Returns the json records from rdr as a lazy sequence.<br>
-  rdr must be a string or implement io.Reader.</p>
+  rdr must be a string or implement io.Reader.<br>
+  Optional opts map may have the following keys:<br>
+  :keywords? - if true, JSON keys will be converted from strings to keywords.</p>
   
   
 </li>
