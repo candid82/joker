@@ -25,7 +25,7 @@
   (let [dir (str "tests/eval/" test-dir "/")
         filename "input.joke"
         stdin (slurp-or (str dir "stdin.txt") *in*)
-        res (joker.os/exec joker-cmd {:dir dir :args [filename] :stdin stdin})
+        res (joker.os/exec joker-cmd {:dir dir :args [filename] :stdin stdin :env true})
         out (:out res)
         err (:err res)
         rc (:exit res)

@@ -8,10 +8,11 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
-func sh(dir string, stdin io.Reader, stdout io.Writer, stderr io.Writer, name string, args []string) Object {
+func sh(dir string, stdin io.Reader, stdout io.Writer, stderr io.Writer, env []string, name string, args []string) Object {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	cmd.Stdin = stdin
+	cmd.Env = env
 
 	var stdoutBuffer, stderrBuffer bytes.Buffer
 	if stdout != nil {

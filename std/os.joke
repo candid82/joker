@@ -159,7 +159,7 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-   :go "sh(\"\", nil, nil, nil, name, arguments)"}
+   :go "sh(\"\", nil, nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
 (defn sh-from
@@ -171,13 +171,16 @@
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program."
   {:added "1.0"
-   :go "sh(dir, nil, nil, nil, name, arguments)"}
+   :go "sh(dir, nil, nil, nil, nil, name, arguments)"}
   [^String dir ^String name & ^String arguments])
 
 (defn exec
   "Executes the named program with the given arguments. opts is a map with the following keys (all optional):
-  :args - vector of arguments (all arguments must be strings),
-  :dir - if specified, working directory will be set to this value before executing the program,
+  :args - vector of arguments (all arguments must be strings).
+  :dir - if specified, working directory will be set to this value before executing the program.
+  :env - if specified and true, the environment will be set to the current environment before executing the program. Otherwise,
+    the environment will be determined by the Go runtime which, if :dir is specified, might or might not map $PWD to the expected
+    value -- it might be the current $PWD but, as of Go 1.19, is expected to be set to the value of :dir.
   :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.
   If it's a string, the string's content will serve as stdin for the program. IOReader can be, for example,
   *in* (in which case Joker's stdin will be redirected to the program's stdin) or the value returned by (joker.os/open).
@@ -185,10 +188,10 @@
   to Joker's stdout) or the value returned by (joker.os/create).
   :stderr - the same as :stdout, but for stderr.
   Returns a map with the following keys:
-  :success - whether or not the execution was successful,
+  :success - whether or not the execution was successful.
   :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
-  :exit - exit code of program (or attempt to execute it),
-  :out - string capturing stdout of the program (unless :stdout option was passed)
+  :exit - exit code of program (or attempt to execute it).
+  :out - string capturing stdout of the program (unless :stdout option was passed).
   :err - string capturing stderr of the program (unless :stderr option was passed)."
   {:added "1.0"
    :go "execute(name, opts)"}

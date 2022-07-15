@@ -37,7 +37,7 @@ const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
 func execute(name string, opts Map) Object {
 	var dir string
-	var args []string
+	var args, env []string
 	var stdin io.Reader
 	var stdout, stderr io.Writer
 	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok && !dirObj.Equals(NIL) {
@@ -48,6 +48,11 @@ func execute(name string, opts Map) Object {
 		for !s.IsEmpty() {
 			args = append(args, EnsureObjectIsString(s.First(), "args: %s").S)
 			s = s.Rest()
+		}
+	}
+	if ok, envObj := opts.Get(MakeKeyword("env")); ok {
+		if b := EnsureObjectIsBoolean(envObj, ":env must be a Boolean: %s").B; b {
+			env = os.Environ()
 		}
 	}
 	if ok, stdinObj := opts.Get(MakeKeyword("stdin")); ok {
@@ -92,7 +97,7 @@ func execute(name string, opts Map) Object {
 			panic(RT.NewError("stderr option must be an IOWriter, got " + stderrObj.GetType().ToString(false)))
 		}
 	}
-	return sh(dir, stdin, stdout, stderr, name, args)
+	return sh(dir, stdin, stdout, stderr, env, name, args)
 }
 
 func readDir(dirname string) Object {

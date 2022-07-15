@@ -727,7 +727,7 @@ func __sh_(_args []Object) Object {
 		CheckArity(_args, 1, 999)
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
-		_res := sh("", nil, nil, nil, name, arguments)
+		_res := sh("", nil, nil, nil, nil, name, arguments)
 		return _res
 
 	default:
@@ -747,7 +747,7 @@ func __sh_from_(_args []Object) Object {
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)
-		_res := sh(dir, nil, nil, nil, name, arguments)
+		_res := sh(dir, nil, nil, nil, nil, name, arguments)
 		return _res
 
 	default:
