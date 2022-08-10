@@ -402,6 +402,23 @@ func __hostname_(_args []Object) Object {
 	return NIL
 }
 
+var __kill_process__P ProcFn = __kill_process_
+var kill_process_ Proc = Proc{Fn: __kill_process__P, Name: "kill_process_", Package: "std/os"}
+
+func __kill_process_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		pid := ExtractInt(_args, 0)
+		_res := killProcess(pid)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __lchown__P ProcFn = __lchown_
 var lchown_ Proc = Proc{Fn: __lchown__P, Name: "lchown_", Package: "std/os"}
 
@@ -749,6 +766,25 @@ func __sh_from_(_args []Object) Object {
 		arguments := ExtractStrings(_args, 2)
 		_res := sh(dir, nil, nil, nil, name, arguments)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __start_process__P ProcFn = __start_process_
+var start_process_ Proc = Proc{Fn: __start_process__P, Name: "start_process_", Package: "std/os"}
+
+func __start_process_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case true:
+		CheckArity(_args, 1, 999)
+		name := ExtractString(_args, 0)
+		args := ExtractStrings(_args, 1)
+		_res := startProcess(name, args)
+		return MakeInt(_res)
 
 	default:
 		PanicArity(_c)

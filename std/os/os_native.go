@@ -35,6 +35,22 @@ func commandArgs() Object {
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
+func startProcess(name string, args []string) int {
+	var attrs os.ProcAttr
+	args = append([]string{name}, args...)
+	p, err := os.StartProcess(name, args, &attrs)
+	PanicOnErr(err)
+	return p.Pid
+}
+
+func killProcess(pid int) Object {
+	p, err := os.FindProcess(pid)
+	PanicOnErr(err)
+	err = p.Kill()
+	PanicOnErr(err)
+	return NIL
+}
+
 func execute(name string, opts Map) Object {
 	var dir string
 	var args []string

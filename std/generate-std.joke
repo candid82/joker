@@ -60,8 +60,7 @@
 (defn raw-quoted-string
   "Returns a Go-style backtick-quoted string with backticks handled by appending double-quoted backticks"
   [s]
-  (str "`" (rpl s "`" "` + \"`\" + `") "`")
-  )
+  (str "`" (rpl s "`" "` + \"`\" + `") "`"))
 
 (defn go-name
   "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
@@ -149,12 +148,14 @@
   [m]
   (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
     (s/join "" (map #(-> addmeta-template
-                    (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
-                    (rpl "{value}" (make-value (val %)))) m))))
+                         (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
+                         (rpl "{value}" (make-value (val %)))) m))))
 
 (defn generate-fn-decl
   [ns-name ns-name-final k v]
   (let [m (meta v)
+        _ (when-not (:doc m)
+            (throw (ex-info (str "Missing docstring for function declaration: " k) {})))
         arglists (:arglists m)
         go-fn-name (go-name (str k))
         arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
@@ -194,14 +195,14 @@
   [name m]
   (let [type (type-name (:tag m))]
     (if (= type "Var")
-      (format "var %s *GoVar" name)  ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
+      (format "var %s *GoVar" name) ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
       (format "var %s %s" name (go-return-type type)))))
 
 (defn generate-const-or-var-init
   [name m]
   (let [type (type-name (:tag m))]
     (if (= type "Var")
-      (format "\t%s = &GoVar{Value: &%s}"  ; Get pointer to the actual var, not a copy of the var
+      (format "\t%s = &GoVar{Value: &%s}" ; Get pointer to the actual var, not a copy of the var
               name
               (:go m))
       (format "\t%s = Make%s(%s)"
@@ -282,7 +283,7 @@
         go-non-fns (sort-by first (ns-public-go-non-fns ns))
         go-fns (sort-by first (ns-public-go-fns ns))
         fn-decls (for [[k v] go-fns]
-              (generate-fn-decl ns-name ns-name-final k v))
+                   (generate-fn-decl ns-name ns-name-final k v))
         non-fn-decls (for [[k v] go-non-fns]
                        (generate-non-fn-decl ns-name ns-name-final k v))
         non-fn-inits (for [[k v] go-non-fns]
@@ -312,7 +313,7 @@
         go-non-fns (sort-by first (ns-public-go-non-fns ns))
         go-fns (sort-by first (ns-public-go-fns ns))
         fn-decls (for [[k v] go-fns]
-              (generate-fn-decl ns-name ns-name-final k v))
+                   (generate-fn-decl ns-name ns-name-final k v))
         non-fn-decls (for [[k v] go-non-fns]
                        (generate-non-fn-decl ns-name ns-name-final k v))
         non-fn-inits (for [[k v] go-non-fns]
@@ -383,4 +384,4 @@
           (remove-blanky-lines (generate-ns-slow-init ns-sym ns-name ns-name-final pre)))
     (when pre
       (spit (ns-file-name-fast-init dir ns-name-final)
-           (remove-blanky-lines (generate-ns-fast-init ns-sym ns-name ns-name-final))))))
+            (remove-blanky-lines (generate-ns-fast-init ns-sym ns-name ns-name-final))))))
