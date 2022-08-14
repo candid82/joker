@@ -1,9 +1,11 @@
 package os
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -35,12 +37,29 @@ func commandArgs() Object {
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
-func startProcess(name string, args []string) int {
-	var attrs os.ProcAttr
-	args = append([]string{name}, args...)
-	p, err := os.StartProcess(name, args, &attrs)
+func startProcess(name string, opts Map) int {
+	dir, args, stdin, stdout, stderr := parseExecOpts(opts)
+
+	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
+	cmd.Stdin = stdin
+
+	var stdoutBuffer, stderrBuffer bytes.Buffer
+	if stdout != nil {
+		cmd.Stdout = stdout
+	} else {
+		cmd.Stdout = &stdoutBuffer
+	}
+	if stderr != nil {
+		cmd.Stderr = stderr
+	} else {
+		cmd.Stderr = &stderrBuffer
+	}
+
+	err := cmd.Start()
 	PanicOnErr(err)
-	return p.Pid
+
+	return cmd.Process.Pid
 }
 
 func killProcess(pid int) Object {
@@ -51,11 +70,7 @@ func killProcess(pid int) Object {
 	return NIL
 }
 
-func execute(name string, opts Map) Object {
-	var dir string
-	var args []string
-	var stdin io.Reader
-	var stdout, stderr io.Writer
+func parseExecOpts(opts Map) (dir string, args []string, stdin io.Reader, stdout, stderr io.Writer) {
 	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok && !dirObj.Equals(NIL) {
 		dir = EnsureObjectIsString(dirObj, "dir: %s").S
 	}
@@ -108,6 +123,11 @@ func execute(name string, opts Map) Object {
 			panic(RT.NewError("stderr option must be an IOWriter, got " + stderrObj.GetType().ToString(false)))
 		}
 	}
+	return
+}
+
+func execute(name string, opts Map) Object {
+	dir, args, stdin, stdout, stderr := parseExecOpts(opts)
 	return sh(dir, stdin, stdout, stderr, name, args)
 }
 

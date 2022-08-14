@@ -195,11 +195,13 @@
   [^String name ^Map opts])
 
 (defn ^Int start-process
-  "Starts a new process with the program and arguments specified by name and argv.
+  "Starts a new process with the program specified by name.
+  opts is a map with the same keys as in exec.
+  Doesn't wait for the process to finish.
   Returns the process's PID."
   {:added "1.0.1"
-   :go "startProcess(name, args)"}
-  [^String name & ^String args])
+   :go "startProcess(name, opts)"}
+  [^String name ^Map opts])
 
 (defn kill-process
   "Causes the process with the given PID to exit immediately.

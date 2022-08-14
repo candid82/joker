@@ -779,11 +779,10 @@ var start_process_ Proc = Proc{Fn: __start_process__P, Name: "start_process_", P
 func __start_process_(_args []Object) Object {
 	_c := len(_args)
 	switch {
-	case true:
-		CheckArity(_args, 1, 999)
+	case _c == 2:
 		name := ExtractString(_args, 0)
-		args := ExtractStrings(_args, 1)
-		_res := startProcess(name, args)
+		opts := ExtractMap(_args, 1)
+		_res := startProcess(name, opts)
 		return MakeInt(_res)
 
 	default:

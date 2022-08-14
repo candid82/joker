@@ -281,8 +281,9 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("start-process", start_process_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("args"))),
-			`Starts a new process with the program and arguments specified by name and argv.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
+			`Starts a new process with the program and arguments specified by name and argv.
+  Returns the process's PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("stat", stat_,
 		MakeMeta(
