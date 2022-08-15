@@ -402,10 +402,10 @@ func __hostname_(_args []Object) Object {
 	return NIL
 }
 
-var __kill_process__P ProcFn = __kill_process_
-var kill_process_ Proc = Proc{Fn: __kill_process__P, Name: "kill_process_", Package: "std/os"}
+var __kill__P ProcFn = __kill_
+var kill_ Proc = Proc{Fn: __kill__P, Name: "kill_", Package: "std/os"}
 
-func __kill_process_(_args []Object) Object {
+func __kill_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 1:
@@ -791,10 +791,10 @@ func __signal_(_args []Object) Object {
 	return NIL
 }
 
-var __start_process__P ProcFn = __start_process_
-var start_process_ Proc = Proc{Fn: __start_process__P, Name: "start_process_", Package: "std/os"}
+var __start__P ProcFn = __start_
+var start_ Proc = Proc{Fn: __start__P, Name: "start_", Package: "std/os"}
 
-func __start_process_(_args []Object) Object {
+func __start_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:

@@ -147,7 +147,7 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom()),
 			`Returns the host name reported by the kernel.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
-	osNamespace.InternVar("kill-process", kill_process_,
+	osNamespace.InternVar("kill", kill_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("pid"))),
 			`Causes the process with the given PID to exit immediately.
@@ -284,7 +284,7 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("pid"), MakeSymbol("signal"))),
 			`Sends signal to the process with the given PID.`, "1.0.1"))
 
-	osNamespace.InternVar("start-process", start_process_,
+	osNamespace.InternVar("start", start_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
 			`Starts a new process with the program specified by name.
