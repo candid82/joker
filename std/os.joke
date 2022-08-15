@@ -211,6 +211,12 @@
    :go "killProcess(pid)"}
   [^Int pid])
 
+(defn signal
+  "Sends signal to the process with the given PID."
+  {:added "1.0.1"
+   :go "sendSignal(pid, signal)"}
+  [^Int pid ^Int signal])
+
 (defn mkdir
   "Creates a new directory with the specified name and permission bits."
   {:added "1.0"

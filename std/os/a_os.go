@@ -773,6 +773,24 @@ func __sh_from_(_args []Object) Object {
 	return NIL
 }
 
+var __signal__P ProcFn = __signal_
+var signal_ Proc = Proc{Fn: __signal__P, Name: "signal_", Package: "std/os"}
+
+func __signal_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		pid := ExtractInt(_args, 0)
+		signal := ExtractInt(_args, 1)
+		_res := sendSignal(pid, signal)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __start_process__P ProcFn = __start_process_
 var start_process_ Proc = Proc{Fn: __start_process__P, Name: "start_process_", Package: "std/os"}
 

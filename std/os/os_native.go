@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	. "github.com/candid82/joker/core"
 )
@@ -60,6 +61,14 @@ func startProcess(name string, opts Map) int {
 	PanicOnErr(err)
 
 	return cmd.Process.Pid
+}
+
+func sendSignal(pid, signal int) Object {
+	p, err := os.FindProcess(pid)
+	PanicOnErr(err)
+	err = p.Signal(syscall.Signal(signal))
+	PanicOnErr(err)
+	return NIL
 }
 
 func killProcess(pid int) Object {

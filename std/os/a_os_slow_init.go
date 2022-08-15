@@ -279,10 +279,17 @@ func InternsOrThunks() {
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
 
+	osNamespace.InternVar("signal", signal_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("pid"), MakeSymbol("signal"))),
+			`Sends signal to the process with the given PID.`, "1.0.1"))
+
 	osNamespace.InternVar("start-process", start_process_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
-			`Starts a new process with the program and arguments specified by name and argv.
+			`Starts a new process with the program specified by name.
+  opts is a map with the same keys as in exec.
+  Doesn't wait for the process to finish.
   Returns the process's PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("stat", stat_,
