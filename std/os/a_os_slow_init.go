@@ -151,7 +151,6 @@ func InternsOrThunks() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("pid"))),
 			`Causes the process with the given PID to exit immediately.
-  Does not wait until the process has actually exited.
   Only kills the process itself, not any other processes it may have started.`, "1.0.1"))
 
 	osNamespace.InternVar("lchown", lchown_,

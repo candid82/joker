@@ -76,6 +76,9 @@ func killProcess(pid int) Object {
 	PanicOnErr(err)
 	err = p.Kill()
 	PanicOnErr(err)
+	// Wait to avoid zombie child processes.
+	// Ignore result and error (which may occur if p is not a child process)
+	p.Wait()
 	return NIL
 }
 
