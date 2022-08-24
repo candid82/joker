@@ -309,6 +309,8 @@ To run Joker in format mode pass `--format` flag. For example:
 
 `joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
 
+You might also want to try [cljf](https://github.com/candid82/cljf). Its formatting algorithm is similar to Joker's, but it runs much faster.
+
 ### Integration with editors
 
 - Sublime Text: [sublime-pretty-clojure](https://github.com/candid82/sublime-pretty-clojure) - formats Clojure code when saving the file.
