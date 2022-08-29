@@ -2,6 +2,283 @@
       :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
+(def ^{:doc "SIGABRT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x6"}
+  SIGABRT)
+
+(def ^{:doc "SIGALRM"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xe"}
+  SIGALRM)
+
+(def ^{:doc "SIGBUS"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0xa"
+            :default "0x7"}}
+  SIGBUS)
+
+(def ^{:doc "SIGCHLD"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x14"
+            :linux "0x11"}}
+  SIGCHLD)
+
+(def ^{:doc "SIGCONT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x13"
+            :linux "0x12"}}
+  SIGCONT)
+
+(def ^{:doc "SIGEMT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x7"}}
+  SIGEMT)
+
+(def ^{:doc "SIGFPE"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x8"}
+  SIGFPE)
+
+(def ^{:doc "SIGHUP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x1"}
+  SIGHUP)
+
+(def ^{:doc "SIGILL"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x4"}
+  SIGILL)
+
+(def ^{:doc "SIGINFO"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1d"}}
+  SIGINFO)
+
+(def ^{:doc "SIGINT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x2"}
+  SIGINT)
+
+(def ^{:doc "SIGIO"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x17"
+            :linux "0x1d"}}
+  SIGIO)
+
+(def ^{:doc "SIGIOT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x6"
+            :linux "0x6"}}
+  SIGIOT)
+
+(def ^{:doc "SIGKILL"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x9"}
+  SIGKILL)
+
+(def ^{:doc "SIGPIPE"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xd"}
+  SIGPIPE)
+
+(def ^{:doc "SIGPROF"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1b"
+            :linux "0x1b"}}
+  SIGPROF)
+
+(def ^{:doc "SIGQUIT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x3"}
+  SIGQUIT)
+
+(def ^{:doc "SIGSEGV"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xb"}
+  SIGSEGV)
+
+(def ^{:doc "SIGSTOP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x11"
+            :linux "0x13"}}
+  SIGSTOP)
+
+(def ^{:doc "SIGSYS"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0xc"
+            :linux "0x1f"}}
+  SIGSYS)
+
+(def ^{:doc "SIGTERM"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xf"}
+  SIGTERM)
+
+(def ^{:doc "SIGTRAP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x5"}
+  SIGTRAP)
+
+(def ^{:doc "SIGTSTP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x12"
+            :linux "0x14"}}
+  SIGTSTP)
+
+(def ^{:doc "SIGTTIN"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x15"
+            :linux "0x15"}}
+  SIGTTIN)
+
+(def ^{:doc "SIGTTOU"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x16"
+            :linux "0x16"}}
+  SIGTTOU)
+
+(def ^{:doc "SIGURG"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x10"
+            :linux "0x17"}}
+  SIGURG)
+
+(def ^{:doc "SIGUSR1"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1e"
+            :linux "0xa"}}
+  SIGUSR1)
+
+(def ^{:doc "SIGUSR2"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1f"
+            :linux "0xc"}}
+  SIGUSR2)
+
+(def ^{:doc "SIGVTALRM"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1a"
+            :linux "0x1a"}}
+  SIGVTALRM)
+
+(def ^{:doc "SIGWINCH"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x1c"
+            :linux "0x1c"}}
+  SIGWINCH)
+
+(def ^{:doc "SIGXCPU"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x18"
+            :linux "0x18"}}
+  SIGXCPU)
+
+(def ^{:doc "SIGXFSZ"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:darwin "0x19"
+            :linux "0x19"}}
+  SIGXFSZ)
+
+(def ^{:doc "SIGCLD"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:linux "0x11"}}
+  SIGCLD)
+
+(def ^{:doc "SIGPOLL"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:linux "0x1d"}}
+  SIGPOLL)
+
+(def ^{:doc "SIGPWR"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:linux "0x1e"}}
+  SIGPWR)
+
+(def ^{:doc "SIGSTKFLT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:linux "0x10"}}
+  SIGSTKFLT)
+
+(def ^{:doc "SIGUNUSED"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go {:linux "0x1f"}}
+  SIGUNUSED)
+
 (defn chmod
   "Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target."
   {:added "1.0"

@@ -14,6 +14,166 @@ func InternsOrThunks() {
 	}
 	osNamespace.ResetMeta(MakeMeta(nil, `Provides a platform-independent interface to operating system functionality.`, "1.0"))
 
+	osNamespace.InternVar("SIGABRT", SIGABRT_,
+		MakeMeta(
+			nil,
+			`SIGABRT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGALRM", SIGALRM_,
+		MakeMeta(
+			nil,
+			`SIGALRM`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGBUS", SIGBUS_,
+		MakeMeta(
+			nil,
+			`SIGBUS`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGCHLD", SIGCHLD_,
+		MakeMeta(
+			nil,
+			`SIGCHLD`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGCONT", SIGCONT_,
+		MakeMeta(
+			nil,
+			`SIGCONT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGEMT", SIGEMT_,
+		MakeMeta(
+			nil,
+			`SIGEMT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGFPE", SIGFPE_,
+		MakeMeta(
+			nil,
+			`SIGFPE`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGHUP", SIGHUP_,
+		MakeMeta(
+			nil,
+			`SIGHUP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGILL", SIGILL_,
+		MakeMeta(
+			nil,
+			`SIGILL`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGINFO", SIGINFO_,
+		MakeMeta(
+			nil,
+			`SIGINFO`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGINT", SIGINT_,
+		MakeMeta(
+			nil,
+			`SIGINT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGIO", SIGIO_,
+		MakeMeta(
+			nil,
+			`SIGIO`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGIOT", SIGIOT_,
+		MakeMeta(
+			nil,
+			`SIGIOT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGKILL", SIGKILL_,
+		MakeMeta(
+			nil,
+			`SIGKILL`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGPIPE", SIGPIPE_,
+		MakeMeta(
+			nil,
+			`SIGPIPE`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGPROF", SIGPROF_,
+		MakeMeta(
+			nil,
+			`SIGPROF`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGQUIT", SIGQUIT_,
+		MakeMeta(
+			nil,
+			`SIGQUIT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGSEGV", SIGSEGV_,
+		MakeMeta(
+			nil,
+			`SIGSEGV`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGSTOP", SIGSTOP_,
+		MakeMeta(
+			nil,
+			`SIGSTOP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGSYS", SIGSYS_,
+		MakeMeta(
+			nil,
+			`SIGSYS`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTERM", SIGTERM_,
+		MakeMeta(
+			nil,
+			`SIGTERM`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTRAP", SIGTRAP_,
+		MakeMeta(
+			nil,
+			`SIGTRAP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTSTP", SIGTSTP_,
+		MakeMeta(
+			nil,
+			`SIGTSTP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTTIN", SIGTTIN_,
+		MakeMeta(
+			nil,
+			`SIGTTIN`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTTOU", SIGTTOU_,
+		MakeMeta(
+			nil,
+			`SIGTTOU`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGURG", SIGURG_,
+		MakeMeta(
+			nil,
+			`SIGURG`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGUSR1", SIGUSR1_,
+		MakeMeta(
+			nil,
+			`SIGUSR1`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGUSR2", SIGUSR2_,
+		MakeMeta(
+			nil,
+			`SIGUSR2`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGVTALRM", SIGVTALRM_,
+		MakeMeta(
+			nil,
+			`SIGVTALRM`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGWINCH", SIGWINCH_,
+		MakeMeta(
+			nil,
+			`SIGWINCH`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGXCPU", SIGXCPU_,
+		MakeMeta(
+			nil,
+			`SIGXCPU`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGXFSZ", SIGXFSZ_,
+		MakeMeta(
+			nil,
+			`SIGXFSZ`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
 	osNamespace.InternVar("args", args_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
