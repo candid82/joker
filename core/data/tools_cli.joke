@@ -227,7 +227,7 @@
                         (try
                           [(parse-fn value) nil]
                           (catch Error e
-                            [nil (parse-error opt optarg (str e))]))
+                            [nil (parse-error opt optarg (ex-message e))]))
                         [value nil])]
     (if error
       [::error error]
@@ -269,23 +269,23 @@
         default-fns (default-option-map specs :default-fn)
         requireds (missing-errors specs)]
     (-> (reduce
-          (fn [[m ids errors] [opt-type opt optarg]]
-            (if-let [spec (find-spec specs opt-type opt)]
-              (let [[value error] (parse-optarg spec opt optarg)
-                    id (:id spec)]
-                (if-not (= value ::error)
-                  (if (and strict
-                           (or (find-spec specs :short-opt optarg)
-                               (find-spec specs :long-opt optarg)))
-                    [m ids (conj errors (missing-required-error opt (:required spec)))]
-                    [(if-let [update-fn (:update-fn spec)]
-                       (update-in m [id] update-fn)
-                       ((:assoc-fn spec assoc) m id value))
-                     (conj ids id)
-                     errors])
-                  [m ids (conj errors error)]))
-              [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
-          [defaults [] []] tokens)
+         (fn [[m ids errors] [opt-type opt optarg]]
+           (if-let [spec (find-spec specs opt-type opt)]
+             (let [[value error] (parse-optarg spec opt optarg)
+                   id (:id spec)]
+               (if-not (= value ::error)
+                 (if (and strict
+                          (or (find-spec specs :short-opt optarg)
+                              (find-spec specs :long-opt optarg)))
+                   [m ids (conj errors (missing-required-error opt (:required spec)))]
+                   [(if-let [update-fn (:update-fn spec)]
+                      (update-in m [id] update-fn)
+                      ((:assoc-fn spec assoc) m id value))
+                    (conj ids id)
+                    errors])
+                 [m ids (conj errors error)]))
+             [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
+         [defaults [] []] tokens)
         (#(reduce
            (fn [[m ids errors] [id error]]
              (if (contains? m id)
@@ -338,11 +338,11 @@
 
 (defn- required-arguments [specs]
   (reduce
-    (fn [s {:keys [required short-opt long-opt]}]
-      (if required
-        (into s (remove nil? [short-opt long-opt]))
-        s))
-    #{} specs))
+   (fn [s {:keys [required short-opt long-opt]}]
+     (if required
+       (into s (remove nil? [short-opt long-opt]))
+       s))
+   #{} specs))
 
 (defn ^{:added "1.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal.
@@ -367,7 +367,7 @@
   As of 0.4.1, this also applies any :default-fn present."
   [option-specs]
   (let [specs (compile-option-specs option-specs)
-        vals  (default-option-map specs :default)]
+        vals (default-option-map specs :default)]
     (reduce (fn [m [id f]]
               (if (contains? m id)
                 m
