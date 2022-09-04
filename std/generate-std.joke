@@ -10,6 +10,9 @@
 (require '[joker.string :as s]
          '[joker.os :as os])
 
+(def JOKER_STD_OS (or (keyword (joker.os/get-env "JOKER_STD_OS"))
+                      :darwin))
+
 (def rpl s/replace)
 
 (defn debug
@@ -60,8 +63,7 @@
 (defn raw-quoted-string
   "Returns a Go-style backtick-quoted string with backticks handled by appending double-quoted backticks"
   [s]
-  (str "`" (rpl s "`" "` + \"`\" + `") "`")
-  )
+  (str "`" (rpl s "`" "` + \"`\" + `") "`"))
 
 (defn go-name
   "Convert Clojure-style function name to unique Go-style name suitable as its internal implementation."
@@ -149,12 +151,14 @@
   [m]
   (let [m (dissoc m :doc :added :arglists :ns :name :file :line :column :go)]
     (s/join "" (map #(-> addmeta-template
-                    (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
-                    (rpl "{value}" (make-value (val %)))) m))))
+                         (rpl "{key}" (s/replace-first (str (key %)) ":" ""))
+                         (rpl "{value}" (make-value (val %)))) m))))
 
 (defn generate-fn-decl
   [ns-name ns-name-final k v]
   (let [m (meta v)
+        _ (when-not (:doc m)
+            (throw (ex-info (str "Missing docstring for function declaration: " k) {})))
         arglists (:arglists m)
         go-fn-name (go-name (str k))
         arities (s/join "\n\t" (map #(generate-arity % (:go m) (:tag m)) arglists))
@@ -194,43 +198,53 @@
   [name m]
   (let [type (type-name (:tag m))]
     (if (= type "Var")
-      (format "var %s *GoVar" name)  ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
+      (format "var %s *GoVar" name) ; Not yet supported by this version of Joker (see https://github.com/jcburley/joker/)
       (format "var %s %s" name (go-return-type type)))))
 
 (defn generate-const-or-var-init
   [name m]
-  (let [type (type-name (:tag m))]
-    (if (= type "Var")
-      (format "\t%s = &GoVar{Value: &%s}"  ; Get pointer to the actual var, not a copy of the var
-              name
-              (:go m))
-      (format "\t%s = Make%s(%s)"
-              name
-              type
-              (:go m)))))
+  (let [type (type-name (:tag m))
+        go (:go m)
+        v (if (map? go)
+            (or (get go JOKER_STD_OS)
+                (:default go))
+            go)]
+    (when v
+      (if (= type "Var")
+        (format "\t%s = &GoVar{Value: &%s}" ; Get pointer to the actual var, not a copy of the var
+                name
+                v)
+        (format "\t%s = Make%s(%s)"
+                name
+                type
+                v)))))
 
 (defn generate-non-fn-decl
   [ns-name ns-name-final k v]
   (let [m (meta v)
-        go-non-fn-name (go-name (str k))
-        non-fn-str (generate-const-or-var-decl go-non-fn-name m)
-        intern-str (-> intern-template
-                       (rpl "{nsFullName}" ns-name)
-                       (rpl "{nsName}" ns-name-final)
-                       (rpl "{fnName}" (str k))
-                       (rpl "{goName}" go-non-fn-name)
-                       (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
-                       (rpl "{added}" (:added m))
-                       (rpl "{moreMeta}" (add-other-meta m))
-                       (rpl "{args}" "nil"))]
-    [non-fn-str intern-str]))
+        go (:go m)]
+    (if (and (map? go)
+             (not (contains? go :default))
+             (not (contains? go JOKER_STD_OS)))
+      nil
+      (let [go-non-fn-name (go-name (str k))
+            non-fn-str (generate-const-or-var-decl go-non-fn-name m)
+            intern-str (-> intern-template
+                           (rpl "{nsFullName}" ns-name)
+                           (rpl "{nsName}" ns-name-final)
+                           (rpl "{fnName}" (str k))
+                           (rpl "{goName}" go-non-fn-name)
+                           (rpl "{fnDocstring}" (raw-quoted-string (:doc m)))
+                           (rpl "{added}" (:added m))
+                           (rpl "{moreMeta}" (add-other-meta m))
+                           (rpl "{args}" "nil"))]
+        [non-fn-str intern-str]))))
 
-(defn generate-non-fn-init
+(defn- generate-non-fn-init
   [ns-name-final k v]
   (let [m (meta v)
-        go-non-fn-name (go-name (str k))
-        non-fn-str (generate-const-or-var-init go-non-fn-name m)]
-    non-fn-str))
+        go-non-fn-name (go-name (str k))]
+    (generate-const-or-var-init go-non-fn-name m)))
 
 (defn comment-out
   [s]
@@ -282,11 +296,13 @@
         go-non-fns (sort-by first (ns-public-go-non-fns ns))
         go-fns (sort-by first (ns-public-go-fns ns))
         fn-decls (for [[k v] go-fns]
-              (generate-fn-decl ns-name ns-name-final k v))
-        non-fn-decls (for [[k v] go-non-fns]
-                       (generate-non-fn-decl ns-name ns-name-final k v))
-        non-fn-inits (for [[k v] go-non-fns]
-                       (generate-non-fn-init ns-name-final k v))
+                   (generate-fn-decl ns-name ns-name-final k v))
+        non-fn-decls (remove nil?
+                             (for [[k v] go-non-fns]
+                               (generate-non-fn-decl ns-name ns-name-final k v)))
+        non-fn-inits (remove nil?
+                             (for [[k v] go-non-fns]
+                               (generate-non-fn-init ns-name-final k v)))
         res (-> package-template
                 (rpl "{nsFullName}" ns-name)
                 (rpl "{nsName}" ns-name-final)
@@ -312,11 +328,10 @@
         go-non-fns (sort-by first (ns-public-go-non-fns ns))
         go-fns (sort-by first (ns-public-go-fns ns))
         fn-decls (for [[k v] go-fns]
-              (generate-fn-decl ns-name ns-name-final k v))
-        non-fn-decls (for [[k v] go-non-fns]
-                       (generate-non-fn-decl ns-name ns-name-final k v))
-        non-fn-inits (for [[k v] go-non-fns]
-                       (generate-non-fn-init ns-name-final k v))
+                   (generate-fn-decl ns-name ns-name-final k v))
+        non-fn-decls (remove nil?
+                             (for [[k v] go-non-fns]
+                               (generate-non-fn-decl ns-name ns-name-final k v)))
         res (-> package-slow-template
                 (rpl "{maybeSlowOnly}" (if pre "//go:build gen_code\n// +build gen_code\n" ""))
                 (rpl "{nsFullName}" ns-name)
@@ -383,4 +398,4 @@
           (remove-blanky-lines (generate-ns-slow-init ns-sym ns-name ns-name-final pre)))
     (when pre
       (spit (ns-file-name-fast-init dir ns-name-final)
-           (remove-blanky-lines (generate-ns-fast-init ns-sym ns-name ns-name-final))))))
+            (remove-blanky-lines (generate-ns-fast-init ns-sym ns-name ns-name-final))))))

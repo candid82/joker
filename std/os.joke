@@ -2,6 +2,90 @@
       :doc "Provides a platform-independent interface to operating system functionality."}
   os)
 
+(def ^{:doc "SIGABRT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x6"}
+  SIGABRT)
+
+(def ^{:doc "SIGALRM"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xe"}
+  SIGALRM)
+
+(def ^{:doc "SIGFPE"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x8"}
+  SIGFPE)
+
+(def ^{:doc "SIGHUP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x1"}
+  SIGHUP)
+
+(def ^{:doc "SIGILL"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x4"}
+  SIGILL)
+
+(def ^{:doc "SIGINT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x2"}
+  SIGINT)
+
+(def ^{:doc "SIGKILL"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x9"}
+  SIGKILL)
+
+(def ^{:doc "SIGPIPE"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xd"}
+  SIGPIPE)
+
+(def ^{:doc "SIGQUIT"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x3"}
+  SIGQUIT)
+
+(def ^{:doc "SIGSEGV"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xb"}
+  SIGSEGV)
+
+(def ^{:doc "SIGTERM"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0xf"}
+  SIGTERM)
+
+(def ^{:doc "SIGTRAP"
+       :added "1.0.1"
+       :tag Int
+       :const true
+       :go "0x5"}
+  SIGTRAP)
+
 (defn chmod
   "Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target."
   {:added "1.0"
@@ -193,6 +277,28 @@
   {:added "1.0"
    :go "execute(name, opts)"}
   [^String name ^Map opts])
+
+(defn ^Int start
+  "Starts a new process with the program specified by name.
+  opts is a map with the same keys as in exec.
+  Doesn't wait for the process to finish.
+  Returns the process's PID."
+  {:added "1.0.1"
+   :go "startProcess(name, opts)"}
+  [^String name ^Map opts])
+
+(defn kill
+  "Causes the process with the given PID to exit immediately.
+  Only kills the process itself, not any other processes it may have started."
+  {:added "1.0.1"
+   :go "killProcess(pid)"}
+  [^Int pid])
+
+(defn signal
+  "Sends signal to the process with the given PID."
+  {:added "1.0.1"
+   :go "sendSignal(pid, signal)"}
+  [^Int pid ^Int signal])
 
 (defn mkdir
   "Creates a new directory with the specified name and permission bits."

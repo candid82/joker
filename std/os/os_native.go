@@ -1,10 +1,13 @@
 package os
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
+	"syscall"
 
 	. "github.com/candid82/joker/core"
 )
@@ -35,11 +38,51 @@ func commandArgs() Object {
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
 
-func execute(name string, opts Map) Object {
-	var dir string
-	var args []string
-	var stdin io.Reader
-	var stdout, stderr io.Writer
+func startProcess(name string, opts Map) int {
+	dir, args, stdin, stdout, stderr := parseExecOpts(opts)
+
+	cmd := exec.Command(name, args...)
+	cmd.Dir = dir
+	cmd.Stdin = stdin
+
+	var stdoutBuffer, stderrBuffer bytes.Buffer
+	if stdout != nil {
+		cmd.Stdout = stdout
+	} else {
+		cmd.Stdout = &stdoutBuffer
+	}
+	if stderr != nil {
+		cmd.Stderr = stderr
+	} else {
+		cmd.Stderr = &stderrBuffer
+	}
+
+	err := cmd.Start()
+	PanicOnErr(err)
+
+	return cmd.Process.Pid
+}
+
+func sendSignal(pid, signal int) Object {
+	p, err := os.FindProcess(pid)
+	PanicOnErr(err)
+	err = p.Signal(syscall.Signal(signal))
+	PanicOnErr(err)
+	return NIL
+}
+
+func killProcess(pid int) Object {
+	p, err := os.FindProcess(pid)
+	PanicOnErr(err)
+	err = p.Kill()
+	PanicOnErr(err)
+	// Wait to avoid zombie child processes.
+	// Ignore result and error (which may occur if p is not a child process)
+	p.Wait()
+	return NIL
+}
+
+func parseExecOpts(opts Map) (dir string, args []string, stdin io.Reader, stdout, stderr io.Writer) {
 	if ok, dirObj := opts.Get(MakeKeyword("dir")); ok && !dirObj.Equals(NIL) {
 		dir = EnsureObjectIsString(dirObj, "dir: %s").S
 	}
@@ -92,6 +135,11 @@ func execute(name string, opts Map) Object {
 			panic(RT.NewError("stderr option must be an IOWriter, got " + stderrObj.GetType().ToString(false)))
 		}
 	}
+	return
+}
+
+func execute(name string, opts Map) Object {
+	dir, args, stdin, stdout, stderr := parseExecOpts(opts)
 	return sh(dir, stdin, stdout, stderr, name, args)
 }
 

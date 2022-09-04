@@ -32,4 +32,6 @@ if [ "$SUM256" != "$NEW_SUM256" ]; then
     build
 fi
 
-./joker "$@"
+if [ "$1" != "--build-only" ]; then
+  ./joker "$@"
+fi

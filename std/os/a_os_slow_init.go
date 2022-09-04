@@ -14,6 +14,66 @@ func InternsOrThunks() {
 	}
 	osNamespace.ResetMeta(MakeMeta(nil, `Provides a platform-independent interface to operating system functionality.`, "1.0"))
 
+	osNamespace.InternVar("SIGABRT", SIGABRT_,
+		MakeMeta(
+			nil,
+			`SIGABRT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGALRM", SIGALRM_,
+		MakeMeta(
+			nil,
+			`SIGALRM`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGFPE", SIGFPE_,
+		MakeMeta(
+			nil,
+			`SIGFPE`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGHUP", SIGHUP_,
+		MakeMeta(
+			nil,
+			`SIGHUP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGILL", SIGILL_,
+		MakeMeta(
+			nil,
+			`SIGILL`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGINT", SIGINT_,
+		MakeMeta(
+			nil,
+			`SIGINT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGKILL", SIGKILL_,
+		MakeMeta(
+			nil,
+			`SIGKILL`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGPIPE", SIGPIPE_,
+		MakeMeta(
+			nil,
+			`SIGPIPE`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGQUIT", SIGQUIT_,
+		MakeMeta(
+			nil,
+			`SIGQUIT`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGSEGV", SIGSEGV_,
+		MakeMeta(
+			nil,
+			`SIGSEGV`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTERM", SIGTERM_,
+		MakeMeta(
+			nil,
+			`SIGTERM`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
+	osNamespace.InternVar("SIGTRAP", SIGTRAP_,
+		MakeMeta(
+			nil,
+			`SIGTRAP`, "1.0.1").Plus(MakeKeyword("const"), String{S: "true"}).Plus(MakeKeyword("tag"), String{S: "Int"}))
+
 	osNamespace.InternVar("args", args_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
@@ -147,6 +207,12 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom()),
 			`Returns the host name reported by the kernel.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
+	osNamespace.InternVar("kill", kill_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("pid"))),
+			`Causes the process with the given PID to exit immediately.
+  Only kills the process itself, not any other processes it may have started.`, "1.0.1"))
+
 	osNamespace.InternVar("lchown", lchown_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
@@ -271,6 +337,19 @@ func InternsOrThunks() {
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
+
+	osNamespace.InternVar("signal", signal_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("pid"), MakeSymbol("signal"))),
+			`Sends signal to the process with the given PID.`, "1.0.1"))
+
+	osNamespace.InternVar("start", start_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
+			`Starts a new process with the program specified by name.
+  opts is a map with the same keys as in exec.
+  Doesn't wait for the process to finish.
+  Returns the process's PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("stat", stat_,
 		MakeMeta(

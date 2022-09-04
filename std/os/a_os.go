@@ -8,6 +8,18 @@ import (
 	"os"
 )
 
+var SIGABRT_ Int
+var SIGALRM_ Int
+var SIGFPE_ Int
+var SIGHUP_ Int
+var SIGILL_ Int
+var SIGINT_ Int
+var SIGKILL_ Int
+var SIGPIPE_ Int
+var SIGQUIT_ Int
+var SIGSEGV_ Int
+var SIGTERM_ Int
+var SIGTRAP_ Int
 var __args__P ProcFn = __args_
 var args_ Proc = Proc{Fn: __args__P, Name: "args_", Package: "std/os"}
 
@@ -402,6 +414,23 @@ func __hostname_(_args []Object) Object {
 	return NIL
 }
 
+var __kill__P ProcFn = __kill_
+var kill_ Proc = Proc{Fn: __kill__P, Name: "kill_", Package: "std/os"}
+
+func __kill_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		pid := ExtractInt(_args, 0)
+		_res := killProcess(pid)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __lchown__P ProcFn = __lchown_
 var lchown_ Proc = Proc{Fn: __lchown__P, Name: "lchown_", Package: "std/os"}
 
@@ -756,6 +785,42 @@ func __sh_from_(_args []Object) Object {
 	return NIL
 }
 
+var __signal__P ProcFn = __signal_
+var signal_ Proc = Proc{Fn: __signal__P, Name: "signal_", Package: "std/os"}
+
+func __signal_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		pid := ExtractInt(_args, 0)
+		signal := ExtractInt(_args, 1)
+		_res := sendSignal(pid, signal)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __start__P ProcFn = __start_
+var start_ Proc = Proc{Fn: __start__P, Name: "start_", Package: "std/os"}
+
+func __start_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		name := ExtractString(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := startProcess(name, opts)
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __stat__P ProcFn = __stat_
 var stat_ Proc = Proc{Fn: __stat__P, Name: "stat_", Package: "std/os"}
 
@@ -918,7 +983,18 @@ func __user_home_dir_(_args []Object) Object {
 }
 
 func Init() {
-
+	SIGABRT_ = MakeInt(0x6)
+	SIGALRM_ = MakeInt(0xe)
+	SIGFPE_ = MakeInt(0x8)
+	SIGHUP_ = MakeInt(0x1)
+	SIGILL_ = MakeInt(0x4)
+	SIGINT_ = MakeInt(0x2)
+	SIGKILL_ = MakeInt(0x9)
+	SIGPIPE_ = MakeInt(0xd)
+	SIGQUIT_ = MakeInt(0x3)
+	SIGSEGV_ = MakeInt(0xb)
+	SIGTERM_ = MakeInt(0xf)
+	SIGTRAP_ = MakeInt(0x5)
 	InternsOrThunks()
 }
 
