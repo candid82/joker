@@ -10,36 +10,16 @@ import (
 
 var SIGABRT_ Int
 var SIGALRM_ Int
-var SIGBUS_ Int
-var SIGCHLD_ Int
-var SIGCONT_ Int
-var SIGEMT_ Int
 var SIGFPE_ Int
 var SIGHUP_ Int
 var SIGILL_ Int
-var SIGINFO_ Int
 var SIGINT_ Int
-var SIGIO_ Int
-var SIGIOT_ Int
 var SIGKILL_ Int
 var SIGPIPE_ Int
-var SIGPROF_ Int
 var SIGQUIT_ Int
 var SIGSEGV_ Int
-var SIGSTOP_ Int
-var SIGSYS_ Int
 var SIGTERM_ Int
 var SIGTRAP_ Int
-var SIGTSTP_ Int
-var SIGTTIN_ Int
-var SIGTTOU_ Int
-var SIGURG_ Int
-var SIGUSR1_ Int
-var SIGUSR2_ Int
-var SIGVTALRM_ Int
-var SIGWINCH_ Int
-var SIGXCPU_ Int
-var SIGXFSZ_ Int
 var __args__P ProcFn = __args_
 var args_ Proc = Proc{Fn: __args__P, Name: "args_", Package: "std/os"}
 
@@ -1005,36 +985,16 @@ func __user_home_dir_(_args []Object) Object {
 func Init() {
 	SIGABRT_ = MakeInt(0x6)
 	SIGALRM_ = MakeInt(0xe)
-	SIGBUS_ = MakeInt(0xa)
-	SIGCHLD_ = MakeInt(0x14)
-	SIGCONT_ = MakeInt(0x13)
-	SIGEMT_ = MakeInt(0x7)
 	SIGFPE_ = MakeInt(0x8)
 	SIGHUP_ = MakeInt(0x1)
 	SIGILL_ = MakeInt(0x4)
-	SIGINFO_ = MakeInt(0x1d)
 	SIGINT_ = MakeInt(0x2)
-	SIGIO_ = MakeInt(0x17)
-	SIGIOT_ = MakeInt(0x6)
 	SIGKILL_ = MakeInt(0x9)
 	SIGPIPE_ = MakeInt(0xd)
-	SIGPROF_ = MakeInt(0x1b)
 	SIGQUIT_ = MakeInt(0x3)
 	SIGSEGV_ = MakeInt(0xb)
-	SIGSTOP_ = MakeInt(0x11)
-	SIGSYS_ = MakeInt(0xc)
 	SIGTERM_ = MakeInt(0xf)
 	SIGTRAP_ = MakeInt(0x5)
-	SIGTSTP_ = MakeInt(0x12)
-	SIGTTIN_ = MakeInt(0x15)
-	SIGTTOU_ = MakeInt(0x16)
-	SIGURG_ = MakeInt(0x10)
-	SIGUSR1_ = MakeInt(0x1e)
-	SIGUSR2_ = MakeInt(0x1f)
-	SIGVTALRM_ = MakeInt(0x1a)
-	SIGWINCH_ = MakeInt(0x1c)
-	SIGXCPU_ = MakeInt(0x18)
-	SIGXFSZ_ = MakeInt(0x19)
 	InternsOrThunks()
 }
 

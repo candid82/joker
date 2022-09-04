@@ -316,12 +316,12 @@ To run Joker in format mode pass `--format` flag. For example:
 ## Building
 
 Joker requires Go v1.13 or later.
-Below commands should get you up and running (replace `darwin` in `JOKER_STD_OS=darwin` with `linux` or `windows` if you build for those platforms).
+Below commands should get you up and running.
 
 ```
 go get -d github.com/candid82/joker
 cd $GOPATH/src/github.com/candid82/joker
-JOKER_STD_OS=darwin ./run.sh --version && go install
+./run.sh --version && go install
 ```
 
 ### Cross-platform Builds
@@ -330,13 +330,6 @@ After building the native version (to autogenerate appropriate files, "vet" the 
 
 ```
 $ GOOS=linux GOARCH=arm GOARM=6 go build
-```
-
-If you build cross-os (e.g. linux binary on macOs) you also need to generate std library for the right platform. E.g.:
-
-```
-JOKER_STD_OS=linux ./run.sh --build-only
-GOOS=linux GOARCH=amd64 go build
 ```
 
 The `run.sh` script does not support cross-platform building directly, but can be used in conjunction with `build-arm.sh` to cross-build from a Linux **amd64** or **386** system to a Linux **arm** system via:
