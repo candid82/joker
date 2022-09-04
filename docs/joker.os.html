@@ -29,6 +29,42 @@
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
+  <a href="#SIGABRT">SIGABRT</a>
+</li>
+<li>
+  <a href="#SIGALRM">SIGALRM</a>
+</li>
+<li>
+  <a href="#SIGFPE">SIGFPE</a>
+</li>
+<li>
+  <a href="#SIGHUP">SIGHUP</a>
+</li>
+<li>
+  <a href="#SIGILL">SIGILL</a>
+</li>
+<li>
+  <a href="#SIGINT">SIGINT</a>
+</li>
+<li>
+  <a href="#SIGKILL">SIGKILL</a>
+</li>
+<li>
+  <a href="#SIGPIPE">SIGPIPE</a>
+</li>
+<li>
+  <a href="#SIGQUIT">SIGQUIT</a>
+</li>
+<li>
+  <a href="#SIGSEGV">SIGSEGV</a>
+</li>
+<li>
+  <a href="#SIGTERM">SIGTERM</a>
+</li>
+<li>
+  <a href="#SIGTRAP">SIGTRAP</a>
+</li>
+<li>
   <a href="#args">args</a>
 </li>
 <li>
@@ -95,6 +131,9 @@
   <a href="#hostname">hostname</a>
 </li>
 <li>
+  <a href="#kill">kill</a>
+</li>
+<li>
   <a href="#lchown">lchown</a>
 </li>
 <li>
@@ -152,6 +191,12 @@
   <a href="#sh-from">sh-from</a>
 </li>
 <li>
+  <a href="#signal">signal</a>
+</li>
+<li>
+  <a href="#start">start</a>
+</li>
+<li>
   <a href="#stat">stat</a>
 </li>
 <li>
@@ -183,7 +228,115 @@
     <h2 id="_constants">Constants</h2>
     Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
     <ul>
-      (None.)
+      <li>
+  <h3 class="Constant" id="SIGABRT">SIGABRT</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGABRT</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGALRM">SIGALRM</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGALRM</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGFPE">SIGFPE</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGFPE</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGHUP">SIGHUP</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGHUP</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGILL">SIGILL</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGILL</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGINT">SIGINT</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGINT</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGKILL">SIGKILL</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGKILL</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGPIPE">SIGPIPE</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGPIPE</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGQUIT">SIGQUIT</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGQUIT</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGSEGV">SIGSEGV</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGSEGV</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGTERM">SIGTERM</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGTERM</p>
+  
+  
+</li>
+<li>
+  <h3 class="Constant" id="SIGTRAP">SIGTRAP</h3>
+  <span class="var-kind Constant">Int</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"></pre>
+  <p class="var-docstr">SIGTRAP</p>
+  
+  
+</li>
+
     </ul>
     <h2 id="_variables">Variables</h2>
     <ul>
@@ -436,6 +589,17 @@
   
 </li>
 <li>
+  <h3 class="Function" id="kill">kill</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"><div><code>(kill pid)</code></div>
+</pre>
+  <p class="var-docstr">Causes the process with the given PID to exit immediately.<br>
+  Only kills the process itself, not any other processes it may have started.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="lchown">lchown</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
@@ -652,6 +816,29 @@
       :exit - exit code of program (or attempt to execute it),<br>
       :out - string capturing stdout of the program,<br>
       :err - string capturing stderr of the program.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="signal">signal</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"><div><code>(signal pid signal)</code></div>
+</pre>
+  <p class="var-docstr">Sends signal to the process with the given PID.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="start">start</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0.1</span>
+  <pre class="var-usage"><div><code>(start name opts)</code></div>
+</pre>
+  <p class="var-docstr">Starts a new process with the program specified by name.<br>
+  opts is a map with the same keys as in exec.<br>
+  Doesn&#39;t wait for the process to finish.<br>
+  Returns the process&#39;s PID.</p>
   
   
 </li>
