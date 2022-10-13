@@ -307,7 +307,6 @@
 
 (defn gen-class [& options])
 (defn with-loading-context [& body])
-(defn bound-fn [& fntail])
 (defn future [& body])
 (defn pvalues [& exprs])
 (defn with-precision [precision & exprs])
@@ -321,6 +320,10 @@
 (defn definterface [name & sigs])
 (defn proxy-super [meth & args])
 (defn with-open [bindings & body])
+
+(defmacro bound-fn
+  [& fntail]
+  `(fn ~@fntail))
 
 (defmacro proxy
   [class-and-interfaces args & fs]
