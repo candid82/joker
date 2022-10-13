@@ -35,8 +35,8 @@
         formula-file (get (os/env) "JOKER_FORMULA_PATH")
         formula (slurp formula-file)
         [_ current-version] (re-find (re-pattern version-pattern) formula)
-        linux-sha (shasum (str "joker-" version' "-linux-amd64.zip"))
-        mac-sha (shasum (str "joker-" version' "-mac-amd64.zip"))
+        linux-sha (shasum "joker-linux-amd64.zip")
+        mac-sha (shasum "joker-mac-amd64.zip")
         shasum-rex (re-pattern shasum-pattern)]
     (when-not current-version
       (exit-err "Could not find version number"))
