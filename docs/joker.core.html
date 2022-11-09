@@ -1133,6 +1133,12 @@
   <a href="#update-in">update-in</a>
 </li>
 <li>
+  <a href="#update-keys">update-keys</a>
+</li>
+<li>
+  <a href="#update-vals">update-vals</a>
+</li>
+<li>
   <a href="#use">use</a>
 </li>
 <li>
@@ -1549,7 +1555,7 @@
   <p class="var-docstr">Takes a value from ch.<br>
   Returns nil if ch is closed and nothing is available on ch.<br>
   Blocks if nothing is available on ch and ch is not closed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4475">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4497">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -1616,7 +1622,7 @@
   Throws an exception if val is nil.<br>
   Blocks if ch is full (no buffer space is available).<br>
   Returns true unless ch is already closed.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4483">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4505">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2058,7 +2064,7 @@
 <div><code>(chan n)</code><code class="hide">^Channel (chan ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Returns a new channel with an optional buffer of size n.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4469">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4491">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2115,7 +2121,7 @@
 <br>
   Logically closing happens after all puts have been delivered. Therefore, any<br>
   blocked puts will remain blocked until a taker releases them.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4492">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4514">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -2411,7 +2417,7 @@
   <pre class="var-usage"><div><code>(defmethod multifn dispatch-val &amp; fn-tail)</code></div>
 </pre>
   <p class="var-docstr">Creates and installs a new method of multimethod associated with dispatch-value. </p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4389">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4411">source</a>
   
 </li>
 <li>
@@ -2442,7 +2448,7 @@
   Multimethods expect the value of the hierarchy option to be supplied as<br>
   a reference type e.g. a var (i.e. via the Var-quote dispatch macro #&#39;<br>
   or the var special form).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4329">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4351">source</a>
   
 </li>
 <li>
@@ -2813,7 +2819,7 @@
 <div><code>(exit code)</code><code class="hide">(exit ^Int code)</code></div>
 </pre>
   <p class="var-docstr">Causes the current program to exit with the given status code (defaults to 0).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4535">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4557">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3079,7 +3085,7 @@
 </pre>
   <p class="var-docstr">Given a multimethod and a dispatch value, returns the dispatch fn<br>
   that would apply to that value, or nil if none apply and no default</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4427">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4449">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3101,7 +3107,7 @@
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)<br>
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine<br>
   (or another goroutine) doesn&#39;t do any I/O or channel operations (&lt;! or &gt;!).</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4451">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4473">source</a>
   
 </li>
 <li>
@@ -3368,7 +3374,7 @@
   <pre class="var-usage"><div><code>(joker-version)</code><code class="hide">^String (joker-version)</code></div>
 </pre>
   <p class="var-docstr">Returns joker version as a printable string.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4291">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4313">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -3788,7 +3794,7 @@
   <pre class="var-usage"><div><code>(methods multifn)</code><code class="hide">^Map (methods multifn)</code></div>
 </pre>
   <p class="var-docstr">Given a multimethod, returns a map of dispatch values -&gt; dispatch fns</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4419">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4441">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4352,7 +4358,7 @@
 </pre>
   <p class="var-docstr">Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y<br>
    when there is a conflict</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4412">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4434">source</a>
   
 </li>
 <li>
@@ -4362,7 +4368,7 @@
   <pre class="var-usage"><div><code>(prefers multifn)</code><code class="hide">^Map (prefers multifn)</code></div>
 </pre>
   <p class="var-docstr">Given a multimethod, returns a map of preferred value -&gt; set of other values</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4439">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4461">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -4775,7 +4781,7 @@
   <pre class="var-usage"><div><code>(remove-all-methods multifn)</code></div>
 </pre>
   <p class="var-docstr">Removes all of the methods of multimethod.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4397">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4419">source</a>
   
 </li>
 <li>
@@ -4785,7 +4791,7 @@
   <pre class="var-usage"><div><code>(remove-method multifn dispatch-val)</code></div>
 </pre>
   <p class="var-docstr">Removes the method of multimethod associated with dispatch-value.</p>
-  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4406">source</a>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4428">source</a>
   
 </li>
 <li>
@@ -5547,6 +5553,32 @@
   nested structure.  If any levels do not exist, hash-maps will be<br>
   created.</p>
   <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L3544">source</a>
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="update-keys">update-keys</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.1</span>
+  <pre class="var-usage"><div><code>(update-keys m f)</code><code class="hide">^Map (update-keys m ^Callable f)</code></div>
+</pre>
+  <p class="var-docstr">m f =&gt; {(f k) v ...}<br>
+  Given a map m and a function f of 1-argument, returns a new map whose<br>
+  keys are the result of applying f to the keys of m, mapped to the<br>
+  corresponding values of m.<br>
+  f must return a unique key for each key of m, else the behavior is undefined.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4291">source</a>
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="update-vals">update-vals</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.1</span>
+  <pre class="var-usage"><div><code>(update-vals m f)</code><code class="hide">^Map (update-vals m ^Callable f)</code></div>
+</pre>
+  <p class="var-docstr">m f =&gt; {k (f v) ...}<br>
+  Given a map m and a function f of 1-argument, returns a new map where the keys of m<br>
+  are mapped to result of applying f to the corresponding values of m.</p>
+  <a href="https://github.com/candid82/joker/blob/master/core/data/core.joke#L4303">source</a>
   <a href="#" class="types">show types</a>
 </li>
 <li>
