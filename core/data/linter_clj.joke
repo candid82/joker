@@ -51,7 +51,7 @@
   (when-not (resolve sym)
     (intern__ *ns* sym)))
 
-(doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string)]
+(doseq [sym '(clojure.edn clojure.core clojure.uuid clojure.core.server clojure.java.io clojure.main clojure.core.protocols clojure.instant clojure.string clojure.datafy clojure.math)]
   (inject-ns__ sym))
 
 ;; Unsupported arities
@@ -302,6 +302,18 @@
   ([stream eof-error? eof-value recursive?])
   ([opts stream]))
 (defn PrintWriter-on [flush-fn close-fn])
+
+(defn abs ^Number [^Number num])
+(defn NaN? ^Boolean [^Number num])
+(defn infinite? ^Boolean [^Number num])
+
+(defn parse-double ^Double [^String s])
+(defn parse-long ^Number [^String s])
+(defn parse-boolean ^Boolean [^String s])
+(defn parse-uuid [^String s])
+(defn random-uuid [])
+
+(defn iteration ^Seqable [^Callable step & opts])
 
 ;; Clojure core macros not supported by Joker
 
