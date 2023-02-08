@@ -30,6 +30,8 @@ You can also [build](#building) Joker from the source code.
 
 `joker` - launch REPL. Exit via `(exit)`, **EOF** (such as `Ctrl-D`), or **SIGINT** (such as `Ctrl-C`).
 
+Hint: `Ctrl-D` also works as delete key on some systems. If you find default REPL editing behavior annoying (e.g. automatic parenthesis matching, backspace doesn't delete a matching parenthesis), try `joker --no-readline` or `rlwrap joker --no-readline` if you have [rlwrap](https://github.com/hanslub42/rlwrap) installed.
+
 `joker <filename>` - execute a script. Joker uses `.joke` filename extension. For example: `joker foo.joke`. Normally exits after executing the script, unless `--exit-to-repl` is specified before `--file <filename>`
 in which case drops into the REPL after the script is (successfully) executed. (Note use of `--file` in this case, to ensure `<filename>` is not treated as a `<socket>` specification for the repl.)
 
