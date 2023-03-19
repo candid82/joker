@@ -129,10 +129,11 @@ type (
 		Call(args []Object) Object
 	}
 	Binding struct {
-		name   Symbol
-		index  int
-		frame  int
-		isUsed bool
+		name         Symbol
+		index        int
+		frame        int
+		isUsed       bool
+		inferredType *Type
 	}
 	Bindings struct {
 		bindings map[*string]*Binding
@@ -368,7 +369,7 @@ func (b *Bindings) PopFrame() *Bindings {
 	return b.parent
 }
 
-func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) {
+func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool, inferredType *Type) {
 	if LINTER_MODE && !skipUnused {
 		old := b.bindings[sym.name]
 		if old != nil && needsUnusedWarning(old) {
@@ -376,9 +377,10 @@ func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) {
 		}
 	}
 	b.bindings[sym.name] = &Binding{
-		name:  sym,
-		frame: b.frame,
-		index: index,
+		name:         sym,
+		frame:        b.frame,
+		index:        index,
+		inferredType: inferredType,
 	}
 }
 
@@ -389,7 +391,7 @@ func (ctx *ParseContext) PushEmptyLocalFrame() {
 func (ctx *ParseContext) PushLocalFrame(names []Symbol) {
 	ctx.PushEmptyLocalFrame()
 	for i, sym := range names {
-		ctx.localBindings.AddBinding(sym, i, true)
+		ctx.localBindings.AddBinding(sym, i, true, nil)
 	}
 }
 
@@ -928,8 +930,9 @@ func wrapWithMeta(fnExpr *FnExpr, obj Object, ctx *ParseContext) Expr {
 // Examples:
 // (fn f [] 1 2)
 // (fn f ([] 1 2)
-//       ([a] a 3)
-//       ([a & b] a b))
+//
+//	([a] a 3)
+//	([a & b] a b))
 func parseFn(obj Object, ctx *ParseContext) Expr {
 	res := &FnExpr{Position: GetPosition(obj)}
 	bodies := obj.(Seq).Rest()
@@ -1121,10 +1124,14 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
 				}
 			}
+			var inferredType *Type
 			if formName != "letfn" {
 				res.values[i] = Parse(b.at(i*2+1), ctx)
+				if LINTER_MODE {
+					inferredType = res.values[i].InferType()
+				}
 			}
-			ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
+			ctx.localBindings.AddBinding(res.names[i], i, skipUnused, inferredType)
 		}
 
 		if formName == "letfn" {
@@ -1664,7 +1671,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}()
 			for !syms.IsEmpty() {
 				if sym, ok := syms.First().(Symbol); ok {
-					ctx.linterBindings.AddBinding(sym, 0, true)
+					ctx.linterBindings.AddBinding(sym, 0, true, nil)
 				}
 				syms = syms.Rest()
 			}

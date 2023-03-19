@@ -177,7 +177,7 @@ func (expr *SetMacroExpr) Dump(pos bool) Map {
 }
 
 func (expr *BindingExpr) InferType() *Type {
-	return nil
+	return expr.binding.inferredType
 }
 
 func (expr *BindingExpr) Dump(pos bool) Map {
