@@ -1,0 +1,41 @@
+(ns joker.test-joker.markdown
+  (:require [joker.test :refer [deftest is are]]
+            [joker.markdown :as md]))
+
+(def input "one\ntwo")
+
+(deftest with-hard-wraps?
+  (is (= (md/convert-string input {:with-hard-wraps? true})
+         "<p>one<br />\ntwo</p>\n")
+      "add line breaks when true")
+  (is (= (md/convert-string input {:with-hard-wraps? false})
+         "<p>one\ntwo</p>\n")
+      "no line breaks when off")
+  (is (= (md/convert-string input)
+         "<p>one<br />\ntwo</p>\n")
+      "should default to on for backwards compatibility")
+  (is (= (md/convert-string input {:with-hard-wraps? true})
+         (md/convert-string input))
+      "no flag and 'true' should be the same")
+  (is (thrown-with-msg? EvalError
+                        #"Expected Boolean, got String"
+                        (md/convert-string input {:with-hard-wraps? "foo"}))))
+
+(deftest with-xhtml?
+  (is (= (md/convert-string input {:with-xhtml? true})
+         "<p>one<br />\ntwo</p>\n"))
+  (is (= (md/convert-string input {:with-xhtml? false})
+         "<p>one<br>\ntwo</p>\n"))
+  (is (= (md/convert-string input)
+         (md/convert-string input {:with-xhtml? true}))))
+
+
+(def unsafe-input "<script>alert('pwned!')</script>")
+
+(deftest with-unsafe?
+  (is (= (md/convert-string unsafe-input {:with-unsafe? true})
+         "<script>alert('pwned!')</script>"))
+  (is (= (md/convert-string unsafe-input {:with-unsafe? false})
+         "<!-- raw HTML omitted -->\n"))
+  (is (= (md/convert-string unsafe-input)
+         (md/convert-string unsafe-input {:with-unsafe? true}))))

@@ -49,8 +49,15 @@
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(convert-string s)</code></div>
+<div><code>(convert-string s opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the HTML rendering of Markdown string s</p>
+  <p class="var-docstr">Returns the HTML rendering of Markdown string s.<br>
+  opts is an optional map of boolean rendering options (all default to true)<br>
+<br>
+  :with-hard-wraps? - Render newlines as &lt;br&gt;.<br>
+  :with-xhtml? - Render as XHTML.<br>
+  :with-unsafe? - When false, all raw html will be omitted from the output. When true html is passed through unchanged.<br>
+  </p>
   
   
 </li>

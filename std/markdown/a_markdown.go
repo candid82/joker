@@ -17,6 +17,12 @@ func __convert_string_(_args []Object) Object {
 		_res := convertString(s)
 		return MakeString(_res)
 
+	case _c == 2:
+		s := ExtractString(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := convertStringOpts(s, opts)
+		return MakeString(_res)
+
 	default:
 		PanicArity(_c)
 	}
