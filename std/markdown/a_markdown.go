@@ -19,7 +19,7 @@ func __convert_string_(_args []Object) Object {
 
 	case _c == 2:
 		s := ExtractString(_args, 0)
-		opts := ExtractObject(_args, 1)
+		opts := ExtractMap(_args, 1)
 		_res := convertStringOpts(s, opts)
 		return MakeString(_res)
 

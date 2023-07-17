@@ -18,7 +18,7 @@
          (md/convert-string input))
       "no flag and 'true' should be the same")
   (is (thrown-with-msg? EvalError
-                        #"must be a boolean"
+                        #"Expected Boolean, got String"
                         (md/convert-string input {:with-hard-wraps? "foo"}))))
 
 (deftest with-xhtml?

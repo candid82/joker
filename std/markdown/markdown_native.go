@@ -13,28 +13,7 @@ import (
 )
 
 func convertString(source string) string {
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.Table,
-			extension.DefinitionList,
-			extension.Footnote,
-			extension.Typographer,
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
-		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
-			html.WithXHTML(),
-			html.WithUnsafe(), // allow for raw markup
-		),
-	)
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(source), &buf); err != nil {
-		panic(err)
-	}
-	return buf.String()
+	return convert(source, []renderer.Option{html.WithHardWraps(), html.WithXHTML(), html.WithUnsafe()})
 }
 
 func getKeywordFlag(opts Map, name string, def bool) bool {
@@ -42,19 +21,10 @@ func getKeywordFlag(opts Map, name string, def bool) bool {
 	if !ok {
 		return def
 	}
-	val, ok := entry.(Boolean)
-	if !ok {
-		panic(RT.NewError("flags must be a boolean"))
-	}
-	return val.B
+	return EnsureObjectIsBoolean(entry, name+": %s").B
 }
 
-func convertStringOpts(source string, opts Object) string {
-	options, ok := opts.(Map)
-	if !ok {
-		panic(RT.NewError("Options must be a map"))
-	}
-
+func convertStringOpts(source string, options Map) string {
 	renderOptions := []renderer.Option{}
 	if flag := getKeywordFlag(options, "with-hard-wraps?", true); flag {
 		renderOptions = append(renderOptions, html.WithHardWraps())
@@ -65,6 +35,10 @@ func convertStringOpts(source string, opts Object) string {
 	if flag := getKeywordFlag(options, "with-unsafe?", true); flag {
 		renderOptions = append(renderOptions, html.WithUnsafe())
 	}
+	return convert(source, renderOptions)
+}
+
+func convert(source string, renderOptions []renderer.Option) string {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
