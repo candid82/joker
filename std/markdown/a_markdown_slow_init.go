@@ -17,7 +17,8 @@ func InternsOrThunks() {
 	markdownNamespace.InternVar("convert-string", convert_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Returns the HTML rendering of Markdown string s `+"`"+`opts`+"`"+` is an optional map of boolean rendering options (all default to tru to `+"`"+`true`+"`"+`)
+			`Returns the HTML rendering of Markdown string s.
+  opts is an optional map of boolean rendering options (all default to true)
 
   :with-hard-wraps? - Render newlines as <br>.
   :with-xhtml? - Render as XHTML.
