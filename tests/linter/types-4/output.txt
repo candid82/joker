@@ -1,0 +1,1 @@
+tests/linter/types-4/input.clj:2:6: Parse warning: arg[0] of core/+ must have type Number, got String
