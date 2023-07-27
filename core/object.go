@@ -205,7 +205,7 @@ type (
 	Associative interface {
 		Conjable
 		Gettable
-		EntryAt(key Object) *Vector
+		EntryAt(key Object) *ArrayVector
 		Assoc(key, val Object) Associative
 	}
 	Reversible interface {
@@ -321,6 +321,7 @@ type (
 		Type           *Type
 		Var            *Type
 		Vector         *Type
+		Vec            *Type
 		ArrayVector    *Type
 		VectorRSeq     *Type
 		VectorSeq      *Type
@@ -943,7 +944,7 @@ func (n Nil) Assoc(key, value Object) Associative {
 	return EmptyArrayMap().Assoc(key, value)
 }
 
-func (n Nil) EntryAt(key Object) *Vector {
+func (n Nil) EntryAt(key Object) *ArrayVector {
 	return nil
 }
 
@@ -1239,10 +1240,10 @@ func MakeInt(i int) Int {
 	return Int{I: i}
 }
 
-func MakeIntVector(ii []int) *Vector {
-	res := EmptyVector()
+func MakeIntVector(ii []int) *ArrayVector {
+	res := EmptyArrayVector()
 	for _, i := range ii {
-		res = res.Conjoin(MakeInt(i))
+		res.Append(MakeInt(i))
 	}
 	return res
 }
@@ -1511,10 +1512,10 @@ func MakeString(s string) String {
 	return String{S: s}
 }
 
-func MakeStringVector(ss []string) *Vector {
-	res := EmptyVector()
+func MakeStringVector(ss []string) *ArrayVector {
+	res := EmptyArrayVector()
 	for _, s := range ss {
-		res = res.Conjoin(MakeString(s))
+		res.Append(MakeString(s))
 	}
 	return res
 }

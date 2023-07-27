@@ -643,10 +643,10 @@ func parseSeq(seq Seq, ctx *ParseContext) []Expr {
 	return res
 }
 
-func parseVector(v *Vector, pos Position, ctx *ParseContext) Expr {
-	r := make([]Expr, v.count)
-	for i := 0; i < v.count; i++ {
-		r[i] = Parse(v.at(i), ctx)
+func parseVector(v Vec, pos Position, ctx *ParseContext) Expr {
+	r := make([]Expr, v.Count())
+	for i := 0; i < v.Count(); i++ {
+		r[i] = Parse(v.At(i), ctx)
 	}
 	return &VectorExpr{
 		v:        r,
@@ -1840,7 +1840,7 @@ func Parse(obj Object, ctx *ParseContext) Expr {
 	switch v := obj.(type) {
 	case Nil:
 		res = NewLiteralExpr(obj)
-	case *Vector:
+	case Vec:
 		canHaveMeta = true
 		res = parseVector(v, pos, ctx)
 	case Map:

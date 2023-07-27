@@ -18,7 +18,7 @@ func fromObject(obj Object) interface{} {
 		return obj.Double().D
 	case Nil:
 		return nil
-	case *Vector:
+	case Vec:
 		cnt := obj.Count()
 		res := make([]interface{}, cnt)
 		for i := 0; i < cnt; i++ {

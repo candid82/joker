@@ -33,6 +33,7 @@ func (v *ArrayVector) Clone() *ArrayVector {
 func (v *ArrayVector) Conjoin(obj Object) Vec {
 	if v.Count() >= VECTOR_THRESHOLD {
 		res := NewVectorFrom(v.arr...)
+		res = res.Conjoin(obj)
 		res.meta = v.meta
 		return res
 	}
@@ -126,10 +127,10 @@ func (v *ArrayVector) Get(key Object) (bool, Object) {
 	return CountedIndexedGet(v, key)
 }
 
-func (v *ArrayVector) EntryAt(key Object) *Vector {
+func (v *ArrayVector) EntryAt(key Object) *ArrayVector {
 	ok, val := v.Get(key)
 	if ok {
-		return NewVectorFrom(key, val)
+		return NewArrayVectorFrom(key, val)
 	}
 	return nil
 }
@@ -175,4 +176,12 @@ func (v *ArrayVector) Pprint(w io.Writer, indent int) int {
 
 func (v *ArrayVector) Format(w io.Writer, indent int) int {
 	return CountedIndexedFormat(v, w, indent)
+}
+
+func NewArrayVectorFrom(objs ...Object) *ArrayVector {
+	res := EmptyArrayVector()
+	for i := 0; i < len(objs); i++ {
+		res.Append(objs[i])
+	}
+	return res
 }

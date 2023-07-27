@@ -758,11 +758,11 @@ func (m *HashMap) Assoc(key, val Object) Associative {
 	return res
 }
 
-func (m *HashMap) EntryAt(key Object) *Vector {
+func (m *HashMap) EntryAt(key Object) *ArrayVector {
 	if m.root != nil {
 		p := m.root.find(0, key.Hash(), key)
 		if p != nil {
-			return NewVectorFrom(p.Key, p.Value)
+			return NewArrayVectorFrom(p.Key, p.Value)
 		}
 	}
 	return nil

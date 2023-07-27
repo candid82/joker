@@ -365,10 +365,10 @@ func (v *Vector) Get(key Object) (bool, Object) {
 	return CountedIndexedGet(v, key)
 }
 
-func (v *Vector) EntryAt(key Object) *Vector {
+func (v *Vector) EntryAt(key Object) *ArrayVector {
 	ok, val := v.Get(key)
 	if ok {
-		return NewVectorFrom(key, val)
+		return NewArrayVectorFrom(key, val)
 	}
 	return nil
 }

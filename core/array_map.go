@@ -196,10 +196,10 @@ func (m *ArrayMap) Assoc(key Object, value Object) Associative {
 	return res
 }
 
-func (m *ArrayMap) EntryAt(key Object) *Vector {
+func (m *ArrayMap) EntryAt(key Object) *ArrayVector {
 	i := m.indexOf(key)
 	if i != -1 {
-		return NewVectorFrom(key, m.arr[i+1])
+		return NewArrayVectorFrom(key, m.arr[i+1])
 	}
 	return nil
 }

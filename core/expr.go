@@ -41,7 +41,7 @@ func (expr *LiteralExpr) Dump(pos bool) Map {
 }
 
 func (expr *VectorExpr) InferType() *Type {
-	return TYPE.Vector
+	return TYPE.Vec
 }
 
 func (expr *VectorExpr) Dump(pos bool) Map {

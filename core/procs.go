@@ -1954,11 +1954,11 @@ func knownMacrosToMap(km Object) (Map, error) {
 		switch obj := obj.(type) {
 		case Symbol:
 			res.Add(obj, NIL)
-		case *Vector:
+		case Vec:
 			if obj.Count() != 2 {
 				return nil, errors.New(":known-macros item must be a symbol or a vector with two elements")
 			}
-			res.Add(obj.at(0), obj.at(1))
+			res.Add(obj.At(0), obj.At(1))
 		default:
 			return nil, errors.New(":known-macros item must be a symbol or a vector, got " + obj.GetType().ToString(false))
 		}

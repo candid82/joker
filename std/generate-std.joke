@@ -190,7 +190,7 @@
     "BigIntU" "*BigInt"
     "BigFloat" "*BigFloat"
     "Number" "*BigInt"
-    "StringVector" "*Vector"
+    "StringVector" "*ArrayVector"
     "Error" "String"
     t))
 

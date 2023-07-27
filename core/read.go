@@ -1114,7 +1114,7 @@ func makeSyntaxQuote(obj Object, env map[*string]Symbol, reader *Reader) Object 
 			panic(MakeReadError(reader, "Splice not in list"))
 		}
 		return syntaxQuoteColl(s, env, reader, SYMBOLS.emptySymbol, info)
-	case *Vector:
+	case Vec:
 		return syntaxQuoteColl(s.Seq(), env, reader, SYMBOLS.vector, info)
 	case *ArrayMap:
 		return syntaxQuoteColl(ArraySeqFromArrayMap(s), env, reader, SYMBOLS.hashMap, info)

@@ -257,7 +257,7 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 	} else if obj.Equals(SYMBOLS.fn) {
 		if !seq.IsEmpty() {
 			switch seq.First().(type) {
-			case *Vector:
+			case Vec:
 				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
 			case Symbol:
 				seq, prevObj, i = seqFirstAfterSpace(seq, w, i, isDefRecord)
