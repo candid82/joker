@@ -402,8 +402,11 @@ func readNumber(reader *Reader) Object {
 	return scanInt(str, str, 0, reader)
 }
 
-/* Returns whether the rune may be a non-initial character in a symbol
-/* or keyword name. */
+/*
+	Returns whether the rune may be a non-initial character in a symbol
+
+/* or keyword name.
+*/
 func isIdentRune(r rune) bool {
 	switch r {
 	case '"', ';', '@', '^', '`', '~', '(', ')', '[', ']', '{', '}', '\\', ',', ' ', '\t', '\n', '\r', EOF:
@@ -479,13 +482,16 @@ func readIdent(reader *Reader, first rune) Object {
    ones (if new rules are desired), and c) hope for reasonably good
    performance. */
 
-/* Returns whether a rune is a character that is inherently allowed in
+/*
+	Returns whether a rune is a character that is inherently allowed in
+
 /* identifiers (symbols, keywords) by dint of the fact that
 /* clojure.core and other core packages define identifiers with these
 /* characters. While not important for parsing (Clojure is extremely
 /* permissive regarding which characters can be lexed into an
 /* identifier), linting can helpfully find and warn about characters
-/* outside of this set (as extended via configuration). */
+/* outside of this set (as extended via configuration).
+*/
 func isCoreIdentRune(r rune) bool {
 	switch r {
 	case '*', '+', '!', '-', '?', '=', '<', '>', '&', '_', '.', '\'', '#', '$', ':', '%': // Used in clojure.core, joker.core, etc.
@@ -713,9 +719,9 @@ func readMulti(reader *Reader, previouslyRead []Object) (Object, []Object) {
 	if len(previouslyRead) == 0 {
 		obj, multi := Read(reader)
 		if multi {
-			v := obj.(*Vector)
+			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				previouslyRead = append(previouslyRead, v.at(i))
+				previouslyRead = append(previouslyRead, v.At(i))
 			}
 		} else {
 			return obj, previouslyRead
@@ -785,9 +791,9 @@ func readList(reader *Reader) Object {
 	for r != ')' {
 		obj, multi := Read(reader)
 		if multi {
-			v := obj.(*Vector)
+			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				s = append(s, v.at(i))
+				s = append(s, v.At(i))
 			}
 		} else {
 			s = append(s, obj)
@@ -811,9 +817,9 @@ func readVector(reader *Reader) Object {
 	for r != ']' {
 		obj, multi := Read(reader)
 		if multi {
-			v := obj.(*Vector)
+			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				res = res.Conjoin(v.at(i))
+				res = res.Conjoin(v.At(i))
 			}
 		} else {
 			res = res.Conjoin(obj)
@@ -873,9 +879,9 @@ func readMapWithNamespace(reader *Reader, nsname string) Object {
 		if !multi {
 			objs = appendMapElement(objs, obj)
 		} else {
-			v := obj.(*Vector)
+			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				objs = appendMapElement(objs, v.at(i))
+				objs = appendMapElement(objs, v.At(i))
 			}
 		}
 		eatWhitespace(reader)
@@ -917,10 +923,10 @@ func readSet(reader *Reader) Object {
 				panic(MakeReadError(reader, "Duplicate set element "+obj.ToString(false)))
 			}
 		} else {
-			v := obj.(*Vector)
+			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				if !set.Add(v.at(i)) {
-					panic(MakeReadError(reader, "Duplicate set element "+v.at(i).ToString(false)))
+				if !set.Add(v.At(i)) {
+					panic(MakeReadError(reader, "Duplicate set element "+v.At(i).ToString(false)))
 				}
 			}
 		}
@@ -1369,11 +1375,11 @@ func readFirst(reader *Reader) Object {
 	if !multi {
 		return obj
 	}
-	v := obj.(*Vector)
+	v := obj.(Vec)
 	if v.Count() == 0 {
 		return readFirst(reader)
 	}
-	return v.at(0)
+	return v.At(0)
 }
 
 func addPrefix(obj Object, prefix string) {

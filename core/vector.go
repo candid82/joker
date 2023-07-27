@@ -1,12 +1,25 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 )
 
 type (
+	Vec interface {
+		Object
+		CountedIndexed
+		Gettable
+		Associative
+		Sequential
+		Comparable
+		Indexed
+		Stack
+		Reversible
+		Meta
+		Seqable
+		Formatter
+	}
 	Vector struct {
 		InfoHolder
 		MetaHolder
@@ -18,18 +31,18 @@ type (
 	VectorSeq struct {
 		InfoHolder
 		MetaHolder
-		vector *Vector
+		vector CountedIndexed
 		index  int
 	}
 	VectorRSeq struct {
 		InfoHolder
 		MetaHolder
-		vector *Vector
+		vector CountedIndexed
 		index  int
 	}
 )
 
-var empty_node []interface{} = make([]interface{}, 32)
+var empty_node = make([]interface{}, 32)
 
 func (v *Vector) WithMeta(meta Map) Object {
 	res := *v
@@ -51,9 +64,6 @@ func (v *Vector) tailoff() int {
 }
 
 func (v *Vector) arrayFor(i int) []interface{} {
-	if i >= v.count || i < 0 {
-		panic(RT.NewError(fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count-1)))
-	}
 	if i >= v.tailoff() {
 		return v.tail
 	}
@@ -65,7 +75,18 @@ func (v *Vector) arrayFor(i int) []interface{} {
 }
 
 func (v *Vector) at(i int) Object {
+	if i >= v.count || i < 0 {
+		panic(RT.NewError(fmt.Sprintf("Index %d is out of bounds [0..%d]", i, v.count-1)))
+	}
 	return v.arrayFor(i)[i&0x01F].(Object)
+}
+
+func (v *Vector) uncheckedAt(i int) Object {
+	return v.arrayFor(i)[i&0x01F].(Object)
+}
+
+func (v *Vector) At(i int) Object {
+	return v.uncheckedAt(i)
 }
 
 func newPath(level uint, node []interface{}) []interface{} {
@@ -116,24 +137,19 @@ func (v *Vector) Conjoin(obj Object) *Vector {
 }
 
 func (v *Vector) ToString(escape bool) string {
-	var b bytes.Buffer
-	b.WriteRune('[')
-	if v.count > 0 {
-		for i := 0; i < v.count-1; i++ {
-			b.WriteString(v.at(i).ToString(escape))
-			b.WriteRune(' ')
-		}
-		b.WriteString(v.at(v.count - 1).ToString(escape))
-	}
-	b.WriteRune(']')
-	return b.String()
+	return CountedIndexedToString(v, escape)
 }
 
 func (v *Vector) Equals(other interface{}) bool {
 	if v == other {
 		return true
 	}
-	return IsSeqEqual(v.Seq(), other)
+	switch other := other.(type) {
+	case CountedIndexed:
+		return AreCountedIndexedEqual(v, other)
+	default:
+		return IsSeqEqual(v.Seq(), other)
+	}
 }
 
 func (v *Vector) GetType() *Type {
@@ -141,19 +157,19 @@ func (v *Vector) GetType() *Type {
 }
 
 func (v *Vector) Hash() uint32 {
-	return hashOrdered(v.Seq())
+	return CountedIndexedHash(v)
 }
 
 func (seq *VectorSeq) Seq() Seq {
 	return seq
 }
 
-func (vseq *VectorSeq) Equals(other interface{}) bool {
-	return IsSeqEqual(vseq, other)
+func (seq *VectorSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
 }
 
-func (vseq *VectorSeq) ToString(escape bool) string {
-	return SeqToString(vseq, escape)
+func (seq *VectorSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
 }
 
 func (seq *VectorSeq) Pprint(w io.Writer, indent int) int {
@@ -164,54 +180,54 @@ func (seq *VectorSeq) Format(w io.Writer, indent int) int {
 	return formatSeq(seq, w, indent)
 }
 
-func (vseq *VectorSeq) WithMeta(meta Map) Object {
-	res := *vseq
+func (seq *VectorSeq) WithMeta(meta Map) Object {
+	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
-func (vseq *VectorSeq) GetType() *Type {
+func (seq *VectorSeq) GetType() *Type {
 	return TYPE.VectorSeq
 }
 
-func (vseq *VectorSeq) Hash() uint32 {
-	return hashOrdered(vseq)
+func (seq *VectorSeq) Hash() uint32 {
+	return hashOrdered(seq)
 }
 
-func (vseq *VectorSeq) First() Object {
-	if vseq.index < vseq.vector.count {
-		return vseq.vector.at(vseq.index)
+func (seq *VectorSeq) First() Object {
+	if seq.index < seq.vector.Count() {
+		return seq.vector.At(seq.index)
 	}
 	return NIL
 }
 
-func (vseq *VectorSeq) Rest() Seq {
-	if vseq.index+1 < vseq.vector.count {
-		return &VectorSeq{vector: vseq.vector, index: vseq.index + 1}
+func (seq *VectorSeq) Rest() Seq {
+	if seq.index+1 < seq.vector.Count() {
+		return &VectorSeq{vector: seq.vector, index: seq.index + 1}
 	}
 	return EmptyList
 }
 
-func (vseq *VectorSeq) IsEmpty() bool {
-	return vseq.index >= vseq.vector.count
+func (seq *VectorSeq) IsEmpty() bool {
+	return seq.index >= seq.vector.Count()
 }
 
-func (vseq *VectorSeq) Cons(obj Object) Seq {
-	return &ConsSeq{first: obj, rest: vseq}
+func (seq *VectorSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
 }
 
-func (vseq *VectorSeq) sequential() {}
+func (seq *VectorSeq) sequential() {}
 
 func (seq *VectorRSeq) Seq() Seq {
 	return seq
 }
 
-func (vseq *VectorRSeq) Equals(other interface{}) bool {
-	return IsSeqEqual(vseq, other)
+func (seq *VectorRSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
 }
 
-func (vseq *VectorRSeq) ToString(escape bool) string {
-	return SeqToString(vseq, escape)
+func (seq *VectorRSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
 }
 
 func (seq *VectorRSeq) Pprint(w io.Writer, indent int) int {
@@ -222,43 +238,43 @@ func (seq *VectorRSeq) Format(w io.Writer, indent int) int {
 	return formatSeq(seq, w, indent)
 }
 
-func (vseq *VectorRSeq) WithMeta(meta Map) Object {
-	res := *vseq
+func (seq *VectorRSeq) WithMeta(meta Map) Object {
+	res := *seq
 	res.meta = SafeMerge(res.meta, meta)
 	return &res
 }
 
-func (vseq *VectorRSeq) GetType() *Type {
+func (seq *VectorRSeq) GetType() *Type {
 	return TYPE.VectorRSeq
 }
 
-func (vseq *VectorRSeq) Hash() uint32 {
-	return hashOrdered(vseq)
+func (seq *VectorRSeq) Hash() uint32 {
+	return hashOrdered(seq)
 }
 
-func (vseq *VectorRSeq) First() Object {
-	if vseq.index >= 0 {
-		return vseq.vector.at(vseq.index)
+func (seq *VectorRSeq) First() Object {
+	if seq.index >= 0 {
+		return seq.vector.At(seq.index)
 	}
 	return NIL
 }
 
-func (vseq *VectorRSeq) Rest() Seq {
-	if vseq.index-1 >= 0 {
-		return &VectorRSeq{vector: vseq.vector, index: vseq.index - 1}
+func (seq *VectorRSeq) Rest() Seq {
+	if seq.index-1 >= 0 {
+		return &VectorRSeq{vector: seq.vector, index: seq.index - 1}
 	}
 	return EmptyList
 }
 
-func (vseq *VectorRSeq) IsEmpty() bool {
-	return vseq.index < 0
+func (seq *VectorRSeq) IsEmpty() bool {
+	return seq.index < 0
 }
 
-func (vseq *VectorRSeq) Cons(obj Object) Seq {
-	return &ConsSeq{first: obj, rest: vseq}
+func (seq *VectorRSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
 }
 
-func (vseq *VectorRSeq) sequential() {}
+func (seq *VectorRSeq) sequential() {}
 
 func (v *Vector) Seq() Seq {
 	return &VectorSeq{vector: v, index: 0}
@@ -286,20 +302,8 @@ func (v *Vector) TryNth(i int, d Object) Object {
 func (v *Vector) sequential() {}
 
 func (v *Vector) Compare(other Object) int {
-	v2 := EnsureObjectIsVector(other, "Cannot compare Vector: %s")
-	if v.Count() > v2.Count() {
-		return 1
-	}
-	if v.Count() < v2.Count() {
-		return -1
-	}
-	for i := 0; i < v.Count(); i++ {
-		c := EnsureObjectIsComparable(v.at(i), "").Compare(v2.at(i))
-		if c != 0 {
-			return c
-		}
-	}
-	return 0
+	v2 := EnsureObjectIsCountedIndexed(other, "Cannot compare Vector: %s")
+	return CountedIndexedCompare(v, v2)
 }
 
 func (v *Vector) Peek() Object {
@@ -358,13 +362,7 @@ func (v *Vector) Pop() Stack {
 }
 
 func (v *Vector) Get(key Object) (bool, Object) {
-	switch key := key.(type) {
-	case Int:
-		if key.I >= 0 && key.I < v.count {
-			return true, v.at(key.I)
-		}
-	}
-	return false, nil
+	return CountedIndexedGet(v, key)
 }
 
 func (v *Vector) EntryAt(key Object) *Vector {
@@ -464,46 +462,13 @@ func (v *Vector) Empty() Collection {
 }
 
 func (v *Vector) kvreduce(c Callable, init Object) Object {
-	res := init
-	for i := 0; i < v.Count(); i++ {
-		res = c.Call([]Object{res, Int{I: i}, v.Nth(i)})
-	}
-	return res
+	return CountedIndexedKvreduce(v, c, init)
 }
 
 func (v *Vector) Pprint(w io.Writer, indent int) int {
-	ind := indent + 1
-	fmt.Fprint(w, "[")
-	if v.count > 0 {
-		for i := 0; i < v.count-1; i++ {
-			pprintObject(v.at(i), indent+1, w)
-			fmt.Fprint(w, "\n")
-			writeIndent(w, indent+1)
-		}
-		ind = pprintObject(v.at(v.count-1), indent+1, w)
-	}
-	fmt.Fprint(w, "]")
-	return ind + 1
+	return CountedIndexedPprint(v, w, indent)
 }
 
 func (v *Vector) Format(w io.Writer, indent int) int {
-	ind := indent + 1
-	fmt.Fprint(w, "[")
-	if v.count > 0 {
-		for i := 0; i < v.count-1; i++ {
-			ind = formatObject(v.at(i), ind, w)
-
-			ind = maybeNewLine(w, v.at(i), v.at(i+1), indent+1, ind)
-		}
-		ind = formatObject(v.at(v.count-1), ind, w)
-	}
-	if v.count > 0 {
-		if isComment(v.at(v.count - 1)) {
-			fmt.Fprint(w, "\n")
-			writeIndent(w, indent+1)
-			ind = indent + 1
-		}
-	}
-	fmt.Fprint(w, "]")
-	return ind + 1
+	return CountedIndexedFormat(v, w, indent)
 }

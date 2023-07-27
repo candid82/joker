@@ -792,7 +792,7 @@ func (m *HashMap) Keys() Seq {
 	return &MappingSeq{
 		seq: m.Seq(),
 		fn: func(obj Object) Object {
-			return obj.(*Vector).Nth(0)
+			return obj.(Vec).Nth(0)
 		},
 	}
 }
@@ -801,7 +801,7 @@ func (m *HashMap) Vals() Seq {
 	return &MappingSeq{
 		seq: m.Seq(),
 		fn: func(obj Object) Object {
-			return obj.(*Vector).Nth(1)
+			return obj.(Vec).Nth(1)
 		},
 	}
 }

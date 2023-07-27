@@ -175,6 +175,7 @@ func (m *ArrayMap) Count() int {
 
 func (m *ArrayMap) Clone() *ArrayMap {
 	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
+	result.meta = m.meta
 	copy(result.arr, m.arr)
 	return &result
 }

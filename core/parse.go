@@ -808,9 +808,9 @@ func parseBody(seq Seq, ctx *ParseContext) []Expr {
 
 func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 	res := make([]Symbol, 0)
-	v := params.(*Vector)
-	for i := 0; i < v.count; i++ {
-		ro := v.at(i)
+	v := params.(Vec)
+	for i := 0; i < v.Count(); i++ {
+		ro := v.At(i)
 		sym := ro
 		if !IsSymbol(sym) {
 			if LINTER_MODE {
@@ -820,12 +820,12 @@ func parseParams(params Object) (bindings []Symbol, isVariadic bool) {
 			}
 		}
 		if SYMBOLS.amp.Equals(sym) {
-			if v.count > i+2 {
-				ro := v.at(i + 2)
+			if v.Count() > i+2 {
+				ro := v.At(i + 2)
 				panic(&ParseError{obj: ro, msg: "Unexpected parameter: " + ro.ToString(false)})
 			}
-			if v.count == i+2 {
-				variadic := v.at(i + 1)
+			if v.Count() == i+2 {
+				variadic := v.At(i + 1)
 				if !IsSymbol(variadic) {
 					if LINTER_MODE {
 						variadic = generateSymbol("linter")
@@ -1090,22 +1090,23 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 	}
 	bindings := Second(obj.(Seq))
 	switch b := bindings.(type) {
-	case *Vector:
-		if b.count%2 != 0 {
+	case Vec:
+		cnt := b.Count()
+		if cnt%2 != 0 {
 			panic(&ParseError{obj: bindings, msg: formName + " requires an even number of forms in binding vector"})
 		}
-		if LINTER_MODE && formName != "loop" && b.count == 0 {
+		if LINTER_MODE && formName != "loop" && cnt == 0 {
 			pos := GetPosition(obj)
 			printParseWarning(pos, formName+" form with empty bindings vector")
 		}
 		skipUnused := isSkipUnused(b)
-		res.names = make([]Symbol, b.count/2)
-		res.values = make([]Expr, b.count/2)
+		res.names = make([]Symbol, cnt/2)
+		res.values = make([]Expr, cnt/2)
 		ctx.PushEmptyLocalFrame()
 		defer ctx.PopLocalFrame()
 
-		for i := 0; i < b.count/2; i++ {
-			s := b.at(i * 2)
+		for i := 0; i < cnt/2; i++ {
+			s := b.At(i * 2)
 			switch sym := s.(type) {
 			case Symbol:
 				if sym.ns != nil {
@@ -1126,7 +1127,7 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 			}
 			var inferredType *Type
 			if formName != "letfn" {
-				res.values[i] = Parse(b.at(i*2+1), ctx)
+				res.values[i] = Parse(b.At(i*2+1), ctx)
 				if LINTER_MODE {
 					inferredType = res.values[i].InferType()
 				}
@@ -1135,8 +1136,8 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 		}
 
 		if formName == "letfn" {
-			for i := 0; i < b.count/2; i++ {
-				res.values[i] = Parse(b.at(i*2+1), ctx)
+			for i := 0; i < cnt/2; i++ {
+				res.values[i] = Parse(b.At(i*2+1), ctx)
 			}
 		}
 
@@ -1172,7 +1173,7 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 		}
 
 	default:
-		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings"})
+		panic(&ParseError{obj: obj, msg: formName + " requires a vector for its bindings, got " + bindings.GetType().ToString(false)})
 	}
 	return res
 }
@@ -1246,13 +1247,13 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 			return res.WithInfo(objInfo)
 		}
 		return res.WithInfo(info)
-	case *Vector:
-		var res Conjable = EmptyVector()
-		for i := 0; i < s.count; i++ {
-			t := fixInfo(s.at(i), info)
-			res = res.Conj(t)
+	case Vec:
+		res := EmptyArrayVector()
+		res.meta = s.(Meta).GetMeta()
+		for i := 0; i < s.Count(); i++ {
+			t := fixInfo(s.At(i), info)
+			res.Append(t)
 		}
-		res.(*Vector).meta = s.meta
 		if objInfo := obj.GetInfo(); objInfo != nil {
 			return res.WithInfo(objInfo)
 		}
@@ -1393,7 +1394,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 
 func checkArglist(arglist Seq, passedArgsCount int) bool {
 	for !arglist.IsEmpty() {
-		if v, ok := arglist.First().(*Vector); ok {
+		if v, ok := arglist.First().(Vec); ok {
 			if v.Count() == passedArgsCount ||
 				v.Count() >= 2 && v.Nth(v.Count()-2).Equals(SYMBOLS.amp) && passedArgsCount >= (v.Count()-2) {
 				return true

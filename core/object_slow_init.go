@@ -19,6 +19,7 @@ func init() {
 		Comparable:     RegInterface("Comparable", (*Comparable)(nil), ""),
 		Comparator:     RegInterface("Comparator", (*Comparator)(nil), ""),
 		Counted:        RegInterface("Counted", (*Counted)(nil), ""),
+		CountedIndexed: RegInterface("CountedIndexed", (*CountedIndexed)(nil), ""),
 		Deref:          RegInterface("Deref", (*Deref)(nil), ""),
 		Error:          RegInterface("Error", (*Error)(nil), ""),
 		Gettable:       RegInterface("Gettable", (*Gettable)(nil), ""),
@@ -79,6 +80,7 @@ func init() {
 		Type:          RegRefType("Type", (*Type)(nil), ""),
 		Var:           RegRefType("Var", (*Var)(nil), ""),
 		Vector:        RegRefType("Vector", (*Vector)(nil), ""),
+		ArrayVector:   RegRefType("ArrayVector", (*ArrayVector)(nil), ""),
 		VectorRSeq:    RegRefType("VectorRSeq", (*VectorRSeq)(nil), ""),
 		VectorSeq:     RegRefType("VectorSeq", (*VectorSeq)(nil), ""),
 	}

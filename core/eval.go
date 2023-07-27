@@ -208,9 +208,9 @@ func (expr *LiteralExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *VectorExpr) Eval(env *LocalEnv) Object {
-	res := EmptyVector()
+	res := EmptyArrayVector()
 	for _, e := range expr.v {
-		res = res.Conjoin(Eval(e, env))
+		res.Append(Eval(e, env))
 	}
 	return res
 }

@@ -81,22 +81,22 @@ func seqFirstAfterForcedBreak(seq Seq, w io.Writer, indent int) (Seq, Object, in
 	return seq, obj, indent
 }
 
-func formatBindings(v *Vector, w io.Writer, indent int) int {
+func formatBindings(v Vec, w io.Writer, indent int) int {
 	return v.Format(w, indent)
 }
 
-func formatVectorVertically(v *Vector, w io.Writer, indent int) int {
+func formatVectorVertically(v Vec, w io.Writer, indent int) int {
 	fmt.Fprint(w, "[")
 	newIndent := indent + 1
-	for i := 0; i < v.count; i++ {
-		newIndent = formatObject(v.at(i), indent+1, w)
-		if i+1 < v.count {
+	for i := 0; i < v.Count(); i++ {
+		newIndent = formatObject(v.At(i), indent+1, w)
+		if i+1 < v.Count() {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+1)
 		}
 	}
-	if v.count > 0 {
-		if isComment(v.at(v.count - 1)) {
+	if v.Count() > 0 {
+		if isComment(v.At(v.Count() - 1)) {
 			fmt.Fprint(w, "\n")
 			writeIndent(w, indent+1)
 			newIndent = indent + 1
@@ -269,14 +269,14 @@ func formatSeqEx(seq Seq, w io.Writer, indent int, formatAsDef bool) int {
 			}
 		}
 	} else if obj.Equals(SYMBOLS.let) || obj.Equals(SYMBOLS.loop) {
-		if v, ok := seq.First().(*Vector); ok {
+		if v, ok := seq.First().(Vec); ok {
 			fmt.Fprint(w, " ")
 			i = formatBindings(v, w, i+1)
 			prevObj = seq.First()
 			seq = seq.Rest()
 		}
 	} else if obj.Equals(SYMBOLS.letfn) {
-		if v, ok := seq.First().(*Vector); ok {
+		if v, ok := seq.First().(Vec); ok {
 			fmt.Fprint(w, " ")
 			i = formatVectorVertically(v, w, i+1)
 			prevObj = seq.First()
