@@ -1,0 +1,52 @@
+(ns ^{:go-imports []
+      :doc "Provides API for accessing and manipulating git repositories.
+
+         Example:
+
+         user=> (def db (joker.bolt/open \"bolt.db\" 0600))
+         #'user/db
+         user=> (joker.bolt/create-bucket db \"users\")
+         nil
+         user=> (def id (joker.bolt/next-sequence db \"users\"))
+         #'user/id
+         user=> id
+         1
+         user=> (joker.bolt/put db \"users\" (str id) (joker.json/write-string {:id id :name \"Joe Black\"}))
+         nil
+         user=> (joker.json/read-string (joker.bolt/get db \"users\" (str id)))
+         {\"id\" 1, \"name\" \"Joe Black\"}"}
+  git)
+
+(defn ^GitRepo open
+  "Opens a git repository from the given path. It detects if the
+   repository is bare or a normal one. Throws an error if the path doesn't contain a valid repository."
+  {:added "1.3"
+   :go "open(path)"}
+  [^String path])
+
+(defn config
+  "Returns git repo's config"
+  {:added "1.3"
+   :go "config(repo)"}
+  [^GitRepo repo])
+
+(defn ref
+  "Returns the reference for a given reference name. If resolved is
+   true, any symbolic reference will be resolved."
+  {:added "1.3"
+   :go "ref(repo, name, resolved)"}
+  [^GitRepo repo, ^String name, ^Boolean resolved])
+
+(defn head
+  "Returns the reference where HEAD is pointing to."
+  {:added "1.3"
+   :go "head(repo)"}
+  [^GitRepo repo])
+
+(defn log
+  "Returns the commit history from the given opts."
+  {:added "1.3"
+   :go "log(repo, opts)"}
+  [^GitRepo repo ^Map opts])
+
+
