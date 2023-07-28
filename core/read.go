@@ -811,7 +811,7 @@ func readList(reader *Reader) Object {
 }
 
 func readVector(reader *Reader) Object {
-	res := EmptyVector()
+	res := EmptyArrayVector()
 	eatWhitespace(reader)
 	r := reader.Peek()
 	for r != ']' {
@@ -819,10 +819,10 @@ func readVector(reader *Reader) Object {
 		if multi {
 			v := obj.(Vec)
 			for i := 0; i < v.Count(); i++ {
-				res = res.Conjoin(v.At(i))
+				res.Append(v.At(i))
 			}
 		} else {
-			res = res.Conjoin(obj)
+			res.Append(obj)
 		}
 		eatWhitespace(reader)
 		r = reader.Peek()
