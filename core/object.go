@@ -335,8 +335,6 @@ func (pos Position) Filename() string {
 	return *pos.filename
 }
 
-var hasher hash.Hash32 = fnv.New32a()
-
 func newIteratorError() error {
 	return errors.New("Iterator reached the end of collection")
 }
@@ -348,8 +346,7 @@ func uint32ToBytes(i uint32) []byte {
 }
 
 func getHash() hash.Hash32 {
-	hasher.Reset()
-	return hasher
+	return fnv.New32a()
 }
 
 func hashSymbol(ns, name *string) uint32 {
