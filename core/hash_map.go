@@ -856,3 +856,13 @@ func (m *HashMap) Empty() Collection {
 func (m *HashMap) Pprint(w io.Writer, indent int) int {
 	return pprintMap(m, w, indent)
 }
+
+func (m *HashMap) kvreduce(c Callable, init Object) Object {
+	res := init
+	iter := m.Iter()
+	for iter.HasNext() {
+		kv := iter.Next()
+		res = c.Call([]Object{res, kv.Key, kv.Value})
+	}
+	return res
+}
