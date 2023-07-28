@@ -19,6 +19,7 @@ type (
 		Meta
 		Seqable
 		Formatter
+		Callable
 	}
 	Vector struct {
 		InfoHolder
