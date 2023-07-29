@@ -1807,9 +1807,14 @@ func CountedIndexedReduce(v CountedIndexed, c Callable) Object {
 	case 1:
 		return v.At(0)
 	default:
-		acc := c.Call([]Object{v.At(0), v.At(1)})
+		args := make([]Object, 2)
+		args[0] = v.At(0)
+		args[1] = v.At(1)
+		acc := c.Call(args)
 		for i := 2; i < v.Count(); i++ {
-			acc = c.Call([]Object{acc, v.At(i)})
+			args[0] = acc
+			args[1] = v.At(i)
+			acc = c.Call(args)
 		}
 		return acc
 	}
@@ -1820,9 +1825,14 @@ func CountedIndexedReduceInit(v CountedIndexed, c Callable, init Object) Object 
 	case 0:
 		return init
 	default:
-		acc := c.Call([]Object{init, v.At(0)})
+		args := make([]Object, 2)
+		args[0] = init
+		args[1] = v.At(0)
+		acc := c.Call(args)
 		for i := 1; i < v.Count(); i++ {
-			acc = c.Call([]Object{acc, v.At(i)})
+			args[0] = acc
+			args[1] = v.At(i)
+			acc = c.Call(args)
 		}
 		return acc
 	}
