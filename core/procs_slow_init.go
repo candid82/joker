@@ -163,6 +163,7 @@ func init() {
 	intern("load-file__", procLoadFile, "procLoadFile")
 	intern("load-lib-from-path__", procLoadLibFromPath, "procLoadLibFromPath")
 	intern("reduce-kv__", procReduceKv, "procReduceKv")
+	intern("reduce__", procReduce, "procReduce")
 	intern("slurp__", procSlurp, "procSlurp")
 	intern("spit__", procSpit, "procSpit")
 	intern("shuffle__", procShuffle, "procShuffle")

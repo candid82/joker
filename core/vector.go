@@ -473,3 +473,11 @@ func (v *Vector) Pprint(w io.Writer, indent int) int {
 func (v *Vector) Format(w io.Writer, indent int) int {
 	return CountedIndexedFormat(v, w, indent)
 }
+
+func (v *Vector) reduce(c Callable) Object {
+	return CountedIndexedReduce(v, c)
+}
+
+func (v *Vector) reduceInit(c Callable, init Object) Object {
+	return CountedIndexedReduceInit(v, c, init)
+}

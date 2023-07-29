@@ -516,6 +516,21 @@ func EnsureArgIsKVReduce(args []Object, index int) KVReduce {
 	panic(FailArg(obj, "KVReduce", index))
 }
 
+func EnsureObjectIsReduce(obj Object, pattern string) Reduce {
+	if c, yes := obj.(Reduce); yes {
+		return c
+	}
+	panic(FailObject(obj, "Reduce", pattern))
+}
+
+func EnsureArgIsReduce(args []Object, index int) Reduce {
+	obj := args[index]
+	if c, yes := obj.(Reduce); yes {
+		return c
+	}
+	panic(FailArg(obj, "Reduce", index))
+}
+
 func EnsureObjectIsPending(obj Object, pattern string) Pending {
 	if c, yes := obj.(Pending); yes {
 		return c

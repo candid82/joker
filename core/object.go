@@ -1,4 +1,4 @@
-//go:generate go run gen/gen_types.go assert Comparable Vec Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel CountedIndexed
+//go:generate go run gen/gen_types.go assert Comparable Vec Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Reduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel CountedIndexed
 //go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *ArrayVector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
@@ -250,6 +250,10 @@ type (
 	KVReduce interface {
 		kvreduce(c Callable, init Object) Object
 	}
+	Reduce interface {
+		reduceInit(c Callable, init Object) Object
+		reduce(c Callable) Object
+	}
 	Pending interface {
 		IsRealized() bool
 	}
@@ -269,6 +273,7 @@ type (
 		IOReader       *Type
 		IOWriter       *Type
 		KVReduce       *Type
+		Reduce         *Type
 		Map            *Type
 		Meta           *Type
 		Named          *Type
@@ -1793,4 +1798,32 @@ func CountedIndexedFormat(v CountedIndexed, w io.Writer, indent int) int {
 	}
 	fmt.Fprint(w, "]")
 	return ind + 1
+}
+
+func CountedIndexedReduce(v CountedIndexed, c Callable) Object {
+	switch v.Count() {
+	case 0:
+		return c.Call([]Object{})
+	case 1:
+		return v.At(0)
+	default:
+		acc := c.Call([]Object{v.At(0), v.At(1)})
+		for i := 2; i < v.Count(); i++ {
+			acc = c.Call([]Object{acc, v.At(i)})
+		}
+		return acc
+	}
+}
+
+func CountedIndexedReduceInit(v CountedIndexed, c Callable, init Object) Object {
+	switch v.Count() {
+	case 0:
+		return init
+	default:
+		acc := c.Call([]Object{init, v.At(0)})
+		for i := 1; i < v.Count(); i++ {
+			acc = c.Call([]Object{acc, v.At(i)})
+		}
+		return acc
+	}
 }

@@ -27,6 +27,7 @@ func init() {
 		IOReader:       RegInterface("IOReader", (*io.Reader)(nil), ""),
 		IOWriter:       RegInterface("IOWriter", (*io.Writer)(nil), ""),
 		KVReduce:       RegInterface("KVReduce", (*KVReduce)(nil), ""),
+		Reduce:         RegInterface("Reduce", (*Reduce)(nil), ""),
 		Map:            RegInterface("Map", (*Map)(nil), ""),
 		Meta:           RegInterface("Meta", (*Meta)(nil), ""),
 		Named:          RegInterface("Named", (*Named)(nil), ""),

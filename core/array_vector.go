@@ -185,3 +185,11 @@ func NewArrayVectorFrom(objs ...Object) *ArrayVector {
 	}
 	return res
 }
+
+func (v *ArrayVector) reduce(c Callable) Object {
+	return CountedIndexedReduce(v, c)
+}
+
+func (v *ArrayVector) reduceInit(c Callable, init Object) Object {
+	return CountedIndexedReduceInit(v, c, init)
+}

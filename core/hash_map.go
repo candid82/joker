@@ -1,6 +1,8 @@
 package core
 
-import "io"
+import (
+	"io"
+)
 
 type (
 	Box struct {

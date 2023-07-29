@@ -692,15 +692,19 @@
   items, returns val and f is not called."
   {:added "1.0"}
   ([^Callable f coll]
-   (let [s (seq coll)]
-     (if s
-       (reduce f (first s) (next s))
-       (f))))
+   (if (instance? Reduce coll)
+     (reduce__ f coll)
+     (let [s (seq coll)]
+       (if s
+         (reduce f (first s) (next s))
+         (f)))))
   ([^Callable f val coll]
-   (let [s (seq coll)]
-     (if s
-       (recur f (f val (first s)) (next s))
-       val))))
+   (if (instance? Reduce coll)
+     (reduce__ f val coll)
+     (let [s (seq coll)]
+       (if s
+         (recur f (f val (first s)) (next s))
+         val)))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
