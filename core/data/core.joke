@@ -139,7 +139,7 @@
 (def ^{:arglists '([x])
        :doc "Returns true if x is a vector"
        :added "1.0"}
-  vector? (fn vector? ^Boolean [x] (instance? Vector x)))
+  vector? (fn vector? ^Boolean [x] (instance? Vec x)))
 
 (def ^{:arglists '([msg map] [msg map cause])
        :doc "Create an instance of ExInfo, an Error that carries a map of additional data."
@@ -268,13 +268,13 @@
 (def ^{:arglists '([coll])
        :doc "Creates a new vector containing the contents of coll."
        :added "1.0"
-       :tag Vector}
+       :tag Vec}
   vec vec__)
 
 (defn vector
   "Creates a new vector containing the args."
   {:added "1.0"}
-  ^Vector [& args]
+  ^Vec [& args]
   (vec args))
 
 (def ^{:arglists '([& keyvals])
@@ -692,15 +692,19 @@
   items, returns val and f is not called."
   {:added "1.0"}
   ([^Callable f coll]
-   (let [s (seq coll)]
-     (if s
-       (reduce f (first s) (next s))
-       (f))))
+   (if (instance? Reduce coll)
+     (reduce__ f coll)
+     (let [s (seq coll)]
+       (if s
+         (reduce f (first s) (next s))
+         (f)))))
   ([^Callable f val coll]
-   (let [s (seq coll)]
-     (if s
-       (recur f (f val (first s)) (next s))
-       val))))
+   (if (instance? Reduce coll)
+     (reduce__ f val coll)
+     (let [s (seq coll)]
+       (if s
+         (recur f (f val (first s)) (next s))
+         val)))))
 
 (defn reverse
   "Returns a seq of the items in coll in reverse order. Not lazy."
@@ -1263,8 +1267,8 @@
   {:added "1.0"}
   [bindings & body]
   (assert-args
-   (vector? bindings) "a vector for its binding"
-   (= 2 (count bindings)) "exactly 2 forms in binding vector")
+   (vector? bindings) "a vector for its bindings"
+   (= 2 (count bindings)) "exactly 2 forms in bindings vector")
   (let [form (bindings 0) tst (bindings 1)]
     `(let [temp# ~tst]
        (when temp#
@@ -1446,7 +1450,7 @@
   multiple times, and thus should be free of side effects.
   Returns [old new], the value of the atom before and after the swap."
   {:added "1.0"}
-  ^Vector [^Atom atom ^Callable f & args]
+  ^Vec [^Atom atom ^Callable f & args]
   (apply swap-vals__ atom f args))
 
 (defn reset!
@@ -1460,7 +1464,7 @@
   "Sets the value of atom to newval. Returns [old new], the value of the
   atom before and after the reset."
   {:added "1.0"}
-  ^Vector [^Atom atom newval]
+  ^Vec [^Atom atom newval]
   (reset-vals__ atom newval))
 
 (defn alter-meta!
@@ -1737,13 +1741,13 @@
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   {:added "1.0"}
-  ^Vector [^Number n ^Seqable coll]
+  ^Vec [^Number n ^Seqable coll]
   [(take n coll) (drop n coll)])
 
 (defn split-with
   "Returns a vector of [(take-while pred coll) (drop-while pred coll)]"
   {:added "1.0"}
-  ^Vector [^Callable pred ^Seqable coll]
+  ^Vec [^Callable pred ^Seqable coll]
   [(take-while pred coll) (drop-while pred coll)])
 
 (defn repeat
@@ -2159,9 +2163,9 @@
   the resulting vector shares structure with the original and no
   trimming is done."
   {:added "1.0"}
-  (^Vector [^Vector v ^Number start]
+  (^Vec [^Vec v ^Number start]
    (subvec v start (count v)))
-  (^Vector [^Vector v ^Number start ^Number end]
+  (^Vec [^Vec v ^Number start ^Number end]
    (subvec__ v start end)))
 
 (defmacro doto
@@ -3910,20 +3914,20 @@
   exhausted.  Any remaining items in other colls are ignored. Function
   f should accept number-of-colls arguments."
   {:added "1.0"}
-  (^Vector [^Callable f coll]
+  (^Vec [^Callable f coll]
    (reduce (fn [v o] (conj v (f o))) [] coll))
-  (^Vector [^Callable f c1 c2]
+  (^Vec [^Callable f c1 c2]
    (into [] (map f c1 c2)))
-  (^Vector [^Callable f c1 c2 c3]
+  (^Vec [^Callable f c1 c2 c3]
    (into [] (map f c1 c2 c3)))
-  (^Vector [^Callable f c1 c2 c3 & colls]
+  (^Vec [^Callable f c1 c2 c3 & colls]
    (into [] (apply map f c1 c2 c3 colls))))
 
 (defn filterv
   "Returns a vector of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
-  ^Vector [^Callable pred coll]
+  ^Vec [^Callable pred coll]
   (reduce (fn [v o] (if (pred o) (conj v o) v))
           []
           coll))
@@ -4013,7 +4017,7 @@
 (defn shuffle
   "Return a random permutation of coll"
   {:added "1.0"}
-  ^Vector [coll]
+  ^Vec [coll]
   (shuffle__ coll))
 
 (defn map-indexed

@@ -5,11 +5,6 @@ package main
 
 // Imports of std libraries required by core libraries go here.
 import (
-	_ "github.com/candid82/joker/std/html"
-	_ "github.com/candid82/joker/std/string"
-)
-
-import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
@@ -21,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/candid82/joker/std/html"
+	_ "github.com/candid82/joker/std/string"
+
 	. "github.com/candid82/joker/core"
 	"github.com/candid82/joker/core/gen_go"
 )
@@ -30,10 +28,13 @@ type FileInfo struct {
 	Filename string
 }
 
-/* The entries must be ordered such that a given namespace depends
+/*
+	The entries must be ordered such that a given namespace depends
+
 /* only upon namespaces loaded above it. E.g. joker.template depends
 /* on joker.walk, so is listed afterwards, not in alphabetical
-/* order. */
+/* order.
+*/
 var CoreSourceFiles []FileInfo = []FileInfo{
 	{
 		Name:     "<joker.core>",
@@ -158,7 +159,9 @@ type GenEnv struct {
 	LateInit         bool                                    // Whether emitting a namespace other than joker.core
 }
 
-/* NewEnv() statically declares numerous variables and sets some of
+/*
+	NewEnv() statically declares numerous variables and sets some of
+
 /* them to initial values before any func init()'s run. Later, func
 /* main() calls (*Env)InitEnv() and other receivers, as appropriate,
 /* to set per-invocation values. Normally, by this point in time,
@@ -176,7 +179,8 @@ type GenEnv struct {
 /* added to this map. Currently, only direct assignment is handled;
 /* something like `(def *n* (count *command-line-args*))` would thus
 /* not work without special handling, which does not yet appear to be
-/* necessary. */
+/* necessary.
+*/
 var knownLateInits = map[string]struct{}{
 	"joker.core/*in*":                struct{}{},
 	"joker.core/*out*":               struct{}{},
@@ -675,11 +679,14 @@ func NewImports() *Imports {
 	return &Imports{map[string]string{}, map[string]*Import{}}
 }
 
-/* Given desired local and the full (though relative) name of the
+/*
+	Given desired local and the full (though relative) name of the
+
 /* package, make sure the local name agrees with any existing entry
 /* and isn't already used (picking an alternate local name if
 /* necessary), add the mapping if necessary, and return the (possibly
-/* alternate) local name. */
+/* alternate) local name.
+*/
 func AddImport(imports *Imports, local, full string, okToSubstitute bool) string {
 	components := strings.Split(full, "/")
 	if imports == nil {

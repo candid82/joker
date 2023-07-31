@@ -21,19 +21,19 @@ func EnsureArgIsComparable(args []Object, index int) Comparable {
 	panic(FailArg(obj, "Comparable", index))
 }
 
-func EnsureObjectIsVector(obj Object, pattern string) *Vector {
-	if c, yes := obj.(*Vector); yes {
+func EnsureObjectIsVec(obj Object, pattern string) Vec {
+	if c, yes := obj.(Vec); yes {
 		return c
 	}
-	panic(FailObject(obj, "Vector", pattern))
+	panic(FailObject(obj, "Vec", pattern))
 }
 
-func EnsureArgIsVector(args []Object, index int) *Vector {
+func EnsureArgIsVec(args []Object, index int) Vec {
 	obj := args[index]
-	if c, yes := obj.(*Vector); yes {
+	if c, yes := obj.(Vec); yes {
 		return c
 	}
-	panic(FailArg(obj, "Vector", index))
+	panic(FailArg(obj, "Vec", index))
 }
 
 func EnsureObjectIsChar(obj Object, pattern string) Char {
@@ -516,6 +516,21 @@ func EnsureArgIsKVReduce(args []Object, index int) KVReduce {
 	panic(FailArg(obj, "KVReduce", index))
 }
 
+func EnsureObjectIsReduce(obj Object, pattern string) Reduce {
+	if c, yes := obj.(Reduce); yes {
+		return c
+	}
+	panic(FailObject(obj, "Reduce", pattern))
+}
+
+func EnsureArgIsReduce(args []Object, index int) Reduce {
+	obj := args[index]
+	if c, yes := obj.(Reduce); yes {
+		return c
+	}
+	panic(FailArg(obj, "Reduce", index))
+}
+
 func EnsureObjectIsPending(obj Object, pattern string) Pending {
 	if c, yes := obj.(Pending); yes {
 		return c
@@ -619,4 +634,19 @@ func EnsureArgIsChannel(args []Object, index int) *Channel {
 		return c
 	}
 	panic(FailArg(obj, "Channel", index))
+}
+
+func EnsureObjectIsCountedIndexed(obj Object, pattern string) CountedIndexed {
+	if c, yes := obj.(CountedIndexed); yes {
+		return c
+	}
+	panic(FailObject(obj, "CountedIndexed", pattern))
+}
+
+func EnsureArgIsCountedIndexed(args []Object, index int) CountedIndexed {
+	obj := args[index]
+	if c, yes := obj.(CountedIndexed); yes {
+		return c
+	}
+	panic(FailArg(obj, "CountedIndexed", index))
 }

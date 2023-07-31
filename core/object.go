@@ -1,10 +1,11 @@
-//go:generate go run gen/gen_types.go assert Comparable *Vector Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert Comparable Vec Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Reduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel CountedIndexed
+//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *ArrayVector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
 package core
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/gob"
 	"errors"
@@ -53,6 +54,10 @@ type (
 	}
 	Counted interface {
 		Count() int
+	}
+	CountedIndexed interface {
+		Counted
+		At(int) Object
 	}
 	Error interface {
 		error
@@ -200,7 +205,7 @@ type (
 	Associative interface {
 		Conjable
 		Gettable
-		EntryAt(key Object) *Vector
+		EntryAt(key Object) *ArrayVector
 		Assoc(key, val Object) Associative
 	}
 	Reversible interface {
@@ -245,6 +250,10 @@ type (
 	KVReduce interface {
 		kvreduce(c Callable, init Object) Object
 	}
+	Reduce interface {
+		reduceInit(c Callable, init Object) Object
+		reduce(c Callable) Object
+	}
 	Pending interface {
 		IsRealized() bool
 	}
@@ -255,6 +264,7 @@ type (
 		Comparable     *Type
 		Comparator     *Type
 		Counted        *Type
+		CountedIndexed *Type
 		Deref          *Type
 		Channel        *Type
 		Error          *Type
@@ -263,6 +273,7 @@ type (
 		IOReader       *Type
 		IOWriter       *Type
 		KVReduce       *Type
+		Reduce         *Type
 		Map            *Type
 		Meta           *Type
 		Named          *Type
@@ -315,6 +326,8 @@ type (
 		Type           *Type
 		Var            *Type
 		Vector         *Type
+		Vec            *Type
+		ArrayVector    *Type
 		VectorRSeq     *Type
 		VectorSeq      *Type
 	}
@@ -327,8 +340,6 @@ func (pos Position) Filename() string {
 	return *pos.filename
 }
 
-var hasher hash.Hash32 = fnv.New32a()
-
 func newIteratorError() error {
 	return errors.New("Iterator reached the end of collection")
 }
@@ -340,8 +351,7 @@ func uint32ToBytes(i uint32) []byte {
 }
 
 func getHash() hash.Hash32 {
-	hasher.Reset()
-	return hasher
+	return fnv.New32a()
 }
 
 func hashSymbol(ns, name *string) uint32 {
@@ -936,7 +946,7 @@ func (n Nil) Assoc(key, value Object) Associative {
 	return EmptyArrayMap().Assoc(key, value)
 }
 
-func (n Nil) EntryAt(key Object) *Vector {
+func (n Nil) EntryAt(key Object) *ArrayVector {
 	return nil
 }
 
@@ -1232,10 +1242,10 @@ func MakeInt(i int) Int {
 	return Int{I: i}
 }
 
-func MakeIntVector(ii []int) *Vector {
-	res := EmptyVector()
+func MakeIntVector(ii []int) *ArrayVector {
+	res := EmptyArrayVector()
 	for _, i := range ii {
-		res = res.Conjoin(MakeInt(i))
+		res.Append(MakeInt(i))
 	}
 	return res
 }
@@ -1504,10 +1514,10 @@ func MakeString(s string) String {
 	return String{S: s}
 }
 
-func MakeStringVector(ss []string) *Vector {
-	res := EmptyVector()
+func MakeStringVector(ss []string) *ArrayVector {
+	res := EmptyArrayVector()
 	for _, s := range ss {
-		res = res.Conjoin(MakeString(s))
+		res.Append(MakeString(s))
 	}
 	return res
 }
@@ -1593,7 +1603,7 @@ func IsKeyword(obj Object) bool {
 
 func IsVector(obj Object) bool {
 	switch obj.(type) {
-	case *Vector:
+	case Vec:
 		return true
 	default:
 		return false
@@ -1682,4 +1692,148 @@ func RegInterface(name string, inst interface{}, doc string) *Type {
 	t := &Type{MetaHolder{meta}, name, reflect.TypeOf(inst).Elem()}
 	TYPES[STRINGS.Intern(name)] = t
 	return t
+}
+
+func CountedIndexedToString(v CountedIndexed, escape bool) string {
+	var b bytes.Buffer
+	b.WriteRune('[')
+	cnt := v.Count()
+	if cnt > 0 {
+		for i := 0; i < cnt-1; i++ {
+			b.WriteString(v.At(i).ToString(escape))
+			b.WriteRune(' ')
+		}
+		b.WriteString(v.At(cnt - 1).ToString(escape))
+	}
+	b.WriteRune(']')
+	return b.String()
+}
+
+func AreCountedIndexedEqual(v1, v2 CountedIndexed) bool {
+	if v1.Count() != v2.Count() {
+		return false
+	}
+	for i := 0; i < v1.Count(); i++ {
+		if !v1.At(i).Equals(v2.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
+func CountedIndexedHash(v CountedIndexed) uint32 {
+	h := getHash()
+	for i := 0; i < v.Count(); i++ {
+		h.Write(uint32ToBytes(v.At(i).Hash()))
+	}
+	return h.Sum32()
+}
+
+func CountedIndexedGet(v CountedIndexed, key Object) (bool, Object) {
+	switch key := key.(type) {
+	case Int:
+		if key.I >= 0 && key.I < v.Count() {
+			return true, v.At(key.I)
+		}
+	}
+	return false, nil
+}
+
+func CountedIndexedCompare(v1, v2 CountedIndexed) int {
+	if v1.Count() > v2.Count() {
+		return 1
+	}
+	if v1.Count() < v2.Count() {
+		return -1
+	}
+	for i := 0; i < v1.Count(); i++ {
+		c := EnsureObjectIsComparable(v1.At(i), "").Compare(v2.At(i))
+		if c != 0 {
+			return c
+		}
+	}
+	return 0
+}
+
+func CountedIndexedKvreduce(v CountedIndexed, c Callable, init Object) Object {
+	res := init
+	for i := 0; i < v.Count(); i++ {
+		res = c.Call([]Object{res, Int{I: i}, v.At(i)})
+	}
+	return res
+}
+
+func CountedIndexedPprint(v CountedIndexed, w io.Writer, indent int) int {
+	ind := indent + 1
+	fmt.Fprint(w, "[")
+	if v.Count() > 0 {
+		for i := 0; i < v.Count()-1; i++ {
+			pprintObject(v.At(i), indent+1, w)
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+		}
+		ind = pprintObject(v.At(v.Count()-1), indent+1, w)
+	}
+	fmt.Fprint(w, "]")
+	return ind + 1
+}
+
+func CountedIndexedFormat(v CountedIndexed, w io.Writer, indent int) int {
+	ind := indent + 1
+	fmt.Fprint(w, "[")
+	if v.Count() > 0 {
+		for i := 0; i < v.Count()-1; i++ {
+			ind = formatObject(v.At(i), ind, w)
+
+			ind = maybeNewLine(w, v.At(i), v.At(i+1), indent+1, ind)
+		}
+		ind = formatObject(v.At(v.Count()-1), ind, w)
+	}
+	if v.Count() > 0 {
+		if isComment(v.At(v.Count() - 1)) {
+			fmt.Fprint(w, "\n")
+			writeIndent(w, indent+1)
+			ind = indent + 1
+		}
+	}
+	fmt.Fprint(w, "]")
+	return ind + 1
+}
+
+func CountedIndexedReduce(v CountedIndexed, c Callable) Object {
+	switch v.Count() {
+	case 0:
+		return c.Call([]Object{})
+	case 1:
+		return v.At(0)
+	default:
+		args := make([]Object, 2)
+		args[0] = v.At(0)
+		args[1] = v.At(1)
+		acc := c.Call(args)
+		for i := 2; i < v.Count(); i++ {
+			args[0] = acc
+			args[1] = v.At(i)
+			acc = c.Call(args)
+		}
+		return acc
+	}
+}
+
+func CountedIndexedReduceInit(v CountedIndexed, c Callable, init Object) Object {
+	switch v.Count() {
+	case 0:
+		return init
+	default:
+		args := make([]Object, 2)
+		args[0] = init
+		args[1] = v.At(0)
+		acc := c.Call(args)
+		for i := 1; i < v.Count(); i++ {
+			args[0] = acc
+			args[1] = v.At(i)
+			acc = c.Call(args)
+		}
+		return acc
+	}
 }

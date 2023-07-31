@@ -147,6 +147,11 @@ func (x *Vector) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
+func (x *ArrayVector) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
 func (x *VectorSeq) WithInfo(info *ObjectInfo) Object {
 	x.info = info
 	return x

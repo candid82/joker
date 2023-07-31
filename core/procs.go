@@ -655,15 +655,18 @@ var procCount = func(args []Object) Object {
 
 var procSubvec = func(args []Object) Object {
 	// TODO: implement proper Subvector structure
-	v := EnsureArgIsVector(args, 0)
+	v := EnsureArgIsVec(args, 0)
 	start := EnsureArgIsInt(args, 1).I
 	end := EnsureArgIsInt(args, 2).I
 	if start > end {
 		panic(RT.NewError(fmt.Sprintf("subvec's start index (%d) is greater than end index (%d)", start, end)))
 	}
+	if end > v.Count() {
+		panic(RT.NewError(fmt.Sprintf("subvec's end index (%d) is greater than vector's count (%d)", end, v.Count())))
+	}
 	subv := make([]Object, 0, end-start)
 	for i := start; i < end; i++ {
-		subv = append(subv, v.at(i))
+		subv = append(subv, v.At(i))
 	}
 	return NewVectorFrom(subv...)
 }
@@ -1486,14 +1489,14 @@ var procLoadLibFromPath = func(args []Object) Object {
 	libname := EnsureArgIsSymbol(args, 0).Name()
 	pathname := EnsureArgIsString(args, 1).S
 	cp := GLOBAL_ENV.classPath.Value
-	cpvec := EnsureObjectIsVector(cp, "*classpath*: %s")
+	cpvec := EnsureObjectIsVec(cp, "*classpath*: %s")
 	count := cpvec.Count()
 	var f *os.File
 	var err error
 	var canonicalErr error
 	var filename string
 	for i := 0; i < count; i++ {
-		elem := cpvec.at(i)
+		elem := cpvec.At(i)
 		cpelem := EnsureObjectIsString(elem, "*classpath*["+strconv.Itoa(i)+"]: %s")
 		s := cpelem.S
 		if s == "" {
@@ -1524,6 +1527,17 @@ var procReduceKv = func(args []Object) Object {
 	return coll.kvreduce(f, init)
 }
 
+var procReduce = func(args []Object) Object {
+	f := EnsureArgIsCallable(args, 0)
+	if len(args) == 2 {
+		coll := EnsureArgIsReduce(args, 1)
+		return coll.reduce(f)
+	}
+	init := args[1]
+	coll := EnsureArgIsReduce(args, 2)
+	return coll.reduceInit(f, init)
+}
+
 var procIndexOf = func(args []Object) Object {
 	s := EnsureArgIsString(args, 0)
 	ch := EnsureArgIsChar(args, 1)
@@ -1537,15 +1551,15 @@ var procIndexOf = func(args []Object) Object {
 
 func libExternalPath(sym Symbol) (path string, ok bool) {
 	nsSourcesVar, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*ns-sources*"))
-	nsSources := ToSlice(nsSourcesVar.Value.(*Vector).Seq())
+	nsSources := ToSlice(nsSourcesVar.Value.(Vec).Seq())
 
 	var sourceKey string
 	var sourceMap Map
 	for _, source := range nsSources {
-		sourceKey = source.(*Vector).Nth(0).ToString(false)
+		sourceKey = source.(Vec).Nth(0).ToString(false)
 		match, _ := regexp.MatchString(sourceKey, sym.Name())
 		if match {
-			sourceMap = source.(*Vector).Nth(1).(Map)
+			sourceMap = source.(Vec).Nth(1).(Map)
 			break
 		}
 	}
@@ -1951,11 +1965,11 @@ func knownMacrosToMap(km Object) (Map, error) {
 		switch obj := obj.(type) {
 		case Symbol:
 			res.Add(obj, NIL)
-		case *Vector:
+		case Vec:
 			if obj.Count() != 2 {
 				return nil, errors.New(":known-macros item must be a symbol or a vector with two elements")
 			}
-			res.Add(obj.at(0), obj.at(1))
+			res.Add(obj.At(0), obj.At(1))
 		default:
 			return nil, errors.New(":known-macros item must be a symbol or a vector, got " + obj.GetType().ToString(false))
 		}

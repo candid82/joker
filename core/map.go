@@ -43,11 +43,11 @@ func (iter *EmptyMapIterator) Next() *Pair {
 
 func mapConj(m Map, obj Object) Conjable {
 	switch obj := obj.(type) {
-	case *Vector:
-		if obj.count != 2 {
+	case Vec:
+		if obj.Count() != 2 {
 			panic(RT.NewError("Vector argument to map's conj must be a vector with two elements"))
 		}
-		return m.Assoc(obj.at(0), obj.at(1))
+		return m.Assoc(obj.At(0), obj.At(1))
 	case Map:
 		return m.Merge(obj)
 	default:

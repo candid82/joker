@@ -2,10 +2,11 @@ package bolt
 
 import (
 	"bytes"
-	. "github.com/candid82/joker/core"
-	bolt "go.etcd.io/bbolt"
 	"os"
 	"unsafe"
+
+	. "github.com/candid82/joker/core"
+	bolt "go.etcd.io/bbolt"
 )
 
 type (
@@ -153,13 +154,13 @@ func get(db *bolt.DB, bucket, key string) Object {
 	return MakeString(string(v))
 }
 
-func byPrefix(db *bolt.DB, bucket, prefix string) *Vector {
-	res := EmptyVector()
+func byPrefix(db *bolt.DB, bucket, prefix string) *ArrayVector {
+	res := EmptyArrayVector()
 	db.View(func(tx *bolt.Tx) error {
 		c := getBucket(tx, bucket).Cursor()
 		pr := []byte(prefix)
 		for k, v := c.Seek(pr); k != nil && bytes.HasPrefix(k, pr); k, v = c.Next() {
-			res = res.Conjoin(NewVectorFrom(MakeString(string(k)), MakeString(string(v))))
+			res.Append(NewVectorFrom(MakeString(string(k)), MakeString(string(v))))
 		}
 		return nil
 	})
