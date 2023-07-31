@@ -42,7 +42,12 @@ func InternsOrThunks() {
 	gitNamespace.InternVar("log", log_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("opts"))),
-			`Returns the commit history from the given opts.`, "1.3"))
+			`Returns the commit historyk from the given opts.`, "1.3"))
+
+	gitNamespace.InternVar("object", object_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
+			`Returns an Object with the given hash.`, "1.3"))
 
 	gitNamespace.InternVar("open", open_,
 		MakeMeta(
@@ -55,5 +60,11 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("name"), MakeSymbol("resolved"))),
 			`Returns the reference for a given reference name. If resolved is
    true, any symbolic reference will be resolved.`, "1.3"))
+
+	gitNamespace.InternVar("resolve-revision", resolve_revision_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("revision"))),
+			`Resolves revision to corresponding hash. It will always
+   resolve to a commit hash, not a tree or annotated tag.`, "1.3").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

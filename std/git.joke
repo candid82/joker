@@ -44,9 +44,22 @@
   [^GitRepo repo])
 
 (defn log
-  "Returns the commit history from the given opts."
+  "Returns the commit historyk from the given opts."
   {:added "1.3"
    :go "log(repo, opts)"}
   [^GitRepo repo ^Map opts])
+
+(defn ^String resolve-revision
+  "Resolves revision to corresponding hash. It will always
+   resolve to a commit hash, not a tree or annotated tag."
+  {:added "1.3"
+   :go "resolveRevision(repo, revision)"}
+  [^GitRepo repo ^String revision])
+
+(defn object
+  "Returns an Object with the given hash."
+  {:added "1.3"
+   :go "findObject(repo, hash)"}
+  [^GitRepo repo ^String hash])
 
 

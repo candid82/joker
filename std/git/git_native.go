@@ -197,7 +197,7 @@ func makeCommit(cmt *object.Commit) Map {
 	return res
 }
 
-func log(repo *git.Repository, opts Map) *Vector {
+func log(repo *git.Repository, opts Map) Vec {
 	var logOpts git.LogOptions
 	if ok, v := opts.Get(MakeKeyword("from")); ok {
 		logOpts.From = plumbing.NewHash(EnsureObjectIsString(v, "").S)
@@ -236,12 +236,44 @@ func log(repo *git.Repository, opts Map) *Vector {
 	}
 	it, err := repo.Log(&logOpts)
 	PanicOnErr(err)
-	res := EmptyVector()
+	res := EmptyArrayVector()
 	err = it.ForEach(func(cmt *object.Commit) error {
-		res = res.Conjoin(makeCommit(cmt))
+		res.Append(makeCommit(cmt))
 		return nil
 	})
 	PanicOnErr(err)
+	return res
+}
+
+func resolveRevision(repo *git.Repository, rev string) string {
+	hash, err := repo.ResolveRevision(plumbing.Revision(rev))
+	PanicOnErr(err)
+	return hash.String()
+}
+
+func findObject(repo *git.Repository, hash string) Map {
+	obj, err := repo.Object(plumbing.AnyObject, plumbing.NewHash(hash))
+	PanicOnErr(err)
+	res := EmptyArrayMap()
+	res.Add(MakeKeyword("id"), MakeString(obj.ID().String()))
+	objType := MakeKeyword("invalid")
+	switch obj.Type() {
+	case 1:
+		objType = MakeKeyword("commit")
+	case 2:
+		objType = MakeKeyword("tree")
+	case 3:
+		objType = MakeKeyword("blob")
+	case 4:
+		objType = MakeKeyword("tag")
+	case 6:
+		objType = MakeKeyword("ofs-delta")
+	case 7:
+		objType = MakeKeyword("ref-delta")
+	case 8:
+		objType = MakeKeyword("any")
+	}
+	res.Add(MakeKeyword("type"), objType)
 	return res
 }
 

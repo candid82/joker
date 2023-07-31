@@ -58,6 +58,24 @@ func __log_(_args []Object) Object {
 	return NIL
 }
 
+var __object__P ProcFn = __object_
+var object_ Proc = Proc{Fn: __object__P, Name: "object_", Package: "std/git"}
+
+func __object_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		repo := ExtractGitRepo(_args, 0)
+		hash := ExtractString(_args, 1)
+		_res := findObject(repo, hash)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __open__P ProcFn = __open_
 var open_ Proc = Proc{Fn: __open__P, Name: "open_", Package: "std/git"}
 
@@ -87,6 +105,24 @@ func __ref_(_args []Object) Object {
 		resolved := ExtractBoolean(_args, 2)
 		_res := ref(repo, name, resolved)
 		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __resolve_revision__P ProcFn = __resolve_revision_
+var resolve_revision_ Proc = Proc{Fn: __resolve_revision__P, Name: "resolve_revision_", Package: "std/git"}
+
+func __resolve_revision_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		repo := ExtractGitRepo(_args, 0)
+		revision := ExtractString(_args, 1)
+		_res := resolveRevision(repo, revision)
+		return MakeString(_res)
 
 	default:
 		PanicArity(_c)
