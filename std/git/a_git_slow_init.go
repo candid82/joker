@@ -67,4 +67,9 @@ func InternsOrThunks() {
 			`Resolves revision to corresponding hash. It will always
    resolve to a commit hash, not a tree or annotated tag.`, "1.3").Plus(MakeKeyword("tag"), String{S: "String"}))
 
+	gitNamespace.InternVar("status", status_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
+			`Returns the working tree status.`, "1.3"))
+
 }

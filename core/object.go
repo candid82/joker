@@ -1514,6 +1514,10 @@ func MakeString(s string) String {
 	return String{S: s}
 }
 
+func MakeChar(r rune) Char {
+	return Char{Ch: r}
+}
+
 func MakeStringVector(ss []string) *ArrayVector {
 	res := EmptyArrayVector()
 	for _, s := range ss {

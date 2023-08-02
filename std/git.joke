@@ -62,4 +62,10 @@
    :go "findObject(repo, hash)"}
   [^GitRepo repo ^String hash])
 
+(defn status
+  "Returns the working tree status."
+  {:added "1.3"
+   :go "status(repo)"}
+  [^GitRepo repo])
+
 
