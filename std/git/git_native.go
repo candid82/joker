@@ -251,6 +251,12 @@ func resolveRevision(repo *git.Repository, rev string) string {
 	return hash.String()
 }
 
+func findCommit(repo *git.Repository, hash string) Map {
+	obj, err := repo.CommitObject(plumbing.NewHash(hash))
+	PanicOnErr(err)
+	return makeCommit(obj)
+}
+
 func findObject(repo *git.Repository, hash string) Map {
 	obj, err := repo.Object(plumbing.AnyObject, plumbing.NewHash(hash))
 	PanicOnErr(err)

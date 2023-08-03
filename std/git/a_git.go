@@ -6,6 +6,24 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
+var __commit__P ProcFn = __commit_
+var commit_ Proc = Proc{Fn: __commit__P, Name: "commit_", Package: "std/git"}
+
+func __commit_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		repo := ExtractGitRepo(_args, 0)
+		hash := ExtractString(_args, 1)
+		_res := findCommit(repo, hash)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __config__P ProcFn = __config_
 var config_ Proc = Proc{Fn: __config__P, Name: "config_", Package: "std/git"}
 

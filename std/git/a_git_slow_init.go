@@ -29,6 +29,11 @@ func InternsOrThunks() {
          user=> (joker.json/read-string (joker.bolt/get db "users" (str id)))
          {"id" 1, "name" "Joe Black"}`, "1.0"))
 
+	gitNamespace.InternVar("commit", commit_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
+			`Returns a commit with the given hash.`, "1.3"))
+
 	gitNamespace.InternVar("config", config_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
@@ -42,7 +47,7 @@ func InternsOrThunks() {
 	gitNamespace.InternVar("log", log_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("opts"))),
-			`Returns the commit historyk from the given opts.`, "1.3"))
+			`Returns the commit history from the given opts.`, "1.3"))
 
 	gitNamespace.InternVar("object", object_,
 		MakeMeta(
