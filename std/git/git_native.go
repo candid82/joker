@@ -175,8 +175,8 @@ func head(repo *git.Repository) Map {
 
 func makeSignature(s object.Signature) Map {
 	res := EmptyArrayMap()
-	res.Add(MakeKeyword("name"), MakeKeyword(s.Name))
-	res.Add(MakeKeyword("email"), MakeKeyword(s.Email))
+	res.Add(MakeKeyword("name"), MakeString(s.Name))
+	res.Add(MakeKeyword("email"), MakeString(s.Email))
 	res.Add(MakeKeyword("when"), MakeTime(s.When))
 	return res
 }

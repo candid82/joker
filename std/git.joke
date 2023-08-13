@@ -44,7 +44,32 @@
   [^GitRepo repo])
 
 (defn log
-  "Returns the commit history from the given opts."
+  "Returns the commit history from the given opts.
+  opts may have the following keys:
+
+  :from - when the from option is set the log will only contain commits
+  reachable from it. If this option is not set, HEAD will be used as
+  the default from.
+
+  :order - the default traversal algorithm is depth-first search.
+  Set order to :committer-time for ordering by committer time (more compatible with `git log`).
+  Set order to :bsf for breadth-first search
+
+  :path-filter - filter commits based on the path of files that are updated.
+  Takes file path as argument and should return true if the file is desired.
+  It can be used to implement `git log -- <path>`.
+  Either <path> is a file path, or directory path, or a regexp of file/directory path.
+
+  :all - pretend as if all the refs in refs/, along with HEAD, are listed on the command line as <commit>.
+  It is equivalent to running `git log --all`.
+  If set to true, the :from option will be ignored.
+
+  :since - show commits more recent than a specific date.
+  It is equivalent to running `git log --since <date>` or `git log --after <date>`.
+
+  :until - show commits older than a specific date.
+  It is equivalent to running `git log --until <date>` or `git log --before <date>`.
+"
   {:added "1.3"
    :go "log(repo, opts)"}
   [^GitRepo repo ^Map opts])
