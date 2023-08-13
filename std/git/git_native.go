@@ -283,22 +283,6 @@ func findObject(repo *git.Repository, hash string) Map {
 	return res
 }
 
-func status(repo *git.Repository) Map {
-	workTree, err := repo.Worktree()
-	PanicOnErr(err)
-	st, err := workTree.Status()
-	PanicOnErr(err)
-	res := EmptyArrayMap()
-	for filename, filestatus := range st {
-		fileStatusMap := EmptyArrayMap()
-		fileStatusMap.Add(MakeKeyword("staging"), MakeChar(rune(filestatus.Staging)))
-		fileStatusMap.Add(MakeKeyword("worktree"), MakeChar(rune(filestatus.Worktree)))
-		fileStatusMap.Add(MakeKeyword("extra"), MakeString(filestatus.Extra))
-		res.Add(MakeString(filename), fileStatusMap)
-	}
-	return res
-}
-
 func init() {
 	gitRepoType = RegType("GitRepo", (*GitRepo)(nil), "Wraps git.Repository type")
 }

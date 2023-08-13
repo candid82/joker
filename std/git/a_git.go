@@ -148,23 +148,6 @@ func __resolve_revision_(_args []Object) Object {
 	return NIL
 }
 
-var __status__P ProcFn = __status_
-var status_ Proc = Proc{Fn: __status__P, Name: "status_", Package: "std/git"}
-
-func __status_(_args []Object) Object {
-	_c := len(_args)
-	switch {
-	case _c == 1:
-		repo := ExtractGitRepo(_args, 0)
-		_res := status(repo)
-		return _res
-
-	default:
-		PanicArity(_c)
-	}
-	return NIL
-}
-
 func Init() {
 
 	InternsOrThunks()
