@@ -12,22 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of git.InternsOrThunks().")
 	}
-	gitNamespace.ResetMeta(MakeMeta(nil, `Provides API for accessing and manipulating git repositories.
-
-         Example:
-
-         user=> (def db (joker.bolt/open "bolt.db" 0600))
-         #'user/db
-         user=> (joker.bolt/create-bucket db "users")
-         nil
-         user=> (def id (joker.bolt/next-sequence db "users"))
-         #'user/id
-         user=> id
-         1
-         user=> (joker.bolt/put db "users" (str id) (joker.json/write-string {:id id :name "Joe Black"}))
-         nil
-         user=> (joker.json/read-string (joker.bolt/get db "users" (str id)))
-         {"id" 1, "name" "Joe Black"}`, "1.0"))
+	gitNamespace.ResetMeta(MakeMeta(nil, `Provides API for accessing and manipulating git repositories.`, "1.0"))
 
 	gitNamespace.InternVar("commit", commit_,
 		MakeMeta(
