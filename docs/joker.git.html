@@ -1,0 +1,181 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.git</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Provides API for accessing and manipulating git repositories.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#commit">commit</a>
+</li>
+<li>
+  <a href="#config">config</a>
+</li>
+<li>
+  <a href="#head">head</a>
+</li>
+<li>
+  <a href="#log">log</a>
+</li>
+<li>
+  <a href="#object">object</a>
+</li>
+<li>
+  <a href="#open">open</a>
+</li>
+<li>
+  <a href="#ref">ref</a>
+</li>
+<li>
+  <a href="#resolve-revision">resolve-revision</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="commit">commit</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(commit repo hash)</code></div>
+</pre>
+  <p class="var-docstr">Returns a commit with the given hash.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="config">config</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(config repo)</code></div>
+</pre>
+  <p class="var-docstr">Returns git repo&#39;s config</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="head">head</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(head repo)</code></div>
+</pre>
+  <p class="var-docstr">Returns the reference where HEAD is pointing to.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="log">log</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(log repo opts)</code></div>
+</pre>
+  <p class="var-docstr">Returns the commit history from the given opts.<br>
+  opts may have the following keys:<br>
+<br>
+  :from - when the from option is set the log will only contain commits<br>
+  reachable from it. If this option is not set, HEAD will be used as<br>
+  the default from.<br>
+<br>
+  :order - the default traversal algorithm is depth-first search.<br>
+  Set order to :committer-time for ordering by committer time (more compatible with `git log`).<br>
+  Set order to :bsf for breadth-first search<br>
+<br>
+  :path-filter - filter commits based on the path of files that are updated.<br>
+  Takes file path as argument and should return true if the file is desired.<br>
+  It can be used to implement `git log -- &lt;path&gt;`.<br>
+  Either &lt;path&gt; is a file path, or directory path, or a regexp of file/directory path.<br>
+<br>
+  :all - pretend as if all the refs in refs/, along with HEAD, are listed on the command line as &lt;commit&gt;.<br>
+  It is equivalent to running `git log --all`.<br>
+  If set to true, the :from option will be ignored.<br>
+<br>
+  :since - show commits more recent than a specific date.<br>
+  It is equivalent to running `git log --since &lt;date&gt;` or `git log --after &lt;date&gt;`.<br>
+<br>
+  :until - show commits older than a specific date.<br>
+  It is equivalent to running `git log --until &lt;date&gt;` or `git log --before &lt;date&gt;`.<br>
+</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="object">object</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(object repo hash)</code></div>
+</pre>
+  <p class="var-docstr">Returns an Object with the given hash.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="open">open</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(open path)</code></div>
+</pre>
+  <p class="var-docstr">Opens a git repository from the given path. It detects if the<br>
+   repository is bare or a normal one. Throws an error if the path doesn&#39;t contain a valid repository.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="ref">ref</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(ref repo name resolved)</code></div>
+</pre>
+  <p class="var-docstr">Returns the reference for a given reference name. If resolved is<br>
+   true, any symbolic reference will be resolved.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="resolve-revision">resolve-revision</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3</span>
+  <pre class="var-usage"><div><code>(resolve-revision repo revision)</code></div>
+</pre>
+  <p class="var-docstr">Resolves revision to corresponding hash. It will always<br>
+   resolve to a commit hash, not a tree or annotated tag.</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>
