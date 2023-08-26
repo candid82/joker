@@ -257,6 +257,29 @@ func findCommit(repo *git.Repository, hash string) Map {
 	return makeCommit(obj)
 }
 
+func addPath(repo *git.Repository, path string) string {
+	workTree, err := repo.Worktree()
+	PanicOnErr(err)
+	hash, err := workTree.Add(path)
+	PanicOnErr(err)
+	return hash.String()
+}
+
+func addCommit(repo *git.Repository, msg string, opts Map) string {
+	workTree, err := repo.Worktree()
+	PanicOnErr(err)
+	var commitOpts git.CommitOptions
+	if ok, v := opts.Get(MakeKeyword("all")); ok {
+		commitOpts.All = ToBool(v)
+	}
+	if ok, v := opts.Get(MakeKeyword("allow-empty-commits")); ok {
+		commitOpts.AllowEmptyCommits = ToBool(v)
+	}
+	hash, err := workTree.Commit(msg, &commitOpts)
+	PanicOnErr(err)
+	return hash.String()
+}
+
 func findObject(repo *git.Repository, hash string) Map {
 	obj, err := repo.Object(plumbing.AnyObject, plumbing.NewHash(hash))
 	PanicOnErr(err)

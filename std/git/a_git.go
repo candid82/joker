@@ -6,6 +6,43 @@ import (
 	. "github.com/candid82/joker/core"
 )
 
+var __add_commit__P ProcFn = __add_commit_
+var add_commit_ Proc = Proc{Fn: __add_commit__P, Name: "add_commit_", Package: "std/git"}
+
+func __add_commit_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		repo := ExtractGitRepo(_args, 0)
+		msg := ExtractString(_args, 1)
+		opts := ExtractMap(_args, 2)
+		_res := addCommit(repo, msg, opts)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __add_path__P ProcFn = __add_path_
+var add_path_ Proc = Proc{Fn: __add_path__P, Name: "add_path_", Package: "std/git"}
+
+func __add_path_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		repo := ExtractGitRepo(_args, 0)
+		path := ExtractString(_args, 1)
+		_res := addPath(repo, path)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __commit__P ProcFn = __commit_
 var commit_ Proc = Proc{Fn: __commit__P, Name: "commit_", Package: "std/git"}
 

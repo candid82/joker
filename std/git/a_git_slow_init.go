@@ -14,6 +14,22 @@ func InternsOrThunks() {
 	}
 	gitNamespace.ResetMeta(MakeMeta(nil, `Provides API for accessing and manipulating git repositories.`, "1.0"))
 
+	gitNamespace.InternVar("add-commit", add_commit_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("msg"), MakeSymbol("opts"))),
+			`Stores the current contents of the index in a new commit along with
+   a log message from the user describing the changes.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	gitNamespace.InternVar("add-path", add_path_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("path"))),
+			`Adds the file contents of a file in the worktree to the index. If the
+   file is already staged in the index no error is thrown. If a file deleted
+   from the workspace is given, the file is removed from the index. If a
+   directory given, adds the files and all his sub-directories recursively in
+   the worktree to the index. If any of the files is already staged in the index
+   no error is thrown. When path is a file, the hash is returned.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
+
 	gitNamespace.InternVar("commit", commit_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),

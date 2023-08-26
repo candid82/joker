@@ -77,3 +77,21 @@
   {:added "1.3"
    :go "findCommit(repo, hash)"}
   [^GitRepo repo ^String hash])
+
+(defn ^String add-path
+  "Adds the file contents of a file in the worktree to the index. If the
+   file is already staged in the index no error is thrown. If a file deleted
+   from the workspace is given, the file is removed from the index. If a
+   directory given, adds the files and all his sub-directories recursively in
+   the worktree to the index. If any of the files is already staged in the index
+   no error is thrown. When path is a file, the hash is returned."
+  {:added "1.4"
+   :go "addPath(repo, path)"}
+  [^GitRepo repo ^String path])
+
+(defn ^String add-commit
+  "Stores the current contents of the index in a new commit along with
+   a log message from the user describing the changes."
+  {:added "1.4"
+   :go "addCommit(repo, msg, opts)"}
+  [^GitRepo repo ^String msg ^Map opts])
