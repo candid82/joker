@@ -310,8 +310,6 @@
 (defn parse-double ^Double [^String s])
 (defn parse-long ^Number [^String s])
 (defn parse-boolean ^Boolean [^String s])
-(defn parse-uuid [^String s])
-(defn random-uuid [])
 
 (defn iteration ^Seqable [^Callable step & opts])
 

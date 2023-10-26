@@ -218,6 +218,8 @@
 (defn inst-ms [inst])
 (defn inst? [x])
 (defn uuid? [x])
+(defn parse-uuid [^String s])
+(defn random-uuid [])
 (defn halt-when
   ([^Callable pred])
   ([^Callable pred ^Callable retf]))
