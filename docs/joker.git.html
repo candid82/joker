@@ -29,6 +29,12 @@
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
+  <a href="#add-commit">add-commit</a>
+</li>
+<li>
+  <a href="#add-path">add-path</a>
+</li>
+<li>
   <a href="#commit">commit</a>
 </li>
 <li>
@@ -66,6 +72,32 @@
     <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
+  <h3 class="Function" id="add-commit">add-commit</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.4</span>
+  <pre class="var-usage"><div><code>(add-commit repo msg opts)</code></div>
+</pre>
+  <p class="var-docstr">Stores the current contents of the index in a new commit along with<br>
+   a log message from the user describing the changes.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="add-path">add-path</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.4</span>
+  <pre class="var-usage"><div><code>(add-path repo path)</code></div>
+</pre>
+  <p class="var-docstr">Adds the file contents of a file in the worktree to the index. If the<br>
+   file is already staged in the index no error is thrown. If a file deleted<br>
+   from the workspace is given, the file is removed from the index. If a<br>
+   directory given, adds the files and all his sub-directories recursively in<br>
+   the worktree to the index. If any of the files is already staged in the index<br>
+   no error is thrown. When path is a file, the hash is returned.</p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="commit">commit</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
