@@ -258,6 +258,7 @@ func init() {
 		"%s",`[1:],
 			ns))
 	}
+	sort.Strings(coreNamespaces)
 	dataContent := strings.Replace(dataTemplate, "{coreNamespaces}", strings.Join(coreNamespaces, "\n"), 1)
 	ioutil.WriteFile("a_data.go", []byte(dataContent), 0666)
 }
