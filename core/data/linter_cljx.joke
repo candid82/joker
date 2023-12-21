@@ -215,6 +215,7 @@
 
 ;; Clojure core functions not supported by Joker
 
+(defn abs ^Number [^Number num])
 (defn inst-ms [inst])
 (defn inst? [x])
 (defn uuid? [x])
