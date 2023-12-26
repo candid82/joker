@@ -1,6 +1,5 @@
-(ns
-  ^{:go-imports ["io"]
-    :doc "Provides basic interfaces to I/O primitives."}
+(ns ^{:go-imports ["io"]
+      :doc "Provides basic interfaces to I/O primitives."}
   io)
 
 (defn ^Int copy
@@ -9,7 +8,7 @@
   src must be IOReader, e.g. as returned by joker.os/open.
   dst must be IOWriter, e.g. as returned by joker.os/create."
   {:added "1.0"
-  :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
+   :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
   [^IOWriter dst ^IOReader src])
 
 (defn pipe

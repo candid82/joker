@@ -132,7 +132,7 @@ func InternsOrThunks() {
 	timeNamespace.InternVar("day-of-year", day_of_year_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
-			`Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years.`, "1.3.3").Plus(MakeKeyword("tag"), String{S: "Int"}))
+			`Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years.`, "1.3.4").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("format", format_,
 		MakeMeta(

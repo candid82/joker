@@ -1,24 +1,23 @@
-(ns
-  ^{:go-imports ["math"]
-    :doc "Provides basic constants and mathematical functions."}
+(ns ^{:go-imports ["math"]
+      :doc "Provides basic constants and mathematical functions."}
   math)
 
 (defn ^Double sin
   "Returns the sine of the radian argument x."
   {:added "1.0"
-  :go "math.Sin(x.Double().D)"}
+   :go "math.Sin(x.Double().D)"}
   [^Number x])
 
 (defn ^Double cos
   "Returns the cosine of the radian argument x."
   {:added "1.0"
-  :go "math.Cos(x.Double().D)"}
+   :go "math.Cos(x.Double().D)"}
   [^Number x])
 
 (defn ^Double hypot
   "Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow."
   {:added "1.0"
-  :go "math.Hypot(p.Double().D, q.Double().D)"}
+   :go "math.Hypot(p.Double().D, q.Double().D)"}
   [^Number p, ^Number q])
 
 (defn ^Double abs
@@ -42,13 +41,13 @@
 (defn ^Double copy-sign
   "Returns value with the magnitude of x and the sign of y."
   {:added "1.0"
-  :go "math.Copysign(x.Double().D, y.Double().D)"}
+   :go "math.Copysign(x.Double().D, y.Double().D)"}
   [^Number x, ^Number y])
 
 (defn ^Double dim
   "Returns the maximum of x-y and 0."
   {:added "1.0"
-  :go "math.Dim(x.Double().D, y.Double().D)"}
+   :go "math.Dim(x.Double().D, y.Double().D)"}
   [^Number x, ^Number y])
 
 (defn ^Double exp
@@ -191,116 +190,102 @@
    :go "math.Trunc(x.Double().D)"}
   [^Number x])
 
-(def
-  ^{:doc "pi"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Pi"}
+(def ^{:doc "pi"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Pi"}
   pi)
 
-(def
-  ^{:doc "e"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.E"}
+(def ^{:doc "e"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.E"}
   e)
 
-(def
-  ^{:doc "Phi"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Phi"}
+(def ^{:doc "Phi"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Phi"}
   phi)
 
-(def
-  ^{:doc "Square root of 2"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Sqrt2"}
+(def ^{:doc "Square root of 2"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Sqrt2"}
   sqrt-of-2)
 
-(def
-  ^{:doc "Square root of e"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.SqrtE"}
+(def ^{:doc "Square root of e"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.SqrtE"}
   sqrt-of-e)
 
-(def
-  ^{:doc "Square root of pi"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.SqrtPi"}
+(def ^{:doc "Square root of pi"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.SqrtPi"}
   sqrt-of-pi)
 
-(def
-  ^{:doc "Square root of phi"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.SqrtPhi"}
+(def ^{:doc "Square root of phi"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.SqrtPhi"}
   sqrt-of-phi)
 
-(def
-  ^{:doc "Natural logarithm of 2"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Ln2"}
+(def ^{:doc "Natural logarithm of 2"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Ln2"}
   ln-of-2)
 
-(def
-  ^{:doc "Base-2 logarithm of e"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Log2E"}
+(def ^{:doc "Base-2 logarithm of e"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Log2E"}
   log-2-of-e)
 
-(def
-  ^{:doc "Natural logarithm of 10"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Ln10"}
+(def ^{:doc "Natural logarithm of 10"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Ln10"}
   ln-of-10)
 
-(def
-  ^{:doc "Base-10 logarithm of e"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Log10E"}
+(def ^{:doc "Base-10 logarithm of e"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Log10E"}
   log-10-of-e)
 
-(def
-  ^{:doc "Natural logarithm of 2"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.Ln2"}
+(def ^{:doc "Natural logarithm of 2"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.Ln2"}
   ln-of-2)
 
-(def
-  ^{:doc "Largest finite value representable by Double"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.MaxFloat64"}
+(def ^{:doc "Largest finite value representable by Double"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.MaxFloat64"}
   max-double)
 
-(def
-  ^{:doc "Smallest positive, non-zero value representable by Double"
-    :added "1.0"
-    :tag Double
-    :const true
-    :go "math.SmallestNonzeroFloat64"}
+(def ^{:doc "Smallest positive, non-zero value representable by Double"
+       :added "1.0"
+       :tag Double
+       :const true
+       :go "math.SmallestNonzeroFloat64"}
   smallest-nonzero-double)
 
 (defn ^BigInt precision

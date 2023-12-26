@@ -1,6 +1,5 @@
-(ns
-  ^{:go-imports []
-    :doc "Implements GitHub Flavored Markdown rendering."}
+(ns ^{:go-imports []
+      :doc "Implements GitHub Flavored Markdown rendering."}
   markdown)
 
 (defn ^String convert-string
@@ -14,5 +13,5 @@
   {:added "1.0"
    :go {1 "convertString(s)"
         2 "convertStringOpts(s, opts)"}}
-   ([^String s])
-   ([^String s ^Map opts]))
+  ([^String s])
+  ([^String s ^Map opts]))

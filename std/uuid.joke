@@ -1,5 +1,4 @@
-(ns
-  ^{:doc "Generates UUIDs."}
+(ns ^{:doc "Generates UUIDs."}
   uuid)
 
 (defn ^String new

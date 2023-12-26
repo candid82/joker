@@ -1,6 +1,5 @@
-(ns
-  ^{:go-imports []
-    :doc "Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
+(ns ^{:go-imports []
+      :doc "Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
 
          Example:
 

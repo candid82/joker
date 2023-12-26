@@ -1,45 +1,44 @@
-(ns
-  ^{:go-imports ["time"]
-    :doc "Provides functionality for measuring and displaying time."}
+(ns ^{:go-imports ["time"]
+      :doc "Provides functionality for measuring and displaying time."}
   time)
 
 (defn sleep
   "Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately."
   {:added "1.0"
-  :go "! RT.GIL.Unlock(); time.Sleep(time.Duration(d)); RT.GIL.Lock(); _res := NIL"}
+   :go "! RT.GIL.Unlock(); time.Sleep(time.Duration(d)); RT.GIL.Lock(); _res := NIL"}
   [^Integer d])
 
 (defn ^Time now
   "Returns the current local time."
   {:added "1.0"
-  :go "time.Now()"}
+   :go "time.Now()"}
   [])
 
 (defn ^Time from-unix
   "Returns the local Time corresponding to the given Unix time, sec seconds and
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999]."
   {:added "1.0"
-  :go "time.Unix(int64(sec), int64(nsec))"}
+   :go "time.Unix(int64(sec), int64(nsec))"}
   [^Integer sec ^Integer nsec])
 
 (defn ^Int unix
   "Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC."
   {:added "1.0"
-  :go "int(t.Unix())"}
+   :go "int(t.Unix())"}
   [^Time t])
 
 (defn ^Int sub
   "Returns the duration t-u in nanoseconds."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "int(t.Sub(u))"}
+   ;; TODO: 32-bit issue
+   :go "int(t.Sub(u))"}
   [^Time t ^Time u])
 
 (defn ^Time add
   "Returns the time t+d."
   {:added "1.0"
-  :go "t.Add(time.Duration(d))"}
+   :go "t.Add(time.Duration(d))"}
   [^Time t ^Integer d])
 
 (defn ^Time add-date
@@ -59,22 +58,22 @@
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "!t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)"}
+   ;; TODO: 32-bit issue
+   :go "!t, err := time.ParseDuration(s); PanicOnErr(err); _res := int(t)"}
   [^String s])
 
 (defn ^Int since
   "Returns the time in nanoseconds elapsed since t."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "int(time.Since(t))"}
+   ;; TODO: 32-bit issue
+   :go "int(time.Since(t))"}
   [^Time t])
 
 (defn ^Int until
   "Returns the duration in nanoseconds until t."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "int(time.Until(t))"}
+   ;; TODO: 32-bit issue
+   :go "int(time.Until(t))"}
   [^Time t])
 
 (defn ^String format
@@ -84,46 +83,46 @@
   would be displayed if it were the value; it serves as an example of the desired output.
   The same display rules will then be applied to the time value.."
   {:added "1.0"
-  :go "t.Format(layout)"}
+   :go "t.Format(layout)"}
   [^Time t ^String layout])
 
 (defn ^Double hours
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of hours."
   {:added "1.0"
-  :go "time.Duration(d).Hours()"}
+   :go "time.Duration(d).Hours()"}
   [^Integer d])
 
 (defn ^Double minutes
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes."
   {:added "1.0"
-  :go "time.Duration(d).Minutes()"}
+   :go "time.Duration(d).Minutes()"}
   [^Integer d])
 
 (defn ^Int round
   "Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
   The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "int(time.Duration(d).Round(time.Duration(m)))"}
+   ;; TODO: 32-bit issue
+   :go "int(time.Duration(d).Round(time.Duration(m)))"}
   [^Integer d ^Integer m])
 
 (defn ^Double seconds
   "Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds."
   {:added "1.0"
-  :go "time.Duration(d).Seconds()"}
+   :go "time.Duration(d).Seconds()"}
   [^Integer d])
 
 (defn ^String string
   "Returns a string representing the duration in the form 72h3m0.5s."
   {:added "1.0"
-  :go "time.Duration(d).String()"}
+   :go "time.Duration(d).String()"}
   [^Integer d])
 
 (defn ^Int truncate
   "Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged."
   {:added "1.0"
-  ;; TODO: 32-bit issue
-  :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
+   ;; TODO: 32-bit issue
+   :go "int(time.Duration(d).Truncate(time.Duration(m)))"}
   [^Integer d ^Integer m])
 
 (defn ^Time in-timezone
@@ -133,175 +132,154 @@
   [^Time t ^String tz])
 
 (defn ^Int day-of-year
-	"Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years."
-	{:added "1.3.3"
-	:go "t.YearDay()"}
-	[^Time t])
+  "Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years."
+  {:added "1.3.4"
+   :go "t.YearDay()"}
+  [^Time t])
 
-(def
-  ^{:doc "Number of nanoseconds in 1 nanosecond"
-    :added "1.0"
-    :tag Int
-    :const true
-    :go "int(time.Nanosecond)"}
+(def ^{:doc "Number of nanoseconds in 1 nanosecond"
+       :added "1.0"
+       :tag Int
+       :const true
+       :go "int(time.Nanosecond)"}
   nanosecond)
 
-(def
-  ^{:doc "Number of nanoseconds in 1 microsecond"
-    :added "1.0"
-    :tag Int
-    :const true
-    :go "int(time.Microsecond)"}
+(def ^{:doc "Number of nanoseconds in 1 microsecond"
+       :added "1.0"
+       :tag Int
+       :const true
+       :go "int(time.Microsecond)"}
   microsecond)
 
-(def
-  ^{:doc "Number of nanoseconds in 1 millisecond"
-    :added "1.0"
-    :tag Int
-    :const true
-    :go "int(time.Millisecond)"}
+(def ^{:doc "Number of nanoseconds in 1 millisecond"
+       :added "1.0"
+       :tag Int
+       :const true
+       :go "int(time.Millisecond)"}
   millisecond)
 
-(def
-  ^{:doc "Number of nanoseconds in 1 second"
-    :added "1.0"
-    :tag Int
-    :const true
-    :go "int(time.Second)"}
+(def ^{:doc "Number of nanoseconds in 1 second"
+       :added "1.0"
+       :tag Int
+       :const true
+       :go "int(time.Second)"}
   second)
 
-(def
-  ^{:doc "Number of nanoseconds in 1 minute"
-    :added "1.0"
-    :tag BigInt
-    :const true
-    :go "MakeMathBigIntFromInt64(int64(time.Minute))"}
+(def ^{:doc "Number of nanoseconds in 1 minute"
+       :added "1.0"
+       :tag BigInt
+       :const true
+       :go "MakeMathBigIntFromInt64(int64(time.Minute))"}
   minute)
 
-(def
-  ^{:doc "Number of nanoseconds in 1 hour"
-    :added "1.0"
-    :tag BigInt
-    :const true
-    :go "MakeMathBigIntFromInt64(int64(time.Hour))"}
+(def ^{:doc "Number of nanoseconds in 1 hour"
+       :added "1.0"
+       :tag BigInt
+       :const true
+       :go "MakeMathBigIntFromInt64(int64(time.Hour))"}
   hour)
 
-(def
-  ^{:doc "Mon Jan _2 15:04:05 2006"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.ANSIC"}
+(def ^{:doc "Mon Jan _2 15:04:05 2006"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.ANSIC"}
   ansi-c)
 
-(def
-  ^{:doc "Mon Jan _2 15:04:05 MST 2006"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.UnixDate"}
+(def ^{:doc "Mon Jan _2 15:04:05 MST 2006"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.UnixDate"}
   unix-date)
 
-(def
-  ^{:doc "Mon Jan 02 15:04:05 -0700 2006"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RubyDate"}
+(def ^{:doc "Mon Jan 02 15:04:05 -0700 2006"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RubyDate"}
   ruby-date)
 
-(def
-  ^{:doc "02 Jan 06 15:04 MST"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC822"}
+(def ^{:doc "02 Jan 06 15:04 MST"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC822"}
   rfc822)
 
-(def
-  ^{:doc "02 Jan 06 15:04 -0700"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC822Z"}
+(def ^{:doc "02 Jan 06 15:04 -0700"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC822Z"}
   rfc822-z)
 
-(def
-  ^{:doc "Monday, 02-Jan-06 15:04:05 MST"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC850"}
+(def ^{:doc "Monday, 02-Jan-06 15:04:05 MST"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC850"}
   rfc850)
 
-(def
-  ^{:doc "Mon, 02 Jan 2006 15:04:05 MST"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC1123"}
+(def ^{:doc "Mon, 02 Jan 2006 15:04:05 MST"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC1123"}
   rfc1123)
 
-(def
-  ^{:doc "Mon, 02 Jan 2006 15:04:05 -0700"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC1123Z"}
+(def ^{:doc "Mon, 02 Jan 2006 15:04:05 -0700"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC1123Z"}
   rfc1123-z)
 
-(def
-  ^{:doc "2006-01-02T15:04:05Z07:00"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC3339"}
+(def ^{:doc "2006-01-02T15:04:05Z07:00"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC3339"}
   rfc3339)
 
-(def
-  ^{:doc "2006-01-02T15:04:05.999999999Z07:00"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.RFC3339Nano"}
+(def ^{:doc "2006-01-02T15:04:05.999999999Z07:00"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.RFC3339Nano"}
   rfc3339-nano)
 
-(def
-  ^{:doc "3:04PM"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.Kitchen"}
+(def ^{:doc "3:04PM"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.Kitchen"}
   kitchen)
 
-(def
-  ^{:doc "Jan _2 15:04:05"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.Stamp"}
+(def ^{:doc "Jan _2 15:04:05"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.Stamp"}
   stamp)
 
-(def
-  ^{:doc "Jan _2 15:04:05.000"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.StampMilli"}
+(def ^{:doc "Jan _2 15:04:05.000"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.StampMilli"}
   stamp-milli)
 
-(def
-  ^{:doc "Jan _2 15:04:05.000000"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.StampMicro"}
+(def ^{:doc "Jan _2 15:04:05.000000"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.StampMicro"}
   stamp-micro)
 
-(def
-  ^{:doc "Jan _2 15:04:05.000000000"
-    :added "1.0"
-    :tag String
-    :const true
-    :go "time.StampNano"}
+(def ^{:doc "Jan _2 15:04:05.000000000"
+       :added "1.0"
+       :tag String
+       :const true
+       :go "time.StampNano"}
   stamp-nano)

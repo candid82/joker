@@ -1,30 +1,29 @@
-(ns
-  ^{:go-imports ["regexp" "strings" "unicode"]
-    :doc "Implements simple functions to manipulate strings."}
+(ns ^{:go-imports ["regexp" "strings" "unicode"]
+      :doc "Implements simple functions to manipulate strings."}
   string)
 
 (defn ^Boolean ends-with?
   "True if s ends with substr."
   {:added "1.0"
-  :go "strings.HasSuffix(s, substr)"}
+   :go "strings.HasSuffix(s, substr)"}
   [^String s ^Stringable substr])
 
 (defn ^Boolean starts-with?
   "True if s starts with substr."
   {:added "1.0"
-  :go "strings.HasPrefix(s, substr)"}
+   :go "strings.HasPrefix(s, substr)"}
   [^String s ^Stringable substr])
 
 (defn ^String pad-right
   "Returns s padded with pad at the end to length n."
   {:added "1.0"
-  :go "padRight(s, pad, n)"}
+   :go "padRight(s, pad, n)"}
   [^String s ^Stringable pad ^Int n])
 
 (defn ^String pad-left
   "Returns s padded with pad at the beginning to length n."
   {:added "1.0"
-  :go "padLeft(s, pad, n)"}
+   :go "padLeft(s, pad, n)"}
   [^String s ^Stringable pad ^Int n])
 
 (defn split
@@ -34,8 +33,8 @@
   be the unsplit remainder. If n is <= 0, no limit is in effect (all substrings
   are returned in the vector)."
   {:added "1.0"
-  :go {2 "splitOnStringOrRegex(s, sep, 0)"
-       3 "splitOnStringOrRegex(s, sep, n)"}}
+   :go {2 "splitOnStringOrRegex(s, sep, 0)"
+        3 "splitOnStringOrRegex(s, sep, n)"}}
   ;; TODO: ^"String|Regex" sep
   ([^String s ^Object sep])
   ([^String s ^Object sep ^Int n]))
@@ -43,14 +42,14 @@
 (defn split-lines
   "Splits string on \\n or \\r\\n. Returns vector of the splits."
   {:added "1.0"
-  :go "split(s, newLine, 0)"}
+   :go "split(s, newLine, 0)"}
   [^String s])
 
 (defn ^String join
   "Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator."
   {:added "1.0"
-  :go {1 "join(\"\", coll)"
-       2 "join(separator, coll)"}}
+   :go {1 "join(\"\", coll)"
+        2 "join(separator, coll)"}}
   ([^Seqable coll])
   ([^Stringable separator ^Seqable coll]))
 
@@ -62,7 +61,7 @@
   parenthesized group in the pattern.
   "
   {:added "1.0"
-  :go "replace(s, match, repl)"}
+   :go "replace(s, match, repl)"}
   [^String s ^Object match ^Stringable repl])
 
 (defn ^String replace-first
@@ -73,25 +72,25 @@
   parenthesized group in the pattern.
   "
   {:added "1.0"
-  :go "replaceFirst(s, match, repl)"}
+   :go "replaceFirst(s, match, repl)"}
   [^String s ^Object match ^Stringable repl])
 
 (defn ^String trim
   "Removes whitespace from both ends of string."
   {:added "1.0"
-  :go "strings.TrimSpace(s)"}
+   :go "strings.TrimSpace(s)"}
   [^String s])
 
 (defn ^String trim-newline
   "Removes all trailing newline \\n or return \\r characters from string."
   {:added "1.0"
-  :go "strings.TrimRight(s, \"\\n\\r\")"}
+   :go "strings.TrimRight(s, \"\\n\\r\")"}
   [^String s])
 
 (defn ^String trim-left
   "Removes whitespace from the left side of string."
   {:added "1.0"
-  :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
+   :go "strings.TrimLeftFunc(s, unicode.IsSpace)"}
   [^String s])
 
 (defn ^String triml
@@ -103,7 +102,7 @@
 (defn ^String trim-right
   "Removes whitespace from the right side of string."
   {:added "1.0"
-  :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
+   :go "strings.TrimRightFunc(s, unicode.IsSpace)"}
   [^String s])
 
 (defn ^String trimr
@@ -115,14 +114,14 @@
 (defn ^Boolean blank?
   "True if s is nil, empty, or contains only whitespace."
   {:added "1.0"
-  :go "isBlank(s)"}
+   :go "isBlank(s)"}
   [^Object s])
 
 (defn ^String capitalize
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   {:added "1.0"
-  :go "capitalize(s)"}
+   :go "capitalize(s)"}
   [^Stringable s])
 
 (defn ^String escape
@@ -132,21 +131,21 @@
   If (cmap ch) is nil, append ch to the new string.
   If (cmap ch) is non-nil, append (str (cmap ch)) instead."
   {:added "1.0"
-  :go "escape(s, cmap)"}
+   :go "escape(s, cmap)"}
   [^String s ^Callable cmap])
 
 (defn ^Boolean includes?
   "True if s includes substr."
   {:added "1.0"
-  :go "strings.Contains(s, substr)"}
+   :go "strings.Contains(s, substr)"}
   [^String s ^Stringable substr])
 
 (defn index-of
   "Return index of value (string or char) in s, optionally searching
   forward from from or nil if not found."
   {:added "1.0"
-  :go {2 "indexOf(s, value, 0)"
-       3 "indexOf(s, value, from)"}}
+   :go {2 "indexOf(s, value, 0)"
+        3 "indexOf(s, value, from)"}}
   ([^String s ^Object value])
   ([^String s ^Object value ^Int from]))
 
@@ -154,27 +153,27 @@
   "Return last index of value (string or char) in s, optionally
   searching backward from from or nil if not found."
   {:added "1.0"
-  :go {2 "lastIndexOf(s, value, 0)"
-       3 "lastIndexOf(s, value, from)"}}
+   :go {2 "lastIndexOf(s, value, 0)"
+        3 "lastIndexOf(s, value, from)"}}
   ([^String s ^Object value])
   ([^String s ^Object value ^Int from]))
 
 (defn ^String lower-case
   "Converts string to all lower-case."
   {:added "1.0"
-  :go "strings.ToLower(s)"}
+   :go "strings.ToLower(s)"}
   [^Stringable s])
 
 (defn ^String upper-case
   "Converts string to all upper-case."
   {:added "1.0"
-  :go "strings.ToUpper(s)"}
+   :go "strings.ToUpper(s)"}
   [^Stringable s])
 
 (defn ^String reverse
   "Returns s with its characters reversed."
   {:added "1.0"
-  :go "reverse(s)"}
+   :go "reverse(s)"}
   [^String s])
 
 (defn ^Regex re-quote
