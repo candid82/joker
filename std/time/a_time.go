@@ -66,6 +66,23 @@ func __add_date_(_args []Object) Object {
 	return NIL
 }
 
+var __day_of_year__P ProcFn = __day_of_year_
+var day_of_year_ Proc = Proc{Fn: __day_of_year__P, Name: "day_of_year_", Package: "std/time"}
+
+func __day_of_year_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		t := ExtractTime(_args, 0)
+		_res := t.YearDay()
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __format__P ProcFn = __format_
 var format_ Proc = Proc{Fn: __format__P, Name: "format_", Package: "std/time"}
 
