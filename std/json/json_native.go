@@ -36,7 +36,7 @@ func fromObject(obj Object) interface{} {
 		return res
 	case Seqable:
 		s := obj.Seq()
-		var res []interface{}
+		var res []interface{} = []interface{}{}
 		for !s.IsEmpty() {
 			res = append(res, fromObject(s.First()))
 			s = s.Rest()
