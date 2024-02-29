@@ -12,6 +12,7 @@
   (is (= "\"keyword\"" (json/write-string :keyword)))
   (is (= "null" (json/write-string nil)))
   (is (= "\"string\"" (json/write-string "string")))
+  (is (= "[]" (json/write-string [])))
   (is (= "{\"keyword\":\"string\"}" (json/write-string {:keyword "string"})))
   (is (= "[1,true]" (json/write-string [1 true])))
   (is (= "[\"string\",null]" (json/write-string (drop 2 [1 true "string" nil]))))
