@@ -1475,6 +1475,7 @@ func loadFile(filename string) Object {
 	var reader *Reader
 	f, err := os.Open(filename)
 	PanicOnErr(err)
+	defer f.Close()
 	reader = NewReader(bufio.NewReader(f), filename)
 	ProcessReaderFromEval(reader, filename)
 	return NIL
