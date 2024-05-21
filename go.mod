@@ -8,7 +8,7 @@ require (
 	github.com/jcburley/go-spew v1.3.0
 	github.com/pkg/profile v1.2.1
 	github.com/yuin/goldmark v1.4.13
-	go.etcd.io/bbolt v1.3.3
+	go.etcd.io/bbolt v1.3.7
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -32,7 +32,7 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
