@@ -21,3 +21,12 @@ func queryUnescape(s string) string {
 	}
 	return res
 }
+
+func parseQuery(s string) Object {
+	values, _ := url.ParseQuery(s)
+	res := EmptyArrayMap()
+	for k, v := range values {
+		res.Add(MakeString(k), MakeStringVector(v))
+	}
+	return res
+}

@@ -14,6 +14,15 @@ func InternsOrThunks() {
 	}
 	urlNamespace.ResetMeta(MakeMeta(nil, `Parses URLs and implements query escaping.`, "1.0"))
 
+	urlNamespace.InternVar("parse-query", parse_query_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			`Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.
+  Always returns a non-nil map containing all the valid query parameters found.
+  Query is expected to be a list of key=value settings separated by ampersands. A setting without
+  an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
+  semicolon are considered invalid. `, "1.3.6"))
+
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),

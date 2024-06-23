@@ -7,6 +7,23 @@ import (
 	"net/url"
 )
 
+var __parse_query__P ProcFn = __parse_query_
+var parse_query_ Proc = Proc{Fn: __parse_query__P, Name: "parse_query_", Package: "std/url"}
+
+func __parse_query_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 1:
+		s := ExtractString(_args, 0)
+		_res := parseQuery(s)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __path_escape__P ProcFn = __path_escape_
 var path_escape_ Proc = Proc{Fn: __path_escape__P, Name: "path_escape_", Package: "std/url"}
 

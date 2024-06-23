@@ -31,3 +31,13 @@
   {:added "1.0"
    :go "queryUnescape(s)"}
   [^String s])
+
+(defn parse-query
+  "Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.
+  Always returns a non-nil map containing all the valid query parameters found.
+  Query is expected to be a list of key=value settings separated by ampersands. A setting without
+  an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
+  semicolon are considered invalid. "
+  {:added "1.3.6"
+   :go "parseQuery(s)"}
+  [^String s])

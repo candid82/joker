@@ -1,0 +1,9 @@
+(ns joker.test-joker.url
+  (:require [joker.test :refer [deftest is]]
+            [joker.url :as url]))
+
+(deftest parse-query
+  (is (= {} (url/parse-query "")))
+  (is (= {"q" ["1"]} (url/parse-query "q=1")))
+  (is (= {"q" [""]} (url/parse-query "q")))
+  (is (= {"foo" ["1"] "bar" ["2" "3"]} (url/parse-query "foo=1&bar=2&bar=3"))))
