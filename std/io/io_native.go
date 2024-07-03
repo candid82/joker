@@ -22,3 +22,12 @@ func close(f Object) Nil {
 	}
 	panic(RT.NewError("Object is not closable: " + f.ToString(false)))
 }
+
+func read(r io.Reader, n int) string {
+	buf := make([]byte, n)
+	cnt, err := r.Read(buf)
+	if err != io.EOF {
+		PanicOnErr(err)
+	}
+	return string(buf[:cnt])
+}

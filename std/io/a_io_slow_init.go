@@ -34,4 +34,10 @@ func InternsOrThunks() {
   with code expecting an IOWriter.
   Returns a vector [reader, writer].`, "1.0"))
 
+	ioNamespace.InternVar("read", read_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("r"), MakeSymbol("n"))),
+			`Reads up to n bytes from IOReader r and returns a string of the read bytes.
+  May return a shorter (or blank) string if EOF is encountered.`, "1.3.6").Plus(MakeKeyword("tag"), String{S: "String"}))
+
 }

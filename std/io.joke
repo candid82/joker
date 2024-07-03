@@ -24,3 +24,10 @@
   {:added "1.0"
    :go "close(f)"}
   [^Object f])
+
+(defn ^String read
+  "Reads up to n bytes from IOReader r and returns a string of the read bytes.
+  May return a shorter (or blank) string if EOF is encountered."
+  {:added "1.3.6"
+   :go "read(r, n)"}
+  ^String [^IOReader r ^Int n])

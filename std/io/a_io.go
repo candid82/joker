@@ -60,6 +60,24 @@ func __pipe_(_args []Object) Object {
 	return NIL
 }
 
+var __read__P ProcFn = __read_
+var read_ Proc = Proc{Fn: __read__P, Name: "read_", Package: "std/io"}
+
+func __read_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		r := ExtractIOReader(_args, 0)
+		n := ExtractInt(_args, 1)
+		_res := read(r, n)
+		return MakeString(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func Init() {
 
 	InternsOrThunks()
