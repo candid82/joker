@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
+set -eu
 
 export GOARCH=amd64
 export GOOS=
 
 for GOOS in darwin linux windows freebsd netbsd openbsd; do
-    go build
+    if ! go build; then
+        echo \
+            error: \
+            "building for GOARCH=$GOARCH GOOS=$GOOS failed" \
+            >/dev/stderr \
+            ;
+        continue
+    fi
 
     case "$GOOS" in
     darwin) os=mac ;;
