@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-version=$1
+export GOARCH=amd64
+export GOOS=
 
-GOOS=darwin GOARCH=amd64 go build
-zip joker-mac-amd64.zip joker
-GOOS=linux GOARCH=amd64 go build
-zip joker-linux-amd64.zip joker
-GOOS=windows GOARCH=amd64 go build
-zip joker-win-amd64.zip joker.exe
+for GOOS in darwin linux windows freebsd netbsd openbsd; do
+    go build
+
+    case "$GOOS" in
+    darwin) os=mac ;;
+    windows) os=win ;;
+    *) os=$GOOS ;;
+    esac
+    [[ $GOOS = windows ]] && executable=joker.exe || executable=joker
+
+    zip -9 joker-"$os"-"$GOARCH".zip "$executable"
+done
