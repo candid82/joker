@@ -37,6 +37,9 @@
 <li>
   <a href="#pipe">pipe</a>
 </li>
+<li>
+  <a href="#read">read</a>
+</li>
 
     </ul>
     <h2 id="_constants">Constants</h2>
@@ -82,6 +85,17 @@
   <p class="var-docstr">Pipe creates a synchronous in-memory pipe. It can be used to connect code expecting an IOReader<br>
   with code expecting an IOWriter.<br>
   Returns a vector [reader, writer].</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="read">read</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3.6</span>
+  <pre class="var-usage"><div><code>(read r n)</code></div>
+</pre>
+  <p class="var-docstr">Reads up to n bytes from IOReader r and returns a string of the read bytes.<br>
+  May return a shorter (or blank) string if EOF is encountered.</p>
   
   
 </li>

@@ -29,6 +29,9 @@
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
+  <a href="#parse-query">parse-query</a>
+</li>
+<li>
   <a href="#path-escape">path-escape</a>
 </li>
 <li>
@@ -54,6 +57,20 @@
     <h2 id="_functions">Functions, Macros, and Special Forms</h2>
     <ul>
       <li>
+  <h3 class="Function" id="parse-query">parse-query</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.3.6</span>
+  <pre class="var-usage"><div><code>(parse-query s)</code></div>
+</pre>
+  <p class="var-docstr">Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.<br>
+  Always returns a non-nil map containing all the valid query parameters found.<br>
+  Query is expected to be a list of key=value settings separated by ampersands. A setting without<br>
+  an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded<br>
+  semicolon are considered invalid. </p>
+  
+  
+</li>
+<li>
   <h3 class="Function" id="path-escape">path-escape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
