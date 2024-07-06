@@ -2,7 +2,7 @@
 
 fail=0
 
-for test_script in `ls *-tests.sh`
+for test_script in *-tests.sh
 do
     if [ $test_script != "all-tests.sh" ]; then
         echo >&2 "RUNNING $test_script"
