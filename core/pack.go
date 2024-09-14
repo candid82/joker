@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"maps"
+	"slices"
+	"sort"
 )
 
 const (
@@ -77,16 +80,50 @@ func NewPackEnv() *PackEnv {
 	}
 }
 
+type BindingPair struct {
+	binding *Binding
+	index   int
+}
+type ByIndex []BindingPair
+
+func (a ByIndex) Len() int      { return len(a) }
+func (a ByIndex) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByIndex) Less(i, j int) bool {
+	return a[i].index < a[j].index
+}
+
+type ByString []*string
+
+func (a ByString) Len() int      { return len(a) }
+func (a ByString) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByString) Less(i, j int) bool {
+	if a[i] == nil {
+		return true
+	}
+	if a[j] == nil {
+		return false
+	}
+	return *a[i] < *a[j]
+}
+
 func (env *PackEnv) Pack(p []byte) []byte {
 	var bp []byte
 	bp = appendInt(bp, len(env.Bindings))
+	var bindings []BindingPair
 	for k, v := range env.Bindings {
-		bp = appendInt(bp, v)
-		bp = k.Pack(bp, env)
+		bindings = append(bindings, BindingPair{k, v})
 	}
+	sort.Sort(ByIndex(bindings))
+	for _, pair := range bindings {
+		bp = appendInt(bp, pair.index)
+		bp = pair.binding.Pack(bp, env)
+	}
+
 	p = appendInt(p, len(env.Strings))
-	for k, v := range env.Strings {
-		p = appendUint16(p, v)
+	stringKeys := slices.Collect(maps.Keys(env.Strings))
+	sort.Sort(ByString(stringKeys))
+	for _, k := range stringKeys {
+		p = appendUint16(p, env.Strings[k])
 		if k == nil {
 			p = appendInt(p, -1)
 		} else {

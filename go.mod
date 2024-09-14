@@ -1,6 +1,6 @@
 module github.com/candid82/joker
 
-go 1.20
+go 1.23
 
 require (
 	github.com/candid82/liner v1.4.0
