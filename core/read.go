@@ -1148,8 +1148,9 @@ func handleNoReaderError(reader *Reader, s Symbol) Object {
 func readTagged(reader *Reader) Object {
 	obj := readFirst(reader)
 	if FORMAT_MODE {
-		addPrefix(obj, "#")
-		return obj
+		next := readFirst(reader)
+		addPrefix(next, "#" + obj.ToString(false) + " ")
+		return next
 	}
 	switch s := obj.(type) {
 	case Symbol:
