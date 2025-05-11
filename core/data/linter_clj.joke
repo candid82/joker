@@ -75,7 +75,6 @@
   ([stream eof-error? eof-value recursive?])
   ([opts stream]))
 
-
 ;; Clojure core functions not supported by Joker
 
 (defn ensure [ref])
@@ -292,9 +291,6 @@
 (defn uri? [x])
 (defn print-method [x writer])
 (defn print-dup [x writer])
-(defn add-tap [f])
-(defn remove-tap [f])
-(defn tap> [x])
 (defn read+string
   ([])
   ([stream])

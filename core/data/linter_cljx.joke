@@ -31,7 +31,6 @@
           'uuid #'joker.core/identity}
          (map (fn [sym] {sym #'joker.core/taggify__}) (:known-tags joker.core/*linter-config*))))
 
-
 (defn ^:private validate-fields__
   [fields name]
   (when-not (vector? fields)
@@ -161,7 +160,6 @@
     [p (zipmap (map #(-> % first name keyword) fs)
                (map #(derive-info__ (cons `fn (hint (drop 1 %))) (first %)) fs))]))
 
-
 (defn ^:private extend__ [atype & proto+mmaps])
 
 (defmacro extend-type
@@ -177,6 +175,9 @@
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
 
+(defn add-tap [f])
+(defn remove-tap [f])
+(defn tap> [x])
 
 ;; Redefine some core functions with type hints
 
@@ -408,7 +409,6 @@
      (defn ~name [] ~@body)
      ;; To silence "globally unused"" warning.
      (~name)))
-
 
 (ns clojure.core.async)
 
