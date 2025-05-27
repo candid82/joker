@@ -1772,6 +1772,15 @@ var procParseDouble = func(args []Object) Object {
 	return Double{D: d}
 }
 
+var procParseLong = func(args []Object) Object {
+	s := EnsureArgIsString(args, 0)
+	i, err := strconv.ParseInt(s.S, 10, 64)
+	if err != nil {
+		return NIL
+	}
+	return Int{I: int(i)}
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()

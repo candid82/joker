@@ -299,8 +299,6 @@
   ([opts stream]))
 (defn PrintWriter-on [flush-fn close-fn])
 
-(defn parse-long ^Number [^String s])
-
 (defn iteration ^Seqable [^Callable step & opts])
 
 ;; Clojure core macros not supported by Joker

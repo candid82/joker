@@ -192,4 +192,5 @@ func init() {
 	intern("abs__", procAbs, "procAbs")
 	intern("infinite?__", procIsInfinite, "procIsInfinite")
 	intern("parseDouble__", procParseDouble, "procParseDouble")
+	intern("parseLong__", procParseLong, "procParseLong")
 }

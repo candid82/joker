@@ -4597,3 +4597,9 @@
   {:added "1.5"}
   ^Double [^String s]
   (parseDouble__ s))
+
+(defn parse-long
+  "Parses string of decimal digits with optional leading -/+ and return an Int value, or nil if parse fails."
+  {:added "1.5"}
+  ^Number [^String s]
+  (parseLong__ s))
