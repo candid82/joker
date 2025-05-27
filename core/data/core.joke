@@ -4568,3 +4568,9 @@
   {:added "1.5"}
   ^Boolean [^Number s]
   (nan?__ s))
+
+(defn abs
+  "Returns the absolute value of a."
+  {:added "1.5"}
+  ^Number [^Number s]
+  (abs__ s))

@@ -1734,6 +1734,30 @@ var procIsNaN = func(args []Object) Object {
 	return Boolean{B: math.IsNaN(n.Double().D)}
 }
 
+var procAbs = func(args []Object) Object {
+	n := EnsureArgIsNumber(args, 0)
+	switch n := n.(type) {
+	case Double:
+		return Double{D: math.Abs(n.D)}
+	case *BigInt:
+		b := &big.Int{}
+		return &BigInt{b: b.Abs(n.b)}
+	case *BigFloat:
+		b := &big.Float{}
+		return &BigFloat{b: b.Abs(n.b)}
+	case *Ratio:
+		r := &big.Rat{}
+		return &Ratio{r: r.Abs(n.r)}
+	case Int:
+		x := n.I
+		if x < 0 {
+			x = -x
+		}
+		return Int{I: x}
+	}
+	panic(FailArg(n, "Number", 0))
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()

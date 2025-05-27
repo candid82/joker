@@ -299,7 +299,6 @@
   ([opts stream]))
 (defn PrintWriter-on [flush-fn close-fn])
 
-(defn NaN? ^Boolean [^Number num])
 (defn infinite? ^Boolean [^Number num])
 
 (defn parse-double ^Double [^String s])

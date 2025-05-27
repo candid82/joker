@@ -189,4 +189,5 @@ func init() {
 	intern("verbosity-level__", procVerbosityLevel, "procVerbosityLevel")
 	intern("exit__", procExit, "procExit")
 	intern("nan?__", procIsNaN, "procIsNaN")
+	intern("abs__", procAbs, "procAbs")
 }
