@@ -246,7 +246,6 @@
 (defn imul [a b])
 (defn array-for [pv i])
 (defn js-mod [n d])
-(defn infinite? [x])
 (defn equiv-map [x y])
 (defn object-array ([size-or-seq]) ([size init-val-or-seq]))
 (defn derive ([tag parent]) ([h tag parent]))

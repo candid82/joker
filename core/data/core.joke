@@ -4574,3 +4574,9 @@
   {:added "1.5"}
   ^Number [^Number s]
   (abs__ s))
+
+(defn infinite?
+  "Returns true if num is negative or positive infinity, else false."
+  {:added "1.5"}
+  ^Boolean [^Number s]
+  (infinite?__ s))

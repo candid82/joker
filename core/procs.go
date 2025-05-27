@@ -1758,6 +1758,11 @@ var procAbs = func(args []Object) Object {
 	panic(FailArg(n, "Number", 0))
 }
 
+var procIsInfinite = func(args []Object) Object {
+	n := EnsureArgIsNumber(args, 0)
+	return Boolean{B: math.IsInf(n.Double().D, 0)}
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()

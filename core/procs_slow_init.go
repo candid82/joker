@@ -190,4 +190,5 @@ func init() {
 	intern("exit__", procExit, "procExit")
 	intern("nan?__", procIsNaN, "procIsNaN")
 	intern("abs__", procAbs, "procAbs")
+	intern("infinite?__", procIsInfinite, "procIsInfinite")
 }
