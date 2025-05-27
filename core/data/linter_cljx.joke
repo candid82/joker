@@ -225,6 +225,7 @@
 (defn halt-when
   ([^Callable pred])
   ([^Callable pred ^Callable retf]))
+(defn seq-to-map-for-destructuring ^Map [s])
 
 ;; Clojure core vars not supported by Joker
 
