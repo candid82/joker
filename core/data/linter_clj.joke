@@ -301,6 +301,17 @@
 
 (defn iteration ^Seqable [^Callable step & opts])
 
+(defn stream-into!
+  ([to stream])
+  ([to xform stream]))
+(defn stream-reduce!
+  ([f s])
+  ([f init s]))
+(defn stream-seq! ^Seq [stream])
+(defn stream-transduce!
+  ([xform f stream])
+  ([xform f init stream]))
+
 ;; Clojure core macros not supported by Joker
 
 (defn gen-class [& options])
