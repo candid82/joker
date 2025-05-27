@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"math/big"
 	"math/rand"
 	"os"
@@ -1726,6 +1727,11 @@ var procVerbosityLevel = func(args []Object) Object {
 var procExit = func(args []Object) Object {
 	ExitJoker(EnsureArgIsInt(args, 0).I)
 	return NIL
+}
+
+var procIsNaN = func(args []Object) Object {
+	n := EnsureArgIsNumber(args, 0)
+	return Boolean{B: math.IsNaN(n.Double().D)}
 }
 
 func PackReader(reader *Reader, filename string) ([]byte, error) {

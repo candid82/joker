@@ -10,7 +10,6 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-
 (def ^{:arglists '([& items])
        :doc "Creates a new list containing the items."
        :added "1.0"
@@ -536,7 +535,6 @@
                     (when zs
                       (cat (first zs) (next zs)))))))]
      (cat (concat x y) zs))))
-
 
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
@@ -4564,3 +4562,9 @@
   ([] (exit 0))
   ([^Int code]
    (exit__ code)))
+
+(defn NaN?
+  "Returns true if num is NaN, else false."
+  {:added "1.5"}
+  ^Boolean [^Number s]
+  (nan?__ s))
