@@ -4580,3 +4580,14 @@
   {:added "1.5"}
   ^Boolean [^Number s]
   (infinite?__ s))
+
+(defn parse-boolean
+  "Parses strings \"true\" or \"false\" and returns a boolean, or nil if invalid"
+  {:added "1.5"}
+  ^Boolean [^String s]
+  (if (string? s)
+    (case s
+      "true" true
+      "false" false
+      nil)
+    (throw (ex-info (str "Argument must be an string: " s) {}))))
