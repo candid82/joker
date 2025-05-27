@@ -3,10 +3,13 @@
 
 package core
 
-/* Called by parse_init.go in an outer var block, this runs before any
-   func init() as well as before func main(). InitEnv() and others are
-   called at runtime to set some of these Values based on the current
-   invocation. */
+/*
+Called by parse_init.go in an outer var block, this runs before any
+
+	func init() as well as before func main(). InitEnv() and others are
+	called at runtime to set some of these Values based on the current
+	invocation.
+*/
 func NewEnv() *Env {
 	features := EmptySet()
 	features.Add(MakeKeyword("default"))
@@ -35,6 +38,8 @@ func NewEnv() *Env {
 	res.classPath.isPrivate = true
 	res.printReadably = res.CoreNamespace.Intern(MakeSymbol("*print-readably*"))
 	res.printReadably.Value = Boolean{B: true}
+	res.CoreNamespace.InternVar("*repl*", Boolean{B: false},
+		MakeMeta(nil, "true if Joker is running in repl mode", "1.5"))
 	res.CoreNamespace.InternVar("*linter-mode*", Boolean{B: LINTER_MODE},
 		MakeMeta(nil, "true if Joker is running in linter mode", "1.0"))
 	res.CoreNamespace.InternVar("*linter-config*", EmptyArrayMap(),
