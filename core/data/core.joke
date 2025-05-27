@@ -4626,3 +4626,15 @@
         (if (= n (count p))
           (cons p (partitionv n step pad (nthrest s step)))
           (list (into [] (take n (concat p pad))))))))))
+
+(defn partitionv-all
+  "Returns a lazy sequence of vector partitions, but may include
+  partitions with fewer than n items at the end."
+  {:added "1.5"}
+  ([n coll]
+   (partitionv-all n n coll))
+  ([n step coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (let [seg (into [] (take n coll))]
+        (cons seg (partitionv-all n step (drop step s))))))))
