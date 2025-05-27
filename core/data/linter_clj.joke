@@ -299,9 +299,7 @@
   ([opts stream]))
 (defn PrintWriter-on [flush-fn close-fn])
 
-(defn parse-double ^Double [^String s])
 (defn parse-long ^Number [^String s])
-(defn parse-boolean ^Boolean [^String s])
 
 (defn iteration ^Seqable [^Callable step & opts])
 

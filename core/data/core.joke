@@ -4591,3 +4591,9 @@
       "false" false
       nil)
     (throw (ex-info (str "Argument must be an string: " s) {}))))
+
+(defn parse-double
+  "Parses string with floating point components and return a Double value, or nil if parse fails."
+  {:added "1.5"}
+  ^Double [^String s]
+  (parseDouble__ s))

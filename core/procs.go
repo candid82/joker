@@ -1763,6 +1763,15 @@ var procIsInfinite = func(args []Object) Object {
 	return Boolean{B: math.IsInf(n.Double().D, 0)}
 }
 
+var procParseDouble = func(args []Object) Object {
+	s := EnsureArgIsString(args, 0)
+	d, err := strconv.ParseFloat(s.S, 64)
+	if err != nil {
+		return NIL
+	}
+	return Double{D: d}
+}
+
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
