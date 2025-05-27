@@ -4638,3 +4638,9 @@
     (when-let [s (seq coll)]
       (let [seg (into [] (take n coll))]
         (cons seg (partitionv-all n step (drop step s))))))))
+
+(defn splitv-at
+  "Returns a vector of [(into [] (take n coll)) (drop n coll)]"
+  {:added "1.5"}
+  [n coll]
+  [(into [] (take n coll)) (drop n coll)])
