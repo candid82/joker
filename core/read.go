@@ -425,16 +425,14 @@ func readIdent(reader *Reader, first rune) Object {
 	var lastAdded rune
 	r := reader.Get()
 	for isIdentRune(r) {
-		if r == ':' {
-			if lastAdded == ':' {
-				panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
-			}
+		if r == ':' && lastAdded == ':' {
+			panic(MakeReadError(reader, "Invalid use of ':' in symbol name"))
 		}
 		b.WriteRune(r)
 		lastAdded = r
 		r = reader.Get()
 	}
-	if lastAdded == ':' || lastAdded == '/' {
+	if lastAdded == ':' || (lastAdded == '/' && b.Len() > 1) {
 		panic(MakeReadError(reader, fmt.Sprintf("Invalid use of %c in symbol name", lastAdded)))
 	}
 	reader.Unget()
@@ -443,7 +441,7 @@ func readIdent(reader *Reader, first rune) Object {
 	case str == "":
 		panic(MakeReadError(reader, "Invalid keyword: :"))
 	case first == ':':
-		if str[0] == '/' {
+		if str[0] == '/' && len(str) > 1 {
 			panic(MakeReadError(reader, "Blank namespaces are not allowed"))
 		}
 		if str[0] == ':' {
@@ -569,7 +567,9 @@ func readValidatedIdent(reader *Reader, first rune) Object {
 	switch o := obj.(type) {
 	case Keyword:
 		warnInvalidIdent(reader, o.ns)
-		warnInvalidIdent(reader, o.name)
+		if *o.name != "/" {
+			warnInvalidIdent(reader, o.name)
+		}
 	case Symbol:
 		warnInvalidIdent(reader, o.ns)
 		warnInvalidIdent(reader, o.name)
@@ -1149,7 +1149,7 @@ func readTagged(reader *Reader) Object {
 	obj := readFirst(reader)
 	if FORMAT_MODE {
 		next := readFirst(reader)
-		addPrefix(next, "#" + obj.ToString(false) + " ")
+		addPrefix(next, "#"+obj.ToString(false)+" ")
 		return next
 	}
 	switch s := obj.(type) {

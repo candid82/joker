@@ -1,0 +1,1 @@
+tests/linter/reader-indent-4/input.clj:2:0: Read error: Invalid use of / in symbol name
