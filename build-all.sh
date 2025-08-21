@@ -5,6 +5,7 @@ export GOARCH=amd64
 export GOOS=
 
 for GOOS in darwin linux windows freebsd netbsd openbsd; do
+    echo "building for " $GOOS
     if ! go build; then
         echo \
             error: \
