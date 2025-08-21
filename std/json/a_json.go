@@ -60,7 +60,13 @@ func __write_string_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		v := ExtractObject(_args, 0)
-		_res := writeString(v)
+		_res := writeString(v, EmptyArrayMap())
+		return _res
+
+	case _c == 2:
+		v := ExtractObject(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := writeString(v, opts)
 		return _res
 
 	default:

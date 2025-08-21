@@ -31,7 +31,8 @@ func InternsOrThunks() {
 
 	jsonNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-			`Returns the JSON encoding of v.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("v")), NewVectorFrom(MakeSymbol("v"), MakeSymbol("opts"))),
+			`Returns the JSON encoding of v. Optional opts may include :prefix and :indent keys
+  with the same semantics as prefix and indent arguments to Go's json.MarshalIndent function.`, "1.0"))
 
 }

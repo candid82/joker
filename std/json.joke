@@ -13,10 +13,13 @@
   ([^String s ^Map opts]))
 
 (defn write-string
-  "Returns the JSON encoding of v."
+  "Returns the JSON encoding of v. Optional opts may include :prefix and :indent keys
+  with the same semantics as prefix and indent arguments to Go's json.MarshalIndent function."
   {:added "1.0"
-   :go "writeString(v)"}
-  [^Object v])
+   :go {1 "writeString(v, EmptyArrayMap())"
+        2 "writeString(v, opts)"}}
+  ([^Object v])
+  ([^Object v ^Map opts]))
 
 (defn json-seq
   "Returns the json records from rdr as a lazy sequence.

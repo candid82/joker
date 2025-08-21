@@ -130,8 +130,27 @@ func jsonSeqOpts(src Object, opts Map) Object {
 	return jsonLazySeq()
 }
 
-func writeString(obj Object) String {
-	res, err := json.Marshal(fromObject(obj))
+func writeString(obj Object, opts Map) String {
+	var (
+		prefix String
+		indent String
+		res    []byte
+		err    error
+	)
+	if opts != nil {
+		if ok, v := opts.Get(MakeKeyword("prefix")); ok {
+			prefix = EnsureObjectIsString(v, "prefix: %s")
+		}
+		if ok, v := opts.Get(MakeKeyword("indent")); ok {
+			indent = EnsureObjectIsString(v, "indent: %s")
+		}
+	}
+
+	if prefix.S != "" || indent.S != "" {
+		res, err = json.MarshalIndent(fromObject(obj), prefix.S, indent.S)
+	} else {
+		res, err = json.Marshal(fromObject(obj))
+	}
 	if err != nil {
 		panic(RT.NewError("Cannot encode value to json: " + err.Error()))
 	}
