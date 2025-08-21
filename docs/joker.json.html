@@ -82,8 +82,10 @@
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(write-string v)</code></div>
+<div><code>(write-string v opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the JSON encoding of v.</p>
+  <p class="var-docstr">Returns the JSON encoding of v. Optional opts may include :prefix and :indent keys<br>
+  with the same semantics as prefix and indent arguments to Go&#39;s json.MarshalIndent function.</p>
   
   
 </li>
