@@ -63,12 +63,34 @@
   (exec "git" "push")
   (exec "git" "push" "--tags"))
 
+(defn- build-binary
+  [goarch goos]
+  (os/set-env "GOOS" goos)
+  (os/unset-env "GOARCH")
+  (exec "go" "build")
+  (os/unset-env "GOARCH")
+  (os/unset-env "GOOS"))
+
+(defn- zip-binary
+  [goarch goos]
+  (let [os (case goos
+             "darwin" "mac"
+             "windows" "win"
+             goos)
+        zip-filename (str "joker-" os "-" goarch ".zip")
+        filename (if (= "windows" goos) "joker.exe" "joker")]
+    (exec "zip" "-9" zip-filename filename)))
+
 (defn- build-binaries
   [version]
   (println "Building binaries...")
-  (exec "./build-all.sh")
-  (exec "rm" "-f" "joker.exe")
-  (exec "rm" "-f" "joker"))
+  (let [goarch "amd64"]
+    (doseq [goos ["darwin" "linux" "windows" "freebsd" "netbsd" "openbsd"]]
+      (println "Building" goos)
+      (build-binary goarch goos)
+      (zip-binary goarch goos))
+    (exec "rm" "-f" "joker.exe")
+    (exec "rm" "-f" "joker")))
 
 (defn- generate-docs
   []
