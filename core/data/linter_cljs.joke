@@ -1,7 +1,13 @@
 (doseq [sym '(js Math)]
   (inject-ns__ sym))
 
-(doseq [sym '(object string number array function boolean default)]
+(doseq [sym '(object string number array function boolean default IEquiv IComparable IWatchable IDeref IPending
+                     ISequential IAssociative ISorted ICounted IReversible ISeqable IIndexed IIterable ICollection
+                     ISeq IVector IList IMap ISet ICloneable IAtom IChunk IChunkedNext IChunkedSeq IDerefWithTimeout
+                     IDrop IEditableCollection IEmptyableCollection IEncodeClojure IEncodeJS IFind IFn IHash IKVReduce
+                     ILookup IMapEntry IMeta IMultiFn INamed INext IPrintWithWriter IRecord IReduce IReset IStack ISwap
+                     ITransientAssociative ITransientCollection ITransientMap ITransientSet ITransientVector IUUID
+                     IVolatile IWithMeta IWriter)]
   (when-not (resolve sym)
     (intern__ *ns* sym)))
 
