@@ -213,6 +213,14 @@ func (seq *VectorSeq) IsEmpty() bool {
 	return seq.index >= seq.vector.Count()
 }
 
+func (seq *VectorSeq) Count() int {
+	n := seq.vector.Count() - seq.index
+	if n < 0 {
+		return 0
+	}
+	return n
+}
+
 func (seq *VectorSeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
@@ -269,6 +277,13 @@ func (seq *VectorRSeq) Rest() Seq {
 
 func (seq *VectorRSeq) IsEmpty() bool {
 	return seq.index < 0
+}
+
+func (seq *VectorRSeq) Count() int {
+	if seq.index < 0 {
+		return 0
+	}
+	return seq.index + 1
 }
 
 func (seq *VectorRSeq) Cons(obj Object) Seq {
