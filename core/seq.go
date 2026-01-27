@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 )
@@ -254,7 +253,8 @@ func (seq *ArraySeq) Cons(obj Object) Seq {
 func (seq *ArraySeq) sequential() {}
 
 func SeqToString(seq Seq, escape bool) string {
-	var b bytes.Buffer
+	b := getBuffer()
+	defer putBuffer(b)
 	b.WriteRune('(')
 	for iter := iter(seq); iter.HasNext(); {
 		b.WriteString(iter.Next().ToString(escape))

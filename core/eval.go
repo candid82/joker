@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"sync"
@@ -68,7 +67,8 @@ func (rt *Runtime) NewErrorWithPos(msg string, pos Position) *EvalError {
 }
 
 func (rt *Runtime) stacktrace() string {
-	var b bytes.Buffer
+	b := getBuffer()
+	defer putBuffer(b)
 	pos := Position{}
 	if rt.currentExpr != nil {
 		pos = rt.currentExpr.Pos()
@@ -125,7 +125,8 @@ func (s *Callstack) clone() *Callstack {
 }
 
 func (s *Callstack) String() string {
-	var b bytes.Buffer
+	b := getBuffer()
+	defer putBuffer(b)
 	for _, f := range s.frames {
 		pos := f.traceable.Pos()
 		b.WriteString(fmt.Sprintf("%s %s:%d:%d\n", f.traceable.Name(), pos.Filename(), pos.startLine, pos.startColumn))
