@@ -208,11 +208,15 @@ func (expr *LiteralExpr) Eval(env *LocalEnv) Object {
 }
 
 func (expr *VectorExpr) Eval(env *LocalEnv) Object {
-	res := EmptyArrayVector()
-	for _, e := range expr.v {
-		res.Append(Eval(e, env))
+	n := len(expr.v)
+	if n == 0 {
+		return EmptyArrayVector()
 	}
-	return res
+	arr := make([]Object, n)
+	for i, e := range expr.v {
+		arr[i] = Eval(e, env)
+	}
+	return &ArrayVector{arr: arr}
 }
 
 func (expr *MapExpr) Eval(env *LocalEnv) Object {
