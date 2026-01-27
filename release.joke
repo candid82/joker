@@ -2,7 +2,6 @@
 (alias 'os 'joker.os)
 
 (def ^:private version-pattern "version\\s+\"(.*)\"")
-(def ^:private shasum-pattern "sha256\\s+\"(.*)\"")
 
 (defn- exit-err
   [& args]
@@ -36,14 +35,19 @@
         formula (slurp formula-file)
         [_ current-version] (re-find (re-pattern version-pattern) formula)
         linux-sha (shasum "joker-linux-amd64.zip")
-        mac-sha (shasum "joker-mac-amd64.zip")
-        shasum-rex (re-pattern shasum-pattern)]
+        mac-amd64-sha (shasum "joker-mac-amd64.zip")
+        mac-arm64-sha (shasum "joker-mac-arm64.zip")]
     (when-not current-version
       (exit-err "Could not find version number"))
+    (println "SHA256 checksums:")
+    (println "  linux-amd64:" linux-sha)
+    (println "  mac-arm64:  " mac-arm64-sha)
+    (println "  mac-amd64:  " mac-amd64-sha)
     (spit formula-file (-> formula
                            (s/replace current-version version')
-                           (s/replace shasum-rex (str "sha256 \"" mac-sha "\""))
-                           (s/replace-first shasum-rex (str "sha256 \"" linux-sha "\""))))
+                           (s/replace #"sha256 \".*\" # linux-amd64" (str "sha256 \"" linux-sha "\" # linux-amd64"))
+                           (s/replace #"sha256 \".*\" # mac-arm64" (str "sha256 \"" mac-arm64-sha "\" # mac-arm64"))
+                           (s/replace #"sha256 \".*\" # mac-amd64" (str "sha256 \"" mac-amd64-sha "\" # mac-amd64"))))
     (let [res (os/sh-from (s/replace formula-file "/joker.rb" "")
                           "git" "commit" "-a" "-m" (str "joker-" version))]
       (when-not (:success res)
@@ -84,13 +88,20 @@
 (defn- build-binaries
   [version]
   (println "Building binaries...")
+  ;; Build amd64 binaries for all platforms
   (let [goarch "amd64"]
     (doseq [goos ["darwin" "linux" "windows" "freebsd" "netbsd" "openbsd"]]
-      (println "Building" goos)
+      (println "Building" goos goarch)
       (build-binary goarch goos)
-      (zip-binary goarch goos))
-    (exec "rm" "-f" "joker.exe")
-    (exec "rm" "-f" "joker")))
+      (zip-binary goarch goos)))
+  ;; Build arm64 binary for Apple Silicon
+  (let [goarch "arm64"
+        goos "darwin"]
+    (println "Building" goos goarch)
+    (build-binary goarch goos)
+    (zip-binary goarch goos))
+  (exec "rm" "-f" "joker.exe")
+  (exec "rm" "-f" "joker"))
 
 (defn- generate-docs
   []
