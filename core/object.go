@@ -330,8 +330,15 @@ type (
 		ArrayVector    *Type
 		VectorRSeq     *Type
 		VectorSeq      *Type
+		StringSeq      *Type
 	}
 )
+
+// stringSeq is a lazy seq over a string's runes; yields Chars on demand.
+type stringSeq struct {
+	s   string
+	off int
+}
 
 func (pos Position) Filename() string {
 	if pos.filename == nil {
@@ -1554,12 +1561,54 @@ func (s String) Count() int {
 }
 
 func (s String) Seq() Seq {
-	runes := make([]Object, 0, len(s.S))
-	for _, r := range s.S {
-		runes = append(runes, Char{Ch: r})
-	}
-	return &ArraySeq{arr: runes}
+	return &stringSeq{s: s.S, off: 0}
 }
+
+func (seq *stringSeq) Seq() Seq       { return seq }
+func (seq *stringSeq) sequential()    {}
+
+func (seq *stringSeq) First() Object {
+	if seq.off >= len(seq.s) {
+		return NIL
+	}
+	r, _ := utf8.DecodeRuneInString(seq.s[seq.off:])
+	return Char{Ch: r}
+}
+
+func (seq *stringSeq) Rest() Seq {
+	if seq.off >= len(seq.s) {
+		return EmptyList
+	}
+	_, size := utf8.DecodeRuneInString(seq.s[seq.off:])
+	return &stringSeq{s: seq.s, off: seq.off + size}
+}
+
+func (seq *stringSeq) IsEmpty() bool {
+	return seq.off >= len(seq.s)
+}
+
+func (seq *stringSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *stringSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
+}
+
+func (seq *stringSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *stringSeq) GetInfo() *ObjectInfo { return nil }
+func (seq *stringSeq) WithInfo(info *ObjectInfo) Object { return seq }
+func (seq *stringSeq) GetType() *Type       { return TYPE.StringSeq }
+func (seq *stringSeq) Hash() uint32         { return hashOrdered(seq) }
+func (seq *stringSeq) WithMeta(meta Map) Object {
+	// stringSeq has no meta; return as-is like other minimal seqs
+	return seq
+}
+func (seq *stringSeq) Pprint(w io.Writer, indent int) int { return pprintSeq(seq, w, indent) }
+func (seq *stringSeq) Format(w io.Writer, indent int) int { return formatSeq(seq, w, indent) }
 
 func (s String) Nth(i int) Object {
 	if i < 0 {

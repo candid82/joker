@@ -85,5 +85,6 @@ func init() {
 		ArrayVector:   RegRefType("ArrayVector", (*ArrayVector)(nil), ""),
 		VectorRSeq:    RegRefType("VectorRSeq", (*VectorRSeq)(nil), ""),
 		VectorSeq:     RegRefType("VectorSeq", (*VectorSeq)(nil), ""),
+		StringSeq:     RegRefType("StringSeq", (*stringSeq)(nil), ""),
 	}
 }
