@@ -179,11 +179,15 @@ func (v *ArrayVector) Format(w io.Writer, indent int) int {
 }
 
 func NewArrayVectorFrom(objs ...Object) *ArrayVector {
-	res := EmptyArrayVector()
-	for i := 0; i < len(objs); i++ {
-		res.Append(objs[i])
+	n := len(objs)
+	if n == 0 {
+		return EmptyArrayVector()
 	}
-	return res
+	arr := make([]Object, n)
+	for i, o := range objs {
+		arr[i] = o
+	}
+	return &ArrayVector{arr: arr}
 }
 
 func (v *ArrayVector) reduce(c Callable) Object {

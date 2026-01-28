@@ -10,3 +10,4 @@ core/a_*.go
 docs/dash/*.html
 docs/dash/*.css
 docs/dash/*.js
+.claude

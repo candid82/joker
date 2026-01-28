@@ -1,0 +1,141 @@
+(ns joker.vector-test
+  "Tests for vector construction functions"
+  (:require [joker.test :refer [deftest is testing]]))
+
+;; Tests for NewVectorFrom (via `vector` function)
+
+(deftest test-vector-empty
+  (testing "Empty vector creation"
+    (is (= [] (vector)))
+    (is (vector? (vector)))
+    (is (= 0 (count (vector))))))
+
+(deftest test-vector-small
+  (testing "Small vector creation (<=32 elements)"
+    (is (= [1] (vector 1)))
+    (is (= [1 2 3] (vector 1 2 3)))
+    (is (= (range 10) (apply vector (range 10))))
+    (is (= (range 32) (apply vector (range 32))))
+    (is (= 32 (count (apply vector (range 32)))))))
+
+(deftest test-vector-large
+  (testing "Large vector creation (>32 elements)"
+    (is (= (range 33) (apply vector (range 33))))
+    (is (= (range 100) (apply vector (range 100))))
+    (is (= (range 1000) (apply vector (range 1000))))
+    (is (= 33 (count (apply vector (range 33)))))
+    (is (= 100 (count (apply vector (range 100)))))
+    (is (= 1000 (count (apply vector (range 1000)))))))
+
+(deftest test-vector-nth-access
+  (testing "Element access after vector creation"
+    (let [small (apply vector (range 32))
+          large (apply vector (range 100))]
+      (is (= 0 (nth small 0)))
+      (is (= 31 (nth small 31)))
+      (is (= 0 (nth large 0)))
+      (is (= 31 (nth large 31)))
+      (is (= 32 (nth large 32)))
+      (is (= 99 (nth large 99))))))
+
+;; Tests for NewVectorFromSeq (via `vec` function)
+
+(deftest test-vec-from-empty
+  (testing "vec from empty collections"
+    (is (= [] (vec nil)))
+    (is (= [] (vec [])))
+    (is (= [] (vec '())))
+    (is (= [] (vec #{})))))
+
+(deftest test-vec-from-list
+  (testing "vec from list (Counted seq)"
+    (is (= [1] (vec '(1))))
+    (is (= [1 2 3] (vec '(1 2 3))))
+    (is (= (range 32) (vec (apply list (range 32)))))
+    (is (= (range 100) (vec (apply list (range 100)))))))
+
+(deftest test-vec-from-vector
+  (testing "vec from vector"
+    (is (= [1 2 3] (vec [1 2 3])))
+    (is (= (range 100) (vec (vec (range 100)))))))
+
+(deftest test-vec-from-range
+  (testing "vec from range (Counted via ArraySeq)"
+    (is (= [0 1 2 3 4] (vec (range 5))))
+    (is (= (range 32) (vec (range 32))))
+    (is (= (range 33) (vec (range 33))))
+    (is (= (range 100) (vec (range 100))))))
+
+(deftest test-vec-from-lazy-seq
+  (testing "vec from lazy seq (non-Counted)"
+    (is (= [2 4 6 8 10] (vec (map #(* 2 %) (range 1 6)))))
+    (is (= (range 0 64 2) (vec (map #(* 2 %) (range 32)))))
+    (is (= (range 0 200 2) (vec (map #(* 2 %) (range 100)))))))
+
+(deftest test-vec-from-string
+  (testing "vec from string"
+    (is (= [\h \e \l \l \o] (vec "hello")))
+    (is (= 5 (count (vec "hello"))))))
+
+(deftest test-vec-nth-access
+  (testing "Element access after vec creation from counted seq"
+    (let [from-list (vec (apply list (range 100)))
+          from-range (vec (range 100))]
+      (is (= 0 (nth from-list 0)))
+      (is (= 50 (nth from-list 50)))
+      (is (= 99 (nth from-list 99)))
+      (is (= 0 (nth from-range 0)))
+      (is (= 50 (nth from-range 50)))
+      (is (= 99 (nth from-range 99))))))
+
+;; Tests for vector operations after creation to verify integrity
+
+(deftest test-vector-conj
+  (testing "conj on created vectors"
+    (let [small (apply vector (range 32))
+          large (apply vector (range 100))]
+      (is (= 33 (count (conj small 32))))
+      (is (= 32 (nth (conj small 32) 32)))
+      (is (= 101 (count (conj large 100))))
+      (is (= 100 (nth (conj large 100) 100))))))
+
+(deftest test-vector-assoc
+  (testing "assoc on created vectors"
+    (let [small (apply vector (range 32))
+          large (apply vector (range 100))]
+      (is (= 999 (nth (assoc small 15 999) 15)))
+      (is (= 999 (nth (assoc large 50 999) 50)))
+      (is (= 999 (nth (assoc large 99 999) 99))))))
+
+(deftest test-vector-subvec
+  (testing "subvec on created vectors"
+    (let [v (apply vector (range 100))]
+      (is (= [0 1 2] (subvec v 0 3)))
+      (is (= [50 51 52] (subvec v 50 53)))
+      (is (= [97 98 99] (subvec v 97 100))))))
+
+(deftest test-vector-equality
+  (testing "Vector equality across creation methods"
+    (is (= (apply vector (range 50))
+           (vec (range 50))
+           (vec (apply list (range 50)))))
+    (is (= (apply vector (range 100))
+           (vec (range 100))
+           (vec (apply list (range 100)))))))
+
+;; Tests for ArrayVector (used for map entries, etc.)
+
+(deftest test-map-entry-vectors
+  (testing "Map entry vectors (ArrayVector)"
+    (let [m {:a 1 :b 2}
+          entries (seq m)]
+      (is (every? vector? entries))
+      (is (= 2 (count (first entries))))
+      (is (= :a (first (first (seq {:a 1})))))
+      (is (= 1 (second (first (seq {:a 1}))))))))
+
+(deftest test-vector-map-entry-access
+  (testing "Accessing elements from map entries"
+    (let [[k v] (first {:foo :bar})]
+      (is (= :foo k))
+      (is (= :bar v)))))
