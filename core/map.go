@@ -66,6 +66,24 @@ func mapEquals(m Map, other interface{}) bool {
 		if m.Count() != otherMap.Count() {
 			return false
 		}
+		// ArrayMap vs ArrayMap: use direct array scan (avoid generic Iter/Get).
+		if am, mOK := m.(*ArrayMap); mOK {
+			if amOther, otherOK := otherMap.(*ArrayMap); otherOK {
+				return arrayMapEquals(am, amOther)
+			}
+		}
+		// When other is ArrayMap, iterate it and do Get on m so we use O(n) HashMap.Get
+		// instead of O(n²) ArrayMap.Get when m is HashMap.
+		if am, ok := otherMap.(*ArrayMap); ok {
+			for i := 0; i < len(am.arr); i += 2 {
+				k, v := am.arr[i], am.arr[i+1]
+				ok, val := m.Get(k)
+				if !ok || !val.Equals(v) {
+					return false
+				}
+			}
+			return true
+		}
 		for iter := m.Iter(); iter.HasNext(); {
 			p := iter.Next()
 			success, value := otherMap.Get(p.Key)

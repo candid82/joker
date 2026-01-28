@@ -131,6 +131,25 @@ func (m *ArrayMap) indexOf(key Object) int {
 	return -1
 }
 
+// arrayMapEquals compares two ArrayMaps using direct array access and indexOf.
+// Used by mapEquals for the ArrayMap-vs-ArrayMap fast path.
+func arrayMapEquals(m, other *ArrayMap) bool {
+	if m == other {
+		return true
+	}
+	if len(m.arr) != len(other.arr) {
+		return false
+	}
+	for i := 0; i < len(m.arr); i += 2 {
+		key, val := m.arr[i], m.arr[i+1]
+		j := other.indexOf(key)
+		if j < 0 || !val.Equals(other.arr[j+1]) {
+			return false
+		}
+	}
+	return true
+}
+
 func (m *ArrayMap) Get(key Object) (bool, Object) {
 	i := m.indexOf(key)
 	if i != -1 {
