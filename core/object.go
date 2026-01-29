@@ -175,6 +175,10 @@ type (
 		isMacro bool
 		fnExpr  *FnExpr
 		env     *LocalEnv
+		// Bytecode VM fields
+		proto      *FunctionProto
+		upvalues   []*Upvalue
+		isCompiled bool
 	}
 	ExInfo struct {
 		ArrayMap
