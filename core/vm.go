@@ -247,9 +247,12 @@ func (vm *VM) run() Object {
 			argCount := int(chunk.Code[frame.ip])
 			frame.ip++
 			callee := vm.Peek(argCount)
-			vm.callValue(callee, argCount)
-			frame = &vm.frames[vm.frameCount-1]
-			chunk = frame.closure.proto.Chunk
+			if vm.callValue(callee, argCount) {
+				// New frame was pushed, switch to it
+				frame = &vm.frames[vm.frameCount-1]
+				chunk = frame.closure.proto.Chunk
+			}
+			// Otherwise, result is already on stack, continue in current frame
 
 		case OP_CLOSURE:
 			idx := vm.readShort(frame, chunk)
@@ -347,21 +350,24 @@ func (vm *VM) readShort(frame *CallFrame, chunk *Chunk) uint16 {
 }
 
 // callValue calls a callable with the given arguments.
-func (vm *VM) callValue(callee Object, argCount int) {
+// Returns true if a new call frame was pushed (for compiled functions),
+// false if the call completed and the result is on the stack.
+func (vm *VM) callValue(callee Object, argCount int) bool {
 	switch fn := callee.(type) {
 	case *Fn:
 		if fn.isCompiled && fn.proto != nil {
 			vm.callFn(fn, argCount)
-		} else {
-			// Fall back to AST evaluation
-			args := make([]Object, argCount)
-			for i := argCount - 1; i >= 0; i-- {
-				args[i] = vm.Pop()
-			}
-			vm.Pop() // Pop the function
-			result := fn.Call(args)
-			vm.Push(result)
+			return true
 		}
+		// Fall back to AST evaluation
+		args := make([]Object, argCount)
+		for i := argCount - 1; i >= 0; i-- {
+			args[i] = vm.Pop()
+		}
+		vm.Pop() // Pop the function
+		result := fn.Call(args)
+		vm.Push(result)
+		return false
 	case Callable:
 		// Native function or other callable
 		args := make([]Object, argCount)
@@ -371,6 +377,7 @@ func (vm *VM) callValue(callee Object, argCount int) {
 		vm.Pop() // Pop the callable
 		result := fn.Call(args)
 		vm.Push(result)
+		return false
 	default:
 		panic(RT.NewError("Cannot call " + callee.GetType().ToString(false)))
 	}
@@ -435,10 +442,9 @@ func (vm *VM) closeUpvalues(lastIndex int) {
 	}
 }
 
-// Global VM instance for simple cases
-var globalVM = NewVM()
-
-// VMExecute executes a compiled function using the global VM.
+// VMExecute executes a compiled function.
+// Creates a new VM for each call to avoid re-entrancy issues.
 func VMExecute(fn *Fn, args []Object) Object {
-	return globalVM.Execute(fn, args)
+	vm := NewVM()
+	return vm.Execute(fn, args)
 }

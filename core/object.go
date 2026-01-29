@@ -709,6 +709,27 @@ func (fn *Fn) Hash() uint32 {
 }
 
 func (fn *Fn) Call(args []Object) Object {
+	// Try bytecode VM path for pre-compiled functions
+	if fn.isCompiled && fn.proto != nil {
+		return fn.callVM(args)
+	}
+
+	// Fall back to AST evaluation
+	// Note: Lazy compilation is disabled for now due to complex interactions
+	// with macro expansion. Functions created via the VM's OP_CLOSURE will
+	// have isCompiled=true and use the VM path above.
+	return fn.callAST(args)
+}
+
+// callVM executes the function using the bytecode VM.
+func (fn *Fn) callVM(args []Object) Object {
+	RT.pushFrame()
+	defer RT.popFrame()
+	return VMExecute(fn, args)
+}
+
+// callAST executes the function using the AST evaluator.
+func (fn *Fn) callAST(args []Object) Object {
 	min := math.MaxInt32
 	max := -1
 	for _, arity := range fn.fnExpr.arities {

@@ -58,7 +58,11 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 		return nil, RT.NewError("VM only supports single-arity non-variadic functions currently")
 	}
 
-	arity := fnExpr.arities[0]
+	return CompileFnArity(fnExpr.arities[0], name)
+}
+
+// CompileFnArity compiles a single function arity to bytecode.
+func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
 	c := NewCompiler(nil, name)
 	c.function.Arity = len(arity.args)
 
@@ -76,6 +80,9 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 		if i < len(arity.body)-1 {
 			c.emitOp(OP_POP)
 		}
+	}
+	if len(arity.body) == 0 {
+		c.emitOp(OP_NIL)
 	}
 
 	c.emitReturn()
