@@ -93,6 +93,7 @@ type (
 		arities  []FnArityExpr
 		variadic *FnArityExpr
 		self     Symbol
+		compiled *FunctionProto // Pre-compiled bytecode (set by CompileAST)
 	}
 	LetExpr struct {
 		Position

@@ -711,6 +711,15 @@ func (fn *Fn) Hash() uint32 {
 func (fn *Fn) Call(args []Object) Object {
 	// Try bytecode VM path for pre-compiled functions
 	if fn.isCompiled && fn.proto != nil {
+		// Check if this closure has any open upvalues
+		// Open upvalues point to a VM stack that may no longer be valid
+		for _, upval := range fn.upvalues {
+			if upval != nil && upval.index >= 0 {
+				// Closure has open upvalues that reference a (possibly invalid) VM stack
+				// This should not happen - upvalues should be closed before closure escapes
+				panic(RT.NewError("VM BUG: closure called with open upvalues (upvalue not closed before escape)"))
+			}
+		}
 		return fn.callVM(args)
 	}
 

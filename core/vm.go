@@ -52,6 +52,9 @@ func (vm *VM) Push(value Object) {
 	if vm.stackTop >= vmStackMax {
 		panic(RT.NewError("VM stack overflow"))
 	}
+	if value == nil {
+		panic(RT.NewError("VM BUG: pushing Go nil to stack"))
+	}
 	vm.stack[vm.stackTop] = value
 	vm.stackTop++
 }
@@ -62,7 +65,11 @@ func (vm *VM) Pop() Object {
 		panic(RT.NewError("VM stack underflow"))
 	}
 	vm.stackTop--
-	return vm.stack[vm.stackTop]
+	result := vm.stack[vm.stackTop]
+	if result == nil {
+		panic(RT.NewError("VM BUG: popped Go nil from stack"))
+	}
+	return result
 }
 
 // Peek returns a value from the stack without popping.
@@ -144,11 +151,16 @@ func (vm *VM) run() Object {
 			slot := chunk.Code[frame.ip]
 			frame.ip++
 			upval := frame.closure.upvalues[slot]
+			var val Object
 			if upval.index >= 0 {
-				vm.Push(vm.stack[upval.index])
+				val = vm.stack[upval.index]
 			} else {
-				vm.Push(upval.closed)
+				val = upval.closed
 			}
+			if val == nil {
+				panic(RT.NewError("VM BUG: upvalue is nil"))
+			}
+			vm.Push(val)
 
 		case OP_SET_UPVALUE:
 			slot := chunk.Code[frame.ip]
@@ -163,6 +175,9 @@ func (vm *VM) run() Object {
 		case OP_GET_VAR:
 			idx := vm.readShort(frame, chunk)
 			v := chunk.Constants[idx].(*Var)
+			if v.Value == nil {
+				panic(RT.NewError("Var not initialized: " + v.ToString(false)))
+			}
 			vm.Push(v.Value)
 
 		case OP_SET_VAR:
@@ -263,11 +278,37 @@ func (vm *VM) run() Object {
 				upvalues:   make([]*Upvalue, len(proto.Upvalues)),
 				isCompiled: true,
 			}
-			for i, info := range proto.Upvalues {
-				if info.IsLocal {
-					fn.upvalues[i] = vm.captureUpvalue(frame.slots + int(info.Index))
+			// Read upvalue info from bytecode and capture upvalues
+			// We close all upvalues immediately to ensure the closure is self-contained
+			// and can be called from any context (including a different VM execution).
+			for i := range proto.Upvalues {
+				isLocal := chunk.Code[frame.ip] == 1
+				frame.ip++
+				index := int(chunk.Code[frame.ip])
+				frame.ip++
+
+				var val Object
+				if isLocal {
+					// Capture from current frame's local
+					val = vm.stack[frame.slots+index]
 				} else {
-					fn.upvalues[i] = frame.closure.upvalues[info.Index]
+					// Get from parent closure's upvalue
+					parentUpval := frame.closure.upvalues[index]
+					if parentUpval.index >= 0 {
+						// Parent's upvalue is open, read from stack
+						val = vm.stack[parentUpval.index]
+					} else {
+						// Parent's upvalue is closed, use its closed value
+						val = parentUpval.closed
+					}
+				}
+				if val == nil {
+					panic(RT.NewError("VM BUG: captured nil value for upvalue"))
+				}
+				// Create a closed upvalue directly
+				fn.upvalues[i] = &Upvalue{
+					index:  -1, // Already closed
+					closed: val,
 				}
 			}
 			vm.Push(fn)
@@ -359,13 +400,23 @@ func (vm *VM) callValue(callee Object, argCount int) bool {
 			vm.callFn(fn, argCount)
 			return true
 		}
-		// Fall back to AST evaluation
+		// Fall back to AST evaluation for uncompiled/multi-arity functions
 		args := make([]Object, argCount)
 		for i := argCount - 1; i >= 0; i-- {
 			args[i] = vm.Pop()
+			if args[i] == nil {
+				panic(RT.NewError("BUG: popped nil from VM stack"))
+			}
 		}
 		vm.Pop() // Pop the function
-		result := fn.Call(args)
+		// Verify we have the correct function - sanity check
+		if fn.isCompiled {
+			panic(RT.NewError("BUG: isCompiled=true but proto=nil"))
+		}
+		result := fn.callAST(args) // Call AST directly to avoid re-checking isCompiled
+		if result == nil {
+			panic(RT.NewError("VM BUG: Fn.callAST returned Go nil"))
+		}
 		vm.Push(result)
 		return false
 	case Callable:
@@ -376,9 +427,18 @@ func (vm *VM) callValue(callee Object, argCount int) bool {
 		}
 		vm.Pop() // Pop the callable
 		result := fn.Call(args)
+		if result == nil {
+			if obj, ok := fn.(Object); ok {
+				panic(RT.NewError("VM BUG: Callable returned Go nil: " + obj.ToString(false)))
+			}
+			panic(RT.NewError("VM BUG: Callable returned Go nil"))
+		}
 		vm.Push(result)
 		return false
 	default:
+		if callee == nil {
+			panic(RT.NewError("Cannot call Go nil (var not initialized?)"))
+		}
 		panic(RT.NewError("Cannot call " + callee.GetType().ToString(false)))
 	}
 }
@@ -434,12 +494,19 @@ func (vm *VM) captureUpvalue(stackIndex int) *Upvalue {
 
 // closeUpvalues closes all upvalues at or above the given stack index.
 func (vm *VM) closeUpvalues(lastIndex int) {
+	count := 0
 	for vm.openUpvals != nil && vm.openUpvals.index >= lastIndex {
 		upval := vm.openUpvals
-		upval.closed = vm.stack[upval.index]
+		val := vm.stack[upval.index]
+		if val == nil {
+			panic(RT.NewError("VM BUG: closing upvalue with nil value at index " + strconv.Itoa(upval.index)))
+		}
+		upval.closed = val
 		upval.index = -1 // Mark as closed
 		vm.openUpvals = upval.next
+		count++
 	}
+	_ = count // Debug: can add fmt.Printf here if needed
 }
 
 // VMExecute executes a compiled function.

@@ -825,3 +825,26 @@ func padLeft(s string, length int, pad string) string {
 	}
 	return s
 }
+
+// IsVMCompatibleFn checks if a function expression can be compiled to bytecode.
+func IsVMCompatibleFn(e *FnExpr) bool {
+	// Only support single-arity non-variadic functions for now
+	if len(e.arities) != 1 || e.variadic != nil {
+		return false
+	}
+	for _, bodyExpr := range e.arities[0].body {
+		if !IsVMCompatible(bodyExpr) {
+			return false
+		}
+	}
+	return true
+}
+
+// tryCompileFnExpr attempts to compile a FnExpr to bytecode.
+func tryCompileFnExpr(e *FnExpr) (*FunctionProto, error) {
+	name := "<anonymous>"
+	if e.self.name != nil {
+		name = e.self.Name()
+	}
+	return CompileFnArity(e.arities[0], name)
+}

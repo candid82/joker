@@ -398,6 +398,11 @@ func (expr *FnExpr) Eval(env *LocalEnv) Object {
 		env = env.addFrame([]Object{res})
 	}
 	res.env = env
+	// Use pre-compiled bytecode if available
+	if expr.compiled != nil {
+		res.proto = expr.compiled
+		res.isCompiled = true
+	}
 	return res
 }
 

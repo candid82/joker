@@ -1225,6 +1225,7 @@ func loadReader(reader *Reader) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
+		CompileAST(expr)
 		lastObj, err = TryEval(expr)
 		if err != nil {
 			return nil, err
@@ -1811,6 +1812,7 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 			return nil, err
 		}
 		p = expr.Pack(p, packEnv)
+		CompileAST(expr)
 		_, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
@@ -1879,6 +1881,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if err != nil {
 			return err
 		}
+		CompileAST(expr)
 		obj, err = TryEval(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
@@ -1912,6 +1915,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		PanicOnErr(err)
 		expr, err := TryParse(obj, parseContext)
 		PanicOnErr(err)
+		CompileAST(expr)
 		obj, err = TryEval(expr)
 		PanicOnErr(err)
 	}
