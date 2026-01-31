@@ -1,0 +1,68 @@
+(ns compare-vm
+  "Compare benchmark results between VM and non-VM modes."
+  (:require [joker.os :as os]
+            [joker.json :as json]
+            [joker.string :as str]))
+
+(def joker-path (or (joker.os/get-env "JOKER_PATH") "./joker"))
+
+(defn- run-worker
+  "Run benchmarks as subprocess with given args, return parsed results."
+  ([mode-name args]
+   (printf "Running benchmarks %s...\n" mode-name)
+   (let [result (joker.os/exec joker-path {:args (concat args ["benchmarks/run-benchmarks.joke" "--json"])})]
+     (if (zero? (:exit result))
+       (json/read-string (:out result))
+       (do
+         (printf "Error running %s: %s\n" mode-name (:err result))
+         (joker.os/exit 1)))))
+  ([mode-name args _]
+   (run-worker mode-name args)))
+
+(defn- results->map
+  "Convert results vector to map keyed by benchmark name."
+  [results]
+  (into {} (map (fn [r] [(get r "name") r]) results)))
+
+(defn- format-diff
+  "Format diff as percentage with sign."
+  [diff]
+  (if (pos? diff)
+    (format "+%.1f%%" diff)
+    (format "%.1f%%" diff)))
+
+(defn- main []
+  (println "VM vs Non-VM Benchmark Comparison")
+  (println "==================================")
+  (println)
+
+  ;; Run both modes as subprocesses
+  (let [no-vm-results (run-worker "without VM" ["--no-vm"])
+        vm-results (run-worker "with VM" [])
+        no-vm-map (results->map no-vm-results)
+        vm-map (results->map vm-results)
+        ;; Get all benchmark names (preserving order from VM results)
+        names (map #(get % "name") vm-results)]
+
+    ;; Print comparison table
+    (println)
+    (printf "  %-40s %12s %12s %10s\n" "Benchmark" "No-VM (ms)" "VM (ms)" "Diff")
+    (printf "  %-40s %12s %12s %10s\n"
+            (apply str (repeat 40 "-"))
+            "------------"
+            "------------"
+            "----------")
+
+    (doseq [name names]
+      (let [vm-data (get vm-map name)
+            no-vm-data (get no-vm-map name)
+            vm-elapsed (get vm-data "elapsed")
+            no-vm-elapsed (get no-vm-data "elapsed")
+            ;; Negative diff means VM is faster
+            diff (* 100 (/ (- vm-elapsed no-vm-elapsed) no-vm-elapsed))]
+        (printf "  %-40s %12.2f %12.2f %10s\n"
+                name no-vm-elapsed vm-elapsed (format-diff diff))))
+
+    (println)))
+
+(main)

@@ -11,15 +11,14 @@
 
 (defn- main []
   (let [json? (have-option "--json")
-        ;; Get specific file from command line args, or run all
+        ;; Get specific file from command line args, or run all from tests/
         specific-file (first (filter #(joker.string/ends-with? % ".joke") *command-line-args*))
         benchmark-files (if specific-file
                           [specific-file]
-                          (->> (joker.os/ls "benchmarks")
+                          (->> (joker.os/ls "benchmarks/tests")
                                (remove :dir?)
                                (map :name)
                                (filter #(joker.string/ends-with? % ".joke"))
-                               (remove #(= % "benchmark.joke"))  ; Skip framework
                                (remove #(joker.string/starts-with? % "."))))]
     (when-not json?
       (println "Joker Benchmarks")
@@ -27,7 +26,7 @@
     ;; Load each benchmark file
     (let [namespaces (for [f benchmark-files]
                        (binding [*ns* *ns*]
-                         (load-file (str "benchmarks/" f))
+                         (load-file (str "benchmarks/tests/" f))
                          *ns*))]
       ;; Run benchmarks in all loaded namespaces
       (apply run-benchmarks (if json? {:json true} {}) namespaces))))
