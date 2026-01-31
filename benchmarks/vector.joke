@@ -1,0 +1,100 @@
+(ns benchmarks.vector
+  "Benchmark for vector construction optimizations."
+  (:require [joker.benchmark :refer [defbenchmark]]))
+
+;; Pre-defined data for benchmarks
+(def list-32 (apply list (range 32)))
+(def list-100 (apply list (range 100)))
+(def list-1000 (apply list (range 1000)))
+(def vec-100 (vec (range 100)))
+(def vec-1000 (vec (range 1000)))
+(def small-map {:a 1 :b 2 :c 3 :d 4})
+(def medium-map (zipmap (range 8) (range 8)))
+
+;; NewVectorFrom benchmarks (via `vector` function)
+(defbenchmark vector-empty
+  {:name "(vector)" :iterations 100000}
+  (vector))
+
+(defbenchmark vector-1
+  {:name "(vector 1)" :iterations 100000}
+  (vector 1))
+
+(defbenchmark vector-10
+  {:name "(vector 1 2 ... 10)" :iterations 100000}
+  (vector 1 2 3 4 5 6 7 8 9 10))
+
+(defbenchmark vector-32
+  {:name "(apply vector (range 32))" :iterations 100000}
+  (apply vector (range 32)))
+
+(defbenchmark vector-33
+  {:name "(apply vector (range 33))" :iterations 100000}
+  (apply vector (range 33)))
+
+(defbenchmark vector-100
+  {:name "(apply vector (range 100))" :iterations 10000}
+  (apply vector (range 100)))
+
+(defbenchmark vector-1000
+  {:name "(apply vector (range 1000))" :iterations 1000}
+  (apply vector (range 1000)))
+
+;; NewVectorFromSeq - Counted seqs
+(defbenchmark vec-from-list-32
+  {:name "(vec list-32)" :iterations 100000}
+  (vec list-32))
+
+(defbenchmark vec-from-list-100
+  {:name "(vec list-100)" :iterations 100000}
+  (vec list-100))
+
+(defbenchmark vec-from-list-1000
+  {:name "(vec list-1000)" :iterations 10000}
+  (vec list-1000))
+
+(defbenchmark vec-from-range-32
+  {:name "(vec (range 32))" :iterations 100000}
+  (vec (range 32)))
+
+(defbenchmark vec-from-range-100
+  {:name "(vec (range 100))" :iterations 10000}
+  (vec (range 100)))
+
+(defbenchmark vec-from-range-1000
+  {:name "(vec (range 1000))" :iterations 1000}
+  (vec (range 1000)))
+
+(defbenchmark vec-from-vecseq-100
+  {:name "(vec (seq vec-100))" :iterations 100000}
+  (vec (seq vec-100)))
+
+(defbenchmark vec-from-vecseq-1000
+  {:name "(vec (seq vec-1000))" :iterations 10000}
+  (vec (seq vec-1000)))
+
+;; NewVectorFromSeq - Non-Counted seqs (lazy)
+(defbenchmark vec-from-lazy-32
+  {:name "(vec (map identity (range 32)))" :iterations 10000}
+  (vec (map identity (range 32))))
+
+(defbenchmark vec-from-lazy-100
+  {:name "(vec (map identity (range 100)))" :iterations 10000}
+  (vec (map identity (range 100))))
+
+(defbenchmark vec-from-lazy-1000
+  {:name "(vec (map identity (range 1000)))" :iterations 1000}
+  (vec (map identity (range 1000))))
+
+;; NewArrayVectorFrom (via map entries)
+(defbenchmark map-entries-small
+  {:name "(seq {:a 1 :b 2 :c 3 :d 4})" :iterations 100000}
+  (doall (seq small-map)))
+
+(defbenchmark map-entries-medium
+  {:name "(seq (zipmap (range 8) (range 8)))" :iterations 100000}
+  (doall (seq medium-map)))
+
+(defbenchmark map-first-entry
+  {:name "(first {:a 1})" :iterations 100000}
+  (first {:a 1}))

@@ -1,0 +1,73 @@
+(ns benchmarks.base
+  (:require [joker.benchmark :refer [defbenchmark]]))
+
+;; VM-compatible helper functions (single-arity, non-variadic)
+(defn fib [n]
+  (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))
+
+(defn sum-loop [n]
+  (loop [i 0 acc 0]
+    (if (< i n) (recur (+ i 1) (+ acc i)) acc)))
+
+(defn arithmetic [x]
+  (+ (* x x) (- x 1) (/ x 2)))
+
+(defn nested-let [x]
+  (let [a (+ x 1) b (* a 2) c (- b 3)]
+    (+ a b c)))
+
+(defn closure-test []
+  (let [adder (fn [x] (fn [y] (+ x y)))
+        add5 (adder 5)]
+    (add5 10)))
+
+;; Higher-order function tests
+(defn map-test [n]
+  (reduce + (map (fn [x] (* x x)) (range n))))
+
+(defn reduce-test [n]
+  (reduce (fn [acc x] (+ acc (* x x))) 0 (range n)))
+
+(defn mapv-test [n]
+  (reduce + (mapv (fn [x] (+ x 1)) (range n))))
+
+(defn nested-hof-test [n]
+  (reduce (fn [acc xs] (+ acc (reduce + (map (fn [x] (* x 2)) xs))))
+          0 (partition 10 (range n))))
+
+;; Benchmark definitions
+(defbenchmark fib-20
+  {:name "fib(20)" :iterations 100}
+  (fib 20))
+
+(defbenchmark sum-loop-10000
+  {:name "sum-loop(10000)" :iterations 1000}
+  (sum-loop 10000))
+
+(defbenchmark arithmetic-x10000
+  {:name "arithmetic(42) x10000" :iterations 100}
+  (loop [i 0 r nil] (if (< i 10000) (recur (inc i) (arithmetic 42)) r)))
+
+(defbenchmark nested-let-x10000
+  {:name "nested-let(5) x10000" :iterations 100}
+  (loop [i 0 r nil] (if (< i 10000) (recur (inc i) (nested-let 5)) r)))
+
+(defbenchmark closure-test-x10000
+  {:name "closure-test x10000" :iterations 100}
+  (loop [i 0 r nil] (if (< i 10000) (recur (inc i) (closure-test)) r)))
+
+(defbenchmark map-fn-x1000
+  {:name "map(fn) x1000" :iterations 10}
+  (loop [i 0 r nil] (if (< i 10) (recur (inc i) (map-test 1000)) r)))
+
+(defbenchmark reduce-fn-x1000
+  {:name "reduce(fn) x1000" :iterations 10}
+  (loop [i 0 r nil] (if (< i 10) (recur (inc i) (reduce-test 1000)) r)))
+
+(defbenchmark mapv-fn-x1000
+  {:name "mapv(fn) x1000" :iterations 10}
+  (loop [i 0 r nil] (if (< i 10) (recur (inc i) (mapv-test 1000)) r)))
+
+(defbenchmark nested-hof-x1000
+  {:name "nested-hof x1000" :iterations 10}
+  (loop [i 0 r nil] (if (< i 10) (recur (inc i) (nested-hof-test 1000)) r)))

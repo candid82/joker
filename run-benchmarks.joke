@@ -1,0 +1,35 @@
+(ns run-benchmarks
+  (:require [joker.os :as os]
+            [joker.string :as str]))
+
+;; Load the benchmark framework first
+(load-file "benchmarks/benchmark.joke")
+(require '[joker.benchmark :refer [run-benchmarks]])
+
+(defn- have-option [opt]
+  (some #(= opt %) *command-line-args*))
+
+(defn- main []
+  (let [json? (have-option "--json")
+        ;; Get specific file from command line args, or run all
+        specific-file (first (filter #(joker.string/ends-with? % ".joke") *command-line-args*))
+        benchmark-files (if specific-file
+                          [specific-file]
+                          (->> (joker.os/ls "benchmarks")
+                               (remove :dir?)
+                               (map :name)
+                               (filter #(joker.string/ends-with? % ".joke"))
+                               (remove #(= % "benchmark.joke"))  ; Skip framework
+                               (remove #(joker.string/starts-with? % "."))))]
+    (when-not json?
+      (println "Joker Benchmarks")
+      (println "================"))
+    ;; Load each benchmark file
+    (let [namespaces (for [f benchmark-files]
+                       (binding [*ns* *ns*]
+                         (load-file (str "benchmarks/" f))
+                         *ns*))]
+      ;; Run benchmarks in all loaded namespaces
+      (apply run-benchmarks (if json? {:json true} {}) namespaces))))
+
+(main)

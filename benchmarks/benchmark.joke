@@ -1,0 +1,98 @@
+(ns joker.benchmark
+  "A benchmarking framework analogous to joker.test.
+
+  Usage:
+    (defbenchmark my-benchmark
+      {:iterations 1000}
+      (do-something))
+
+    (run-benchmarks)  ; runs all benchmarks in current namespace
+    (run-benchmarks {:json true})  ; output as JSON for comparison"
+  (:require [joker.time :as t]
+            [joker.json :as json]))
+
+;; Timing helper - multi-arity to prevent VM compilation of harness
+(defn benchmark
+  "Run f iterations times and return elapsed time in milliseconds."
+  ([iterations f]
+   (let [start (t/now)]
+     (dotimes [_ iterations]
+       (f))
+     (/ (t/since start) 1000000.0)))
+  ([iterations f _]
+   (benchmark iterations f)))
+
+(defmacro defbenchmark
+  "Defines a benchmark.
+   opts - map with :iterations (required), :name (optional, defaults to var name)
+   body - the code to benchmark (will be wrapped in a fn)
+
+   Example:
+     (defbenchmark fib-20
+       {:iterations 100}
+       (fib 20))"
+  [name opts & body]
+  `(def ~(vary-meta name assoc
+                    :benchmark true
+                    :benchmark-opts opts
+                    :benchmark-fn `(fn [] ~@body))
+     (fn [] ((get (meta (var ~name)) :benchmark-fn)))))
+
+(defn- run-benchmark-var
+  "Run a single benchmark var and return results map."
+  [v]
+  (when (:benchmark (meta v))
+    (let [opts (:benchmark-opts (meta v))
+          f (:benchmark-fn (meta v))
+          bench-name (or (:name opts) (str (:name (meta v))))
+          iterations (:iterations opts)
+          elapsed (benchmark iterations f)
+          per-op (/ (* elapsed 1000) iterations)]
+      {:name bench-name
+       :iterations iterations
+       :elapsed elapsed
+       :per-op per-op})))
+
+(defn- benchmark-vars
+  "Get all vars with :benchmark metadata from a namespace."
+  [ns]
+  (->> (ns-interns ns)
+       (vals)
+       (filter #(:benchmark (meta %)))))
+
+(defn- print-result
+  "Print a single benchmark result."
+  [result]
+  (printf "  %-45s %8.2f ms  (%7.3f us/op)\n"
+          (:name result) (:elapsed result) (:per-op result)))
+
+(defn run-benchmarks
+  "Run all benchmarks in the given namespaces.
+   Options (first arg if map):
+     :json true - output results as JSON instead of formatted text
+   Defaults to current namespace if no namespaces given."
+  ([] (run-benchmarks {} *ns*))
+  ([opts-or-ns & namespaces]
+   (let [[opts namespaces] (if (map? opts-or-ns)
+                             [opts-or-ns namespaces]
+                             [{} (cons opts-or-ns namespaces)])
+         json? (:json opts)
+         all-results (atom [])]
+     (doseq [ns namespaces]
+       (let [ns-obj (the-ns ns)
+             vars (benchmark-vars ns-obj)]
+         (when (seq vars)
+           (when-not json?
+             (println)
+             (println "Running benchmarks in" (ns-name ns-obj))
+             (println (apply str (repeat 60 "="))))
+           (doseq [v vars]
+             (let [result (run-benchmark-var v)]
+               (swap! all-results conj result)
+               (when-not json?
+                 (print-result result)))))))
+     (when json?
+       (println (json/write-string @all-results)))
+     (when-not json?
+       (println))
+     @all-results)))
