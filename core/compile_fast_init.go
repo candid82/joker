@@ -7,6 +7,9 @@ package core
 // This should be called after parsing but before evaluation, when all macros have
 // been expanded.
 func CompileAST(expr Expr) {
+	if DISABLE_VM {
+		return
+	}
 	if expr == nil {
 		return
 	}

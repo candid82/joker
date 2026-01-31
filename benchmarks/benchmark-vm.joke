@@ -1,0 +1,59 @@
+(ns benchmark-vm
+  (:require [joker.time :as t]))
+
+;; Use multi-arity to prevent VM compilation for benchmark harness
+;; (VM only compiles single-arity, non-variadic functions)
+(defn benchmark
+  "Run f iterations times and return elapsed time in milliseconds."
+  ([iterations f]
+   (let [start (t/now)]
+     (dotimes [_ iterations]
+       (f))
+     (/ (t/since start) 1000000.0)))
+  ([iterations f _]
+   (benchmark iterations f)))
+
+(defn run-benchmark
+  ([name iterations f]
+   (let [elapsed (benchmark iterations f)
+         per-op (/ (* elapsed 1000) iterations)]
+     (printf "  %-40s %8.2f ms  (%6.3f us/op)\n" name elapsed per-op)))
+  ([name iterations f _]
+   (run-benchmark name iterations f)))
+
+;; Test functions (VM-compatible: single-arity, non-variadic)
+(defn fib [n]
+  (if (< n 2)
+    n
+    (+ (fib (- n 1)) (fib (- n 2)))))
+
+(defn sum-loop [n]
+  (loop [i 0 acc 0]
+    (if (< i n)
+      (recur (+ i 1) (+ acc i))
+      acc)))
+
+(defn arithmetic [x]
+  (+ (* x x) (- x 1) (/ x 2)))
+
+(defn nested-let [x]
+  (let [a (+ x 1)
+        b (* a 2)
+        c (- b 3)]
+    (+ a b c)))
+
+(defn closure-test []
+  (let [adder (fn [x] (fn [y] (+ x y)))
+        add5 (adder 5)]
+    (add5 10)))
+
+;; Run benchmarks
+(println "VM vs Tree-Walker Benchmark")
+(println "===========================")
+(println)
+
+(run-benchmark "fib(20)" 100 #(fib 20))
+; (run-benchmark "sum-loop(10000)" 1000 #(sum-loop 10000))
+(run-benchmark "arithmetic(42) x10000" 100 #(dotimes [_ 10000] (arithmetic 42)))
+; (run-benchmark "nested-let(5) x10000" 100 #(dotimes [_ 10000] (nested-let 5)))
+; (run-benchmark "closure-test x10000" 100 #(dotimes [_ 10000] (closure-test)))

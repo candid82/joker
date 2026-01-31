@@ -13,13 +13,14 @@ type Local struct {
 
 // Compiler compiles expressions to bytecode.
 type Compiler struct {
-	enclosing  *Compiler       // For nested functions
-	function   *FunctionProto  // Function being compiled
-	locals     []Local         // Local variables in scope
-	localCount int             // Number of locals
-	scopeDepth int             // Current scope depth
-	loopStart  int             // Bytecode offset of loop start (for recur)
-	loopDepth  int             // Scope depth at loop start
+	enclosing     *Compiler      // For nested functions
+	function      *FunctionProto // Function being compiled
+	locals        []Local        // Local variables in scope
+	localCount    int            // Number of locals
+	scopeDepth    int            // Current scope depth
+	loopStart     int            // Bytecode offset of loop start (for recur)
+	loopDepth     int            // Scope depth at loop start
+	loopSlotStart int            // Local slot index where loop variables start
 }
 
 // NewCompiler creates a new compiler for a function.
@@ -263,6 +264,10 @@ func (c *Compiler) compileLoop(e *LoopExpr) error {
 	// Save previous loop state
 	prevLoopStart := c.loopStart
 	prevLoopDepth := c.loopDepth
+	prevLoopSlotStart := c.loopSlotStart
+
+	// Record where loop variables will be stored (before adding them)
+	c.loopSlotStart = c.localCount
 
 	// Compile bindings
 	for i, name := range e.names {
@@ -292,6 +297,7 @@ func (c *Compiler) compileLoop(e *LoopExpr) error {
 	// Restore loop state
 	c.loopStart = prevLoopStart
 	c.loopDepth = prevLoopDepth
+	c.loopSlotStart = prevLoopSlotStart
 
 	c.endScope()
 	return nil
@@ -309,12 +315,13 @@ func (c *Compiler) compileRecur(e *RecurExpr) error {
 		}
 	}
 
-	// Emit recur instruction
+	// Emit recur instruction with arg count and slot start
 	c.emitOp(OP_RECUR)
 	c.emitByte(byte(len(e.args)))
+	c.emitByte(byte(c.loopSlotStart))
 
 	// Jump back to loop start
-	offset := len(c.function.Chunk.Code) - c.loopStart + 3 // +3 for the LOOP instruction
+	offset := len(c.function.Chunk.Code) - c.loopStart + 3 // +3 for the LOOP instruction itself
 	c.emitOp(OP_LOOP)
 	c.emitShort(uint16(offset))
 
@@ -790,8 +797,10 @@ func disassembleInstruction(chunk *Chunk, offset int) string {
 		} else {
 			result += " " + strconv.Itoa(int(idx))
 		}
-	case OP_GET_LOCAL, OP_SET_LOCAL, OP_GET_UPVALUE, OP_SET_UPVALUE, OP_CALL, OP_RECUR:
+	case OP_GET_LOCAL, OP_SET_LOCAL, OP_GET_UPVALUE, OP_SET_UPVALUE, OP_CALL:
 		result += " " + strconv.Itoa(int(chunk.Code[offset+1]))
+	case OP_RECUR:
+		result += " argCount=" + strconv.Itoa(int(chunk.Code[offset+1])) + " slotStart=" + strconv.Itoa(int(chunk.Code[offset+2]))
 	case OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET:
 		val := uint16(chunk.Code[offset+1])<<8 | uint16(chunk.Code[offset+2])
 		result += " " + strconv.Itoa(int(val))
@@ -812,8 +821,10 @@ func nextInstructionOffset(chunk *Chunk, offset int) int {
 		// For now, return offset + 3 (the disassembler won't show upvalue info)
 		_ = idx
 		return offset + 3
-	case OP_GET_LOCAL, OP_SET_LOCAL, OP_GET_UPVALUE, OP_SET_UPVALUE, OP_CALL, OP_RECUR:
+	case OP_GET_LOCAL, OP_SET_LOCAL, OP_GET_UPVALUE, OP_SET_UPVALUE, OP_CALL:
 		return offset + 2
+	case OP_RECUR:
+		return offset + 3
 	default:
 		return offset + 1
 	}

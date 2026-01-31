@@ -616,6 +616,8 @@ func parseArgs(args []string) {
 			noReadline = true
 		case "--no-repl-history":
 			noReplHistory = true
+		case "--no-vm":
+			DISABLE_VM = true
 		case "--exit-to-repl":
 			exitToRepl = true
 			if i < length-1 && notOption(args[i+1]) {

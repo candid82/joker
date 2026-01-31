@@ -11,25 +11,25 @@ const (
 
 // Upvalue represents a captured variable in a closure.
 type Upvalue struct {
-	index  int       // Stack index while open (-1 when closed)
-	closed Object    // Holds value after closing
-	next   *Upvalue  // Linked list for open upvalues
+	index  int      // Stack index while open (-1 when closed)
+	closed Object   // Holds value after closing
+	next   *Upvalue // Linked list for open upvalues
 }
 
 // CallFrame represents a single function invocation on the call stack.
 type CallFrame struct {
-	closure *Fn   // The function being executed
-	ip      int   // Instruction pointer into chunk.Code
-	slots   int   // Base index in VM stack for this frame's locals
+	closure *Fn // The function being executed
+	ip      int // Instruction pointer into chunk.Code
+	slots   int // Base index in VM stack for this frame's locals
 }
 
 // VM is the bytecode virtual machine.
 type VM struct {
-	stack      []Object     // Value stack
-	stackTop   int          // Points to next free slot
-	frames     []CallFrame  // Call frame stack
-	frameCount int          // Number of active frames
-	openUpvals *Upvalue     // Linked list of open upvalues (sorted by stack index)
+	stack      []Object    // Value stack
+	stackTop   int         // Points to next free slot
+	frames     []CallFrame // Call frame stack
+	frameCount int         // Number of active frames
+	openUpvals *Upvalue    // Linked list of open upvalues (sorted by stack index)
 }
 
 // NewVM creates a new VM instance.
@@ -328,12 +328,14 @@ func (vm *VM) run() Object {
 		case OP_RECUR:
 			argCount := int(chunk.Code[frame.ip])
 			frame.ip++
-			// Copy new argument values to local slots
+			slotStart := int(chunk.Code[frame.ip])
+			frame.ip++
+			// Copy new argument values to loop variable slots
 			for i := 0; i < argCount; i++ {
-				vm.stack[frame.slots+1+i] = vm.stack[vm.stackTop-argCount+i]
+				vm.stack[frame.slots+slotStart+i] = vm.stack[vm.stackTop-argCount+i]
 			}
-			vm.stackTop = frame.slots + 1 + argCount
-			frame.ip = 0 // Jump back to start of function
+			vm.stackTop = frame.slots + slotStart + argCount
+			// Don't reset frame.ip; let OP_LOOP handle the backward jump
 
 		case OP_VECTOR:
 			count := int(vm.readShort(frame, chunk))
