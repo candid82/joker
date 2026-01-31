@@ -1,0 +1,109 @@
+(ns compare-vm
+  (:require [joker.time :as t]
+            [joker.os :as os]
+            [joker.string :as str]
+            [joker.json :as json]))
+
+;; Test functions (VM-compatible: single-arity, non-variadic)
+(defn fib [n]
+  (if (< n 2)
+    n
+    (+ (fib (- n 1)) (fib (- n 2)))))
+
+(defn sum-loop [n]
+  (loop [i 0 acc 0]
+    (if (< i n)
+      (recur (+ i 1) (+ acc i))
+      acc)))
+
+(defn arithmetic [x]
+  (+ (* x x) (- x 1) (/ x 2)))
+
+(defn nested-let [x]
+  (let [a (+ x 1)
+        b (* a 2)
+        c (- b 3)]
+    (+ a b c)))
+
+(defn closure-test []
+  (let [adder (fn [x] (fn [y] (+ x y)))
+        add5 (adder 5)]
+    (add5 10)))
+
+;; Use multi-arity to prevent VM compilation for benchmark harness
+(defn run-timed
+  "Run f iterations times and return [result elapsed-ms]."
+  ([iterations f]
+   (let [result (f)  ; Get result from first run
+         start (t/now)]
+     (dotimes [_ iterations]
+       (f))
+     [result (/ (t/since start) 1000000.0)]))
+  ([iterations f _]
+   (run-timed iterations f)))
+
+;; Benchmark definitions: [name iterations fn]
+(def benchmarks
+  [["fib(20)" 100 #(fib 20)]
+   ["sum-loop(10000)" 1000 #(sum-loop 10000)]
+   ["arithmetic(42) x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (arithmetic 42)) r))]
+   ["nested-let(5) x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (nested-let 5)) r))]
+   ["closure-test x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (closure-test)) r))]])
+
+(defn run-all-benchmarks
+  "Run all benchmarks and return results as a map."
+  ([]
+   (into {}
+         (for [[name iterations f] benchmarks]
+           (let [[result elapsed] (run-timed iterations f)]
+             [name {:result result :elapsed elapsed}]))))
+  ([_] (run-all-benchmarks)))
+
+;; When run with --worker flag, output JSON results and exit
+(when (= (first *command-line-args*) "--worker")
+  (print (json/write-string (run-all-benchmarks)))
+  (os/exit 0))
+
+;; Main: run in both modes and compare
+(println "VM vs Tree-Walker Benchmark Comparison")
+(println "=======================================")
+(println)
+
+(def joker-path (or (os/get-env "JOKER_PATH") "./joker"))
+
+(defn run-worker
+  "Run benchmark as subprocess with given args, return parsed results."
+  ([mode-name args]
+   (printf "Running %s...\n" mode-name)
+   (let [result (os/exec joker-path {:args (concat args ["benchmarks/compare-vm.joke" "--worker"])})]
+     (if (zero? (:exit result))
+       (json/read-string (:out result))
+       (do
+         (printf "Error running %s: %s\n" mode-name (:err result))
+         (os/exit 1)))))
+  ([mode-name args _]
+   (run-worker mode-name args)))
+
+;; Run both modes as subprocesses for symmetry
+(def no-vm-results (run-worker "without VM" ["--no-vm"]))
+(def vm-results (run-worker "with VM" []))
+
+;; Print comparison table
+(println)
+(printf "  %-35s %10s %10s %8s\n" "Benchmark" "No-VM (ms)" "VM (ms)" "Speedup")
+(printf "  %-35s %10s %10s %8s\n" (apply str (repeat 35 "-")) "----------" "----------" "--------")
+
+(doseq [[name _iterations _f] benchmarks]
+  (let [vm-data (get vm-results name)
+        no-vm-data (get no-vm-results name)
+        ;; JSON uses string keys for nested maps
+        vm-result (get vm-data "result" (:result vm-data))
+        no-vm-result (get no-vm-data "result" (:result no-vm-data))
+        vm-elapsed (get vm-data "elapsed" (:elapsed vm-data))
+        no-vm-elapsed (get no-vm-data "elapsed" (:elapsed no-vm-data))
+        speedup (* 100 (/ (- no-vm-elapsed vm-elapsed) no-vm-elapsed))]
+    (if (= vm-result no-vm-result)
+      (printf "  %-35s %10.2f %10.2f %7.1f%%\n" name no-vm-elapsed vm-elapsed speedup)
+      (printf "  %-35s ERROR: results differ! VM=%s No-VM=%s\n" name (pr-str vm-result) (pr-str no-vm-result)))))
+
+(println)

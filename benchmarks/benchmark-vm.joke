@@ -53,7 +53,7 @@
 (println)
 
 (run-benchmark "fib(20)" 100 #(fib 20))
-; (run-benchmark "sum-loop(10000)" 1000 #(sum-loop 10000))
+(run-benchmark "sum-loop(10000)" 1000 #(sum-loop 10000))
 (run-benchmark "arithmetic(42) x10000" 100 #(dotimes [_ 10000] (arithmetic 42)))
-; (run-benchmark "nested-let(5) x10000" 100 #(dotimes [_ 10000] (nested-let 5)))
-; (run-benchmark "closure-test x10000" 100 #(dotimes [_ 10000] (closure-test)))
+(run-benchmark "nested-let(5) x10000" 100 #(dotimes [_ 10000] (nested-let 5)))
+(run-benchmark "closure-test x10000" 100 #(dotimes [_ 10000] (closure-test)))
