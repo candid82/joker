@@ -30,6 +30,22 @@
         add5 (adder 5)]
     (add5 10)))
 
+;; Higher-order function tests (stress test VM pool reuse)
+(defn map-test [n]
+  (reduce + (map (fn [x] (* x x)) (range n))))
+
+(defn reduce-test [n]
+  (reduce (fn [acc x] (+ acc (* x x))) 0 (range n)))
+
+(defn mapv-test [n]
+  (reduce + (mapv (fn [x] (+ x 1)) (range n))))
+
+(defn nested-hof-test [n]
+  ;; Nested higher-order functions: map inside reduce
+  (reduce (fn [acc xs] (+ acc (reduce + (map (fn [x] (* x 2)) xs))))
+          0
+          (partition 10 (range n))))
+
 ;; Use multi-arity to prevent VM compilation for benchmark harness
 (defn run-timed
   "Run f iterations times and return [result elapsed-ms]."
@@ -48,7 +64,12 @@
    ["sum-loop(10000)" 1000 #(sum-loop 10000)]
    ["arithmetic(42) x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (arithmetic 42)) r))]
    ["nested-let(5) x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (nested-let 5)) r))]
-   ["closure-test x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (closure-test)) r))]])
+   ["closure-test x10000" 100 #(loop [i 0 r nil] (if (< i 10000) (recur (inc i) (closure-test)) r))]
+   ;; Higher-order function benchmarks (stress test VM pool reuse)
+   ["map(fn) x1000" 10 #(loop [i 0 r nil] (if (< i 10) (recur (inc i) (map-test 1000)) r))]
+   ["reduce(fn) x1000" 10 #(loop [i 0 r nil] (if (< i 10) (recur (inc i) (reduce-test 1000)) r))]
+   ["mapv(fn) x1000" 10 #(loop [i 0 r nil] (if (< i 10) (recur (inc i) (mapv-test 1000)) r))]
+   ["nested-hof x1000" 10 #(loop [i 0 r nil] (if (< i 10) (recur (inc i) (nested-hof-test 1000)) r))]])
 
 (defn run-all-benchmarks
   "Run all benchmarks and return results as a map."

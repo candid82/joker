@@ -2,6 +2,7 @@ package core
 
 import (
 	"strconv"
+	"sync"
 )
 
 const (
@@ -511,9 +512,19 @@ func (vm *VM) closeUpvalues(lastIndex int) {
 	_ = count // Debug: can add fmt.Printf here if needed
 }
 
+// vmPool is a pool of VM instances for reuse, avoiding allocations
+// on each call to higher-order functions like map/reduce.
+var vmPool = sync.Pool{
+	New: func() interface{} {
+		return NewVM()
+	},
+}
+
 // VMExecute executes a compiled function.
-// Creates a new VM for each call to avoid re-entrancy issues.
+// Uses a pool of VM instances to avoid allocating a new VM on each call.
 func VMExecute(fn *Fn, args []Object) Object {
-	vm := NewVM()
-	return vm.Execute(fn, args)
+	vm := vmPool.Get().(*VM)
+	result := vm.Execute(fn, args)
+	vmPool.Put(vm)
+	return result
 }
