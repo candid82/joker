@@ -70,3 +70,33 @@
   (testing "set literals"
     (is (= #{1 2 3} #{1 2 3}))
     (is (contains? #{1 2 3} 2))))
+
+(deftest test-multi-arity
+  (testing "multi-arity functions"
+    (let [f (fn ([x] x) ([x y] (+ x y)))]
+      (is (= 1 (f 1)))
+      (is (= 3 (f 1 2))))
+    (let [g (fn ([x] (* x 2)) ([x y] (* x y)) ([x y z] (* x y z)))]
+      (is (= 6 (g 3)))
+      (is (= 12 (g 3 4)))
+      (is (= 60 (g 3 4 5))))))
+
+(deftest test-variadic
+  (testing "variadic functions"
+    (let [f (fn [x & rest] (if rest (+ x (first rest)) x))]
+      (is (= 1 (f 1)))
+      (is (= 3 (f 1 2))))
+    (let [g (fn [& args] (count args))]
+      (is (= 0 (g)))
+      (is (= 3 (g 1 2 3))))
+    (let [h (fn [a b & more] (apply + a b more))]
+      (is (= 3 (h 1 2)))
+      (is (= 6 (h 1 2 3)))
+      (is (= 10 (h 1 2 3 4))))))
+
+(deftest test-multi-arity-variadic
+  (testing "multi-arity with variadic"
+    (let [f (fn ([x] (* x 2)) ([x y & more] (apply + x y more)))]
+      (is (= 2 (f 1)))
+      (is (= 3 (f 1 2)))
+      (is (= 6 (f 1 2 3))))))

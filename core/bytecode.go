@@ -119,14 +119,26 @@ type UpvalueInfo struct {
 	IsLocal bool  // True if capturing parent's local, false if parent's upvalue
 }
 
+// ArityProto holds compiled bytecode for a single function arity.
+type ArityProto struct {
+	Arity      int           // Number of fixed parameters (excluding rest param)
+	IsVariadic bool          // True if this arity accepts rest args
+	Chunk      *Chunk        // The bytecode for this arity
+	Upvalues   []UpvalueInfo // Upvalue capture info for this arity
+}
+
 // FunctionProto holds a compiled function's bytecode.
 type FunctionProto struct {
-	Arity        int              // Number of required parameters
-	Variadic     bool             // Whether function accepts rest args
-	Name         string           // Function name (for debugging/errors)
-	Chunk        *Chunk           // The bytecode
-	Upvalues     []UpvalueInfo    // Upvalue capture info
-	SubFunctions []*FunctionProto // Nested function prototypes (for closures)
+	Name          string           // Function name (for debugging/errors)
+	Arities       []*ArityProto    // Fixed-arity implementations
+	VariadicArity *ArityProto      // Variadic implementation (nil if none)
+	SubFunctions  []*FunctionProto // Nested function prototypes (for closures)
+
+	// Legacy fields for single-arity (backward compat during transition)
+	Arity    int           // Number of required parameters
+	Variadic bool          // Whether function accepts rest args
+	Chunk    *Chunk        // The bytecode
+	Upvalues []UpvalueInfo // Upvalue capture info
 }
 
 // NewFunctionProto creates a new function prototype.

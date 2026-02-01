@@ -19,9 +19,10 @@ type Upvalue struct {
 
 // CallFrame represents a single function invocation on the call stack.
 type CallFrame struct {
-	closure *Fn // The function being executed
-	ip      int // Instruction pointer into chunk.Code
-	slots   int // Base index in VM stack for this frame's locals
+	closure    *Fn         // The function being executed
+	arityProto *ArityProto // The specific arity being executed
+	ip         int         // Instruction pointer into chunk.Code
+	slots      int         // Base index in VM stack for this frame's locals
 }
 
 // VM is the bytecode virtual machine.
@@ -91,18 +92,62 @@ func (vm *VM) PopN(n int) []Object {
 // Execute runs a compiled function with the given arguments.
 func (vm *VM) Execute(fn *Fn, args []Object) Object {
 	vm.Reset()
+	proto := fn.proto
+	argCount := len(args)
 
-	// Push the function and arguments onto the stack
+	// Select the appropriate arity
+	var arityProto *ArityProto
+	if len(proto.Arities) > 0 || proto.VariadicArity != nil {
+		arityProto = selectArityProto(proto, argCount)
+		if arityProto == nil {
+			panic(RT.NewError(buildArityErrorMessage(proto, argCount)))
+		}
+	} else {
+		// Legacy single-arity case
+		if argCount != proto.Arity && !proto.Variadic {
+			panic(RT.NewError("Expected " + strconv.Itoa(proto.Arity) + " arguments but got " + strconv.Itoa(argCount)))
+		}
+		arityProto = &ArityProto{
+			Arity:      proto.Arity,
+			IsVariadic: proto.Variadic,
+			Chunk:      proto.Chunk,
+			Upvalues:   proto.Upvalues,
+		}
+	}
+
+	// Push the function onto the stack
 	vm.Push(fn)
-	for _, arg := range args {
-		vm.Push(arg)
+
+	// Push arguments
+	if arityProto.IsVariadic {
+		// Push fixed args
+		for i := 0; i < arityProto.Arity && i < argCount; i++ {
+			vm.Push(args[i])
+		}
+		// Pack rest args into ArraySeq
+		restCount := argCount - arityProto.Arity
+		if restCount > 0 {
+			restArgs := make([]Object, restCount)
+			for i := 0; i < restCount; i++ {
+				restArgs[i] = args[arityProto.Arity+i]
+			}
+			vm.Push(&ArraySeq{arr: restArgs, index: 0})
+		} else {
+			vm.Push(NIL)
+		}
+		argCount = arityProto.Arity + 1
+	} else {
+		for _, arg := range args {
+			vm.Push(arg)
+		}
 	}
 
 	// Set up the initial call frame
 	vm.frames[0] = CallFrame{
-		closure: fn,
-		ip:      0,
-		slots:   0,
+		closure:    fn,
+		arityProto: arityProto,
+		ip:         0,
+		slots:      0,
 	}
 	vm.frameCount = 1
 
@@ -112,7 +157,7 @@ func (vm *VM) Execute(fn *Fn, args []Object) Object {
 // run is the main execution loop.
 func (vm *VM) run() Object {
 	frame := &vm.frames[vm.frameCount-1]
-	chunk := frame.closure.proto.Chunk
+	chunk := frame.arityProto.Chunk
 
 	for {
 		op := Opcode(chunk.Code[frame.ip])
@@ -266,7 +311,7 @@ func (vm *VM) run() Object {
 			if vm.callValue(callee, argCount) {
 				// New frame was pushed, switch to it
 				frame = &vm.frames[vm.frameCount-1]
-				chunk = frame.closure.proto.Chunk
+				chunk = frame.arityProto.Chunk
 			}
 			// Otherwise, result is already on stack, continue in current frame
 
@@ -324,7 +369,7 @@ func (vm *VM) run() Object {
 			vm.stackTop = frame.slots
 			vm.Push(result)
 			frame = &vm.frames[vm.frameCount-1]
-			chunk = frame.closure.proto.Chunk
+			chunk = frame.arityProto.Chunk
 
 		case OP_RECUR:
 			argCount := int(chunk.Code[frame.ip])
@@ -446,11 +491,104 @@ func (vm *VM) callValue(callee Object, argCount int) bool {
 	}
 }
 
+// selectArityProto selects the appropriate arity for the given argument count.
+func selectArityProto(proto *FunctionProto, argCount int) *ArityProto {
+	// Try exact match in fixed arities
+	for _, arity := range proto.Arities {
+		if arity.Arity == argCount {
+			return arity
+		}
+	}
+	// Try variadic (accepts Arity or more args)
+	if proto.VariadicArity != nil && argCount >= proto.VariadicArity.Arity {
+		return proto.VariadicArity
+	}
+	return nil
+}
+
+// buildArityErrorMessage builds an error message for arity mismatch.
+func buildArityErrorMessage(proto *FunctionProto, argCount int) string {
+	name := proto.Name
+	if name == "" {
+		name = "function"
+	}
+
+	// Collect valid arities
+	var arities []int
+	for _, a := range proto.Arities {
+		arities = append(arities, a.Arity)
+	}
+	if proto.VariadicArity != nil {
+		arities = append(arities, proto.VariadicArity.Arity)
+	}
+
+	// Legacy single-arity case
+	if len(arities) == 0 {
+		return "Wrong number of args (" + strconv.Itoa(argCount) + ") passed to " + name
+	}
+
+	// Build expected arities string
+	expected := ""
+	for i, a := range arities {
+		if i > 0 {
+			if i == len(arities)-1 {
+				expected += " or "
+			} else {
+				expected += ", "
+			}
+		}
+		expected += strconv.Itoa(a)
+		if proto.VariadicArity != nil && a == proto.VariadicArity.Arity {
+			expected += "+"
+		}
+	}
+
+	return "Wrong number of args (" + strconv.Itoa(argCount) + ") passed to " + name + ", expected: " + expected
+}
+
 // callFn sets up a call frame for a compiled function.
 func (vm *VM) callFn(fn *Fn, argCount int) {
 	proto := fn.proto
-	if argCount != proto.Arity && !proto.Variadic {
-		panic(RT.NewError("Expected " + strconv.Itoa(proto.Arity) + " arguments but got " + strconv.Itoa(argCount)))
+
+	// Select the appropriate arity
+	var arityProto *ArityProto
+
+	// Check if we have new multi-arity structure
+	if len(proto.Arities) > 0 || proto.VariadicArity != nil {
+		arityProto = selectArityProto(proto, argCount)
+		if arityProto == nil {
+			panic(RT.NewError(buildArityErrorMessage(proto, argCount)))
+		}
+	} else {
+		// Legacy single-arity case
+		if argCount != proto.Arity && !proto.Variadic {
+			panic(RT.NewError("Expected " + strconv.Itoa(proto.Arity) + " arguments but got " + strconv.Itoa(argCount)))
+		}
+		// Create a temporary ArityProto for legacy case
+		arityProto = &ArityProto{
+			Arity:      proto.Arity,
+			IsVariadic: proto.Variadic,
+			Chunk:      proto.Chunk,
+			Upvalues:   proto.Upvalues,
+		}
+	}
+
+	// Pack rest args for variadic calls
+	if arityProto.IsVariadic {
+		restCount := argCount - arityProto.Arity
+		if restCount > 0 {
+			// Collect rest args from stack into ArraySeq
+			restArgs := make([]Object, restCount)
+			for i := restCount - 1; i >= 0; i-- {
+				restArgs[i] = vm.Pop()
+			}
+			vm.Push(&ArraySeq{arr: restArgs, index: 0})
+			argCount = arityProto.Arity + 1 // fixed args + rest seq
+		} else {
+			// No rest args, push NIL for the rest param
+			vm.Push(NIL)
+			argCount = arityProto.Arity + 1
+		}
 	}
 
 	if vm.frameCount >= vmFramesMax {
@@ -460,6 +598,7 @@ func (vm *VM) callFn(fn *Fn, argCount int) {
 	frame := &vm.frames[vm.frameCount]
 	vm.frameCount++
 	frame.closure = fn
+	frame.arityProto = arityProto
 	frame.ip = 0
 	frame.slots = vm.stackTop - argCount - 1
 }

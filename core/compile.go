@@ -54,20 +54,61 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 		name = fnExpr.self.Name()
 	}
 
-	// For now, only compile single-arity non-variadic functions
-	if len(fnExpr.arities) != 1 || fnExpr.variadic != nil {
-		return nil, RT.NewError("VM only supports single-arity non-variadic functions currently")
+	proto := &FunctionProto{
+		Name:         name,
+		Arities:      make([]*ArityProto, 0, len(fnExpr.arities)),
+		SubFunctions: make([]*FunctionProto, 0, 4),
 	}
 
-	return CompileFnArity(fnExpr.arities[0], name)
+	// Compile each fixed arity
+	for _, arity := range fnExpr.arities {
+		arityProto, c, err := compileArityProtoWithCompiler(arity, name, false)
+		if err != nil {
+			return nil, err
+		}
+		proto.Arities = append(proto.Arities, arityProto)
+		// Collect sub-functions from this arity's compiler
+		proto.SubFunctions = append(proto.SubFunctions, c.function.SubFunctions...)
+	}
+
+	// Compile variadic arity
+	if fnExpr.variadic != nil {
+		varProto, c, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true)
+		if err != nil {
+			return nil, err
+		}
+		proto.VariadicArity = varProto
+		// Collect sub-functions from variadic arity's compiler
+		proto.SubFunctions = append(proto.SubFunctions, c.function.SubFunctions...)
+	}
+
+	// Set legacy fields for single-arity case (backward compat)
+	if len(proto.Arities) == 1 && proto.VariadicArity == nil {
+		proto.Arity = proto.Arities[0].Arity
+		proto.Chunk = proto.Arities[0].Chunk
+		proto.Upvalues = proto.Arities[0].Upvalues
+	} else if len(proto.Arities) == 0 && proto.VariadicArity != nil {
+		proto.Arity = proto.VariadicArity.Arity
+		proto.Variadic = true
+		proto.Chunk = proto.VariadicArity.Chunk
+		proto.Upvalues = proto.VariadicArity.Upvalues
+	}
+
+	return proto, nil
 }
 
-// CompileFnArity compiles a single function arity to bytecode.
-func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
+// compileArityProtoWithCompiler compiles a single function arity and returns both the ArityProto and the compiler.
+// The compiler is returned so callers can access SubFunctions if needed.
+func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bool) (*ArityProto, *Compiler, error) {
 	c := NewCompiler(nil, name)
-	c.function.Arity = len(arity.args)
 
-	// Add parameters as locals
+	// For variadic, Arity is fixed params count (excluding rest)
+	fixedArgCount := len(arity.args)
+	if isVariadic && fixedArgCount > 0 {
+		fixedArgCount-- // Last arg is the rest param
+	}
+
+	// Add parameters as locals (including rest param for variadic)
 	for _, arg := range arity.args {
 		c.addLocal(arg)
 	}
@@ -75,7 +116,7 @@ func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
 	// Compile the body
 	for i, bodyExpr := range arity.body {
 		if err := c.compile(bodyExpr); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		// Pop intermediate results except the last
 		if i < len(arity.body)-1 {
@@ -87,7 +128,34 @@ func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
 	}
 
 	c.emitReturn()
-	return c.function, nil
+
+	return &ArityProto{
+		Arity:      fixedArgCount,
+		IsVariadic: isVariadic,
+		Chunk:      c.function.Chunk,
+		Upvalues:   c.function.Upvalues,
+	}, c, nil
+}
+
+// CompileArityProto compiles a single function arity to an ArityProto.
+func CompileArityProto(arity FnArityExpr, name string, isVariadic bool) (*ArityProto, error) {
+	arityProto, _, err := compileArityProtoWithCompiler(arity, name, isVariadic)
+	return arityProto, err
+}
+
+// CompileFnArity compiles a single function arity to bytecode (legacy, kept for compatibility).
+func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
+	arityProto, err := CompileArityProto(arity, name, false)
+	if err != nil {
+		return nil, err
+	}
+	return &FunctionProto{
+		Name:     name,
+		Arity:    arityProto.Arity,
+		Chunk:    arityProto.Chunk,
+		Upvalues: arityProto.Upvalues,
+		Arities:  []*ArityProto{arityProto},
+	}, nil
 }
 
 // compile compiles a single expression.
@@ -470,50 +538,111 @@ func (c *Compiler) compileFn(e *FnExpr) error {
 		name = e.self.Name()
 	}
 
-	// For now, only compile single-arity non-variadic functions
-	if len(e.arities) != 1 || e.variadic != nil {
-		return RT.NewError("VM only supports single-arity non-variadic functions currently")
+	// Compile a single arity using inner compiler
+	compileInnerArity := func(arity FnArityExpr, isVariadic bool) (*ArityProto, *Compiler, error) {
+		inner := NewCompiler(c, name)
+
+		// For variadic, Arity is fixed params count (excluding rest)
+		fixedArgCount := len(arity.args)
+		if isVariadic && fixedArgCount > 0 {
+			fixedArgCount-- // Last arg is the rest param
+		}
+
+		// Add parameters as locals (including rest param for variadic)
+		for _, arg := range arity.args {
+			inner.addLocal(arg)
+		}
+
+		// Compile the body
+		for i, bodyExpr := range arity.body {
+			if err := inner.compile(bodyExpr); err != nil {
+				return nil, nil, err
+			}
+			if i < len(arity.body)-1 {
+				inner.emitOp(OP_POP)
+			}
+		}
+		if len(arity.body) == 0 {
+			inner.emitOp(OP_NIL)
+		}
+
+		inner.emitReturn()
+
+		return &ArityProto{
+			Arity:      fixedArgCount,
+			IsVariadic: isVariadic,
+			Chunk:      inner.function.Chunk,
+			Upvalues:   inner.function.Upvalues,
+		}, inner, nil
 	}
 
-	arity := e.arities[0]
-	inner := NewCompiler(c, name)
-	inner.function.Arity = len(arity.args)
-
-	// Add parameters as locals
-	for _, arg := range arity.args {
-		inner.addLocal(arg)
+	// Build the function proto
+	proto := &FunctionProto{
+		Name:         name,
+		Arities:      make([]*ArityProto, 0, len(e.arities)),
+		SubFunctions: make([]*FunctionProto, 0, 4),
 	}
 
-	// Compile the body
-	for i, bodyExpr := range arity.body {
-		if err := inner.compile(bodyExpr); err != nil {
+	// We need to track all upvalues from all arities
+	// For simplicity, we use the first arity's compiler for upvalue emission
+	var mainInner *Compiler
+
+	// Compile each fixed arity
+	for i, arity := range e.arities {
+		arityProto, inner, err := compileInnerArity(arity, false)
+		if err != nil {
 			return err
 		}
-		if i < len(arity.body)-1 {
-			inner.emitOp(OP_POP)
+		proto.Arities = append(proto.Arities, arityProto)
+		if i == 0 {
+			mainInner = inner
 		}
 	}
-	if len(arity.body) == 0 {
-		inner.emitOp(OP_NIL)
+
+	// Compile variadic arity
+	if e.variadic != nil {
+		varProto, inner, err := compileInnerArity(*e.variadic, true)
+		if err != nil {
+			return err
+		}
+		proto.VariadicArity = varProto
+		if mainInner == nil {
+			mainInner = inner
+		}
 	}
 
-	inner.emitReturn()
+	// Set legacy fields - always set Upvalues from mainInner since that's what we emit
+	if mainInner != nil {
+		proto.Upvalues = mainInner.function.Upvalues
+	}
+
+	// Set other legacy fields for single-arity case (backward compat)
+	if len(proto.Arities) == 1 && proto.VariadicArity == nil {
+		proto.Arity = proto.Arities[0].Arity
+		proto.Chunk = proto.Arities[0].Chunk
+	} else if len(proto.Arities) == 0 && proto.VariadicArity != nil {
+		proto.Arity = proto.VariadicArity.Arity
+		proto.Variadic = true
+		proto.Chunk = proto.VariadicArity.Chunk
+	}
 
 	// Add the inner function to our sub-functions
-	idx := c.function.AddSubFunction(inner.function)
+	idx := c.function.AddSubFunction(proto)
 
 	// Emit closure instruction
 	c.emitOp(OP_CLOSURE)
 	c.emitShort(uint16(idx))
 
 	// Emit upvalue info (after the closure instruction)
-	for _, upval := range inner.function.Upvalues {
-		if upval.IsLocal {
-			c.emitByte(1)
-		} else {
-			c.emitByte(0)
+	if mainInner != nil {
+		for _, upval := range mainInner.function.Upvalues {
+			if upval.IsLocal {
+				c.emitByte(1)
+			} else {
+				c.emitByte(0)
+			}
+			c.emitByte(upval.Index)
 		}
-		c.emitByte(upval.Index)
 	}
 
 	return nil
@@ -745,13 +874,19 @@ func IsVMCompatible(expr Expr) bool {
 	case *DefExpr:
 		return e.value == nil || IsVMCompatible(e.value)
 	case *FnExpr:
-		// Only support single-arity non-variadic functions for now
-		if len(e.arities) != 1 || e.variadic != nil {
-			return false
+		// Check all arities
+		for _, arity := range e.arities {
+			for _, bodyExpr := range arity.body {
+				if !IsVMCompatible(bodyExpr) {
+					return false
+				}
+			}
 		}
-		for _, bodyExpr := range e.arities[0].body {
-			if !IsVMCompatible(bodyExpr) {
-				return false
+		if e.variadic != nil {
+			for _, bodyExpr := range e.variadic.body {
+				if !IsVMCompatible(bodyExpr) {
+					return false
+				}
 			}
 		}
 		return true
@@ -839,13 +974,19 @@ func padLeft(s string, length int, pad string) string {
 
 // IsVMCompatibleFn checks if a function expression can be compiled to bytecode.
 func IsVMCompatibleFn(e *FnExpr) bool {
-	// Only support single-arity non-variadic functions for now
-	if len(e.arities) != 1 || e.variadic != nil {
-		return false
+	// Check all arities
+	for _, arity := range e.arities {
+		for _, bodyExpr := range arity.body {
+			if !IsVMCompatible(bodyExpr) {
+				return false
+			}
+		}
 	}
-	for _, bodyExpr := range e.arities[0].body {
-		if !IsVMCompatible(bodyExpr) {
-			return false
+	if e.variadic != nil {
+		for _, bodyExpr := range e.variadic.body {
+			if !IsVMCompatible(bodyExpr) {
+				return false
+			}
 		}
 	}
 	return true
@@ -853,9 +994,5 @@ func IsVMCompatibleFn(e *FnExpr) bool {
 
 // tryCompileFnExpr attempts to compile a FnExpr to bytecode.
 func tryCompileFnExpr(e *FnExpr) (*FunctionProto, error) {
-	name := "<anonymous>"
-	if e.self.name != nil {
-		name = e.self.Name()
-	}
-	return CompileFnArity(e.arities[0], name)
+	return CompileFnExpr(e, nil)
 }
