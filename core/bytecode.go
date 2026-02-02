@@ -121,10 +121,11 @@ type UpvalueInfo struct {
 
 // ArityProto holds compiled bytecode for a single function arity.
 type ArityProto struct {
-	Arity      int           // Number of fixed parameters (excluding rest param)
-	IsVariadic bool          // True if this arity accepts rest args
-	Chunk      *Chunk        // The bytecode for this arity
-	Upvalues   []UpvalueInfo // Upvalue capture info for this arity
+	Arity        int              // Number of fixed parameters (excluding rest param)
+	IsVariadic   bool             // True if this arity accepts rest args
+	Chunk        *Chunk           // The bytecode for this arity
+	Upvalues     []UpvalueInfo    // Upvalue capture info for this arity
+	SubFunctions []*FunctionProto // Nested function prototypes for this arity
 }
 
 // FunctionProto holds a compiled function's bytecode.

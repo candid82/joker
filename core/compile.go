@@ -55,31 +55,26 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 	}
 
 	proto := &FunctionProto{
-		Name:         name,
-		Arities:      make([]*ArityProto, 0, len(fnExpr.arities)),
-		SubFunctions: make([]*FunctionProto, 0, 4),
+		Name:    name,
+		Arities: make([]*ArityProto, 0, len(fnExpr.arities)),
 	}
 
 	// Compile each fixed arity
 	for _, arity := range fnExpr.arities {
-		arityProto, c, err := compileArityProtoWithCompiler(arity, name, false)
+		arityProto, _, err := compileArityProtoWithCompiler(arity, name, false)
 		if err != nil {
 			return nil, err
 		}
 		proto.Arities = append(proto.Arities, arityProto)
-		// Collect sub-functions from this arity's compiler
-		proto.SubFunctions = append(proto.SubFunctions, c.function.SubFunctions...)
 	}
 
 	// Compile variadic arity
 	if fnExpr.variadic != nil {
-		varProto, c, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true)
+		varProto, _, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true)
 		if err != nil {
 			return nil, err
 		}
 		proto.VariadicArity = varProto
-		// Collect sub-functions from variadic arity's compiler
-		proto.SubFunctions = append(proto.SubFunctions, c.function.SubFunctions...)
 	}
 
 	// Set legacy fields for single-arity case (backward compat)
@@ -87,11 +82,13 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 		proto.Arity = proto.Arities[0].Arity
 		proto.Chunk = proto.Arities[0].Chunk
 		proto.Upvalues = proto.Arities[0].Upvalues
+		proto.SubFunctions = proto.Arities[0].SubFunctions
 	} else if len(proto.Arities) == 0 && proto.VariadicArity != nil {
 		proto.Arity = proto.VariadicArity.Arity
 		proto.Variadic = true
 		proto.Chunk = proto.VariadicArity.Chunk
 		proto.Upvalues = proto.VariadicArity.Upvalues
+		proto.SubFunctions = proto.VariadicArity.SubFunctions
 	}
 
 	return proto, nil
@@ -130,10 +127,11 @@ func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bo
 	c.emitReturn()
 
 	return &ArityProto{
-		Arity:      fixedArgCount,
-		IsVariadic: isVariadic,
-		Chunk:      c.function.Chunk,
-		Upvalues:   c.function.Upvalues,
+		Arity:        fixedArgCount,
+		IsVariadic:   isVariadic,
+		Chunk:        c.function.Chunk,
+		Upvalues:     c.function.Upvalues,
+		SubFunctions: c.function.SubFunctions,
 	}, c, nil
 }
 
@@ -569,18 +567,18 @@ func (c *Compiler) compileFn(e *FnExpr) error {
 		inner.emitReturn()
 
 		return &ArityProto{
-			Arity:      fixedArgCount,
-			IsVariadic: isVariadic,
-			Chunk:      inner.function.Chunk,
-			Upvalues:   inner.function.Upvalues,
+			Arity:        fixedArgCount,
+			IsVariadic:   isVariadic,
+			Chunk:        inner.function.Chunk,
+			Upvalues:     inner.function.Upvalues,
+			SubFunctions: inner.function.SubFunctions,
 		}, inner, nil
 	}
 
 	// Build the function proto
 	proto := &FunctionProto{
-		Name:         name,
-		Arities:      make([]*ArityProto, 0, len(e.arities)),
-		SubFunctions: make([]*FunctionProto, 0, 4),
+		Name:    name,
+		Arities: make([]*ArityProto, 0, len(e.arities)),
 	}
 
 	// We need to track all upvalues from all arities
@@ -620,10 +618,12 @@ func (c *Compiler) compileFn(e *FnExpr) error {
 	if len(proto.Arities) == 1 && proto.VariadicArity == nil {
 		proto.Arity = proto.Arities[0].Arity
 		proto.Chunk = proto.Arities[0].Chunk
+		proto.SubFunctions = proto.Arities[0].SubFunctions
 	} else if len(proto.Arities) == 0 && proto.VariadicArity != nil {
 		proto.Arity = proto.VariadicArity.Arity
 		proto.Variadic = true
 		proto.Chunk = proto.VariadicArity.Chunk
+		proto.SubFunctions = proto.VariadicArity.SubFunctions
 	}
 
 	// Add the inner function to our sub-functions

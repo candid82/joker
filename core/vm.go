@@ -317,8 +317,7 @@ func (vm *VM) run() Object {
 
 		case OP_CLOSURE:
 			idx := vm.readShort(frame, chunk)
-			parentProto := frame.closure.proto
-			proto := parentProto.SubFunctions[idx]
+			proto := frame.arityProto.SubFunctions[idx]
 			fn := &Fn{
 				proto:      proto,
 				upvalues:   make([]*Upvalue, len(proto.Upvalues)),
