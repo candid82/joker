@@ -64,13 +64,33 @@ const (
 
 	// Stack manipulation
 	OP_POPN // Pop N values from under the top (preserves top)
+
+	// Exception handling
+	OP_THROW     // Pop Error from stack and panic
+	OP_TRY_BEGIN // Begin try block (2-byte handler info index)
+	OP_TRY_END   // End try block (normal exit)
 )
+
+// CatchInfo describes one catch clause for exception handling.
+type CatchInfo struct {
+	ExcType   *Type // Type to catch
+	HandlerIP int   // IP of catch body
+	LocalSlot int   // Slot for exception binding
+}
+
+// HandlerInfo describes a try block's exception handling configuration.
+type HandlerInfo struct {
+	Catches   []CatchInfo // Catch clauses in order
+	FinallyIP int         // IP of finally block (-1 if none)
+	EndIP     int         // IP after finally block (for normal exit)
+}
 
 // Chunk holds compiled bytecode and associated data.
 type Chunk struct {
-	Code      []byte   // Bytecode instructions
-	Constants []Object // Constant pool
-	Lines     []int    // Line number for each byte (for error reporting)
+	Code      []byte        // Bytecode instructions
+	Constants []Object      // Constant pool
+	Lines     []int         // Line number for each byte (for error reporting)
+	Handlers  []HandlerInfo // Exception handler info (indexed by OP_TRY_BEGIN operand)
 }
 
 // NewChunk creates a new empty chunk.
@@ -79,7 +99,14 @@ func NewChunk() *Chunk {
 		Code:      make([]byte, 0, 256),
 		Constants: make([]Object, 0, 16),
 		Lines:     make([]int, 0, 256),
+		Handlers:  make([]HandlerInfo, 0, 4),
 	}
+}
+
+// AddHandler adds an exception handler and returns its index.
+func (c *Chunk) AddHandler(handler HandlerInfo) int {
+	c.Handlers = append(c.Handlers, handler)
+	return len(c.Handlers) - 1
 }
 
 // AppendByte appends a byte to the chunk.
@@ -193,6 +220,9 @@ var opcodeNames = [...]string{
 	OP_SET:           "SET",
 	OP_CLOSE_UPVALUE: "CLOSE_UPVALUE",
 	OP_POPN:          "POPN",
+	OP_THROW:         "THROW",
+	OP_TRY_BEGIN:     "TRY_BEGIN",
+	OP_TRY_END:       "TRY_END",
 }
 
 // OpcodeName returns the name of an opcode.

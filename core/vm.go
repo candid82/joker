@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	vmStackMax  = 256 * 64 // Maximum value stack size
-	vmFramesMax = 64       // Maximum call frame depth
+	vmStackMax    = 256 * 64 // Maximum value stack size
+	vmFramesMax   = 64       // Maximum call frame depth
+	vmHandlersMax = 64       // Maximum exception handler depth
 )
 
 // Upvalue represents a captured variable in a closure.
@@ -25,20 +26,30 @@ type CallFrame struct {
 	slots      int         // Base index in VM stack for this frame's locals
 }
 
+// ExceptionHandler tracks an active try block for exception handling.
+type ExceptionHandler struct {
+	handlerIdx int // Index into chunk.Handlers
+	frameIndex int // Frame index when installed
+	stackTop   int // Stack top when try began
+}
+
 // VM is the bytecode virtual machine.
 type VM struct {
-	stack      []Object    // Value stack
-	stackTop   int         // Points to next free slot
-	frames     []CallFrame // Call frame stack
-	frameCount int         // Number of active frames
-	openUpvals *Upvalue    // Linked list of open upvalues (sorted by stack index)
+	stack        []Object           // Value stack
+	stackTop     int                // Points to next free slot
+	frames       []CallFrame        // Call frame stack
+	frameCount   int                // Number of active frames
+	openUpvals   *Upvalue           // Linked list of open upvalues (sorted by stack index)
+	handlers     []ExceptionHandler // Exception handler stack
+	handlerCount int                // Number of active handlers
 }
 
 // NewVM creates a new VM instance.
 func NewVM() *VM {
 	return &VM{
-		stack:  make([]Object, vmStackMax),
-		frames: make([]CallFrame, vmFramesMax),
+		stack:    make([]Object, vmStackMax),
+		frames:   make([]CallFrame, vmFramesMax),
+		handlers: make([]ExceptionHandler, vmHandlersMax),
 	}
 }
 
@@ -47,6 +58,7 @@ func (vm *VM) Reset() {
 	vm.stackTop = 0
 	vm.frameCount = 0
 	vm.openUpvals = nil
+	vm.handlerCount = 0
 }
 
 // Push pushes a value onto the stack.
@@ -154,279 +166,358 @@ func (vm *VM) Execute(fn *Fn, args []Object) Object {
 	return vm.run()
 }
 
+// vmReturnValue is used to signal a return from deep in the VM execution.
+type vmReturnValue struct {
+	result Object
+}
+
 // run is the main execution loop.
 func (vm *VM) run() Object {
 	frame := &vm.frames[vm.frameCount-1]
 	chunk := frame.arityProto.Chunk
 
+runLoop:
 	for {
-		op := Opcode(chunk.Code[frame.ip])
-		frame.ip++
+		// Set up panic recovery for exception handling
+		didPanic := false
+		var panicValue interface{}
 
-		switch op {
-		case OP_CONST:
-			idx := vm.readShort(frame, chunk)
-			vm.Push(chunk.Constants[idx])
-
-		case OP_NIL:
-			vm.Push(NIL)
-
-		case OP_TRUE:
-			vm.Push(Boolean{B: true})
-
-		case OP_FALSE:
-			vm.Push(Boolean{B: false})
-
-		case OP_POP:
-			vm.Pop()
-
-		case OP_DUP:
-			vm.Push(vm.Peek(0))
-
-		case OP_GET_LOCAL:
-			slot := chunk.Code[frame.ip]
-			frame.ip++
-			vm.Push(vm.stack[frame.slots+int(slot)])
-
-		case OP_SET_LOCAL:
-			slot := chunk.Code[frame.ip]
-			frame.ip++
-			vm.stack[frame.slots+int(slot)] = vm.Peek(0)
-
-		case OP_GET_UPVALUE:
-			slot := chunk.Code[frame.ip]
-			frame.ip++
-			upval := frame.closure.upvalues[slot]
-			var val Object
-			if upval.index >= 0 {
-				val = vm.stack[upval.index]
-			} else {
-				val = upval.closed
-			}
-			if val == nil {
-				panic(RT.NewError("VM BUG: upvalue is nil"))
-			}
-			vm.Push(val)
-
-		case OP_SET_UPVALUE:
-			slot := chunk.Code[frame.ip]
-			frame.ip++
-			upval := frame.closure.upvalues[slot]
-			if upval.index >= 0 {
-				vm.stack[upval.index] = vm.Peek(0)
-			} else {
-				upval.closed = vm.Peek(0)
-			}
-
-		case OP_GET_VAR:
-			idx := vm.readShort(frame, chunk)
-			v := chunk.Constants[idx].(*Var)
-			if v.Value == nil {
-				panic(RT.NewError("Var not initialized: " + v.ToString(false)))
-			}
-			vm.Push(v.Value)
-
-		case OP_SET_VAR:
-			idx := vm.readShort(frame, chunk)
-			v := chunk.Constants[idx].(*Var)
-			v.Value = vm.Peek(0)
-
-		case OP_ADD:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(ops.Add(a, b))
-
-		case OP_SUBTRACT:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(ops.Subtract(a, b))
-
-		case OP_MULTIPLY:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(ops.Multiply(a, b))
-
-		case OP_DIVIDE:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(ops.Divide(a, b))
-
-		case OP_NEGATE:
-			val := EnsureObjectIsNumber(vm.Pop(), "")
-			switch v := val.(type) {
-			case Int:
-				vm.Push(Int{I: -v.I})
-			case Double:
-				vm.Push(Double{D: -v.D})
-			default:
-				// For BigInt/BigFloat/Ratio, use multiply by -1
-				ops := GetOps(val)
-				vm.Push(ops.Multiply(val, Int{I: -1}))
-			}
-
-		case OP_EQUAL:
-			b := vm.Pop()
-			a := vm.Pop()
-			vm.Push(Boolean{B: a.Equals(b)})
-
-		case OP_LESS:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(Boolean{B: ops.Lt(a, b)})
-
-		case OP_GREATER:
-			b := EnsureObjectIsNumber(vm.Pop(), "")
-			a := EnsureObjectIsNumber(vm.Pop(), "")
-			ops := GetOps(a).Combine(GetOps(b))
-			vm.Push(Boolean{B: ops.Gt(a, b)})
-
-		case OP_NOT:
-			val := vm.Pop()
-			vm.Push(Boolean{B: !ToBool(val)})
-
-		case OP_JUMP:
-			offset := vm.readShort(frame, chunk)
-			frame.ip += int(int16(offset))
-
-		case OP_JUMP_IF_FALSE:
-			offset := vm.readShort(frame, chunk)
-			if !ToBool(vm.Peek(0)) {
-				frame.ip += int(int16(offset))
-			}
-			vm.Pop()
-
-		case OP_LOOP:
-			offset := vm.readShort(frame, chunk)
-			frame.ip -= int(offset)
-
-		case OP_CALL:
-			argCount := int(chunk.Code[frame.ip])
-			frame.ip++
-			callee := vm.Peek(argCount)
-			if vm.callValue(callee, argCount) {
-				// New frame was pushed, switch to it
-				frame = &vm.frames[vm.frameCount-1]
-				chunk = frame.arityProto.Chunk
-			}
-			// Otherwise, result is already on stack, continue in current frame
-
-		case OP_CLOSURE:
-			idx := vm.readShort(frame, chunk)
-			proto := frame.arityProto.SubFunctions[idx]
-			fn := &Fn{
-				proto:      proto,
-				upvalues:   make([]*Upvalue, len(proto.Upvalues)),
-				isCompiled: true,
-			}
-			// Read upvalue info from bytecode and capture upvalues
-			// We close all upvalues immediately to ensure the closure is self-contained
-			// and can be called from any context (including a different VM execution).
-			for i := range proto.Upvalues {
-				isLocal := chunk.Code[frame.ip] == 1
-				frame.ip++
-				index := int(chunk.Code[frame.ip])
-				frame.ip++
-
-				var val Object
-				if isLocal {
-					// Capture from current frame's local
-					val = vm.stack[frame.slots+index]
-				} else {
-					// Get from parent closure's upvalue
-					parentUpval := frame.closure.upvalues[index]
-					if parentUpval.index >= 0 {
-						// Parent's upvalue is open, read from stack
-						val = vm.stack[parentUpval.index]
-					} else {
-						// Parent's upvalue is closed, use its closed value
-						val = parentUpval.closed
-					}
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					didPanic = true
+					panicValue = r
 				}
-				if val == nil {
-					panic(RT.NewError("VM BUG: captured nil value for upvalue"))
-				}
-				// Create a closed upvalue directly
-				fn.upvalues[i] = &Upvalue{
-					index:  -1, // Already closed
-					closed: val,
+			}()
+
+			for {
+				result := vm.executeOneOp(&frame, &chunk)
+				if result != nil {
+					panic(vmReturnValue{result: result})
 				}
 			}
-			vm.Push(fn)
+		}()
 
-		case OP_RETURN:
-			result := vm.Pop()
-			vm.closeUpvalues(frame.slots)
-			vm.frameCount--
-			if vm.frameCount == 0 {
-				return result
+		if didPanic {
+			// Check if this is a return signal
+			if ret, ok := panicValue.(vmReturnValue); ok {
+				return ret.result
 			}
-			vm.stackTop = frame.slots
-			vm.Push(result)
-			frame = &vm.frames[vm.frameCount-1]
-			chunk = frame.arityProto.Chunk
-
-		case OP_RECUR:
-			argCount := int(chunk.Code[frame.ip])
-			frame.ip++
-			slotStart := int(chunk.Code[frame.ip])
-			frame.ip++
-			// Copy new argument values to loop variable slots
-			for i := 0; i < argCount; i++ {
-				vm.stack[frame.slots+slotStart+i] = vm.stack[vm.stackTop-argCount+i]
+			// Try to dispatch to an exception handler
+			if err, ok := panicValue.(Error); ok {
+				if vm.dispatchException(err, &frame, &chunk) {
+					continue runLoop // Handler found, continue execution
+				}
 			}
-			vm.stackTop = frame.slots + slotStart + argCount
-			// Don't reset frame.ip; let OP_LOOP handle the backward jump
-
-		case OP_VECTOR:
-			count := int(vm.readShort(frame, chunk))
-			elements := make([]Object, count)
-			for i := count - 1; i >= 0; i-- {
-				elements[i] = vm.Pop()
-			}
-			vm.Push(NewVectorFrom(elements...))
-
-		case OP_MAP:
-			count := int(vm.readShort(frame, chunk))
-			m := EmptyArrayMap()
-			for i := 0; i < count; i++ {
-				val := vm.Pop()
-				key := vm.Pop()
-				m = m.Assoc(key, val).(*ArrayMap)
-			}
-			vm.Push(m)
-
-		case OP_SET:
-			count := int(vm.readShort(frame, chunk))
-			elements := make([]Object, count)
-			for i := count - 1; i >= 0; i-- {
-				elements[i] = vm.Pop()
-			}
-			vm.Push(NewSetFromSeq(NewListFrom(elements...)))
-
-		case OP_CLOSE_UPVALUE:
-			vm.closeUpvalues(vm.stackTop - 1)
-			vm.Pop()
-
-		case OP_POPN:
-			// Pop N values from under the top (preserves top)
-			n := int(chunk.Code[frame.ip])
-			frame.ip++
-			if n > 0 {
-				top := vm.stack[vm.stackTop-1]
-				vm.stackTop -= n + 1 // Remove n values plus old top position
-				vm.stack[vm.stackTop] = top
-				vm.stackTop++
-			}
-
-		default:
-			panic(RT.NewError("Unknown opcode: " + strconv.Itoa(int(op))))
+			// No handler found or not an Error, re-panic
+			panic(panicValue)
 		}
 	}
+}
+
+// executeOneOp executes a single opcode and returns non-nil if the VM should return.
+func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
+	frame := *framePtr
+	chunk := *chunkPtr
+
+	op := Opcode(chunk.Code[frame.ip])
+	frame.ip++
+
+	switch op {
+	case OP_CONST:
+		idx := vm.readShort(frame, chunk)
+		vm.Push(chunk.Constants[idx])
+
+	case OP_NIL:
+		vm.Push(NIL)
+
+	case OP_TRUE:
+		vm.Push(Boolean{B: true})
+
+	case OP_FALSE:
+		vm.Push(Boolean{B: false})
+
+	case OP_POP:
+		vm.Pop()
+
+	case OP_DUP:
+		vm.Push(vm.Peek(0))
+
+	case OP_GET_LOCAL:
+		slot := chunk.Code[frame.ip]
+		frame.ip++
+		vm.Push(vm.stack[frame.slots+int(slot)])
+
+	case OP_SET_LOCAL:
+		slot := chunk.Code[frame.ip]
+		frame.ip++
+		vm.stack[frame.slots+int(slot)] = vm.Peek(0)
+
+	case OP_GET_UPVALUE:
+		slot := chunk.Code[frame.ip]
+		frame.ip++
+		upval := frame.closure.upvalues[slot]
+		var val Object
+		if upval.index >= 0 {
+			val = vm.stack[upval.index]
+		} else {
+			val = upval.closed
+		}
+		if val == nil {
+			panic(RT.NewError("VM BUG: upvalue is nil"))
+		}
+		vm.Push(val)
+
+	case OP_SET_UPVALUE:
+		slot := chunk.Code[frame.ip]
+		frame.ip++
+		upval := frame.closure.upvalues[slot]
+		if upval.index >= 0 {
+			vm.stack[upval.index] = vm.Peek(0)
+		} else {
+			upval.closed = vm.Peek(0)
+		}
+
+	case OP_GET_VAR:
+		idx := vm.readShort(frame, chunk)
+		v := chunk.Constants[idx].(*Var)
+		if v.Value == nil {
+			panic(RT.NewError("Var not initialized: " + v.ToString(false)))
+		}
+		vm.Push(v.Value)
+
+	case OP_SET_VAR:
+		idx := vm.readShort(frame, chunk)
+		v := chunk.Constants[idx].(*Var)
+		v.Value = vm.Peek(0)
+
+	case OP_ADD:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(ops.Add(a, b))
+
+	case OP_SUBTRACT:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(ops.Subtract(a, b))
+
+	case OP_MULTIPLY:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(ops.Multiply(a, b))
+
+	case OP_DIVIDE:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(ops.Divide(a, b))
+
+	case OP_NEGATE:
+		val := EnsureObjectIsNumber(vm.Pop(), "")
+		switch v := val.(type) {
+		case Int:
+			vm.Push(Int{I: -v.I})
+		case Double:
+			vm.Push(Double{D: -v.D})
+		default:
+			// For BigInt/BigFloat/Ratio, use multiply by -1
+			ops := GetOps(val)
+			vm.Push(ops.Multiply(val, Int{I: -1}))
+		}
+
+	case OP_EQUAL:
+		b := vm.Pop()
+		a := vm.Pop()
+		vm.Push(Boolean{B: a.Equals(b)})
+
+	case OP_LESS:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(Boolean{B: ops.Lt(a, b)})
+
+	case OP_GREATER:
+		b := EnsureObjectIsNumber(vm.Pop(), "")
+		a := EnsureObjectIsNumber(vm.Pop(), "")
+		ops := GetOps(a).Combine(GetOps(b))
+		vm.Push(Boolean{B: ops.Gt(a, b)})
+
+	case OP_NOT:
+		val := vm.Pop()
+		vm.Push(Boolean{B: !ToBool(val)})
+
+	case OP_JUMP:
+		offset := vm.readShort(frame, chunk)
+		frame.ip += int(int16(offset))
+
+	case OP_JUMP_IF_FALSE:
+		offset := vm.readShort(frame, chunk)
+		if !ToBool(vm.Peek(0)) {
+			frame.ip += int(int16(offset))
+		}
+		vm.Pop()
+
+	case OP_LOOP:
+		offset := vm.readShort(frame, chunk)
+		frame.ip -= int(offset)
+
+	case OP_CALL:
+		argCount := int(chunk.Code[frame.ip])
+		frame.ip++
+		callee := vm.Peek(argCount)
+		if vm.callValue(callee, argCount) {
+			// New frame was pushed, switch to it
+			*framePtr = &vm.frames[vm.frameCount-1]
+			*chunkPtr = (*framePtr).arityProto.Chunk
+		}
+		// Otherwise, result is already on stack, continue in current frame
+
+	case OP_CLOSURE:
+		idx := vm.readShort(frame, chunk)
+		proto := frame.arityProto.SubFunctions[idx]
+		fn := &Fn{
+			proto:      proto,
+			upvalues:   make([]*Upvalue, len(proto.Upvalues)),
+			isCompiled: true,
+		}
+		// Read upvalue info from bytecode and capture upvalues
+		// We close all upvalues immediately to ensure the closure is self-contained
+		// and can be called from any context (including a different VM execution).
+		for i := range proto.Upvalues {
+			isLocal := chunk.Code[frame.ip] == 1
+			frame.ip++
+			index := int(chunk.Code[frame.ip])
+			frame.ip++
+
+			var val Object
+			if isLocal {
+				// Capture from current frame's local
+				val = vm.stack[frame.slots+index]
+			} else {
+				// Get from parent closure's upvalue
+				parentUpval := frame.closure.upvalues[index]
+				if parentUpval.index >= 0 {
+					// Parent's upvalue is open, read from stack
+					val = vm.stack[parentUpval.index]
+				} else {
+					// Parent's upvalue is closed, use its closed value
+					val = parentUpval.closed
+				}
+			}
+			if val == nil {
+				panic(RT.NewError("VM BUG: captured nil value for upvalue"))
+			}
+			// Create a closed upvalue directly
+			fn.upvalues[i] = &Upvalue{
+				index:  -1, // Already closed
+				closed: val,
+			}
+		}
+		vm.Push(fn)
+
+	case OP_RETURN:
+		result := vm.Pop()
+		vm.closeUpvalues(frame.slots)
+		vm.frameCount--
+		if vm.frameCount == 0 {
+			return result // Signal to run() that we're done
+		}
+		vm.stackTop = frame.slots
+		vm.Push(result)
+		*framePtr = &vm.frames[vm.frameCount-1]
+		*chunkPtr = (*framePtr).arityProto.Chunk
+
+	case OP_RECUR:
+		argCount := int(chunk.Code[frame.ip])
+		frame.ip++
+		slotStart := int(chunk.Code[frame.ip])
+		frame.ip++
+		// Copy new argument values to loop variable slots
+		for i := 0; i < argCount; i++ {
+			vm.stack[frame.slots+slotStart+i] = vm.stack[vm.stackTop-argCount+i]
+		}
+		vm.stackTop = frame.slots + slotStart + argCount
+		// Don't reset frame.ip; let OP_LOOP handle the backward jump
+
+	case OP_VECTOR:
+		count := int(vm.readShort(frame, chunk))
+		elements := make([]Object, count)
+		for i := count - 1; i >= 0; i-- {
+			elements[i] = vm.Pop()
+		}
+		vm.Push(NewVectorFrom(elements...))
+
+	case OP_MAP:
+		count := int(vm.readShort(frame, chunk))
+		m := EmptyArrayMap()
+		for i := 0; i < count; i++ {
+			val := vm.Pop()
+			key := vm.Pop()
+			m = m.Assoc(key, val).(*ArrayMap)
+		}
+		vm.Push(m)
+
+	case OP_SET:
+		count := int(vm.readShort(frame, chunk))
+		elements := make([]Object, count)
+		for i := count - 1; i >= 0; i-- {
+			elements[i] = vm.Pop()
+		}
+		vm.Push(NewSetFromSeq(NewListFrom(elements...)))
+
+	case OP_CLOSE_UPVALUE:
+		vm.closeUpvalues(vm.stackTop - 1)
+		vm.Pop()
+
+	case OP_POPN:
+		// Pop N values from under the top (preserves top)
+		n := int(chunk.Code[frame.ip])
+		frame.ip++
+		if n > 0 {
+			top := vm.stack[vm.stackTop-1]
+			vm.stackTop -= n + 1 // Remove n values plus old top position
+			vm.stack[vm.stackTop] = top
+			vm.stackTop++
+		}
+
+	case OP_THROW:
+		exc := vm.Pop()
+		var err Error
+		switch e := exc.(type) {
+		case Error:
+			err = e
+		default:
+			err = RT.NewError("Cannot throw " + exc.ToString(false))
+		}
+		// Just panic - the recover in run() will handle dispatch
+		panic(err)
+
+	case OP_TRY_BEGIN:
+		handlerIdx := int(vm.readShort(frame, chunk))
+		if vm.handlerCount >= vmHandlersMax {
+			panic(RT.NewError("VM exception handler stack overflow"))
+		}
+		vm.handlers[vm.handlerCount] = ExceptionHandler{
+			handlerIdx: handlerIdx,
+			frameIndex: vm.frameCount - 1,
+			stackTop:   vm.stackTop,
+		}
+		vm.handlerCount++
+
+	case OP_TRY_END:
+		// Normal exit from try block - pop the handler
+		if vm.handlerCount > 0 {
+			vm.handlerCount--
+		}
+
+	default:
+		panic(RT.NewError("Unknown opcode: " + strconv.Itoa(int(op))))
+	}
+
+	return nil
 }
 
 // readShort reads a 2-byte big-endian value from the bytecode.
@@ -602,40 +693,8 @@ func (vm *VM) callFn(fn *Fn, argCount int) {
 	frame.slots = vm.stackTop - argCount - 1
 }
 
-// captureUpvalue captures a local variable for a closure.
-func (vm *VM) captureUpvalue(stackIndex int) *Upvalue {
-	var prev *Upvalue
-	upval := vm.openUpvals
-
-	// Find insertion point (sorted by stack index, descending)
-	for upval != nil && upval.index > stackIndex {
-		prev = upval
-		upval = upval.next
-	}
-
-	// Reuse existing upvalue if found
-	if upval != nil && upval.index == stackIndex {
-		return upval
-	}
-
-	// Create new upvalue
-	newUpval := &Upvalue{
-		index: stackIndex,
-		next:  upval,
-	}
-
-	if prev == nil {
-		vm.openUpvals = newUpval
-	} else {
-		prev.next = newUpval
-	}
-
-	return newUpval
-}
-
 // closeUpvalues closes all upvalues at or above the given stack index.
 func (vm *VM) closeUpvalues(lastIndex int) {
-	count := 0
 	for vm.openUpvals != nil && vm.openUpvals.index >= lastIndex {
 		upval := vm.openUpvals
 		val := vm.stack[upval.index]
@@ -645,9 +704,58 @@ func (vm *VM) closeUpvalues(lastIndex int) {
 		upval.closed = val
 		upval.index = -1 // Mark as closed
 		vm.openUpvals = upval.next
-		count++
 	}
-	_ = count // Debug: can add fmt.Printf here if needed
+}
+
+// dispatchException tries to find a matching catch handler for the exception.
+// Returns true if a handler was found and execution should continue,
+// false if no handler was found and the exception should propagate.
+func (vm *VM) dispatchException(exc Error, framePtr **CallFrame, chunkPtr **Chunk) bool {
+	for vm.handlerCount > 0 {
+		vm.handlerCount--
+		handler := vm.handlers[vm.handlerCount]
+
+		// Get the frame where the handler was installed
+		if handler.frameIndex >= vm.frameCount {
+			continue // Frame was already popped, skip this handler
+		}
+
+		// Restore to the handler's frame
+		for vm.frameCount > handler.frameIndex+1 {
+			vm.closeUpvalues(vm.frames[vm.frameCount-1].slots)
+			vm.frameCount--
+		}
+
+		frame := &vm.frames[handler.frameIndex]
+		chunk := frame.arityProto.Chunk
+		handlerInfo := &chunk.Handlers[handler.handlerIdx]
+
+		// Find a matching catch clause
+		for _, catchInfo := range handlerInfo.Catches {
+			if IsInstance(catchInfo.ExcType, exc) {
+				// Found a match! Restore stack and jump to catch handler
+				vm.stackTop = handler.stackTop
+				vm.Push(exc) // Push exception for the catch binding
+				frame.ip = catchInfo.HandlerIP
+
+				// Update the caller's frame/chunk pointers
+				*framePtr = frame
+				*chunkPtr = chunk
+				return true
+			}
+		}
+
+		// No matching catch - check for finally
+		if handlerInfo.FinallyIP >= 0 {
+			// Execute finally by jumping to it
+			// The exception will be re-thrown after finally completes
+			// For now, we'll re-panic (finally execution is complex)
+			// TODO: Implement proper finally execution with pending exception
+		}
+	}
+
+	// No handler found
+	return false
 }
 
 // vmPool is a pool of VM instances for reuse, avoiding allocations

@@ -191,6 +191,8 @@ func (c *Compiler) compile(expr Expr) error {
 		return c.compile(e.expr)
 	case *ThrowExpr:
 		return c.compileThrow(e)
+	case *TryExpr:
+		return c.compileTry(e)
 	default:
 		return RT.NewError("Cannot compile expression type: " + expr.Dump(false).ToString(false))
 	}
@@ -653,9 +655,98 @@ func (c *Compiler) compileThrow(e *ThrowExpr) error {
 	if err := c.compile(e.e); err != nil {
 		return err
 	}
-	// For now, we'll panic - proper exception handling requires more work
-	// This is a placeholder that will cause the VM to exit to AST evaluation
-	return RT.NewError("throw not yet implemented in VM")
+	c.emitOp(OP_THROW)
+	return nil
+}
+
+func (c *Compiler) compileTry(e *TryExpr) error {
+	// Create handler info - we'll fill in the IPs as we compile
+	handler := HandlerInfo{
+		Catches:   make([]CatchInfo, len(e.catches)),
+		FinallyIP: -1,
+		EndIP:     -1,
+	}
+
+	// Add placeholder handler and emit OP_TRY_BEGIN
+	handlerIdx := c.function.Chunk.AddHandler(handler)
+	c.emitOp(OP_TRY_BEGIN)
+	c.emitShort(uint16(handlerIdx))
+
+	// Compile try body
+	for i, bodyExpr := range e.body {
+		if err := c.compile(bodyExpr); err != nil {
+			return err
+		}
+		if i < len(e.body)-1 {
+			c.emitOp(OP_POP)
+		}
+	}
+	if len(e.body) == 0 {
+		c.emitOp(OP_NIL)
+	}
+
+	// Normal exit from try - pop handler and jump to after finally
+	c.emitOp(OP_TRY_END)
+	exitJump := c.emitJump(OP_JUMP)
+
+	// Compile each catch clause
+	for i, catch := range e.catches {
+		catchIP := len(c.function.Chunk.Code)
+
+		// Begin scope for catch binding
+		c.beginScope()
+
+		// The exception will be on the stack when we jump here
+		// Add it as a local variable
+		c.addLocal(catch.excSymbol)
+
+		// Record catch info
+		c.function.Chunk.Handlers[handlerIdx].Catches[i] = CatchInfo{
+			ExcType:   catch.excType,
+			HandlerIP: catchIP,
+			LocalSlot: c.localCount - 1, // The slot we just added
+		}
+
+		// Compile catch body
+		for j, bodyExpr := range catch.body {
+			if err := c.compile(bodyExpr); err != nil {
+				return err
+			}
+			if j < len(catch.body)-1 {
+				c.emitOp(OP_POP)
+			}
+		}
+		if len(catch.body) == 0 {
+			c.emitOp(OP_NIL)
+		}
+
+		c.endScope()
+
+		// Jump to after finally (unless this is the last catch and there's no finally)
+		if i < len(e.catches)-1 || e.finallyExpr != nil {
+			c.patchJump(exitJump)
+			exitJump = c.emitJump(OP_JUMP)
+		}
+	}
+
+	// Compile finally block if present
+	if e.finallyExpr != nil {
+		c.function.Chunk.Handlers[handlerIdx].FinallyIP = len(c.function.Chunk.Code)
+
+		// Finally body - result is discarded
+		for _, bodyExpr := range e.finallyExpr {
+			if err := c.compile(bodyExpr); err != nil {
+				return err
+			}
+			c.emitOp(OP_POP)
+		}
+	}
+
+	// Patch the exit jump to come here
+	c.patchJump(exitJump)
+	c.function.Chunk.Handlers[handlerIdx].EndIP = len(c.function.Chunk.Code)
+
+	return nil
 }
 
 // Scope management
@@ -892,7 +983,31 @@ func IsVMCompatible(expr Expr) bool {
 		return true
 	case *MetaExpr:
 		return IsVMCompatible(e.expr)
-	case *TryExpr, *CatchExpr, *ThrowExpr, *MacroCallExpr:
+	case *ThrowExpr:
+		return IsVMCompatible(e.e)
+	case *TryExpr:
+		// Check try body
+		for _, bodyExpr := range e.body {
+			if !IsVMCompatible(bodyExpr) {
+				return false
+			}
+		}
+		// Check catch clauses
+		for _, catch := range e.catches {
+			for _, bodyExpr := range catch.body {
+				if !IsVMCompatible(bodyExpr) {
+					return false
+				}
+			}
+		}
+		// Check finally
+		for _, bodyExpr := range e.finallyExpr {
+			if !IsVMCompatible(bodyExpr) {
+				return false
+			}
+		}
+		return true
+	case *CatchExpr, *MacroCallExpr:
 		return false
 	default:
 		return false
@@ -936,7 +1051,7 @@ func disassembleInstruction(chunk *Chunk, offset int) string {
 		result += " " + strconv.Itoa(int(chunk.Code[offset+1]))
 	case OP_RECUR:
 		result += " argCount=" + strconv.Itoa(int(chunk.Code[offset+1])) + " slotStart=" + strconv.Itoa(int(chunk.Code[offset+2]))
-	case OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET:
+	case OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET, OP_TRY_BEGIN:
 		val := uint16(chunk.Code[offset+1])<<8 | uint16(chunk.Code[offset+2])
 		result += " " + strconv.Itoa(int(val))
 	}
@@ -947,7 +1062,7 @@ func disassembleInstruction(chunk *Chunk, offset int) string {
 func nextInstructionOffset(chunk *Chunk, offset int) int {
 	op := Opcode(chunk.Code[offset])
 	switch op {
-	case OP_CONST, OP_GET_VAR, OP_SET_VAR, OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET:
+	case OP_CONST, OP_GET_VAR, OP_SET_VAR, OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET, OP_TRY_BEGIN:
 		return offset + 3
 	case OP_CLOSURE:
 		// CLOSURE has variable length due to upvalue info
