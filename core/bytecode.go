@@ -69,6 +69,7 @@ const (
 	OP_THROW     // Pop Error from stack and panic
 	OP_TRY_BEGIN // Begin try block (2-byte handler info index)
 	OP_TRY_END   // End try block (normal exit)
+	OP_POP_SLOT  // Remove value at specific slot (1-byte slot index), shift values above down
 )
 
 // CatchInfo describes one catch clause for exception handling.
@@ -80,9 +81,10 @@ type CatchInfo struct {
 
 // HandlerInfo describes a try block's exception handling configuration.
 type HandlerInfo struct {
-	Catches   []CatchInfo // Catch clauses in order
-	FinallyIP int         // IP of finally block (-1 if none)
-	EndIP     int         // IP after finally block (for normal exit)
+	Catches       []CatchInfo // Catch clauses in order
+	FinallyIP     int         // IP of finally block (-1 if none)
+	EndIP         int         // IP after finally block (for normal exit)
+	TryLocalCount int         // Local count when try block begins (for stack management)
 }
 
 // Chunk holds compiled bytecode and associated data.

@@ -18,7 +18,7 @@ default: :hey then :there and finally (:you)
 Great function
 Better function
 (:foo 1 :bar)
-{:foo 1, :baz hello}
+{:baz hello, :foo 1}
 Bob Dobbs
 Bob Dobbs
 ???

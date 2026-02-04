@@ -188,7 +188,15 @@ func (g *GenGo) slice(target string, v reflect.Value) string {
 	for i := 0; i < numEntries; i++ {
 		res := g.value(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
 		if res == "" {
-			el = append(el, "\tnil,")
+			// For numeric types, empty string means zero value - output 0 not nil
+			switch elemType.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+				reflect.Float32, reflect.Float64:
+				el = append(el, "\t0,")
+			default:
+				el = append(el, "\tnil,")
+			}
 		} else {
 			el = append(el, "\t"+res+",")
 		}

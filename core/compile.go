@@ -47,6 +47,12 @@ func Compile(expr Expr, name string) (*FunctionProto, error) {
 	return c.function, nil
 }
 
+// CompileTopLevel compiles a top-level expression to a zero-argument FunctionProto.
+// This is used for file-level VM execution.
+func CompileTopLevel(expr Expr) (*FunctionProto, error) {
+	return Compile(expr, "<top-level>")
+}
+
 // CompileFnExpr compiles a function expression.
 func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 	name := "<anonymous>"
@@ -512,19 +518,18 @@ func (c *Compiler) compileBinaryOp(args []Expr, op Opcode) (bool, error) {
 }
 
 func (c *Compiler) compileDef(e *DefExpr) error {
-	// Compile the value
+	// Only set the var's value if one is provided
+	// (def x) leaves x unchanged, (def x val) sets x to val
 	if e.value != nil {
 		if err := c.compile(e.value); err != nil {
 			return err
 		}
-	} else {
-		c.emitOp(OP_NIL)
+		// Store in the var and pop the value
+		idx := c.function.Chunk.AddConstant(e.vr)
+		c.emitOp(OP_SET_VAR)
+		c.emitShort(uint16(idx))
+		c.emitOp(OP_POP) // Pop the value, leaving just the var on stack
 	}
-
-	// Store in the var
-	idx := c.function.Chunk.AddConstant(e.vr)
-	c.emitOp(OP_SET_VAR)
-	c.emitShort(uint16(idx))
 
 	// Push the var as the result
 	c.emitConstant(e.vr)
@@ -661,10 +666,12 @@ func (c *Compiler) compileThrow(e *ThrowExpr) error {
 
 func (c *Compiler) compileTry(e *TryExpr) error {
 	// Create handler info - we'll fill in the IPs as we compile
+	// Record localCount so dispatchException can properly place the exception
 	handler := HandlerInfo{
-		Catches:   make([]CatchInfo, len(e.catches)),
-		FinallyIP: -1,
-		EndIP:     -1,
+		Catches:       make([]CatchInfo, len(e.catches)),
+		FinallyIP:     -1,
+		EndIP:         -1,
+		TryLocalCount: c.localCount,
 	}
 
 	// Add placeholder handler and emit OP_TRY_BEGIN
@@ -720,7 +727,15 @@ func (c *Compiler) compileTry(e *TryExpr) error {
 			c.emitOp(OP_NIL)
 		}
 
-		c.endScope()
+		// Custom scope cleanup for catch - use OP_POP_SLOT to remove the exception
+		// binding at its specific slot, preserving any operands above it
+		c.scopeDepth--
+		catchSlot := c.function.Chunk.Handlers[handlerIdx].TryLocalCount
+		if c.localCount > 0 && c.locals[c.localCount-1].depth > c.scopeDepth {
+			c.emitOp(OP_POP_SLOT)
+			c.emitByte(byte(catchSlot))
+			c.localCount--
+		}
 
 		// Jump to after finally (unless this is the last catch and there's no finally)
 		if i < len(e.catches)-1 || e.finallyExpr != nil {
@@ -963,6 +978,11 @@ func IsVMCompatible(expr Expr) bool {
 		}
 		return true
 	case *DefExpr:
+		// DefExpr with metadata is not VM-compatible since compileDef doesn't
+		// handle metadata merging (AST evaluation sets var meta from expr.meta)
+		if e.meta != nil {
+			return false
+		}
 		return e.value == nil || IsVMCompatible(e.value)
 	case *FnExpr:
 		// Check all arities
@@ -986,13 +1006,11 @@ func IsVMCompatible(expr Expr) bool {
 	case *ThrowExpr:
 		return IsVMCompatible(e.e)
 	case *TryExpr:
-		// Check try body
 		for _, bodyExpr := range e.body {
 			if !IsVMCompatible(bodyExpr) {
 				return false
 			}
 		}
-		// Check catch clauses
 		for _, catch := range e.catches {
 			for _, bodyExpr := range catch.body {
 				if !IsVMCompatible(bodyExpr) {
@@ -1000,10 +1018,11 @@ func IsVMCompatible(expr Expr) bool {
 				}
 			}
 		}
-		// Check finally
-		for _, bodyExpr := range e.finallyExpr {
-			if !IsVMCompatible(bodyExpr) {
-				return false
+		if e.finallyExpr != nil {
+			for _, bodyExpr := range e.finallyExpr {
+				if !IsVMCompatible(bodyExpr) {
+					return false
+				}
 			}
 		}
 		return true

@@ -1692,7 +1692,8 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			if c.vr.Value != nil {
 				switch f := c.vr.Value.(type) {
 				case *Fn:
-					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
+					// Skip arity check for VM-compiled functions (fnExpr is nil)
+					if f.fnExpr != nil && !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
 						require := getRequireVar(ctx)
 						refer := getReferVar(ctx)
 						alias := getAliasVar(ctx)

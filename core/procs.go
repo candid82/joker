@@ -1841,6 +1841,13 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
+
+	// Create a VM instance for executing top-level expressions
+	var vm *VM
+	if !DISABLE_VM && phase >= EVAL {
+		vm = NewVM()
+	}
+
 	var prevObj Object
 	for {
 		obj, err := TryRead(reader)
@@ -1881,6 +1888,22 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if err != nil {
 			return err
 		}
+
+		// Try VM execution for compatible expressions
+		if vm != nil && IsVMCompatible(expr) {
+			if proto, compileErr := CompileTopLevel(expr); compileErr == nil {
+				obj = vm.ExecuteTopLevel(proto)
+				if phase == EVAL {
+					continue
+				}
+				if _, ok := obj.(Nil); !ok {
+					fmt.Fprintln(Stdout, obj.ToString(true))
+				}
+				continue
+			}
+		}
+
+		// Fall back to AST evaluation
 		CompileAST(expr)
 		obj, err = TryEval(expr)
 		if err != nil {
@@ -1907,6 +1930,13 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
+
+	// Create a VM instance for executing top-level expressions
+	var vm *VM
+	if !DISABLE_VM {
+		vm = NewVM()
+	}
+
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
@@ -1915,6 +1945,16 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		PanicOnErr(err)
 		expr, err := TryParse(obj, parseContext)
 		PanicOnErr(err)
+
+		// Try VM execution for compatible expressions
+		if vm != nil && IsVMCompatible(expr) {
+			if proto, compileErr := CompileTopLevel(expr); compileErr == nil {
+				vm.ExecuteTopLevel(proto)
+				continue
+			}
+		}
+
+		// Fall back to AST evaluation
 		CompileAST(expr)
 		obj, err = TryEval(expr)
 		PanicOnErr(err)

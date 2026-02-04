@@ -120,10 +120,11 @@ func (vm *VM) Execute(fn *Fn, args []Object) Object {
 			panic(RT.NewError("Expected " + strconv.Itoa(proto.Arity) + " arguments but got " + strconv.Itoa(argCount)))
 		}
 		arityProto = &ArityProto{
-			Arity:      proto.Arity,
-			IsVariadic: proto.Variadic,
-			Chunk:      proto.Chunk,
-			Upvalues:   proto.Upvalues,
+			Arity:        proto.Arity,
+			IsVariadic:   proto.Variadic,
+			Chunk:        proto.Chunk,
+			Upvalues:     proto.Upvalues,
+			SubFunctions: proto.SubFunctions,
 		}
 	}
 
@@ -155,6 +156,49 @@ func (vm *VM) Execute(fn *Fn, args []Object) Object {
 	}
 
 	// Set up the initial call frame
+	vm.frames[0] = CallFrame{
+		closure:    fn,
+		arityProto: arityProto,
+		ip:         0,
+		slots:      0,
+	}
+	vm.frameCount = 1
+
+	return vm.run()
+}
+
+// ExecuteTopLevel executes a compiled zero-argument expression.
+// This is used for top-level expressions in file evaluation.
+// Unlike Execute(), this takes a FunctionProto directly (not an Fn).
+func (vm *VM) ExecuteTopLevel(proto *FunctionProto) Object {
+	// Reset state for this expression
+	vm.stackTop = 0
+	vm.frameCount = 0
+	vm.openUpvals = nil
+	vm.handlerCount = 0
+
+	// Create a temporary Fn wrapper for the compiled expression
+	fn := &Fn{proto: proto, isCompiled: true}
+
+	// Push the function onto the stack (slot 0)
+	vm.Push(fn)
+
+	// Get the arity proto - Compile() uses legacy single-arity format
+	var arityProto *ArityProto
+	if len(proto.Arities) > 0 {
+		arityProto = proto.Arities[0]
+	} else {
+		// Legacy format from Compile()
+		arityProto = &ArityProto{
+			Arity:        proto.Arity,
+			IsVariadic:   proto.Variadic,
+			Chunk:        proto.Chunk,
+			Upvalues:     proto.Upvalues,
+			SubFunctions: proto.SubFunctions,
+		}
+	}
+
+	// Set up the call frame for zero-argument execution
 	vm.frames[0] = CallFrame{
 		closure:    fn,
 		arityProto: arityProto,
@@ -513,6 +557,19 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 			vm.handlerCount--
 		}
 
+	case OP_POP_SLOT:
+		// Remove value at specific slot, shifting values above it down.
+		// Used for catch scope cleanup to remove exception binding while
+		// preserving operands for outer expressions.
+		slot := int(chunk.Code[frame.ip])
+		frame.ip++
+		absoluteSlot := frame.slots + slot
+		// Shift values above the slot down by 1
+		for i := absoluteSlot; i < vm.stackTop-1; i++ {
+			vm.stack[i] = vm.stack[i+1]
+		}
+		vm.stackTop--
+
 	default:
 		panic(RT.NewError("Unknown opcode: " + strconv.Itoa(int(op))))
 	}
@@ -656,10 +713,11 @@ func (vm *VM) callFn(fn *Fn, argCount int) {
 		}
 		// Create a temporary ArityProto for legacy case
 		arityProto = &ArityProto{
-			Arity:      proto.Arity,
-			IsVariadic: proto.Variadic,
-			Chunk:      proto.Chunk,
-			Upvalues:   proto.Upvalues,
+			Arity:        proto.Arity,
+			IsVariadic:   proto.Variadic,
+			Chunk:        proto.Chunk,
+			Upvalues:     proto.Upvalues,
+			SubFunctions: proto.SubFunctions,
 		}
 	}
 
@@ -733,9 +791,21 @@ func (vm *VM) dispatchException(exc Error, framePtr **CallFrame, chunkPtr **Chun
 		// Find a matching catch clause
 		for _, catchInfo := range handlerInfo.Catches {
 			if IsInstance(catchInfo.ExcType, exc) {
-				// Found a match! Restore stack and jump to catch handler
-				vm.stackTop = handler.stackTop
-				vm.Push(exc) // Push exception for the catch binding
+				// Found a match! Place exception at the correct slot.
+				// The exception binding slot is TryLocalCount (where localCount was at try-begin).
+				// Any operands on the stack (between locals and stackTop) need to be shifted up
+				// to make room for the exception at its expected slot.
+				excSlot := frame.slots + handlerInfo.TryLocalCount
+
+				// Shift operands up by 1 to make room for exception
+				for i := handler.stackTop - 1; i >= excSlot; i-- {
+					vm.stack[i+1] = vm.stack[i]
+				}
+
+				// Place exception at the correct slot
+				vm.stack[excSlot] = exc
+				vm.stackTop = handler.stackTop + 1
+
 				frame.ip = catchInfo.HandlerIP
 
 				// Update the caller's frame/chunk pointers
