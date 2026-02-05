@@ -325,15 +325,29 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 	case OP_GET_VAR:
 		idx := vm.readShort(frame, chunk)
 		v := chunk.Constants[idx].(*Var)
+		// Match AST evaluation behavior: uninitialized vars resolve to nil
 		if v.Value == nil {
-			panic(RT.NewError("Var not initialized: " + v.ToString(false)))
+			vm.Push(NIL)
+		} else {
+			vm.Push(v.Value)
 		}
-		vm.Push(v.Value)
 
 	case OP_SET_VAR:
 		idx := vm.readShort(frame, chunk)
 		v := chunk.Constants[idx].(*Var)
 		v.Value = vm.Peek(0)
+
+	case OP_SET_VAR_META:
+		varIdx := vm.readShort(frame, chunk)
+		metaIdx := vm.readShort(frame, chunk)
+		v := chunk.Constants[varIdx].(*Var)
+		v.meta = chunk.Constants[metaIdx].(Map)
+
+	case OP_MERGE_VAR_META:
+		varIdx := vm.readShort(frame, chunk)
+		v := chunk.Constants[varIdx].(*Var)
+		userMeta := vm.Pop().(Map)
+		v.meta = v.meta.Merge(userMeta)
 
 	case OP_ADD:
 		b := EnsureObjectIsNumber(vm.Pop(), "")

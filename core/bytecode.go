@@ -70,6 +70,10 @@ const (
 	OP_TRY_BEGIN // Begin try block (2-byte handler info index)
 	OP_TRY_END   // End try block (normal exit)
 	OP_POP_SLOT  // Remove value at specific slot (1-byte slot index), shift values above down
+
+	// Var metadata
+	OP_SET_VAR_META   // Set var meta from constant (2-byte var index, 2-byte meta index)
+	OP_MERGE_VAR_META // Merge map from stack into var meta (2-byte var index)
 )
 
 // CatchInfo describes one catch clause for exception handling.

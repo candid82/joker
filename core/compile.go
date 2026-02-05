@@ -531,6 +531,43 @@ func (c *Compiler) compileDef(e *DefExpr) error {
 		c.emitOp(OP_POP) // Pop the value, leaving just the var on stack
 	}
 
+	// Set var metadata (matching AST evaluation behavior)
+	// Build base metadata with line, column, file, ns, name
+	baseMetaArr := EmptyArrayMap()
+	baseMetaArr.Add(KEYWORDS.line, Int{I: e.startLine})
+	baseMetaArr.Add(KEYWORDS.column, Int{I: e.startColumn})
+	if e.filename != nil {
+		baseMetaArr.Add(KEYWORDS.file, String{S: *e.filename})
+	}
+	baseMetaArr.Add(KEYWORDS.ns, e.vr.ns)
+	baseMetaArr.Add(KEYWORDS.name, e.vr.name)
+	var baseMeta Map = baseMetaArr
+	if e.vr.isMacro {
+		baseMeta = baseMeta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
+	}
+
+	varIdx := c.function.Chunk.AddConstant(e.vr)
+
+	if e.meta != nil {
+		// Compile user metadata and merge at runtime
+		metaIdx := c.function.Chunk.AddConstant(baseMeta)
+		c.emitOp(OP_SET_VAR_META)
+		c.emitShort(uint16(varIdx))
+		c.emitShort(uint16(metaIdx))
+
+		if err := c.compile(e.meta); err != nil {
+			return err
+		}
+		c.emitOp(OP_MERGE_VAR_META)
+		c.emitShort(uint16(varIdx))
+	} else {
+		// Just set base metadata
+		metaIdx := c.function.Chunk.AddConstant(baseMeta)
+		c.emitOp(OP_SET_VAR_META)
+		c.emitShort(uint16(varIdx))
+		c.emitShort(uint16(metaIdx))
+	}
+
 	// Push the var as the result
 	c.emitConstant(e.vr)
 	return nil
@@ -978,9 +1015,7 @@ func IsVMCompatible(expr Expr) bool {
 		}
 		return true
 	case *DefExpr:
-		// DefExpr with metadata is not VM-compatible since compileDef doesn't
-		// handle metadata merging (AST evaluation sets var meta from expr.meta)
-		if e.meta != nil {
+		if e.meta != nil && !IsVMCompatible(e.meta) {
 			return false
 		}
 		return e.value == nil || IsVMCompatible(e.value)
