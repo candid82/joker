@@ -196,10 +196,6 @@ go generate ./...                    # Regenerate core
 6. Add tests in `tests/eval/`
 7. Rebuild and test
 
-## Git Commits and PRs
-
-- Never add "Co-Authored-By: Claude..." or any AI attribution lines to commit or PR messages.
-
 ## Important Notes
 
 - Joker requires Go 1.24.0+
