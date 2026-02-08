@@ -94,12 +94,12 @@
       (println "Building" goos goarch)
       (build-binary goarch goos)
       (zip-binary goarch goos)))
-  ;; Build arm64 binary for Apple Silicon
-  (let [goarch "arm64"
-        goos "darwin"]
-    (println "Building" goos goarch)
-    (build-binary goarch goos)
-    (zip-binary goarch goos))
+  ;; Build arm64 binaries
+  (let [goarch "arm64"]
+    (doseq [goos ["darwin" "linux"]]
+      (println "Building" goos goarch)
+      (build-binary goarch goos)
+      (zip-binary goarch goos)))
   (exec "rm" "-f" "joker.exe")
   (exec "rm" "-f" "joker"))
 
