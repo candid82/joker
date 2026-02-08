@@ -12,7 +12,7 @@ On macOS, the easiest way to install Joker is via Homebrew:
 brew install candid82/brew/joker
 ```
 
-The same command can be used on Linux if you use [Linuxbrew](http://linuxbrew.sh/).
+The same command can be used on Linux if you use [Homebrew on Linux](https://brew.sh/).
 
 If you use Arch Linux, there is [AUR package](https://aur.archlinux.org/packages/joker-bin/).
 
@@ -127,7 +127,7 @@ Note that `Nil` is a type that has one value: `nil`.
 1. Miscellaneous:
 
 - `case` is just a syntactic sugar on top of `condp` and doesn't require options to be constants. It scans all the options sequentially.
-- `slurp` only takes one argument - a filename (string). No options are supported.
+- `slurp` only takes one argument - a filename (string) or a reader object (e.g. `*in*`). No options are supported.
 - `ifn?` is called `callable?`
 - Map entry is represented as a two-element vector.
 - resolving unbound var returns `nil`, not the value `Unbound`. You can still check if the var is bound with `bound?` function.
@@ -146,15 +146,14 @@ Executing the following command `joker --lint test.clj` will produce the followi
 test.clj:1:1: Parse warning: let form with empty body
 ```
 
-The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Parse error`, `Parse warning` or `Exception`.
+The output format is as follows: `<filename>:<line>:<column>: <issue type>: <message>`, where `<issue type>` can be `Read error`, `Read warning`, `Parse error`, `Parse warning` or `Exception`.
 
 ### Integration with editors
 
 - Emacs: [flycheck syntax checker](https://github.com/candid82/flycheck-joker)
 - Sublime Text: [SublimeLinter plugin](https://github.com/candid82/SublimeLinter-contrib-joker)
-- Atom: [linter-joker](https://atom.io/packages/linter-joker)
-- Vim: [syntastic-joker](https://github.com/aclaimant/syntastic-joker), [ale](https://github.com/w0rp/ale)
-- VSCode: [VSCode Linter Plugin (alpha)](https://github.com/martinklepsch/vscode-joker-clojure-linter)
+- Vim: [syntastic-joker](https://github.com/aclaimant/syntastic-joker), [ale](https://github.com/dense-analysis/ale)
+- VSCode: [VSCode Linter Plugin](https://github.com/martinklepsch/vscode-joker-clojure-linter)
 - Kakoune: [clj-kakoune-joker](https://github.com/w33tmaricich/clj-kakoune-joker)
 
 [Here](https://github.com/candid82/SublimeLinter-contrib-joker#reader-errors) are some examples of errors and warnings that the linter can output.
@@ -319,12 +318,12 @@ You might also want to try [cljf](https://github.com/candid82/cljf). Its formatt
 
 ## Building
 
-Joker requires Go v1.13 or later.
+Joker requires Go v1.24.0 or later.
 Below commands should get you up and running.
 
 ```
-go get -d github.com/candid82/joker
-cd $GOPATH/src/github.com/candid82/joker
+git clone https://github.com/candid82/joker.git
+cd joker
 ./run.sh --version && go install
 ```
 
