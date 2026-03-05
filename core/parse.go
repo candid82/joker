@@ -15,7 +15,6 @@ type (
 		InferType() *Type
 		Pos() Position
 		Dump(includePosition bool) Map
-		Pack(p []byte, env *PackEnv) []byte
 	}
 	LiteralExpr struct {
 		Position
@@ -1393,6 +1392,70 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	return true
 }
 
+// selectArityProtoForLinter selects the matching ArityProto for the given arg count.
+func selectArityProtoForLinter(proto *FunctionProto, passedArgsCount int) *ArityProto {
+	for _, arity := range proto.Arities {
+		if arity.Arity == passedArgsCount {
+			return arity
+		}
+	}
+	if proto.VariadicArity != nil && passedArgsCount >= proto.VariadicArity.Arity {
+		return proto.VariadicArity
+	}
+	return nil
+}
+
+// reportWrongArityProto checks arity using FunctionProto (for VM-compiled functions without fnExpr).
+// Returns true if a warning was reported, false if the arity is valid.
+func reportWrongArityProto(proto *FunctionProto, isMacro bool, call *CallExpr, pos Position) bool {
+	passedArgsCount := len(call.args)
+	if isMacro {
+		passedArgsCount += 2
+	}
+	// Check fixed arities
+	for _, arity := range proto.Arities {
+		if arity.Arity == passedArgsCount {
+			return checkTypesProto(arity.ArgTypes, isMacro, call)
+		}
+	}
+	// Check variadic arity
+	if proto.VariadicArity != nil && passedArgsCount >= proto.VariadicArity.Arity {
+		return checkTypesProto(proto.VariadicArity.ArgTypes, isMacro, call)
+	}
+	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+	return true
+}
+
+// checkTypesProto checks argument types using ArityProto.ArgTypes.
+func checkTypesProto(argTypes [][]*Type, isMacro bool, call *CallExpr) bool {
+	if argTypes == nil {
+		return false
+	}
+	// For macros, skip first 2 args (&form and &env) when matching against call args
+	offset := 0
+	if isMacro {
+		offset = 2
+	}
+	res := false
+	for i := offset; i < len(argTypes); i++ {
+		if len(argTypes[i]) == 0 {
+			continue
+		}
+		callArgIdx := i - offset
+		if callArgIdx >= len(call.args) {
+			break
+		}
+		passedType := call.args[callArgIdx].InferType()
+		if passedType != nil {
+			if !isTypeOneOf(argTypes[i], passedType) {
+				printParseWarning(call.args[callArgIdx].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", callArgIdx, call.Name(), typesString(argTypes[i]), passedType.ToString(false)))
+				res = true
+			}
+		}
+	}
+	return res
+}
+
 func checkArglist(arglist Seq, passedArgsCount int) bool {
 	for !arglist.IsEmpty() {
 		if v, ok := arglist.First().(Vec); ok {
@@ -1692,8 +1755,13 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			if c.vr.Value != nil {
 				switch f := c.vr.Value.(type) {
 				case *Fn:
-					// Skip arity check for VM-compiled functions (fnExpr is nil)
-					if f.fnExpr != nil && !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
+					warningReported := false
+					if f.fnExpr != nil {
+						warningReported = reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos)
+					} else if f.proto != nil {
+						warningReported = reportWrongArityProto(f.proto, c.vr.isMacro, res, pos)
+					}
+					if !warningReported {
 						require := getRequireVar(ctx)
 						refer := getReferVar(ctx)
 						alias := getAliasVar(ctx)

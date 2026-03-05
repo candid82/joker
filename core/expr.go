@@ -105,8 +105,14 @@ func (expr *CallExpr) InferType() *Type {
 	case *VarRefExpr:
 		switch f := callableExpr.vr.Value.(type) {
 		case *Fn:
-			if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil && arity.taggedType != nil {
-				return arity.taggedType
+			if f.fnExpr != nil {
+				if arity := selectArity(f.fnExpr, len(expr.args)); arity != nil && arity.taggedType != nil {
+					return arity.taggedType
+				}
+			} else if f.proto != nil {
+				if arity := selectArityProtoForLinter(f.proto, len(expr.args)); arity != nil && arity.TaggedType != nil {
+					return arity.TaggedType
+				}
 			}
 		}
 		return callableExpr.vr.taggedType
@@ -151,13 +157,21 @@ func (expr *VarRefExpr) InferType() *Type {
 	// if expr.vr.taggedType != nil {
 	// 	return expr.vr.taggedType
 	// }
-	if expr.vr.expr == nil {
-		return nil
-	}
 	if expr.vr.isDynamic {
 		return nil
 	}
-	return expr.vr.expr.InferType()
+	if expr.vr.expr != nil {
+		if t := expr.vr.expr.InferType(); t != nil {
+			return t
+		}
+	}
+	// Fallback: infer from the var's current value (e.g., set by VM execution).
+	if expr.vr.Value != nil {
+		if _, ok := expr.vr.Value.(*Fn); ok {
+			return TYPE.Fn
+		}
+	}
+	return nil
 }
 
 func (expr *VarRefExpr) Dump(pos bool) Map {

@@ -732,6 +732,38 @@ func (fn *Fn) Call(args []Object) Object {
 
 // callVM executes the function using the bytecode VM.
 func (fn *Fn) callVM(args []Object) Object {
+	// For macros, pre-check arity with adjusted counts to match AST error messages.
+	if fn.isMacro && fn.proto != nil {
+		argCount := len(args)
+		if selectArityProto(fn.proto, argCount) == nil {
+			// Compute min/max from proto arities, adjusted for &form/&env
+			min := math.MaxInt32
+			max := -1
+			for _, a := range fn.proto.Arities {
+				if a.Arity < min {
+					min = a.Arity
+				}
+				if a.Arity > max {
+					max = a.Arity
+				}
+			}
+			if fn.proto.VariadicArity != nil {
+				// +1 because ArityProto.Arity excludes rest param, but error message
+				// should count it (matching AST path which uses len(v.args))
+				a := fn.proto.VariadicArity.Arity + 1
+				if a < min {
+					min = a
+				}
+				max = math.MaxInt32
+			}
+			c := argCount - 2
+			min -= 2
+			if max != math.MaxInt32 {
+				max -= 2
+			}
+			PanicArityMinMax(c, min, max)
+		}
+	}
 	RT.pushFrame()
 	defer RT.popFrame()
 	return VMExecute(fn, args)

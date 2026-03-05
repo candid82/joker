@@ -74,6 +74,9 @@ const (
 	// Var metadata
 	OP_SET_VAR_META   // Set var meta from constant (2-byte var index, 2-byte meta index)
 	OP_MERGE_VAR_META // Merge map from stack into var meta (2-byte var index)
+
+	// Macro support
+	OP_SET_MACRO // Set var as macro (2-byte constant pool index -> Var)
 )
 
 // CatchInfo describes one catch clause for exception handling.
@@ -159,6 +162,8 @@ type ArityProto struct {
 	Chunk        *Chunk           // The bytecode for this arity
 	Upvalues     []UpvalueInfo    // Upvalue capture info for this arity
 	SubFunctions []*FunctionProto // Nested function prototypes for this arity
+	ArgTypes     [][]*Type        // Type tags for each arg (for linter type checking). Nil if no tags.
+	TaggedType   *Type            // Return type tag (for linter type inference). Nil if no tag.
 }
 
 // FunctionProto holds a compiled function's bytecode.
@@ -229,6 +234,7 @@ var opcodeNames = [...]string{
 	OP_THROW:         "THROW",
 	OP_TRY_BEGIN:     "TRY_BEGIN",
 	OP_TRY_END:       "TRY_END",
+	OP_SET_MACRO:     "SET_MACRO",
 }
 
 // OpcodeName returns the name of an opcode.

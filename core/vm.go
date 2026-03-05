@@ -348,6 +348,17 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		v := chunk.Constants[varIdx].(*Var)
 		userMeta := vm.Pop().(Map)
 		v.meta = v.meta.Merge(userMeta)
+		// Extract taggedType from merged metadata (matches parseDef's updateVar behavior)
+		if ok, typeName := v.meta.Get(KEYWORDS.tag); ok {
+			switch t := typeName.(type) {
+			case Symbol:
+				if tp := TYPES[t.name]; tp != nil {
+					v.taggedType = tp
+				}
+			case *Type:
+				v.taggedType = t
+			}
+		}
 
 	case OP_ADD:
 		b := EnsureObjectIsNumber(vm.Pop(), "")
@@ -510,11 +521,11 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 
 	case OP_MAP:
 		count := int(vm.readShort(frame, chunk))
-		m := EmptyArrayMap()
+		var m Associative = EmptyArrayMap()
 		for i := 0; i < count; i++ {
 			val := vm.Pop()
 			key := vm.Pop()
-			m = m.Assoc(key, val).(*ArrayMap)
+			m = m.Assoc(key, val).(Associative)
 		}
 		vm.Push(m)
 
@@ -570,6 +581,17 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		if vm.handlerCount > 0 {
 			vm.handlerCount--
 		}
+
+	case OP_SET_MACRO:
+		idx := vm.readShort(frame, chunk)
+		v := chunk.Constants[idx].(*Var)
+		v.isMacro = true
+		v.isUsed = false
+		if fn, ok := v.Value.(*Fn); ok {
+			fn.isMacro = true
+		}
+		setMacroMeta(v)
+		vm.Push(v)
 
 	case OP_POP_SLOT:
 		// Remove value at specific slot, shifting values above it down.

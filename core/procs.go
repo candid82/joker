@@ -1811,13 +1811,16 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 			fmt.Fprintln(Stderr, err)
 			return nil, err
 		}
-		p = expr.Pack(p, packEnv)
-		CompileAST(expr)
-		_, err = TryEval(expr)
-		if err != nil {
-			fmt.Fprintln(Stderr, err)
-			return nil, err
+		// Compile to bytecode and serialize
+		proto, compileErr := CompileTopLevel(expr)
+		if compileErr != nil {
+			fmt.Fprintln(Stderr, compileErr)
+			return nil, compileErr
 		}
+		p = proto.Pack(p, packEnv)
+		// Execute to establish definitions for subsequent expressions
+		vm := NewVM()
+		vm.ExecuteTopLevel(proto)
 	}
 }
 
@@ -1966,11 +1969,11 @@ func processData(data []byte) {
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
 	header, p := UnpackHeader(data, GLOBAL_ENV)
+	vm := NewVM()
 	for len(p) > 0 {
-		var expr Expr
-		expr, p = UnpackExpr(p, header)
-		_, err := TryEval(expr)
-		PanicOnErr(err)
+		var proto *FunctionProto
+		proto, p = UnpackFunctionProto(p, header)
+		vm.ExecuteTopLevel(proto)
 	}
 	if VerbosityLevel > 0 {
 		fmt.Fprintf(Stderr, "processData: Evaluated code for %s\n", GLOBAL_ENV.CurrentNamespace().ToString(false))
