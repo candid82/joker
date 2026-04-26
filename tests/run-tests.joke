@@ -23,9 +23,10 @@
       exe (str pwd "/joker")]
   (doseq [test-dir test-dirs]
     (let [dir (str root-dir "/" test-dir "/")
-          filename (if (joker.os/exists? (str dir "input.clj"))
-                     (str dir "input.clj")
-                     (str dir "input.cljs"))
+          filename (cond
+                     (joker.os/exists? (str dir "input.clj")) (str dir "input.clj")
+                     (joker.os/exists? (str dir "input.cljs")) (str dir "input.cljs")
+                     :else (str dir "input.joke"))
           res (joker.os/sh exe cmd filename)
           output (output-k res)
           expected (slurp (str dir output-file-name))]

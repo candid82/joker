@@ -1,0 +1,8 @@
+(ns test.ns
+  (require [joker.better-cond :as b]))
+
+;; Should PASS
+(b/cond
+  :when-let [b 2]
+  :let [a b]
+  1 (do 1 a))

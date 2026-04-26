@@ -27,7 +27,7 @@
    Also supports :let."
   {:added "1.0"}
   [bindings & body]
-  `(if-let ~bindings (do ~@body)))
+  `(if-let ~bindings ~(if (next body) `(do ~@body) (first body))))
 
 (defmacro if-some
   "A variation on if-some where all the exprs in the bindings vector must be non-nil.
@@ -52,7 +52,7 @@
    Also supports :let."
   {:added "1.0"}
   [bindings & body]
-  `(if-some ~bindings (do ~@body)))
+  `(if-some ~bindings ~(if (next body) `(do ~@body) (first body))))
 
 (defmacro cond
   "A variation on cond which sports let bindings, do and implicit else:
@@ -80,4 +80,3 @@
                 `(when-some ~expr (cond ~@more-clauses))
                 `(if ~test ~expr (cond ~@more-clauses)))))))
       test)))
-
