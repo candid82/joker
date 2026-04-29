@@ -1,0 +1,47 @@
+(require 'joker.http)
+(require 'joker.time)
+
+(def addr "127.0.0.1:18291")
+(def base-url (str "http://" addr))
+(def events (chan 10))
+(def short-delay (* 50 joker.time/millisecond))
+
+(defn handler
+  [req]
+  (case (:uri req)
+    "/ready" {:status 200 :body "ready"}
+    "/events" {:status 200
+               :sse events}
+    {:status 404 :body "missing"}))
+
+(defn wait-ready
+  []
+  (loop [attempts 20]
+    (let [ready? (try
+                   (= "ready" (:body (joker.http/send {:url (str base-url "/ready")})))
+                   (catch Error e
+                     false))]
+      (cond
+        ready? true
+        (zero? attempts) (throw (ex-info "HTTP SSE test server did not start" {}))
+        :else (do
+                (joker.time/sleep short-delay)
+                (recur (dec attempts)))))))
+
+(go (joker.http/start-server addr handler))
+(wait-ready)
+
+(go
+  (joker.time/sleep short-delay)
+  (>! events "hello")
+  (>! events {:event "note"
+              :id "42"
+              :retry 1500
+              :data "line 1\nline 2"})
+  (>! events {:comment "done"})
+  (close! events))
+
+(let [res (joker.http/send {:url (str base-url "/events")})]
+  (println (:status res))
+  (println (first (get-in res [:headers "Content-Type"])))
+  (print (:body res)))

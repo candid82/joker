@@ -40,6 +40,19 @@ func InternsOrThunks() {
 	httpNamespace.InternVar("start-server", start_server_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
-			`Starts HTTP server on the TCP network address addr.`, "1.0"))
+			`Starts HTTP server on the TCP network address addr.
+  handler receives a request map and returns a response map.
+  A response map with an :sse channel streams Server-Sent Events
+  until the channel closes or the client disconnects. Values read from
+  the channel may be strings, which are sent as data events, or maps with
+  any of the following keys:
+  - data (string)
+  - event (string)
+  - id (string)
+  - retry (int)
+  - comment (string)
+  Optional status and headers keys are applied before streaming. SSE
+  responses default to Content-Type text/event-stream, Cache-Control
+  no-cache and Connection keep-alive unless those headers are provided.`, "1.0"))
 
 }

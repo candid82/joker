@@ -60,3 +60,22 @@ func (ch *Channel) Close() {
 		ch.isClosed = true
 	}
 }
+
+func (ch *Channel) Receive(done <-chan struct{}) (Object, bool, Error) {
+	if done == nil {
+		res, ok := <-ch.ch
+		if !ok {
+			return NIL, false, nil
+		}
+		return res.value, true, res.err
+	}
+	select {
+	case res, ok := <-ch.ch:
+		if !ok {
+			return NIL, false, nil
+		}
+		return res.value, true, res.err
+	case <-done:
+		return NIL, false, nil
+	}
+}

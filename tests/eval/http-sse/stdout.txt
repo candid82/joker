@@ -1,0 +1,12 @@
+200
+text/event-stream
+data: hello
+
+event: note
+id: 42
+retry: 1500
+data: line 1
+data: line 2
+
+: done
+

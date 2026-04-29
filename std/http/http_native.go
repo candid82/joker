@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	. "github.com/candid82/joker/core"
@@ -98,34 +99,143 @@ func respToMap(resp *http.Response) Map {
 	return res
 }
 
-func mapToResp(response Map, w http.ResponseWriter) {
+func addHeaders(headers Object, w http.ResponseWriter) {
+	header := w.Header()
+	h := EnsureObjectIsMap(headers, "HTTP response headers: %s")
+	for iter := h.Iter(); iter.HasNext(); {
+		p := iter.Next()
+		hname := EnsureObjectIsString(p.Key, "HTTP response header name %s").S
+		switch pvalue := p.Value.(type) {
+		case String:
+			header.Add(hname, pvalue.S)
+		case Seqable:
+			s := pvalue.Seq()
+			for !s.IsEmpty() {
+				header.Add(hname, EnsureObjectIsString(s.First(), "HTTP response header value: %s").S)
+				s = s.Rest()
+			}
+		default:
+			panic(RT.NewError("HTTP response header value must be a string or a seq of strings"))
+		}
+	}
+}
+
+func responseStatus(response Map) int {
 	status := 0
 	if ok, s := response.Get(MakeKeyword("status")); ok {
 		status = EnsureObjectIsInt(s, "HTTP response status: %s").I
 	}
+	return status
+}
+
+func appendSSEField(sb *strings.Builder, field string, value string) {
+	for _, line := range strings.Split(value, "\n") {
+		if field == "" {
+			sb.WriteString(": ")
+		} else {
+			sb.WriteString(field)
+			sb.WriteString(": ")
+		}
+		sb.WriteString(line)
+		sb.WriteByte('\n')
+	}
+}
+
+func formatSSEEvent(event Object) string {
+	var sb strings.Builder
+	wrote := false
+	switch event := event.(type) {
+	case String:
+		appendSSEField(&sb, "data", event.S)
+		wrote = true
+	case Map:
+		if ok, value := event.Get(MakeKeyword("comment")); ok {
+			appendSSEField(&sb, "", EnsureObjectIsString(value, "SSE event comment: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("event")); ok {
+			appendSSEField(&sb, "event", EnsureObjectIsString(value, "SSE event type: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("id")); ok {
+			appendSSEField(&sb, "id", EnsureObjectIsString(value, "SSE event id: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("retry")); ok {
+			appendSSEField(&sb, "retry", strconv.Itoa(EnsureObjectIsInt(value, "SSE event retry: %s").I))
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("data")); ok {
+			appendSSEField(&sb, "data", EnsureObjectIsString(value, "SSE event data: %s").S)
+			wrote = true
+		}
+		if !wrote {
+			panic(RT.NewError("SSE event map must contain at least one of :data, :event, :id, :retry or :comment"))
+		}
+	default:
+		panic(RT.NewError(fmt.Sprintf("SSE event must be a string or map, got %s", event.GetType().ToString(false))))
+	}
+	sb.WriteByte('\n')
+	return sb.String()
+}
+
+func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
+	ch := EnsureObjectIsChannel(getOrPanic(response, MakeKeyword("sse"), ":sse key must be present in SSE response map"), "SSE channel: %s")
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		panic(RT.NewError("HTTP response writer does not support streaming"))
+	}
+	header := w.Header()
+	if ok, headers := response.Get(MakeKeyword("headers")); ok {
+		addHeaders(headers, w)
+	}
+	if header.Get("Content-Type") == "" {
+		header.Set("Content-Type", "text/event-stream")
+	}
+	if header.Get("Cache-Control") == "" {
+		header.Set("Cache-Control", "no-cache")
+	}
+	if header.Get("Connection") == "" {
+		header.Set("Connection", "keep-alive")
+	}
+	if status := responseStatus(response); status != 0 {
+		w.WriteHeader(status)
+	}
+	for {
+		RT.GIL.Unlock()
+		event, ok, err := ch.Receive(done)
+		RT.GIL.Lock()
+		if err != nil {
+			panic(err)
+		}
+		if !ok {
+			return
+		}
+		msg := formatSSEEvent(event)
+		RT.GIL.Unlock()
+		_, writeErr := io.WriteString(w, msg)
+		if writeErr == nil {
+			flusher.Flush()
+		}
+		RT.GIL.Lock()
+		if writeErr != nil {
+			return
+		}
+	}
+}
+
+func mapToResp(response Map, w http.ResponseWriter, done <-chan struct{}) {
+	if ok, _ := response.Get(MakeKeyword("sse")); ok {
+		streamSSE(response, w, done)
+		return
+	}
+	status := responseStatus(response)
 	body := ""
 	if ok, b := response.Get(MakeKeyword("body")); ok {
 		body = EnsureObjectIsString(b, "HTTP response body: %s").S
 	}
 	if ok, headers := response.Get(MakeKeyword("headers")); ok {
-		header := w.Header()
-		h := EnsureObjectIsMap(headers, "HTTP response headers: %s")
-		for iter := h.Iter(); iter.HasNext(); {
-			p := iter.Next()
-			hname := EnsureObjectIsString(p.Key, "HTTP response header name %s").S
-			switch pvalue := p.Value.(type) {
-			case String:
-				header.Add(hname, pvalue.S)
-			case Seqable:
-				s := pvalue.Seq()
-				for !s.IsEmpty() {
-					header.Add(hname, EnsureObjectIsString(s.First(), "HTTP response header value: %s").S)
-					s = s.Rest()
-				}
-			default:
-				panic(RT.NewError("HTTP response header value must be a string or a seq of strings"))
-			}
-		}
+		addHeaders(headers, w)
 	}
 	if status != 0 {
 		w.WriteHeader(status)
@@ -162,7 +272,7 @@ func startServer(addr string, handler Callable) Object {
 			}
 		}()
 		response := handler.Call([]Object{reqToMap(host, port, req)})
-		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w)
+		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w, req.Context().Done())
 	}))
 	PanicOnErr(err)
 	return NIL
