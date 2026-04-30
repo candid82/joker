@@ -4,6 +4,9 @@
 (def addr "127.0.0.1:18291")
 (def base-url (str "http://" addr))
 (def events (chan 10))
+(def bad-events (chan 1))
+(def close-info (atom nil))
+(def error-close-info (atom nil))
 (def short-delay (* 50 joker.time/millisecond))
 
 (defn handler
@@ -11,7 +14,10 @@
   (case (:uri req)
     "/ready" {:status 200 :body "ready"}
     "/events" {:status 200
-               :sse events}
+               :sse events
+               :on-close #(reset! close-info %)}
+    "/bad-events" {:sse bad-events
+                   :on-close #(reset! error-close-info %)}
     {:status 404 :body "missing"}))
 
 (defn wait-ready
@@ -44,4 +50,13 @@
 (let [res (joker.http/send {:url (str base-url "/events")})]
   (println (:status res))
   (println (first (get-in res [:headers "Content-Type"])))
-  (print (:body res)))
+  (print (:body res))
+  (println (:reason @close-info)))
+
+(go (>! bad-events 42))
+
+(let [res (joker.http/send {:url (str base-url "/bad-events")})]
+  (println (:status res))
+  (println (:body res))
+  (println (:reason @error-close-info))
+  (println (instance? Error (:error @error-close-info))))

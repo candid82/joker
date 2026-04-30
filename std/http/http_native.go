@@ -179,8 +179,40 @@ func formatSSEEvent(event Object) string {
 	return sb.String()
 }
 
+func sseCloseInfo(reason string, err Error) Map {
+	res := EmptyArrayMap()
+	res.Add(MakeKeyword("reason"), MakeKeyword(reason))
+	if err != nil {
+		res.Add(MakeKeyword("error"), err)
+	}
+	return res
+}
+
 func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 	ch := EnsureObjectIsChannel(getOrPanic(response, MakeKeyword("sse"), ":sse key must be present in SSE response map"), "SSE channel: %s")
+	var onClose Callable
+	if ok, value := response.Get(MakeKeyword("on-close")); ok {
+		onClose = EnsureObjectIsCallable(value, "SSE on-close callback: %s")
+	}
+	var closeInfo Map
+	defer func() {
+		if r := recover(); r != nil {
+			if closeInfo == nil {
+				if err, ok := r.(Error); ok {
+					closeInfo = sseCloseInfo("error", err)
+				} else {
+					closeInfo = sseCloseInfo("error", RT.NewError(fmt.Sprint(r)))
+				}
+			}
+			if onClose != nil {
+				onClose.Call([]Object{closeInfo})
+			}
+			panic(r)
+		}
+		if onClose != nil {
+			onClose.Call([]Object{closeInfo})
+		}
+	}()
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		panic(RT.NewError("HTTP response writer does not support streaming"))
@@ -203,12 +235,18 @@ func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 	}
 	for {
 		RT.GIL.Unlock()
-		event, ok, err := ch.Receive(done)
+		event, status, err := ch.Receive(done)
 		RT.GIL.Lock()
 		if err != nil {
+			closeInfo = sseCloseInfo("error", err)
 			panic(err)
 		}
-		if !ok {
+		if status == ChannelReceiveClosed {
+			closeInfo = sseCloseInfo("channel-closed", nil)
+			return
+		}
+		if status == ChannelReceiveDone {
+			closeInfo = sseCloseInfo("client-closed", nil)
 			return
 		}
 		msg := formatSSEEvent(event)
@@ -219,6 +257,7 @@ func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 		}
 		RT.GIL.Lock()
 		if writeErr != nil {
+			closeInfo = sseCloseInfo("write-error", RT.NewError(writeErr.Error()))
 			return
 		}
 	}

@@ -32,9 +32,14 @@
   - id (string)
   - retry (int)
   - comment (string)
-  Optional status and headers keys are applied before streaming. SSE
-  responses default to Content-Type text/event-stream, Cache-Control
-  no-cache and Connection keep-alive unless those headers are provided."
+  Optional status and headers keys are applied before streaming. If the
+  response contains an on-close fn, it is called with a map after
+  streaming ends. The map contains a reason key with one of
+  :channel-closed, :client-closed, :write-error or :error. For
+  :write-error and :error, the map also contains an error key with an
+  Error object. SSE responses default to Content-Type text/event-stream,
+  Cache-Control no-cache and Connection keep-alive unless those headers
+  are provided."
   {:added "1.0"
    :go "startServer(addr, handler)"}
   [^String addr ^Callable handler])

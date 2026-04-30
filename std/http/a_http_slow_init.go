@@ -51,8 +51,13 @@ func InternsOrThunks() {
   - id (string)
   - retry (int)
   - comment (string)
-  Optional status and headers keys are applied before streaming. SSE
-  responses default to Content-Type text/event-stream, Cache-Control
-  no-cache and Connection keep-alive unless those headers are provided.`, "1.0"))
+  Optional status and headers keys are applied before streaming. If the
+  response contains an on-close fn, it is called with a map after
+  streaming ends. The map contains a reason key with one of
+  :channel-closed, :client-closed, :write-error or :error. For
+  :write-error and :error, the map also contains an error key with an
+  Error object. SSE responses default to Content-Type text/event-stream,
+  Cache-Control no-cache and Connection keep-alive unless those headers
+  are provided.`, "1.0"))
 
 }

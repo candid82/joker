@@ -10,3 +10,8 @@ data: line 2
 
 : done
 
+:channel-closed
+500
+Internal server error
+:error
+true
