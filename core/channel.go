@@ -69,6 +69,20 @@ func (ch *Channel) Close() {
 	}
 }
 
+func (ch *Channel) Send(value Object) (ok bool) {
+	if ch.isClosed {
+		return false
+	}
+	ok = true
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+	ch.ch <- MakeFutureResult(value, nil)
+	return
+}
+
 func (ch *Channel) Receive(done <-chan struct{}) (Object, ChannelReceiveStatus, Error) {
 	if done == nil {
 		res, ok := <-ch.ch

@@ -422,4 +422,17 @@ func InternsOrThunks() {
   On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.
   On Plan 9, it returns the $home environment variable.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
+	osNamespace.InternVar("watch", watch_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("paths"), MakeSymbol("ch")), NewVectorFrom(MakeSymbol("paths"), MakeSymbol("ch"), MakeSymbol("opts"))),
+			`Watches paths for file system changes, sends event maps to ch, and returns a
+  zero-argument cancel function. paths must be Seqable and each path must be a
+  string. opts may contain :recursive? to watch child directories recursively.
+
+  Event maps have {:type :event :path path :ops ops}, where ops is a set
+  containing one or more of :create, :write, :remove, :rename, and :chmod.
+  Runtime watcher errors are sent as {:type :error :error error}.
+
+  Calling the returned cancel function stops the watcher and closes ch.`, "1.7.2"))
+
 }

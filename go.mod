@@ -6,6 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/candid82/liner v1.4.0
+	github.com/fsnotify/fsnotify v1.10.0
 	github.com/go-git/go-git/v5 v5.13.0
 	github.com/jcburley/go-spew v1.3.0
 	github.com/pkg/profile v1.2.1

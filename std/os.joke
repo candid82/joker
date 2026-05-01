@@ -300,6 +300,22 @@
    :go "sendSignal(pid, signal)"}
   [^Int pid ^Int signal])
 
+(defn watch
+  "Watches paths for file system changes, sends event maps to ch, and returns a
+  zero-argument cancel function. paths must be Seqable and each path must be a
+  string. opts may contain :recursive? to watch child directories recursively.
+
+  Event maps have {:type :event :path path :ops ops}, where ops is a set
+  containing one or more of :create, :write, :remove, :rename, and :chmod.
+  Runtime watcher errors are sent as {:type :error :error error}.
+
+  Calling the returned cancel function stops the watcher and closes ch."
+  {:added "1.7.2"
+   :go {2 "watch(paths, ch, EmptyArrayMap())"
+        3 "watch(paths, ch, opts)"}}
+  ([^Seqable paths ^Channel ch])
+  ([^Seqable paths ^Channel ch ^Map opts]))
+
 (defn mkdir
   "Creates a new directory with the specified name and permission bits."
   {:added "1.0"
