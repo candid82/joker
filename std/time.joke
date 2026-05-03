@@ -53,6 +53,12 @@
    :go "!_res, err := time.Parse(layout, value); PanicOnErr(err)"}
   [^String layout ^String value])
 
+(defn ^Time parse-in-timezone
+  "Parses a time string in the given timezone."
+  {:added "1.7.2"
+   :go "parseInTimezone(layout, value, tz)"}
+  [^String layout ^String value ^String tz])
+
 (defn ^Int parse-duration
   "Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are

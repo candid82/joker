@@ -181,6 +181,11 @@ func InternsOrThunks() {
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
+	timeNamespace.InternVar("parse-in-timezone", parse_in_timezone_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"), MakeSymbol("tz"))),
+			`Parses a time string in the given timezone.`, "1.7.2").Plus(MakeKeyword("tag"), String{S: "Time"}))
+
 	timeNamespace.InternVar("round", round_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),

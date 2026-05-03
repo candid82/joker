@@ -225,6 +225,25 @@ func __parse_duration_(_args []Object) Object {
 	return NIL
 }
 
+var __parse_in_timezone__P ProcFn = __parse_in_timezone_
+var parse_in_timezone_ Proc = Proc{Fn: __parse_in_timezone__P, Name: "parse_in_timezone_", Package: "std/time"}
+
+func __parse_in_timezone_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		layout := ExtractString(_args, 0)
+		value := ExtractString(_args, 1)
+		tz := ExtractString(_args, 2)
+		_res := parseInTimezone(layout, value, tz)
+		return MakeTime(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __round__P ProcFn = __round_
 var round_ Proc = Proc{Fn: __round__P, Name: "round_", Package: "std/time"}
 
