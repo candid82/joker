@@ -89,7 +89,25 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(start-server addr handler)</code></div>
 </pre>
-  <p class="var-docstr">Starts HTTP server on the TCP network address addr.</p>
+  <p class="var-docstr">Starts HTTP server on the TCP network address addr.<br>
+  handler receives a request map and returns a response map.<br>
+  A response map with an :sse channel streams Server-Sent Events<br>
+  until the channel closes or the client disconnects. Values read from<br>
+  the channel may be strings, which are sent as data events, or maps with<br>
+  any of the following keys:<br>
+  - data (string)<br>
+  - event (string)<br>
+  - id (string)<br>
+  - retry (int)<br>
+  - comment (string)<br>
+  Optional status and headers keys are applied before streaming. If the<br>
+  response contains an on-close fn, it is called with a map after<br>
+  streaming ends. The map contains a reason key with one of<br>
+  :channel-closed, :client-closed, :write-error or :error. For<br>
+  :write-error and :error, the map also contains an error key with an<br>
+  Error object. SSE responses default to Content-Type text/event-stream,<br>
+  Cache-Control no-cache and Connection keep-alive unless those headers<br>
+  are provided.</p>
   
   
 </li>

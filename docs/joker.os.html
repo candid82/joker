@@ -223,6 +223,9 @@
 <li>
   <a href="#user-home-dir">user-home-dir</a>
 </li>
+<li>
+  <a href="#watch">watch</a>
+</li>
 
     </ul>
     <h2 id="_constants">Constants</h2>
@@ -955,6 +958,25 @@
 <br>
   On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.<br>
   On Plan 9, it returns the $home environment variable.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="watch">watch</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.7.2</span>
+  <pre class="var-usage"><div><code>(watch paths ch)</code></div>
+<div><code>(watch paths ch opts)</code></div>
+</pre>
+  <p class="var-docstr">Watches paths for file system changes, sends event maps to ch, and returns a<br>
+  zero-argument cancel function. paths must be Seqable and each path must be a<br>
+  string. opts may contain :recursive? to watch child directories recursively.<br>
+<br>
+  Event maps have {:type :event :path path :ops ops}, where ops is a set<br>
+  containing one or more of :create, :write, :remove, :rename, and :chmod.<br>
+  Runtime watcher errors are sent as {:type :error :error error}.<br>
+<br>
+  Calling the returned cancel function stops the watcher and closes ch.</p>
   
   
 </li>
