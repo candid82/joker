@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements utility routines for manipulating filename paths.</p>
+    <p class="var-docstr">Manipulates platform-specific filesystem paths and exposes a few path-aware filesystem queries.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -125,7 +125,8 @@
   <p class="var-docstr">Returns an absolute representation of path. If the path is not absolute it will be<br>
   joined with the current working directory to turn it into an absolute path.<br>
   The absolute path name for a given file is not guaranteed to be unique.<br>
-  Calls clean on the result.</p>
+  Calls clean on the result. Throws Error if the current working directory<br>
+  cannot be determined.</p>
   
   
 </li>
@@ -196,7 +197,8 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
 </pre>
   <p class="var-docstr">Returns the path name after the evaluation of any symbolic links. If path is relative the result will be<br>
   relative to the current directory, unless one of the components is an absolute symbolic link.<br>
-  Calls clean on the result.</p>
+  Calls clean on the result. Throws Error when symbolic links cannot be<br>
+  resolved, including when path does not exist.</p>
   
   
 </li>
@@ -217,7 +219,15 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(file-seq root)</code></div>
 </pre>
-  <p class="var-docstr">Returns a seq of maps with info about files or directories under root.</p>
+  <p class="var-docstr">Walks root and returns a vector of info maps for root and its descendants.<br>
+<br>
+  Traversal is eager and uses the platform filesystem. Each map contains:<br>
+  - name (string path)<br>
+  - size (int)<br>
+  - mode (int)<br>
+  - modtime (Time)<br>
+  - dir? (boolean)<br>
+  Throws Error when root cannot be walked or when an entry cannot be read.</p>
   
   
 </li>
@@ -238,12 +248,12 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(glob pattern)</code></div>
 </pre>
-  <p class="var-docstr">Returns the names of all files matching pattern or nil if there is no matching file.<br>
+  <p class="var-docstr">Returns a vector of names matching pattern, or an empty vector when nothing matches.<br>
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical<br>
   names such as /usr/*/bin/ed (assuming the separator is &#39;/&#39;).<br>
 <br>
   Ignores file system errors such as I/O errors reading directories.<br>
-  Throws exception when pattern is malformed.</p>
+  Throws Error when pattern is malformed.</p>
   
   
 </li>
@@ -267,7 +277,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
 </pre>
   <p class="var-docstr">Reports whether name matches the shell file name pattern.<br>
   Requires pattern to match all of name, not just a substring.<br>
-  Throws exception if pattern is malformed.<br>
+  Throws Error if pattern is malformed.<br>
   On Windows, escaping is disabled. Instead, &#39;\&#39; is treated as path separator.</p>
   
   
@@ -280,7 +290,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
 </pre>
   <p class="var-docstr">Returns a relative path that is lexically equivalent to targpath when joined to basepath<br>
   with an intervening separator. On success, the returned path will always be relative to basepath,<br>
-  even if basepath and targpath share no elements. An exception is thrown if targpath can&#39;t be made<br>
+  even if basepath and targpath share no elements. Throws Error if targpath can&#39;t be made<br>
   relative to basepath or if knowing the current working directory would be necessary to compute it.<br>
   Calls clean on the result.</p>
   
@@ -305,7 +315,7 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   <pre class="var-usage"><div><code>(split-list path)</code></div>
 </pre>
   <p class="var-docstr">Splits a list of paths joined by the OS-specific list-separator, usually found in PATH or GOPATH environment variables.<br>
-  Returns an empty slice when passed an empty string.</p>
+  Returns an empty vector when passed an empty string.</p>
   
   
 </li>

@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of filepath.InternsOrThunks().")
 	}
-	filepathNamespace.ResetMeta(MakeMeta(nil, `Implements utility routines for manipulating filename paths.`, "1.0"))
+	filepathNamespace.ResetMeta(MakeMeta(nil, `Manipulates platform-specific filesystem paths and exposes a few path-aware filesystem queries.`, "1.0"))
 
 	filepathNamespace.InternVar("list-separator", list_separator_,
 		MakeMeta(
@@ -30,7 +30,8 @@ func InternsOrThunks() {
 			`Returns an absolute representation of path. If the path is not absolute it will be
   joined with the current working directory to turn it into an absolute path.
   The absolute path name for a given file is not guaranteed to be unique.
-  Calls clean on the result.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  Calls clean on the result. Throws Error if the current working directory
+  cannot be determined.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	filepathNamespace.InternVar("abs?", isabs_,
 		MakeMeta(
@@ -76,7 +77,8 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
 			`Returns the path name after the evaluation of any symbolic links. If path is relative the result will be
   relative to the current directory, unless one of the components is an absolute symbolic link.
-  Calls clean on the result.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  Calls clean on the result. Throws Error when symbolic links cannot be
+  resolved, including when path does not exist.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	filepathNamespace.InternVar("ext", ext_,
 		MakeMeta(
@@ -87,7 +89,15 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 	filepathNamespace.InternVar("file-seq", file_seq_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("root"))),
-			`Returns a seq of maps with info about files or directories under root.`, "1.0"))
+			`Walks root and returns a vector of info maps for root and its descendants.
+
+  Traversal is eager and uses the platform filesystem. Each map contains:
+  - name (string path)
+  - size (int)
+  - mode (int)
+  - modtime (Time)
+  - dir? (boolean)
+  Throws Error when root cannot be walked or when an entry cannot be read.`, "1.0"))
 
 	filepathNamespace.InternVar("from-slash", from_slash_,
 		MakeMeta(
@@ -98,12 +108,12 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 	filepathNamespace.InternVar("glob", glob_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("pattern"))),
-			`Returns the names of all files matching pattern or nil if there is no matching file.
+			`Returns a vector of names matching pattern, or an empty vector when nothing matches.
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical
   names such as /usr/*/bin/ed (assuming the separator is '/').
 
   Ignores file system errors such as I/O errors reading directories.
-  Throws exception when pattern is malformed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "[String]"}))
+  Throws Error when pattern is malformed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "[String]"}))
 
 	filepathNamespace.InternVar("join", join_,
 		MakeMeta(
@@ -117,7 +127,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			NewListFrom(NewVectorFrom(MakeSymbol("pattern"), MakeSymbol("name"))),
 			`Reports whether name matches the shell file name pattern.
   Requires pattern to match all of name, not just a substring.
-  Throws exception if pattern is malformed.
+  Throws Error if pattern is malformed.
   On Windows, escaping is disabled. Instead, '\' is treated as path separator.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	filepathNamespace.InternVar("rel", rel_,
@@ -125,7 +135,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			NewListFrom(NewVectorFrom(MakeSymbol("basepath"), MakeSymbol("targpath"))),
 			`Returns a relative path that is lexically equivalent to targpath when joined to basepath
   with an intervening separator. On success, the returned path will always be relative to basepath,
-  even if basepath and targpath share no elements. An exception is thrown if targpath can't be made
+  even if basepath and targpath share no elements. Throws Error if targpath can't be made
   relative to basepath or if knowing the current working directory would be necessary to compute it.
   Calls clean on the result.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
@@ -140,7 +150,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
 			`Splits a list of paths joined by the OS-specific list-separator, usually found in PATH or GOPATH environment variables.
-  Returns an empty slice when passed an empty string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "[String]"}))
+  Returns an empty vector when passed an empty string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "[String]"}))
 
 	filepathNamespace.InternVar("to-slash", to_slash_,
 		MakeMeta(
