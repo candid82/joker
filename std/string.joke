@@ -1,5 +1,5 @@
 (ns ^{:go-imports ["regexp" "strings" "unicode"]
-      :doc "Implements simple functions to manipulate strings."}
+      :doc "Provides Unicode-aware string predicates, transforms, searches, and splitting helpers."}
   string)
 
 (defn ^Boolean ends-with?
@@ -15,13 +15,19 @@
   [^String s ^Stringable substr])
 
 (defn ^String pad-right
-  "Returns s padded with pad at the end to length n."
+  "Returns s padded with pad at the end to n Unicode characters.
+
+  Returns s unchanged when it is already at least n characters long. pad must
+  be non-empty when padding is required."
   {:added "1.0"
    :go "padRight(s, pad, n)"}
   [^String s ^Stringable pad ^Int n])
 
 (defn ^String pad-left
-  "Returns s padded with pad at the beginning to length n."
+  "Returns s padded with pad at the beginning to n Unicode characters.
+
+  Returns s unchanged when it is already at least n characters long. pad must
+  be non-empty when padding is required."
   {:added "1.0"
    :go "padLeft(s, pad, n)"}
   [^String s ^Stringable pad ^Int n])
@@ -46,7 +52,9 @@
   [^String s])
 
 (defn ^String join
-  "Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator."
+  "Returns the elements of coll joined by an optional separator.
+
+  Elements are converted with their ordinary string form before joining."
   {:added "1.0"
    :go {1 "join(\"\", coll)"
         2 "join(separator, coll)"}}
@@ -67,10 +75,8 @@
 (defn ^String replace-first
   "Replaces the first instance of match (String or Regex) with string repl in string s.
 
-  If match is Regex, $1, $2, etc. in the replacement string repl are
-  substituted with the string that matched the corresponding
-  parenthesized group in the pattern.
-  "
+  Unlike replace, Regex replacements here are inserted literally; $1, $2, and
+  similar text are not expanded."
   {:added "1.0"
    :go "replaceFirst(s, match, repl)"}
   [^String s ^Object match ^Stringable repl])
@@ -141,8 +147,10 @@
   [^String s ^Stringable substr])
 
 (defn index-of
-  "Return index of value (string or char) in s, optionally searching
-  forward from from or nil if not found."
+  "Returns the Unicode-character index of value in s, or nil when absent.
+
+  value must be a string or char. The optional from argument is a
+  Unicode-character index from which to begin the forward search."
   {:added "1.0"
    :go {2 "indexOf(s, value, 0)"
         3 "indexOf(s, value, from)"}}
@@ -150,8 +158,10 @@
   ([^String s ^Object value ^Int from]))
 
 (defn last-index-of
-  "Return last index of value (string or char) in s, optionally
-  searching backward from from or nil if not found."
+  "Returns the last Unicode-character index of value in s, or nil when absent.
+
+  value must be a string or char. With from, only the prefix ending at that
+  Unicode-character index is searched."
   {:added "1.0"
    :go {2 "lastIndexOf(s, value, 0)"
         3 "lastIndexOf(s, value, from)"}}
@@ -177,7 +187,7 @@
   [^String s])
 
 (defn ^Regex re-quote
-  "Returns an instance of Regex that matches the string exactly"
+  "Returns a Regex that matches s literally rather than treating it as a pattern."
   {:added "1.0"
    :go "regexp.MustCompile(regexp.QuoteMeta(s))"}
   [^String s])

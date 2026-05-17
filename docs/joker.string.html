@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements simple functions to manipulate strings.</p>
+    <p class="var-docstr">Provides Unicode-aware string predicates, transforms, searches, and splitting helpers.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -178,8 +178,10 @@
   <pre class="var-usage"><div><code>(index-of s value)</code></div>
 <div><code>(index-of s value from)</code></div>
 </pre>
-  <p class="var-docstr">Return index of value (string or char) in s, optionally searching<br>
-  forward from from or nil if not found.</p>
+  <p class="var-docstr">Returns the Unicode-character index of value in s, or nil when absent.<br>
+<br>
+  value must be a string or char. The optional from argument is a<br>
+  Unicode-character index from which to begin the forward search.</p>
   
   
 </li>
@@ -190,7 +192,9 @@
   <pre class="var-usage"><div><code>(join coll)</code></div>
 <div><code>(join separator coll)</code></div>
 </pre>
-  <p class="var-docstr">Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.</p>
+  <p class="var-docstr">Returns the elements of coll joined by an optional separator.<br>
+<br>
+  Elements are converted with their ordinary string form before joining.</p>
   
   
 </li>
@@ -201,8 +205,10 @@
   <pre class="var-usage"><div><code>(last-index-of s value)</code></div>
 <div><code>(last-index-of s value from)</code></div>
 </pre>
-  <p class="var-docstr">Return last index of value (string or char) in s, optionally<br>
-  searching backward from from or nil if not found.</p>
+  <p class="var-docstr">Returns the last Unicode-character index of value in s, or nil when absent.<br>
+<br>
+  value must be a string or char. With from, only the prefix ending at that<br>
+  Unicode-character index is searched.</p>
   
   
 </li>
@@ -222,7 +228,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pad-left s pad n)</code></div>
 </pre>
-  <p class="var-docstr">Returns s padded with pad at the beginning to length n.</p>
+  <p class="var-docstr">Returns s padded with pad at the beginning to n Unicode characters.<br>
+<br>
+  Returns s unchanged when it is already at least n characters long. pad must<br>
+  be non-empty when padding is required.</p>
   
   
 </li>
@@ -232,7 +241,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(pad-right s pad n)</code></div>
 </pre>
-  <p class="var-docstr">Returns s padded with pad at the end to length n.</p>
+  <p class="var-docstr">Returns s padded with pad at the end to n Unicode characters.<br>
+<br>
+  Returns s unchanged when it is already at least n characters long. pad must<br>
+  be non-empty when padding is required.</p>
   
   
 </li>
@@ -242,7 +254,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(re-quote s)</code></div>
 </pre>
-  <p class="var-docstr">Returns an instance of Regex that matches the string exactly</p>
+  <p class="var-docstr">Returns a Regex that matches s literally rather than treating it as a pattern.</p>
   
   
 </li>
@@ -269,10 +281,8 @@
 </pre>
   <p class="var-docstr">Replaces the first instance of match (String or Regex) with string repl in string s.<br>
 <br>
-  If match is Regex, $1, $2, etc. in the replacement string repl are<br>
-  substituted with the string that matched the corresponding<br>
-  parenthesized group in the pattern.<br>
-  </p>
+  Unlike replace, Regex replacements here are inserted literally; $1, $2, and<br>
+  similar text are not expanded.</p>
   
   
 </li>
