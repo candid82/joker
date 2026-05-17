@@ -111,8 +111,8 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),
 			`Replaces the first instance of match (String or Regex) with string repl in string s.
 
-  Unlike replace, Regex replacements here are inserted literally; $1, $2, and
-  similar text are not expanded.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  If match is Regex, $1, $2, etc. in repl are expanded from the corresponding
+  parenthesized groups, as in replace.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("reverse", reverse_,
 		MakeMeta(

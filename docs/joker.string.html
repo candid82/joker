@@ -281,8 +281,8 @@
 </pre>
   <p class="var-docstr">Replaces the first instance of match (String or Regex) with string repl in string s.<br>
 <br>
-  Unlike replace, Regex replacements here are inserted literally; $1, $2, and<br>
-  similar text are not expanded.</p>
+  If match is Regex, $1, $2, etc. in repl are expanded from the corresponding<br>
+  parenthesized groups, as in replace.</p>
   
   
 </li>

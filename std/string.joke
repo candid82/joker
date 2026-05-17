@@ -75,8 +75,8 @@
 (defn ^String replace-first
   "Replaces the first instance of match (String or Regex) with string repl in string s.
 
-  Unlike replace, Regex replacements here are inserted literally; $1, $2, and
-  similar text are not expanded."
+  If match is Regex, $1, $2, etc. in repl are expanded from the corresponding
+  parenthesized groups, as in replace."
   {:added "1.0"
    :go "replaceFirst(s, match, repl)"}
   [^String s ^Object match ^Stringable repl])

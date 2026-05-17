@@ -18,6 +18,9 @@ func padRight(s, pad string, n int) string {
 		return s
 	}
 	c := utf8.RuneCountInString(pad)
+	if c == 0 {
+		panic(RT.NewError("pad must not be empty when padding is required"))
+	}
 	d := toAdd / c
 	r := toAdd % c
 	for i := 0; i < d; i++ {
@@ -35,6 +38,9 @@ func padLeft(s, pad string, n int) string {
 		return s
 	}
 	c := utf8.RuneCountInString(pad)
+	if c == 0 {
+		panic(RT.NewError("pad must not be empty when padding is required"))
+	}
 	d := toAdd / c
 	r := toAdd % c
 	for i := 0; i < d; i++ {
@@ -176,11 +182,14 @@ func replaceFirst(s string, match Object, repl string) string {
 	case String:
 		return strings.Replace(s, match.S, repl, 1)
 	case *Regex:
-		m := match.R.FindStringIndex(s)
+		m := match.R.FindStringSubmatchIndex(s)
 		if m == nil {
 			return s
 		}
-		return s[:m[0]] + repl + s[m[1]:]
+		buf := append([]byte{}, s[:m[0]]...)
+		buf = match.R.ExpandString(buf, repl, s, m)
+		buf = append(buf, s[m[1]:]...)
+		return string(buf)
 	default:
 		panic(RT.NewArgTypeError(1, match, "String or Regex"))
 	}
