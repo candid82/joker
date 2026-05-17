@@ -12,52 +12,63 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of crypto.InternsOrThunks().")
 	}
-	cryptoNamespace.ResetMeta(MakeMeta(nil, `Implements common cryptographic and hash functions.`, "1.0"))
+	cryptoNamespace.ResetMeta(MakeMeta(nil, `Computes HMACs and common message digests, returning raw digest bytes as strings.`, "1.0"))
 
 	cryptoNamespace.InternVar("hmac", hmac_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("algorithm"), MakeSymbol("message"), MakeSymbol("key"))),
-			`Returns HMAC signature for message and key using specified algorithm.
-  Algorithm is one of the following: :sha1, :sha224, :sha256, :sha384, :sha512.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the HMAC of message using key and algorithm as raw bytes.
+
+  algorithm must be one of :sha1, :sha224, :sha256, :sha384, or :sha512.
+  Throws Error for any other algorithm. The returned string is binary digest
+  data; use joker.hex/encode-string or joker.base64/encode-string when a
+  printable representation is needed.
+
+  Example:
+    (joker.base64/encode-string
+      (joker.crypto/hmac :sha256 "message" "secret"))`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("md5", md5_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the MD5 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the MD5 digest of data as 16 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha1", sha1_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA1 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-1 digest of data as 20 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha224", sha224_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA224 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-224 digest of data as 28 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha256", sha256_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA256 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-256 digest of data as 32 raw bytes.
+
+  Example:
+    (joker.hex/encode-string (joker.crypto/sha256 "hello"))`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha384", sha384_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA384 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-384 digest of data as 48 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512", sha512_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA512 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-512 digest of data as 64 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512-224", sha512_224_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA512/224 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-512/224 digest of data as 28 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512-256", sha512_256_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
-			`Returns the SHA512/256 checksum of the data.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the SHA-512/256 digest of data as 32 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
