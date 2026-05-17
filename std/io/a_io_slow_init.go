@@ -12,32 +12,44 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of io.InternsOrThunks().")
 	}
-	ioNamespace.ResetMeta(MakeMeta(nil, `Provides basic interfaces to I/O primitives.`, "1.0"))
+	ioNamespace.ResetMeta(MakeMeta(nil, `Provides small helpers for copying, piping, reading, and closing Joker I/O objects.`, "1.0"))
 
 	ioNamespace.InternVar("close", close_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
-			`Closes f (IOWriter, IOReader, or File) if possible. Otherwise throws an error.`, "1.0"))
+			`Closes f and returns nil.
+
+  f must implement close, such as an IOWriter, IOReader, or File. Throws Error
+  when f is not closable or when closing fails.`, "1.0"))
 
 	ioNamespace.InternVar("copy", copy_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dst"), MakeSymbol("src"))),
-			`Copies from src to dst until either EOF is reached on src or an error occurs.
-  Returns the number of bytes copied or throws an error.
+			`Copies bytes from src to dst until src reaches EOF or an error occurs.
+
+  Returns the number of bytes copied. Throws Error for read or write failures.
   src must be IOReader, e.g. as returned by joker.os/open.
-  dst must be IOWriter, e.g. as returned by joker.os/create.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+  dst must be IOWriter, e.g. as returned by joker.os/create.
+
+  Example:
+    (joker.io/copy out in)`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	ioNamespace.InternVar("pipe", pipe_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Pipe creates a synchronous in-memory pipe. It can be used to connect code expecting an IOReader
-  with code expecting an IOWriter.
-  Returns a vector [reader, writer].`, "1.0"))
+			`Creates a synchronous in-memory pipe and returns [reader writer].
+
+  Writes block until the reader consumes data, so use the two ends from
+  cooperating computations when neither side should stall the other. Closing
+  either end unblocks operations on the other end according to pipe semantics.`, "1.0"))
 
 	ioNamespace.InternVar("read", read_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("r"), MakeSymbol("n"))),
-			`Reads up to n bytes from IOReader r and returns a string of the read bytes.
-  May return a shorter (or blank) string if EOF is encountered.`, "1.3.6").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Performs one read from IOReader r and returns up to n bytes as a string.
+
+  This is not a read-exactly operation: it may return fewer than n bytes even
+  before EOF, and returns "" when EOF is encountered before any bytes are read.
+  Throws Error for non-EOF read failures. n should be non-negative.`, "1.3.6").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

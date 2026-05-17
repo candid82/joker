@@ -1,33 +1,45 @@
 (ns ^{:go-imports ["io"]
-      :doc "Provides basic interfaces to I/O primitives."}
+      :doc "Provides small helpers for copying, piping, reading, and closing Joker I/O objects."}
   io)
 
 (defn ^Int copy
-  "Copies from src to dst until either EOF is reached on src or an error occurs.
-  Returns the number of bytes copied or throws an error.
+  "Copies bytes from src to dst until src reaches EOF or an error occurs.
+
+  Returns the number of bytes copied. Throws Error for read or write failures.
   src must be IOReader, e.g. as returned by joker.os/open.
-  dst must be IOWriter, e.g. as returned by joker.os/create."
+  dst must be IOWriter, e.g. as returned by joker.os/create.
+
+  Example:
+    (joker.io/copy out in)"
   {:added "1.0"
    :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
   [^IOWriter dst ^IOReader src])
 
 (defn pipe
-  "Pipe creates a synchronous in-memory pipe. It can be used to connect code expecting an IOReader
-  with code expecting an IOWriter.
-  Returns a vector [reader, writer]."
+  "Creates a synchronous in-memory pipe and returns [reader writer].
+
+  Writes block until the reader consumes data, so use the two ends from
+  cooperating computations when neither side should stall the other. Closing
+  either end unblocks operations on the other end according to pipe semantics."
   {:added "1.0"
    :go "pipe()"}
   [])
 
 (defn close
-  "Closes f (IOWriter, IOReader, or File) if possible. Otherwise throws an error."
+  "Closes f and returns nil.
+
+  f must implement close, such as an IOWriter, IOReader, or File. Throws Error
+  when f is not closable or when closing fails."
   {:added "1.0"
    :go "close(f)"}
   [^Object f])
 
 (defn ^String read
-  "Reads up to n bytes from IOReader r and returns a string of the read bytes.
-  May return a shorter (or blank) string if EOF is encountered."
+  "Performs one read from IOReader r and returns up to n bytes as a string.
+
+  This is not a read-exactly operation: it may return fewer than n bytes even
+  before EOF, and returns \"\" when EOF is encountered before any bytes are read.
+  Throws Error for non-EOF read failures. n should be non-negative."
   {:added "1.3.6"
    :go "read(r, n)"}
   ^String [^IOReader r ^Int n])
