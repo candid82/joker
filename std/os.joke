@@ -409,7 +409,7 @@
   :size - size in bytes (Int)
   :mode - mode (Int)
   :dir? - true if the file is a directory (Boolean)
-  :modtime - modification time (Time)"
+  :modtime - modification time as Unix seconds (Int)"
   {:added "1.0"
    :go "readDir(dirname)"}
   [^String dirname])

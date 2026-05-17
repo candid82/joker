@@ -238,7 +238,7 @@ func InternsOrThunks() {
   :size - size in bytes (Int)
   :mode - mode (Int)
   :dir? - true if the file is a directory (Boolean)
-  :modtime - modification time (Time)`, "1.0"))
+  :modtime - modification time as Unix seconds (Int)`, "1.0"))
 
 	osNamespace.InternVar("lstat", lstat_,
 		MakeMeta(
