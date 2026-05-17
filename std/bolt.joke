@@ -46,8 +46,8 @@
 (defn create-bucket
   "Creates bucket name and returns nil.
 
-  Throws Error if the bucket already exists, if name is blank, or if name is too
-  long."
+  Throws Error if the bucket already exists, if name is blank or too long, or
+  if the transaction fails."
   {:added "1.0"
    :go "createBucket(db, name)"}
   [^BoltDB db ^String name])
@@ -56,7 +56,7 @@
   "Creates bucket name when needed and returns nil.
 
   Does nothing when the bucket already exists. Throws Error if name is blank or
-  too long."
+  too long, or if the transaction fails."
   {:added "1.0"
    :go "createBucketIfNotExists(db, name)"}
   [^BoltDB db ^String name])
@@ -64,7 +64,7 @@
 (defn delete-bucket
   "Deletes bucket name and returns nil.
 
-  Throws Error when the bucket does not exist."
+  Throws Error when the bucket does not exist or the transaction fails."
   {:added "1.0"
    :go "deleteBucket(db, name)"}
   [^BoltDB db ^String name])
@@ -73,7 +73,7 @@
   "Returns the next auto-incrementing integer for bucket.
 
   Each call advances the bucket sequence counter inside a write transaction.
-  Throws Error when bucket does not exist."
+  Throws Error when bucket does not exist or the transaction fails."
   {:added "1.0"
    :go "nextSequence(db, bucket)"}
   [^BoltDB db ^String bucket])
@@ -83,7 +83,7 @@
 
   Keys and values are strings stored as raw bytes. Replaces any previous value
   for key. Throws Error when bucket does not exist, when key is blank or too
-  large, or when value is too large."
+  large, when value is too large, or when the transaction fails."
   {:added "1.0"
    :go "put(db, bucket, key, value)"}
   [^BoltDB db ^String bucket ^String key ^String value])
@@ -91,7 +91,8 @@
 (defn delete
   "Removes key from bucket and returns nil.
 
-  Missing keys are ignored. Throws Error when bucket does not exist."
+  Missing keys are ignored. Throws Error when bucket does not exist or the
+  transaction fails."
   {:added "1.0"
    :go "delete(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
@@ -99,7 +100,8 @@
 (defn get
   "Returns the string value stored at key in bucket.
 
-  Returns nil when key does not exist. Throws Error when bucket does not exist."
+  Returns nil when key does not exist. Throws Error when bucket does not exist
+  or the transaction fails."
   {:added "1.0"
    :go "get(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
@@ -109,7 +111,7 @@
 
   Results are returned as a vector of [key value] vectors in Bolt key order.
   Passing the empty string returns all key/value pairs in the bucket. Throws
-  Error when bucket does not exist."
+  Error when bucket does not exist or the transaction fails."
   {:added "1.0"
    :go "byPrefix(db, bucket, prefix)"}
   [^BoltDB db ^String bucket ^String prefix])

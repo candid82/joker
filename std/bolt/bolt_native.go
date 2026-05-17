@@ -77,29 +77,32 @@ func close(db *bolt.DB) Nil {
 }
 
 func createBucket(db *bolt.DB, name string) Nil {
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket([]byte(name))
 		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return NIL
 }
 
 func createBucketIfNotExists(db *bolt.DB, name string) Nil {
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(name))
 		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return NIL
 }
 
 func deleteBucket(db *bolt.DB, name string) Nil {
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(name))
 		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return NIL
 }
 
@@ -113,41 +116,47 @@ func getBucket(tx *bolt.Tx, bucket string) *bolt.Bucket {
 
 func nextSequence(db *bolt.DB, bucket string) Int {
 	var id uint64
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
-		id, _ = b.NextSequence()
+		var err error
+		id, err = b.NextSequence()
+		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return MakeInt(int(id))
 }
 
 func put(db *bolt.DB, bucket, key, value string) Nil {
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
 		err := b.Put([]byte(key), []byte(value))
 		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return NIL
 }
 
 func delete(db *bolt.DB, bucket, key string) Nil {
-	db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
 		err := b.Delete([]byte(key))
 		PanicOnErr(err)
 		return nil
 	})
+	PanicOnErr(err)
 	return NIL
 }
 
 func get(db *bolt.DB, bucket, key string) Object {
 	var v []byte
-	db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
 		v = b.Get([]byte(key))
 		return nil
 	})
+	PanicOnErr(err)
 	if v == nil {
 		return NIL
 	}
@@ -156,7 +165,7 @@ func get(db *bolt.DB, bucket, key string) Object {
 
 func byPrefix(db *bolt.DB, bucket, prefix string) *ArrayVector {
 	res := EmptyArrayVector()
-	db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		c := getBucket(tx, bucket).Cursor()
 		pr := []byte(prefix)
 		for k, v := c.Seek(pr); k != nil && bytes.HasPrefix(k, pr); k, v = c.Next() {
@@ -164,6 +173,7 @@ func byPrefix(db *bolt.DB, bucket, prefix string) *ArrayVector {
 		}
 		return nil
 	})
+	PanicOnErr(err)
 	return res
 }
 

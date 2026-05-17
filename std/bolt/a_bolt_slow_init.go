@@ -36,7 +36,7 @@ func InternsOrThunks() {
 
   Results are returned as a vector of [key value] vectors in Bolt key order.
   Passing the empty string returns all key/value pairs in the bucket. Throws
-  Error when bucket does not exist.`, "1.0"))
+  Error when bucket does not exist or the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("close", close_,
 		MakeMeta(
@@ -51,8 +51,8 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
 			`Creates bucket name and returns nil.
 
-  Throws Error if the bucket already exists, if name is blank, or if name is too
-  long.`, "1.0"))
+  Throws Error if the bucket already exists, if name is blank or too long, or
+  if the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("create-bucket-if-not-exists", create_bucket_if_not_exists_,
 		MakeMeta(
@@ -60,28 +60,30 @@ func InternsOrThunks() {
 			`Creates bucket name when needed and returns nil.
 
   Does nothing when the bucket already exists. Throws Error if name is blank or
-  too long.`, "1.0"))
+  too long, or if the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("delete", delete_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
 			`Removes key from bucket and returns nil.
 
-  Missing keys are ignored. Throws Error when bucket does not exist.`, "1.0"))
+  Missing keys are ignored. Throws Error when bucket does not exist or the
+  transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("delete-bucket", delete_bucket_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
 			`Deletes bucket name and returns nil.
 
-  Throws Error when the bucket does not exist.`, "1.0"))
+  Throws Error when the bucket does not exist or the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("get", get_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
 			`Returns the string value stored at key in bucket.
 
-  Returns nil when key does not exist. Throws Error when bucket does not exist.`, "1.0"))
+  Returns nil when key does not exist. Throws Error when bucket does not exist
+  or the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("next-sequence", next_sequence_,
 		MakeMeta(
@@ -89,7 +91,7 @@ func InternsOrThunks() {
 			`Returns the next auto-incrementing integer for bucket.
 
   Each call advances the bucket sequence counter inside a write transaction.
-  Throws Error when bucket does not exist.`, "1.0"))
+  Throws Error when bucket does not exist or the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("open", open_,
 		MakeMeta(
@@ -114,6 +116,6 @@ func InternsOrThunks() {
 
   Keys and values are strings stored as raw bytes. Replaces any previous value
   for key. Throws Error when bucket does not exist, when key is blank or too
-  large, or when value is too large.`, "1.0"))
+  large, when value is too large, or when the transaction fails.`, "1.0"))
 
 }

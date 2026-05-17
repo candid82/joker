@@ -96,7 +96,7 @@
 <br>
   Results are returned as a vector of [key value] vectors in Bolt key order.<br>
   Passing the empty string returns all key/value pairs in the bucket. Throws<br>
-  Error when bucket does not exist.</p>
+  Error when bucket does not exist or the transaction fails.</p>
   
   
 </li>
@@ -121,8 +121,8 @@
 </pre>
   <p class="var-docstr">Creates bucket name and returns nil.<br>
 <br>
-  Throws Error if the bucket already exists, if name is blank, or if name is too<br>
-  long.</p>
+  Throws Error if the bucket already exists, if name is blank or too long, or<br>
+  if the transaction fails.</p>
   
   
 </li>
@@ -135,7 +135,7 @@
   <p class="var-docstr">Creates bucket name when needed and returns nil.<br>
 <br>
   Does nothing when the bucket already exists. Throws Error if name is blank or<br>
-  too long.</p>
+  too long, or if the transaction fails.</p>
   
   
 </li>
@@ -147,7 +147,8 @@
 </pre>
   <p class="var-docstr">Removes key from bucket and returns nil.<br>
 <br>
-  Missing keys are ignored. Throws Error when bucket does not exist.</p>
+  Missing keys are ignored. Throws Error when bucket does not exist or the<br>
+  transaction fails.</p>
   
   
 </li>
@@ -159,7 +160,7 @@
 </pre>
   <p class="var-docstr">Deletes bucket name and returns nil.<br>
 <br>
-  Throws Error when the bucket does not exist.</p>
+  Throws Error when the bucket does not exist or the transaction fails.</p>
   
   
 </li>
@@ -171,7 +172,8 @@
 </pre>
   <p class="var-docstr">Returns the string value stored at key in bucket.<br>
 <br>
-  Returns nil when key does not exist. Throws Error when bucket does not exist.</p>
+  Returns nil when key does not exist. Throws Error when bucket does not exist<br>
+  or the transaction fails.</p>
   
   
 </li>
@@ -184,7 +186,7 @@
   <p class="var-docstr">Returns the next auto-incrementing integer for bucket.<br>
 <br>
   Each call advances the bucket sequence counter inside a write transaction.<br>
-  Throws Error when bucket does not exist.</p>
+  Throws Error when bucket does not exist or the transaction fails.</p>
   
   
 </li>
@@ -219,7 +221,7 @@
 <br>
   Keys and values are strings stored as raw bytes. Replaces any previous value<br>
   for key. Throws Error when bucket does not exist, when key is blank or too<br>
-  large, or when value is too large.</p>
+  large, when value is too large, or when the transaction fails.</p>
   
   
 </li>
