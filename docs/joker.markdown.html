@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements GitHub Flavored Markdown rendering.</p>
+    <p class="var-docstr">Renders GitHub Flavored Markdown to HTML.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -51,13 +51,21 @@
   <pre class="var-usage"><div><code>(convert-string s)</code></div>
 <div><code>(convert-string s opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the HTML rendering of Markdown string s.<br>
-  opts is an optional map of boolean rendering options (all default to true)<br>
+  <p class="var-docstr">Renders Markdown string s to HTML.<br>
+<br>
+  GitHub Flavored Markdown extensions are enabled, along with tables,<br>
+  definition lists, footnotes, typographer replacements, and automatic heading<br>
+  IDs.<br>
+<br>
+  opts is an optional map of boolean rendering options; all default to true:<br>
 <br>
   :with-hard-wraps? - Render newlines as &lt;br&gt;.<br>
   :with-xhtml? - Render as XHTML.<br>
   :with-unsafe? - When false, all raw html will be omitted from the output. When true html is passed through unchanged.<br>
-  </p>
+<br>
+  Example:<br>
+    (joker.markdown/convert-string &#34;# Hello&#34;)<br>
+    ;; =&gt; &#34;&lt;h1 id=\&#34;hello\&#34;&gt;Hello&lt;/h1&gt;\n&#34;</p>
   
   
 </li>

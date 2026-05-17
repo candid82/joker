@@ -12,17 +12,25 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of markdown.InternsOrThunks().")
 	}
-	markdownNamespace.ResetMeta(MakeMeta(nil, `Implements GitHub Flavored Markdown rendering.`, "1.0"))
+	markdownNamespace.ResetMeta(MakeMeta(nil, `Renders GitHub Flavored Markdown to HTML.`, "1.0"))
 
 	markdownNamespace.InternVar("convert-string", convert_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Returns the HTML rendering of Markdown string s.
-  opts is an optional map of boolean rendering options (all default to true)
+			`Renders Markdown string s to HTML.
+
+  GitHub Flavored Markdown extensions are enabled, along with tables,
+  definition lists, footnotes, typographer replacements, and automatic heading
+  IDs.
+
+  opts is an optional map of boolean rendering options; all default to true:
 
   :with-hard-wraps? - Render newlines as <br>.
   :with-xhtml? - Render as XHTML.
   :with-unsafe? - When false, all raw html will be omitted from the output. When true html is passed through unchanged.
-  `, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+  Example:
+    (joker.markdown/convert-string "# Hello")
+    ;; => "<h1 id=\"hello\">Hello</h1>\n"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
