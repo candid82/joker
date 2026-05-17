@@ -140,7 +140,7 @@ func config(repo *git.Repository) Map {
 	res.Add(MakeKeyword("branches"), branches)
 	urls := EmptyArrayMap()
 	for name, url := range cfg.URLs {
-		branches.Add(MakeString(name), makeUrl(url))
+		urls.Add(MakeString(name), makeUrl(url))
 	}
 	res.Add(MakeKeyword("urls"), urls)
 	return res
@@ -186,7 +186,7 @@ func makeCommit(cmt *object.Commit) Map {
 	res.Add(MakeKeyword("hash"), MakeString(cmt.Hash.String()))
 	res.Add(MakeKeyword("author"), makeSignature(cmt.Author))
 	res.Add(MakeKeyword("committer"), makeSignature(cmt.Committer))
-	res.Add(MakeKeyword("pgp-siganture"), MakeString(cmt.PGPSignature))
+	res.Add(MakeKeyword("pgp-signature"), MakeString(cmt.PGPSignature))
 	res.Add(MakeKeyword("message"), MakeString(cmt.Message))
 	res.Add(MakeKeyword("tree-hash"), MakeString(cmt.TreeHash.String()))
 	parentHashes := EmptyVector()

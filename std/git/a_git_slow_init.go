@@ -64,7 +64,7 @@ func InternsOrThunks() {
 			`Returns commit history as a vector of commit maps.
 
   Each commit map contains :hash, :author, :committer, :message, :tree-hash,
-  :parent-hashes, and :pgp-siganture. Signature maps contain :name, :email, and
+  :parent-hashes, and :pgp-signature. Signature maps contain :name, :email, and
   :when.
 
   opts may have the following keys:
