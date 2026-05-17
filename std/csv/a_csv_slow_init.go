@@ -62,7 +62,8 @@ func InternsOrThunks() {
 
   f must implement io.Writer, for example a file returned by joker.os/create.
   data and opts have the same meaning as in joker.csv/write-string. write does
-  not close f.`, "1.0"))
+  not close f. Throws Error for write failures, including errors reported while
+  flushing buffered CSV output.`, "1.0"))
 
 	csvNamespace.InternVar("write-string", write_string_,
 		MakeMeta(

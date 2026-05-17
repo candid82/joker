@@ -72,11 +72,11 @@
 
   f must implement io.Writer, for example a file returned by joker.os/create.
   data and opts have the same meaning as in joker.csv/write-string. write does
-  not close f."
+  not close f. Throws Error for write failures, including errors reported while
+  flushing buffered CSV output."
   {:added "1.0"
    :go {2 "write(f, data, EmptyArrayMap())"
         3 "write(f, data, opts)"}}
   ([^IOWriter f ^Seqable data])
   ([^IOWriter f ^Seqable data ^Map opts]))
-
 
