@@ -15,16 +15,30 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of html.InternsOrThunks().")
 	}
-	htmlNamespace.ResetMeta(MakeMeta(nil, `Provides functions for escaping and unescaping HTML text.`, "1.0"))
+	htmlNamespace.ResetMeta(MakeMeta(nil, `Escapes and unescapes HTML text entities.`, "1.0"))
 
 	htmlNamespace.InternVar("escape", escape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and ".`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Escapes HTML-sensitive characters in s.
+
+  Replaces only <, >, &, ', and " with their HTML entity forms, matching Go's
+  html.EscapeString behavior.
+
+  Example:
+    (joker.html/escape "<a href='x'>&")
+    ;; => "&lt;a href=&#39;x&#39;&gt;&amp;"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	htmlNamespace.InternVar("unescape", unescape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Unescapes entities like &lt; to become <.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Unescapes HTML entities in s.
+
+  Recognizes named and numeric entities using Go's html.UnescapeString rules.
+  Text that is not part of a valid entity is preserved.
+
+  Example:
+    (joker.html/unescape "Tom &amp; Jerry")
+    ;; => "Tom & Jerry"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
