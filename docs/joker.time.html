@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provides functionality for measuring and displaying time.</p>
+    <p class="var-docstr">Creates, parses, formats, compares, and converts times and nanosecond durations.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -396,7 +396,7 @@
   which defines the format by showing how the reference time, defined to be<br>
   Mon Jan 2 15:04:05 -0700 MST 2006<br>
   would be displayed if it were the value; it serves as an example of the desired output.<br>
-  The same display rules will then be applied to the time value..</p>
+  The same display rules will then be applied to the time value.</p>
   
   
 </li>
@@ -427,7 +427,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(in-timezone t tz)</code></div>
 </pre>
-  <p class="var-docstr">Returns a copy of t representing the same time instant, but with the copy&#39;s timezone information set to tz for display purposes.</p>
+  <p class="var-docstr">Returns t represented in timezone tz.<br>
+<br>
+  The instant is unchanged; only the location used for display and calendar<br>
+  fields changes. tz must be a loadable IANA timezone name. Throws Error when<br>
+  tz cannot be loaded.</p>
   
   
 </li>
@@ -457,7 +461,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse layout value)</code></div>
 </pre>
-  <p class="var-docstr">Parses a time string.</p>
+  <p class="var-docstr">Parses value according to layout and returns a Time.<br>
+<br>
+  layout uses Go&#39;s reference-time convention. When value contains no zone<br>
+  information, parsing uses UTC. Throws Error when value does not match layout.</p>
   
   
 </li>
@@ -479,7 +486,10 @@
   <span class="var-added">v1.7.2</span>
   <pre class="var-usage"><div><code>(parse-in-timezone layout value tz)</code></div>
 </pre>
-  <p class="var-docstr">Parses a time string in the given timezone.</p>
+  <p class="var-docstr">Parses value according to layout in timezone tz and returns a Time.<br>
+<br>
+  tz must be a loadable IANA timezone name such as &#34;America/New_York&#34;.<br>
+  Throws Error when tz cannot be loaded or value does not match layout.</p>
   
   
 </li>

@@ -1,5 +1,5 @@
 (ns ^{:go-imports ["time"]
-      :doc "Provides functionality for measuring and displaying time."}
+      :doc "Creates, parses, formats, compares, and converts times and nanosecond durations."}
   time)
 
 (defn sleep
@@ -48,13 +48,19 @@
   [^Time t ^Integer years ^Integer months ^Integer days])
 
 (defn ^Time parse
-  "Parses a time string."
+  "Parses value according to layout and returns a Time.
+
+  layout uses Go's reference-time convention. When value contains no zone
+  information, parsing uses UTC. Throws Error when value does not match layout."
   {:added "1.0"
    :go "!_res, err := time.Parse(layout, value); PanicOnErr(err)"}
   [^String layout ^String value])
 
 (defn ^Time parse-in-timezone
-  "Parses a time string in the given timezone."
+  "Parses value according to layout in timezone tz and returns a Time.
+
+  tz must be a loadable IANA timezone name such as \"America/New_York\".
+  Throws Error when tz cannot be loaded or value does not match layout."
   {:added "1.7.2"
    :go "parseInTimezone(layout, value, tz)"}
   [^String layout ^String value ^String tz])
@@ -87,7 +93,7 @@
   which defines the format by showing how the reference time, defined to be
   Mon Jan 2 15:04:05 -0700 MST 2006
   would be displayed if it were the value; it serves as an example of the desired output.
-  The same display rules will then be applied to the time value.."
+  The same display rules will then be applied to the time value."
   {:added "1.0"
    :go "t.Format(layout)"}
   [^Time t ^String layout])
@@ -132,7 +138,11 @@
   [^Integer d ^Integer m])
 
 (defn ^Time in-timezone
-  "Returns a copy of t representing the same time instant, but with the copy's timezone information set to tz for display purposes."
+  "Returns t represented in timezone tz.
+
+  The instant is unchanged; only the location used for display and calendar
+  fields changes. tz must be a loadable IANA timezone name. Throws Error when
+  tz cannot be loaded."
   {:added "1.0"
    :go "inTimezone(t, tz)"}
   [^Time t ^String tz])

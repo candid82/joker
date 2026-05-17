@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of time.InternsOrThunks().")
 	}
-	timeNamespace.ResetMeta(MakeMeta(nil, `Provides functionality for measuring and displaying time.`, "1.0"))
+	timeNamespace.ResetMeta(MakeMeta(nil, `Creates, parses, formats, compares, and converts times and nanosecond durations.`, "1.0"))
 
 	timeNamespace.InternVar("ansi-c", ansi_c_,
 		MakeMeta(
@@ -141,7 +141,7 @@ func InternsOrThunks() {
   which defines the format by showing how the reference time, defined to be
   Mon Jan 2 15:04:05 -0700 MST 2006
   would be displayed if it were the value; it serves as an example of the desired output.
-  The same display rules will then be applied to the time value..`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  The same display rules will then be applied to the time value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("from-unix", from_unix_,
 		MakeMeta(
@@ -157,7 +157,11 @@ func InternsOrThunks() {
 	timeNamespace.InternVar("in-timezone", in_timezone_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("tz"))),
-			`Returns a copy of t representing the same time instant, but with the copy's timezone information set to tz for display purposes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
+			`Returns t represented in timezone tz.
+
+  The instant is unchanged; only the location used for display and calendar
+  fields changes. tz must be a loadable IANA timezone name. Throws Error when
+  tz cannot be loaded.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("minutes", minutes_,
 		MakeMeta(
@@ -172,7 +176,10 @@ func InternsOrThunks() {
 	timeNamespace.InternVar("parse", parse_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"))),
-			`Parses a time string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
+			`Parses value according to layout and returns a Time.
+
+  layout uses Go's reference-time convention. When value contains no zone
+  information, parsing uses UTC. Throws Error when value does not match layout.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("parse-duration", parse_duration_,
 		MakeMeta(
@@ -184,7 +191,10 @@ func InternsOrThunks() {
 	timeNamespace.InternVar("parse-in-timezone", parse_in_timezone_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"), MakeSymbol("tz"))),
-			`Parses a time string in the given timezone.`, "1.7.2").Plus(MakeKeyword("tag"), String{S: "Time"}))
+			`Parses value according to layout in timezone tz and returns a Time.
+
+  tz must be a loadable IANA timezone name such as "America/New_York".
+  Throws Error when tz cannot be loaded or value does not match layout.`, "1.7.2").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("round", round_,
 		MakeMeta(
