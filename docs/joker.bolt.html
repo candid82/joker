@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.<br>
+    <p class="var-docstr">Provides a small string-oriented API for the Bolt embedded key/value database.<br>
 <br>
          Example:<br>
 <br>
@@ -92,10 +92,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(by-prefix db bucket prefix)</code></div>
 </pre>
-  <p class="var-docstr">Retrives key/value pairs for all keys in bucket<br>
-  that start with prefix.<br>
-  Returns a vector of [key value] tuples. Passing empty prefix<br>
-  will return all key/values in bucket.</p>
+  <p class="var-docstr">Returns key/value pairs from bucket whose keys start with prefix.<br>
+<br>
+  Results are returned as a vector of [key value] vectors in Bolt key order.<br>
+  Passing the empty string returns all key/value pairs in the bucket. Throws<br>
+  Error when bucket does not exist.</p>
   
   
 </li>
@@ -105,9 +106,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(close db)</code></div>
 </pre>
-  <p class="var-docstr">Releases all database resources.<br>
-  It will block waiting for any open transactions to finish<br>
-  before closing the database and returning.</p>
+  <p class="var-docstr">Closes db and releases its database resources.<br>
+<br>
+  Blocks until open transactions finish, then releases the file lock. Throws<br>
+  Error if closing fails.</p>
   
   
 </li>
@@ -117,8 +119,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-bucket db name)</code></div>
 </pre>
-  <p class="var-docstr">Creates a new bucket. Throws an error if the bucket already exists,<br>
-  if the bucket name is blank, or if the bucket name is too long.</p>
+  <p class="var-docstr">Creates bucket name and returns nil.<br>
+<br>
+  Throws Error if the bucket already exists, if name is blank, or if name is too<br>
+  long.</p>
   
   
 </li>
@@ -128,8 +132,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(create-bucket-if-not-exists db name)</code></div>
 </pre>
-  <p class="var-docstr">Creates a new bucket if it doesn&#39;t already exist.<br>
-   Throws an error if the bucket name is blank, or if the bucket name is too long.</p>
+  <p class="var-docstr">Creates bucket name when needed and returns nil.<br>
+<br>
+  Does nothing when the bucket already exists. Throws Error if name is blank or<br>
+  too long.</p>
   
   
 </li>
@@ -139,7 +145,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(delete db bucket key)</code></div>
 </pre>
-  <p class="var-docstr">Removes a key from the bucket if it exists.</p>
+  <p class="var-docstr">Removes key from bucket and returns nil.<br>
+<br>
+  Missing keys are ignored. Throws Error when bucket does not exist.</p>
   
   
 </li>
@@ -149,7 +157,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(delete-bucket db name)</code></div>
 </pre>
-  <p class="var-docstr">Deletes a bucket. Throws an error if the bucket doesn&#39;t exist.</p>
+  <p class="var-docstr">Deletes bucket name and returns nil.<br>
+<br>
+  Throws Error when the bucket does not exist.</p>
   
   
 </li>
@@ -159,8 +169,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(get db bucket key)</code></div>
 </pre>
-  <p class="var-docstr">Retrieves the value for a key in the bucket.<br>
-  Returns nil if the key does not exist.</p>
+  <p class="var-docstr">Returns the string value stored at key in bucket.<br>
+<br>
+  Returns nil when key does not exist. Throws Error when bucket does not exist.</p>
   
   
 </li>
@@ -170,7 +181,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(next-sequence db bucket)</code></div>
 </pre>
-  <p class="var-docstr">Returns an autoincrementing integer for the bucket.</p>
+  <p class="var-docstr">Returns the next auto-incrementing integer for bucket.<br>
+<br>
+  Each call advances the bucket sequence counter inside a write transaction.<br>
+  Throws Error when bucket does not exist.</p>
   
   
 </li>
@@ -180,10 +194,18 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(open filename mode)</code></div>
 </pre>
-  <p class="var-docstr">Creates and opens a database at the given path.<br>
-  If the file does not exist then it will be created automatically<br>
-  with mode perm (before umask).<br>
-  mode is normally passed as an octal literal, e.g. 0600</p>
+  <p class="var-docstr">Opens the database file at filename and returns a BoltDB handle.<br>
+<br>
+  If the file does not exist, it is created with mode before the process umask<br>
+  is applied. mode is normally written as an octal literal such as 0600.<br>
+  Throws Error when the database cannot be opened.<br>
+<br>
+  The underlying database uses an exclusive file lock; because this wrapper uses<br>
+  Bolt&#39;s default options, open may wait indefinitely for another process to<br>
+  release the same database file.<br>
+<br>
+  Example:<br>
+    (def db (joker.bolt/open &#34;app.db&#34; 0600))</p>
   
   
 </li>
@@ -193,9 +215,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(put db bucket key value)</code></div>
 </pre>
-  <p class="var-docstr">Sets the value for a key in the bucket.<br>
-  If the key exist then its previous value will be overwritten.<br>
-  Throws an error if the key is blank, if the key is too large, or if the value is too large.</p>
+  <p class="var-docstr">Stores value at key in bucket and returns nil.<br>
+<br>
+  Keys and values are strings stored as raw bytes. Replaces any previous value<br>
+  for key. Throws Error when bucket does not exist, when key is blank or too<br>
+  large, or when value is too large.</p>
   
   
 </li>

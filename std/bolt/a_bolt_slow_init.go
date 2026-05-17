@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of bolt.InternsOrThunks().")
 	}
-	boltNamespace.ResetMeta(MakeMeta(nil, `Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
+	boltNamespace.ResetMeta(MakeMeta(nil, `Provides a small string-oriented API for the Bolt embedded key/value database.
 
          Example:
 
@@ -32,64 +32,88 @@ func InternsOrThunks() {
 	boltNamespace.InternVar("by-prefix", by_prefix_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("prefix"))),
-			`Retrives key/value pairs for all keys in bucket
-  that start with prefix.
-  Returns a vector of [key value] tuples. Passing empty prefix
-  will return all key/values in bucket.`, "1.0"))
+			`Returns key/value pairs from bucket whose keys start with prefix.
+
+  Results are returned as a vector of [key value] vectors in Bolt key order.
+  Passing the empty string returns all key/value pairs in the bucket. Throws
+  Error when bucket does not exist.`, "1.0"))
 
 	boltNamespace.InternVar("close", close_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"))),
-			`Releases all database resources.
-  It will block waiting for any open transactions to finish
-  before closing the database and returning.`, "1.0"))
+			`Closes db and releases its database resources.
+
+  Blocks until open transactions finish, then releases the file lock. Throws
+  Error if closing fails.`, "1.0"))
 
 	boltNamespace.InternVar("create-bucket", create_bucket_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Creates a new bucket. Throws an error if the bucket already exists,
-  if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
+			`Creates bucket name and returns nil.
+
+  Throws Error if the bucket already exists, if name is blank, or if name is too
+  long.`, "1.0"))
 
 	boltNamespace.InternVar("create-bucket-if-not-exists", create_bucket_if_not_exists_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Creates a new bucket if it doesn't already exist.
-   Throws an error if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
+			`Creates bucket name when needed and returns nil.
+
+  Does nothing when the bucket already exists. Throws Error if name is blank or
+  too long.`, "1.0"))
 
 	boltNamespace.InternVar("delete", delete_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
-			`Removes a key from the bucket if it exists.`, "1.0"))
+			`Removes key from bucket and returns nil.
+
+  Missing keys are ignored. Throws Error when bucket does not exist.`, "1.0"))
 
 	boltNamespace.InternVar("delete-bucket", delete_bucket_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Deletes a bucket. Throws an error if the bucket doesn't exist.`, "1.0"))
+			`Deletes bucket name and returns nil.
+
+  Throws Error when the bucket does not exist.`, "1.0"))
 
 	boltNamespace.InternVar("get", get_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
-			`Retrieves the value for a key in the bucket.
-  Returns nil if the key does not exist.`, "1.0"))
+			`Returns the string value stored at key in bucket.
+
+  Returns nil when key does not exist. Throws Error when bucket does not exist.`, "1.0"))
 
 	boltNamespace.InternVar("next-sequence", next_sequence_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"))),
-			`Returns an autoincrementing integer for the bucket.`, "1.0"))
+			`Returns the next auto-incrementing integer for bucket.
+
+  Each call advances the bucket sequence counter inside a write transaction.
+  Throws Error when bucket does not exist.`, "1.0"))
 
 	boltNamespace.InternVar("open", open_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("filename"), MakeSymbol("mode"))),
-			`Creates and opens a database at the given path.
-  If the file does not exist then it will be created automatically
-  with mode perm (before umask).
-  mode is normally passed as an octal literal, e.g. 0600`, "1.0").Plus(MakeKeyword("tag"), String{S: "BoltDB"}))
+			`Opens the database file at filename and returns a BoltDB handle.
+
+  If the file does not exist, it is created with mode before the process umask
+  is applied. mode is normally written as an octal literal such as 0600.
+  Throws Error when the database cannot be opened.
+
+  The underlying database uses an exclusive file lock; because this wrapper uses
+  Bolt's default options, open may wait indefinitely for another process to
+  release the same database file.
+
+  Example:
+    (def db (joker.bolt/open "app.db" 0600))`, "1.0").Plus(MakeKeyword("tag"), String{S: "BoltDB"}))
 
 	boltNamespace.InternVar("put", put_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the value for a key in the bucket.
-  If the key exist then its previous value will be overwritten.
-  Throws an error if the key is blank, if the key is too large, or if the value is too large.`, "1.0"))
+			`Stores value at key in bucket and returns nil.
+
+  Keys and values are strings stored as raw bytes. Replaces any previous value
+  for key. Throws Error when bucket does not exist, when key is blank or too
+  large, or when value is too large.`, "1.0"))
 
 }

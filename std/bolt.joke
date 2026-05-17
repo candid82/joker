@@ -1,5 +1,5 @@
 (ns ^{:go-imports []
-      :doc "Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
+      :doc "Provides a small string-oriented API for the Bolt embedded key/value database.
 
          Example:
 
@@ -18,74 +18,98 @@
   bolt)
 
 (defn ^BoltDB open
-  "Creates and opens a database at the given path.
-  If the file does not exist then it will be created automatically
-  with mode perm (before umask).
-  mode is normally passed as an octal literal, e.g. 0600"
+  "Opens the database file at filename and returns a BoltDB handle.
+
+  If the file does not exist, it is created with mode before the process umask
+  is applied. mode is normally written as an octal literal such as 0600.
+  Throws Error when the database cannot be opened.
+
+  The underlying database uses an exclusive file lock; because this wrapper uses
+  Bolt's default options, open may wait indefinitely for another process to
+  release the same database file.
+
+  Example:
+    (def db (joker.bolt/open \"app.db\" 0600))"
   {:added "1.0"
    :go "open(filename, mode)"}
   [^String filename ^Int mode])
 
 (defn close
-  "Releases all database resources.
-  It will block waiting for any open transactions to finish
-  before closing the database and returning."
+  "Closes db and releases its database resources.
+
+  Blocks until open transactions finish, then releases the file lock. Throws
+  Error if closing fails."
   {:added "1.0"
    :go "close(db)"}
   [^BoltDB db])
 
 (defn create-bucket
-  "Creates a new bucket. Throws an error if the bucket already exists,
-  if the bucket name is blank, or if the bucket name is too long."
+  "Creates bucket name and returns nil.
+
+  Throws Error if the bucket already exists, if name is blank, or if name is too
+  long."
   {:added "1.0"
    :go "createBucket(db, name)"}
   [^BoltDB db ^String name])
 
 (defn create-bucket-if-not-exists
-  "Creates a new bucket if it doesn't already exist.
-   Throws an error if the bucket name is blank, or if the bucket name is too long."
+  "Creates bucket name when needed and returns nil.
+
+  Does nothing when the bucket already exists. Throws Error if name is blank or
+  too long."
   {:added "1.0"
    :go "createBucketIfNotExists(db, name)"}
   [^BoltDB db ^String name])
 
 (defn delete-bucket
-  "Deletes a bucket. Throws an error if the bucket doesn't exist."
+  "Deletes bucket name and returns nil.
+
+  Throws Error when the bucket does not exist."
   {:added "1.0"
    :go "deleteBucket(db, name)"}
   [^BoltDB db ^String name])
 
 (defn next-sequence
-  "Returns an autoincrementing integer for the bucket."
+  "Returns the next auto-incrementing integer for bucket.
+
+  Each call advances the bucket sequence counter inside a write transaction.
+  Throws Error when bucket does not exist."
   {:added "1.0"
    :go "nextSequence(db, bucket)"}
   [^BoltDB db ^String bucket])
 
 (defn put
-  "Sets the value for a key in the bucket.
-  If the key exist then its previous value will be overwritten.
-  Throws an error if the key is blank, if the key is too large, or if the value is too large."
+  "Stores value at key in bucket and returns nil.
+
+  Keys and values are strings stored as raw bytes. Replaces any previous value
+  for key. Throws Error when bucket does not exist, when key is blank or too
+  large, or when value is too large."
   {:added "1.0"
    :go "put(db, bucket, key, value)"}
   [^BoltDB db ^String bucket ^String key ^String value])
 
 (defn delete
-  "Removes a key from the bucket if it exists."
+  "Removes key from bucket and returns nil.
+
+  Missing keys are ignored. Throws Error when bucket does not exist."
   {:added "1.0"
    :go "delete(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
 
 (defn get
-  "Retrieves the value for a key in the bucket.
-  Returns nil if the key does not exist."
+  "Returns the string value stored at key in bucket.
+
+  Returns nil when key does not exist. Throws Error when bucket does not exist."
   {:added "1.0"
    :go "get(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
 
 (defn by-prefix
-  "Retrives key/value pairs for all keys in bucket
-  that start with prefix.
-  Returns a vector of [key value] tuples. Passing empty prefix
-  will return all key/values in bucket."
+  "Returns key/value pairs from bucket whose keys start with prefix.
+
+  Results are returned as a vector of [key value] vectors in Bolt key order.
+  Passing the empty string returns all key/value pairs in the bucket. Throws
+  Error when bucket does not exist."
   {:added "1.0"
    :go "byPrefix(db, bucket, prefix)"}
   [^BoltDB db ^String bucket ^String prefix])
