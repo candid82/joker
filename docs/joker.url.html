@@ -64,11 +64,10 @@
 </pre>
   <p class="var-docstr">Parses URL-encoded query string s into a map of string keys to value vectors.<br>
 <br>
-  Always returns a map containing the valid query parameters found.<br>
+  Always returns a map containing the query parameters found.<br>
   Query is expected to be a list of key=value settings separated by ampersands. A setting without<br>
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded<br>
-  semicolon or malformed escapes are considered invalid and are omitted rather<br>
-  than thrown.</p>
+  semicolon or malformed escapes throw Error.</p>
   
   
 </li>

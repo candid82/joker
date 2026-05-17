@@ -6,4 +6,6 @@
   (is (= {} (url/parse-query "")))
   (is (= {"q" ["1"]} (url/parse-query "q=1")))
   (is (= {"q" [""]} (url/parse-query "q")))
-  (is (= {"foo" ["1"] "bar" ["2" "3"]} (url/parse-query "foo=1&bar=2&bar=3"))))
+  (is (= {"foo" ["1"] "bar" ["2" "3"]} (url/parse-query "foo=1&bar=2&bar=3")))
+  (is (thrown? Error (url/parse-query "bad=%zz")))
+  (is (thrown? Error (url/parse-query "bad;query"))))

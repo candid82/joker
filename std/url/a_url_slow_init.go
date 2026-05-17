@@ -19,11 +19,10 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
 			`Parses URL-encoded query string s into a map of string keys to value vectors.
 
-  Always returns a map containing the valid query parameters found.
+  Always returns a map containing the query parameters found.
   Query is expected to be a list of key=value settings separated by ampersands. A setting without
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
-  semicolon or malformed escapes are considered invalid and are omitted rather
-  than thrown.`, "1.3.6"))
+  semicolon or malformed escapes throw Error.`, "1.3.6"))
 
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(
