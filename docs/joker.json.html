@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements encoding and decoding of JSON as defined in RFC 4627.</p>
+    <p class="var-docstr">Encodes Joker values to JSON and decodes JSON strings or streams into Joker values.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -57,10 +57,14 @@
   <pre class="var-usage"><div><code>(json-seq rdr)</code></div>
 <div><code>(json-seq rdr opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the json records from rdr as a lazy sequence.<br>
-  rdr must be a string or implement io.Reader.<br>
-  Optional opts map may have the following keys:<br>
-  :keywords? - if true, JSON keys will be converted from strings to keywords.</p>
+  <p class="var-docstr">Returns successive JSON values from rdr as a lazy sequence.<br>
+<br>
+  rdr must be a string or implement io.Reader. Multiple top-level JSON values<br>
+  may be read from one stream. Decoding happens as the sequence is realized, so<br>
+  malformed later input may throw Error only when that element is requested.<br>
+<br>
+  opts may contain:<br>
+  - keywords? - truthy to convert JSON object keys from strings to keywords</p>
   
   
 </li>
@@ -71,9 +75,18 @@
   <pre class="var-usage"><div><code>(read-string s)</code></div>
 <div><code>(read-string s opts)</code></div>
 </pre>
-  <p class="var-docstr">Parses the JSON-encoded data and return the result as a Joker value.<br>
-  Optional opts map may have the following keys:<br>
-  :keywords? - if true, JSON keys will be converted from strings to keywords.</p>
+  <p class="var-docstr">Parses one JSON value from s and returns the corresponding Joker value.<br>
+<br>
+  JSON objects become maps, arrays become vectors, strings become strings,<br>
+  booleans become booleans, null becomes nil, and JSON numbers become Int when<br>
+  integral or Double otherwise. Throws Error when s is not valid JSON.<br>
+<br>
+  opts may contain:<br>
+  - keywords? - truthy to convert JSON object keys from strings to keywords<br>
+<br>
+  Example:<br>
+    (joker.json/read-string &#34;{\&#34;name\&#34;:\&#34;Ada\&#34;}&#34; {:keywords? true})<br>
+    ;; =&gt; {:name &#34;Ada&#34;}</p>
   
   
 </li>
@@ -84,8 +97,21 @@
   <pre class="var-usage"><div><code>(write-string v)</code></div>
 <div><code>(write-string v opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the JSON encoding of v. Optional opts may include :prefix and :indent keys<br>
-  with the same semantics as prefix and indent arguments to Go&#39;s json.MarshalIndent function.</p>
+  <p class="var-docstr">Returns the JSON encoding of v.<br>
+<br>
+  Keywords are encoded without their leading colon. Map keys are converted to<br>
+  strings, Seqable values become arrays, and numeric values are encoded through<br>
+  their double representation.<br>
+<br>
+  opts may contain:<br>
+  - prefix (string)<br>
+  - indent (string)<br>
+  When either is non-empty, pretty-printing follows Go json.MarshalIndent<br>
+  semantics. Throws Error when JSON encoding fails.<br>
+<br>
+  Example:<br>
+    (joker.json/write-string {:name &#34;Ada&#34; :scores [1 2]})<br>
+    ;; =&gt; &#34;{\&#34;name\&#34;:\&#34;Ada\&#34;,\&#34;scores\&#34;:[1,2]}&#34;</p>
   
   
 </li>

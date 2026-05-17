@@ -12,27 +12,53 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of json.InternsOrThunks().")
 	}
-	jsonNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of JSON as defined in RFC 4627.`, "1.0"))
+	jsonNamespace.ResetMeta(MakeMeta(nil, `Encodes Joker values to JSON and decodes JSON strings or streams into Joker values.`, "1.0"))
 
 	jsonNamespace.InternVar("json-seq", json_seq_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
-			`Returns the json records from rdr as a lazy sequence.
-  rdr must be a string or implement io.Reader.
-  Optional opts map may have the following keys:
-  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
+			`Returns successive JSON values from rdr as a lazy sequence.
+
+  rdr must be a string or implement io.Reader. Multiple top-level JSON values
+  may be read from one stream. Decoding happens as the sequence is realized, so
+  malformed later input may throw Error only when that element is requested.
+
+  opts may contain:
+  - keywords? - truthy to convert JSON object keys from strings to keywords`, "1.0"))
 
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
-			`Parses the JSON-encoded data and return the result as a Joker value.
-  Optional opts map may have the following keys:
-  :keywords? - if true, JSON keys will be converted from strings to keywords.`, "1.0"))
+			`Parses one JSON value from s and returns the corresponding Joker value.
+
+  JSON objects become maps, arrays become vectors, strings become strings,
+  booleans become booleans, null becomes nil, and JSON numbers become Int when
+  integral or Double otherwise. Throws Error when s is not valid JSON.
+
+  opts may contain:
+  - keywords? - truthy to convert JSON object keys from strings to keywords
+
+  Example:
+    (joker.json/read-string "{\"name\":\"Ada\"}" {:keywords? true})
+    ;; => {:name "Ada"}`, "1.0"))
 
 	jsonNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("v")), NewVectorFrom(MakeSymbol("v"), MakeSymbol("opts"))),
-			`Returns the JSON encoding of v. Optional opts may include :prefix and :indent keys
-  with the same semantics as prefix and indent arguments to Go's json.MarshalIndent function.`, "1.0"))
+			`Returns the JSON encoding of v.
+
+  Keywords are encoded without their leading colon. Map keys are converted to
+  strings, Seqable values become arrays, and numeric values are encoded through
+  their double representation.
+
+  opts may contain:
+  - prefix (string)
+  - indent (string)
+  When either is non-empty, pretty-printing follows Go json.MarshalIndent
+  semantics. Throws Error when JSON encoding fails.
+
+  Example:
+    (joker.json/write-string {:name "Ada" :scores [1 2]})
+    ;; => "{\"name\":\"Ada\",\"scores\":[1,2]}"`, "1.0"))
 
 }
