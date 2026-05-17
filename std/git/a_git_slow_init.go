@@ -12,57 +12,75 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of git.InternsOrThunks().")
 	}
-	gitNamespace.ResetMeta(MakeMeta(nil, `Provides API for accessing and manipulating git repositories.`, "1.0"))
+	gitNamespace.ResetMeta(MakeMeta(nil, `Reads and mutates local Git repositories through go-git-backed map-oriented wrappers.`, "1.0"))
 
 	gitNamespace.InternVar("add-commit", add_commit_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("msg"), MakeSymbol("opts"))),
-			`Stores the current contents of the index in a new commit along with
-   a log message from the user describing the changes.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Creates a commit from the current index and returns its hash string.
+
+  msg is the commit message. opts may contain:
+  - all - truthy to stage modified and deleted tracked files before committing
+  - allow-empty-commits - truthy to permit a commit with no tree changes
+  Throws Error when the worktree cannot commit.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	gitNamespace.InternVar("add-path", add_path_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("path"))),
-			`Adds the file contents of a file in the worktree to the index. If the
-   file is already staged in the index no error is thrown. If a file deleted
-   from the workspace is given, the file is removed from the index. If a
-   directory given, adds the files and all his sub-directories recursively in
-   the worktree to the index. If any of the files is already staged in the index
-   no error is thrown. When path is a file, the hash is returned.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Stages path from the worktree into the index and returns a hash string.
+
+  Existing staged files may be staged again. Deleted files are removed from the
+  index. Directory paths are added recursively. Throws Error when the worktree
+  cannot be accessed or the path cannot be staged.`, "1.4").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	gitNamespace.InternVar("commit", commit_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
-			`Returns a commit with the given hash.`, "1.3"))
+			`Returns the commit map for hash.
+
+  The result has the same shape as entries returned by joker.git/log. Throws
+  Error when hash does not name a commit.`, "1.3"))
 
 	gitNamespace.InternVar("config", config_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
-			`Returns git repo's config`, "1.3"))
+			`Returns repo configuration as a map.
+
+  The map includes core properties such as :bare?, :worktree, :default-branch,
+  :user, :author, :committer, :remotes, :submodules, :branches, and :urls.
+  Throws Error when the configuration cannot be read.`, "1.3"))
 
 	gitNamespace.InternVar("head", head_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
-			`Returns the reference where HEAD is pointing to.`, "1.3"))
+			`Returns the repository HEAD reference map.
+
+  The returned map has the same shape as joker.git/ref. Throws Error when HEAD
+  cannot be resolved.`, "1.3"))
 
 	gitNamespace.InternVar("log", log_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("opts"))),
-			`Returns the commit history from the given opts.
+			`Returns commit history as a vector of commit maps.
+
+  Each commit map contains :hash, :author, :committer, :message, :tree-hash,
+  :parent-hashes, and :pgp-siganture. Signature maps contain :name, :email, and
+  :when.
+
   opts may have the following keys:
 
-  :from - when the from option is set the log will only contain commits
+  :from - commit hash string from which traversal starts. When set, the log
+  only contains commits
   reachable from it. If this option is not set, HEAD will be used as
   the default from.
 
-  :order - the default traversal algorithm is depth-first search.
-  Set order to :committer-time for ordering by committer time (more compatible with `+"`"+`git log`+"`"+`).
-  Set order to :bsf for breadth-first search
+  :order - one of :default, :dfs, :dfs-post, :bsf, or :committer-time. The
+  default traversal is depth-first search. :committer-time is closer to
+  ordinary `+"`"+`git log`+"`"+` ordering.
 
   :path-filter - filter commits based on the path of files that are updated.
-  Takes file path as argument and should return true if the file is desired.
+  The fn receives each path string and should return truthy for desired paths.
   It can be used to implement `+"`"+`git log -- <path>`+"`"+`.
-  Either <path> is a file path, or directory path, or a regexp of file/directory path.
 
   :all - pretend as if all the refs in refs/, along with HEAD, are listed on the command line as <commit>.
   It is equivalent to running `+"`"+`git log --all`+"`"+`.
@@ -73,29 +91,42 @@ func InternsOrThunks() {
 
   :until - show commits older than a specific date.
   It is equivalent to running `+"`"+`git log --until <date>`+"`"+` or `+"`"+`git log --before <date>`+"`"+`.
-`, "1.3"))
+
+  Throws Error when traversal cannot be started or completed, or when :order
+  has an unsupported value.`, "1.3"))
 
 	gitNamespace.InternVar("object", object_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
-			`Returns an Object with the given hash.`, "1.3"))
+			`Returns a summary map for the Git object with hash.
+
+  The map contains :id and :type, where :type is one of :commit, :tree, :blob,
+  :tag, :ofs-delta, :ref-delta, :any, or :invalid. Throws Error when no object
+  can be found.`, "1.3"))
 
 	gitNamespace.InternVar("open", open_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
-			`Opens a git repository from the given path. It detects if the
-   repository is bare or a normal one. Throws an error if the path doesn't contain a valid repository.`, "1.3").Plus(MakeKeyword("tag"), String{S: "GitRepo"}))
+			`Opens the Git repository at path and returns a GitRepo handle.
+
+  Detects both bare and worktree repositories. Throws Error when path does not
+  contain a valid repository or the repository cannot be opened.`, "1.3").Plus(MakeKeyword("tag"), String{S: "GitRepo"}))
 
 	gitNamespace.InternVar("ref", ref_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("name"), MakeSymbol("resolved"))),
-			`Returns the reference for a given reference name. If resolved is
-   true, any symbolic reference will be resolved.`, "1.3"))
+			`Returns reference name as a map.
+
+  If resolved is true, symbolic references are resolved before being returned.
+  The result contains :type (:hash, :symbolic, or :invalid), :name, :target,
+  and :hash. Throws Error when the reference cannot be found.`, "1.3"))
 
 	gitNamespace.InternVar("resolve-revision", resolve_revision_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("revision"))),
-			`Resolves revision to corresponding hash. It will always
-   resolve to a commit hash, not a tree or annotated tag.`, "1.3").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Resolves revision to a commit hash string.
+
+  The result is always the commit hash, not a tree hash or annotated-tag hash.
+  Throws Error when revision cannot be resolved.`, "1.3").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

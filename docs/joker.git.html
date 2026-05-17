@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provides API for accessing and manipulating git repositories.</p>
+    <p class="var-docstr">Reads and mutates local Git repositories through go-git-backed map-oriented wrappers.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -77,8 +77,12 @@
   <span class="var-added">v1.4</span>
   <pre class="var-usage"><div><code>(add-commit repo msg opts)</code></div>
 </pre>
-  <p class="var-docstr">Stores the current contents of the index in a new commit along with<br>
-   a log message from the user describing the changes.</p>
+  <p class="var-docstr">Creates a commit from the current index and returns its hash string.<br>
+<br>
+  msg is the commit message. opts may contain:<br>
+  - all - truthy to stage modified and deleted tracked files before committing<br>
+  - allow-empty-commits - truthy to permit a commit with no tree changes<br>
+  Throws Error when the worktree cannot commit.</p>
   
   
 </li>
@@ -88,12 +92,11 @@
   <span class="var-added">v1.4</span>
   <pre class="var-usage"><div><code>(add-path repo path)</code></div>
 </pre>
-  <p class="var-docstr">Adds the file contents of a file in the worktree to the index. If the<br>
-   file is already staged in the index no error is thrown. If a file deleted<br>
-   from the workspace is given, the file is removed from the index. If a<br>
-   directory given, adds the files and all his sub-directories recursively in<br>
-   the worktree to the index. If any of the files is already staged in the index<br>
-   no error is thrown. When path is a file, the hash is returned.</p>
+  <p class="var-docstr">Stages path from the worktree into the index and returns a hash string.<br>
+<br>
+  Existing staged files may be staged again. Deleted files are removed from the<br>
+  index. Directory paths are added recursively. Throws Error when the worktree<br>
+  cannot be accessed or the path cannot be staged.</p>
   
   
 </li>
@@ -103,7 +106,10 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(commit repo hash)</code></div>
 </pre>
-  <p class="var-docstr">Returns a commit with the given hash.</p>
+  <p class="var-docstr">Returns the commit map for hash.<br>
+<br>
+  The result has the same shape as entries returned by joker.git/log. Throws<br>
+  Error when hash does not name a commit.</p>
   
   
 </li>
@@ -113,7 +119,11 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(config repo)</code></div>
 </pre>
-  <p class="var-docstr">Returns git repo&#39;s config</p>
+  <p class="var-docstr">Returns repo configuration as a map.<br>
+<br>
+  The map includes core properties such as :bare?, :worktree, :default-branch,<br>
+  :user, :author, :committer, :remotes, :submodules, :branches, and :urls.<br>
+  Throws Error when the configuration cannot be read.</p>
   
   
 </li>
@@ -123,7 +133,10 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(head repo)</code></div>
 </pre>
-  <p class="var-docstr">Returns the reference where HEAD is pointing to.</p>
+  <p class="var-docstr">Returns the repository HEAD reference map.<br>
+<br>
+  The returned map has the same shape as joker.git/ref. Throws Error when HEAD<br>
+  cannot be resolved.</p>
   
   
 </li>
@@ -133,21 +146,26 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(log repo opts)</code></div>
 </pre>
-  <p class="var-docstr">Returns the commit history from the given opts.<br>
+  <p class="var-docstr">Returns commit history as a vector of commit maps.<br>
+<br>
+  Each commit map contains :hash, :author, :committer, :message, :tree-hash,<br>
+  :parent-hashes, and :pgp-siganture. Signature maps contain :name, :email, and<br>
+  :when.<br>
+<br>
   opts may have the following keys:<br>
 <br>
-  :from - when the from option is set the log will only contain commits<br>
+  :from - commit hash string from which traversal starts. When set, the log<br>
+  only contains commits<br>
   reachable from it. If this option is not set, HEAD will be used as<br>
   the default from.<br>
 <br>
-  :order - the default traversal algorithm is depth-first search.<br>
-  Set order to :committer-time for ordering by committer time (more compatible with `git log`).<br>
-  Set order to :bsf for breadth-first search<br>
+  :order - one of :default, :dfs, :dfs-post, :bsf, or :committer-time. The<br>
+  default traversal is depth-first search. :committer-time is closer to<br>
+  ordinary `git log` ordering.<br>
 <br>
   :path-filter - filter commits based on the path of files that are updated.<br>
-  Takes file path as argument and should return true if the file is desired.<br>
+  The fn receives each path string and should return truthy for desired paths.<br>
   It can be used to implement `git log -- &lt;path&gt;`.<br>
-  Either &lt;path&gt; is a file path, or directory path, or a regexp of file/directory path.<br>
 <br>
   :all - pretend as if all the refs in refs/, along with HEAD, are listed on the command line as &lt;commit&gt;.<br>
   It is equivalent to running `git log --all`.<br>
@@ -158,7 +176,9 @@
 <br>
   :until - show commits older than a specific date.<br>
   It is equivalent to running `git log --until &lt;date&gt;` or `git log --before &lt;date&gt;`.<br>
-</p>
+<br>
+  Throws Error when traversal cannot be started or completed, or when :order<br>
+  has an unsupported value.</p>
   
   
 </li>
@@ -168,7 +188,11 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(object repo hash)</code></div>
 </pre>
-  <p class="var-docstr">Returns an Object with the given hash.</p>
+  <p class="var-docstr">Returns a summary map for the Git object with hash.<br>
+<br>
+  The map contains :id and :type, where :type is one of :commit, :tree, :blob,<br>
+  :tag, :ofs-delta, :ref-delta, :any, or :invalid. Throws Error when no object<br>
+  can be found.</p>
   
   
 </li>
@@ -178,8 +202,10 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(open path)</code></div>
 </pre>
-  <p class="var-docstr">Opens a git repository from the given path. It detects if the<br>
-   repository is bare or a normal one. Throws an error if the path doesn&#39;t contain a valid repository.</p>
+  <p class="var-docstr">Opens the Git repository at path and returns a GitRepo handle.<br>
+<br>
+  Detects both bare and worktree repositories. Throws Error when path does not<br>
+  contain a valid repository or the repository cannot be opened.</p>
   
   
 </li>
@@ -189,8 +215,11 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(ref repo name resolved)</code></div>
 </pre>
-  <p class="var-docstr">Returns the reference for a given reference name. If resolved is<br>
-   true, any symbolic reference will be resolved.</p>
+  <p class="var-docstr">Returns reference name as a map.<br>
+<br>
+  If resolved is true, symbolic references are resolved before being returned.<br>
+  The result contains :type (:hash, :symbolic, or :invalid), :name, :target,<br>
+  and :hash. Throws Error when the reference cannot be found.</p>
   
   
 </li>
@@ -200,8 +229,10 @@
   <span class="var-added">v1.3</span>
   <pre class="var-usage"><div><code>(resolve-revision repo revision)</code></div>
 </pre>
-  <p class="var-docstr">Resolves revision to corresponding hash. It will always<br>
-   resolve to a commit hash, not a tree or annotated tag.</p>
+  <p class="var-docstr">Resolves revision to a commit hash string.<br>
+<br>
+  The result is always the commit hash, not a tree hash or annotated-tag hash.<br>
+  Throws Error when revision cannot be resolved.</p>
   
   
 </li>
