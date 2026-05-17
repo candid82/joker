@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Generates UUIDs.</p>
+    <p class="var-docstr">Generates random UUID version 4 strings.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -50,7 +50,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(new)</code></div>
 </pre>
-  <p class="var-docstr">Creates a new random UUID.</p>
+  <p class="var-docstr">Returns a newly generated random UUID version 4 string.<br>
+<br>
+  Uses cryptographic randomness and the canonical 8-4-4-4-12 hexadecimal form.<br>
+  Throws Error if secure randomness cannot be read.</p>
   
   
 </li>
