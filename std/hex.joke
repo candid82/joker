@@ -1,15 +1,26 @@
 (ns ^{:go-imports ["encoding/hex"]
-      :doc "Implements hexadecimal encoding and decoding."}
+      :doc "Encodes and decodes strings with lower-case hexadecimal text."}
   hex)
 
 (defn ^String decode-string
-  "Returns the bytes represented by the hexadecimal string s."
+  "Decodes hexadecimal string s and returns the represented bytes as a string.
+
+  Throws Error when s has odd length or contains non-hexadecimal characters.
+  The returned string may contain arbitrary bytes, not only printable text.
+
+  Example:
+    (joker.hex/decode-string \"68656c6c6f\")
+    ;; => \"hello\""
   {:added "1.0"
    :go "! t, err := hex.DecodeString(s); PanicOnErr(err); _res := string(t)"}
   [^String s])
 
 (defn ^String encode-string
-  "Returns the hexadecimal encoding of s."
+  "Returns the lower-case hexadecimal encoding of string s.
+
+  Example:
+    (joker.hex/encode-string \"hello\")
+    ;; => \"68656c6c6f\""
   {:added "1.0"
    :go "hex.EncodeToString([]byte(s))"}
   [^String s])

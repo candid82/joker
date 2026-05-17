@@ -12,16 +12,27 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of hex.InternsOrThunks().")
 	}
-	hexNamespace.ResetMeta(MakeMeta(nil, `Implements hexadecimal encoding and decoding.`, "1.0"))
+	hexNamespace.ResetMeta(MakeMeta(nil, `Encodes and decodes strings with lower-case hexadecimal text.`, "1.0"))
 
 	hexNamespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the bytes represented by the hexadecimal string s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Decodes hexadecimal string s and returns the represented bytes as a string.
+
+  Throws Error when s has odd length or contains non-hexadecimal characters.
+  The returned string may contain arbitrary bytes, not only printable text.
+
+  Example:
+    (joker.hex/decode-string "68656c6c6f")
+    ;; => "hello"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	hexNamespace.InternVar("encode-string", encode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the hexadecimal encoding of s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the lower-case hexadecimal encoding of string s.
+
+  Example:
+    (joker.hex/encode-string "hello")
+    ;; => "68656c6c6f"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

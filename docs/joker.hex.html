@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements hexadecimal encoding and decoding.</p>
+    <p class="var-docstr">Encodes and decodes strings with lower-case hexadecimal text.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -53,7 +53,14 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(decode-string s)</code></div>
 </pre>
-  <p class="var-docstr">Returns the bytes represented by the hexadecimal string s.</p>
+  <p class="var-docstr">Decodes hexadecimal string s and returns the represented bytes as a string.<br>
+<br>
+  Throws Error when s has odd length or contains non-hexadecimal characters.<br>
+  The returned string may contain arbitrary bytes, not only printable text.<br>
+<br>
+  Example:<br>
+    (joker.hex/decode-string &#34;68656c6c6f&#34;)<br>
+    ;; =&gt; &#34;hello&#34;</p>
   
   
 </li>
@@ -63,7 +70,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(encode-string s)</code></div>
 </pre>
-  <p class="var-docstr">Returns the hexadecimal encoding of s.</p>
+  <p class="var-docstr">Returns the lower-case hexadecimal encoding of string s.<br>
+<br>
+  Example:<br>
+    (joker.hex/encode-string &#34;hello&#34;)<br>
+    ;; =&gt; &#34;68656c6c6f&#34;</p>
   
   
 </li>
