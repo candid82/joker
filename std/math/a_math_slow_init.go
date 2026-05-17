@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of math.InternsOrThunks().")
 	}
-	mathNamespace.ResetMeta(MakeMeta(nil, `Provides basic constants and mathematical functions.`, "1.0"))
+	mathNamespace.ResetMeta(MakeMeta(nil, `Provides floating-point mathematical functions, IEEE-754 helpers, and numeric constants.`, "1.0"))
 
 	mathNamespace.InternVar("e", e_,
 		MakeMeta(
@@ -129,7 +129,7 @@ func InternsOrThunks() {
 	mathNamespace.InternVar("floor", floor_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-			`Returns the greatest integer value greater than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Returns the greatest integer value less than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("hypot", hypot_,
 		MakeMeta(
@@ -261,6 +261,6 @@ func InternsOrThunks() {
 	mathNamespace.InternVar("trunc", trunc_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
-			`Returns the integer value of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
+			`Returns the integer value of x, rounded toward zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 }

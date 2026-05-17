@@ -1,5 +1,5 @@
 (ns ^{:go-imports ["math"]
-      :doc "Provides basic constants and mathematical functions."}
+      :doc "Provides floating-point mathematical functions, IEEE-754 helpers, and numeric constants."}
   math)
 
 (defn ^Double sin
@@ -71,7 +71,7 @@
   [^Number x])
 
 (defn ^Double floor
-  "Returns the greatest integer value greater than or equal to x."
+  "Returns the greatest integer value less than or equal to x."
   {:added "1.0"
    :go "math.Floor(x.Double().D)"}
   [^Number x])
@@ -185,7 +185,7 @@
   [^Number x])
 
 (defn ^Double trunc
-  "Returns the integer value of x."
+  "Returns the integer value of x, rounded toward zero."
   {:added "1.0"
    :go "math.Trunc(x.Double().D)"}
   [^Number x])
