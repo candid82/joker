@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provides a platform-independent interface to operating system functionality.</p>
+    <p class="var-docstr">Provides filesystem, process, environment, and watcher helpers backed by the host operating system.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -491,7 +491,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(exec name opts)</code></div>
 </pre>
-  <p class="var-docstr">Executes the named program with the given arguments. opts is a map with the following keys (all optional):<br>
+  <p class="var-docstr">Executes name according to opts and waits for it to finish.<br>
+<br>
+  A non-zero program exit is returned as data rather than thrown. Failure to<br>
+  start the process throws Error.<br>
+<br>
+  opts may contain:<br>
   :args - vector of arguments (all arguments must be strings),<br>
   :dir - if specified, working directory will be set to this value before executing the program,<br>
   :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.<br>
@@ -500,9 +505,9 @@
   :stdout - if specified, must be an IOWriter. It can be, for example, *out* (in which case the program&#39;s stdout will be redirected<br>
   to Joker&#39;s stdout) or the value returned by (joker.os/create).<br>
   :stderr - the same as :stdout, but for stderr.<br>
-  Returns a map with the following keys:<br>
+  Returns a map with:<br>
   :success - whether or not the execution was successful,<br>
-  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+  :err-msg (present iff :success is false) - string capturing error object returned by Go runtime<br>
   :exit - exit code of program (or attempt to execute it),<br>
   :out - string capturing stdout of the program (unless :stdout option was passed)<br>
   :err - string capturing stderr of the program (unless :stderr option was passed).</p>
@@ -635,7 +640,7 @@
   :size - size in bytes (Int)<br>
   :mode - mode (Int)<br>
   :dir? - true if the file is a directory (Boolean)<br>
-  :modtime - modification time (unix timestamp) (Int)</p>
+  :modtime - modification time (Time)</p>
   
   
 </li>
@@ -797,9 +802,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sh name &amp; arguments)</code></div>
 </pre>
-  <p class="var-docstr">Executes the named program with the given arguments. Returns a map with the following keys:<br>
+  <p class="var-docstr">Executes name with arguments and waits for it to finish.<br>
+<br>
+  A non-zero program exit is returned as data rather than thrown. Failure to<br>
+  start the process throws Error. Returns a map with:<br>
       :success - whether or not the execution was successful,<br>
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime<br>
       :exit - exit code of program (or attempt to execute it),<br>
       :out - string capturing stdout of the program,<br>
       :err - string capturing stderr of the program.</p>
@@ -812,10 +820,12 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(sh-from dir name &amp; arguments)</code></div>
 </pre>
-  <p class="var-docstr">Executes the named program with the given arguments and working directory set to dir.<br>
-  Returns a map with the following keys:<br>
+  <p class="var-docstr">Executes name with arguments from working directory dir and waits for it to finish.<br>
+<br>
+  Behaves like joker.os/sh except for the working directory. A non-zero program<br>
+  exit is returned as data; failure to start the process throws Error. Returns:<br>
       :success - whether or not the execution was successful,<br>
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime<br>
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime<br>
       :exit - exit code of program (or attempt to execute it),<br>
       :out - string capturing stdout of the program,<br>
       :err - string capturing stderr of the program.</p>
@@ -840,8 +850,8 @@
 </pre>
   <p class="var-docstr">Starts a new process with the program specified by name.<br>
   opts is a map with the same keys as in exec.<br>
-  Doesn&#39;t wait for the process to finish.<br>
-  Returns the process&#39;s PID.</p>
+  Does not wait for the process to finish and returns its PID. Throws Error if<br>
+  the process cannot be started.</p>
   
   
 </li>
@@ -976,7 +986,10 @@
   containing one or more of :create, :write, :remove, :rename, and :chmod.<br>
   Runtime watcher errors are sent as {:type :error :error error}.<br>
 <br>
-  Calling the returned cancel function stops the watcher and closes ch.</p>
+  When :recursive? is true, existing child directories are watched and newly<br>
+  created child directories are added automatically. Calling the returned<br>
+  cancel function stops the watcher and closes ch. If ch is closed by the<br>
+  caller, the watcher stops sending and shuts itself down.</p>
   
   
 </li>

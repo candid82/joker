@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of os.InternsOrThunks().")
 	}
-	osNamespace.ResetMeta(MakeMeta(nil, `Provides a platform-independent interface to operating system functionality.`, "1.0"))
+	osNamespace.ResetMeta(MakeMeta(nil, `Provides filesystem, process, environment, and watcher helpers backed by the host operating system.`, "1.0"))
 
 	osNamespace.InternVar("SIGABRT", SIGABRT_,
 		MakeMeta(
@@ -150,7 +150,12 @@ func InternsOrThunks() {
 	osNamespace.InternVar("exec", exec_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
-			`Executes the named program with the given arguments. opts is a map with the following keys (all optional):
+			`Executes name according to opts and waits for it to finish.
+
+  A non-zero program exit is returned as data rather than thrown. Failure to
+  start the process throws Error.
+
+  opts may contain:
   :args - vector of arguments (all arguments must be strings),
   :dir - if specified, working directory will be set to this value before executing the program,
   :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.
@@ -159,9 +164,9 @@ func InternsOrThunks() {
   :stdout - if specified, must be an IOWriter. It can be, for example, *out* (in which case the program's stdout will be redirected
   to Joker's stdout) or the value returned by (joker.os/create).
   :stderr - the same as :stdout, but for stderr.
-  Returns a map with the following keys:
+  Returns a map with:
   :success - whether or not the execution was successful,
-  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+  :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
   :out - string capturing stdout of the program (unless :stdout option was passed)
   :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0"))
@@ -233,7 +238,7 @@ func InternsOrThunks() {
   :size - size in bytes (Int)
   :mode - mode (Int)
   :dir? - true if the file is a directory (Boolean)
-  :modtime - modification time (unix timestamp) (Int)`, "1.0"))
+  :modtime - modification time (Time)`, "1.0"))
 
 	osNamespace.InternVar("lstat", lstat_,
 		MakeMeta(
@@ -320,9 +325,12 @@ func InternsOrThunks() {
 	osNamespace.InternVar("sh", sh_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments. Returns a map with the following keys:
+			`Executes name with arguments and waits for it to finish.
+
+  A non-zero program exit is returned as data rather than thrown. Failure to
+  start the process throws Error. Returns a map with:
       :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
@@ -330,10 +338,12 @@ func InternsOrThunks() {
 	osNamespace.InternVar("sh-from", sh_from_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments and working directory set to dir.
-  Returns a map with the following keys:
+			`Executes name with arguments from working directory dir and waits for it to finish.
+
+  Behaves like joker.os/sh except for the working directory. A non-zero program
+  exit is returned as data; failure to start the process throws Error. Returns:
       :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
       :err - string capturing stderr of the program.`, "1.0"))
@@ -348,8 +358,8 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
 			`Starts a new process with the program specified by name.
   opts is a map with the same keys as in exec.
-  Doesn't wait for the process to finish.
-  Returns the process's PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
+  Does not wait for the process to finish and returns its PID. Throws Error if
+  the process cannot be started.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("stat", stat_,
 		MakeMeta(
@@ -433,6 +443,9 @@ func InternsOrThunks() {
   containing one or more of :create, :write, :remove, :rename, and :chmod.
   Runtime watcher errors are sent as {:type :error :error error}.
 
-  Calling the returned cancel function stops the watcher and closes ch.`, "1.7.2"))
+  When :recursive? is true, existing child directories are watched and newly
+  created child directories are added automatically. Calling the returned
+  cancel function stops the watcher and closes ch. If ch is closed by the
+  caller, the watcher stops sending and shuts itself down.`, "1.7.2"))
 
 }
