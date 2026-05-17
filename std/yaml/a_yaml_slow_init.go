@@ -12,16 +12,24 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of yaml.InternsOrThunks().")
 	}
-	yamlNamespace.ResetMeta(MakeMeta(nil, `Implements encoding and decoding of YAML.`, "1.0"))
+	yamlNamespace.ResetMeta(MakeMeta(nil, `Encodes Joker values to YAML and decodes YAML strings into Joker values.`, "1.0"))
 
 	yamlNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Parses the YAML-encoded data and return the result as a Joker value.`, "1.0"))
+			`Parses YAML string s and returns the corresponding Joker value.
+
+  YAML mappings become maps, sequences become vectors, scalars become their
+  nearest Joker values, and null becomes nil. Throws Error when s is invalid
+  YAML.`, "1.0"))
 
 	yamlNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
-			`Returns the YAML encoding of v.`, "1.0"))
+			`Returns the YAML encoding of v.
+
+  Keywords are encoded without their leading colon, map keys are converted to
+  strings, and vectors become YAML sequences. Throws Error when v cannot be
+  encoded.`, "1.0"))
 
 }

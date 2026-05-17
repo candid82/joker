@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements encoding and decoding of YAML.</p>
+    <p class="var-docstr">Encodes Joker values to YAML and decodes YAML strings into Joker values.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -53,7 +53,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(read-string s)</code></div>
 </pre>
-  <p class="var-docstr">Parses the YAML-encoded data and return the result as a Joker value.</p>
+  <p class="var-docstr">Parses YAML string s and returns the corresponding Joker value.<br>
+<br>
+  YAML mappings become maps, sequences become vectors, scalars become their<br>
+  nearest Joker values, and null becomes nil. Throws Error when s is invalid<br>
+  YAML.</p>
   
   
 </li>
@@ -63,7 +67,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(write-string v)</code></div>
 </pre>
-  <p class="var-docstr">Returns the YAML encoding of v.</p>
+  <p class="var-docstr">Returns the YAML encoding of v.<br>
+<br>
+  Keywords are encoded without their leading colon, map keys are converted to<br>
+  strings, and vectors become YAML sequences. Throws Error when v cannot be<br>
+  encoded.</p>
   
   
 </li>

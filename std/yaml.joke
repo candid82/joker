@@ -1,17 +1,24 @@
 (ns ^{:go-imports []
-      :doc "Implements encoding and decoding of YAML."}
+      :doc "Encodes Joker values to YAML and decodes YAML strings into Joker values."}
   yaml)
 
 (defn read-string
-  "Parses the YAML-encoded data and return the result as a Joker value."
+  "Parses YAML string s and returns the corresponding Joker value.
+
+  YAML mappings become maps, sequences become vectors, scalars become their
+  nearest Joker values, and null becomes nil. Throws Error when s is invalid
+  YAML."
   {:added "1.0"
    :go "readString(s)"}
   [^String s])
 
 (defn write-string
-  "Returns the YAML encoding of v."
+  "Returns the YAML encoding of v.
+
+  Keywords are encoded without their leading colon, map keys are converted to
+  strings, and vectors become YAML sequences. Throws Error when v cannot be
+  encoded."
   {:added "1.0"
    :go "writeString(v)"}
   [^Object v])
-
 
