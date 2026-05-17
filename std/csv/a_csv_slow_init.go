@@ -12,13 +12,17 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of csv.InternsOrThunks().")
 	}
-	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) files as defined in RFC 4180.`, "1.0"))
+	csvNamespace.ResetMeta(MakeMeta(nil, `Reads and writes comma-separated values (CSV) using RFC 4180-style parsing and formatting.`, "1.0"))
 
 	csvNamespace.InternVar("csv-seq", csv_seq_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
-			`Returns the csv records from rdr as a lazy sequence.
-  rdr must be a string or implement io.Reader.
+			`Returns records from rdr as a lazy sequence of string vectors.
+
+  rdr must be a string or implement io.Reader. Parsing happens as the returned
+  sequence is realized, so malformed input may throw Error later while the
+  sequence is consumed rather than when csv-seq is called.
+
   opts may have the following keys:
 
   :comma - field delimiter (defaults to ',').
@@ -29,7 +33,7 @@ func InternsOrThunks() {
   Lines beginning with the comment character without preceding whitespace are ignored.
   With leading whitespace the comment character becomes part of the
   field, even if trim-leading-space is true.
-  comment must be a valid chat and must not be \r, \n,
+  comment must be a valid char and must not be \r, \n,
   or the Unicode replacement character (0xFFFD).
   It must also not be equal to comma.
 
@@ -45,25 +49,37 @@ func InternsOrThunks() {
 
   :trim-leading-space - if true, leading white space in a field is ignored.
   This is done even if the field delimiter, comma, is white space.
-  Default value is false.`, "1.0"))
+  Default value is false.
+
+  Example:
+    (joker.csv/csv-seq "a,b\nc,d")
+    ;; => (["a" "b"] ["c" "d"])`, "1.0"))
 
 	csvNamespace.InternVar("write", write_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("f"), MakeSymbol("data")), NewVectorFrom(MakeSymbol("f"), MakeSymbol("data"), MakeSymbol("opts"))),
-			`Writes records to a CSV encoded file.
-  f must be io.Writer (for example, as returned by joker.os/create).
-  data must be Seqable, each element of which must be Seqable as well.
-  opts is as in joker.csv/write-string.`, "1.0"))
+			`Writes data as CSV to f and returns nil.
+
+  f must implement io.Writer, for example a file returned by joker.os/create.
+  data and opts have the same meaning as in joker.csv/write-string. write does
+  not close f.`, "1.0"))
 
 	csvNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("data")), NewVectorFrom(MakeSymbol("data"), MakeSymbol("opts"))),
-			`Writes records to a string in CSV format and returns the string.
-  data must be Seqable, each element of which must be Seqable as well.
+			`Formats data as CSV and returns the resulting string.
+
+  data must be Seqable, and each record within it must be Seqable. Field values
+  are converted to strings before writing.
+
   opts may have the following keys:
 
-  :comma - field delimiter (defaults to ',')
+  :comma - field delimiter (defaults to ',').
 
-  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  :use-crlf - if true, uses \r\n as the line terminator. Default value is false.
+
+  Example:
+    (joker.csv/write-string [["a" "b"] ["c" "d"]])
+    ;; => "a,b\nc,d\n"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
