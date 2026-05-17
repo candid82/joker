@@ -1,4 +1,6 @@
 (require 'joker.http)
+(require 'joker.os)
+(require 'joker.string)
 (require 'joker.time)
 
 (def addr "127.0.0.1:18291")
@@ -29,13 +31,29 @@
                      false))]
       (cond
         ready? true
-        (zero? attempts) (throw (ex-info "HTTP SSE test server did not start" {}))
+        (zero? attempts) false
         :else (do
                 (joker.time/sleep short-delay)
                 (recur (dec attempts)))))))
 
-(go (joker.http/start-server addr handler))
-(wait-ready)
+(defn loopback-unavailable?
+  [e]
+  (let [msg (str e)]
+    (or (joker.string/includes? msg "operation not permitted")
+        (joker.string/includes? msg "permission denied"))))
+
+(def server (go (joker.http/start-server addr handler)))
+
+(when-not (wait-ready)
+  (try
+    (<! server)
+    (throw (ex-info "HTTP SSE test server did not start" {}))
+    (catch Error e
+      (if (loopback-unavailable? e)
+        (do
+          (println "SKIP: loopback networking unavailable")
+          (joker.os/exit 0))
+        (throw e)))))
 
 (go
   (joker.time/sleep short-delay)

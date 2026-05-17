@@ -1,4 +1,4 @@
-input.joke:58:11: Eval error: SSE event must be a string or map, got Int
+input.joke:76:11: Eval error: SSE event must be a string or map, got Int
 Stacktrace:
-  global input.joke:38:1
-  user/wait-ready input.joke:58:11
+  global input.joke:47:11
+  user/wait-ready input.joke:76:11
