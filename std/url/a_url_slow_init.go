@@ -12,16 +12,18 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of url.InternsOrThunks().")
 	}
-	urlNamespace.ResetMeta(MakeMeta(nil, `Parses URLs and implements query escaping.`, "1.0"))
+	urlNamespace.ResetMeta(MakeMeta(nil, `Escapes URL path/query components and parses URL-encoded query strings.`, "1.0"))
 
 	urlNamespace.InternVar("parse-query", parse_query_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.
-  Always returns a non-nil map containing all the valid query parameters found.
+			`Parses URL-encoded query string s into a map of string keys to value vectors.
+
+  Always returns a map containing the valid query parameters found.
   Query is expected to be a list of key=value settings separated by ampersands. A setting without
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
-  semicolon are considered invalid. `, "1.3.6"))
+  semicolon or malformed escapes are considered invalid and are omitted rather
+  than thrown.`, "1.3.6"))
 
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(
@@ -31,11 +33,11 @@ func InternsOrThunks() {
 	urlNamespace.InternVar("path-unescape", path_unescape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Does the inverse transformation of path-escape, converting each 3-byte encoded
-  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts
-  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.
+			`Reverses path-escape for one URL path segment.
 
-  PathUnescape is identical to QueryUnescape except that it does not unescape '+' to ' ' (space).`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  Converts percent-encoded substrings such as "%2F" to their bytes. Unlike
+  query-unescape, it leaves '+' unchanged. Throws Error when a percent escape is
+  malformed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	urlNamespace.InternVar("query-escape", query_escape_,
 		MakeMeta(
@@ -45,8 +47,9 @@ func InternsOrThunks() {
 	urlNamespace.InternVar("query-unescape", query_unescape_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Does the inverse transformation of query-escape, converting each 3-byte encoded
-  substring of the form "%AB" into the hex-decoded byte 0xAB. It also converts
-  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Reverses query-escape for query text.
+
+  Converts percent-encoded substrings such as "%2F" to their bytes and '+'
+  into space. Throws Error when a percent escape is malformed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Parses URLs and implements query escaping.</p>
+    <p class="var-docstr">Escapes URL path/query components and parses URL-encoded query strings.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -62,11 +62,13 @@
   <span class="var-added">v1.3.6</span>
   <pre class="var-usage"><div><code>(parse-query s)</code></div>
 </pre>
-  <p class="var-docstr">Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.<br>
-  Always returns a non-nil map containing all the valid query parameters found.<br>
+  <p class="var-docstr">Parses URL-encoded query string s into a map of string keys to value vectors.<br>
+<br>
+  Always returns a map containing the valid query parameters found.<br>
   Query is expected to be a list of key=value settings separated by ampersands. A setting without<br>
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded<br>
-  semicolon are considered invalid. </p>
+  semicolon or malformed escapes are considered invalid and are omitted rather<br>
+  than thrown.</p>
   
   
 </li>
@@ -86,11 +88,11 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(path-unescape s)</code></div>
 </pre>
-  <p class="var-docstr">Does the inverse transformation of path-escape, converting each 3-byte encoded<br>
-  substring of the form &#34;%AB&#34; into the hex-decoded byte 0xAB. It also converts<br>
-  &#39;+&#39; into &#39; &#39; (space). It returns an error if any % is not followed by two hexadecimal digits.<br>
+  <p class="var-docstr">Reverses path-escape for one URL path segment.<br>
 <br>
-  PathUnescape is identical to QueryUnescape except that it does not unescape &#39;+&#39; to &#39; &#39; (space).</p>
+  Converts percent-encoded substrings such as &#34;%2F&#34; to their bytes. Unlike<br>
+  query-unescape, it leaves &#39;+&#39; unchanged. Throws Error when a percent escape is<br>
+  malformed.</p>
   
   
 </li>
@@ -110,9 +112,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(query-unescape s)</code></div>
 </pre>
-  <p class="var-docstr">Does the inverse transformation of query-escape, converting each 3-byte encoded<br>
-  substring of the form &#34;%AB&#34; into the hex-decoded byte 0xAB. It also converts<br>
-  &#39;+&#39; into &#39; &#39; (space). It returns an error if any % is not followed by two hexadecimal digits.</p>
+  <p class="var-docstr">Reverses query-escape for query text.<br>
+<br>
+  Converts percent-encoded substrings such as &#34;%2F&#34; to their bytes and &#39;+&#39;<br>
+  into space. Throws Error when a percent escape is malformed.</p>
   
   
 </li>

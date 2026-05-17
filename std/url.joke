@@ -1,5 +1,5 @@
 (ns ^{:go-imports ["net/url"]
-      :doc "Parses URLs and implements query escaping."}
+      :doc "Escapes URL path/query components and parses URL-encoded query strings."}
   url)
 
 (defn ^String path-escape
@@ -9,11 +9,11 @@
   [^String s])
 
 (defn ^String path-unescape
-  "Does the inverse transformation of path-escape, converting each 3-byte encoded
-  substring of the form \"%AB\" into the hex-decoded byte 0xAB. It also converts
-  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits.
+  "Reverses path-escape for one URL path segment.
 
-  PathUnescape is identical to QueryUnescape except that it does not unescape '+' to ' ' (space)."
+  Converts percent-encoded substrings such as \"%2F\" to their bytes. Unlike
+  query-unescape, it leaves '+' unchanged. Throws Error when a percent escape is
+  malformed."
   {:added "1.0"
    :go "pathUnescape(s)"}
   [^String s])
@@ -25,19 +25,22 @@
   [^String s])
 
 (defn ^String query-unescape
-  "Does the inverse transformation of query-escape, converting each 3-byte encoded
-  substring of the form \"%AB\" into the hex-decoded byte 0xAB. It also converts
-  '+' into ' ' (space). It returns an error if any % is not followed by two hexadecimal digits."
+  "Reverses query-escape for query text.
+
+  Converts percent-encoded substrings such as \"%2F\" to their bytes and '+'
+  into space. Throws Error when a percent escape is malformed."
   {:added "1.0"
    :go "queryUnescape(s)"}
   [^String s])
 
 (defn parse-query
-  "Parses the URL-encoded query string and returns a map listing the vectors of values specified for each key.
-  Always returns a non-nil map containing all the valid query parameters found.
+  "Parses URL-encoded query string s into a map of string keys to value vectors.
+
+  Always returns a map containing the valid query parameters found.
   Query is expected to be a list of key=value settings separated by ampersands. A setting without
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
-  semicolon are considered invalid. "
+  semicolon or malformed escapes are considered invalid and are omitted rather
+  than thrown."
   {:added "1.3.6"
    :go "parseQuery(s)"}
   [^String s])
