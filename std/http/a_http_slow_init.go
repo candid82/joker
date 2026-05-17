@@ -12,52 +12,118 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of http.InternsOrThunks().")
 	}
-	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client and server implementations.`, "1.0"))
+	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client requests, blocking servers, static file serving, and Server-Sent Events (SSE).`, "1.0"))
 
 	httpNamespace.InternVar("send", send_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
-			`Sends an HTTP request and returns an HTTP response.
+			`Sends an HTTP request and returns an HTTP response map.
+
   request is a map with the following keys:
-  - url (string)
+  - url (string, required)
   - method (string, keyword or symbol, defaults to :get)
   - body (string)
-  - host (string, overrides Host header if provided)
-  - headers (map).
-  All keys except for url are optional.
-  response is a map with the following keys:
+  - host (string, overrides the Host header if provided)
+  - headers (map from string header names to string values)
+
+  The response map contains:
   - status (int)
   - body (string)
-  - headers (map)
-  - content-length (int)`, "1.0"))
+  - headers (map from string header names to vectors of string values)
+  - content-length (int; -1 when unknown)
+
+  HTTP status codes such as 404 or 500 are returned normally in :status.
+  Throws Error when the request cannot be built or completed, such as for a
+  malformed URL, DNS/connect/TLS failure, redirect failure, or response-body
+  read failure.
+
+  Redirects are followed automatically using the default HTTP client policy,
+  which stops after 10 consecutive requests. No timeout is configured and
+  there is currently no timeout request option, so send may block indefinitely
+  while waiting for the network or response body. The whole response body is
+  read before send returns; streaming responses therefore return only after
+  the stream ends.
+
+  Example:
+    (let [res (joker.http/send {:url "https://example.com/api"
+                                :method :post
+                                :headers {"Content-Type" "text/plain"}
+                                :body "hello"})]
+      [(:status res) (:body res)])`, "1.0"))
 
 	httpNamespace.InternVar("start-file-server", start_file_server_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("root"))),
-			`Starts HTTP server on the TCP network address addr that
-  serves HTTP requests with the contents of the file system rooted at root.`, "1.0"))
+			`Starts an HTTP file server on TCP network address addr and blocks while it
+  runs.
+
+  Files are served from the filesystem rooted at root using the standard HTTP
+  file-server behavior. Routing details such as redirects, directory handling,
+  MIME detection, and missing-file responses are delegated to the underlying
+  HTTP server. Throws Error if the server cannot listen or later stops with an
+  error. There is currently no server handle or shutdown API; run
+  start-file-server in go when the caller must keep doing other work.
+
+  Example:
+    (go (joker.http/start-file-server "127.0.0.1:8080" "public"))`, "1.0"))
 
 	httpNamespace.InternVar("start-server", start_server_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
-			`Starts HTTP server on the TCP network address addr.
-  handler receives a request map and returns a response map.
-  A response map with an :sse channel streams Server-Sent Events
-  until the channel closes or the client disconnects. Values read from
-  the channel may be strings, which are sent as data events, or maps with
-  any of the following keys:
+			`Starts an HTTP server on TCP network address addr and blocks while it runs.
+
+  Typical addr values are "127.0.0.1:8080" or ":8080". Throws Error if the
+  server cannot listen or later stops with an error. There is currently no
+  server handle or shutdown API; run start-server in go when the caller must
+  keep doing other work.
+
+  handler is called with a request map containing:
+  - request-method (keyword, lower-case)
+  - body (string)
+  - uri (string)
+  - query-string (string)
+  - server-name (string)
+  - server-port (string)
+  - remote-addr (string)
+  - protocol (string)
+  - scheme (keyword; currently always :http)
+  - host (string)
+  - headers (map from lower-case string names to comma-joined string values)
+
+  The full request body is read before handler is called. handler must return a
+  response map. For an ordinary response, supported keys are:
+  - status (int, optional; omitted uses the HTTP server default)
+  - body (string, optional; defaults to "")
+  - headers (map, optional; values may be strings or seqs of strings)
+
+  If handler or response processing throws, the server writes a 500 response
+  with body "Internal server error" and prints the error to stderr.
+
+  A response map containing :sse starts a Server-Sent Events stream instead of
+  an ordinary body response. :sse must be a channel. Values read from it may be
+  strings, which are sent as data events, or maps with one or more of:
   - data (string)
   - event (string)
   - id (string)
   - retry (int)
   - comment (string)
-  Optional status and headers keys are applied before streaming. If the
-  response contains an on-close fn, it is called with a map after
-  streaming ends. The map contains a reason key with one of
-  :channel-closed, :client-closed, :write-error or :error. For
-  :write-error and :error, the map also contains an error key with an
-  Error object. SSE responses default to Content-Type text/event-stream,
-  Cache-Control no-cache and Connection keep-alive unless those headers
-  are provided.`, "1.0"))
+  Invalid SSE values throw Error. Optional status and headers keys are applied
+  before streaming; body is ignored for SSE responses. The stream ends when the
+  channel closes, the client disconnects, a write fails, or an error is raised.
+  If the response contains an on-close fn, it is called with a map whose reason
+  key is one of :channel-closed, :client-closed, :write-error or :error. For
+  :write-error and :error, the map also contains an error key with an Error
+  object. SSE responses default to Content-Type text/event-stream,
+  Cache-Control no-cache and Connection keep-alive unless those headers are
+  provided.
+
+  Example:
+    (go
+      (joker.http/start-server
+        "127.0.0.1:8080"
+        (fn [req]
+          {:status 200
+           :headers {"Content-Type" "text/plain"}
+           :body (str "hello " (:uri req))})))`, "1.0"))
 
 }
