@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Implements conversions to and from string representations of basic data types.</p>
+    <p class="var-docstr">Converts booleans, numbers, chars, and quoted literals to and from strings.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -101,7 +101,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(atoi s)</code></div>
 </pre>
-  <p class="var-docstr">Equivalent to (parse-int s 10 0).</p>
+  <p class="var-docstr">Parses decimal integer string s.<br>
+<br>
+  Equivalent to (parse-int s 10 0). Throws Error when s is not a valid decimal<br>
+  integer for the native Int size.</p>
   
   
 </li>
@@ -173,7 +176,10 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-bool s)</code></div>
 </pre>
-  <p class="var-docstr">Returns the boolean value represented by the string. It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False. Any other value returns an error.</p>
+  <p class="var-docstr">Returns the boolean value represented by s.<br>
+<br>
+  Accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, and False.<br>
+  Throws Error for any other value.</p>
   
   
 </li>
@@ -183,7 +189,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(parse-double s)</code></div>
 </pre>
-  <p class="var-docstr">Converts the string s to a floating-point number.</p>
+  <p class="var-docstr">Parses s as a Double.<br>
+<br>
+  Throws Error when s is not a valid floating-point literal.</p>
   
   
 </li>
@@ -195,7 +203,7 @@
 </pre>
   <p class="var-docstr">Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.<br>
   If base == 0, the base is implied by the string&#39;s prefix: base 16 for &#34;0x&#34;, base 8 for &#34;0&#34;, and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.<br>
-  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. For a bitSize below 0 or above 64 an error is returned.</p>
+  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. Throws Error for invalid syntax, invalid base, invalid bit size, or overflow.</p>
   
   
 </li>
@@ -282,7 +290,8 @@
   <pre class="var-usage"><div><code>(unquote s)</code></div>
 </pre>
   <p class="var-docstr">Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.<br>
-  (If s is single-quoted, it would be a Go character literal; Unquote returns the corresponding one-character string.)</p>
+  (If s is single-quoted, it would be a Go character literal; unquote returns the corresponding one-character string.)<br>
+  Throws Error when s is not a valid quoted literal.</p>
   
   
 </li>

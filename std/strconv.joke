@@ -1,9 +1,12 @@
 (ns ^{:go-imports ["strconv"]
-      :doc "Implements conversions to and from string representations of basic data types."}
+      :doc "Converts booleans, numbers, chars, and quoted literals to and from strings."}
   strconv)
 
 (defn ^Int atoi
-  "Equivalent to (parse-int s 10 0)."
+  "Parses decimal integer string s.
+
+  Equivalent to (parse-int s 10 0). Throws Error when s is not a valid decimal
+  integer for the native Int size."
   {:added "1.0"
    :go "!_res, err := strconv.Atoi(s); PanicOnErr(err)"}
   [^String s])
@@ -53,13 +56,18 @@
   [^Int i])
 
 (defn ^Boolean parse-bool
-  "Returns the boolean value represented by the string. It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False. Any other value returns an error."
+  "Returns the boolean value represented by s.
+
+  Accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, and False.
+  Throws Error for any other value."
   {:added "1.0"
    :go "!_res, err := strconv.ParseBool(s); PanicOnErr(err)"}
   [^String s])
 
 (defn ^Double parse-double
-  "Converts the string s to a floating-point number."
+  "Parses s as a Double.
+
+  Throws Error when s is not a valid floating-point literal."
   {:added "1.0"
    :go "!_res, err := strconv.ParseFloat(s, 64); PanicOnErr(err)"}
   [^String s])
@@ -67,7 +75,7 @@
 (defn ^Int parse-int
   "Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.
   If base == 0, the base is implied by the string's prefix: base 16 for \"0x\", base 8 for \"0\", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.
-  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. For a bitSize below 0 or above 64 an error is returned."
+  The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. Throws Error for invalid syntax, invalid base, invalid bit size, or overflow."
   {:added "1.0"
    ;; TODO: 32-bit issue
    :go "!t, err := strconv.ParseInt(s, base, bitSize); PanicOnErr(err); _res := int(t)"}
@@ -117,7 +125,8 @@
 
 (defn ^String unquote
   "Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.
-  (If s is single-quoted, it would be a Go character literal; Unquote returns the corresponding one-character string.)"
+  (If s is single-quoted, it would be a Go character literal; unquote returns the corresponding one-character string.)
+  Throws Error when s is not a valid quoted literal."
   {:added "1.0"
    :go "!_res, err := strconv.Unquote(s); PanicOnErr(err)"}
   [^String s])
