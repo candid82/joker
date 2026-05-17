@@ -12,16 +12,34 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of base64.InternsOrThunks().")
 	}
-	base64Namespace.ResetMeta(MakeMeta(nil, `Implements base64 encoding as specified by RFC 4648.`, "1.0"))
+	base64Namespace.ResetMeta(MakeMeta(nil, `Encodes and decodes strings with standard padded Base64 as specified by RFC 4648.`, "1.0"))
 
 	base64Namespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the bytes represented by the base64 string s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Decodes standard padded Base64 string s and returns the decoded bytes as a
+  string.
+
+  The standard RFC 4648 alphabet is used. Carriage returns and line feeds in s
+  are ignored. Throws Error when s contains invalid Base64 data or malformed
+  padding.
+
+  The returned string may contain arbitrary bytes, not only printable text.
+
+  Example:
+    (joker.base64/decode-string "aGVsbG8=")
+    ;; => "hello"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	base64Namespace.InternVar("encode-string", encode_string_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns the base64 encoding of s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns the standard padded Base64 encoding of string s.
+
+  s is encoded from its raw bytes using the RFC 4648 standard alphabet and = as
+  padding when needed.
+
+  Example:
+    (joker.base64/encode-string "hello")
+    ;; => "aGVsbG8="`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }
