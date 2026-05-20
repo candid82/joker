@@ -387,8 +387,7 @@
 
 (defn- load-libs-options__
   []
-  #{:as :reload :reload-all :require :use :verbose :refer :default :refer-macros :exclude :only :rename :include-macros})
+  #{:as :as-alias :reload :reload-all :require :use :verbose :refer :default :refer-macros :exclude :only :rename :include-macros})
 
 (in-ns 'user)
 (joker.core/refer 'joker.core)
-

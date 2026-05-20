@@ -3301,7 +3301,7 @@
 
 (defn- load-libs-options__
   []
-  #{:as :reload :reload-all :require :use :verbose :exclude :only :rename :refer})
+  #{:as :as-alias :reload :reload-all :require :use :verbose :exclude :only :rename :refer})
 
 (defn- load-lib
   "Loads a lib with options"
@@ -3318,19 +3318,23 @@
                     (first unsupported)
                     (apply str "Unsupported option(s) supplied: "
                            (interpose \, unsupported)))
-        {:keys [as reload reload-all require use verbose default]} opts
+        {:keys [as as-alias reload reload-all require use verbose default]} opts
         loaded (contains? *loaded-libs* lib)
-        load (cond reload-all
+        load (cond as-alias
+                   nil
+                   reload-all
                    load-all
                    (or reload (not require) (not loaded))
                    load-one)
-        need-ns (or as use default)
+        need-ns (or as as-alias use default)
         filter-opts (select-keys opts require-opt-keys)
         undefined-on-entry (not (find-ns lib))]
     (when (and *linter-mode* loaded)
       (println-linter__ (ex-info (str "duplicate require for " lib)
                                  {:form lib :_prefix "Parse warning"})))
     (binding [*loading-verbosely* (or *loading-verbosely* verbose)]
+      (when as-alias
+        (create-ns__ lib))
       (if load
         (try
           (load lib need-ns require)
@@ -3347,6 +3351,10 @@
         (when *loading-verbosely*
           (printf "(joker.core/alias '%s '%s)\n" as lib))
         (alias as lib))
+      (when as-alias
+        (when *loading-verbosely*
+          (printf "(joker.core/alias '%s '%s)\n" as-alias lib))
+        (alias as-alias lib))
       (when default
         (when *loading-verbosely*
           (printf "(joker.core/alias '%s '%s)\n" default lib))
