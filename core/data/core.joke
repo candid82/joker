@@ -4489,8 +4489,8 @@
 
   Joker is single threaded and uses the GIL (Global Interpreter Lock) to make sure
   only one goroutine (including the root one) executes at the same time.
-  However, channel operations and some I/O functions (joker.http/send, joker.os/sh*, joker.os/exec,
-  and joker.time/sleep) release the GIL and allow other goroutines to run.
+  However, channel operations and some I/O functions (joker.http/send, joker.smtp/send,
+  joker.os/sh*, joker.os/exec, and joker.time/sleep) release the GIL and allow other goroutines to run.
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine
   (or another goroutine) doesn't do any I/O or channel operations (<! or >!)."

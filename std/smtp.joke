@@ -1,0 +1,39 @@
+(ns ^{:go-imports []
+      :doc "Sends email through SMTP using raw RFC 5322 messages."}
+  smtp)
+
+(defn send
+  "Sends an email message through an SMTP server and returns nil.
+
+  request is a map with the following keys:
+  - addr (string, required): SMTP server address, such as \"smtp.example.com:587\".
+  - from (string, required): envelope sender address.
+  - to (seq of strings, required): envelope recipient addresses.
+  - message (string, required): raw RFC 5322 message including headers and body.
+  - auth (map, optional): SMTP authentication options.
+
+  Supported auth maps:
+  - {:type :plain :username \"user\" :password \"secret\"}
+  - {:type :plain :identity \"\" :username \"user\" :password \"secret\" :host \"smtp.example.com\"}
+  - {:type :cram-md5 :username \"user\" :secret \"secret\"}
+
+  For :plain auth, :identity defaults to \"\" and :host defaults to the host
+  parsed from :addr. If :auth is omitted or nil, no authentication is used.
+
+  send does not build MIME messages, encode attachments, validate addresses, or
+  add mail headers. It delegates delivery to Go's net/smtp.SendMail. Throws
+  Error when the request is malformed or the SMTP operation fails. No timeout is
+  configured, so send may block indefinitely while connecting or sending.
+
+  Example:
+    (joker.smtp/send
+      {:addr \"smtp.example.com:587\"
+       :auth {:type :plain
+              :username \"user\"
+              :password \"secret\"}
+       :from \"sender@example.com\"
+       :to [\"recipient@example.com\"]
+       :message \"From: sender@example.com\\r\\nTo: recipient@example.com\\r\\nSubject: Hello\\r\\n\\r\\nBody\"})"
+  {:added "1.8"
+   :go "sendMessage(request)"}
+  [^Map request])
