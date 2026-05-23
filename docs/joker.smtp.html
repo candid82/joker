@@ -1,0 +1,92 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.smtp</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Sends email through SMTP using raw RFC 5322 messages.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#send">send</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="send">send</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(send request)</code></div>
+</pre>
+  <p class="var-docstr">Sends an email message through an SMTP server and returns nil.<br>
+<br>
+  request is a map with the following keys:<br>
+  - addr (string, required): SMTP server address, such as &#34;smtp.example.com:587&#34;.<br>
+  - from (string, required): envelope sender address.<br>
+  - to (seq of strings, required): envelope recipient addresses.<br>
+  - message (string, required): raw RFC 5322 message including headers and body.<br>
+  - auth (map, optional): SMTP authentication options.<br>
+<br>
+  Supported auth maps:<br>
+  - {:type :plain :username &#34;user&#34; :password &#34;secret&#34;}<br>
+  - {:type :plain :identity &#34;&#34; :username &#34;user&#34; :password &#34;secret&#34; :host &#34;smtp.example.com&#34;}<br>
+  - {:type :cram-md5 :username &#34;user&#34; :secret &#34;secret&#34;}<br>
+<br>
+  For :plain auth, :identity defaults to &#34;&#34; and :host defaults to the host<br>
+  parsed from :addr. If :auth is omitted or nil, no authentication is used.<br>
+<br>
+  send does not build MIME messages, encode attachments, validate addresses, or<br>
+  add mail headers. It delegates delivery to Go&#39;s net/smtp.SendMail. Throws<br>
+  Error when the request is malformed or the SMTP operation fails. No timeout is<br>
+  configured, so send may block indefinitely while connecting or sending.<br>
+<br>
+  Example:<br>
+    (joker.smtp/send<br>
+      {:addr &#34;smtp.example.com:587&#34;<br>
+       :auth {:type :plain<br>
+              :username &#34;user&#34;<br>
+              :password &#34;secret&#34;}<br>
+       :from &#34;sender@example.com&#34;<br>
+       :to [&#34;recipient@example.com&#34;]<br>
+       :message &#34;From: sender@example.com\r\nTo: recipient@example.com\r\nSubject: Hello\r\n\r\nBody&#34;})</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>
