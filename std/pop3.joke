@@ -1,0 +1,141 @@
+(ns ^{:go-imports []
+      :doc "Retrieves raw email messages from POP3 mailboxes using explicit client sessions."}
+  pop3)
+
+(defn ^POP3Client connect
+  "Connects to a POP3 server, authenticates, and returns a POP3Client session.
+
+  opts is a map with the following keys:
+  - addr (string, required): server address, such as \"pop.example.com:995\".
+  - username (string, required): USER authentication value.
+  - password (string, required): PASS authentication value.
+  - tls (keyword, string, or symbol, optional): :implicit (default),
+    :starttls, or :none.
+  - server-name (string, optional): TLS certificate hostname override. By
+    default the host portion of :addr is used.
+  - timeout-ms (int, optional): positive timeout applied separately to
+    connecting, TLS negotiation, authentication, and each later operation.
+    If omitted, operations have no configured timeout.
+
+  :implicit establishes TLS before reading the POP3 greeting. :starttls reads
+  the greeting, issues STLS, and then establishes TLS before authentication.
+  :none sends credentials on an unencrypted connection and must be selected
+  explicitly.
+
+  Authentication uses USER and PASS. connect throws Error on configuration,
+  network, TLS, protocol, or authentication failure.
+
+  Example:
+    (def client
+      (joker.pop3/connect {:addr \"pop.example.com:995\"
+                           :tls :implicit
+                           :username \"user@example.com\"
+                           :password \"secret\"
+                           :timeout-ms 30000}))"
+  {:added "1.8"
+   :go "connect(opts)"}
+  [^Map opts])
+
+(defn capabilities
+  "Returns the server CAPA response as a map of capability strings to vectors
+  of argument strings.
+
+  For example, a response containing UIDL and SASL PLAIN becomes
+  {\"UIDL\" [] \"SASL\" [\"PLAIN\"]}. Throws Error when CAPA is unsupported or
+  the session cannot complete the operation."
+  {:added "1.8"
+   :go "capabilities(client)"}
+  [^POP3Client client])
+
+(defn stat
+  "Returns mailbox statistics as {:count n :octets size}.
+
+  :count is the number of messages in the mailbox and :octets is their
+  combined reported size."
+  {:added "1.8"
+   :go "stat(client)"}
+  [^POP3Client client])
+
+(defn list
+  "Returns POP3 message size information.
+
+  With one argument, returns a vector of {:number n :octets size} maps for all
+  available messages. With number, returns the size map for that message.
+  Throws Error when the server rejects the request or responds incorrectly."
+  {:added "1.8"
+   :go {1 "listAll(client)"
+        2 "listOne(client, number)"}}
+  ([^POP3Client client])
+  ([^POP3Client client ^Int number]))
+
+(defn uidl
+  "Returns POP3 unique identifiers.
+
+  With one argument, returns a vector of {:number n :uid id} maps for all
+  available messages. With number, returns the identifier map for that
+  message. UIDL is an optional POP3 command; unsupported servers cause Error."
+  {:added "1.8"
+   :go {1 "uidlAll(client)"
+        2 "uidlOne(client, number)"}}
+  ([^POP3Client client])
+  ([^POP3Client client ^Int number]))
+
+(defn ^String retrieve
+  "Retrieves the complete raw RFC 5322 message for message number.
+
+  Returns the message as a string with POP3 dot-stuffing removed and CRLF line
+  endings preserved. The complete message is buffered in memory. This function
+  does not parse MIME content or headers."
+  {:added "1.8"
+   :go "retrieve(client, number)"}
+  [^POP3Client client ^Int number])
+
+(defn ^String top
+  "Retrieves message headers and up to lines body lines for message number.
+
+  TOP is an optional POP3 command; unsupported servers cause Error. The
+  returned raw message fragment has POP3 dot-stuffing removed and CRLF line
+  endings preserved. lines must be non-negative."
+  {:added "1.8"
+   :go "top(client, number, lines)"}
+  [^POP3Client client ^Int number ^Int lines])
+
+(defn delete
+  "Marks message number for deletion and returns nil.
+
+  POP3 applies marked deletions only after a successful quit. Use reset to
+  clear deletion marks or close to abort a session without issuing QUIT."
+  {:added "1.8"
+   :go "deleteMessage(client, number)"}
+  [^POP3Client client ^Int number])
+
+(defn reset
+  "Clears any deletion marks in the current session and returns nil."
+  {:added "1.8"
+   :go "reset(client)"}
+  [^POP3Client client])
+
+(defn noop
+  "Sends POP3 NOOP to keep a session active or check connectivity and returns
+  nil."
+  {:added "1.8"
+   :go "noop(client)"}
+  [^POP3Client client])
+
+(defn quit
+  "Sends QUIT, commits server-side deletions marked in this session, closes the
+  connection, and returns nil.
+
+  The POP3Client is unusable after quit, including when QUIT fails."
+  {:added "1.8"
+   :go "quit(client)"}
+  [^POP3Client client])
+
+(defn close
+  "Closes client without sending QUIT and returns nil.
+
+  Use close to abandon a session without committing deletion marks. close is
+  idempotent; the POP3Client is unusable afterward."
+  {:added "1.8"
+   :go "close(client)"}
+  [^POP3Client client])
