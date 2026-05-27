@@ -1,0 +1,269 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.pop3</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Retrieves raw email messages from POP3 mailboxes using explicit client sessions.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#capabilities">capabilities</a>
+</li>
+<li>
+  <a href="#close">close</a>
+</li>
+<li>
+  <a href="#connect">connect</a>
+</li>
+<li>
+  <a href="#delete">delete</a>
+</li>
+<li>
+  <a href="#list">list</a>
+</li>
+<li>
+  <a href="#noop">noop</a>
+</li>
+<li>
+  <a href="#quit">quit</a>
+</li>
+<li>
+  <a href="#reset">reset</a>
+</li>
+<li>
+  <a href="#retrieve">retrieve</a>
+</li>
+<li>
+  <a href="#stat">stat</a>
+</li>
+<li>
+  <a href="#top">top</a>
+</li>
+<li>
+  <a href="#uidl">uidl</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="capabilities">capabilities</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(capabilities client)</code></div>
+</pre>
+  <p class="var-docstr">Returns the server CAPA response as a map of capability strings to vectors<br>
+  of argument strings.<br>
+<br>
+  For example, a response containing UIDL and SASL PLAIN becomes<br>
+  {&#34;UIDL&#34; [] &#34;SASL&#34; [&#34;PLAIN&#34;]}. Throws Error when CAPA is unsupported or<br>
+  the session cannot complete the operation.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="close">close</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(close client)</code></div>
+</pre>
+  <p class="var-docstr">Closes client without sending QUIT and returns nil.<br>
+<br>
+  Use close to abandon a session without committing deletion marks. close is<br>
+  idempotent; the POP3Client is unusable afterward.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="connect">connect</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(connect opts)</code></div>
+</pre>
+  <p class="var-docstr">Connects to a POP3 server, authenticates, and returns a POP3Client session.<br>
+<br>
+  opts is a map with the following keys:<br>
+  - addr (string, required): server address, such as &#34;pop.example.com:995&#34;.<br>
+  - username (string, required): USER authentication value.<br>
+  - password (string, required): PASS authentication value.<br>
+  - tls (keyword, string, or symbol, optional): :implicit (default),<br>
+    :starttls, or :none.<br>
+  - server-name (string, optional): TLS certificate hostname override. By<br>
+    default the host portion of :addr is used.<br>
+  - timeout-ms (int, optional): positive timeout applied separately to<br>
+    connecting, TLS negotiation, authentication, and each later operation.<br>
+    If omitted, operations have no configured timeout.<br>
+<br>
+  :implicit establishes TLS before reading the POP3 greeting. :starttls reads<br>
+  the greeting, issues STLS, and then establishes TLS before authentication.<br>
+  :none sends credentials on an unencrypted connection and must be selected<br>
+  explicitly.<br>
+<br>
+  Authentication uses USER and PASS. connect throws Error on configuration,<br>
+  network, TLS, protocol, or authentication failure.<br>
+<br>
+  Example:<br>
+    (def client<br>
+      (joker.pop3/connect {:addr &#34;pop.example.com:995&#34;<br>
+                           :tls :implicit<br>
+                           :username &#34;user@example.com&#34;<br>
+                           :password &#34;secret&#34;<br>
+                           :timeout-ms 30000}))</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="delete">delete</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(delete client number)</code></div>
+</pre>
+  <p class="var-docstr">Marks message number for deletion and returns nil.<br>
+<br>
+  POP3 applies marked deletions only after a successful quit. Use reset to<br>
+  clear deletion marks or close to abort a session without issuing QUIT.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="list">list</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(list client)</code></div>
+<div><code>(list client number)</code></div>
+</pre>
+  <p class="var-docstr">Returns POP3 message size information.<br>
+<br>
+  With one argument, returns a vector of {:number n :octets size} maps for all<br>
+  available messages. With number, returns the size map for that message.<br>
+  Throws Error when the server rejects the request or responds incorrectly.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="noop">noop</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(noop client)</code></div>
+</pre>
+  <p class="var-docstr">Sends POP3 NOOP to keep a session active or check connectivity and returns<br>
+  nil.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="quit">quit</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(quit client)</code></div>
+</pre>
+  <p class="var-docstr">Sends QUIT, commits server-side deletions marked in this session, closes the<br>
+  connection, and returns nil.<br>
+<br>
+  The POP3Client is unusable after quit, including when QUIT fails.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="reset">reset</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(reset client)</code></div>
+</pre>
+  <p class="var-docstr">Clears any deletion marks in the current session and returns nil.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="retrieve">retrieve</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(retrieve client number)</code></div>
+</pre>
+  <p class="var-docstr">Retrieves the complete raw RFC 5322 message for message number.<br>
+<br>
+  Returns the message as a string with POP3 dot-stuffing removed and CRLF line<br>
+  endings preserved. The complete message is buffered in memory. This function<br>
+  does not parse MIME content or headers.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="stat">stat</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(stat client)</code></div>
+</pre>
+  <p class="var-docstr">Returns mailbox statistics as {:count n :octets size}.<br>
+<br>
+  :count is the number of messages in the mailbox and :octets is their<br>
+  combined reported size.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="top">top</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(top client number lines)</code></div>
+</pre>
+  <p class="var-docstr">Retrieves message headers and up to lines body lines for message number.<br>
+<br>
+  TOP is an optional POP3 command; unsupported servers cause Error. The<br>
+  returned raw message fragment has POP3 dot-stuffing removed and CRLF line<br>
+  endings preserved. lines must be non-negative.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="uidl">uidl</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8</span>
+  <pre class="var-usage"><div><code>(uidl client)</code></div>
+<div><code>(uidl client number)</code></div>
+</pre>
+  <p class="var-docstr">Returns POP3 unique identifiers.<br>
+<br>
+  With one argument, returns a vector of {:number n :uid id} maps for all<br>
+  available messages. With number, returns the identifier map for that<br>
+  message. UIDL is an optional POP3 command; unsupported servers cause Error.</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>
