@@ -77,38 +77,38 @@ func InternsOrThunks() {
 	osNamespace.InternVar("args", args_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	osNamespace.InternVar("chdir", chdir_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Changes the current working directory to the named directory.`, "1.0"))
+			`Changes the current working directory to the named directory.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chmod", chmod_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("mode"))),
-			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0"))
+			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chown", chown_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
 			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
-  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value.`, "1.0"))
+  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chtimes", chtimes_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("atime"), MakeSymbol("mtime"))),
-			`Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.`, "1.0"))
+			`Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("clearenv", clearenv_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Deletes all environment variables.`, "1.0"))
+			`Deletes all environment variables.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("close", close_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
-			`Closes the file, rendering it unusable for I/O.`, "1.0"))
+			`Closes the file, rendering it unusable for I/O.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("create", create_,
 		MakeMeta(
@@ -140,7 +140,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("env", env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Returns a map representing the environment.`, "1.0"))
+			`Returns a map representing the environment.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("euid", euid_,
 		MakeMeta(
@@ -169,7 +169,7 @@ func InternsOrThunks() {
   :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
   :out - string capturing stdout of the program (unless :stdout option was passed)
-  :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0"))
+  :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("executable", executable_,
 		MakeMeta(
@@ -184,7 +184,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("code")), NewVectorFrom()),
-			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0"))
+			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("expand-env", expand_env_,
 		MakeMeta(
@@ -216,18 +216,18 @@ func InternsOrThunks() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("pid"))),
 			`Causes the process with the given PID to exit immediately.
-  Only kills the process itself, not any other processes it may have started.`, "1.0.1"))
+  Only kills the process itself, not any other processes it may have started.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("lchown", lchown_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
 			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
-  it changes the uid and gid of the link itself.`, "1.0"))
+  it changes the uid and gid of the link itself.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("link", link_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
-			`Creates newname as a hard link to the oldname file.`, "1.0"))
+			`Creates newname as a hard link to the oldname file.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(
@@ -238,24 +238,24 @@ func InternsOrThunks() {
   :size - size in bytes (Int)
   :mode - mode (Int)
   :dir? - true if the file is a directory (Boolean)
-  :modtime - modification time as Unix seconds (Int)`, "1.0"))
+  :modtime - modification time as Unix seconds (Int)`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	osNamespace.InternVar("lstat", lstat_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
-			`Like stat, but if the file is a symbolic link, the result describes the symbolic link.`, "1.0"))
+			`Like stat, but if the file is a symbolic link, the result describes the symbolic link.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("mkdir", mkdir_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
-			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+			`Creates a new directory with the specified name and permission bits.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("mkdir-all", mkdir_all_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
 			`Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.
   The permission bits perm (before umask) are used for all directories that mkdir-all creates.
-  If path is already a directory, mkdir-all does nothing and returns nil.`, "1.0"))
+  If path is already a directory, mkdir-all does nothing and returns nil.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("mkdir-temp", mkdir_temp_,
 		MakeMeta(
@@ -302,7 +302,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("remove", remove_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
-			`Removes the named file or (empty) directory.`, "1.0"))
+			`Removes the named file or (empty) directory.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("remove-all", remove_all_,
 		MakeMeta(
@@ -310,17 +310,17 @@ func InternsOrThunks() {
 			`Removes path and any children it contains.
 
   It removes everything it can, then panics with the first error (if
-  any) it encountered.`, "1.0"))
+  any) it encountered.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("rename", rename_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("oldpath"), MakeSymbol("newpath"))),
-			`Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.`, "1.0"))
+			`Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("set-env", set_env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the value of the environment variable named by the key.`, "1.0"))
+			`Sets the value of the environment variable named by the key.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("sh", sh_,
 		MakeMeta(
@@ -333,7 +333,7 @@ func InternsOrThunks() {
       :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
+      :err - string capturing stderr of the program.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("sh-from", sh_from_,
 		MakeMeta(
@@ -346,12 +346,12 @@ func InternsOrThunks() {
       :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
+      :err - string capturing stderr of the program.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("signal", signal_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("pid"), MakeSymbol("signal"))),
-			`Sends signal to the process with the given PID.`, "1.0.1"))
+			`Sends signal to the process with the given PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("start", start_,
 		MakeMeta(
@@ -369,12 +369,12 @@ func InternsOrThunks() {
   :size - length in bytes for regular files; system-dependent for others
   :mode - file mode bits
   :modtime - modification time
-  :dir? - true if file is a directory`, "1.0"))
+  :dir? - true if file is a directory`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("symlink", symlink_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
-			`Creates newname as a symbolic link to oldname.`, "1.0"))
+			`Creates newname as a symbolic link to oldname.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("temp-dir", temp_dir_,
 		MakeMeta(
@@ -388,7 +388,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("truncate", truncate_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("size"))),
-			`Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target.`, "1.0"))
+			`Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("uid", uid_,
 		MakeMeta(
@@ -398,7 +398,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("unset-env", unset_env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
-			`Unsets a single environment variable.`, "1.0"))
+			`Unsets a single environment variable.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("user-cache-dir", user_cache_dir_,
 		MakeMeta(
@@ -446,6 +446,6 @@ func InternsOrThunks() {
   When :recursive? is true, existing child directories are watched and newly
   created child directories are added automatically. Calling the returned
   cancel function stops the watcher and closes ch. If ch is closed by the
-  caller, the watcher stops sending and shuts itself down.`, "1.7.2"))
+  caller, the watcher stops sending and shuts itself down.`, "1.7.2").Plus(MakeKeyword("tag"), String{S: "Proc"}))
 
 }

@@ -22,7 +22,7 @@ func InternsOrThunks() {
   Always returns a map containing the query parameters found.
   Query is expected to be a list of key=value settings separated by ampersands. A setting without
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded
-  semicolon or malformed escapes throw Error.`, "1.3.6"))
+  semicolon or malformed escapes throw Error.`, "1.3.6").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(

@@ -12,7 +12,7 @@
    :go "readString(s)"}
   [^String s])
 
-(defn write-string
+(defn ^String write-string
   "Returns the YAML encoding of v.
 
   Keywords are encoded without their leading colon, map keys are converted to
@@ -21,4 +21,3 @@
   {:added "1.0"
    :go "writeString(v)"}
   [^Object v])
-

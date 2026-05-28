@@ -39,7 +39,7 @@ func InternsOrThunks() {
 			`Returns the commit map for hash.
 
   The result has the same shape as entries returned by joker.git/log. Throws
-  Error when hash does not name a commit.`, "1.3"))
+  Error when hash does not name a commit.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	gitNamespace.InternVar("config", config_,
 		MakeMeta(
@@ -48,7 +48,7 @@ func InternsOrThunks() {
 
   The map includes core properties such as :bare?, :worktree, :default-branch,
   :user, :author, :committer, :remotes, :submodules, :branches, and :urls.
-  Throws Error when the configuration cannot be read.`, "1.3"))
+  Throws Error when the configuration cannot be read.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	gitNamespace.InternVar("head", head_,
 		MakeMeta(
@@ -56,7 +56,7 @@ func InternsOrThunks() {
 			`Returns the repository HEAD reference map.
 
   The returned map has the same shape as joker.git/ref. Throws Error when HEAD
-  cannot be resolved.`, "1.3"))
+  cannot be resolved.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	gitNamespace.InternVar("log", log_,
 		MakeMeta(
@@ -93,7 +93,7 @@ func InternsOrThunks() {
   It is equivalent to running `+"`"+`git log --until <date>`+"`"+` or `+"`"+`git log --before <date>`+"`"+`.
 
   Throws Error when traversal cannot be started or completed, or when :order
-  has an unsupported value.`, "1.3"))
+  has an unsupported value.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	gitNamespace.InternVar("object", object_,
 		MakeMeta(
@@ -102,7 +102,7 @@ func InternsOrThunks() {
 
   The map contains :id and :type, where :type is one of :commit, :tree, :blob,
   :tag, :ofs-delta, :ref-delta, :any, or :invalid. Throws Error when no object
-  can be found.`, "1.3"))
+  can be found.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	gitNamespace.InternVar("open", open_,
 		MakeMeta(
@@ -119,7 +119,7 @@ func InternsOrThunks() {
 
   If resolved is true, symbolic references are resolved before being returned.
   The result contains :type (:hash, :symbolic, or :invalid), :name, :target,
-  and :hash. Throws Error when the reference cannot be found.`, "1.3"))
+  and :hash. Throws Error when the reference cannot be found.`, "1.3").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	gitNamespace.InternVar("resolve-revision", resolve_revision_,
 		MakeMeta(

@@ -2,7 +2,7 @@
       :doc "Parses raw RFC 5322 email messages, address fields, and mail dates."}
   mail)
 
-(defn read-message
+(defn ^Map read-message
   "Parses an RFC 5322 message from source and returns its headers and raw body.
 
   source must be a string or implement io.Reader, such as a string returned by
@@ -28,7 +28,7 @@
    :go "parseAddress(s)"}
   [^String s])
 
-(defn parse-address-list
+(defn ^Vec parse-address-list
   "Parses an RFC 5322 address list and returns a vector of maps.
 
   Each element has the form {:name display-name :address mailbox}. Throws

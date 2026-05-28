@@ -216,7 +216,7 @@ func InternsOrThunks() {
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
 			`Pauses the execution thread for at least the duration d (expressed in nanoseconds).
-  A negative or zero duration causes sleep to return immediately.`, "1.0"))
+  A negative or zero duration causes sleep to return immediately.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	timeNamespace.InternVar("string", string_,
 		MakeMeta(

@@ -2,7 +2,7 @@
       :doc "Sends email through SMTP using raw RFC 5322 messages."}
   smtp)
 
-(defn send
+(defn ^Nil send
   "Sends an email message through an SMTP server and returns nil.
 
   request is a map with the following keys:

@@ -2,7 +2,7 @@
       :doc "Creates, parses, formats, compares, and converts times and nanosecond durations."}
   time)
 
-(defn sleep
+(defn ^Nil sleep
   "Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately."
   {:added "1.0"

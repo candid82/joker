@@ -53,7 +53,7 @@ func InternsOrThunks() {
 
   Example:
     (joker.csv/csv-seq "a,b\nc,d")
-    ;; => (["a" "b"] ["c" "d"])`, "1.0"))
+    ;; => (["a" "b"] ["c" "d"])`, "1.0").Plus(MakeKeyword("tag"), String{S: "Seq"}))
 
 	csvNamespace.InternVar("write", write_,
 		MakeMeta(
@@ -63,7 +63,7 @@ func InternsOrThunks() {
   f must implement io.Writer, for example a file returned by joker.os/create.
   data and opts have the same meaning as in joker.csv/write-string. write does
   not close f. Throws Error for write failures, including errors reported while
-  flushing buffered CSV output.`, "1.0"))
+  flushing buffered CSV output.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	csvNamespace.InternVar("write-string", write_string_,
 		MakeMeta(

@@ -86,32 +86,32 @@
        :go "0x5"}
   SIGTRAP)
 
-(defn chmod
+(defn ^Nil chmod
   "Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target."
   {:added "1.0"
    :go "! err := os.Chmod(name, os.FileMode(mode)); PanicOnErr(err); _res := NIL"}
   [^String name, ^Int mode])
 
-(defn chown
+(defn ^Nil chown
   "Changes the numeric uid and gid of the named file. If the file is a symbolic link,
   it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value."
   {:added "1.0"
    :go "! err := os.Chown(name, uid, gid); PanicOnErr(err); _res := NIL"}
   [^String name, ^Int uid, ^Int gid])
 
-(defn chtimes
+(defn ^Nil chtimes
   "Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions."
   {:added "1.0"
    :go "! err := os.Chtimes(name, atime, mtime); PanicOnErr(err); _res := NIL"}
   [^String name, ^Time atime, ^Time mtime])
 
-(defn clearenv
+(defn ^Nil clearenv
   "Deletes all environment variables."
   {:added "1.0"
    :go "! os.Clearenv(); _res := NIL"}
   [])
 
-(defn env
+(defn ^Map env
   "Returns a map representing the environment."
   {:added "1.0"
    :go "env()"}
@@ -184,14 +184,14 @@
    :go "os.IsPathSeparator(uint8(c))"}
   [^Char c])
 
-(defn lchown
+(defn ^Nil lchown
   "Changes the numeric uid and gid of the named file. If the file is a symbolic link,
   it changes the uid and gid of the link itself."
   {:added "1.0"
    :go "! err := os.Lchown(name, uid, gid); PanicOnErr(err); _res := NIL"}
   [^String name, ^Int uid, ^Int gid])
 
-(defn link
+(defn ^Nil link
   "Creates newname as a hard link to the oldname file."
   {:added "1.0"
    :go "! err := os.Link(oldname, newname); PanicOnErr(err); _res := NIL"}
@@ -203,13 +203,13 @@
    :go "! _res, err := os.Hostname(); PanicOnErr(err)"}
   [])
 
-(defn set-env
+(defn ^Nil set-env
   "Sets the value of the environment variable named by the key."
   {:added "1.0"
    :go "! err := os.Setenv(key, value); PanicOnErr(err); _res := NIL"}
   [^String key ^String value])
 
-(defn unset-env
+(defn ^Nil unset-env
   "Unsets a single environment variable."
   {:added "1.0"
    :go "! err := os.Unsetenv(key); PanicOnErr(err); _res := NIL"}
@@ -221,13 +221,13 @@
    :go "getEnv(key)"}
   [^String key])
 
-(defn args
+(defn ^Vec args
   "Returns a sequence of the command line arguments, starting with the program name (normally, joker)."
   {:added "1.0"
    :go "commandArgs()"}
   [])
 
-(defn exit
+(defn ^Nil exit
   "Causes the current program to exit with the given status code (defaults to 0)."
   {:added "1.0"
    :go {1 "NIL; ExitJoker(code)"
@@ -235,7 +235,7 @@
   ([^Int code])
   ([]))
 
-(defn sh
+(defn ^Map sh
   "Executes name with arguments and waits for it to finish.
 
   A non-zero program exit is returned as data rather than thrown. Failure to
@@ -249,7 +249,7 @@
    :go "sh(\"\", nil, nil, nil, name, arguments)"}
   [^String name & ^String arguments])
 
-(defn sh-from
+(defn ^Map sh-from
   "Executes name with arguments from working directory dir and waits for it to finish.
 
   Behaves like joker.os/sh except for the working directory. A non-zero program
@@ -263,7 +263,7 @@
    :go "sh(dir, nil, nil, nil, name, arguments)"}
   [^String dir ^String name & ^String arguments])
 
-(defn exec
+(defn ^Map exec
   "Executes name according to opts and waits for it to finish.
 
   A non-zero program exit is returned as data rather than thrown. Failure to
@@ -297,20 +297,20 @@
    :go "startProcess(name, opts)"}
   [^String name ^Map opts])
 
-(defn kill
+(defn ^Nil kill
   "Causes the process with the given PID to exit immediately.
   Only kills the process itself, not any other processes it may have started."
   {:added "1.0.1"
    :go "killProcess(pid)"}
   [^Int pid])
 
-(defn signal
+(defn ^Nil signal
   "Sends signal to the process with the given PID."
   {:added "1.0.1"
    :go "sendSignal(pid, signal)"}
   [^Int pid ^Int signal])
 
-(defn watch
+(defn ^Proc watch
   "Watches paths for file system changes, sends event maps to ch, and returns a
   zero-argument cancel function. paths must be Seqable and each path must be a
   string. opts may contain :recursive? to watch child directories recursively.
@@ -329,13 +329,13 @@
   ([^Seqable paths ^Channel ch])
   ([^Seqable paths ^Channel ch ^Map opts]))
 
-(defn mkdir
+(defn ^Nil mkdir
   "Creates a new directory with the specified name and permission bits."
   {:added "1.0"
    :go "! err := os.Mkdir(name, os.FileMode(perm)); PanicOnErr(err); _res := NIL"}
   [^String name ^Int perm])
 
-(defn mkdir-all
+(defn ^Nil mkdir-all
   "Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.
   The permission bits perm (before umask) are used for all directories that mkdir-all creates.
   If path is already a directory, mkdir-all does nothing and returns nil."
@@ -349,19 +349,19 @@
    :go "! _res, err := os.Readlink(name); PanicOnErr(err)"}
   [^String name])
 
-(defn symlink
+(defn ^Nil symlink
   "Creates newname as a symbolic link to oldname."
   {:added "1.0"
    :go "! err := os.Symlink(oldname, newname); PanicOnErr(err); _res := NIL"}
   [^String oldname, ^String newname])
 
-(defn rename
+(defn ^Nil rename
   "Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it."
   {:added "1.0"
    :go "! err := os.Rename(oldpath, newpath); PanicOnErr(err); _res := NIL"}
   [^String oldpath, ^String newpath])
 
-(defn truncate
+(defn ^Nil truncate
   "Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target."
   {:added "1.0"
    :go "! err := os.Truncate(name, int64(size)); PanicOnErr(err); _res := NIL"}
@@ -402,7 +402,7 @@
    :go "! _res, err := os.UserHomeDir(); PanicOnErr(err)"}
   [])
 
-(defn ls
+(defn ^Vec ls
   "Reads the directory named by dirname and returns a list of directory entries sorted by filename.
   Each entry is a map with the following keys:
   :name - name (String)
@@ -421,13 +421,13 @@
    :go "! _res, err := os.Getwd(); PanicOnErr(err)"}
   [])
 
-(defn chdir
+(defn ^Nil chdir
   "Changes the current working directory to the named directory."
   {:added "1.0"
    :go "! err := os.Chdir(dirname); PanicOnErr(err); _res := NIL"}
   [^String dirname])
 
-(defn stat
+(defn ^Map stat
   "Returns a map describing the named file. The info map has the following attributes:
   :name - base name of the file
   :size - length in bytes for regular files; system-dependent for others
@@ -438,7 +438,7 @@
    :go "! _info, err := os.Stat(filename); PanicOnErr(err); _res := FileInfoMap(_info.Name(), _info)"}
   [^String filename])
 
-(defn lstat
+(defn ^Map lstat
   "Like stat, but if the file is a symbolic link, the result describes the symbolic link."
   {:added "1.0"
    :go "! _info, err := os.Lstat(filename); PanicOnErr(err); _res := FileInfoMap(_info.Name(), _info)"}
@@ -463,19 +463,19 @@
    :go "! _res, err := os.Create(name); PanicOnErr(err)"}
   [^String name])
 
-(defn close
+(defn ^Nil close
   "Closes the file, rendering it unusable for I/O."
   {:added "1.0"
    :go "! err := f.Close(); PanicOnErr(err); _res := NIL"}
   [^File f])
 
-(defn remove
+(defn ^Nil remove
   "Removes the named file or (empty) directory."
   {:added "1.0"
    :go "! err := os.Remove(name); PanicOnErr(err); _res := NIL"}
   [^String name])
 
-(defn remove-all
+(defn ^Nil remove-all
   "Removes path and any children it contains.
 
   It removes everything it can, then panics with the first error (if

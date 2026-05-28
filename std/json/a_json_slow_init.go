@@ -24,7 +24,7 @@ func InternsOrThunks() {
   malformed later input may throw Error only when that element is requested.
 
   opts may contain:
-  - keywords? - truthy to convert JSON object keys from strings to keywords`, "1.0"))
+  - keywords? - truthy to convert JSON object keys from strings to keywords`, "1.0").Plus(MakeKeyword("tag"), String{S: "Seq"}))
 
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
@@ -59,6 +59,6 @@ func InternsOrThunks() {
 
   Example:
     (joker.json/write-string {:name "Ada" :scores [1 2]})
-    ;; => "{\"name\":\"Ada\",\"scores\":[1,2]}"`, "1.0"))
+    ;; => "{\"name\":\"Ada\",\"scores\":[1,2]}"`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

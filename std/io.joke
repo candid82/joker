@@ -15,7 +15,7 @@
    :go "! n, err := io.Copy(dst, src); PanicOnErr(err); _res := int(n)"} ;; TODO: 32-bit issue
   [^IOWriter dst ^IOReader src])
 
-(defn pipe
+(defn ^Vec pipe
   "Creates a synchronous in-memory pipe and returns [reader writer].
 
   Writes block until the reader consumes data, so use the two ends from
@@ -25,7 +25,7 @@
    :go "pipe()"}
   [])
 
-(defn close
+(defn ^Nil close
   "Closes f and returns nil.
 
   f must implement close, such as an IOWriter, IOReader, or File. Throws Error

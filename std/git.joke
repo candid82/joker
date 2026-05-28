@@ -11,7 +11,7 @@
    :go "open(path)"}
   [^String path])
 
-(defn config
+(defn ^Map config
   "Returns repo configuration as a map.
 
   The map includes core properties such as :bare?, :worktree, :default-branch,
@@ -21,7 +21,7 @@
    :go "config(repo)"}
   [^GitRepo repo])
 
-(defn ref
+(defn ^Map ref
   "Returns reference name as a map.
 
   If resolved is true, symbolic references are resolved before being returned.
@@ -31,7 +31,7 @@
    :go "ref(repo, name, resolved)"}
   [^GitRepo repo, ^String name, ^Boolean resolved])
 
-(defn head
+(defn ^Map head
   "Returns the repository HEAD reference map.
 
   The returned map has the same shape as joker.git/ref. Throws Error when HEAD
@@ -40,7 +40,7 @@
    :go "head(repo)"}
   [^GitRepo repo])
 
-(defn log
+(defn ^Vec log
   "Returns commit history as a vector of commit maps.
 
   Each commit map contains :hash, :author, :committer, :message, :tree-hash,
@@ -87,7 +87,7 @@
    :go "resolveRevision(repo, revision)"}
   [^GitRepo repo ^String revision])
 
-(defn object
+(defn ^Map object
   "Returns a summary map for the Git object with hash.
 
   The map contains :id and :type, where :type is one of :commit, :tree, :blob,
@@ -97,7 +97,7 @@
    :go "findObject(repo, hash)"}
   [^GitRepo repo ^String hash])
 
-(defn commit
+(defn ^Map commit
   "Returns the commit map for hash.
 
   The result has the same shape as entries returned by joker.git/log. Throws

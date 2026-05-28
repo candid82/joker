@@ -2,7 +2,7 @@
       :doc "Manipulates platform-specific filesystem paths and exposes a few path-aware filesystem queries."}
   filepath)
 
-(defn file-seq
+(defn ^Vec file-seq
   "Walks root and returns a vector of info maps for root and its descendants.
 
   Traversal is eager and uses the platform filesystem. Each map contains:
@@ -130,7 +130,7 @@ If the result of this process is an empty string, returns the string \".\"."
    :go "! _res, err := filepath.Rel(basepath, targpath); PanicOnErr(err)"}
   [^String basepath ^String targpath])
 
-(defn split
+(defn ^Vec split
   "Splits path immediately following the final separator, separating it into a directory and file name component.
   If there is no separator in path, returns an empty dir and file set to path. The returned values have
   the property that path = dir+file."

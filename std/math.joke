@@ -122,7 +122,7 @@
    :go "math.Logb(x.Double().D)"}
   [^Number x])
 
-(defn modf
+(defn ^Vec modf
   "Returns a vector with the integer and fractional floating-point numbers that sum to x.
 
   Both values have the same sign as x."

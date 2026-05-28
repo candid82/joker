@@ -20,7 +20,7 @@ func InternsOrThunks() {
 			`Closes f and returns nil.
 
   f must implement close, such as an IOWriter, IOReader, or File. Throws Error
-  when f is not closable or when closing fails.`, "1.0"))
+  when f is not closable or when closing fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	ioNamespace.InternVar("copy", copy_,
 		MakeMeta(
@@ -41,7 +41,7 @@ func InternsOrThunks() {
 
   Writes block until the reader consumes data, so use the two ends from
   cooperating computations when neither side should stall the other. Closing
-  either end unblocks operations on the other end according to pipe semantics.`, "1.0"))
+  either end unblocks operations on the other end according to pipe semantics.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	ioNamespace.InternVar("read", read_,
 		MakeMeta(

@@ -126,12 +126,12 @@ func InternsOrThunks() {
 
   No more than n elements will be returned in the vector; the last element will
   be the unsplit remainder. If n is <= 0, no limit is in effect (all substrings
-  are returned in the vector).`, "1.0"))
+  are returned in the vector).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	stringNamespace.InternVar("split-lines", split_lines_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Splits string on \n or \r\n. Returns vector of the splits.`, "1.0"))
+			`Splits string on \n or \r\n. Returns vector of the splits.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	stringNamespace.InternVar("starts-with?", isstarts_with_,
 		MakeMeta(

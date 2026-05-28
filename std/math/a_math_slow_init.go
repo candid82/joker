@@ -180,7 +180,7 @@ func InternsOrThunks() {
 			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
 			`Returns a vector with the integer and fractional floating-point numbers that sum to x.
 
-  Both values have the same sign as x.`, "1.0"))
+  Both values have the same sign as x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	mathNamespace.InternVar("nan", nan_,
 		MakeMeta(

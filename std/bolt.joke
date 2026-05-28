@@ -34,7 +34,7 @@
    :go "open(filename, mode)"}
   [^String filename ^Int mode])
 
-(defn close
+(defn ^Nil close
   "Closes db and releases its database resources.
 
   Blocks until open transactions finish, then releases the file lock. Throws
@@ -43,7 +43,7 @@
    :go "close(db)"}
   [^BoltDB db])
 
-(defn create-bucket
+(defn ^Nil create-bucket
   "Creates bucket name and returns nil.
 
   Throws Error if the bucket already exists, if name is blank or too long, or
@@ -52,7 +52,7 @@
    :go "createBucket(db, name)"}
   [^BoltDB db ^String name])
 
-(defn create-bucket-if-not-exists
+(defn ^Nil create-bucket-if-not-exists
   "Creates bucket name when needed and returns nil.
 
   Does nothing when the bucket already exists. Throws Error if name is blank or
@@ -61,7 +61,7 @@
    :go "createBucketIfNotExists(db, name)"}
   [^BoltDB db ^String name])
 
-(defn delete-bucket
+(defn ^Nil delete-bucket
   "Deletes bucket name and returns nil.
 
   Throws Error when the bucket does not exist or the transaction fails."
@@ -69,7 +69,7 @@
    :go "deleteBucket(db, name)"}
   [^BoltDB db ^String name])
 
-(defn next-sequence
+(defn ^Int next-sequence
   "Returns the next auto-incrementing integer for bucket.
 
   Each call advances the bucket sequence counter inside a write transaction.
@@ -78,7 +78,7 @@
    :go "nextSequence(db, bucket)"}
   [^BoltDB db ^String bucket])
 
-(defn put
+(defn ^Nil put
   "Stores value at key in bucket and returns nil.
 
   Keys and values are strings stored as raw bytes. Replaces any previous value
@@ -88,7 +88,7 @@
    :go "put(db, bucket, key, value)"}
   [^BoltDB db ^String bucket ^String key ^String value])
 
-(defn delete
+(defn ^Nil delete
   "Removes key from bucket and returns nil.
 
   Missing keys are ignored. Throws Error when bucket does not exist or the
@@ -106,7 +106,7 @@
    :go "get(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
 
-(defn by-prefix
+(defn ^Vec by-prefix
   "Returns key/value pairs from bucket whose keys start with prefix.
 
   Results are returned as a vector of [key value] vectors in Bolt key order.

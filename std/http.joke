@@ -2,7 +2,7 @@
       :doc "Provides HTTP client requests, blocking servers, static file serving, and Server-Sent Events (SSE)."}
   http)
 
-(defn send
+(defn ^Map send
   "Sends an HTTP request and returns an HTTP response map.
 
   request is a map with the following keys:
@@ -40,7 +40,7 @@
    :go "sendRequest(request)"}
   [^Map request])
 
-(defn start-server
+(defn ^Nil start-server
   "Starts an HTTP server on TCP network address addr and blocks while it runs.
 
   Typical addr values are \"127.0.0.1:8080\" or \":8080\". Throws Error if the
@@ -100,7 +100,7 @@
    :go "startServer(addr, handler)"}
   [^String addr ^Callable handler])
 
-(defn start-file-server
+(defn ^Nil start-file-server
   "Starts an HTTP file server on TCP network address addr and blocks while it
   runs.
 

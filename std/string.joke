@@ -32,7 +32,7 @@
    :go "padLeft(s, pad, n)"}
   [^String s ^Stringable pad ^Int n])
 
-(defn split
+(defn ^Vec split
   "Splits string on a string or regular expression. Returns vector of the splits.
 
   No more than n elements will be returned in the vector; the last element will
@@ -45,7 +45,7 @@
   ([^String s ^Object sep])
   ([^String s ^Object sep ^Int n]))
 
-(defn split-lines
+(defn ^Vec split-lines
   "Splits string on \\n or \\r\\n. Returns vector of the splits."
   {:added "1.0"
    :go "split(s, newLine, 0)"}

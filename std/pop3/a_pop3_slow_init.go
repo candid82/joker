@@ -22,7 +22,7 @@ func InternsOrThunks() {
 
   For example, a response containing UIDL and SASL PLAIN becomes
   {"UIDL" [] "SASL" ["PLAIN"]}. Throws Error when CAPA is unsupported or
-  the session cannot complete the operation.`, "1.8"))
+  the session cannot complete the operation.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	pop3Namespace.InternVar("close", close_,
 		MakeMeta(
@@ -30,7 +30,7 @@ func InternsOrThunks() {
 			`Closes client without sending QUIT and returns nil.
 
   Use close to abandon a session without committing deletion marks. close is
-  idempotent; the POP3Client is unusable afterward.`, "1.8"))
+  idempotent; the POP3Client is unusable afterward.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("connect", connect_,
 		MakeMeta(
@@ -71,7 +71,7 @@ func InternsOrThunks() {
 			`Marks message number for deletion and returns nil.
 
   POP3 applies marked deletions only after a successful quit. Use reset to
-  clear deletion marks or close to abort a session without issuing QUIT.`, "1.8"))
+  clear deletion marks or close to abort a session without issuing QUIT.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("list", list_,
 		MakeMeta(
@@ -80,13 +80,13 @@ func InternsOrThunks() {
 
   With one argument, returns a vector of {:number n :octets size} maps for all
   available messages. With number, returns the size map for that message.
-  Throws Error when the server rejects the request or responds incorrectly.`, "1.8"))
+  Throws Error when the server rejects the request or responds incorrectly.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Seqable"}))
 
 	pop3Namespace.InternVar("noop", noop_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
 			`Sends POP3 NOOP to keep a session active or check connectivity and returns
-  nil.`, "1.8"))
+  nil.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("quit", quit_,
 		MakeMeta(
@@ -94,12 +94,12 @@ func InternsOrThunks() {
 			`Sends QUIT, commits server-side deletions marked in this session, closes the
   connection, and returns nil.
 
-  The POP3Client is unusable after quit, including when QUIT fails.`, "1.8"))
+  The POP3Client is unusable after quit, including when QUIT fails.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("reset", reset_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
-			`Clears any deletion marks in the current session and returns nil.`, "1.8"))
+			`Clears any deletion marks in the current session and returns nil.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("retrieve", retrieve_,
 		MakeMeta(
@@ -116,7 +116,7 @@ func InternsOrThunks() {
 			`Returns mailbox statistics as {:count n :octets size}.
 
   :count is the number of messages in the mailbox and :octets is their
-  combined reported size.`, "1.8"))
+  combined reported size.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	pop3Namespace.InternVar("top", top_,
 		MakeMeta(
@@ -134,6 +134,6 @@ func InternsOrThunks() {
 
   With one argument, returns a vector of {:number n :uid id} maps for all
   available messages. With number, returns the identifier map for that
-  message. UIDL is an optional POP3 command; unsupported servers cause Error.`, "1.8"))
+  message. UIDL is an optional POP3 command; unsupported servers cause Error.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Seqable"}))
 
 }

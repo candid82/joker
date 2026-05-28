@@ -144,7 +144,7 @@ func __next_sequence_(_args []Object) Object {
 		db := ExtractBoltDB(_args, 0)
 		bucket := ExtractString(_args, 1)
 		_res := nextSequence(db, bucket)
-		return _res
+		return MakeInt(_res)
 
 	default:
 		PanicArity(_c)

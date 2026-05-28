@@ -29,7 +29,7 @@ func InternsOrThunks() {
 			`Parses an RFC 5322 address list and returns a vector of maps.
 
   Each element has the form {:name display-name :address mailbox}. Throws
-  Error when s is not a valid address list according to Go's net/mail parser.`, "1.8.1"))
+  Error when s is not a valid address list according to Go's net/mail parser.`, "1.8.1").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	mailNamespace.InternVar("parse-date", parse_date_,
 		MakeMeta(
@@ -51,6 +51,6 @@ func InternsOrThunks() {
   vectors so repeated headers are preserved. The complete message body is
   buffered in memory. This function does not parse MIME parts or decode body
   transfer encodings. Throws Error when source is invalid or the headers
-  cannot be parsed.`, "1.8.1"))
+  cannot be parsed.`, "1.8.1").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 }

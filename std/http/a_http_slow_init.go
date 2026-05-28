@@ -49,7 +49,7 @@ func InternsOrThunks() {
                                 :method :post
                                 :headers {"Content-Type" "text/plain"}
                                 :body "hello"})]
-      [(:status res) (:body res)])`, "1.0"))
+      [(:status res) (:body res)])`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	httpNamespace.InternVar("start-file-server", start_file_server_,
 		MakeMeta(
@@ -65,7 +65,7 @@ func InternsOrThunks() {
   start-file-server in go when the caller must keep doing other work.
 
   Example:
-    (go (joker.http/start-file-server "127.0.0.1:8080" "public"))`, "1.0"))
+    (go (joker.http/start-file-server "127.0.0.1:8080" "public"))`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	httpNamespace.InternVar("start-server", start_server_,
 		MakeMeta(
@@ -124,6 +124,6 @@ func InternsOrThunks() {
         (fn [req]
           {:status 200
            :headers {"Content-Type" "text/plain"}
-           :body (str "hello " (:uri req))})))`, "1.0"))
+           :body (str "hello " (:uri req))})))`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 }

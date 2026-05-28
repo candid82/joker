@@ -114,7 +114,7 @@ func getBucket(tx *bolt.Tx, bucket string) *bolt.Bucket {
 	return b
 }
 
-func nextSequence(db *bolt.DB, bucket string) Int {
+func nextSequence(db *bolt.DB, bucket string) int {
 	var id uint64
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := getBucket(tx, bucket)
@@ -124,7 +124,7 @@ func nextSequence(db *bolt.DB, bucket string) Int {
 		return nil
 	})
 	PanicOnErr(err)
-	return MakeInt(int(id))
+	return int(id)
 }
 
 func put(db *bolt.DB, bucket, key, value string) Nil {

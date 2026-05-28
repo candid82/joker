@@ -97,7 +97,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
   - mode (int)
   - modtime (Time)
   - dir? (boolean)
-  Throws Error when root cannot be walked or when an entry cannot be read.`, "1.0"))
+  Throws Error when root cannot be walked or when an entry cannot be read.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	filepathNamespace.InternVar("from-slash", from_slash_,
 		MakeMeta(
@@ -144,7 +144,7 @@ If the result of this process is an empty string, returns the string ".".`, "1.0
 			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
 			`Splits path immediately following the final separator, separating it into a directory and file name component.
   If there is no separator in path, returns an empty dir and file set to path. The returned values have
-  the property that path = dir+file.`, "1.0"))
+  the property that path = dir+file.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	filepathNamespace.InternVar("split-list", split_list_,
 		MakeMeta(

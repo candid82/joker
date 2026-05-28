@@ -33,7 +33,7 @@
    :go "queryUnescape(s)"}
   [^String s])
 
-(defn parse-query
+(defn ^Map parse-query
   "Parses URL-encoded query string s into a map of string keys to value vectors.
 
   Always returns a map containing the query parameters found.

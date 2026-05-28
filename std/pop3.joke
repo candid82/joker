@@ -36,7 +36,7 @@
    :go "connect(opts)"}
   [^Map opts])
 
-(defn capabilities
+(defn ^Map capabilities
   "Returns the server CAPA response as a map of capability strings to vectors
   of argument strings.
 
@@ -47,7 +47,7 @@
    :go "capabilities(client)"}
   [^POP3Client client])
 
-(defn stat
+(defn ^Map stat
   "Returns mailbox statistics as {:count n :octets size}.
 
   :count is the number of messages in the mailbox and :octets is their
@@ -56,7 +56,7 @@
    :go "stat(client)"}
   [^POP3Client client])
 
-(defn list
+(defn ^Seqable list
   "Returns POP3 message size information.
 
   With one argument, returns a vector of {:number n :octets size} maps for all
@@ -68,7 +68,7 @@
   ([^POP3Client client])
   ([^POP3Client client ^Int number]))
 
-(defn uidl
+(defn ^Seqable uidl
   "Returns POP3 unique identifiers.
 
   With one argument, returns a vector of {:number n :uid id} maps for all
@@ -100,7 +100,7 @@
    :go "top(client, number, lines)"}
   [^POP3Client client ^Int number ^Int lines])
 
-(defn delete
+(defn ^Nil delete
   "Marks message number for deletion and returns nil.
 
   POP3 applies marked deletions only after a successful quit. Use reset to
@@ -109,20 +109,20 @@
    :go "deleteMessage(client, number)"}
   [^POP3Client client ^Int number])
 
-(defn reset
+(defn ^Nil reset
   "Clears any deletion marks in the current session and returns nil."
   {:added "1.8"
    :go "reset(client)"}
   [^POP3Client client])
 
-(defn noop
+(defn ^Nil noop
   "Sends POP3 NOOP to keep a session active or check connectivity and returns
   nil."
   {:added "1.8"
    :go "noop(client)"}
   [^POP3Client client])
 
-(defn quit
+(defn ^Nil quit
   "Sends QUIT, commits server-side deletions marked in this session, closes the
   connection, and returns nil.
 
@@ -131,7 +131,7 @@
    :go "quit(client)"}
   [^POP3Client client])
 
-(defn close
+(defn ^Nil close
   "Closes client without sending QUIT and returns nil.
 
   Use close to abandon a session without committing deletion marks. close is

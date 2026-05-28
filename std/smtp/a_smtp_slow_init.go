@@ -47,6 +47,6 @@ func InternsOrThunks() {
               :password "secret"}
        :from "sender@example.com"
        :to ["recipient@example.com"]
-       :message "From: sender@example.com\r\nTo: recipient@example.com\r\nSubject: Hello\r\n\r\nBody"})`, "1.8"))
+       :message "From: sender@example.com\r\nTo: recipient@example.com\r\nSubject: Hello\r\n\r\nBody"})`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 }

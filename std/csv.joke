@@ -2,7 +2,7 @@
       :doc "Reads and writes comma-separated values (CSV) using RFC 4180-style parsing and formatting."}
   csv)
 
-(defn csv-seq
+(defn ^Seq csv-seq
   "Returns records from rdr as a lazy sequence of string vectors.
 
   rdr must be a string or implement io.Reader. Parsing happens as the returned
@@ -67,7 +67,7 @@
   ([^Seqable data])
   ([^Seqable data ^Map opts]))
 
-(defn write
+(defn ^Nil write
   "Writes data as CSV to f and returns nil.
 
   f must implement io.Writer, for example a file returned by joker.os/create.
@@ -79,4 +79,3 @@
         3 "write(f, data, opts)"}}
   ([^IOWriter f ^Seqable data])
   ([^IOWriter f ^Seqable data ^Map opts]))
-

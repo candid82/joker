@@ -130,7 +130,7 @@ func jsonSeqOpts(src Object, opts Map) Object {
 	return jsonLazySeq()
 }
 
-func writeString(obj Object, opts Map) String {
+func writeString(obj Object, opts Map) string {
 	var (
 		prefix String
 		indent String
@@ -154,5 +154,5 @@ func writeString(obj Object, opts Map) String {
 	if err != nil {
 		panic(RT.NewError("Cannot encode value to json: " + err.Error()))
 	}
-	return String{S: string(res)}
+	return string(res)
 }

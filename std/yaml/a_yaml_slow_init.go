@@ -30,6 +30,6 @@ func InternsOrThunks() {
 
   Keywords are encoded without their leading colon, map keys are converted to
   strings, and vectors become YAML sequences. Throws Error when v cannot be
-  encoded.`, "1.0"))
+  encoded.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

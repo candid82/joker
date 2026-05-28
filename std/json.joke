@@ -21,7 +21,7 @@
   ([^String s])
   ([^String s ^Map opts]))
 
-(defn write-string
+(defn ^String write-string
   "Returns the JSON encoding of v.
 
   Keywords are encoded without their leading colon. Map keys are converted to
@@ -43,7 +43,7 @@
   ([^Object v])
   ([^Object v ^Map opts]))
 
-(defn json-seq
+(defn ^Seq json-seq
   "Returns successive JSON values from rdr as a lazy sequence.
 
   rdr must be a string or implement io.Reader. Multiple top-level JSON values

@@ -104,7 +104,7 @@
     (str (first tag) "Vector")
     (str tag)))
 
-(def ^:private unmakable-types #{Map})
+(def ^:private unmakable-types #{Map Nil Proc Seq Seqable Vec})
 
 (defn generate-arity
   [args go tag]
