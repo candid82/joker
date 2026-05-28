@@ -1,0 +1,46 @@
+(ns ^{:go-imports []
+      :doc "Parses raw RFC 5322 email messages, address fields, and mail dates."}
+  mail)
+
+(defn read-message
+  "Parses an RFC 5322 message from source and returns its headers and raw body.
+
+  source must be a string or implement io.Reader, such as a string returned by
+  joker.pop3/retrieve. The result is a map of the form
+  {:headers {\"Header-Name\" [\"value\" ...]} :body \"raw body\"}.
+
+  Header names use Go net/mail's canonical form and header values remain
+  vectors so repeated headers are preserved. The complete message body is
+  buffered in memory. This function does not parse MIME parts or decode body
+  transfer encodings. Throws Error when source is invalid or the headers
+  cannot be parsed."
+  {:added "1.8.1"
+   :go "readMessage(source)"}
+  [^Object source])
+
+(defn parse-address
+  "Parses one RFC 5322 email address and returns
+  {:name display-name :address mailbox}.
+
+  A missing display name is returned as an empty string. Throws Error when s
+  is not a valid address according to Go's net/mail parser."
+  {:added "1.8.1"
+   :go "parseAddress(s)"}
+  [^String s])
+
+(defn parse-address-list
+  "Parses an RFC 5322 address list and returns a vector of maps.
+
+  Each element has the form {:name display-name :address mailbox}. Throws
+  Error when s is not a valid address list according to Go's net/mail parser."
+  {:added "1.8.1"
+   :go "parseAddressList(s)"}
+  [^String s])
+
+(defn ^Time parse-date
+  "Parses an RFC 5322 date string and returns a Time.
+
+  Throws Error when s is not a date accepted by Go's net/mail parser."
+  {:added "1.8.1"
+   :go "parseDate(s)"}
+  [^String s])

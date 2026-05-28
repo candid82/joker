@@ -1,0 +1,120 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.mail</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, and mail dates.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#parse-address">parse-address</a>
+</li>
+<li>
+  <a href="#parse-address-list">parse-address-list</a>
+</li>
+<li>
+  <a href="#parse-date">parse-date</a>
+</li>
+<li>
+  <a href="#read-message">read-message</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="parse-address">parse-address</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8.1</span>
+  <pre class="var-usage"><div><code>(parse-address s)</code></div>
+</pre>
+  <p class="var-docstr">Parses one RFC 5322 email address and returns<br>
+  {:name display-name :address mailbox}.<br>
+<br>
+  A missing display name is returned as an empty string. Throws Error when s<br>
+  is not a valid address according to Go&#39;s net/mail parser.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="parse-address-list">parse-address-list</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8.1</span>
+  <pre class="var-usage"><div><code>(parse-address-list s)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 address list and returns a vector of maps.<br>
+<br>
+  Each element has the form {:name display-name :address mailbox}. Throws<br>
+  Error when s is not a valid address list according to Go&#39;s net/mail parser.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="parse-date">parse-date</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8.1</span>
+  <pre class="var-usage"><div><code>(parse-date s)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 date string and returns a Time.<br>
+<br>
+  Throws Error when s is not a date accepted by Go&#39;s net/mail parser.</p>
+  
+  
+</li>
+<li>
+  <h3 class="Function" id="read-message">read-message</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.8.1</span>
+  <pre class="var-usage"><div><code>(read-message source)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 message from source and returns its headers and raw body.<br>
+<br>
+  source must be a string or implement io.Reader, such as a string returned by<br>
+  joker.pop3/retrieve. The result is a map of the form<br>
+  {:headers {&#34;Header-Name&#34; [&#34;value&#34; ...]} :body &#34;raw body&#34;}.<br>
+<br>
+  Header names use Go net/mail&#39;s canonical form and header values remain<br>
+  vectors so repeated headers are preserved. The complete message body is<br>
+  buffered in memory. This function does not parse MIME parts or decode body<br>
+  transfer encodings. Throws Error when source is invalid or the headers<br>
+  cannot be parsed.</p>
+  
+  
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>

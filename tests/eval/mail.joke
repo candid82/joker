@@ -1,0 +1,35 @@
+(ns joker.test-joker.mail
+  (:require [joker.mail :as mail]
+            [joker.test :refer [deftest is]]
+            [joker.time :as time]))
+
+(deftest read-message
+  (let [raw (str "From: Alice <alice@example.com>\r\n"
+                 "Subject: Hello\r\n"
+                 "Received: first\r\n"
+                 "Received: second\r\n"
+                 "\r\n"
+                 "raw body\r\n")
+        message (mail/read-message raw)]
+    (is (= ["Alice <alice@example.com>"] (get-in message [:headers "From"])))
+    (is (= ["Hello"] (get-in message [:headers "Subject"])))
+    (is (= ["first" "second"] (get-in message [:headers "Received"])))
+    (is (= "raw body\r\n" (:body message)))))
+
+(deftest parse-addresses
+  (is (= {:name "Alice" :address "alice@example.com"}
+         (mail/parse-address "Alice <alice@example.com>")))
+  (is (= [{:name "Alice" :address "alice@example.com"}
+          {:name "" :address "bob@example.com"}]
+         (mail/parse-address-list "Alice <alice@example.com>, bob@example.com"))))
+
+(deftest parse-date
+  (is (= "2026-05-27T10:15:00-04:00"
+         (time/format (mail/parse-date "Wed, 27 May 2026 10:15:00 -0400")
+                      time/rfc3339))))
+
+(deftest invalid-input
+  (is (thrown? Error (mail/read-message "Invalid header\r\n\r\nBody")))
+  (is (thrown? Error (mail/parse-address "Alice <")))
+  (is (thrown? Error (mail/parse-address-list "Alice <")))
+  (is (thrown? Error (mail/parse-date "not a date"))))

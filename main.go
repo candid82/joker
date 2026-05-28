@@ -26,6 +26,7 @@ import (
 	_ "github.com/candid82/joker/std/http"
 	_ "github.com/candid82/joker/std/io"
 	_ "github.com/candid82/joker/std/json"
+	_ "github.com/candid82/joker/std/mail"
 	_ "github.com/candid82/joker/std/markdown"
 	_ "github.com/candid82/joker/std/math"
 	_ "github.com/candid82/joker/std/os"
