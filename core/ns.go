@@ -177,6 +177,7 @@ func (ns *Namespace) InternVar(name string, val Object, meta *ArrayMap) *Var {
 	meta.Add(KEYWORDS.ns, ns)
 	meta.Add(KEYWORDS.name, vr.name)
 	vr.meta = meta
+	vr.taggedType = getTaggedType(vr)
 	return vr
 }
 

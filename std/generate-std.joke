@@ -104,6 +104,8 @@
     (str (first tag) "Vector")
     (str tag)))
 
+(def ^:private unmakable-types #{Map})
+
 (defn generate-arity
   [args go tag]
   (let [handle-args (handle-varargs args)
@@ -126,7 +128,8 @@
                         (extract-args handle-args)))
         (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
         (rpl "{return}"
-             (if tag
+             (if (and tag
+                      (not (unmakable-types tag)))
                (str "return Make" (type-name tag) "(_res)")
                "return _res")))))
 

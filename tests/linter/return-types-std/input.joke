@@ -1,0 +1,6 @@
+(ns return-types-std
+  (:require [joker.mail :as mail]))
+
+(defn ^String email-from [from]
+  (mail/parse-address from))
+

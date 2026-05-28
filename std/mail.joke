@@ -18,7 +18,7 @@
    :go "readMessage(source)"}
   [^Object source])
 
-(defn parse-address
+(defn ^Map parse-address
   "Parses one RFC 5322 email address and returns
   {:name display-name :address mailbox}.
 

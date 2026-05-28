@@ -714,6 +714,34 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	}
 }
 
+func checkReturnType(vr *Var, valueExpr Expr) {
+	if !LINTER_MODE || vr.taggedType == nil || valueExpr == nil {
+		return
+	}
+	if metaExpr, ok := valueExpr.(*MetaExpr); ok {
+		valueExpr = metaExpr.expr
+	}
+	fnExpr, ok := valueExpr.(*FnExpr)
+	if !ok {
+		return
+	}
+	checkArity := func(arity *FnArityExpr) {
+		if len(arity.body) == 0 {
+			return
+		}
+		returnExpr := arity.body[len(arity.body)-1]
+		if returnedType := returnExpr.InferType(); returnedType != nil && !IsEqualOrImplements(vr.taggedType, returnedType) {
+			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), vr.taggedType.ToString(false), returnedType.ToString(false)))
+		}
+	}
+	for i := range fnExpr.arities {
+		checkArity(&fnExpr.arities[i])
+	}
+	if fnExpr.variadic != nil {
+		checkArity(fnExpr.variadic)
+	}
+}
+
 func isCreatedByMacro(formSeq Seq) bool {
 	return formSeq.First().GetInfo().Pos().filename == STR.coreFilename
 }
@@ -762,6 +790,7 @@ func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 			}
 		}
 		updateVar(vr, obj.GetInfo(), res.value, sym)
+		checkReturnType(vr, res.value)
 		if meta != nil {
 			res.meta = Parse(DeriveReadObject(obj, meta), ctx)
 		}
@@ -1300,7 +1329,16 @@ func reportNotAFunction(pos Position, name string) {
 func getTaggedType(obj Meta) *Type {
 	if m := obj.GetMeta(); m != nil {
 		if ok, typeName := m.Get(KEYWORDS.tag); ok {
-			if typeSym, ok := typeName.(Symbol); ok {
+			switch typeName := typeName.(type) {
+			case Symbol:
+				if t := TYPES[typeName.name]; t != nil {
+					return t
+				}
+			case String:
+				if strings.Contains(typeName.S, "|") {
+					return nil
+				}
+				typeSym := MakeSymbol(typeName.S)
 				if t := TYPES[typeSym.name]; t != nil {
 					return t
 				}

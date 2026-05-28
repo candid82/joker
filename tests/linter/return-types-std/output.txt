@@ -1,0 +1,1 @@
+tests/linter/return-types-std/input.joke:5:3: Parse warning: return value of email-from must have type String, got Map

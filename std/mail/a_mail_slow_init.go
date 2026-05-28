@@ -21,7 +21,7 @@ func InternsOrThunks() {
   {:name display-name :address mailbox}.
 
   A missing display name is returned as an empty string. Throws Error when s
-  is not a valid address according to Go's net/mail parser.`, "1.8.1"))
+  is not a valid address according to Go's net/mail parser.`, "1.8.1").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	mailNamespace.InternVar("parse-address-list", parse_address_list_,
 		MakeMeta(
