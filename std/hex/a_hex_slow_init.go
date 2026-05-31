@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	hexNamespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Decodes hexadecimal string s and returns the represented bytes as a string.
 
   Throws Error when s has odd length or contains non-hexadecimal characters.
@@ -28,7 +28,7 @@ func InternsOrThunks() {
 
 	hexNamespace.InternVar("encode-string", encode_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the lower-case hexadecimal encoding of string s.
 
   Example:

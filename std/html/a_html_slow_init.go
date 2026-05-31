@@ -19,7 +19,7 @@ func InternsOrThunks() {
 
 	htmlNamespace.InternVar("escape", escape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Escapes HTML-sensitive characters in s.
 
   Replaces only <, >, &, ', and " with their HTML entity forms, matching Go's
@@ -31,7 +31,7 @@ func InternsOrThunks() {
 
 	htmlNamespace.InternVar("unescape", unescape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Unescapes HTML entities in s.
 
   Recognizes named and numeric entities using Go's html.UnescapeString rules.

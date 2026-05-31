@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	mailNamespace.InternVar("parse-address", parse_address_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses one RFC 5322 email address and returns
   {:name display-name :address mailbox}.
 
@@ -25,7 +25,7 @@ func InternsOrThunks() {
 
 	mailNamespace.InternVar("parse-address-list", parse_address_list_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses an RFC 5322 address list and returns a vector of maps.
 
   Each element has the form {:name display-name :address mailbox}. Throws
@@ -33,14 +33,14 @@ func InternsOrThunks() {
 
 	mailNamespace.InternVar("parse-date", parse_date_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses an RFC 5322 date string and returns a Time.
 
   Throws Error when s is not a date accepted by Go's net/mail parser.`, "1.8.1").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	mailNamespace.InternVar("read-message", read_message_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("source"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("source").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol))),
 			`Parses an RFC 5322 message from source and returns its headers and raw body.
 
   source must be a string or implement io.Reader, such as a string returned by

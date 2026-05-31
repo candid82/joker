@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	urlNamespace.InternVar("parse-query", parse_query_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses URL-encoded query string s into a map of string keys to value vectors.
 
   Always returns a map containing the query parameters found.
@@ -26,12 +26,12 @@ func InternsOrThunks() {
 
 	urlNamespace.InternVar("path-escape", path_escape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Escapes the string so it can be safely placed inside a URL path segment.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	urlNamespace.InternVar("path-unescape", path_unescape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Reverses path-escape for one URL path segment.
 
   Converts percent-encoded substrings such as "%2F" to their bytes. Unlike
@@ -40,12 +40,12 @@ func InternsOrThunks() {
 
 	urlNamespace.InternVar("query-escape", query_escape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Escapes the string so it can be safely placed inside a URL query.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	urlNamespace.InternVar("query-unescape", query_unescape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Reverses query-escape for query text.
 
   Converts percent-encoded substrings such as "%2F" to their bytes and '+'

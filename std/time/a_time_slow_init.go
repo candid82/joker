@@ -121,22 +121,22 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("add", add_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the time t+d.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("add-date", add_date_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("years"), MakeSymbol("months"), MakeSymbol("days"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("years").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol), MakeSymbol("months").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol), MakeSymbol("days").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the time t + (years, months, days).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("day-of-year", day_of_year_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
 			`Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years.`, "1.3.4").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("format", format_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("layout"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("layout").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a textual representation of the time value formatted according to layout,
   which defines the format by showing how the reference time, defined to be
   Mon Jan 2 15:04:05 -0700 MST 2006
@@ -145,18 +145,18 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("from-unix", from_unix_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("sec"), MakeSymbol("nsec"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("sec").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol), MakeSymbol("nsec").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the local Time corresponding to the given Unix time, sec seconds and
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].`, "1.0").Plus(MakeKeyword("tag"), String{S: "Time"}))
 
 	timeNamespace.InternVar("hours", hours_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	timeNamespace.InternVar("in-timezone", in_timezone_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("tz"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("tz").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns t represented in timezone tz.
 
   The instant is unchanged; only the location used for display and calendar
@@ -165,7 +165,7 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("minutes", minutes_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	timeNamespace.InternVar("now", now_,
@@ -175,7 +175,7 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("parse", parse_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("layout").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses value according to layout and returns a Time.
 
   layout uses Go's reference-time convention. When value contains no zone
@@ -183,14 +183,14 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("parse-duration", parse_duration_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are
   ns, us (or µs), ms, s, m, h.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("parse-in-timezone", parse_in_timezone_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("layout"), MakeSymbol("value"), MakeSymbol("tz"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("layout").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("tz").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses value according to layout in timezone tz and returns a Time.
 
   tz must be a loadable IANA timezone name such as "America/New_York".
@@ -198,49 +198,49 @@ func InternsOrThunks() {
 
 	timeNamespace.InternVar("round", round_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol), MakeSymbol("m").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.
   The rounding behavior for halfway values is to round away from zero. If m <= 0, returns d unchanged.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("seconds", seconds_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	timeNamespace.InternVar("since", since_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
 			`Returns the time in nanoseconds elapsed since t.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("sleep", sleep_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Pauses the execution thread for at least the duration d (expressed in nanoseconds).
   A negative or zero duration causes sleep to return immediately.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	timeNamespace.InternVar("string", string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns a string representing the duration in the form 72h3m0.5s.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	timeNamespace.InternVar("sub", sub_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"), MakeSymbol("u"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("u").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
 			`Returns the duration t-u in nanoseconds.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("truncate", truncate_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("d"), MakeSymbol("m"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("d").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol), MakeSymbol("m").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Integer"}).(Map)).(Symbol))),
 			`Returns the result of rounding d toward zero to a multiple of m. If m <= 0, returns d unchanged.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("unix", unix_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
 			`Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	timeNamespace.InternVar("until", until_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("t"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("t").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
 			`Returns the duration in nanoseconds until t.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 }

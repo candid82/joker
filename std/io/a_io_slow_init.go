@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	ioNamespace.InternVar("close", close_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol))),
 			`Closes f and returns nil.
 
   f must implement close, such as an IOWriter, IOReader, or File. Throws Error
@@ -24,7 +24,7 @@ func InternsOrThunks() {
 
 	ioNamespace.InternVar("copy", copy_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dst"), MakeSymbol("src"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("dst").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "IOWriter"}).(Map)).(Symbol), MakeSymbol("src").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "IOReader"}).(Map)).(Symbol))),
 			`Copies bytes from src to dst until src reaches EOF or an error occurs.
 
   Returns the number of bytes copied. Throws Error for read or write failures.
@@ -45,7 +45,7 @@ func InternsOrThunks() {
 
 	ioNamespace.InternVar("read", read_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("r"), MakeSymbol("n"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("r").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "IOReader"}).(Map)).(Symbol), MakeSymbol("n").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Performs one read from IOReader r and returns up to n bytes as a string.
 
   This is not a read-exactly operation: it may return fewer than n bytes even

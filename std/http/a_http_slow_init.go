@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	httpNamespace.InternVar("send", send_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("request").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Sends an HTTP request and returns an HTTP response map.
 
   request is a map with the following keys:
@@ -53,7 +53,7 @@ func InternsOrThunks() {
 
 	httpNamespace.InternVar("start-file-server", start_file_server_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("root"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("addr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("root").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Starts an HTTP file server on TCP network address addr and blocks while it
   runs.
 
@@ -69,7 +69,7 @@ func InternsOrThunks() {
 
 	httpNamespace.InternVar("start-server", start_server_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("addr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("handler").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Callable"}).(Map)).(Symbol))),
 			`Starts an HTTP server on TCP network address addr and blocks while it runs.
 
   Typical addr values are "127.0.0.1:8080" or ":8080". Throws Error if the

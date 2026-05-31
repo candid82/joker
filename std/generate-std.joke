@@ -133,11 +133,19 @@
                (str "return Make" (type-name tag) "(_res)")
                "return _res")))))
 
+(defn generate-arg
+  [arg]
+  (let [res (str "MakeSymbol(" (q (str arg)) ")")
+        tag (:tag (meta arg))]
+    (if tag
+      (str res ".WithMeta(EmptyArrayMap().Assoc(MakeKeyword(\"tag\"), String{S: " (q (str tag)) "}).(Map)).(Symbol)")
+      res)))
+
 (defn generate-arglist
   [args]
   (str "NewVectorFrom("
        (s/join ", " (for [arg args]
-                      (str "MakeSymbol(" (q (str arg)) ")")))
+                      (generate-arg arg)))
        ")"))
 
 (defn make-value

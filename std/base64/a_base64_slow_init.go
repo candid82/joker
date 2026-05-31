@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	base64Namespace.InternVar("decode-string", decode_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Decodes standard padded Base64 string s and returns the decoded bytes as a
   string.
 
@@ -32,7 +32,7 @@ func InternsOrThunks() {
 
 	base64Namespace.InternVar("encode-string", encode_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the standard padded Base64 encoding of string s.
 
   s is encoded from its raw bytes using the RFC 4648 standard alphabet and = as

@@ -31,7 +31,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("by-prefix", by_prefix_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("prefix"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("prefix").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns key/value pairs from bucket whose keys start with prefix.
 
   Results are returned as a vector of [key value] vectors in Bolt key order.
@@ -40,7 +40,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("close", close_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol))),
 			`Closes db and releases its database resources.
 
   Blocks until open transactions finish, then releases the file lock. Throws
@@ -48,7 +48,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("create-bucket", create_bucket_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Creates bucket name and returns nil.
 
   Throws Error if the bucket already exists, if name is blank or too long, or
@@ -56,7 +56,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("create-bucket-if-not-exists", create_bucket_if_not_exists_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Creates bucket name when needed and returns nil.
 
   Does nothing when the bucket already exists. Throws Error if name is blank or
@@ -64,7 +64,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("delete", delete_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes key from bucket and returns nil.
 
   Missing keys are ignored. Throws Error when bucket does not exist or the
@@ -72,14 +72,14 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("delete-bucket", delete_bucket_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Deletes bucket name and returns nil.
 
   Throws Error when the bucket does not exist or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	boltNamespace.InternVar("get", get_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the string value stored at key in bucket.
 
   Returns nil when key does not exist. Throws Error when bucket does not exist
@@ -87,7 +87,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("next-sequence", next_sequence_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the next auto-incrementing integer for bucket.
 
   Each call advances the bucket sequence counter inside a write transaction.
@@ -95,7 +95,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("open", open_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"), MakeSymbol("mode"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("filename").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("mode").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Opens the database file at filename and returns a BoltDB handle.
 
   If the file does not exist, it is created with mode before the process umask
@@ -111,7 +111,7 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("put", put_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"), MakeSymbol("value"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Stores value at key in bucket and returns nil.
 
   Keys and values are strings stored as raw bytes. Replaces any previous value

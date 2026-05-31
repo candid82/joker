@@ -1,0 +1,25 @@
+(ns infer-value
+  (:require [joker.mail :as mail]
+            [joker.string :as string]))
+
+(defn- non-blank
+  [s]
+  (when (and (string? s) (not (string/blank? s)))
+    s))
+
+(defn- normalize-email
+  [email]
+  (when-let [email (non-blank email)]
+    (string/lower-case (string/trim email))))
+
+(defn- email-from
+  [email]
+  (try
+    (mail/parse-address email)
+    (catch Error e
+      nil)))
+
+(defn process
+  [email]
+  (let [from (email-from email)]
+    (normalize-email from)))

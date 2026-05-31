@@ -1,0 +1,1 @@
+tests/linter/infer-value/input.joke:25:22: Parse warning: arg[0] of infer-value/normalize-email must have type String, got Map or Nil

@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	smtpNamespace.InternVar("send", send_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("request").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Sends an email message through an SMTP server and returns nil.
 
   request is a map with the following keys:

@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	jsonNamespace.InternVar("json-seq", json_seq_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("rdr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("rdr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Returns successive JSON values from rdr as a lazy sequence.
 
   rdr must be a string or implement io.Reader. Multiple top-level JSON values
@@ -28,7 +28,7 @@ func InternsOrThunks() {
 
 	jsonNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Parses one JSON value from s and returns the corresponding Joker value.
 
   JSON objects become maps, arrays become vectors, strings become strings,
@@ -44,7 +44,7 @@ func InternsOrThunks() {
 
 	jsonNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v")), NewVectorFrom(MakeSymbol("v"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("v").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("v").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Returns the JSON encoding of v.
 
   Keywords are encoded without their leading colon. Map keys are converted to

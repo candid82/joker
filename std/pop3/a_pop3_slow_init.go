@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("capabilities", capabilities_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Returns the server CAPA response as a map of capability strings to vectors
   of argument strings.
 
@@ -26,7 +26,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("close", close_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Closes client without sending QUIT and returns nil.
 
   Use close to abandon a session without committing deletion marks. close is
@@ -34,7 +34,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("connect", connect_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Connects to a POP3 server, authenticates, and returns a POP3Client session.
 
   opts is a map with the following keys:
@@ -67,7 +67,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("delete", delete_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"), MakeSymbol("number"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol), MakeSymbol("number").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Marks message number for deletion and returns nil.
 
   POP3 applies marked deletions only after a successful quit. Use reset to
@@ -75,7 +75,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("list", list_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client")), NewVectorFrom(MakeSymbol("client"), MakeSymbol("number"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol), MakeSymbol("number").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns POP3 message size information.
 
   With one argument, returns a vector of {:number n :octets size} maps for all
@@ -84,13 +84,13 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("noop", noop_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Sends POP3 NOOP to keep a session active or check connectivity and returns
   nil.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("quit", quit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Sends QUIT, commits server-side deletions marked in this session, closes the
   connection, and returns nil.
 
@@ -98,12 +98,12 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("reset", reset_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Clears any deletion marks in the current session and returns nil.`, "1.8").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	pop3Namespace.InternVar("retrieve", retrieve_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"), MakeSymbol("number"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol), MakeSymbol("number").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Retrieves the complete raw RFC 5322 message for message number.
 
   Returns the message as a string with POP3 dot-stuffing removed and CRLF line
@@ -112,7 +112,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("stat", stat_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol))),
 			`Returns mailbox statistics as {:count n :octets size}.
 
   :count is the number of messages in the mailbox and :octets is their
@@ -120,7 +120,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("top", top_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client"), MakeSymbol("number"), MakeSymbol("lines"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol), MakeSymbol("number").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("lines").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Retrieves message headers and up to lines body lines for message number.
 
   TOP is an optional POP3 command; unsupported servers cause Error. The
@@ -129,7 +129,7 @@ func InternsOrThunks() {
 
 	pop3Namespace.InternVar("uidl", uidl_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("client")), NewVectorFrom(MakeSymbol("client"), MakeSymbol("number"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("client").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "POP3Client"}).(Map)).(Symbol), MakeSymbol("number").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns POP3 unique identifiers.
 
   With one argument, returns a vector of {:number n :uid id} maps for all

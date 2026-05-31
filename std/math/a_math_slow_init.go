@@ -81,103 +81,103 @@ func InternsOrThunks() {
 
 	mathNamespace.InternVar("abs", abs_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the absolute value of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("ceil", ceil_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the least integer value greater than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("copy-sign", copy_sign_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("y").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns value with the magnitude of x and the sign of y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("cos", cos_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the cosine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("cube-root", cube_root_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the cube root of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("dim", dim_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("y").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the maximum of x-y and 0.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("exp", exp_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns e**x, the base-e exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("exp-2", exp_2_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns 2**x, the base-2 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("exp-minus-1", exp_minus_1_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns e**x - 1, the base-e exponential of x minus 1.
 
   This is more accurate than (- (exp x) 1.) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("floor", floor_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the greatest integer value less than or equal to x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("hypot", hypot_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("p"), MakeSymbol("q"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("p").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("q").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns Sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("inf", inf_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("sign"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("sign").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns positive infinity if sign >= 0, negative infinity if sign < 0.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("inf?", isinf_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("sign"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("sign").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns whether x is an infinity.
 
   If sign > 0, returns whether x is positive infinity; if < 0, whether negative infinity; if == 0, whether either infinity.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	mathNamespace.InternVar("log", log_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the natural logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-10", log_10_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the decimal logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-2", log_2_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the binary logarithm of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-binary", log_binary_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the binary exponent of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("log-plus-1", log_plus_1_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the natural logarithm of 1 plus x.
 
   This is more accurate than (log (+ 1 x)) when x is near zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("modf", modf_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns a vector with the integer and fractional floating-point numbers that sum to x.
 
   Both values have the same sign as x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
@@ -189,27 +189,27 @@ func InternsOrThunks() {
 
 	mathNamespace.InternVar("nan?", isnan_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns whether x is an IEEE 754 "not-a-number" value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	mathNamespace.InternVar("next-after", next_after_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("y").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the next representable Double value after x towards y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("pow", pow_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"), MakeSymbol("y"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("y").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns x**y, the base-x exponential of y.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("pow-10", pow_10_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns 10**x, the base-10 exponential of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("precision", precision_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the precision of a Number.
 
   The precision excludes any sign or exponent. For a BigInt, it's the
@@ -227,17 +227,17 @@ func InternsOrThunks() {
 
 	mathNamespace.InternVar("round", round_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the integer nearest to x, rounding half away from zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("round-to-even", round_to_even_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the integer nearest to x, rounding ties to the nearest even integer.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("set-precision", set_precision_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("prec"), MakeSymbol("f"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("prec").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol), MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BigFloat"}).(Map)).(Symbol))),
 			`Returns a copy of a BigFloat with the specified precision.
 
   Calls Go's math/big.(*Float)SetPrec(prec) on a copy of f. prec must
@@ -245,22 +245,22 @@ func InternsOrThunks() {
 
 	mathNamespace.InternVar("sign-bit", sign_bit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns whether x is negative or negative zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	mathNamespace.InternVar("sin", sin_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the sine of the radian argument x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("sqrt", sqrt_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the square root of x.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	mathNamespace.InternVar("trunc", trunc_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("x"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("x").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Number"}).(Map)).(Symbol))),
 			`Returns the integer value of x, rounded toward zero.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 }

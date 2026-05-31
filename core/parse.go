@@ -13,6 +13,7 @@ type (
 	Expr interface {
 		Eval(env *LocalEnv) Object
 		InferType() *Type
+		InferValue(env *InferEnv) InferredValue
 		Pos() Position
 		Dump(includePosition bool) Map
 		Pack(p []byte, env *PackEnv) []byte
@@ -85,6 +86,7 @@ type (
 	FnArityExpr struct {
 		Position
 		args       []Symbol
+		bindings   []*Binding
 		body       []Expr
 		taggedType *Type
 	}
@@ -93,12 +95,14 @@ type (
 		arities  []FnArityExpr
 		variadic *FnArityExpr
 		self     Symbol
+		summary  *FnSummary
 	}
 	LetExpr struct {
 		Position
-		names  []Symbol
-		values []Expr
-		body   []Expr
+		names    []Symbol
+		bindings []*Binding
+		values   []Expr
+		body     []Expr
 	}
 	LoopExpr  LetExpr
 	ThrowExpr struct {
@@ -129,11 +133,14 @@ type (
 		Call(args []Object) Object
 	}
 	Binding struct {
-		name         Symbol
-		index        int
-		frame        int
-		isUsed       bool
-		inferredType *Type
+		name          Symbol
+		index         int
+		frame         int
+		isUsed        bool
+		inferredType  *Type
+		inferredValue *InferredValue
+		requiredTypes []*Type
+		valueExpr     Expr
 	}
 	Bindings struct {
 		bindings map[*string]*Binding
@@ -369,30 +376,34 @@ func (b *Bindings) PopFrame() *Bindings {
 	return b.parent
 }
 
-func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool, inferredType *Type) {
+func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool, inferredType *Type) *Binding {
 	if LINTER_MODE && !skipUnused {
 		old := b.bindings[sym.name]
 		if old != nil && needsUnusedWarning(old) {
 			printParseWarning(GetPosition(old.name), "Unused binding: "+old.name.ToString(false))
 		}
 	}
-	b.bindings[sym.name] = &Binding{
+	binding := &Binding{
 		name:         sym,
 		frame:        b.frame,
 		index:        index,
 		inferredType: inferredType,
 	}
+	b.bindings[sym.name] = binding
+	return binding
 }
 
 func (ctx *ParseContext) PushEmptyLocalFrame() {
 	ctx.localBindings = ctx.localBindings.PushFrame()
 }
 
-func (ctx *ParseContext) PushLocalFrame(names []Symbol) {
+func (ctx *ParseContext) PushLocalFrame(names []Symbol) []*Binding {
 	ctx.PushEmptyLocalFrame()
+	res := make([]*Binding, len(names))
 	for i, sym := range names {
-		ctx.localBindings.AddBinding(sym, i, true, nil)
+		res[i] = ctx.localBindings.AddBinding(sym, i, true, nil)
 	}
+	return res
 }
 
 func (ctx *ParseContext) PopLocalFrame() {
@@ -730,8 +741,9 @@ func checkReturnType(vr *Var, valueExpr Expr) {
 			return
 		}
 		returnExpr := arity.body[len(arity.body)-1]
-		if returnedType := returnExpr.InferType(); returnedType != nil && !IsEqualOrImplements(vr.taggedType, returnedType) {
-			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), vr.taggedType.ToString(false), returnedType.ToString(false)))
+		returnedValue := returnExpr.InferValue(newInferEnv())
+		if !returnedValue.unknown && len(returnedValue.types) != 0 && !inferredTypesCompatible([]*Type{vr.taggedType}, returnedValue.types) {
+			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), vr.taggedType.ToString(false), inferredTypesString(returnedValue.types)))
 		}
 	}
 	for i := range fnExpr.arities {
@@ -885,7 +897,7 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	params := sig.First()
 	body := sig.Rest()
 	args, isVariadic := parseParams(params)
-	ctx.PushLocalFrame(args)
+	bindings := ctx.PushLocalFrame(args)
 	defer ctx.PopLocalFrame()
 	ctx.PushLoopBindings(args)
 	defer ctx.PopLoopBindings()
@@ -897,6 +909,7 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	arity := FnArityExpr{
 		Position:   GetPosition(sig),
 		args:       args,
+		bindings:   bindings,
 		body:       parseBody(body, ctx),
 		taggedType: getTaggedType(params.(Meta)),
 	}
@@ -1130,6 +1143,7 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 		}
 		skipUnused := isSkipUnused(b)
 		res.names = make([]Symbol, cnt/2)
+		res.bindings = make([]*Binding, cnt/2)
 		res.values = make([]Expr, cnt/2)
 		ctx.PushEmptyLocalFrame()
 		defer ctx.PopLocalFrame()
@@ -1161,12 +1175,14 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 					inferredType = res.values[i].InferType()
 				}
 			}
-			ctx.localBindings.AddBinding(res.names[i], i, skipUnused, inferredType)
+			res.bindings[i] = ctx.localBindings.AddBinding(res.names[i], i, skipUnused, inferredType)
+			res.bindings[i].valueExpr = res.values[i]
 		}
 
 		if formName == "letfn" {
 			for i := 0; i < cnt/2; i++ {
 				res.values[i] = Parse(b.At(i*2+1), ctx)
+				res.bindings[i].valueExpr = res.values[i]
 			}
 		}
 
@@ -1754,6 +1770,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 							}
 						}
 					}
+					checkInferredCall(res)
 					return res
 				default:
 					reportNotAFunction(pos, res.Name())
@@ -1764,6 +1781,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		default:
 			checkCall(res.callable, false, res, pos)
 		}
+		checkInferredCall(res)
 	}
 	return res
 }

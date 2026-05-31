@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("add-commit", add_commit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("msg"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("msg").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Creates a commit from the current index and returns its hash string.
 
   msg is the commit message. opts may contain:
@@ -26,7 +26,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("add-path", add_path_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("path"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("path").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Stages path from the worktree into the index and returns a hash string.
 
   Existing staged files may be staged again. Deleted files are removed from the
@@ -35,7 +35,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("commit", commit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("hash").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the commit map for hash.
 
   The result has the same shape as entries returned by joker.git/log. Throws
@@ -43,7 +43,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("config", config_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol))),
 			`Returns repo configuration as a map.
 
   The map includes core properties such as :bare?, :worktree, :default-branch,
@@ -52,7 +52,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("head", head_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol))),
 			`Returns the repository HEAD reference map.
 
   The returned map has the same shape as joker.git/ref. Throws Error when HEAD
@@ -60,7 +60,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("log", log_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Returns commit history as a vector of commit maps.
 
   Each commit map contains :hash, :author, :committer, :message, :tree-hash,
@@ -97,7 +97,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("object", object_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("hash"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("hash").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a summary map for the Git object with hash.
 
   The map contains :id and :type, where :type is one of :commit, :tree, :blob,
@@ -106,7 +106,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("open", open_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("path").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Opens the Git repository at path and returns a GitRepo handle.
 
   Detects both bare and worktree repositories. Throws Error when path does not
@@ -114,7 +114,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("ref", ref_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("name"), MakeSymbol("resolved"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("resolved").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Boolean"}).(Map)).(Symbol))),
 			`Returns reference name as a map.
 
   If resolved is true, symbolic references are resolved before being returned.
@@ -123,7 +123,7 @@ func InternsOrThunks() {
 
 	gitNamespace.InternVar("resolve-revision", resolve_revision_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("repo"), MakeSymbol("revision"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("repo").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "GitRepo"}).(Map)).(Symbol), MakeSymbol("revision").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Resolves revision to a commit hash string.
 
   The result is always the commit hash, not a tree hash or annotated-tag hash.

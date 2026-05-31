@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	yamlNamespace.InternVar("read-string", read_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses YAML string s and returns the corresponding Joker value.
 
   YAML mappings become maps, sequences become vectors, scalars become their
@@ -25,7 +25,7 @@ func InternsOrThunks() {
 
 	yamlNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("v"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("v").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol))),
 			`Returns the YAML encoding of v.
 
   Keywords are encoded without their leading colon, map keys are converted to

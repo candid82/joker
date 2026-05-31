@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	cryptoNamespace.InternVar("hmac", hmac_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("algorithm"), MakeSymbol("message"), MakeSymbol("key"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("algorithm").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Keyword"}).(Map)).(Symbol), MakeSymbol("message").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the HMAC of message using key and algorithm as raw bytes.
 
   algorithm must be one of :sha1, :sha224, :sha256, :sha384, or :sha512.
@@ -30,22 +30,22 @@ func InternsOrThunks() {
 
 	cryptoNamespace.InternVar("md5", md5_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the MD5 digest of data as 16 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha1", sha1_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-1 digest of data as 20 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha224", sha224_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-224 digest of data as 28 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha256", sha256_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-256 digest of data as 32 raw bytes.
 
   Example:
@@ -53,22 +53,22 @@ func InternsOrThunks() {
 
 	cryptoNamespace.InternVar("sha384", sha384_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-384 digest of data as 48 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512", sha512_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-512 digest of data as 64 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512-224", sha512_224_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-512/224 digest of data as 28 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	cryptoNamespace.InternVar("sha512-256", sha512_256_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the SHA-512/256 digest of data as 32 raw bytes.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

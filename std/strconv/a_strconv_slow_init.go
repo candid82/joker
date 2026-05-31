@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	strconvNamespace.InternVar("atoi", atoi_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses decimal integer string s.
 
   Equivalent to (parse-int s 10 0). Throws Error when s is not a valid decimal
@@ -24,39 +24,39 @@ func InternsOrThunks() {
 
 	strconvNamespace.InternVar("can-backquote?", iscan_backquote_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Reports whether the string s can be represented unchanged as a single-line backquoted string without control characters other than tab.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	strconvNamespace.InternVar("format-bool", format_bool_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("b"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("b").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Boolean"}).(Map)).(Symbol))),
 			`Returns "true" or "false" according to the value of b.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("format-double", format_double_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"), MakeSymbol("fmt"), MakeSymbol("prec"), MakeSymbol("bitSize"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Double"}).(Map)).(Symbol), MakeSymbol("fmt").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol), MakeSymbol("prec").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("bitSize").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Converts the floating-point number f to a string, according to the format fmt and precision prec. It rounds the result assuming that the original was obtained from a floating-point value of bitSize bits (32 for float32, 64 for float64).
   The format fmt is one of 'b' (-ddddp±ddd, a binary exponent), 'e' (-d.dddde±dd, a decimal exponent), 'E' (-d.ddddE±dd, a decimal exponent), 'f' (-ddd.dddd, no exponent), 'g' ('e' for large exponents, 'f' otherwise), or 'G' ('E' for large exponents, 'f' otherwise).
   The precision prec controls the number of digits (excluding the exponent) printed by the 'e', 'E', 'f', 'g', and 'G' formats. For 'e', 'E', and 'f' it is the number of digits after the decimal point. For 'g' and 'G' it is the maximum number of significant digits (trailing zeros are removed). The special precision -1 uses the smallest number of digits necessary such that ParseFloat will return f exactly.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("format-int", format_int_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("i"), MakeSymbol("base"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("i").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("base").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Returns the string representation of i in the given base, for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z' for digit values >= 10.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("graphic?", isgraphic_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Reports whether the char is defined as a Graphic by Unicode. Such characters include letters, marks, numbers, punctuation, symbols, and spaces, from categories L, M, N, P, S, and Zs.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	strconvNamespace.InternVar("itoa", itoa_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("i"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("i").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Equivalent to (format-int i 10).`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("parse-bool", parse_bool_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the boolean value represented by s.
 
   Accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, and False.
@@ -64,62 +64,62 @@ func InternsOrThunks() {
 
 	strconvNamespace.InternVar("parse-double", parse_double_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Parses s as a Double.
 
   Throws Error when s is not a valid floating-point literal.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Double"}))
 
 	strconvNamespace.InternVar("parse-int", parse_int_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("base"), MakeSymbol("bitSize"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("base").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("bitSize").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Interprets a string s in the given base (0, 2 to 36) and bit size (0 to 64) and returns the corresponding value i.
   If base == 0, the base is implied by the string's prefix: base 16 for "0x", base 8 for "0", and base 10 otherwise. For bases 1, below 0 or above 36 an error is returned.
   The bitSize argument specifies the integer type that the result must fit into. Bit sizes 0, 8, 16, 32, and 64 correspond to int, int8, int16, int32, and int64. Throws Error for invalid syntax, invalid base, invalid bit size, or overflow.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	strconvNamespace.InternVar("printable?", isprintable_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Reports whether the char is defined as printable by Joker: letters, numbers, punctuation, symbols and ASCII space.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	strconvNamespace.InternVar("quote", quote_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for control characters and non-printable characters as defined by printable?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("quote-char", quote_char_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for control characters and non-printable characters as defined by printable?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("quote-char-to-ascii", quote_char_to_ascii_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for non-ASCII characters and non-printable characters as defined by printable?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("quote-char-to-graphic", quote_char_to_graphic_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Returns a single-quoted char literal representing the character. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for non-ASCII characters and non-printable characters as defined by graphic?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("quote-to-ascii", quote_to_ascii_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for non-ASCII characters and non-printable characters as defined by printable?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("quote-to-graphic", quote_to_graphic_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a double-quoted string literal representing s. The returned string uses escape sequences (\t, \n, \xFF, \u0100)
   for non-ASCII characters and non-printable characters as defined by graphic?.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	strconvNamespace.InternVar("unquote", unquote_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Interprets s as a single-quoted, double-quoted, or backquoted string literal, returning the string value that s quotes.
   (If s is single-quoted, it would be a Go character literal; unquote returns the corresponding one-character string.)
   Throws Error when s is not a valid quoted literal.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))

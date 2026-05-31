@@ -1,0 +1,1 @@
+tests/linter/infer-value-inline/input.joke:7:14: Parse warning: arg[0] of f must have type String, got ArrayMap

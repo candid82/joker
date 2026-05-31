@@ -16,7 +16,7 @@ func InternsOrThunks() {
 
 	csvNamespace.InternVar("csv-seq", csv_seq_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("rdr")), NewVectorFrom(MakeSymbol("rdr"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("rdr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("rdr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Returns records from rdr as a lazy sequence of string vectors.
 
   rdr must be a string or implement io.Reader. Parsing happens as the returned
@@ -57,7 +57,7 @@ func InternsOrThunks() {
 
 	csvNamespace.InternVar("write", write_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"), MakeSymbol("data")), NewVectorFrom(MakeSymbol("f"), MakeSymbol("data"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "IOWriter"}).(Map)).(Symbol), MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "IOWriter"}).(Map)).(Symbol), MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Writes data as CSV to f and returns nil.
 
   f must implement io.Writer, for example a file returned by joker.os/create.
@@ -67,7 +67,7 @@ func InternsOrThunks() {
 
 	csvNamespace.InternVar("write-string", write_string_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("data")), NewVectorFrom(MakeSymbol("data"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("data").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Formats data as CSV and returns the resulting string.
 
   data must be Seqable, and each record within it must be Seqable. Field values
