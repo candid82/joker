@@ -12,7 +12,6 @@ import (
 type (
 	Expr interface {
 		Eval(env *LocalEnv) Object
-		InferType() *Type
 		InferValue(env *InferEnv) InferredValue
 		Pos() Position
 		Dump(includePosition bool) Map
@@ -137,7 +136,6 @@ type (
 		index         int
 		frame         int
 		isUsed        bool
-		inferredType  *Type
 		inferredValue *InferredValue
 		requiredTypes []*Type
 		valueExpr     Expr
@@ -376,7 +374,7 @@ func (b *Bindings) PopFrame() *Bindings {
 	return b.parent
 }
 
-func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool, inferredType *Type) *Binding {
+func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool) *Binding {
 	if LINTER_MODE && !skipUnused {
 		old := b.bindings[sym.name]
 		if old != nil && needsUnusedWarning(old) {
@@ -384,10 +382,9 @@ func (b *Bindings) AddBinding(sym Symbol, index int, skipUnused bool, inferredTy
 		}
 	}
 	binding := &Binding{
-		name:         sym,
-		frame:        b.frame,
-		index:        index,
-		inferredType: inferredType,
+		name:  sym,
+		frame: b.frame,
+		index: index,
 	}
 	b.bindings[sym.name] = binding
 	return binding
@@ -401,7 +398,7 @@ func (ctx *ParseContext) PushLocalFrame(names []Symbol) []*Binding {
 	ctx.PushEmptyLocalFrame()
 	res := make([]*Binding, len(names))
 	for i, sym := range names {
-		res[i] = ctx.localBindings.AddBinding(sym, i, true, nil)
+		res[i] = ctx.localBindings.AddBinding(sym, i, true)
 	}
 	return res
 }
@@ -1168,14 +1165,10 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 					panic(&ParseError{obj: s, msg: "Unsupported binding form: " + sym.ToString(false)})
 				}
 			}
-			var inferredType *Type
 			if formName != "letfn" {
 				res.values[i] = Parse(b.At(i*2+1), ctx)
-				if LINTER_MODE {
-					inferredType = res.values[i].InferType()
-				}
 			}
-			res.bindings[i] = ctx.localBindings.AddBinding(res.names[i], i, skipUnused, inferredType)
+			res.bindings[i] = ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 			res.bindings[i].valueExpr = res.values[i]
 		}
 
@@ -1406,22 +1399,6 @@ func typesString(types []*Type) string {
 	return b.String()
 }
 
-func checkTypes(declaredArgs []Symbol, call *CallExpr) bool {
-	res := false
-	for i, da := range declaredArgs {
-		if declaredTypes := getTaggedTypes(da); len(declaredTypes) > 0 {
-			passedType := call.args[i].InferType()
-			if passedType != nil {
-				if !isTypeOneOf(declaredTypes, passedType) {
-					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), typesString(declaredTypes), passedType.ToString(false)))
-					res = true
-				}
-			}
-		}
-	}
-	return res
-}
-
 func selectArity(expr *FnExpr, passedArgsCount int) *FnArityExpr {
 	for _, arity := range expr.arities {
 		if len(arity.args) == passedArgsCount {
@@ -1440,7 +1417,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 		passedArgsCount += 2
 	}
 	if v := selectArity(expr, passedArgsCount); v != nil {
-		return checkTypes(v.args, call)
+		return false
 	}
 	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
 	return true
@@ -1726,7 +1703,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 			}()
 			for !syms.IsEmpty() {
 				if sym, ok := syms.First().(Symbol); ok {
-					ctx.linterBindings.AddBinding(sym, 0, true, nil)
+					ctx.linterBindings.AddBinding(sym, 0, true)
 				}
 				syms = syms.Rest()
 			}
@@ -1740,22 +1717,26 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		Position: pos,
 	}
 	if LINTER_MODE {
+		typeChecked := false
 		switch c := res.callable.(type) {
 		case *VarRefExpr:
 			if c.vr.Value != nil {
 				switch f := c.vr.Value.(type) {
 				case *Fn:
+					typeChecked = true
 					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
+						typeMismatch := checkInferredCall(res)
 						require := getRequireVar(ctx)
 						refer := getReferVar(ctx)
 						alias := getAliasVar(ctx)
 						createNs := getCreateNsVar(ctx)
 						inNs := getInNsVar(ctx)
-						if (c.vr.Value.Equals(require.Value) ||
-							c.vr.Value.Equals(alias.Value) ||
-							c.vr.Value.Equals(refer.Value) ||
-							c.vr.Value.Equals(inNs.Value) ||
-							c.vr.Value.Equals(createNs.Value)) &&
+						if !typeMismatch &&
+							(c.vr.Value.Equals(require.Value) ||
+								c.vr.Value.Equals(alias.Value) ||
+								c.vr.Value.Equals(refer.Value) ||
+								c.vr.Value.Equals(inNs.Value) ||
+								c.vr.Value.Equals(createNs.Value)) &&
 							areAllLiteralExprs(res.args) {
 							Eval(res, nil)
 						}
@@ -1781,7 +1762,9 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		default:
 			checkCall(res.callable, false, res, pos)
 		}
-		checkInferredCall(res)
+		if !typeChecked {
+			checkInferredCall(res)
+		}
 	}
 	return res
 }

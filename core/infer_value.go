@@ -619,16 +619,6 @@ func returnExprArgDeps(expr Expr, args []*Binding, res []bool, seen map[*Binding
 	}
 }
 
-func hasCallableVarRef(expr Expr) bool {
-	if _, ok := expr.(*VarRefExpr); ok {
-		return true
-	}
-	if metaExpr, ok := expr.(*MetaExpr); ok {
-		return hasCallableVarRef(metaExpr.expr)
-	}
-	return false
-}
-
 func shouldCheckInferredSummary(expr Expr) bool {
 	switch expr := expr.(type) {
 	case *MetaExpr:
@@ -662,7 +652,7 @@ func checkInferredCall(call *CallExpr) bool {
 	if arity != nil && shouldCheckInferredSummary(call.callable) {
 		checkExpected(arity.inferredArgTypes)
 	}
-	if arity != nil && !hasCallableVarRef(call.callable) {
+	if arity != nil {
 		checkExpected(arity.declaredArgTypes)
 	}
 	if declaredArgTypes := declaredArgTypesForCallable(call.callable, len(call.args)); len(declaredArgTypes) > 0 {
