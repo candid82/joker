@@ -1585,6 +1585,68 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 	}
 }
 
+func shouldEvalLiteralLinterCall(vr *Var, call *CallExpr, ctx *ParseContext) bool {
+	require := getRequireVar(ctx)
+	refer := getReferVar(ctx)
+	alias := getAliasVar(ctx)
+	createNs := getCreateNsVar(ctx)
+	inNs := getInNsVar(ctx)
+	return (vr.Value.Equals(require.Value) ||
+		vr.Value.Equals(alias.Value) ||
+		vr.Value.Equals(refer.Value) ||
+		vr.Value.Equals(inNs.Value) ||
+		vr.Value.Equals(createNs.Value)) &&
+		areAllLiteralExprs(call.args)
+}
+
+func checkCallableArglist(vr *Var, call *CallExpr, pos Position) {
+	meta := vr.GetMeta()
+	if meta == nil {
+		return
+	}
+	ok, arglist := meta.Get(KEYWORDS.arglist)
+	if !ok {
+		return
+	}
+	arglistSeq, ok := arglist.(Seq)
+	if !ok {
+		return
+	}
+	if !checkArglist(arglistSeq, len(call.args)) {
+		printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+	}
+}
+
+func checkLinterCall(call *CallExpr, ctx *ParseContext, pos Position) {
+	vrExpr, ok := call.callable.(*VarRefExpr)
+	if !ok {
+		checkCall(call.callable, false, call, pos)
+		checkInferredCall(call)
+		return
+	}
+	vr := vrExpr.vr
+	if vr.Value == nil {
+		checkCall(vr.expr, vr.isMacro, call, pos)
+		checkInferredCall(call)
+		return
+	}
+	switch f := vr.Value.(type) {
+	case *Fn:
+		if reportWrongArity(f.fnExpr, vr.isMacro, call, pos) {
+			return
+		}
+		typeMismatch := checkInferredCall(call)
+		if !typeMismatch && shouldEvalLiteralLinterCall(vr, call, ctx) {
+			Eval(call, nil)
+		}
+	case Callable:
+		checkCallableArglist(vr, call, pos)
+		checkInferredCall(call)
+	default:
+		reportNotAFunction(pos, call.Name())
+	}
+}
+
 func parseList(obj Object, ctx *ParseContext) Expr {
 	expanded := macroexpand1(obj.(Seq), ctx)
 	if expanded != obj {
@@ -1717,54 +1779,7 @@ func parseList(obj Object, ctx *ParseContext) Expr {
 		Position: pos,
 	}
 	if LINTER_MODE {
-		typeChecked := false
-		switch c := res.callable.(type) {
-		case *VarRefExpr:
-			if c.vr.Value != nil {
-				switch f := c.vr.Value.(type) {
-				case *Fn:
-					typeChecked = true
-					if !reportWrongArity(f.fnExpr, c.vr.isMacro, res, pos) {
-						typeMismatch := checkInferredCall(res)
-						require := getRequireVar(ctx)
-						refer := getReferVar(ctx)
-						alias := getAliasVar(ctx)
-						createNs := getCreateNsVar(ctx)
-						inNs := getInNsVar(ctx)
-						if !typeMismatch &&
-							(c.vr.Value.Equals(require.Value) ||
-								c.vr.Value.Equals(alias.Value) ||
-								c.vr.Value.Equals(refer.Value) ||
-								c.vr.Value.Equals(inNs.Value) ||
-								c.vr.Value.Equals(createNs.Value)) &&
-							areAllLiteralExprs(res.args) {
-							Eval(res, nil)
-						}
-					}
-				case Callable:
-					if m := c.vr.GetMeta(); m != nil {
-						if ok, arglist := m.Get(KEYWORDS.arglist); ok {
-							if arglist, ok := arglist.(Seq); ok {
-								if !checkArglist(arglist, len(res.args)) {
-									printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(res.args), res.Name()))
-								}
-							}
-						}
-					}
-					checkInferredCall(res)
-					return res
-				default:
-					reportNotAFunction(pos, res.Name())
-				}
-			} else {
-				checkCall(c.vr.expr, c.vr.isMacro, res, pos)
-			}
-		default:
-			checkCall(res.callable, false, res, pos)
-		}
-		if !typeChecked {
-			checkInferredCall(res)
-		}
+		checkLinterCall(res, ctx, pos)
 	}
 	return res
 }

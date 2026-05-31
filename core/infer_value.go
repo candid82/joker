@@ -632,9 +632,6 @@ func shouldCheckInferredSummary(expr Expr) bool {
 }
 
 func checkInferredCall(call *CallExpr) bool {
-	if !LINTER_MODE {
-		return false
-	}
 	_, arity := callableFnSummary(call.callable, len(call.args))
 	res := false
 	checkExpected := func(expected [][]*Type) {
