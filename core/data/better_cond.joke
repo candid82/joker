@@ -69,7 +69,7 @@
   (when-let [[test expr & more-clauses] (seq clauses)]
     (if (next clauses)
       (if (or (= :do test) (= 'do test))
-        `(do ~expr (cond ~@more-clauses))
+        `(let [~'_ ~expr] (cond ~@more-clauses))
         (if (or (= :let test) (= 'let test))
           `(let ~expr (cond ~@more-clauses))
           (if (or (= :when test) (= 'when test))

@@ -5,4 +5,5 @@
 (b/cond
   :when-let [b 2]
   :let [a b]
+  :do (println a)
   1 (do 1 a))
