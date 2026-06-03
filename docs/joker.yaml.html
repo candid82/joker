@@ -51,7 +51,7 @@
   <h3 class="Function" id="read-string">read-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(read-string s)</code></div>
+  <pre class="var-usage"><div><code>(read-string s)</code><code class="hide">(read-string ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses YAML string s and returns the corresponding Joker value.<br>
 <br>
@@ -59,13 +59,13 @@
   nearest Joker values, and null becomes nil. Throws Error when s is invalid<br>
   YAML.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="write-string">write-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(write-string v)</code></div>
+  <pre class="var-usage"><div><code>(write-string v)</code><code class="hide">(write-string ^Object v)</code></div>
 </pre>
   <p class="var-docstr">Returns the YAML encoding of v.<br>
 <br>
@@ -73,7 +73,7 @@
   strings, and vectors become YAML sequences. Throws Error when v cannot be<br>
   encoded.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

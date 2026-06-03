@@ -360,37 +360,37 @@
   <h3 class="Function" id="add">add</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(add t d)</code></div>
+  <pre class="var-usage"><div><code>(add t d)</code><code class="hide">(add ^Time t ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Returns the time t+d.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="add-date">add-date</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(add-date t years months days)</code></div>
+  <pre class="var-usage"><div><code>(add-date t years months days)</code><code class="hide">(add-date ^Time t ^Integer years ^Integer months ^Integer days)</code></div>
 </pre>
   <p class="var-docstr">Returns the time t + (years, months, days).</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="day-of-year">day-of-year</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3.4</span>
-  <pre class="var-usage"><div><code>(day-of-year t)</code></div>
+  <pre class="var-usage"><div><code>(day-of-year t)</code><code class="hide">(day-of-year ^Time t)</code></div>
 </pre>
   <p class="var-docstr">Returns the day of the year specified by t, in the range [1,365] for non-leap years, and [1,366] in leap years.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="format">format</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(format t layout)</code></div>
+  <pre class="var-usage"><div><code>(format t layout)</code><code class="hide">(format ^Time t ^String layout)</code></div>
 </pre>
   <p class="var-docstr">Returns a textual representation of the time value formatted according to layout,<br>
   which defines the format by showing how the reference time, defined to be<br>
@@ -398,34 +398,34 @@
   would be displayed if it were the value; it serves as an example of the desired output.<br>
   The same display rules will then be applied to the time value.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="from-unix">from-unix</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(from-unix sec nsec)</code></div>
+  <pre class="var-usage"><div><code>(from-unix sec nsec)</code><code class="hide">(from-unix ^Integer sec ^Integer nsec)</code></div>
 </pre>
   <p class="var-docstr">Returns the local Time corresponding to the given Unix time, sec seconds and<br>
   nsec nanoseconds since January 1, 1970 UTC. It is valid to pass nsec outside the range [0, 999999999].</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="hours">hours</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(hours d)</code></div>
+  <pre class="var-usage"><div><code>(hours d)</code><code class="hide">(hours ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Returns the duration (passed as a number of nanoseconds) as a floating point number of hours.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="in-timezone">in-timezone</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(in-timezone t tz)</code></div>
+  <pre class="var-usage"><div><code>(in-timezone t tz)</code><code class="hide">(in-timezone ^Time t ^String tz)</code></div>
 </pre>
   <p class="var-docstr">Returns t represented in timezone tz.<br>
 <br>
@@ -433,17 +433,17 @@
   fields changes. tz must be a loadable IANA timezone name. Throws Error when<br>
   tz cannot be loaded.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="minutes">minutes</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(minutes d)</code></div>
+  <pre class="var-usage"><div><code>(minutes d)</code><code class="hide">(minutes ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Returns the duration (passed as a number of nanoseconds) as a floating point number of minutes.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="now">now</h3>
@@ -459,131 +459,131 @@
   <h3 class="Function" id="parse">parse</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(parse layout value)</code></div>
+  <pre class="var-usage"><div><code>(parse layout value)</code><code class="hide">(parse ^String layout ^String value)</code></div>
 </pre>
   <p class="var-docstr">Parses value according to layout and returns a Time.<br>
 <br>
   layout uses Go&#39;s reference-time convention. When value contains no zone<br>
   information, parsing uses UTC. Throws Error when value does not match layout.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="parse-duration">parse-duration</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(parse-duration s)</code></div>
+  <pre class="var-usage"><div><code>(parse-duration s)</code><code class="hide">(parse-duration ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses a duration string. A duration string is a possibly signed sequence of decimal numbers,<br>
   each with optional fraction and a unit suffix, such as 300ms, -1.5h or 2h45m. Valid time units are<br>
   ns, us (or µs), ms, s, m, h.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="parse-in-timezone">parse-in-timezone</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.7.2</span>
-  <pre class="var-usage"><div><code>(parse-in-timezone layout value tz)</code></div>
+  <pre class="var-usage"><div><code>(parse-in-timezone layout value tz)</code><code class="hide">(parse-in-timezone ^String layout ^String value ^String tz)</code></div>
 </pre>
   <p class="var-docstr">Parses value according to layout in timezone tz and returns a Time.<br>
 <br>
   tz must be a loadable IANA timezone name such as &#34;America/New_York&#34;.<br>
   Throws Error when tz cannot be loaded or value does not match layout.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="round">round</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(round d m)</code></div>
+  <pre class="var-usage"><div><code>(round d m)</code><code class="hide">(round ^Integer d ^Integer m)</code></div>
 </pre>
   <p class="var-docstr">Returns the result of rounding d to the nearest multiple of m. d and m represent time durations in nanoseconds.<br>
   The rounding behavior for halfway values is to round away from zero. If m &lt;= 0, returns d unchanged.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="seconds">seconds</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(seconds d)</code></div>
+  <pre class="var-usage"><div><code>(seconds d)</code><code class="hide">(seconds ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Returns the duration (passed as a number of nanoseconds) as a floating point number of seconds.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="since">since</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(since t)</code></div>
+  <pre class="var-usage"><div><code>(since t)</code><code class="hide">(since ^Time t)</code></div>
 </pre>
   <p class="var-docstr">Returns the time in nanoseconds elapsed since t.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="sleep">sleep</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(sleep d)</code></div>
+  <pre class="var-usage"><div><code>(sleep d)</code><code class="hide">(sleep ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Pauses the execution thread for at least the duration d (expressed in nanoseconds).<br>
   A negative or zero duration causes sleep to return immediately.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="string">string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(string d)</code></div>
+  <pre class="var-usage"><div><code>(string d)</code><code class="hide">(string ^Integer d)</code></div>
 </pre>
   <p class="var-docstr">Returns a string representing the duration in the form 72h3m0.5s.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="sub">sub</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(sub t u)</code></div>
+  <pre class="var-usage"><div><code>(sub t u)</code><code class="hide">(sub ^Time t ^Time u)</code></div>
 </pre>
   <p class="var-docstr">Returns the duration t-u in nanoseconds.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="truncate">truncate</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(truncate d m)</code></div>
+  <pre class="var-usage"><div><code>(truncate d m)</code><code class="hide">(truncate ^Integer d ^Integer m)</code></div>
 </pre>
   <p class="var-docstr">Returns the result of rounding d toward zero to a multiple of m. If m &lt;= 0, returns d unchanged.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="unix">unix</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(unix t)</code></div>
+  <pre class="var-usage"><div><code>(unix t)</code><code class="hide">(unix ^Time t)</code></div>
 </pre>
   <p class="var-docstr">Returns t as a Unix time, the number of seconds elapsed since January 1, 1970 UTC.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="until">until</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(until t)</code></div>
+  <pre class="var-usage"><div><code>(until t)</code><code class="hide">(until ^Time t)</code></div>
 </pre>
   <p class="var-docstr">Returns the duration in nanoseconds until t.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

@@ -57,7 +57,7 @@
   <h3 class="Function" id="parse-address">parse-address</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8.1</span>
-  <pre class="var-usage"><div><code>(parse-address s)</code></div>
+  <pre class="var-usage"><div><code>(parse-address s)</code><code class="hide">(parse-address ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses one RFC 5322 email address and returns<br>
   {:name display-name :address mailbox}.<br>
@@ -65,38 +65,38 @@
   A missing display name is returned as an empty string. Throws Error when s<br>
   is not a valid address according to Go&#39;s net/mail parser.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="parse-address-list">parse-address-list</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8.1</span>
-  <pre class="var-usage"><div><code>(parse-address-list s)</code></div>
+  <pre class="var-usage"><div><code>(parse-address-list s)</code><code class="hide">(parse-address-list ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses an RFC 5322 address list and returns a vector of maps.<br>
 <br>
   Each element has the form {:name display-name :address mailbox}. Throws<br>
   Error when s is not a valid address list according to Go&#39;s net/mail parser.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="parse-date">parse-date</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8.1</span>
-  <pre class="var-usage"><div><code>(parse-date s)</code></div>
+  <pre class="var-usage"><div><code>(parse-date s)</code><code class="hide">(parse-date ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses an RFC 5322 date string and returns a Time.<br>
 <br>
   Throws Error when s is not a date accepted by Go&#39;s net/mail parser.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="read-message">read-message</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8.1</span>
-  <pre class="var-usage"><div><code>(read-message source)</code></div>
+  <pre class="var-usage"><div><code>(read-message source)</code><code class="hide">(read-message ^Object source)</code></div>
 </pre>
   <p class="var-docstr">Parses an RFC 5322 message from source and returns its headers and raw body.<br>
 <br>
@@ -110,7 +110,7 @@
   transfer encodings. Throws Error when source is invalid or the headers<br>
   cannot be parsed.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

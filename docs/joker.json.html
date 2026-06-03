@@ -54,8 +54,8 @@
   <h3 class="Function" id="json-seq">json-seq</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(json-seq rdr)</code></div>
-<div><code>(json-seq rdr opts)</code></div>
+  <pre class="var-usage"><div><code>(json-seq rdr)</code><code class="hide">(json-seq ^Object rdr)</code></div>
+<div><code>(json-seq rdr opts)</code><code class="hide">(json-seq ^Object rdr ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Returns successive JSON values from rdr as a lazy sequence.<br>
 <br>
@@ -66,14 +66,14 @@
   opts may contain:<br>
   - keywords? - truthy to convert JSON object keys from strings to keywords</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="read-string">read-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(read-string s)</code></div>
-<div><code>(read-string s opts)</code></div>
+  <pre class="var-usage"><div><code>(read-string s)</code><code class="hide">(read-string ^String s)</code></div>
+<div><code>(read-string s opts)</code><code class="hide">(read-string ^String s ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Parses one JSON value from s and returns the corresponding Joker value.<br>
 <br>
@@ -88,14 +88,14 @@
     (joker.json/read-string &#34;{\&#34;name\&#34;:\&#34;Ada\&#34;}&#34; {:keywords? true})<br>
     ;; =&gt; {:name &#34;Ada&#34;}</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="write-string">write-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(write-string v)</code></div>
-<div><code>(write-string v opts)</code></div>
+  <pre class="var-usage"><div><code>(write-string v)</code><code class="hide">(write-string ^Object v)</code></div>
+<div><code>(write-string v opts)</code><code class="hide">(write-string ^Object v ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Returns the JSON encoding of v.<br>
 <br>
@@ -113,7 +113,7 @@
     (joker.json/write-string {:name &#34;Ada&#34; :scores [1 2]})<br>
     ;; =&gt; &#34;{\&#34;name\&#34;:\&#34;Ada\&#34;,\&#34;scores\&#34;:[1,2]}&#34;</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

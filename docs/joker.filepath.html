@@ -120,7 +120,7 @@
   <h3 class="Function" id="abs">abs</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(abs path)</code></div>
+  <pre class="var-usage"><div><code>(abs path)</code><code class="hide">(abs ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns an absolute representation of path. If the path is not absolute it will be<br>
   joined with the current working directory to turn it into an absolute path.<br>
@@ -128,35 +128,35 @@
   Calls clean on the result. Throws Error if the current working directory<br>
   cannot be determined.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="abs?">abs?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(abs? path)</code></div>
+  <pre class="var-usage"><div><code>(abs? path)</code><code class="hide">(abs? ^String path)</code></div>
 </pre>
   <p class="var-docstr">Reports whether the path is absolute.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="base">base</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(base path)</code></div>
+  <pre class="var-usage"><div><code>(base path)</code><code class="hide">(base ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the last element of path. Trailing path separators are removed before<br>
   extracting the last element. If the path is empty, returns &#34;.&#34;. If the path consists<br>
   entirely of separators, returns a single separator.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="clean">clean</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(clean path)</code></div>
+  <pre class="var-usage"><div><code>(clean path)</code><code class="hide">(clean ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the shortest path name equivalent to path by purely lexical processing.<br>
   Applies the following rules iteratively until no further processing can be done:<br>
@@ -174,50 +174,50 @@ Finally, any occurrences of slash are replaced by separator.<br>
 <br>
 If the result of this process is an empty string, returns the string &#34;.&#34;.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="dir">dir</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(dir path)</code></div>
+  <pre class="var-usage"><div><code>(dir path)</code><code class="hide">(dir ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns all but the last element of path, typically the path&#39;s directory.<br>
   After dropping the final element, calls clean on the path and trailing slashes are removed.<br>
   If the path is empty, returns &#34;.&#34;. If the path consists entirely of separators,<br>
   returns a single separator. The returned path does not end in a separator unless it is the root directory.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="eval-symlinks">eval-symlinks</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(eval-symlinks path)</code></div>
+  <pre class="var-usage"><div><code>(eval-symlinks path)</code><code class="hide">(eval-symlinks ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the path name after the evaluation of any symbolic links. If path is relative the result will be<br>
   relative to the current directory, unless one of the components is an absolute symbolic link.<br>
   Calls clean on the result. Throws Error when symbolic links cannot be<br>
   resolved, including when path does not exist.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="ext">ext</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(ext path)</code></div>
+  <pre class="var-usage"><div><code>(ext path)</code><code class="hide">(ext ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the file name extension used by path. The extension is the suffix beginning at the final dot<br>
   in the final element of path; it is empty if there is no dot.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="file-seq">file-seq</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(file-seq root)</code></div>
+  <pre class="var-usage"><div><code>(file-seq root)</code><code class="hide">(file-seq ^String root)</code></div>
 </pre>
   <p class="var-docstr">Walks root and returns a vector of info maps for root and its descendants.<br>
 <br>
@@ -229,24 +229,24 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   - dir? (boolean)<br>
   Throws Error when root cannot be walked or when an entry cannot be read.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="from-slash">from-slash</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(from-slash path)</code></div>
+  <pre class="var-usage"><div><code>(from-slash path)</code><code class="hide">(from-slash ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the result of replacing each slash (&#39;/&#39;) character in path with a separator character.<br>
   Multiple slashes are replaced by multiple separators.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="glob">glob</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(glob pattern)</code></div>
+  <pre class="var-usage"><div><code>(glob pattern)</code><code class="hide">(glob ^String pattern)</code></div>
 </pre>
   <p class="var-docstr">Returns a vector of names matching pattern, or an empty vector when nothing matches.<br>
   The syntax of patterns is the same as in Match. The pattern may describe hierarchical<br>
@@ -255,38 +255,38 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   Ignores file system errors such as I/O errors reading directories.<br>
   Throws Error when pattern is malformed.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="join">join</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(join &amp; elems)</code></div>
+  <pre class="var-usage"><div><code>(join &amp; elems)</code><code class="hide">(join &amp; ^String elems)</code></div>
 </pre>
   <p class="var-docstr">Joins any number of path elements into a single path, adding a separator if necessary.<br>
   Calls clean on the result; in particular, all empty strings are ignored. On Windows,<br>
   the result is a UNC path if and only if the first path element is a UNC path.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="matches?">matches?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(matches? pattern name)</code></div>
+  <pre class="var-usage"><div><code>(matches? pattern name)</code><code class="hide">(matches? ^String pattern ^String name)</code></div>
 </pre>
   <p class="var-docstr">Reports whether name matches the shell file name pattern.<br>
   Requires pattern to match all of name, not just a substring.<br>
   Throws Error if pattern is malformed.<br>
   On Windows, escaping is disabled. Instead, &#39;\&#39; is treated as path separator.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="rel">rel</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(rel basepath targpath)</code></div>
+  <pre class="var-usage"><div><code>(rel basepath targpath)</code><code class="hide">(rel ^String basepath ^String targpath)</code></div>
 </pre>
   <p class="var-docstr">Returns a relative path that is lexically equivalent to targpath when joined to basepath<br>
   with an intervening separator. On success, the returned path will always be relative to basepath,<br>
@@ -294,52 +294,52 @@ If the result of this process is an empty string, returns the string &#34;.&#34;
   relative to basepath or if knowing the current working directory would be necessary to compute it.<br>
   Calls clean on the result.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="split">split</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(split path)</code></div>
+  <pre class="var-usage"><div><code>(split path)</code><code class="hide">(split ^String path)</code></div>
 </pre>
   <p class="var-docstr">Splits path immediately following the final separator, separating it into a directory and file name component.<br>
   If there is no separator in path, returns an empty dir and file set to path. The returned values have<br>
   the property that path = dir+file.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="split-list">split-list</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(split-list path)</code></div>
+  <pre class="var-usage"><div><code>(split-list path)</code><code class="hide">(split-list ^String path)</code></div>
 </pre>
   <p class="var-docstr">Splits a list of paths joined by the OS-specific list-separator, usually found in PATH or GOPATH environment variables.<br>
   Returns an empty vector when passed an empty string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="to-slash">to-slash</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(to-slash path)</code></div>
+  <pre class="var-usage"><div><code>(to-slash path)</code><code class="hide">(to-slash ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns the result of replacing each separator character in path with a slash (&#39;/&#39;) character.<br>
   Multiple separators are replaced by multiple slashes.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="volume-name">volume-name</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(volume-name path)</code></div>
+  <pre class="var-usage"><div><code>(volume-name path)</code><code class="hide">(volume-name ^String path)</code></div>
 </pre>
   <p class="var-docstr">Returns leading volume name. Given &#34;C:\foo\bar&#34; it returns &#34;C:&#34; on Windows. Given &#34;\\host\share\foo&#34;<br>
   returns &#34;\\host\share&#34;. On other platforms it returns &#34;&#34;.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

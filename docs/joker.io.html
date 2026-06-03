@@ -57,20 +57,20 @@
   <h3 class="Function" id="close">close</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(close f)</code></div>
+  <pre class="var-usage"><div><code>(close f)</code><code class="hide">(close ^Object f)</code></div>
 </pre>
   <p class="var-docstr">Closes f and returns nil.<br>
 <br>
   f must implement close, such as an IOWriter, IOReader, or File. Throws Error<br>
   when f is not closable or when closing fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="copy">copy</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(copy dst src)</code></div>
+  <pre class="var-usage"><div><code>(copy dst src)</code><code class="hide">(copy ^IOWriter dst ^IOReader src)</code></div>
 </pre>
   <p class="var-docstr">Copies bytes from src to dst until src reaches EOF or an error occurs.<br>
 <br>
@@ -81,7 +81,7 @@
   Example:<br>
     (joker.io/copy out in)</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="pipe">pipe</h3>
@@ -101,7 +101,7 @@
   <h3 class="Function" id="read">read</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3.6</span>
-  <pre class="var-usage"><div><code>(read r n)</code></div>
+  <pre class="var-usage"><div><code>(read r n)</code><code class="hide">(read ^IOReader r ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Performs one read from IOReader r and returns up to n bytes as a string.<br>
 <br>
@@ -109,7 +109,7 @@
   before EOF, and returns &#34;&#34; when EOF is encountered before any bytes are read.<br>
   Throws Error for non-EOF read failures. n should be non-negative.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

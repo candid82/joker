@@ -75,7 +75,7 @@
   <h3 class="Function" id="add-commit">add-commit</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.4</span>
-  <pre class="var-usage"><div><code>(add-commit repo msg opts)</code></div>
+  <pre class="var-usage"><div><code>(add-commit repo msg opts)</code><code class="hide">(add-commit ^GitRepo repo ^String msg ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Creates a commit from the current index and returns its hash string.<br>
 <br>
@@ -84,13 +84,13 @@
   - allow-empty-commits - truthy to permit a commit with no tree changes<br>
   Throws Error when the worktree cannot commit.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="add-path">add-path</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.4</span>
-  <pre class="var-usage"><div><code>(add-path repo path)</code></div>
+  <pre class="var-usage"><div><code>(add-path repo path)</code><code class="hide">(add-path ^GitRepo repo ^String path)</code></div>
 </pre>
   <p class="var-docstr">Stages path from the worktree into the index and returns a hash string.<br>
 <br>
@@ -98,26 +98,26 @@
   index. Directory paths are added recursively. Throws Error when the worktree<br>
   cannot be accessed or the path cannot be staged.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="commit">commit</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(commit repo hash)</code></div>
+  <pre class="var-usage"><div><code>(commit repo hash)</code><code class="hide">(commit ^GitRepo repo ^String hash)</code></div>
 </pre>
   <p class="var-docstr">Returns the commit map for hash.<br>
 <br>
   The result has the same shape as entries returned by joker.git/log. Throws<br>
   Error when hash does not name a commit.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="config">config</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(config repo)</code></div>
+  <pre class="var-usage"><div><code>(config repo)</code><code class="hide">(config ^GitRepo repo)</code></div>
 </pre>
   <p class="var-docstr">Returns repo configuration as a map.<br>
 <br>
@@ -125,26 +125,26 @@
   :user, :author, :committer, :remotes, :submodules, :branches, and :urls.<br>
   Throws Error when the configuration cannot be read.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="head">head</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(head repo)</code></div>
+  <pre class="var-usage"><div><code>(head repo)</code><code class="hide">(head ^GitRepo repo)</code></div>
 </pre>
   <p class="var-docstr">Returns the repository HEAD reference map.<br>
 <br>
   The returned map has the same shape as joker.git/ref. Throws Error when HEAD<br>
   cannot be resolved.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="log">log</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(log repo opts)</code></div>
+  <pre class="var-usage"><div><code>(log repo opts)</code><code class="hide">(log ^GitRepo repo ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Returns commit history as a vector of commit maps.<br>
 <br>
@@ -180,13 +180,13 @@
   Throws Error when traversal cannot be started or completed, or when :order<br>
   has an unsupported value.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="object">object</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(object repo hash)</code></div>
+  <pre class="var-usage"><div><code>(object repo hash)</code><code class="hide">(object ^GitRepo repo ^String hash)</code></div>
 </pre>
   <p class="var-docstr">Returns a summary map for the Git object with hash.<br>
 <br>
@@ -194,26 +194,26 @@
   :tag, :ofs-delta, :ref-delta, :any, or :invalid. Throws Error when no object<br>
   can be found.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="open">open</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(open path)</code></div>
+  <pre class="var-usage"><div><code>(open path)</code><code class="hide">(open ^String path)</code></div>
 </pre>
   <p class="var-docstr">Opens the Git repository at path and returns a GitRepo handle.<br>
 <br>
   Detects both bare and worktree repositories. Throws Error when path does not<br>
   contain a valid repository or the repository cannot be opened.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="ref">ref</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(ref repo name resolved)</code></div>
+  <pre class="var-usage"><div><code>(ref repo name resolved)</code><code class="hide">(ref ^GitRepo repo ^String name ^Boolean resolved)</code></div>
 </pre>
   <p class="var-docstr">Returns reference name as a map.<br>
 <br>
@@ -221,20 +221,20 @@
   The result contains :type (:hash, :symbolic, or :invalid), :name, :target,<br>
   and :hash. Throws Error when the reference cannot be found.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="resolve-revision">resolve-revision</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3</span>
-  <pre class="var-usage"><div><code>(resolve-revision repo revision)</code></div>
+  <pre class="var-usage"><div><code>(resolve-revision repo revision)</code><code class="hide">(resolve-revision ^GitRepo repo ^String revision)</code></div>
 </pre>
   <p class="var-docstr">Resolves revision to a commit hash string.<br>
 <br>
   The result is always the commit hash, not a tree hash or annotated-tag hash.<br>
   Throws Error when revision cannot be resolved.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

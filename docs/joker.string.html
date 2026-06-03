@@ -120,38 +120,38 @@
   <h3 class="Function" id="blank?">blank?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(blank? s)</code></div>
+  <pre class="var-usage"><div><code>(blank? s)</code><code class="hide">(blank? ^Object s)</code></div>
 </pre>
   <p class="var-docstr">True if s is nil, empty, or contains only whitespace.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="capitalize">capitalize</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(capitalize s)</code></div>
+  <pre class="var-usage"><div><code>(capitalize s)</code><code class="hide">(capitalize ^Stringable s)</code></div>
 </pre>
   <p class="var-docstr">Converts first character of the string to upper-case, all other<br>
   characters to lower-case.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="ends-with?">ends-with?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(ends-with? s substr)</code></div>
+  <pre class="var-usage"><div><code>(ends-with? s substr)</code><code class="hide">(ends-with? ^String s ^Stringable substr)</code></div>
 </pre>
   <p class="var-docstr">True if s ends with substr.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="escape">escape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(escape s cmap)</code></div>
+  <pre class="var-usage"><div><code>(escape s cmap)</code><code class="hide">(escape ^String s ^Callable cmap)</code></div>
 </pre>
   <p class="var-docstr">Return a new string, using cmap to escape each character ch<br>
   from s as follows:<br>
@@ -159,110 +159,110 @@
   If (cmap ch) is nil, append ch to the new string.<br>
   If (cmap ch) is non-nil, append (str (cmap ch)) instead.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="includes?">includes?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(includes? s substr)</code></div>
+  <pre class="var-usage"><div><code>(includes? s substr)</code><code class="hide">(includes? ^String s ^Stringable substr)</code></div>
 </pre>
   <p class="var-docstr">True if s includes substr.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="index-of">index-of</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(index-of s value)</code></div>
-<div><code>(index-of s value from)</code></div>
+  <pre class="var-usage"><div><code>(index-of s value)</code><code class="hide">(index-of ^String s ^Object value)</code></div>
+<div><code>(index-of s value from)</code><code class="hide">(index-of ^String s ^Object value ^Int from)</code></div>
 </pre>
   <p class="var-docstr">Returns the Unicode-character index of value in s, or nil when absent.<br>
 <br>
   value must be a string or char. The optional from argument is a<br>
   Unicode-character index from which to begin the forward search.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="join">join</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(join coll)</code></div>
-<div><code>(join separator coll)</code></div>
+  <pre class="var-usage"><div><code>(join coll)</code><code class="hide">(join ^Seqable coll)</code></div>
+<div><code>(join separator coll)</code><code class="hide">(join ^Stringable separator ^Seqable coll)</code></div>
 </pre>
   <p class="var-docstr">Returns the elements of coll joined by an optional separator.<br>
 <br>
   Elements are converted with their ordinary string form before joining.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="last-index-of">last-index-of</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(last-index-of s value)</code></div>
-<div><code>(last-index-of s value from)</code></div>
+  <pre class="var-usage"><div><code>(last-index-of s value)</code><code class="hide">(last-index-of ^String s ^Object value)</code></div>
+<div><code>(last-index-of s value from)</code><code class="hide">(last-index-of ^String s ^Object value ^Int from)</code></div>
 </pre>
   <p class="var-docstr">Returns the last Unicode-character index of value in s, or nil when absent.<br>
 <br>
   value must be a string or char. With from, only the prefix ending at that<br>
   Unicode-character index is searched.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="lower-case">lower-case</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(lower-case s)</code></div>
+  <pre class="var-usage"><div><code>(lower-case s)</code><code class="hide">(lower-case ^Stringable s)</code></div>
 </pre>
   <p class="var-docstr">Converts string to all lower-case.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="pad-left">pad-left</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(pad-left s pad n)</code></div>
+  <pre class="var-usage"><div><code>(pad-left s pad n)</code><code class="hide">(pad-left ^String s ^Stringable pad ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Returns s padded with pad at the beginning to n Unicode characters.<br>
 <br>
   Returns s unchanged when it is already at least n characters long. pad must<br>
   be non-empty when padding is required.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="pad-right">pad-right</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(pad-right s pad n)</code></div>
+  <pre class="var-usage"><div><code>(pad-right s pad n)</code><code class="hide">(pad-right ^String s ^Stringable pad ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Returns s padded with pad at the end to n Unicode characters.<br>
 <br>
   Returns s unchanged when it is already at least n characters long. pad must<br>
   be non-empty when padding is required.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="re-quote">re-quote</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(re-quote s)</code></div>
+  <pre class="var-usage"><div><code>(re-quote s)</code><code class="hide">(re-quote ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns a Regex that matches s literally rather than treating it as a pattern.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="replace">replace</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(replace s match repl)</code></div>
+  <pre class="var-usage"><div><code>(replace s match repl)</code><code class="hide">(replace ^String s ^Object match ^Stringable repl)</code></div>
 </pre>
   <p class="var-docstr">Replaces all instances of match (String or Regex) with string repl in string s.<br>
 <br>
@@ -271,37 +271,37 @@
   parenthesized group in the pattern.<br>
   </p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="replace-first">replace-first</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(replace-first s match repl)</code></div>
+  <pre class="var-usage"><div><code>(replace-first s match repl)</code><code class="hide">(replace-first ^String s ^Object match ^Stringable repl)</code></div>
 </pre>
   <p class="var-docstr">Replaces the first instance of match (String or Regex) with string repl in string s.<br>
 <br>
   If match is Regex, $1, $2, etc. in repl are expanded from the corresponding<br>
   parenthesized groups, as in replace.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="reverse">reverse</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(reverse s)</code></div>
+  <pre class="var-usage"><div><code>(reverse s)</code><code class="hide">(reverse ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns s with its characters reversed.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="split">split</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(split s sep)</code></div>
-<div><code>(split s sep n)</code></div>
+  <pre class="var-usage"><div><code>(split s sep)</code><code class="hide">(split ^String s ^Object sep)</code></div>
+<div><code>(split s sep n)</code><code class="hide">(split ^String s ^Object sep ^Int n)</code></div>
 </pre>
   <p class="var-docstr">Splits string on a string or regular expression. Returns vector of the splits.<br>
 <br>
@@ -309,97 +309,97 @@
   be the unsplit remainder. If n is &lt;= 0, no limit is in effect (all substrings<br>
   are returned in the vector).</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="split-lines">split-lines</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(split-lines s)</code></div>
+  <pre class="var-usage"><div><code>(split-lines s)</code><code class="hide">(split-lines ^String s)</code></div>
 </pre>
   <p class="var-docstr">Splits string on \n or \r\n. Returns vector of the splits.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="starts-with?">starts-with?</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(starts-with? s substr)</code></div>
+  <pre class="var-usage"><div><code>(starts-with? s substr)</code><code class="hide">(starts-with? ^String s ^Stringable substr)</code></div>
 </pre>
   <p class="var-docstr">True if s starts with substr.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="trim">trim</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trim s)</code></div>
+  <pre class="var-usage"><div><code>(trim s)</code><code class="hide">(trim ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from both ends of string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="trim-left">trim-left</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trim-left s)</code></div>
+  <pre class="var-usage"><div><code>(trim-left s)</code><code class="hide">(trim-left ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from the left side of string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="trim-newline">trim-newline</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trim-newline s)</code></div>
+  <pre class="var-usage"><div><code>(trim-newline s)</code><code class="hide">(trim-newline ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes all trailing newline \n or return \r characters from string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="trim-right">trim-right</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trim-right s)</code></div>
+  <pre class="var-usage"><div><code>(trim-right s)</code><code class="hide">(trim-right ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from the right side of string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="triml">triml</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(triml s)</code></div>
+  <pre class="var-usage"><div><code>(triml s)</code><code class="hide">(triml ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from the left side of string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="trimr">trimr</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(trimr s)</code></div>
+  <pre class="var-usage"><div><code>(trimr s)</code><code class="hide">(trimr ^String s)</code></div>
 </pre>
   <p class="var-docstr">Removes whitespace from the right side of string.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="upper-case">upper-case</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(upper-case s)</code></div>
+  <pre class="var-usage"><div><code>(upper-case s)</code><code class="hide">(upper-case ^Stringable s)</code></div>
 </pre>
   <p class="var-docstr">Converts string to all upper-case.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

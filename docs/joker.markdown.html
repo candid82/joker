@@ -48,8 +48,8 @@
   <h3 class="Function" id="convert-string">convert-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(convert-string s)</code></div>
-<div><code>(convert-string s opts)</code></div>
+  <pre class="var-usage"><div><code>(convert-string s)</code><code class="hide">(convert-string ^String s)</code></div>
+<div><code>(convert-string s opts)</code><code class="hide">(convert-string ^String s ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Renders Markdown string s to HTML.<br>
 <br>
@@ -67,7 +67,7 @@
     (joker.markdown/convert-string &#34;# Hello&#34;)<br>
     ;; =&gt; &#34;&lt;h1 id=\&#34;hello\&#34;&gt;Hello&lt;/h1&gt;\n&#34;</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

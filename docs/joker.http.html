@@ -54,7 +54,7 @@
   <h3 class="Function" id="send">send</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(send request)</code></div>
+  <pre class="var-usage"><div><code>(send request)</code><code class="hide">(send ^Map request)</code></div>
 </pre>
   <p class="var-docstr">Sends an HTTP request and returns an HTTP response map.<br>
 <br>
@@ -90,13 +90,13 @@
                                 :body &#34;hello&#34;})]<br>
       [(:status res) (:body res)])</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="start-file-server">start-file-server</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(start-file-server addr root)</code></div>
+  <pre class="var-usage"><div><code>(start-file-server addr root)</code><code class="hide">(start-file-server ^String addr ^String root)</code></div>
 </pre>
   <p class="var-docstr">Starts an HTTP file server on TCP network address addr and blocks while it<br>
   runs.<br>
@@ -111,13 +111,13 @@
   Example:<br>
     (go (joker.http/start-file-server &#34;127.0.0.1:8080&#34; &#34;public&#34;))</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="start-server">start-server</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(start-server addr handler)</code></div>
+  <pre class="var-usage"><div><code>(start-server addr handler)</code><code class="hide">(start-server ^String addr ^Callable handler)</code></div>
 </pre>
   <p class="var-docstr">Starts an HTTP server on TCP network address addr and blocks while it runs.<br>
 <br>
@@ -175,7 +175,7 @@
            :headers {&#34;Content-Type&#34; &#34;text/plain&#34;}<br>
            :body (str &#34;hello &#34; (:uri req))})))</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

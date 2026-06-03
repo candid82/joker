@@ -54,8 +54,8 @@
   <h3 class="Function" id="csv-seq">csv-seq</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(csv-seq rdr)</code></div>
-<div><code>(csv-seq rdr opts)</code></div>
+  <pre class="var-usage"><div><code>(csv-seq rdr)</code><code class="hide">(csv-seq ^Object rdr)</code></div>
+<div><code>(csv-seq rdr opts)</code><code class="hide">(csv-seq ^Object rdr ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Returns records from rdr as a lazy sequence of string vectors.<br>
 <br>
@@ -95,14 +95,14 @@
     (joker.csv/csv-seq &#34;a,b\nc,d&#34;)<br>
     ;; =&gt; ([&#34;a&#34; &#34;b&#34;] [&#34;c&#34; &#34;d&#34;])</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="write">write</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(write f data)</code></div>
-<div><code>(write f data opts)</code></div>
+  <pre class="var-usage"><div><code>(write f data)</code><code class="hide">(write ^IOWriter f ^Seqable data)</code></div>
+<div><code>(write f data opts)</code><code class="hide">(write ^IOWriter f ^Seqable data ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Writes data as CSV to f and returns nil.<br>
 <br>
@@ -111,14 +111,14 @@
   not close f. Throws Error for write failures, including errors reported while<br>
   flushing buffered CSV output.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="write-string">write-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(write-string data)</code></div>
-<div><code>(write-string data opts)</code></div>
+  <pre class="var-usage"><div><code>(write-string data)</code><code class="hide">(write-string ^Seqable data)</code></div>
+<div><code>(write-string data opts)</code><code class="hide">(write-string ^Seqable data ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Formats data as CSV and returns the resulting string.<br>
 <br>
@@ -135,7 +135,7 @@
     (joker.csv/write-string [[&#34;a&#34; &#34;b&#34;] [&#34;c&#34; &#34;d&#34;]])<br>
     ;; =&gt; &#34;a,b\nc,d\n&#34;</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

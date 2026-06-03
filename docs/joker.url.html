@@ -60,7 +60,7 @@
   <h3 class="Function" id="parse-query">parse-query</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.3.6</span>
-  <pre class="var-usage"><div><code>(parse-query s)</code></div>
+  <pre class="var-usage"><div><code>(parse-query s)</code><code class="hide">(parse-query ^String s)</code></div>
 </pre>
   <p class="var-docstr">Parses URL-encoded query string s into a map of string keys to value vectors.<br>
 <br>
@@ -69,23 +69,23 @@
   an equals sign is interpreted as a key set to an empty value. Settings containing a non-URL-encoded<br>
   semicolon or malformed escapes throw Error.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="path-escape">path-escape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(path-escape s)</code></div>
+  <pre class="var-usage"><div><code>(path-escape s)</code><code class="hide">(path-escape ^String s)</code></div>
 </pre>
   <p class="var-docstr">Escapes the string so it can be safely placed inside a URL path segment.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="path-unescape">path-unescape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(path-unescape s)</code></div>
+  <pre class="var-usage"><div><code>(path-unescape s)</code><code class="hide">(path-unescape ^String s)</code></div>
 </pre>
   <p class="var-docstr">Reverses path-escape for one URL path segment.<br>
 <br>
@@ -93,30 +93,30 @@
   query-unescape, it leaves &#39;+&#39; unchanged. Throws Error when a percent escape is<br>
   malformed.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="query-escape">query-escape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(query-escape s)</code></div>
+  <pre class="var-usage"><div><code>(query-escape s)</code><code class="hide">(query-escape ^String s)</code></div>
 </pre>
   <p class="var-docstr">Escapes the string so it can be safely placed inside a URL query.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="query-unescape">query-unescape</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(query-unescape s)</code></div>
+  <pre class="var-usage"><div><code>(query-unescape s)</code><code class="hide">(query-unescape ^String s)</code></div>
 </pre>
   <p class="var-docstr">Reverses query-escape for query text.<br>
 <br>
   Converts percent-encoded substrings such as &#34;%2F&#34; to their bytes and &#39;+&#39;<br>
   into space. Throws Error when a percent escape is malformed.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

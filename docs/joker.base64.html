@@ -51,7 +51,7 @@
   <h3 class="Function" id="decode-string">decode-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(decode-string s)</code></div>
+  <pre class="var-usage"><div><code>(decode-string s)</code><code class="hide">(decode-string ^String s)</code></div>
 </pre>
   <p class="var-docstr">Decodes standard padded Base64 string s and returns the decoded bytes as a<br>
   string.<br>
@@ -66,13 +66,13 @@
     (joker.base64/decode-string &#34;aGVsbG8=&#34;)<br>
     ;; =&gt; &#34;hello&#34;</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="encode-string">encode-string</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(encode-string s)</code></div>
+  <pre class="var-usage"><div><code>(encode-string s)</code><code class="hide">(encode-string ^String s)</code></div>
 </pre>
   <p class="var-docstr">Returns the standard padded Base64 encoding of string s.<br>
 <br>
@@ -83,7 +83,7 @@
     (joker.base64/encode-string &#34;hello&#34;)<br>
     ;; =&gt; &#34;aGVsbG8=&#34;</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

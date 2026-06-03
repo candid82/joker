@@ -81,7 +81,7 @@
   <h3 class="Function" id="capabilities">capabilities</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(capabilities client)</code></div>
+  <pre class="var-usage"><div><code>(capabilities client)</code><code class="hide">(capabilities ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Returns the server CAPA response as a map of capability strings to vectors<br>
   of argument strings.<br>
@@ -90,26 +90,26 @@
   {&#34;UIDL&#34; [] &#34;SASL&#34; [&#34;PLAIN&#34;]}. Throws Error when CAPA is unsupported or<br>
   the session cannot complete the operation.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="close">close</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(close client)</code></div>
+  <pre class="var-usage"><div><code>(close client)</code><code class="hide">(close ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Closes client without sending QUIT and returns nil.<br>
 <br>
   Use close to abandon a session without committing deletion marks. close is<br>
   idempotent; the POP3Client is unusable afterward.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="connect">connect</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(connect opts)</code></div>
+  <pre class="var-usage"><div><code>(connect opts)</code><code class="hide">(connect ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Connects to a POP3 server, authenticates, and returns a POP3Client session.<br>
 <br>
@@ -141,27 +141,27 @@
                            :password &#34;secret&#34;<br>
                            :timeout-ms 30000}))</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="delete">delete</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(delete client number)</code></div>
+  <pre class="var-usage"><div><code>(delete client number)</code><code class="hide">(delete ^POP3Client client ^Int number)</code></div>
 </pre>
   <p class="var-docstr">Marks message number for deletion and returns nil.<br>
 <br>
   POP3 applies marked deletions only after a successful quit. Use reset to<br>
   clear deletion marks or close to abort a session without issuing QUIT.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="list">list</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(list client)</code></div>
-<div><code>(list client number)</code></div>
+  <pre class="var-usage"><div><code>(list client)</code><code class="hide">(list ^POP3Client client)</code></div>
+<div><code>(list client number)</code><code class="hide">(list ^POP3Client client ^Int number)</code></div>
 </pre>
   <p class="var-docstr">Returns POP3 message size information.<br>
 <br>
@@ -169,47 +169,47 @@
   available messages. With number, returns the size map for that message.<br>
   Throws Error when the server rejects the request or responds incorrectly.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="noop">noop</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(noop client)</code></div>
+  <pre class="var-usage"><div><code>(noop client)</code><code class="hide">(noop ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Sends POP3 NOOP to keep a session active or check connectivity and returns<br>
   nil.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="quit">quit</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(quit client)</code></div>
+  <pre class="var-usage"><div><code>(quit client)</code><code class="hide">(quit ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Sends QUIT, commits server-side deletions marked in this session, closes the<br>
   connection, and returns nil.<br>
 <br>
   The POP3Client is unusable after quit, including when QUIT fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="reset">reset</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(reset client)</code></div>
+  <pre class="var-usage"><div><code>(reset client)</code><code class="hide">(reset ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Clears any deletion marks in the current session and returns nil.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="retrieve">retrieve</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(retrieve client number)</code></div>
+  <pre class="var-usage"><div><code>(retrieve client number)</code><code class="hide">(retrieve ^POP3Client client ^Int number)</code></div>
 </pre>
   <p class="var-docstr">Retrieves the complete raw RFC 5322 message for message number.<br>
 <br>
@@ -217,26 +217,26 @@
   endings preserved. The complete message is buffered in memory. This function<br>
   does not parse MIME content or headers.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="stat">stat</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(stat client)</code></div>
+  <pre class="var-usage"><div><code>(stat client)</code><code class="hide">(stat ^POP3Client client)</code></div>
 </pre>
   <p class="var-docstr">Returns mailbox statistics as {:count n :octets size}.<br>
 <br>
   :count is the number of messages in the mailbox and :octets is their<br>
   combined reported size.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="top">top</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(top client number lines)</code></div>
+  <pre class="var-usage"><div><code>(top client number lines)</code><code class="hide">(top ^POP3Client client ^Int number ^Int lines)</code></div>
 </pre>
   <p class="var-docstr">Retrieves message headers and up to lines body lines for message number.<br>
 <br>
@@ -244,14 +244,14 @@
   returned raw message fragment has POP3 dot-stuffing removed and CRLF line<br>
   endings preserved. lines must be non-negative.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="uidl">uidl</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8</span>
-  <pre class="var-usage"><div><code>(uidl client)</code></div>
-<div><code>(uidl client number)</code></div>
+  <pre class="var-usage"><div><code>(uidl client)</code><code class="hide">(uidl ^POP3Client client)</code></div>
+<div><code>(uidl client number)</code><code class="hide">(uidl ^POP3Client client ^Int number)</code></div>
 </pre>
   <p class="var-docstr">Returns POP3 unique identifiers.<br>
 <br>
@@ -259,7 +259,7 @@
   available messages. With number, returns the identifier map for that<br>
   message. UIDL is an optional POP3 command; unsupported servers cause Error.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>
