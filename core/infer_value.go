@@ -28,11 +28,13 @@ type FnAritySummary struct {
 
 type InferEnv struct {
 	analyzingBindings map[*Binding]bool
+	requiredTypes     map[*Binding][]*Type
 }
 
 func newInferEnv() *InferEnv {
 	return &InferEnv{
 		analyzingBindings: map[*Binding]bool{},
+		requiredTypes:     map[*Binding][]*Type{},
 	}
 }
 
@@ -94,9 +96,70 @@ func inferredTypesCompatible(expected []*Type, actual []*Type) bool {
 	return false
 }
 
-func bindingAddRequiredTypes(binding *Binding, expected []*Type) {
+func typeInList(types []*Type, t *Type) bool {
+	for _, existing := range types {
+		if existing == t {
+			return true
+		}
+	}
+	return false
+}
+
+func diffTypes(types, base []*Type) []*Type {
+	var res []*Type
+	for _, t := range types {
+		if !typeInList(base, t) {
+			res = addType(res, t)
+		}
+	}
+	return res
+}
+
+func copyTypes(types []*Type) []*Type {
+	if len(types) == 0 {
+		return nil
+	}
+	res := make([]*Type, len(types))
+	copy(res, types)
+	return res
+}
+
+func (env *InferEnv) clone() *InferEnv {
+	if env == nil {
+		return newInferEnv()
+	}
+	res := newInferEnv()
+	for binding, analyzing := range env.analyzingBindings {
+		res.analyzingBindings[binding] = analyzing
+	}
+	for binding, types := range env.requiredTypes {
+		res.requiredTypes[binding] = copyTypes(types)
+	}
+	return res
+}
+
+func (env *InferEnv) addRequiredTypes(binding *Binding, expected []*Type) {
+	if env == nil || binding == nil {
+		return
+	}
 	for _, t := range expected {
-		binding.requiredTypes = addType(binding.requiredTypes, t)
+		env.requiredTypes[binding] = addType(env.requiredTypes[binding], t)
+	}
+}
+
+func (env *InferEnv) mergeBranches(positive, negative *InferEnv) {
+	if env == nil || positive == nil || negative == nil {
+		return
+	}
+	for binding, positiveTypes := range positive.requiredTypes {
+		baseTypes := env.requiredTypes[binding]
+		negativeTypes := negative.requiredTypes[binding]
+		positiveAdded := diffTypes(positiveTypes, baseTypes)
+		negativeAdded := diffTypes(negativeTypes, baseTypes)
+		if len(positiveAdded) == 0 || len(negativeAdded) == 0 {
+			continue
+		}
+		env.requiredTypes[binding] = joinTypes(env.requiredTypes[binding], joinTypes(positiveAdded, negativeAdded))
 	}
 }
 
@@ -106,8 +169,8 @@ func requireExpr(expr Expr, expected []*Type, env *InferEnv) {
 	}
 	switch expr := expr.(type) {
 	case *BindingExpr:
-		bindingAddRequiredTypes(expr.binding, expected)
-		if expr.binding.valueExpr != nil {
+		env.addRequiredTypes(expr.binding, expected)
+		if expr.binding != nil && expr.binding.valueExpr != nil {
 			requireExpr(expr.binding.valueExpr, expected, env)
 		}
 	case *MetaExpr:
@@ -205,7 +268,12 @@ func (expr *SetExpr) InferValue(env *InferEnv) InferredValue {
 
 func (expr *IfExpr) InferValue(env *InferEnv) InferredValue {
 	expr.cond.InferValue(env)
-	return joinInferredValues(expr.positive.InferValue(env), expr.negative.InferValue(env))
+	positiveEnv := env.clone()
+	negativeEnv := env.clone()
+	positive := expr.positive.InferValue(positiveEnv)
+	negative := expr.negative.InferValue(negativeEnv)
+	env.mergeBranches(positiveEnv, negativeEnv)
+	return joinInferredValues(positive, negative)
 }
 
 func (expr *DefExpr) InferValue(env *InferEnv) InferredValue {
@@ -523,7 +591,6 @@ func (summary *FnSummary) infer() {
 func inferFnArity(arity *FnArityExpr, variadic bool) *FnAritySummary {
 	for _, binding := range arity.bindings {
 		if binding != nil {
-			binding.requiredTypes = nil
 			binding.inferredValue = nil
 		}
 	}
@@ -544,7 +611,7 @@ func inferFnArity(arity *FnArityExpr, variadic bool) *FnAritySummary {
 	for i, arg := range arity.args {
 		res.declaredArgTypes[i] = getTaggedTypes(arg)
 		if i < len(arity.bindings) && arity.bindings[i] != nil {
-			res.inferredArgTypes[i] = arity.bindings[i].requiredTypes
+			res.inferredArgTypes[i] = env.requiredTypes[arity.bindings[i]]
 		}
 	}
 	if variadic && len(arity.args) > 0 {

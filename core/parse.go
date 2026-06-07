@@ -137,7 +137,6 @@ type (
 		frame         int
 		isUsed        bool
 		inferredValue *InferredValue
-		requiredTypes []*Type
 		valueExpr     Expr
 	}
 	Bindings struct {
