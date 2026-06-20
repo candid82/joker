@@ -1960,12 +1960,9 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	return MakeBoolean(found && ns.Lazy == nil)
 }
 
-func findConfigFile(filename string, workingDir string, findDir bool) string {
+func findConfigFile(filename string, workingDir string) string {
 	var err error
 	configName := ".joker"
-	if findDir {
-		configName = ".jokerd"
-	}
 	if filename != "" {
 		filename, err = filepath.Abs(filename)
 		if err != nil {
@@ -1991,18 +1988,14 @@ func findConfigFile(filename string, workingDir string, findDir bool) string {
 				return ""
 			}
 			p := filepath.Join(home, configName)
-			if info, err := os.Stat(p); err == nil {
-				if !findDir || info.IsDir() {
-					return p
-				}
+			if _, err := os.Stat(p); err == nil {
+				return p
 			}
 			return ""
 		}
 		p := filepath.Join(filename, configName)
-		if info, err := os.Stat(p); err == nil {
-			if !findDir || info.IsDir() {
-				return p
-			}
+		if _, err := os.Stat(p); err == nil {
+			return p
 		}
 	}
 }
@@ -2035,7 +2028,7 @@ func knownMacrosToMap(km Object) (Map, error) {
 func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
 	LINTER_CONFIG.Value = EmptyArrayMap()
-	configFileName := findConfigFile(filename, workingDir, false)
+	configFileName := findConfigFile(filename, workingDir)
 	if configFileName == "" {
 		return
 	}
@@ -2216,8 +2209,11 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 	if dialect == EDN {
 		return
 	}
-	configDir := findConfigFile(filename, workingDir, true)
+	configDir := HomeJokerdDir()
 	if configDir == "" {
+		return
+	}
+	if info, err := os.Stat(configDir); err != nil || !info.IsDir() {
 		return
 	}
 	if dialect == JOKER {

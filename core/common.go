@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"unicode/utf8"
 )
 
@@ -109,4 +110,12 @@ func HomeDir() string {
 		home, _ = os.LookupEnv("USERPROFILE")
 	}
 	return home
+}
+
+func HomeJokerdDir() string {
+	home := HomeDir()
+	if home == "" {
+		return ""
+	}
+	return filepath.Join(home, ".jokerd")
 }
