@@ -296,6 +296,9 @@ func (expr *VarRefExpr) InferValue(env *InferEnv) InferredValue {
 		if fn, ok := expr.vr.Value.(*Fn); ok {
 			return fnInferredValue(fn.fnExpr)
 		}
+		if _, ok := expr.vr.Value.(Callable); ok {
+			return typeInferredValue(expr.vr.Value.GetType())
+		}
 		if expr.vr.taggedType != nil {
 			return typeInferredValue(expr.vr.taggedType)
 		}
