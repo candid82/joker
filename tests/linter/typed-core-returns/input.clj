@@ -1,0 +1,15 @@
+(ns typed-core-returns)
+
+(+ (unchecked-add-int 1 2)
+   (unchecked-int 3)
+   (long 4)
+   (bigdec 5))
+
+(subs (munge "a-b") 0)
+(subs (namespace-munge "a-b") 0)
+(name (find-keyword "kw"))
+(keys (sorted-map :a 1))
+(disj (sorted-set :a) :a)
+(first (replicate 1 :x))
+(first (iterator-seq (.iterator [1])))
+@(ensure-reduced 1)
