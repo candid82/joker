@@ -258,7 +258,7 @@
 (defn clear-agent-errors [a])
 (defn reader-conditional? [value])
 (defn unchecked-negate-int [x])
-(defn volatile! [val])
+(defn ^Deref volatile! [val])
 (defn proxy-mappings [proxy])
 (defn enumeration-seq [e])
 (defn short-array ([size-or-seq]) ([size init-val-or-seq]))

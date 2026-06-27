@@ -237,7 +237,7 @@
 (defn array [& var-args])
 (defn remove-method [multifn dispatch-val])
 (defn balance-right-del [key val left del])
-(defn volatile! [val])
+(defn ^Deref volatile! [val])
 (defn bitpos [hash shift])
 (defn m3-fmix [h1 len])
 (defn hash-coll [coll])
