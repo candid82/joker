@@ -23,7 +23,12 @@
    (divide 4 2)
    (unsafe-bit-and 1 1)
    (fix 1.2)
+   (m3-hash-int 1)
    (m3-hash-unencoded-chars "abc")
+   (hash-string nil)
+   (hash-string* nil)
+   (compare-symbols 'a 'b)
+   (compare-keywords :a :b)
    (unchecked-char 65))
 
 (when (compare-and-set! (atom 0) 0 1)
@@ -39,3 +44,4 @@
 (comp (map inc) (filter pos?) (take 1) (drop 0) (partition-all 2) (keep identity) (dedupe))
 (subs (pr-str* :x) 0)
 (subs (js-str :x) 0)
+(set-validator! (atom 1) nil)

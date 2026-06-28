@@ -175,8 +175,8 @@
 (doseq [sym (:known-namespaces joker.core/*linter-config*)]
   (inject-ns__ sym))
 
-(defn add-tap [f])
-(defn remove-tap [f])
+(defn add-tap [^Callable f])
+(defn remove-tap [^Callable f])
 (defn ^Boolean tap> [x])
 
 ;; Redefine some core functions with type hints
@@ -206,7 +206,7 @@
 
 ;; Clojure core macros not supported by Joker
 
-(defn vswap! [vol f & args])
+(defn vswap! [^Deref vol ^Callable f & args])
 (defn areduce [a idx ret init expr])
 (defn locking [x & body])
 (defn amap [a idx ret expr])
@@ -225,7 +225,7 @@
 (defn halt-when
   (^Fn [^Callable pred])
   (^Fn [^Callable pred ^Callable retf]))
-(defn seq-to-map-for-destructuring ^Map [s])
+(defn seq-to-map-for-destructuring ^Map [^Seqable s])
 
 ;; Clojure core vars not supported by Joker
 
