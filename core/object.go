@@ -161,7 +161,7 @@ type (
 		isUsed         bool
 		isGloballyUsed bool
 		isFake         bool
-		taggedType     *Type
+		taggedTypes    []*Type
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {

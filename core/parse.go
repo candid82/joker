@@ -84,10 +84,10 @@ type (
 	}
 	FnArityExpr struct {
 		Position
-		args       []Symbol
-		bindings   []*Binding
-		body       []Expr
-		taggedType *Type
+		args        []Symbol
+		bindings    []*Binding
+		body        []Expr
+		taggedTypes []*Type
 	}
 	FnExpr struct {
 		Position
@@ -717,12 +717,12 @@ func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 		if ok, p := meta.Get(KEYWORDS.dynamic); ok {
 			vr.isDynamic = ToBool(p)
 		}
-		vr.taggedType = getTaggedType(sym)
+		vr.taggedTypes = getTaggedTypes(sym)
 	}
 }
 
 func checkReturnType(vr *Var, valueExpr Expr) {
-	if !LINTER_MODE || vr.taggedType == nil || valueExpr == nil {
+	if !LINTER_MODE || len(vr.taggedTypes) == 0 || valueExpr == nil {
 		return
 	}
 	if metaExpr, ok := valueExpr.(*MetaExpr); ok {
@@ -738,8 +738,8 @@ func checkReturnType(vr *Var, valueExpr Expr) {
 		}
 		returnExpr := arity.body[len(arity.body)-1]
 		returnedValue := returnExpr.InferValue(newInferEnv())
-		if !returnedValue.unknown && len(returnedValue.types) != 0 && !inferredTypesCompatible([]*Type{vr.taggedType}, returnedValue.types) {
-			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), vr.taggedType.ToString(false), inferredTypesString(returnedValue.types)))
+		if !returnedValue.unknown && len(returnedValue.types) != 0 && !inferredTypesCompatible(vr.taggedTypes, returnedValue.types) {
+			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), inferredTypesString(vr.taggedTypes), inferredTypesString(returnedValue.types)))
 		}
 	}
 	for i := range fnExpr.arities {
@@ -903,11 +903,11 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
 	arity := FnArityExpr{
-		Position:   GetPosition(sig),
-		args:       args,
-		bindings:   bindings,
-		body:       parseBody(body, ctx),
-		taggedType: getTaggedType(params.(Meta)),
+		Position:    GetPosition(sig),
+		args:        args,
+		bindings:    bindings,
+		body:        parseBody(body, ctx),
+		taggedTypes: getTaggedTypes(params.(Meta)),
 	}
 	if isVariadic {
 		if fn.variadic != nil {
@@ -1332,28 +1332,6 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 
 func reportNotAFunction(pos Position, name string) {
 	printParseWarning(pos, name+" is not a function")
-}
-
-func getTaggedType(obj Meta) *Type {
-	if m := obj.GetMeta(); m != nil {
-		if ok, typeName := m.Get(KEYWORDS.tag); ok {
-			switch typeName := typeName.(type) {
-			case Symbol:
-				if t := TYPES[typeName.name]; t != nil {
-					return t
-				}
-			case String:
-				if strings.Contains(typeName.S, "|") {
-					return nil
-				}
-				typeSym := MakeSymbol(typeName.S)
-				if t := TYPES[typeSym.name]; t != nil {
-					return t
-				}
-			}
-		}
-	}
-	return nil
 }
 
 func getTaggedTypes(obj Meta) []*Type {

@@ -720,11 +720,9 @@ func (expr *FnArityExpr) Pack(p []byte, env *PackEnv) []byte {
 	p = expr.Pos().Pack(p, env)
 	p = packSymbolSeq(p, expr.args, env)
 	p = packSeq(p, expr.body, env)
-	if expr.taggedType != nil {
-		p = append(p, NOT_NULL)
-		p = appendUint16(p, env.stringIndex(STRINGS.Intern(expr.taggedType.name)))
-	} else {
-		p = append(p, NULL)
+	p = appendInt(p, len(expr.taggedTypes))
+	for _, taggedType := range expr.taggedTypes {
+		p = appendUint16(p, env.stringIndex(STRINGS.Intern(taggedType.name)))
 	}
 	return p
 }
@@ -734,20 +732,21 @@ func unpackFnArityExpr(p []byte, header *PackHeader) (*FnArityExpr, []byte) {
 	pos, p := unpackPosition(p, header)
 	args, p := unpackSymbolSeq(p, header)
 	body, p := unpackSeq(p, header)
-	var taggedType *Type
-	if p[0] == NULL {
-		p = p[1:]
-	} else {
-		p = p[1:]
-		var i uint16
-		i, p = extractUInt16(p)
-		taggedType = TYPES[header.Strings[i]]
+	var count int
+	count, p = extractInt(p)
+	taggedTypes := make([]*Type, 0, count)
+	for i := 0; i < count; i++ {
+		var stringIndex uint16
+		stringIndex, p = extractUInt16(p)
+		if taggedType := TYPES[header.Strings[stringIndex]]; taggedType != nil {
+			taggedTypes = append(taggedTypes, taggedType)
+		}
 	}
 	res := &FnArityExpr{
-		Position:   pos,
-		body:       body,
-		args:       args,
-		taggedType: taggedType,
+		Position:    pos,
+		body:        body,
+		args:        args,
+		taggedTypes: taggedTypes,
 	}
 	return res, p
 }

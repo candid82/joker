@@ -1,1 +1,3 @@
 tests/linter/return-types/input.clj:5:3: Parse warning: return value of email-from must have type String, got Map
+tests/linter/return-types/input.clj:20:3: Parse warning: return value of union-bad must have type Number or Char, got String
+tests/linter/return-types/input.clj:23:3: Parse warning: return value of string-from-union must have type String, got Number or Char
