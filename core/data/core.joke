@@ -1142,9 +1142,9 @@
 
 (defn namespace
   "Returns the namespace String of a symbol or keyword, or nil if not present."
-  {:tag String
+  {:tag "String|Nil"
    :added "1.0"}
-  ^String [^Named x]
+  ^"String|Nil" [^Named x]
   (namespace__ x))
 
 (defn ident?
@@ -1484,7 +1484,7 @@
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
   {:added "1.0"}
-  ^Var [^Symbol sym] (find-var__ sym))
+  ^"Var|Nil" [^Symbol sym] (find-var__ sym))
 
 (defn comp
   "Takes a set of functions and returns a fn that is the composition
@@ -2006,8 +2006,7 @@
 (defn char
   "Coerce to char"
   {:added "1.0"}
-  ;; TODO: types (Char or Number)
-  ^Char [x] (char__ x))
+  ^Char [^"Char|Number" x] (char__ x))
 
 (defn boolean
   "Coerce to boolean"
@@ -2066,15 +2065,13 @@
 (defn bigint
   "Coerce to BigInt"
   {:added "1.0"}
-  ^BigInt [x]
-  ;; TODO: types (Number or String)
+  ^BigInt [^"Number|String" x]
   (bigint__ x))
 
 (defn bigfloat
   "Coerce to BigFloat"
   {:added "1.0"}
-  ^BigFloat [x]
-  ;; TODO: types (Number or String)
+  ^BigFloat [^"Number|String" x]
   (bigfloat__ x))
 
 (def ^{:arglists '([& args])
@@ -2146,7 +2143,7 @@
 (def ^{:arglists '([])
        :doc "Reads the next line from *in*. Returns nil if an error (such as EOF) is detected."
        :added "1.0"
-       :tag String}
+       :tag "String|Nil"}
   read-line read-line__)
 
 (def ^{:arglists '([s])
@@ -2239,7 +2236,7 @@
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
   {:added "1.0"}
-  ^Namespace [^Symbol sym] (find-ns__ sym))
+  ^"Namespace|Nil" [^Symbol sym] (find-ns__ sym))
 
 (defn create-ns
   "Create a new namespace named by the symbol if one doesn't already
@@ -2252,7 +2249,7 @@
   "Removes the namespace named by the symbol. Use with caution.
   Cannot be used to remove the clojure namespace."
   {:added "1.0"}
-  ^Namespace [^Symbol sym] (remove-ns__ sym))
+  ^"Namespace|Nil" [^Symbol sym] (remove-ns__ sym))
 
 (defn all-ns
   "Returns a sequence of all namespaces."
@@ -2264,8 +2261,7 @@
   returns the namespace named by it, throwing an exception if not
   found."
   {:added "1.0"}
-  ^Namespace [x]
-  ;; TODO: types (Namespace or Symbol)
+  ^Namespace [^"Namespace|Symbol" x]
   (if (instance? Namespace x)
     x
     (or (find-ns x)
@@ -2279,22 +2275,19 @@
 (defn ns-name
   "Returns the name of the namespace, a symbol."
   {:added "1.0"}
-  ^Symbol [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Symbol [^"Namespace|Symbol" ns]
   (ns-name__ (the-ns ns)))
 
 (defn ns-map
   "Returns a map of all the mappings for the namespace."
   {:added "1.0"}
-  ^Map [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Map [^"Namespace|Symbol" ns]
   (ns-map__ (the-ns ns)))
 
 (defn ns-unmap
   "Removes the mappings for the symbol from the namespace."
   {:added "1.0"}
-  ^Nil [ns ^Symbol sym]
-  ;; TODO: types (Namespace or Symbol)
+  ^Nil [^"Namespace|Symbol" ns ^Symbol sym]
   (ns-unmap__ (the-ns ns) sym))
 
 (defn ^:private public?
@@ -2304,8 +2297,7 @@
 (defn ns-publics
   "Returns a map of the public intern mappings for the namespace."
   {:added "1.0"}
-  ^Map [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Map [^"Namespace|Symbol" ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
                                       (= ns (var-ns__ v))
@@ -2315,8 +2307,7 @@
 (defn ns-interns
   "Returns a map of the intern mappings for the namespace."
   {:added "1.0"}
-  ^Map [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Map [^"Namespace|Symbol" ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
                                       (= ns (var-ns__ v))))
@@ -2332,13 +2323,11 @@
   to val if supplied. The namespace must exist. The var will adopt any
   metadata from the name symbol.  Returns the var."
   {:added "1.0"}
-  (^Var [ns ^Symbol name]
-   ;; TODO: types (Namespace or Symbol)
+  (^Var [^"Namespace|Symbol" ns ^Symbol name]
    (let [v (intern__ (the-ns ns) name)]
      (when (meta name) (set-meta__ v (meta name)))
      v))
-  (^Var [ns ^Symbol name val]
-   ;; TODO: types (Namespace or Symbol)
+  (^Var [^"Namespace|Symbol" ns ^Symbol name val]
    (let [v (intern__ (the-ns ns) name val)]
      (when (meta name) (set-meta__ v (meta name)))
      v)))
@@ -2388,8 +2377,7 @@
 (defn ns-refers
   "Returns a map of the refer mappings for the namespace."
   {:added "1.0"}
-  ^Map [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Map [^"Namespace|Symbol" ns]
   (let [ns (the-ns ns)]
     (filter-key val (fn [^Var v] (and (instance? Var v)
                                       (not= ns (var-ns__ v))))
@@ -2401,22 +2389,19 @@
   the symbolic name of the target namespace. Use :as in the ns macro in preference
   to calling this directly."
   {:added "1.0"}
-  ^Nil [^Symbol alias namespace-sym]
-  ;; TODO: types (Namespace or Symbol)
+  ^Nil [^Symbol alias ^"Namespace|Symbol" namespace-sym]
   (alias__ *ns* alias (the-ns namespace-sym)))
 
 (defn ns-aliases
   "Returns a map of the aliases for the namespace."
   {:added "1.0"}
-  ^Map [ns]
-  ;; TODO: types (Namespace or Symbol)
+  ^Map [^"Namespace|Symbol" ns]
   (ns-aliases__ (the-ns ns)))
 
 (defn ns-unalias
   "Removes the alias for the symbol from the namespace."
   {:added "1.0"}
-  ^Nil [ns ^Symbol sym]
-  ;; TODO: types (Namespace or Symbol)
+  ^Nil [^"Namespace|Symbol" ns ^Symbol sym]
   (ns-unalias__ (the-ns ns) sym))
 
 (defn take-nth
@@ -2450,18 +2435,17 @@
   if the symbol is fully qualified, the var/Type to which it resolves
   need not be present in the namespace."
   {:added "1.0"}
-  ;; TODO: ns is namespace or symbol
-  (^Var [ns ^Symbol sym]
+  (^"Var|Type|Nil" [^"Namespace|Symbol" ns ^Symbol sym]
    (ns-resolve ns nil sym))
-  (^Var [ns ^Gettable env ^Symbol sym]
+  (^"Var|Type|Nil" [^"Namespace|Symbol" ns ^Gettable env ^Symbol sym]
    (when-not (contains? env sym)
      (ns-resolve__ (the-ns ns) sym))))
 
 (defn resolve
   "Same as (ns-resolve *ns* sym) or (ns-resolve *ns* env sym)"
   {:added "1.0"}
-  (^Var [^Symbol sym] (ns-resolve *ns* sym))
-  (^Var [^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
+  (^"Var|Type|Nil" [^Symbol sym] (ns-resolve *ns* sym))
+  (^"Var|Type|Nil" [^Gettable env ^Symbol sym] (ns-resolve *ns* env sym)))
 
 (def ^{:arglists '([& keyvals])
        :doc "Constructs an array-map. If any keys are equal, they are handled as
@@ -2869,7 +2853,7 @@
   "Returns exception data (a map) if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  ^Map [ex]
+  ^"Map|Nil" [ex]
   (when (instance? ExInfo ex)
     (ex-data__ ex)))
 
@@ -2877,7 +2861,7 @@
   "Returns the cause of ex if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  ^Error [ex]
+  ^"Error|Nil" [ex]
   (when (instance? ExInfo ex)
     (ex-cause__ ex)))
 
@@ -2885,7 +2869,7 @@
   "Returns the message attached to ex if ex is an ExInfo.
   Otherwise returns nil."
   {:added "1.0"}
-  ^String [ex]
+  ^"String|Nil" [ex]
   (when (instance? Error ex)
     (ex-message__ ex)))
 
@@ -2920,8 +2904,7 @@
 (defn re-pattern
   "Returns an instance of Regex"
   {:added "1.0"}
-  ;; TODO: Regex or String
-  ^Regex [s]
+  ^Regex [^"Regex|String" s]
   (if (instance? Regex s)
     s
     (regex__ s)))
@@ -2935,13 +2918,13 @@
 (defn re-find
   "Returns the leftmost regex match, if any, of string to pattern."
   {:added "1.0"}
-  [^Regex re ^String s]
+  ^"String|Vec|Nil" [^Regex re ^String s]
   (re-find__ re s))
 
 (defn re-matches
   "Returns the match, if any, of string to pattern."
   {:added "1.0"}
-  [^Regex re ^String s]
+  ^"String|Vec|Nil" [^Regex re ^String s]
   (let [m (re-find re s)
         c (if (instance? String m)
             (count m)
@@ -3082,7 +3065,7 @@
 (defn empty
   "Returns an empty collection of the same category as coll, or nil"
   {:added "1.0"}
-  ^Collection [coll]
+  ^"Collection|Nil" [coll]
   (empty__ coll))
 
 (defn bound?
@@ -3095,7 +3078,7 @@
 (defn not-empty
   "If coll is empty, returns nil, else coll"
   {:added "1.0"}
-  ^Seqable [^Seqable coll] (when (seq coll) coll))
+  ^"Seqable|Nil" [^Seqable coll] (when (seq coll) coll))
 
 (defn distinct?
   "Returns true if no two of the arguments are ="
@@ -3474,7 +3457,7 @@
   "Resolves namespace-qualified sym per 'resolve'. If initial resolve
   fails, attempts to require sym's namespace and retries."
   {:added "1.0"}
-  ^Var [sym]
+  ^"Var|Type|Nil" [^Symbol sym]
   (if (qualified-symbol? sym)
     (or (resolve sym)
         (do (-> sym namespace symbol require)
@@ -4460,7 +4443,7 @@
   "Given a multimethod and a dispatch value, returns the dispatch fn
   that would apply to that value, or nil if none apply and no default"
   {:added "1.0"}
-  ^Fn [multifn dispatch-val]
+  ^"Fn|Nil" [multifn dispatch-val]
   (let [mfm (meta multifn)
         mfatom (:method-table mfm)
         default (:default mfm)]
@@ -4518,7 +4501,7 @@
   Blocks if ch is full (no buffer space is available).
   Returns true unless ch is already closed."
   {:added "1.0"}
-  [^Channel ch val]
+  ^Boolean [^Channel ch val]
   (>!__ ch val))
 
 (defn close!
@@ -4531,7 +4514,7 @@
   Logically closing happens after all puts have been delivered. Therefore, any
   blocked puts will remain blocked until a taker releases them."
   {:added "1.0"}
-  [^Channel ch]
+  ^Nil [^Channel ch]
   (close!__ ch))
 
 (defn- go-spew
@@ -4592,7 +4575,7 @@
 (defn parse-boolean
   "Parses strings \"true\" or \"false\" and returns a boolean, or nil if invalid"
   {:added "1.5"}
-  ^Boolean [^String s]
+  ^"Boolean|Nil" [^String s]
   (if (string? s)
     (case s
       "true" true
@@ -4603,13 +4586,13 @@
 (defn parse-double
   "Parses string with floating point components and return a Double value, or nil if parse fails."
   {:added "1.5"}
-  ^Double [^String s]
+  ^"Double|Nil" [^String s]
   (parseDouble__ s))
 
 (defn parse-long
   "Parses string of decimal digits with optional leading -/+ and return an Int value, or nil if parse fails."
   {:added "1.5"}
-  ^Number [^String s]
+  ^"Number|Nil" [^String s]
   (parseLong__ s))
 
 (defn partitionv
@@ -4619,15 +4602,15 @@
   necessary to complete last partition upto n items. In case there are
   not enough padding elements, return a partition with less than n items."
   {:added "1.5"}
-  ([n coll]
+  (^Seq [^Number n ^Seqable coll]
    (partitionv n n coll))
-  ([n step coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (into [] (take n s))]
         (when (= n (count p))
           (cons p (partitionv n step (nthrest s step))))))))
-  ([n step pad coll]
+  (^Seq [^Number n ^Number step ^Seqable pad ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [p (into [] (take n s))]
@@ -4639,9 +4622,9 @@
   "Returns a lazy sequence of vector partitions, but may include
   partitions with fewer than n items at the end."
   {:added "1.5"}
-  ([n coll]
+  (^Seq [^Number n ^Seqable coll]
    (partitionv-all n n coll))
-  ([n step coll]
+  (^Seq [^Number n ^Number step ^Seqable coll]
    (lazy-seq
     (when-let [s (seq coll)]
       (let [seg (into [] (take n coll))]
@@ -4650,5 +4633,5 @@
 (defn splitv-at
   "Returns a vector of [(into [] (take n coll)) (drop n coll)]"
   {:added "1.5"}
-  [n coll]
+  ^Vec [^Number n ^Seqable coll]
   [(into [] (take n coll)) (drop n coll)])

@@ -197,10 +197,14 @@ tests/linter/types-1/input.clj:127:6: Parse warning: arg[0] of core/set must hav
 tests/linter/types-1/input.clj:128:10: Parse warning: arg[0] of core/find-ns must have type Symbol, got Int
 tests/linter/types-1/input.clj:129:12: Parse warning: arg[0] of core/create-ns must have type Symbol, got Int
 tests/linter/types-1/input.clj:130:12: Parse warning: arg[0] of core/remove-ns must have type Symbol, got Int
+tests/linter/types-1/input.clj:131:11: Parse warning: arg[0] of core/ns-unmap must have type Namespace or Symbol, got Int
 tests/linter/types-1/input.clj:131:13: Parse warning: arg[1] of core/ns-unmap must have type Symbol, got Int
+tests/linter/types-1/input.clj:132:9: Parse warning: arg[0] of core/intern must have type Namespace or Symbol, got Int
 tests/linter/types-1/input.clj:132:11: Parse warning: arg[1] of core/intern must have type Symbol, got Int
 tests/linter/types-1/input.clj:133:8: Parse warning: arg[0] of core/refer must have type Symbol, got Int
 tests/linter/types-1/input.clj:134:8: Parse warning: arg[0] of core/alias must have type Symbol, got Int
+tests/linter/types-1/input.clj:134:10: Parse warning: arg[1] of core/alias must have type Namespace or Symbol, got Int
+tests/linter/types-1/input.clj:135:13: Parse warning: arg[0] of core/ns-unalias must have type Namespace or Symbol, got Int
 tests/linter/types-1/input.clj:135:15: Parse warning: arg[1] of core/ns-unalias must have type Symbol, got Int
 tests/linter/types-1/input.clj:136:11: Parse warning: arg[0] of core/take-nth must have type Number, got String
 tests/linter/types-1/input.clj:136:15: Parse warning: arg[1] of core/take-nth must have type Seqable, got Int
