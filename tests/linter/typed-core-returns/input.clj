@@ -13,3 +13,27 @@
 (first (replicate 1 :x))
 (first (iterator-seq (.iterator [1])))
 @(ensure-reduced 1)
+
+(let [r (ref 0)]
+  (+ (ref-max-history r)
+     (ref-min-history r))
+  @(ref-max-history r 10)
+  @(ref-min-history r 0))
+
+(when (await-for 1 (agent 0))
+  true)
+(when (future-cancel (future 1))
+  true)
+(when (compare-and-set! (atom 0) 0 1)
+  true)
+
+(first (pcalls (fn [] 1)))
+(first (bases Object))
+(keys (ns-imports *ns*))
+(name (error-mode (agent 0)))
+(first (pvalues 1))
+
+(+ (inst-ms #inst "2020-01-01T00:00:00.000-00:00") 1)
+(when (inst? #inst "2020-01-01T00:00:00.000-00:00") true)
+(when (uuid? #uuid "00000000-0000-0000-0000-000000000000") true)
+(comp (map inc) (filter pos?) (take 1) (drop 0) (partition-all 2) (keep identity) (dedupe))
