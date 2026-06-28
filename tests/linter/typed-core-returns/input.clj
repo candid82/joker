@@ -50,3 +50,6 @@
 (unchecked-int \A)
 (unchecked-char \A)
 (extends? clojure.lang.Seqable nil)
+
+(keys (derive (make-hierarchy) ::a ::b))
+(keys (underive (derive (make-hierarchy) ::a ::b) ::a ::b))

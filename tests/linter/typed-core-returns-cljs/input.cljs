@@ -45,3 +45,7 @@
 (subs (pr-str* :x) 0)
 (subs (js-str :x) 0)
 (set-validator! (atom 1) nil)
+(keys (derive (make-hierarchy) ::a ::b))
+(keys (underive (derive (make-hierarchy) ::a ::b) ::a ::b))
+(when (js-delete #js {} "x") true)
+(throw (ExceptionInfo "x" {} nil))
