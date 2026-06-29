@@ -67,8 +67,8 @@
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
        :added "1.0"}
-  conj (fn conj (^Collection [^"Collection|Nil" coll x] (conj__ coll x))
-         (^Collection [^"Collection|Nil" coll x & xs]
+  conj (fn conj (^Collection [^"Map|Vec|MapSet|Seq|Nil" coll x] (conj__ coll x))
+         (^Collection [^"Map|Vec|MapSet|Seq|Nil" coll x & xs]
           (if xs
             (recur (conj__ coll x) (first xs) (next xs))
             (conj__ coll x)))))

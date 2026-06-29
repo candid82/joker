@@ -105,6 +105,7 @@ tests/linter/types-1/input.clj:74:7: Parse warning: arg[0] of core/vals must hav
 tests/linter/types-1/input.clj:75:7: Parse warning: arg[0] of core/rseq must have type Reversible, got Int
 tests/linter/types-1/input.clj:76:12: Parse warning: arg[0] of core/namespace must have type Named, got Int
 tests/linter/types-1/input.clj:77:12: Parse warning: arg[0] of core/reduce-kv must have type Callable, got Int
+tests/linter/types-1/input.clj:77:16: Parse warning: arg[2] of core/reduce-kv must have type KVReduce or Map, got Int
 tests/linter/types-1/input.clj:78:10: Parse warning: arg[0] of core/var-get must have type Var, got Int
 tests/linter/types-1/input.clj:79:10: Parse warning: arg[0] of core/var-set must have type Var, got Int
 tests/linter/types-1/input.clj:80:17: Parse warning: arg[0] of core/with-bindings* must have type Map, got Int
