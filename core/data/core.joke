@@ -67,9 +67,8 @@
          'added'. (conj nil item) returns (item).  The 'addition' may
          happen at different 'places' depending on the concrete type."
        :added "1.0"}
-  ; TODO: types
-  conj (fn conj (^Collection [coll x] (conj__ coll x))
-         (^Collection [coll x & xs]
+  conj (fn conj (^Collection [^"Collection|Nil" coll x] (conj__ coll x))
+         (^Collection [^"Collection|Nil" coll x & xs]
           (if xs
             (recur (conj__ coll x) (first xs) (next xs))
             (conj__ coll x)))))
@@ -417,9 +416,8 @@
 (defn symbol
   "Returns a Symbol with the given namespace and name."
   {:added "1.0"}
-  ;; TODO: types
-  (^Symbol [name] (if (symbol? name) name (symbol__ name)))
-  (^Symbol [ns name] (symbol__ ns name)))
+  (^Symbol [^"Symbol|String" name] (if (symbol? name) name (symbol__ name)))
+  (^Symbol [^"String|Nil" ns ^String name] (symbol__ ns name)))
 
 (defn gensym
   "Returns a new symbol with a unique name. If a prefix string is
@@ -454,11 +452,10 @@
   in the keyword strings, it will be added automatically."
   {:tag Keyword
    :added "1.0"}
-  ;; TODO: types
-  (^Keyword [name] (cond (keyword? name) name
+  (^Keyword [^"Keyword|Symbol|String" name] (cond (keyword? name) name
                          (symbol? name) (keyword__ name)
                          (string? name) (keyword__ name)))
-  (^Keyword [ns name] (keyword__ ns name)))
+  (^Keyword [^"String|Nil" ns ^String name] (keyword__ ns name)))
 
 (defn spread
   {:private true}
@@ -635,23 +632,20 @@
   "Returns the number of items in the collection. (count nil) returns
   0.  Also works on strings"
   {:added "1.0"}
-  ;; TODO: types
-  ^Int [coll] (count__ coll))
+  ^Int [^"Counted|Seqable" coll] (count__ coll))
 
 (defn int
   "Coerce to int"
   {:added "1.0"}
-  ;; TODO: types
-  ^Int [x] (int__ x))
+  ^Int [^"Char|Number" x] (int__ x))
 
 (defn nth
   "Returns the value at the index. get returns nil if index out of
   bounds, nth throws an exception unless not-found is supplied.  nth
   also works, in O(n) time, for strings and sequences."
   {:added "1.0"}
-  ;; TODO: types
-  ([coll ^Number index] (nth__ coll index))
-  ([coll ^Number index not-found] (nth__ coll index not-found)))
+  ([^"Indexed|Sequential|Nil" coll ^Number index] (nth__ coll index))
+  ([^"Indexed|Sequential|Nil" coll ^Number index not-found] (nth__ coll index not-found)))
 
 (defn <
   "Returns non-nil if nums are in monotonically increasing order,
@@ -959,8 +953,7 @@
 (defn even?
   "Returns true if n is even, throws an exception if n is not an integer"
   {:added "1.0"}
-  ;; TODO: types (Int, BigInt)
-  ^Boolean [n]
+  ^Boolean [^"Int|BigInt" n]
   (if (integer? n)
     (zero? (bit-and (int__ n) 1))
     (throw (ex-info (str "Argument must be an integer: " n) {}))))
@@ -968,8 +961,7 @@
 (defn odd?
   "Returns true if n is odd, throws an exception if n is not an integer"
   {:added "1.0"}
-  ;; TODO: types (Int, BigInt)
-  ^Boolean [n] (not (even? n)))
+  ^Boolean [^"Int|BigInt" n] (not (even? n)))
 
 (defn int?
   "Return true if x is a fixed precision integer"
@@ -1087,7 +1079,7 @@
 (defn find
   "Returns the map entry for key, or nil if key not present."
   {:added "1.0"}
-  [^Associative map key] (find__ map key))
+  ^"Vec|Nil" [^Associative map key] (find__ map key))
 
 (defn select-keys
   "Returns a map containing only those entries in map whose key is in keys"
@@ -1136,8 +1128,7 @@
   "Returns the name String of a string, symbol, keyword or any Named object (e.g. File)."
   {:tag String
    :added "1.0"}
-  ;; TODO: types
-  ^String [x]
+  ^String [^"String|Named" x]
   (if (string? x) x (name__ x)))
 
 (defn namespace
@@ -1331,8 +1322,7 @@
   and f is not called. Note that reduce-kv is supported on vectors,
   where the keys will be the ordinals."
   {:added "1.0"}
-  ;; TODO: types
-  ([^Callable f init coll]
+  ([^Callable f init ^"KVReduce|Map" coll]
    (cond
      (instance? KVReduce coll)
      (reduce-kv__ f init coll)
@@ -1572,8 +1562,7 @@
   "Coerces coll to a (possibly empty) sequence, if it is not already
   one. Will not force a lazy seq. (sequence nil) yields ()"
   {:added "1.0"}
-  ;; TODO: types (Seq or Seqable)
-  ^Seq [coll]
+  ^Seq [^"Seq|Seqable|Nil" coll]
   (if (seq? coll)
     coll
     (or (seq coll) ())))
@@ -1783,7 +1772,7 @@
   the first.  If a key occurs in more than one map, the mapping from
   the latter (left-to-right) will be the mapping in the result."
   {:added "1.0"}
-  ^Map [& maps]
+  ^"Map|Nil" [& maps]
   (when (some identity maps)
     (reduce #(conj (or %1 {}) %2) maps)))
 
@@ -1793,7 +1782,7 @@
   from the latter (left-to-right) will be combined with the mapping in
   the result by calling (f val-in-result val-in-latter)."
   {:added "1.0"}
-  ^Map [^Callable f & maps]
+  ^"Map|Nil" [^Callable f & maps]
   (when (some identity maps)
     (let [merge-entry (fn [m e]
                         (let [k (key e) v (val e)]
@@ -1818,7 +1807,7 @@
       map)))
 
 (defn ^:private line-seq*
-  [rdr]
+  ^"Seq|Nil" [^BufferedReader rdr]
   (when-let [line (reader-read-line__ rdr)]
     (cons line (lazy-seq (line-seq* rdr)))))
 
@@ -1826,7 +1815,7 @@
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must be File or BufferedReader."
   {:added "1.0"}
-  [rdr]
+  ^"Seq|Nil" [^IOReader rdr]
   (cond
     (instance? BufferedReader rdr)
     (line-seq* rdr)
@@ -3038,7 +3027,7 @@
   vector/seq with any elements = a key in smap replaced with the
   corresponding val in smap."
   {:added "1.0"}
-  [^Associative smap ^Seqable coll]
+  ^"Vec|Seq" [^Associative smap ^Seqable coll]
   (if (vector? coll)
     (reduce (fn [v i]
               (if-let [e (find smap (nth v i))]
@@ -3926,7 +3915,7 @@
   f can be a string (filename) or a reader object like *in* or
   the one returned by joker.os/open."
   {:added "1.0"}
-  ^String [f]
+  ^String [^"String|IOReader" f]
   (slurp__ f))
 
 (defn spit
@@ -3935,7 +3924,7 @@
   f can be a string (filename) or a writer object like *out* or
   the one returned by joker.os/create."
   {:added "1.0"}
-  ^Nil [f content & options]
+  ^Nil [^"String|IOWriter" f content & options]
   (spit__ f content (apply hash-map options)))
 
 (defn flatten
