@@ -606,6 +606,9 @@ func inferFnArity(arity *FnArityExpr, variadic bool) *FnAritySummary {
 	}
 	env := newInferEnv()
 	value := inferBodyValue(arity.body, env)
+	if arity.stubReturnUnknown {
+		value = unknownInferredValue()
+	}
 	res := &FnAritySummary{
 		arity:            arity,
 		variadic:         variadic,

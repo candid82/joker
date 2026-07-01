@@ -1784,7 +1784,10 @@ var procParseLong = func(args []Object) Object {
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
-	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	parseContext := &ParseContext{
+		GlobalEnv:    GLOBAL_ENV,
+		isLinterFile: strings.HasPrefix(filepath.Base(filename), "linter_") && strings.HasSuffix(filename, ".joke"),
+	}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
 		defer func() {

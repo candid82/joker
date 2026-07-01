@@ -88,6 +88,9 @@ type (
 		bindings    []*Binding
 		body        []Expr
 		taggedTypes []*Type
+		// Empty linter-only stub arities are declarations;
+		// don't infer Nil from the missing body.
+		stubReturnUnknown bool
 	}
 	FnExpr struct {
 		Position
@@ -157,6 +160,7 @@ type (
 		recur                  bool
 		noRecurAllowed         bool
 		isUnknownCallableScope bool
+		isLinterFile           bool
 	}
 	Warnings struct {
 		ifWithoutElse           bool
@@ -902,12 +906,15 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 	ctx.noRecurAllowed = false
 	defer func() { ctx.noRecurAllowed = noRecurAllowed }()
 
+	parsedBody := parseBody(body, ctx)
+	taggedTypes := getTaggedTypes(params.(Meta))
 	arity := FnArityExpr{
-		Position:    GetPosition(sig),
-		args:        args,
-		bindings:    bindings,
-		body:        parseBody(body, ctx),
-		taggedTypes: getTaggedTypes(params.(Meta)),
+		Position:          GetPosition(sig),
+		args:              args,
+		bindings:          bindings,
+		body:              parsedBody,
+		taggedTypes:       taggedTypes,
+		stubReturnUnknown: ctx.isLinterFile && len(parsedBody) == 0 && len(taggedTypes) == 0,
 	}
 	if isVariadic {
 		if fn.variadic != nil {

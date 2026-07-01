@@ -724,6 +724,7 @@ func (expr *FnArityExpr) Pack(p []byte, env *PackEnv) []byte {
 	for _, taggedType := range expr.taggedTypes {
 		p = appendUint16(p, env.stringIndex(STRINGS.Intern(taggedType.name)))
 	}
+	p = appendBool(p, expr.stubReturnUnknown)
 	return p
 }
 
@@ -742,11 +743,13 @@ func unpackFnArityExpr(p []byte, header *PackHeader) (*FnArityExpr, []byte) {
 			taggedTypes = append(taggedTypes, taggedType)
 		}
 	}
+	stubReturnUnknown, p := extractBool(p)
 	res := &FnArityExpr{
-		Position:    pos,
-		body:        body,
-		args:        args,
-		taggedTypes: taggedTypes,
+		Position:          pos,
+		body:              body,
+		args:              args,
+		taggedTypes:       taggedTypes,
+		stubReturnUnknown: stubReturnUnknown,
 	}
 	return res, p
 }
