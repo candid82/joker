@@ -11,3 +11,4 @@ docs/dash/*.html
 docs/dash/*.css
 docs/dash/*.js
 .claude
+.pi
