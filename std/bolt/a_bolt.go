@@ -16,7 +16,15 @@ func __by_prefix_(_args []Object) Object {
 		db := ExtractBoltDB(_args, 0)
 		bucket := ExtractString(_args, 1)
 		prefix := ExtractString(_args, 2)
-		_res := byPrefix(db, bucket, prefix)
+		_res := byPrefix(db, bucket, prefix, EmptyArrayMap())
+		return _res
+
+	case _c == 4:
+		db := ExtractBoltDB(_args, 0)
+		bucket := ExtractString(_args, 1)
+		prefix := ExtractString(_args, 2)
+		opts := ExtractMap(_args, 3)
+		_res := byPrefix(db, bucket, prefix, opts)
 		return _res
 
 	default:

@@ -91,12 +91,18 @@
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(by-prefix db bucket prefix)</code><code class="hide">(by-prefix ^BoltDB db ^String bucket ^String prefix)</code></div>
+<div><code>(by-prefix db bucket prefix opts)</code><code class="hide">(by-prefix ^BoltDB db ^String bucket ^String prefix ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Returns key/value pairs from bucket whose keys start with prefix.<br>
 <br>
   Results are returned as a vector of [key value] vectors in Bolt key order.<br>
-  Passing the empty string returns all key/value pairs in the bucket. Throws<br>
-  Error when bucket does not exist or the transaction fails.</p>
+  Passing the empty string returns all key/value pairs in the bucket.<br>
+<br>
+  opts may contain:<br>
+  - limit - maximum number of key/value pairs to return; must be non-negative<br>
+<br>
+  Throws Error when bucket does not exist, limit is invalid, or the transaction<br>
+  fails.</p>
   
   <a href="#" class="types">show types</a>
 </li>

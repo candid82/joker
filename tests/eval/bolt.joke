@@ -1,7 +1,7 @@
 (ns joker.test-joker.bolt
   (:require
    [joker.test :refer [deftest is testing]]
-   [joker.bolt :refer [open close create-bucket next-sequence put get]]
+   [joker.bolt :refer [open close create-bucket next-sequence put get by-prefix]]
    [joker.os :refer [create-temp remove]]
    [joker.json :refer [write-string read-string]]))
 
@@ -17,10 +17,18 @@
         (is (nil? (create-bucket db users)))
         (let [id (next-sequence db users)
               _ (is (= id 1))
-              _ (is (nil? (put db users (str id) (write-string {:id id :name joe}))))
+              value (write-string {:id id :name joe})
+              _ (is (nil? (put db users (str id) value)))
+              _ (put db users "10" "ten")
+              _ (put db users "11" "eleven")
               m (read-string (get db users (str id)))
               s (str (sort m))]
           (is (= (format "([\"id\" %d] [\"name\" \"%s\"])" id joe)
-                 s)))
+                 s))
+          (is (= [["1" value] ["10" "ten"] ["11" "eleven"]]
+                 (by-prefix db users "1")))
+          (is (= [["1" value] ["10" "ten"]]
+                 (by-prefix db users "1" {:limit 2})))
+          (is (= [] (by-prefix db users "1" {:limit 0}))))
         (finally (close db)
                  (remove db-name))))))

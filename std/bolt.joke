@@ -110,8 +110,15 @@
   "Returns key/value pairs from bucket whose keys start with prefix.
 
   Results are returned as a vector of [key value] vectors in Bolt key order.
-  Passing the empty string returns all key/value pairs in the bucket. Throws
-  Error when bucket does not exist or the transaction fails."
+  Passing the empty string returns all key/value pairs in the bucket.
+
+  opts may contain:
+  - limit - maximum number of key/value pairs to return; must be non-negative
+
+  Throws Error when bucket does not exist, limit is invalid, or the transaction
+  fails."
   {:added "1.0"
-   :go "byPrefix(db, bucket, prefix)"}
-  [^BoltDB db ^String bucket ^String prefix])
+   :go {3 "byPrefix(db, bucket, prefix, EmptyArrayMap())"
+        4 "byPrefix(db, bucket, prefix, opts)"}}
+  ([^BoltDB db ^String bucket ^String prefix])
+  ([^BoltDB db ^String bucket ^String prefix ^Map opts]))

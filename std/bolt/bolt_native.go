@@ -163,13 +163,30 @@ func get(db *bolt.DB, bucket, key string) Object {
 	return MakeString(string(v))
 }
 
-func byPrefix(db *bolt.DB, bucket, prefix string) *ArrayVector {
+func byPrefix(db *bolt.DB, bucket, prefix string, opts Map) *ArrayVector {
+	limit := -1
+	if ok, value := opts.Get(MakeKeyword("limit")); ok {
+		limit = EnsureObjectIsInt(value, "limit: %s").I
+		if limit < 0 {
+			panic(RT.NewError(":limit must be non-negative"))
+		}
+	}
+
 	res := EmptyArrayVector()
 	err := db.View(func(tx *bolt.Tx) error {
-		c := getBucket(tx, bucket).Cursor()
+		b := getBucket(tx, bucket)
+		if limit == 0 {
+			return nil
+		}
+		c := b.Cursor()
 		pr := []byte(prefix)
+		count := 0
 		for k, v := c.Seek(pr); k != nil && bytes.HasPrefix(k, pr); k, v = c.Next() {
 			res.Append(NewVectorFrom(MakeString(string(k)), MakeString(string(v))))
+			count++
+			if count == limit {
+				break
+			}
 		}
 		return nil
 	})
