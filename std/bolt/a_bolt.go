@@ -50,6 +50,25 @@ func __close_(_args []Object) Object {
 	return NIL
 }
 
+var __count_by_prefix__P ProcFn = __count_by_prefix_
+var count_by_prefix_ Proc = Proc{Fn: __count_by_prefix__P, Name: "count_by_prefix_", Package: "std/bolt"}
+
+func __count_by_prefix_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 3:
+		db := ExtractBoltDB(_args, 0)
+		bucket := ExtractString(_args, 1)
+		prefix := ExtractString(_args, 2)
+		_res := countByPrefix(db, bucket, prefix)
+		return MakeInt(_res)
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 var __create_bucket__P ProcFn = __create_bucket_
 var create_bucket_ Proc = Proc{Fn: __create_bucket__P, Name: "create_bucket_", Package: "std/bolt"}
 

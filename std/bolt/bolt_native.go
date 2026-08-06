@@ -163,6 +163,21 @@ func get(db *bolt.DB, bucket, key string) Object {
 	return MakeString(string(v))
 }
 
+func countByPrefix(db *bolt.DB, bucket, prefix string) int {
+	count := 0
+	err := db.View(func(tx *bolt.Tx) error {
+		b := getBucket(tx, bucket)
+		c := b.Cursor()
+		pr := []byte(prefix)
+		for k, _ := c.Seek(pr); k != nil && bytes.HasPrefix(k, pr); k, _ = c.Next() {
+			count++
+		}
+		return nil
+	})
+	PanicOnErr(err)
+	return count
+}
+
 func byPrefix(db *bolt.DB, bucket, prefix string, opts Map) *ArrayVector {
 	limit := -1
 	if ok, value := opts.Get(MakeKeyword("limit")); ok {

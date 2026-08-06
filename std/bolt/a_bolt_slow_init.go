@@ -51,6 +51,14 @@ func InternsOrThunks() {
   Blocks until open transactions finish, then releases the file lock. Throws
   Error if closing fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
+	boltNamespace.InternVar("count-by-prefix", count_by_prefix_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("prefix").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Returns the number of keys in bucket that start with prefix.
+
+  Passing the empty string counts all keys in the bucket. Throws Error when
+  bucket does not exist or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
+
 	boltNamespace.InternVar("create-bucket", create_bucket_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),

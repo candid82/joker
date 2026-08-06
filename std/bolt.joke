@@ -106,6 +106,15 @@
    :go "get(db, bucket, key)"}
   [^BoltDB db ^String bucket ^String key])
 
+(defn ^Int count-by-prefix
+  "Returns the number of keys in bucket that start with prefix.
+
+  Passing the empty string counts all keys in the bucket. Throws Error when
+  bucket does not exist or the transaction fails."
+  {:added "1.0"
+   :go "countByPrefix(db, bucket, prefix)"}
+  [^BoltDB db ^String bucket ^String prefix])
+
 (defn ^Vec by-prefix
   "Returns key/value pairs from bucket whose keys start with prefix.
 
