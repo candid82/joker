@@ -14,7 +14,13 @@ func __send_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		request := ExtractMap(_args, 0)
-		_res := sendRequest(request)
+		_res := sendRequest(request, nil)
+		return _res
+
+	case _c == 2:
+		request := ExtractMap(_args, 0)
+		opts := ExtractMap(_args, 1)
+		_res := sendRequest(request, opts)
 		return _res
 
 	default:

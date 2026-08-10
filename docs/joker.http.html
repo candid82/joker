@@ -55,6 +55,7 @@
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(send request)</code><code class="hide">(send ^Map request)</code></div>
+<div><code>(send request opts)</code><code class="hide">(send ^Map request ^Map opts)</code></div>
 </pre>
   <p class="var-docstr">Sends an HTTP request and returns an HTTP response map.<br>
 <br>
@@ -64,6 +65,12 @@
   - body (string)<br>
   - host (string, overrides the Host header if provided)<br>
   - headers (map from string header names to string values)<br>
+<br>
+  opts may contain:<br>
+  - timeout-ms (int): positive timeout in milliseconds for the complete<br>
+    operation, including connecting, TLS negotiation, redirects, waiting for<br>
+    response headers, and reading the response body. The timeout is cumulative<br>
+    across redirects. If omitted, no timeout is configured.<br>
 <br>
   The response map contains:<br>
   - status (int)<br>
@@ -77,17 +84,17 @@
   read failure.<br>
 <br>
   Redirects are followed automatically using the default HTTP client policy,<br>
-  which stops after 10 consecutive requests. No timeout is configured and<br>
-  there is currently no timeout request option, so send may block indefinitely<br>
-  while waiting for the network or response body. The whole response body is<br>
-  read before send returns; streaming responses therefore return only after<br>
-  the stream ends.<br>
+  which stops after 10 consecutive requests. Without :timeout-ms, send may<br>
+  block indefinitely while waiting for the network or response body. The whole<br>
+  response body is read before send returns; streaming responses therefore<br>
+  return only after the stream ends.<br>
 <br>
   Example:<br>
     (let [res (joker.http/send {:url &#34;https://example.com/api&#34;<br>
                                 :method :post<br>
                                 :headers {&#34;Content-Type&#34; &#34;text/plain&#34;}<br>
-                                :body &#34;hello&#34;})]<br>
+                                :body &#34;hello&#34;}<br>
+                               {:timeout-ms 5000})]<br>
       [(:status res) (:body res)])</p>
   
   <a href="#" class="types">show types</a>

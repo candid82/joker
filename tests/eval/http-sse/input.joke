@@ -26,7 +26,7 @@
   []
   (loop [attempts 20]
     (let [ready? (try
-                   (= "ready" (:body (joker.http/send {:url (str base-url "/ready")})))
+                   (= "ready" (:body (joker.http/send {:url (str base-url "/ready")} {:timeout-ms 1000})))
                    (catch Error e
                      false))]
       (cond

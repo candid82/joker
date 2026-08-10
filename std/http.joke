@@ -12,6 +12,12 @@
   - host (string, overrides the Host header if provided)
   - headers (map from string header names to string values)
 
+  opts may contain:
+  - timeout-ms (int): positive timeout in milliseconds for the complete
+    operation, including connecting, TLS negotiation, redirects, waiting for
+    response headers, and reading the response body. The timeout is cumulative
+    across redirects. If omitted, no timeout is configured.
+
   The response map contains:
   - status (int)
   - body (string)
@@ -24,21 +30,23 @@
   read failure.
 
   Redirects are followed automatically using the default HTTP client policy,
-  which stops after 10 consecutive requests. No timeout is configured and
-  there is currently no timeout request option, so send may block indefinitely
-  while waiting for the network or response body. The whole response body is
-  read before send returns; streaming responses therefore return only after
-  the stream ends.
+  which stops after 10 consecutive requests. Without :timeout-ms, send may
+  block indefinitely while waiting for the network or response body. The whole
+  response body is read before send returns; streaming responses therefore
+  return only after the stream ends.
 
   Example:
     (let [res (joker.http/send {:url \"https://example.com/api\"
                                 :method :post
                                 :headers {\"Content-Type\" \"text/plain\"}
-                                :body \"hello\"})]
+                                :body \"hello\"}
+                               {:timeout-ms 5000})]
       [(:status res) (:body res)])"
   {:added "1.0"
-   :go "sendRequest(request)"}
-  [^Map request])
+   :go {1 "sendRequest(request, nil)"
+        2 "sendRequest(request, opts)"}}
+  ([^Map request])
+  ([^Map request ^Map opts]))
 
 (defn ^Nil start-server
   "Starts an HTTP server on TCP network address addr and blocks while it runs.

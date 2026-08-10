@@ -1,8 +1,12 @@
 package http
 
 import (
+	"fmt"
+	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/candid82/joker/core"
 )
@@ -14,6 +18,72 @@ func mapValue(t *testing.T, m Map, key string) Object {
 		t.Fatalf("expected map to contain :%s", key)
 	}
 	return value
+}
+
+func TestClientForRequestSetsTimeoutWithoutMutatingDefaultClient(t *testing.T) {
+	defaultTimeout := client.Timeout
+	opts := EmptyArrayMap()
+	opts.Add(MakeKeyword("timeout-ms"), MakeInt(1250))
+
+	requestClient := clientForRequest(opts)
+	if requestClient == client {
+		t.Fatal("expected a per-request client")
+	}
+	if requestClient.Timeout != 1250*time.Millisecond {
+		t.Fatalf("expected 1250ms timeout, got %s", requestClient.Timeout)
+	}
+	if requestClient.Transport != client.Transport {
+		t.Fatal("expected the per-request client to share the default transport")
+	}
+	if client.Timeout != defaultTimeout {
+		t.Fatalf("expected default client timeout to remain %s, got %s", defaultTimeout, client.Timeout)
+	}
+	if clientForRequest(nil) != client {
+		t.Fatal("expected omitted options to use the default client")
+	}
+}
+
+func TestClientForRequestRejectsNonPositiveTimeout(t *testing.T) {
+	for _, timeout := range []int{0, -1} {
+		opts := EmptyArrayMap()
+		opts.Add(MakeKeyword("timeout-ms"), MakeInt(timeout))
+		var recovered interface{}
+		func() {
+			defer func() { recovered = recover() }()
+			clientForRequest(opts)
+		}()
+		if recovered == nil || !strings.Contains(fmt.Sprint(recovered), ":timeout-ms must be positive") {
+			t.Fatalf("expected invalid timeout %d to panic, got %v", timeout, recovered)
+		}
+	}
+}
+
+func TestSendRequestTimeoutIncludesResponseBody(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.(http.Flusher).Flush()
+		time.Sleep(200 * time.Millisecond)
+		_, _ = w.Write([]byte("late body"))
+	}))
+	defer server.Close()
+
+	request := EmptyArrayMap()
+	request.Add(MakeKeyword("url"), MakeString(server.URL))
+	opts := EmptyArrayMap()
+	opts.Add(MakeKeyword("timeout-ms"), MakeInt(20))
+
+	var recovered interface{}
+	func() {
+		RT.GIL.Lock()
+		defer func() {
+			recovered = recover()
+			RT.GIL.Unlock()
+		}()
+		sendRequest(request, opts)
+	}()
+	if recovered == nil || !strings.Contains(strings.ToLower(fmt.Sprint(recovered)), "timeout") {
+		t.Fatalf("expected response body timeout, got %v", recovered)
+	}
 }
 
 func TestStreamSSEFormatsEventsAndReportsChannelClose(t *testing.T) {

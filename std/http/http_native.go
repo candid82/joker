@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	. "github.com/candid82/joker/core"
 )
@@ -282,10 +283,28 @@ func mapToResp(response Map, w http.ResponseWriter, done <-chan struct{}) {
 	io.WriteString(w, body)
 }
 
-func sendRequest(request Map) Map {
+func clientForRequest(opts Map) *http.Client {
+	if opts == nil {
+		return client
+	}
+	ok, value := opts.Get(MakeKeyword("timeout-ms"))
+	if !ok {
+		return client
+	}
+	timeout := EnsureObjectIsInt(value, "timeout-ms: %s").I
+	if timeout <= 0 {
+		panic(RT.NewError(":timeout-ms must be positive"))
+	}
+	requestClient := *client
+	requestClient.Timeout = time.Duration(timeout) * time.Millisecond
+	return &requestClient
+}
+
+func sendRequest(request Map, opts Map) Map {
 	req := mapToReq(request)
+	requestClient := clientForRequest(opts)
 	RT.GIL.Unlock()
-	resp, err := client.Do(req)
+	resp, err := requestClient.Do(req)
 	RT.GIL.Lock()
 	PanicOnErr(err)
 	return respToMap(resp)
