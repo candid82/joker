@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -83,11 +84,26 @@ func reqToMap(host String, port String, req *http.Request) Map {
 	return res
 }
 
-func respToMap(resp *http.Response) Map {
+func readResponseBody(resp *http.Response, opts requestOptions) []byte {
+	if !opts.hasMaxResponseBytes {
+		body, err := ioutil.ReadAll(resp.Body)
+		PanicOnErr(err)
+		return body
+	}
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, opts.maxResponseBytes))
+	PanicOnErr(err)
+	extra, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1))
+	PanicOnErr(err)
+	if len(extra) != 0 {
+		panic(RT.NewError(fmt.Sprintf("HTTP response body exceeds :max-response-bytes limit of %d", opts.maxResponseBytes)))
+	}
+	return body
+}
+
+func respToMap(resp *http.Response, opts requestOptions) Map {
 	defer resp.Body.Close()
 	res := EmptyArrayMap()
-	body, err := ioutil.ReadAll(resp.Body)
-	PanicOnErr(err)
+	body := readResponseBody(resp, opts)
 	res.Add(MakeKeyword("body"), MakeString(string(body)))
 	res.Add(MakeKeyword("status"), MakeInt(resp.StatusCode))
 	respHeaders := EmptyArrayMap()
@@ -283,31 +299,129 @@ func mapToResp(response Map, w http.ResponseWriter, done <-chan struct{}) {
 	io.WriteString(w, body)
 }
 
-func clientForRequest(opts Map) *http.Client {
-	if opts == nil {
-		return client
-	}
-	ok, value := opts.Get(MakeKeyword("timeout-ms"))
-	if !ok {
-		return client
-	}
-	timeout := EnsureObjectIsInt(value, "timeout-ms: %s").I
-	if timeout <= 0 {
-		panic(RT.NewError(":timeout-ms must be positive"))
-	}
-	requestClient := *client
-	requestClient.Timeout = time.Duration(timeout) * time.Millisecond
-	return &requestClient
+type requestOptions struct {
+	timeout               time.Duration
+	connectTimeout        time.Duration
+	responseHeaderTimeout time.Duration
+	followRedirects       bool
+	maxRedirects          int
+	hasMaxRedirects       bool
+	maxResponseBytes      int64
+	hasMaxResponseBytes   bool
 }
 
-func sendRequest(request Map, opts Map) Map {
+func positiveIntOption(opts Map, name string) (int, bool) {
+	ok, value := opts.Get(MakeKeyword(name))
+	if !ok {
+		return 0, false
+	}
+	result := EnsureObjectIsInt(value, name+": %s").I
+	if result <= 0 {
+		panic(RT.NewError(":" + name + " must be positive"))
+	}
+	return result, true
+}
+
+func durationOption(opts Map, name string) time.Duration {
+	milliseconds, ok := positiveIntOption(opts, name)
+	if !ok {
+		return 0
+	}
+	if int64(milliseconds) > int64((time.Duration(1<<63-1))/time.Millisecond) {
+		panic(RT.NewError(":" + name + " is too large"))
+	}
+	return time.Duration(milliseconds) * time.Millisecond
+}
+
+func parseRequestOptions(opts Map) requestOptions {
+	result := requestOptions{followRedirects: true}
+	if opts == nil {
+		return result
+	}
+	result.timeout = durationOption(opts, "timeout-ms")
+	result.connectTimeout = durationOption(opts, "connect-timeout-ms")
+	result.responseHeaderTimeout = durationOption(opts, "response-header-timeout-ms")
+	if ok, value := opts.Get(MakeKeyword("follow-redirects?")); ok {
+		result.followRedirects = EnsureObjectIsBoolean(value, "follow-redirects?: %s").B
+	}
+	result.maxRedirects, result.hasMaxRedirects = positiveIntOption(opts, "max-redirects")
+	if result.hasMaxRedirects && !result.followRedirects {
+		panic(RT.NewError(":max-redirects cannot be used when :follow-redirects? is false"))
+	}
+	if max, ok := positiveIntOption(opts, "max-response-bytes"); ok {
+		result.maxResponseBytes = int64(max)
+		result.hasMaxResponseBytes = true
+	}
+	return result
+}
+
+func transportForRequest(opts requestOptions) *http.Transport {
+	if opts.connectTimeout == 0 && opts.responseHeaderTimeout == 0 {
+		return nil
+	}
+	var base *http.Transport
+	if client.Transport == nil {
+		base = http.DefaultTransport.(*http.Transport)
+	} else {
+		var ok bool
+		base, ok = client.Transport.(*http.Transport)
+		if !ok {
+			panic(RT.NewError("HTTP client transport does not support transport timeout options"))
+		}
+	}
+	transport := base.Clone()
+	if opts.connectTimeout != 0 {
+		dialer := &net.Dialer{
+			Timeout:   opts.connectTimeout,
+			KeepAlive: 30 * time.Second,
+		}
+		transport.DialContext = dialer.DialContext
+	}
+	if opts.responseHeaderTimeout != 0 {
+		transport.ResponseHeaderTimeout = opts.responseHeaderTimeout
+	}
+	return transport
+}
+
+func clientForRequest(opts requestOptions) (*http.Client, *http.Transport) {
+	transport := transportForRequest(opts)
+	if opts.timeout == 0 && transport == nil && opts.followRedirects && !opts.hasMaxRedirects {
+		return client, nil
+	}
+	requestClient := *client
+	if opts.timeout != 0 {
+		requestClient.Timeout = opts.timeout
+	}
+	if transport != nil {
+		requestClient.Transport = transport
+	}
+	if !opts.followRedirects {
+		requestClient.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	} else if opts.hasMaxRedirects {
+		requestClient.CheckRedirect = func(_ *http.Request, via []*http.Request) error {
+			if len(via) > opts.maxRedirects {
+				return fmt.Errorf("stopped after %d redirects", opts.maxRedirects)
+			}
+			return nil
+		}
+	}
+	return &requestClient, transport
+}
+
+func sendRequest(request Map, optsMap Map) Map {
 	req := mapToReq(request)
-	requestClient := clientForRequest(opts)
+	opts := parseRequestOptions(optsMap)
+	requestClient, transport := clientForRequest(opts)
+	if transport != nil {
+		defer transport.CloseIdleConnections()
+	}
 	RT.GIL.Unlock()
 	resp, err := requestClient.Do(req)
 	RT.GIL.Lock()
 	PanicOnErr(err)
-	return respToMap(resp)
+	return respToMap(resp, opts)
 }
 
 func startServer(addr string, handler Callable) Object {

@@ -70,7 +70,22 @@
   - timeout-ms (int): positive timeout in milliseconds for the complete<br>
     operation, including connecting, TLS negotiation, redirects, waiting for<br>
     response headers, and reading the response body. The timeout is cumulative<br>
-    across redirects. If omitted, no timeout is configured.<br>
+    across redirects. If omitted, no overall timeout is configured.<br>
+  - connect-timeout-ms (int): positive timeout in milliseconds for each DNS/TCP<br>
+    connection attempt. It does not include TLS negotiation.<br>
+  - response-header-timeout-ms (int): positive timeout in milliseconds for<br>
+    receiving response headers after writing the request. It applies separately<br>
+    to each redirect response.<br>
+  - follow-redirects? (boolean): whether to follow redirects; defaults to true.<br>
+    When false, the first redirect response is returned normally.<br>
+  - max-redirects (int): positive maximum number of redirects to follow.<br>
+    Exceeding it throws Error. It cannot be used when follow-redirects? is false.<br>
+  - max-response-bytes (int): positive maximum number of bytes to read from the<br>
+    final response body, after any transparent decompression. Exceeding it<br>
+    throws Error.<br>
+<br>
+  timeout-ms is an overall limit and caps operations that also have a<br>
+  phase-specific timeout.<br>
 <br>
   The response map contains:<br>
   - status (int)<br>
@@ -83,18 +98,19 @@
   malformed URL, DNS/connect/TLS failure, redirect failure, or response-body<br>
   read failure.<br>
 <br>
-  Redirects are followed automatically using the default HTTP client policy,<br>
-  which stops after 10 consecutive requests. Without :timeout-ms, send may<br>
-  block indefinitely while waiting for the network or response body. The whole<br>
-  response body is read before send returns; streaming responses therefore<br>
-  return only after the stream ends.<br>
+  By default, redirects are followed using the default HTTP client policy,<br>
+  which stops after 10 consecutive requests. Without any applicable timeout,<br>
+  send may block indefinitely while waiting for the network or response body.<br>
+  The whole response body is read before send returns; streaming responses<br>
+  therefore return only after the stream ends.<br>
 <br>
   Example:<br>
     (let [res (joker.http/send {:url &#34;https://example.com/api&#34;<br>
                                 :method :post<br>
                                 :headers {&#34;Content-Type&#34; &#34;text/plain&#34;}<br>
                                 :body &#34;hello&#34;}<br>
-                               {:timeout-ms 5000})]<br>
+                               {:timeout-ms 5000<br>
+                                :max-response-bytes 1048576})]<br>
       [(:status res) (:body res)])</p>
   
   <a href="#" class="types">show types</a>
