@@ -1,7 +1,7 @@
 (ns joker.test-joker.bolt
   (:require
    [joker.test :refer [deftest is testing]]
-   [joker.bolt :refer [open close create-bucket next-sequence put get count-by-prefix by-prefix]]
+   [joker.bolt :as bolt :refer [open close create-bucket next-sequence put get count-by-prefix by-prefix view]]
    [joker.os :refer [create-temp remove]]
    [joker.json :refer [write-string read-string]]))
 
@@ -36,3 +36,56 @@
           (is (= [] (by-prefix db users "1" {:limit 0}))))
         (finally (close db)
                  (remove db-name))))))
+
+(deftest managed-transactions
+  (let [f (create-temp "" "bolt-transaction-test-")
+        db-name (name f)
+        _ (joker.os/close f)
+        db (open db-name 0600)
+        bucket "values"]
+    (try
+      (create-bucket db bucket)
+
+      (testing "a write transaction commits all operations and returns the callback result"
+        (is (= :committed
+               (bolt/update db
+                 (fn [tx]
+                   (put tx bucket "one" "1")
+                   (put tx bucket "two" "2")
+                   (bolt/create-bucket tx "transaction-bucket")
+                   (bolt/create-bucket-if-not-exists tx "temporary-bucket")
+                   (is (= 1 (next-sequence tx "transaction-bucket")))
+                   (is (= "1" (get tx bucket "one")))
+                   (is (= 2 (count-by-prefix tx bucket "")))
+                   (is (= [["one" "1"]] (by-prefix tx bucket "o")))
+                   (bolt/delete-bucket tx "temporary-bucket")
+                   :committed))))
+        (is (= "1" (get db bucket "one")))
+        (is (= "2" (get db bucket "two")))
+        (is (= 2 (next-sequence db "transaction-bucket"))))
+
+      (testing "a callback exception rolls the entire write transaction back"
+        (is (thrown? Error
+              (bolt/update db
+                (fn [tx]
+                  (put tx bucket "rolled-back" "value")
+                  (bolt/delete tx bucket "one")
+                  (throw (ex-info "rollback" {}))))))
+        (is (nil? (get db bucket "rolled-back")))
+        (is (= "1" (get db bucket "one"))))
+
+      (testing "view returns a value and rejects writes"
+        (is (= ["1" "2"]
+               (view db
+                 (fn [tx]
+                   [(get tx bucket "one") (get tx bucket "two")]))))
+        (is (thrown? Error
+              (view db (fn [tx] (put tx bucket "read-only" "value")))))
+        (is (nil? (get db bucket "read-only"))))
+
+      (testing "transaction handles cannot be used after their callback returns"
+        (let [tx (view db (fn [tx] tx))]
+          (is (thrown? Error (get tx bucket "one")))))
+
+      (finally (close db)
+               (remove db-name)))))

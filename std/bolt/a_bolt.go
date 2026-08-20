@@ -13,18 +13,18 @@ func __by_prefix_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		prefix := ExtractString(_args, 2)
-		_res := byPrefix(db, bucket, prefix, EmptyArrayMap())
+		_res := byPrefix(context, bucket, prefix, EmptyArrayMap())
 		return _res
 
 	case _c == 4:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		prefix := ExtractString(_args, 2)
 		opts := ExtractMap(_args, 3)
-		_res := byPrefix(db, bucket, prefix, opts)
+		_res := byPrefix(context, bucket, prefix, opts)
 		return _res
 
 	default:
@@ -57,10 +57,10 @@ func __count_by_prefix_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		prefix := ExtractString(_args, 2)
-		_res := countByPrefix(db, bucket, prefix)
+		_res := countByPrefix(context, bucket, prefix)
 		return MakeInt(_res)
 
 	default:
@@ -76,9 +76,9 @@ func __create_bucket_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		name := ExtractString(_args, 1)
-		_res := createBucket(db, name)
+		_res := createBucket(context, name)
 		return _res
 
 	default:
@@ -94,9 +94,9 @@ func __create_bucket_if_not_exists_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		name := ExtractString(_args, 1)
-		_res := createBucketIfNotExists(db, name)
+		_res := createBucketIfNotExists(context, name)
 		return _res
 
 	default:
@@ -112,10 +112,10 @@ func __delete_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		key := ExtractString(_args, 2)
-		_res := delete(db, bucket, key)
+		_res := delete(context, bucket, key)
 		return _res
 
 	default:
@@ -131,9 +131,9 @@ func __delete_bucket_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		name := ExtractString(_args, 1)
-		_res := deleteBucket(db, name)
+		_res := deleteBucket(context, name)
 		return _res
 
 	default:
@@ -149,10 +149,10 @@ func __get_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 3:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		key := ExtractString(_args, 2)
-		_res := get(db, bucket, key)
+		_res := get(context, bucket, key)
 		return _res
 
 	default:
@@ -168,9 +168,9 @@ func __next_sequence_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 2:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
-		_res := nextSequence(db, bucket)
+		_res := nextSequence(context, bucket)
 		return MakeInt(_res)
 
 	default:
@@ -204,11 +204,47 @@ func __put_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case _c == 4:
-		db := ExtractBoltDB(_args, 0)
+		context := ExtractBoltContext(_args, 0)
 		bucket := ExtractString(_args, 1)
 		key := ExtractString(_args, 2)
 		value := ExtractString(_args, 3)
-		_res := put(db, bucket, key, value)
+		_res := put(context, bucket, key, value)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __update__P ProcFn = __update_
+var update_ Proc = Proc{Fn: __update__P, Name: "update_", Package: "std/bolt"}
+
+func __update_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		db := ExtractBoltDB(_args, 0)
+		f := ExtractCallable(_args, 1)
+		_res := update(db, f)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
+var __view__P ProcFn = __view_
+var view_ Proc = Proc{Fn: __view__P, Name: "view_", Package: "std/bolt"}
+
+func __view_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		db := ExtractBoltDB(_args, 0)
+		f := ExtractCallable(_args, 1)
+		_res := view(db, f)
 		return _res
 
 	default:
