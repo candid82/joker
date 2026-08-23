@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, and mail dates.</p>
+    <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, mail dates, and MIME email content.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -38,7 +38,16 @@
   <a href="#parse-date">parse-date</a>
 </li>
 <li>
+  <a href="#read-attachments">read-attachments</a>
+</li>
+<li>
+  <a href="#read-email">read-email</a>
+</li>
+<li>
   <a href="#read-message">read-message</a>
+</li>
+<li>
+  <a href="#read-mime-message">read-mime-message</a>
 </li>
 
     </ul>
@@ -93,6 +102,47 @@
   <a href="#" class="types">show types</a>
 </li>
 <li>
+  <h3 class="Function" id="read-attachments">read-attachments</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(read-attachments source)</code><code class="hide">(read-attachments ^Object source)</code></div>
+<div><code>(read-attachments source opts)</code><code class="hide">(read-attachments ^Object source ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 email message and returns its MIME attachments.<br>
+<br>
+  Equivalent to calling joker.mime/attachments on read-mime-message. By default<br>
+  inline parts with a filename are included, which covers common inline images.<br>
+  Pass {:include-inline? false} to include only explicit attachments.</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="read-email">read-email</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(read-email source)</code><code class="hide">(read-email ^Object source)</code></div>
+<div><code>(read-email source opts)</code><code class="hide">(read-email ^Object source ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 email message and extracts headers, body, and attachments.<br>
+<br>
+  Returns {:headers headers :body {:text text-or-nil :html html-or-nil}<br>
+           :attachments [attachment ...]}.<br>
+<br>
+  The body and attachments are extracted from the MIME entity tree produced by<br>
+  read-mime-message. Non-multipart text/plain and text/html messages are handled<br>
+  as body content. Attachment content is decoded according to<br>
+  Content-Transfer-Encoding and represented as raw bytes in a Joker string.<br>
+<br>
+  opts are passed to joker.mime/read-entity and joker.mime/attachments and may<br>
+  contain:<br>
+  - include-inline? - false to exclude inline/file-name parts from attachments<br>
+  - include-content?<br>
+  - max-depth<br>
+  - max-part-bytes</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
   <h3 class="Function" id="read-message">read-message</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.8.1</span>
@@ -109,6 +159,28 @@
   buffered in memory. This function does not parse MIME parts or decode body<br>
   transfer encodings. Throws Error when source is invalid or the headers<br>
   cannot be parsed.</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="read-mime-message">read-mime-message</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(read-mime-message source)</code><code class="hide">(read-mime-message ^Object source)</code></div>
+<div><code>(read-mime-message source opts)</code><code class="hide">(read-mime-message ^Object source ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Parses an RFC 5322 email message and its MIME structure.<br>
+<br>
+  source must be a string or implement io.Reader, such as a string returned by<br>
+  joker.pop3/retrieve. The result is a joker.mime entity tree. Non-multipart<br>
+  messages are returned as a single leaf entity, so joker.mime/body and<br>
+  joker.mime/attachments work uniformly for both multipart and non-multipart<br>
+  email.<br>
+<br>
+  opts are passed to joker.mime/read-entity and may contain:<br>
+  - include-content?<br>
+  - max-depth<br>
+  - max-part-bytes</p>
   
   <a href="#" class="types">show types</a>
 </li>

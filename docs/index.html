@@ -92,6 +92,9 @@
   <a href="#joker.math">joker.math</a>
 </li>
 <li>
+  <a href="#joker.mime">joker.mime</a>
+</li>
+<li>
   <a href="#joker.os">joker.os</a>
 </li>
 <li>
@@ -174,7 +177,13 @@
   <a href="#BigInt">BigInt</a>
 </li>
 <li>
+  <a href="#BoltContext">BoltContext</a>
+</li>
+<li>
   <a href="#BoltDB">BoltDB</a>
+</li>
+<li>
+  <a href="#BoltTx">BoltTx</a>
 </li>
 <li>
   <a href="#Boolean">Boolean</a>
@@ -529,7 +538,7 @@
 <li>
   <h3 class="ns" id="joker.mail">joker.mail</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, and mail dates.</p>
+  <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, mail dates, and MIME email content.</p>
   <a href="joker.mail.html">details</a>
 </li>
 <li>
@@ -543,6 +552,12 @@
   <span class="var-added">v1.0</span>
   <p class="var-docstr">Provides floating-point mathematical functions, IEEE-754 helpers, and numeric constants.</p>
   <a href="joker.math.html">details</a>
+</li>
+<li>
+  <h3 class="ns" id="joker.mime">joker.mime</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Parses MIME media types, entities, message bodies, and attachments.</p>
+  <a href="joker.mime.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.os">joker.os</h3>
@@ -699,10 +714,22 @@
   Wraps the Go &#39;math/big.Int&#39; type</p>
 </li>
 <li>
+  <h3 class="type" id="BoltContext">BoltContext</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Interface type)<br>
+  Implemented by BoltDB and BoltTx</p>
+</li>
+<li>
   <h3 class="type" id="BoltDB">BoltDB</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps Bolt DB type</p>
+</li>
+<li>
+  <h3 class="type" id="BoltTx">BoltTx</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps a transaction-scoped Bolt Tx type</p>
 </li>
 <li>
   <h3 class="type" id="Boolean">Boolean</h3>

@@ -113,7 +113,7 @@
 <br>
   Throws Error when bucket does not exist, limit is invalid, or the transaction<br>
   fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -126,7 +126,7 @@
 <br>
   Blocks until open transactions finish, then releases the file lock. Throws<br>
   Error if closing fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -140,7 +140,7 @@
   context may be a BoltDB, which uses a new read transaction, or an active<br>
   BoltTx. Passing the empty string counts all keys in the bucket. Throws Error<br>
   when bucket does not exist or the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -154,7 +154,7 @@
   context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
   update. Throws Error if the bucket already exists, if name is blank or too<br>
   long, if context is read-only, or if the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -168,7 +168,7 @@
   context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
   update. Does nothing when the bucket already exists. Throws Error if name is<br>
   blank or too long, if context is read-only, or if the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -182,7 +182,7 @@
   context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
   update. Missing keys are ignored. Throws Error when bucket does not exist,<br>
   context is read-only, or the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -196,7 +196,7 @@
   context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
   update. Throws Error when the bucket does not exist, context is read-only, or<br>
   the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -210,7 +210,7 @@
   context may be a BoltDB, which uses a new read transaction, or an active<br>
   BoltTx. Returns nil when key does not exist. Throws Error when bucket does not<br>
   exist or the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -224,7 +224,7 @@
   context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
   update. Each call advances the bucket sequence counter. Throws Error when the<br>
   bucket does not exist, context is read-only, or the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -245,7 +245,7 @@
 <br>
   Example:<br>
     (def db (joker.bolt/open &#34;app.db&#34; 0600))</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -260,7 +260,7 @@
   update. Keys and values are strings stored as raw bytes. Replaces any previous<br>
   value for key. Throws Error when bucket does not exist, context is read-only,<br>
   key is blank or too large, value is too large, or the transaction fails.</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -283,7 +283,7 @@
         (joker.bolt/put tx &#34;users&#34; &#34;1&#34; &#34;Joe&#34;)<br>
         (joker.bolt/put tx &#34;users&#34; &#34;2&#34; &#34;Jane&#34;)<br>
         :saved))</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 <li>
@@ -302,7 +302,7 @@
   Example:<br>
     (joker.bolt/view db<br>
       (fn [tx] (joker.bolt/get tx &#34;users&#34; &#34;1&#34;)))</p>
-
+  
   <a href="#" class="types">show types</a>
 </li>
 
