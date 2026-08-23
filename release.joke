@@ -22,6 +22,12 @@
       (exit-err (str "'[" dir "] " (s/join " " args) "'") "failed:" (:out res) (:err res)))
     (:out res)))
 
+(defn- ensure-clean-worktree
+  [context]
+  (let [status (exec "git" "status" "--porcelain")]
+    (when (seq status)
+      (exit-err (str "Git worktree is not clean " context ":") status))))
+
 (defn- shasum
   [filename]
   (let [res (exec "shasum" "-a" "256" filename)]
@@ -65,10 +71,21 @@
     (when-not procs
       (exit-err "Could not find version line"))
     (spit "core/procs.go" (s/replace procs version-line (str "const VERSION = \"" version "\""))))
-  (exec "git" "commit" "-a" "-m" version)
+  ;; Stage explicitly so newly generated and deleted documentation files are
+  ;; included. `git commit -a` would omit untracked generated files.
+  (exec "git" "add" "-A" "--" "docs" "core/procs.go")
+  (exec "git" "commit" "-m" version)
+  (ensure-clean-worktree "after committing generated docs and the version"))
+
+(defn- publish-version
+  [version]
+  ;; Do not publish until documentation generation, artifact builds, and the
+  ;; Homebrew formula update have all succeeded.
+  (ensure-clean-worktree "before tagging")
+  (println (str "Tagging and pushing " version "..."))
   (exec "git" "tag" version)
   (exec "git" "push")
-  (exec "git" "push" "--tags"))
+  (exec "git" "push" "origin" version))
 
 (defn- build-binary
   [goarch goos]
@@ -117,9 +134,11 @@
       (exit-err "No version provided"))
     (when-not (re-matches #"v\d\.\d{1,2}\.\d{1,2}" version)
       (exit-err "Invalid version provided:" version))
+    (ensure-clean-worktree "before starting the release")
     (generate-docs)
     (update-version version)
     (build-binaries version)
-    (update-brew-formula version)))
+    (update-brew-formula version)
+    (publish-version version)))
 
 (main (joker.os/args))
