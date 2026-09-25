@@ -812,6 +812,55 @@ var procLazySeq = func(args []Object) Object {
 	}
 }
 
+var procMapSeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return NewMapSeq(EnsureArgIsCallable(args, 0), EnsureArgIsSeqable(args, 1))
+}
+
+var procFilterSeq = func(args []Object) Object {
+	CheckArity(args, 3, 3)
+	return NewFilterSeq(EnsureArgIsCallable(args, 0), EnsureArgIsSeqable(args, 1), ToBool(args[2]))
+}
+
+var procMapcatSeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return NewMapcatSeq(EnsureArgIsCallable(args, 0), EnsureArgIsSeqable(args, 1))
+}
+
+var procConcatSeq = func(args []Object) Object {
+	return NewConcatSeq(args)
+}
+
+var procEverySeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	pred := EnsureArgIsCallable(args, 0)
+	seq := EnsureArgIsSeqable(args, 1).Seq()
+	predArgs := []Object{NIL}
+	for !seq.IsEmpty() {
+		predArgs[0] = seq.First()
+		if !ToBool(pred.Call(predArgs)) {
+			return Boolean{B: false}
+		}
+		seq = seq.Rest()
+	}
+	return Boolean{B: true}
+}
+
+var procSomeSeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	pred := EnsureArgIsCallable(args, 0)
+	seq := EnsureArgIsSeqable(args, 1).Seq()
+	predArgs := []Object{NIL}
+	for !seq.IsEmpty() {
+		predArgs[0] = seq.First()
+		if res := pred.Call(predArgs); ToBool(res) {
+			return res
+		}
+		seq = seq.Rest()
+	}
+	return NIL
+}
+
 var procDelay = func(args []Object) Object {
 	return &Delay{
 		fn: args[0].(*Fn),

@@ -109,6 +109,43 @@ func (set *MapSet) Empty() Collection {
 	return EmptySet()
 }
 
+func (set *MapSet) reduce(c Callable) Object {
+	return set.reduceFrom(c, NIL, false)
+}
+
+func (set *MapSet) reduceInit(c Callable, init Object) Object {
+	return set.reduceFrom(c, init, true)
+}
+
+func (set *MapSet) reduceFrom(c Callable, init Object, initialized bool) Object {
+	res := init
+	args := []Object{res, NIL}
+	reduceKey := func(key Object) {
+		if !initialized {
+			res = key
+			initialized = true
+			return
+		}
+		args[0] = res
+		args[1] = key
+		res = c.Call(args)
+	}
+	switch m := set.m.(type) {
+	case *ArrayMap:
+		for i := 0; i < len(m.arr); i += 2 {
+			reduceKey(m.arr[i])
+		}
+	default:
+		for iter := set.m.Iter(); iter.HasNext(); {
+			reduceKey(iter.Next().Key)
+		}
+	}
+	if !initialized {
+		return c.Call(nil)
+	}
+	return res
+}
+
 func NewSetFromSeq(s Seq) *MapSet {
 	res := EmptySet()
 	for !s.IsEmpty() {
