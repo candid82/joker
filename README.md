@@ -60,7 +60,7 @@ Dash docset: `dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Fcandid82%2Fj
 
 [Organizing libraries (namespaces)](LIBRARIES.md)
 
-[Developer notes](DEVELOPER.md)
+[Developer notes](DEVELOPER.md) · [VM implementation status](VM.md)
 
 ## Project goals
 

@@ -2,7 +2,7 @@
 
 # Developer Notes
 
-These notes are intended for developers working on the internals of Joker itself. They are not comprehensive.
+These notes are intended for developers working on the internals of Joker itself. They are not comprehensive. For the bytecode evaluator, see [VM implementation status](VM.md).
 
 ## Library Code (Namespaces)
 
