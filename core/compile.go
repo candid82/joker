@@ -1214,11 +1214,51 @@ func isVMCompatible(expr Expr) bool {
 func isLiteralVMCompatible(obj Object) bool {
 	switch obj.(type) {
 	case Nil, Boolean, Int, Double, String, Char, Keyword, Symbol,
-		*Ratio, *BigInt, *BigFloat, *Regex, *Type:
+		*Ratio, *BigInt, *BigFloat, *Regex, *Type, *Var:
 		return true
+	case *List, *MapSet:
+		// Quoted collections are constants in both evaluators. The packer
+		// prints and reads collection constants, so admit only collections
+		// whose metadata and element types survive that round trip.
+		return isPackedCollectionLiteral(obj)
 	default:
 		return false
 	}
+}
+
+func isPackedCollectionLiteral(obj Object) bool {
+	if m, ok := obj.(Meta); ok && m.GetMeta() != nil {
+		return false
+	}
+	isElement := func(elem Object) bool {
+		if m, ok := elem.(Meta); ok && m.GetMeta() != nil {
+			return false
+		}
+		switch elem.(type) {
+		case Nil, Boolean, Int, Double, String, Char, Keyword, Symbol,
+			*Ratio, *BigInt, *BigFloat, *Regex:
+			return true
+		case *List, *MapSet:
+			return isPackedCollectionLiteral(elem)
+		default:
+			return false
+		}
+	}
+	switch coll := obj.(type) {
+	case *List:
+		for node := coll; !node.IsEmpty(); node = node.rest {
+			if node.GetMeta() != nil || !isElement(node.first) {
+				return false
+			}
+		}
+	case *MapSet:
+		for seq := coll.Seq(); !seq.IsEmpty(); seq = seq.Rest() {
+			if !isElement(seq.First()) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // extractArgTypes extracts type tag info from FnArityExpr args and stores them in the ArityProto.

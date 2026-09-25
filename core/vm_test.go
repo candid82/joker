@@ -207,6 +207,133 @@ func TestVMFallbackAttribution(t *testing.T) {
 	}
 }
 
+func TestVMPackedCollectionLiteralParity(t *testing.T) {
+	cases := []struct {
+		name, code string
+	}{
+		{"quoted empty list", `(fn [] '())`},
+		{"quoted list", `(fn [] '(1 "text" :key))`},
+		{"quoted set", `(fn [] '#{0 1 2})`},
+		{"quoted empty set", `(fn [] '#{})`},
+		{"quoted hash set", `(fn [] '#{0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16})`},
+		{"nested quoted collection", `(fn [] '(#{:a 3} (4 5)))`},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			form, err := TryRead(NewReader(strings.NewReader(tt.code), "<collection-test>"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+			if err != nil {
+				t.Fatal(err)
+			}
+			fnExpr := expr.(*FnExpr)
+			if !IsVMCompatibleFn(fnExpr) {
+				t.Fatal("quoted collection should be VM compatible")
+			}
+			astFn := fnExpr.Eval(nil).(*Fn)
+			proto, err := CompileFnExpr(fnExpr, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			compiled := &Fn{proto: proto, isCompiled: true}
+			astA, astB := astFn.Call(nil), astFn.Call(nil)
+			vmA, vmB := VMExecute(compiled, nil), VMExecute(compiled, nil)
+			if astA != astB || vmA != vmB || astA.GetType() != vmA.GetType() || !astA.Equals(vmA) {
+				t.Errorf("AST %s (%T), VM %s (%T): constant identity, type, or value differs", astA, astA, vmA, vmA)
+			}
+
+			env := NewPackEnv()
+			packed := proto.Pack(nil, env)
+			header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
+			unpacked, rest := UnpackFunctionProto(packed, header)
+			if len(rest) != 0 {
+				t.Fatalf("%d bytes remained after unpacking", len(rest))
+			}
+			packedFn := &Fn{proto: unpacked, isCompiled: true}
+			packedA, packedB := VMExecute(packedFn, nil), VMExecute(packedFn, nil)
+			if packedA != packedB || packedA.GetType() != astA.GetType() || !packedA.Equals(astA) || packedA.ToString(true) != astA.ToString(true) {
+				t.Errorf("packed VM %s (%T), AST %s (%T)", packedA, packedA, astA, astA)
+			}
+		})
+	}
+	meta := EmptyArrayMap().Assoc(MakeKeyword("tag"), Int{I: 1}).(Map)
+	for _, obj := range []Object{
+		NewListFrom(Int{I: 1}).WithMeta(meta),
+		NewList(Int{I: 1}, NewListFrom(Int{I: 2}).WithMeta(meta).(*List)),
+		EmptySet().WithMeta(meta),
+		NewListFrom(TYPE.Fn), // Type objects need the packer's special encoding.
+		EmptySet().Conj(EmptyArrayVector()).(Object),
+	} {
+		if isLiteralVMCompatible(obj) {
+			t.Errorf("unsupported quoted collection should fall back to AST: %s", obj)
+		}
+	}
+}
+
+func TestVMVarLiteralParity(t *testing.T) {
+	code := `(fn [] (var *out*))`
+	form, err := TryRead(NewReader(strings.NewReader(code), "<var-test>"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fnExpr := expr.(*FnExpr)
+	if !IsVMCompatibleFn(fnExpr) {
+		t.Fatal("Var literals should be VM compatible")
+	}
+	ast := fnExpr.Eval(nil).(*Fn).Call(nil)
+	proto, err := CompileFnExpr(fnExpr, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vmFn := &Fn{proto: proto, isCompiled: true}
+	if vm := VMExecute(vmFn, nil); vm != ast || VMExecute(vmFn, nil) != vm {
+		t.Fatal("Var identity differs between AST, VM, or repeated VM calls")
+	}
+	env := NewPackEnv()
+	packed := proto.Pack(nil, env)
+	header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
+	unpacked, rest := UnpackFunctionProto(packed, header)
+	if len(rest) != 0 || VMExecute(&Fn{proto: unpacked, isCompiled: true}, nil) != ast {
+		t.Fatal("Var identity differs after packed-bytecode round trip")
+	}
+}
+
+func TestVMCaseExpansionParity(t *testing.T) {
+	code := `(fn [floor] (case floor 0 [1] 1 [0 2] 2 [1 3] 3 [2]))`
+	form, err := TryRead(NewReader(strings.NewReader(code), "<case-test>"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fnExpr := expr.(*FnExpr)
+	if !IsVMCompatibleFn(fnExpr) {
+		t.Fatal("case-generated set literals should be VM-compatible")
+	}
+	proto, err := CompileFnExpr(fnExpr, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ast := fnExpr.Eval(nil).(*Fn)
+	compiled := &Fn{proto: proto, isCompiled: true}
+	for floor := 0; floor < 4; floor++ {
+		args := []Object{Int{I: floor}}
+		astResult := ast.Call(args)
+		vmResult := VMExecute(compiled, args)
+		if !astResult.Equals(vmResult) || astResult.GetType() != vmResult.GetType() {
+			t.Errorf("floor %d: AST %s, VM %s", floor, astResult, vmResult)
+		}
+	}
+}
+
 func TestVMNamedFunctionAndArityRecur(t *testing.T) {
 	cases := []struct {
 		code string

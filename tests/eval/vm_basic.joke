@@ -111,6 +111,20 @@
   (is (not-any? even? [1 3]))
   (is (not (not-any? even? [1 2]))))
 
+(deftest test-compiled-quoted-collections-and-var
+  (let [literal (fn [] '#{0 1 2})]
+    (is (= #{0 1 2} (literal)))
+    (is (identical? (literal) (literal))))
+  (let [literal (fn [] '(1 :two 3))]
+    (is (= '(1 :two 3) (literal)))
+    (is (identical? (literal) (literal))))
+  (let [literal-var (fn [] (var *out*))]
+    (is (identical? (var *out*) (literal-var)))
+    (is (identical? (literal-var) (literal-var))))
+  (let [literal-var (fn [] (var *assert*))]
+    (is (= false (with-bindings* {(var *assert*) false}
+                   (fn [] (deref (literal-var))))))))
+
 (deftest test-finally-restores-bindings
   (let [original *assert*]
     (is (= false (with-bindings* {#'*assert* false} (fn [] *assert*))))
