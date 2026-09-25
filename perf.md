@@ -147,3 +147,53 @@ The next VM work should therefore be:
 5. Apply the separate sequence-pipeline improvements; the VM alone does not remove lazy-sequence and collection-cursor allocation.
 
 Overall, the VM validates the first recommendation, but the current WIP implementation only partially covers the hot path. Extending VM coverage and removing its AST/native-call bridges should produce a much larger gain than the current 8%.
+
+## Sequence optimization results
+
+The sequence work was implemented on `master` in commit `2423406b` and then merged into `vm`. Timings below are consecutive unprofiled runs of the same workload; instruction counts are included because individual wall-time measurements have some scheduler noise.
+
+| Step | Wall time | User CPU | Instructions | Incremental wall change |
+|---|---:|---:|---:|---:|
+| Baseline `master` | 46.12 s | 138.15 s | 1.120 T | — |
+| Strided `ArrayMap.Keys`/`Vals` views | 46.25 s | 137.24 s | 1.110 T | +0.3% |
+| Native sequence/set reduction | 40.81 s | 123.28 s | 0.988 T | -11.8% |
+| Transient-backed `into` experiment | 41.48 s | 122.96 s | 0.991 T | +1.6% |
+| Go-backed `map`/`filter`/`remove`/`mapcat` | 39.26 s | 94.51 s | 0.924 T | -5.4% |
+| Native `some` and `every?` loops | 36.98 s | 89.25 s | 0.867 T | -5.8% |
+| Revert transient-backed `into` | 36.71 s | 90.42 s | 0.859 T | -0.7% |
+| Release realized transform sources | 32.78 s | 85.08 s | 0.754 T | -10.7% |
+| Go-backed `concat` and final cleanup | 32.53–32.97 s | 85.29–85.92 s | 0.750 T | within ~1% CPU; wall noisy |
+
+The transient `into` change was rejected because two runs showed no improvement (41.48 and 41.97 seconds) and slightly more instructions. All other steps were retained. Clearing a realized transforming sequence's references to its callable and input was especially important: it reduced peak RSS in the adjacent runs from 781 MB to 321 MB and greatly reduced GC scanning.
+
+Compared with the original `master` baseline, the final AST implementation produced:
+
+| Measurement | Before | After | Change |
+|---|---:|---:|---:|
+| Wall time | 46.12 s | 32.97 s | -28.5% |
+| User CPU | 138.15 s | 85.92 s | -37.8% |
+| Peak RSS | 728 MB | 327 MB | -55.1% |
+| Retired instructions | 1.120 T | 0.750 T | -33.1% |
+| `pprof` allocated space | 36.47 GB | 28.27 GB | -22.5% |
+| Allocated objects | 1.239 billion | 0.890 billion | -28.1% |
+
+Final AST profiles:
+
+- `/tmp/day11-seq-final.cpu`
+- `/tmp/day11-seq-final.mem`
+
+### VM after sequence optimization
+
+The sequence changes benefit both evaluators. With the optimized core merged into `vm`:
+
+| Mode | Wall time | User CPU | Peak RSS | Retired instructions |
+|---|---:|---:|---:|---:|
+| `--no-vm` | 32.87 s | 86.02 s | 329 MB | 0.755 T |
+| VM | 30.65 s | 74.21 s | 442 MB | 0.680 T |
+
+Relative to the pre-optimization VM run, VM wall time fell from 42.19 to 30.65 seconds (-27.4%), user CPU fell by 36.0%, peak RSS fell by 47.7%, allocated space fell to 25,203 MB, and allocated objects fell from 1.058 billion to 0.708 billion (-33.1%). The VM's incremental advantage over optimized AST execution is now 6.8% wall time and 13.7% user CPU.
+
+Final VM profiles:
+
+- `/tmp/day11-vm-seq.cpu`
+- `/tmp/day11-vm-seq.mem`
