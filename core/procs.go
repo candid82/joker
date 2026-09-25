@@ -640,6 +640,41 @@ var procAssoc = func(args []Object) Object {
 	return EnsureArgIsAssociative(args, 0).Assoc(args[1], args[2])
 }
 
+var procTransient = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsEditable(args, 0).AsTransient()
+}
+
+var procPersistentBang = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsTransientCollection(args, 0).Persistent()
+}
+
+var procConjBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientCollection(args, 0).ConjBang(args[1])
+}
+
+var procAssocBang = func(args []Object) Object {
+	CheckArity(args, 3, 3)
+	return EnsureArgIsTransientAssociative(args, 0).AssocBang(args[1], args[2])
+}
+
+var procDissocBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientMapCollection(args, 0).WithoutBang(args[1])
+}
+
+var procDisjBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientSetCollection(args, 0).DisjoinBang(args[1])
+}
+
+var procPopBang = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsTransientVector(args, 0).PopBang()
+}
+
 var procEquals = func(args []Object) Object {
 	return Boolean{B: args[0].Equals(args[1])}
 }

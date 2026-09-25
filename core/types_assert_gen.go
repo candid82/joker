@@ -6,6 +6,96 @@ import (
 	"io"
 )
 
+func EnsureObjectIsTransientVector(obj Object, pattern string) *TransientVector {
+	if c, yes := obj.(*TransientVector); yes {
+		return c
+	}
+	panic(FailObject(obj, "TransientVector", pattern))
+}
+
+func EnsureArgIsTransientVector(args []Object, index int) *TransientVector {
+	obj := args[index]
+	if c, yes := obj.(*TransientVector); yes {
+		return c
+	}
+	panic(FailArg(obj, "TransientVector", index))
+}
+
+func EnsureObjectIsEditable(obj Object, pattern string) Editable {
+	if c, yes := obj.(Editable); yes {
+		return c
+	}
+	panic(FailObject(obj, "Editable", pattern))
+}
+
+func EnsureArgIsEditable(args []Object, index int) Editable {
+	obj := args[index]
+	if c, yes := obj.(Editable); yes {
+		return c
+	}
+	panic(FailArg(obj, "Editable", index))
+}
+
+func EnsureObjectIsTransientCollection(obj Object, pattern string) TransientCollection {
+	if c, yes := obj.(TransientCollection); yes {
+		return c
+	}
+	panic(FailObject(obj, "TransientCollection", pattern))
+}
+
+func EnsureArgIsTransientCollection(args []Object, index int) TransientCollection {
+	obj := args[index]
+	if c, yes := obj.(TransientCollection); yes {
+		return c
+	}
+	panic(FailArg(obj, "TransientCollection", index))
+}
+
+func EnsureObjectIsTransientAssociative(obj Object, pattern string) TransientAssociative {
+	if c, yes := obj.(TransientAssociative); yes {
+		return c
+	}
+	panic(FailObject(obj, "TransientAssociative", pattern))
+}
+
+func EnsureArgIsTransientAssociative(args []Object, index int) TransientAssociative {
+	obj := args[index]
+	if c, yes := obj.(TransientAssociative); yes {
+		return c
+	}
+	panic(FailArg(obj, "TransientAssociative", index))
+}
+
+func EnsureObjectIsTransientMapCollection(obj Object, pattern string) TransientMapCollection {
+	if c, yes := obj.(TransientMapCollection); yes {
+		return c
+	}
+	panic(FailObject(obj, "TransientMapCollection", pattern))
+}
+
+func EnsureArgIsTransientMapCollection(args []Object, index int) TransientMapCollection {
+	obj := args[index]
+	if c, yes := obj.(TransientMapCollection); yes {
+		return c
+	}
+	panic(FailArg(obj, "TransientMapCollection", index))
+}
+
+func EnsureObjectIsTransientSetCollection(obj Object, pattern string) TransientSetCollection {
+	if c, yes := obj.(TransientSetCollection); yes {
+		return c
+	}
+	panic(FailObject(obj, "TransientSetCollection", pattern))
+}
+
+func EnsureArgIsTransientSetCollection(args []Object, index int) TransientSetCollection {
+	obj := args[index]
+	if c, yes := obj.(TransientSetCollection); yes {
+		return c
+	}
+	panic(FailArg(obj, "TransientSetCollection", index))
+}
+
 func EnsureObjectIsComparable(obj Object, pattern string) Comparable {
 	if c, yes := obj.(Comparable); yes {
 		return c

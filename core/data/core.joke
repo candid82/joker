@@ -1076,6 +1076,51 @@
          (recur ret (first ks) (next ks))
          ret)))))
 
+(defn transient
+  "Returns an editable version of a vector, map, or set. Use the returned
+  value of every editing operation; transients are not safe for concurrent use."
+  [^Editable coll] (transient__ coll))
+
+(defn persistent!
+  "Returns a persistent collection and invalidates the transient."
+  [^TransientCollection coll] (persistent!__ coll))
+
+(defn conj!
+  "Adds an item to a transient collection and returns a transient."
+  ([] (transient []))
+  ([^TransientCollection coll] coll)
+  ([^TransientCollection coll x] (conj!__ coll x)))
+
+(defn assoc!
+  "Associates key/value pairs in a transient map or vector. Returns a transient."
+  ([^TransientAssociative coll key val] (assoc!__ coll key val))
+  ([^TransientAssociative coll key val & kvs]
+   (let [ret (assoc!__ coll key val)]
+     (if kvs
+       (if (next kvs)
+         (recur ret (first kvs) (second kvs) (nnext kvs))
+         (throw (ex-info "assoc! expects even number of arguments after map/vector, found odd number" {})))
+       ret))))
+
+(defn dissoc!
+  "Removes keys from a transient map and returns a transient."
+  ([^TransientMapCollection coll key] (dissoc!__ coll key))
+  ([^TransientMapCollection coll key & keys]
+   (let [ret (dissoc!__ coll key)]
+     (if keys (recur ret (first keys) (next keys)) ret))))
+
+(defn disj!
+  "Removes keys from a transient set and returns a transient."
+  ([^TransientSetCollection coll] coll)
+  ([^TransientSetCollection coll key] (disj!__ coll key))
+  ([^TransientSetCollection coll key & keys]
+   (let [ret (disj!__ coll key)]
+     (if keys (recur ret (first keys) (next keys)) ret))))
+
+(defn pop!
+  "Removes the last item from a transient vector and returns the transient."
+  [^TransientVector coll] (pop!__ coll))
+
 (defn find
   "Returns the map entry for key, or nil if key not present."
   {:added "1.0"}

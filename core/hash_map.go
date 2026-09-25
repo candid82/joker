@@ -24,15 +24,18 @@ type (
 	BitmapIndexedNode struct {
 		bitmap int
 		array  []interface{}
+		edit   *transientEdit
 	}
 	HashCollisionNode struct {
 		hash  uint32
 		count int
 		array []interface{}
+		edit  *transientEdit
 	}
 	ArrayNode struct {
 		count int
 		array []Node
+		edit  *transientEdit
 	}
 	NodeSeq struct {
 		InfoHolder

@@ -1,5 +1,5 @@
-//go:generate go run gen/gen_types.go assert Comparable Vec Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Reduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel CountedIndexed
-//go:generate go run gen/gen_types.go info *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *ArrayVector *VectorSeq *VectorRSeq
+//go:generate go run gen/gen_types.go assert *TransientVector Editable TransientCollection TransientAssociative TransientMapCollection TransientSetCollection Comparable Vec Char String Symbol Keyword *Regex Boolean Time Number Seqable Callable *Type Meta Int Double Stack Map Set Associative Reversible Named Comparator *Ratio *BigFloat *BigInt *Namespace *Var Error *Fn Deref *Atom Ref KVReduce Reduce Pending *File io.Reader io.Writer StringReader io.RuneReader *Channel CountedIndexed
+//go:generate go run gen/gen_types.go info *TransientVector *TransientArrayMap *TransientHashMap *TransientSet *List *ArrayMapSeq *ArrayMap *HashMap *ExInfo *Fn *Var Nil *Ratio *BigInt *BigFloat Char Double Int Boolean Time Keyword *Regex Symbol String Comment *LazySeq *MappingSeq *ArraySeq *ConsSeq *NodeSeq *ArrayNodeSeq *MapSet *Vector *ArrayVector *VectorSeq *VectorRSeq
 //go:generate go run -tags gen_code gen_code/gen_code.go
 
 package core
@@ -51,6 +51,29 @@ type (
 	Conjable interface {
 		Object
 		Conj(obj Object) Conjable
+	}
+	Editable interface {
+		Object
+		AsTransient() TransientCollection
+	}
+	TransientCollection interface {
+		Object
+		ConjBang(Object) TransientCollection
+		Persistent() Object
+	}
+	TransientAssociative interface {
+		TransientCollection
+		AssocBang(Object, Object) TransientAssociative
+	}
+	TransientMapCollection interface {
+		TransientAssociative
+		WithoutBang(Object) TransientMapCollection
+		Gettable
+		Counted
+	}
+	TransientSetCollection interface {
+		TransientCollection
+		DisjoinBang(Object) TransientSetCollection
 	}
 	Counted interface {
 		Count() int
@@ -258,79 +281,88 @@ type (
 		IsRealized() bool
 	}
 	Types struct {
-		Associative    *Type
-		Callable       *Type
-		Collection     *Type
-		Comparable     *Type
-		Comparator     *Type
-		Counted        *Type
-		CountedIndexed *Type
-		Deref          *Type
-		Channel        *Type
-		Error          *Type
-		Gettable       *Type
-		Indexed        *Type
-		IOReader       *Type
-		IOWriter       *Type
-		KVReduce       *Type
-		Reduce         *Type
-		Map            *Type
-		Meta           *Type
-		Named          *Type
-		Number         *Type
-		Pending        *Type
-		Ref            *Type
-		Reversible     *Type
-		Seq            *Type
-		Seqable        *Type
-		Sequential     *Type
-		Set            *Type
-		Stack          *Type
-		ArrayMap       *Type
-		ArrayMapSeq    *Type
-		ArrayNodeSeq   *Type
-		ArraySeq       *Type
-		MapSet         *Type
-		Atom           *Type
-		BigFloat       *Type
-		BigInt         *Type
-		Boolean        *Type
-		Time           *Type
-		Buffer         *Type
-		Char           *Type
-		ConsSeq        *Type
-		Delay          *Type
-		Double         *Type
-		EvalError      *Type
-		ExInfo         *Type
-		Fn             *Type
-		File           *Type
-		BufferedReader *Type
-		HashMap        *Type
-		Int            *Type
-		Keyword        *Type
-		LazySeq        *Type
-		List           *Type
-		MappingSeq     *Type
-		Namespace      *Type
-		Nil            *Type
-		NodeSeq        *Type
-		ParseError     *Type
-		Proc           *Type
-		ProcFn         *Type
-		Ratio          *Type
-		RecurBindings  *Type
-		Regex          *Type
-		String         *Type
-		Symbol         *Type
-		Type           *Type
-		Var            *Type
-		Vector         *Type
-		Vec            *Type
-		ArrayVector    *Type
-		VectorRSeq     *Type
-		VectorSeq      *Type
-		StringSeq      *Type
+		Associative            *Type
+		Editable               *Type
+		TransientCollection    *Type
+		TransientAssociative   *Type
+		TransientMapCollection *Type
+		TransientSetCollection *Type
+		Callable               *Type
+		Collection             *Type
+		Comparable             *Type
+		Comparator             *Type
+		Counted                *Type
+		CountedIndexed         *Type
+		Deref                  *Type
+		Channel                *Type
+		Error                  *Type
+		Gettable               *Type
+		Indexed                *Type
+		IOReader               *Type
+		IOWriter               *Type
+		KVReduce               *Type
+		Reduce                 *Type
+		Map                    *Type
+		Meta                   *Type
+		Named                  *Type
+		Number                 *Type
+		Pending                *Type
+		Ref                    *Type
+		Reversible             *Type
+		Seq                    *Type
+		Seqable                *Type
+		Sequential             *Type
+		Set                    *Type
+		Stack                  *Type
+		TransientVector        *Type
+		TransientArrayMap      *Type
+		TransientHashMap       *Type
+		TransientSet           *Type
+		ArrayMap               *Type
+		ArrayMapSeq            *Type
+		ArrayNodeSeq           *Type
+		ArraySeq               *Type
+		MapSet                 *Type
+		Atom                   *Type
+		BigFloat               *Type
+		BigInt                 *Type
+		Boolean                *Type
+		Time                   *Type
+		Buffer                 *Type
+		Char                   *Type
+		ConsSeq                *Type
+		Delay                  *Type
+		Double                 *Type
+		EvalError              *Type
+		ExInfo                 *Type
+		Fn                     *Type
+		File                   *Type
+		BufferedReader         *Type
+		HashMap                *Type
+		Int                    *Type
+		Keyword                *Type
+		LazySeq                *Type
+		List                   *Type
+		MappingSeq             *Type
+		Namespace              *Type
+		Nil                    *Type
+		NodeSeq                *Type
+		ParseError             *Type
+		Proc                   *Type
+		ProcFn                 *Type
+		Ratio                  *Type
+		RecurBindings          *Type
+		Regex                  *Type
+		String                 *Type
+		Symbol                 *Type
+		Type                   *Type
+		Var                    *Type
+		Vector                 *Type
+		Vec                    *Type
+		ArrayVector            *Type
+		VectorRSeq             *Type
+		VectorSeq              *Type
+		StringSeq              *Type
 	}
 )
 
@@ -1564,8 +1596,8 @@ func (s String) Seq() Seq {
 	return &stringSeq{s: s.S, off: 0}
 }
 
-func (seq *stringSeq) Seq() Seq       { return seq }
-func (seq *stringSeq) sequential()    {}
+func (seq *stringSeq) Seq() Seq    { return seq }
+func (seq *stringSeq) sequential() {}
 
 func (seq *stringSeq) First() Object {
 	if seq.off >= len(seq.s) {
@@ -1599,10 +1631,10 @@ func (seq *stringSeq) ToString(escape bool) string {
 	return SeqToString(seq, escape)
 }
 
-func (seq *stringSeq) GetInfo() *ObjectInfo { return nil }
+func (seq *stringSeq) GetInfo() *ObjectInfo             { return nil }
 func (seq *stringSeq) WithInfo(info *ObjectInfo) Object { return seq }
-func (seq *stringSeq) GetType() *Type       { return TYPE.StringSeq }
-func (seq *stringSeq) Hash() uint32         { return hashOrdered(seq) }
+func (seq *stringSeq) GetType() *Type                   { return TYPE.StringSeq }
+func (seq *stringSeq) Hash() uint32                     { return hashOrdered(seq) }
 func (seq *stringSeq) WithMeta(meta Map) Object {
 	// stringSeq has no meta; return as-is like other minimal seqs
 	return seq

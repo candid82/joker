@@ -1,0 +1,102 @@
+(ns joker.transients-test
+  (:require [joker.test :refer [deftest is testing]]))
+
+(deftest transient-vectors
+  (testing "small vectors, promotion, reads and pops"
+    (let [source [1 2 3]
+          t (transient source)]
+      (is (= 3 (count t)))
+      (is (= 2 (get t 1)))
+      (is (= :missing (get t 9 :missing)))
+      (is (= :missing (nth t 9 :missing)))
+      (is (contains? t 0))
+      (is (= [1 2 3 4] (persistent! (conj! t 4))))
+      (is (= [1 2 3] source)))
+    (is (= ArrayVector (type (persistent! (transient [])))))
+    (is (= Vector (type (persistent! (reduce conj! (transient []) (range 40))))))
+    (is (= [8] (persistent! (pop! (assoc! (transient [1 2]) 0 8))))))
+  (testing "trie boundaries and source isolation"
+    (let [source (vec (range 1100))
+          t (transient source)]
+      (assoc! t 0 :first)
+      (assoc! t 32 :middle)
+      (assoc! t 1056 :last-leaf)
+      (is (= :middle (nth t 32)))
+      (is (= 32 (nth source 32)))
+      (is (= 1100 (count t)))
+      (is (= 1100 (count source)))
+      (is (= :first (nth (persistent! t) 0)))
+      (is (= 0 (nth source 0))))
+    (let [t (reduce conj! (transient []) (range 1100))]
+      (is (= 1100 (count t)))
+      (is (= 1099 (nth t 1099)))
+      (is (= 1055 (nth (persistent! (reduce (fn [v _] (pop! v)) t (range 44))) 1055)))))
+  (testing "vector errors"
+    (is (thrown? Error (pop! (transient []))))
+    (is (thrown? Error (assoc! (transient []) 2 :bad)))
+    (is (thrown? Error (assoc! (transient []) :bad :bad)))))
+
+(deftest transient-maps
+  (testing "array map promotion and returned values"
+    (let [source {:a 1}
+          t (assoc! (transient source) :b 2)]
+      (is (= 1 (get t :a)))
+      (is (= 2 (count t)))
+      (is (= {:a 1 :b 2} (persistent! t)))
+      (is (= {:a 1} source)))
+    (let [t (reduce (fn [m i] (assoc! m i (* i 2))) (transient {}) (range 100))]
+      (is (= TransientHashMap (type t)))
+      (is (= 100 (count t)))
+      (is (= 198 (get t 99)))
+      (is (contains? t 0))
+      (is (= :missing (get t :none :missing)))
+      (is (= 98 (count (dissoc! t 1 2))))
+      (is (= 1000 (get (persistent! (assoc! t 3 1000)) 3)))))
+  (testing "conj! map entries and maps"
+    (is (= {:a 1 :b 2 :c 3}
+           (persistent! (conj! (conj! (transient {}) [:a 1]) {:b 2 :c 3}))))
+    (is (thrown? Error (conj! (transient {}) [1]))))
+  (testing "nil keys and values"
+    (let [t (assoc! (transient {}) nil nil)]
+      (is (contains? t nil))
+      (is (= nil (get t nil)))
+      (is (= {} (persistent! (dissoc! t nil)))))))
+
+(deftest transient-sets
+  (let [source #{1 2}
+        t (transient source)]
+    (is (= 2 (count t)))
+    (is (contains? t 1))
+    (is (= 1 (get t 1)))
+    (is (= :missing (get t 3 :missing)))
+    (is (= #{2 3} (persistent! (disj! (conj! t 3) 1))))
+    (is (= #{1 2} source)))
+  (let [source (set (range 100))
+        t (transient source)]
+    (disj! t 0 1)
+    (conj! t 101)
+    (is (contains? source 0))
+    (is (= 99 (count (persistent! t)))))
+  (is (= 100 (count (persistent! (reduce conj! (transient #{}) (range 100)))))))
+
+(deftest transient-lifecycle
+  (let [v (transient [1])
+        m (transient {:a 1})
+        s (transient #{1})]
+    (persistent! v)
+    (persistent! m)
+    (persistent! s)
+    (is (thrown? Error (persistent! v)))
+    (is (thrown? Error (count v)))
+    (is (thrown? Error (nth v 0)))
+    (is (thrown? Error (conj! v 2)))
+    (is (thrown? Error (get m :a)))
+    (is (thrown? Error (assoc! m :b 2)))
+    (is (thrown? Error (get s 1)))
+    (is (thrown? Error (disj! s 1))))
+  (is (thrown? Error (transient '(1 2))))
+  (is (thrown? Error (assoc! (transient #{}) 1 2)))
+  (is (thrown? Error (dissoc! (transient []) 0)))
+  (is (thrown? Error (pop! (transient {}))))
+  (is (thrown? Error (hash (transient []))))
+  (is (thrown? Error (assoc! (transient {}) :a 1 :b))))

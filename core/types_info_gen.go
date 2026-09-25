@@ -2,6 +2,26 @@
 
 package core
 
+func (x *TransientVector) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
+func (x *TransientArrayMap) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
+func (x *TransientHashMap) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
+func (x *TransientSet) WithInfo(info *ObjectInfo) Object {
+	x.info = info
+	return x
+}
+
 func (x *List) WithInfo(info *ObjectInfo) Object {
 	x.info = info
 	return x
