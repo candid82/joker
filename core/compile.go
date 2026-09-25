@@ -1140,6 +1140,11 @@ func IsVMCompatible(expr Expr) bool {
 	case *ThrowExpr:
 		return IsVMCompatible(e.e)
 	case *TryExpr:
+		// Exception dispatch does not yet run finally on all exit paths.
+		// Do not precompile functions containing finally (notably core/with-bindings*).
+		if e.finallyExpr != nil {
+			return false
+		}
 		for _, bodyExpr := range e.body {
 			if !IsVMCompatible(bodyExpr) {
 				return false

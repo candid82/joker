@@ -94,6 +94,16 @@
       (is (= 6 (h 1 2 3)))
       (is (= 10 (h 1 2 3 4))))))
 
+(deftest test-finally-restores-bindings
+  (let [original *assert*]
+    (is (= false (with-bindings* {#'*assert* false} (fn [] *assert*))))
+    (is (= original *assert*))
+    (try
+      (with-bindings* {#'*assert* false}
+        (fn [] (throw (ex-info "expected" {}))))
+      (catch Error e nil))
+    (is (= original *assert*))))
+
 (deftest test-multi-arity-variadic
   (testing "multi-arity with variadic"
     (let [f (fn ([x] (* x 2)) ([x y & more] (apply + x y more)))]

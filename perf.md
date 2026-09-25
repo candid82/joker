@@ -214,3 +214,20 @@ Compiling **all** eligible generated core functions was not safe: 258 of 274 can
 These runs are noisy: the combined wall-time difference from the initial run is within ~1%, though instruction count and RSS improve consistently. A memory profile after both changes reports 24,802 MB and 682.3 million allocated objects, versus 25,203 MB and 707.8 million before them. `VM.callValue` flat allocations fall from about 1,240 MB to 887 MB. The remaining allocations are largely AST-fallback calls, whose arguments cannot be borrowed from the reusable VM stack without copying escaping frames.
 
 Follow-up profile: `/tmp/vm-final.mem`.
+
+## Wider generated-core VM coverage
+
+Bisection of the failing eval (`control.joke`) and linter (`unused-ns`) cases isolated `joker.core/with-bindings*`. The VM compiler had marked its `try/finally` as compatible, but `compileTry` skips `finally` on a normal exit and exception handling does not execute it on every exit path. That leaked temporary namespace bindings and caused subsequent parse errors. `IsVMCompatible` now rejects `try/finally`, retaining the AST path for such functions until the VM implements its complete semantics. Regression tests cover compatibility and restoration on normal and exceptional exits.
+
+After that guard, compiling all eligible closed generated core functions (257 functions) passed eval and linter suites. This moves substantial portions of the sequence pipeline into the VM: `evalSeq` flat allocations fell from about 3,678 MB to 1,263 MB, and `LocalEnv.addFrame` from 3,376 MB to 1,166 MB. However, the new profile revealed an allocation regression: `OP_VECTOR` made a persistent vector with a 32-slot tail for every literal, while `VectorExpr.Eval` makes an `ArrayVector`. Matching AST literal construction removed approximately 7.9 GB of allocation in the all-core profile.
+
+| VM batch | Wall time | User CPU | Peak RSS | Instructions | Allocated space | Objects |
+|---|---:|---:|---:|---:|---:|---:|
+| Prior VM (`into` only) | 28.54 s | 71.75 s | 340 MB | 0.653 T | 24,802 MB | 682 M |
+| All compatible generated core, old `OP_VECTOR` | 26.44 s | 71.31 s | 333 MB | 0.621 T | 25,796 MB | 450 M |
+| All compatible generated core, AST-equivalent `OP_VECTOR` | 24.30–24.67 s | 55.55–56.06 s | 322 MB | 0.533 T | 17,896 MB | 446 M |
+| Same build, `--no-vm` | 32.66 s | 85.85 s | 325 MB | 0.755 T | — | — |
+
+Relative to the fresh 29.45 s VM baseline before the generated-core and argument-slice work, the final VM is roughly 17% faster on Day 11. Against AST on the same build it is about 25% faster in wall time. No algorithm or state representation in the workload changed. The new Go tests, eval tests (190 tests/1175 assertions), linter, formatter and flag tests, and `go vet` pass.
+
+Before/after profiles: `/tmp/vmcore-all.mem`, `/tmp/vmcore-final.mem`, `/tmp/vmcore-all.cpu`. Future work: implement complete VM `try/finally` handling, investigate remaining AST fallbacks, and verify map/set literal parity before enabling any additional construct in `IsVMCompatible`.

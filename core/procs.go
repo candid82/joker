@@ -2072,17 +2072,24 @@ func setCoreNamespaces() {
 	ns.MaybeLazy("joker.core")
 
 	// Generated core functions are installed as AST-backed values, so
-	// CompileAST never visits them. Compile the closed `into` helper at
-	// startup, after --no-vm has been parsed. Compiling the entire generated
-	// core is not safe yet, and several other helpers regress on this workload.
+	// CompileAST never visits them. Compile the closed, compatible functions
+	// after --no-vm has been parsed. Unsupported constructs (including
+	// try/finally) retain their AST implementations.
 	if !DISABLE_VM && !LINTER_MODE {
-		if vr := ns.Resolve("into"); vr != nil {
-			if fn, ok := vr.Value.(*Fn); ok && fn.fnExpr != nil && fn.env == nil && !fn.isMacro && fn.fnExpr.self.name == nil && !fn.isCompiled && IsVMCompatibleFn(fn.fnExpr) {
-				if proto, err := CompileFnExpr(fn.fnExpr, nil); err == nil {
-					fn.proto = proto
-					fn.isCompiled = true
-				}
+		compiled := 0
+		for _, vr := range ns.mappings {
+			fn, ok := vr.Value.(*Fn)
+			if !ok || fn.fnExpr == nil || fn.env != nil || fn.isMacro || fn.fnExpr.self.name != nil || fn.isCompiled || !IsVMCompatibleFn(fn.fnExpr) {
+				continue
 			}
+			if proto, err := CompileFnExpr(fn.fnExpr, nil); err == nil {
+				fn.proto = proto
+				fn.isCompiled = true
+				compiled++
+			}
+		}
+		if VerbosityLevel > 0 {
+			fmt.Fprintf(Stderr, "Compiled %d generated core functions for the VM\n", compiled)
 		}
 	}
 

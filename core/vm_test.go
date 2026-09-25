@@ -103,12 +103,31 @@ func TestVMLoopRecur(t *testing.T) {
 func TestVMVectors(t *testing.T) {
 	code := "[1 2 3]"
 	result := evalAndCompile(t, code)
-	if v, ok := result.(Counted); ok {
+	if v, ok := result.(*ArrayVector); ok {
 		if v.Count() != 3 {
 			t.Errorf("expected count 3, got %d", v.Count())
 		}
 	} else {
-		t.Errorf("expected Counted, got %T", result)
+		t.Errorf("expected ArrayVector (like AST literals), got %T", result)
+	}
+}
+
+func TestVMFinallyFallsBackToAST(t *testing.T) {
+	reader := NewReader(strings.NewReader("(fn [] (try 1 (finally 2)))"), "<test>")
+	form, err := TryRead(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fn, ok := expr.(*FnExpr)
+	if !ok {
+		t.Fatalf("expected FnExpr, got %T", expr)
+	}
+	if IsVMCompatibleFn(fn) {
+		t.Fatal("try/finally is not yet safe to compile")
 	}
 }
 

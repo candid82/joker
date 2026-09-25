@@ -504,11 +504,17 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 
 	case OP_VECTOR:
 		count := int(vm.readShort(frame, chunk))
+		if count == 0 {
+			vm.Push(EmptyArrayVector())
+			break
+		}
 		elements := make([]Object, count)
 		for i := count - 1; i >= 0; i-- {
 			elements[i] = vm.Pop()
 		}
-		vm.Push(NewVectorFrom(elements...))
+		// Match VectorExpr.Eval: vector literals use the compact array
+		// representation, not a persistent tree with a 32-element tail.
+		vm.Push(&ArrayVector{arr: elements})
 
 	case OP_MAP:
 		count := int(vm.readShort(frame, chunk))
