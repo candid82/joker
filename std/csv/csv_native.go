@@ -74,6 +74,7 @@ func writeWriter(wr io.Writer, data Seqable, opts Map) {
 		s = s.Rest()
 	}
 	csvWriter.Flush()
+	PanicOnErr(csvWriter.Error())
 }
 
 func write(wr io.Writer, data Seqable, opts Map) Object {

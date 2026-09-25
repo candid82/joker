@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.<br>
+    <p class="var-docstr">Provides a small string-oriented API for the Bolt embedded key/value database.<br>
 <br>
          Example:<br>
 <br>
@@ -48,6 +48,9 @@
 </li>
 <li>
   <a href="#close">close</a>
+</li>
+<li>
+  <a href="#count-by-prefix">count-by-prefix</a>
 </li>
 <li>
   <a href="#create-bucket">create-bucket</a>
@@ -73,6 +76,12 @@
 <li>
   <a href="#put">put</a>
 </li>
+<li>
+  <a href="#update">update</a>
+</li>
+<li>
+  <a href="#view">view</a>
+</li>
 
     </ul>
     <h2 id="_constants">Constants</h2>
@@ -90,114 +99,211 @@
   <h3 class="Function" id="by-prefix">by-prefix</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(by-prefix db bucket prefix)</code></div>
+  <pre class="var-usage"><div><code>(by-prefix context bucket prefix)</code><code class="hide">(by-prefix ^BoltContext context ^String bucket ^String prefix)</code></div>
+<div><code>(by-prefix context bucket prefix opts)</code><code class="hide">(by-prefix ^BoltContext context ^String bucket ^String prefix ^Map opts)</code></div>
 </pre>
-  <p class="var-docstr">Retrives key/value pairs for all keys in bucket<br>
-  that start with prefix.<br>
-  Returns a vector of [key value] tuples. Passing empty prefix<br>
-  will return all key/values in bucket.</p>
+  <p class="var-docstr">Returns key/value pairs from bucket whose keys start with prefix.<br>
+<br>
+  context may be a BoltDB, which uses a new read transaction, or an active<br>
+  BoltTx. Results are returned as a vector of [key value] vectors in Bolt key<br>
+  order. Passing the empty string returns all key/value pairs in the bucket.<br>
+<br>
+  opts may contain:<br>
+  - limit - maximum number of key/value pairs to return; must be non-negative<br>
+<br>
+  Throws Error when bucket does not exist, limit is invalid, or the transaction<br>
+  fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="close">close</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(close db)</code></div>
+  <pre class="var-usage"><div><code>(close db)</code><code class="hide">(close ^BoltDB db)</code></div>
 </pre>
-  <p class="var-docstr">Releases all database resources.<br>
-  It will block waiting for any open transactions to finish<br>
-  before closing the database and returning.</p>
+  <p class="var-docstr">Closes db and releases its database resources.<br>
+<br>
+  Blocks until open transactions finish, then releases the file lock. Throws<br>
+  Error if closing fails.</p>
   
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="count-by-prefix">count-by-prefix</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(count-by-prefix context bucket prefix)</code><code class="hide">(count-by-prefix ^BoltContext context ^String bucket ^String prefix)</code></div>
+</pre>
+  <p class="var-docstr">Returns the number of keys in bucket that start with prefix.<br>
+<br>
+  context may be a BoltDB, which uses a new read transaction, or an active<br>
+  BoltTx. Passing the empty string counts all keys in the bucket. Throws Error<br>
+  when bucket does not exist or the transaction fails.</p>
   
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="create-bucket">create-bucket</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(create-bucket db name)</code></div>
+  <pre class="var-usage"><div><code>(create-bucket context name)</code><code class="hide">(create-bucket ^BoltContext context ^String name)</code></div>
 </pre>
-  <p class="var-docstr">Creates a new bucket. Throws an error if the bucket already exists,<br>
-  if the bucket name is blank, or if the bucket name is too long.</p>
+  <p class="var-docstr">Creates bucket name and returns nil.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Throws Error if the bucket already exists, if name is blank or too<br>
+  long, if context is read-only, or if the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="create-bucket-if-not-exists">create-bucket-if-not-exists</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(create-bucket-if-not-exists db name)</code></div>
+  <pre class="var-usage"><div><code>(create-bucket-if-not-exists context name)</code><code class="hide">(create-bucket-if-not-exists ^BoltContext context ^String name)</code></div>
 </pre>
-  <p class="var-docstr">Creates a new bucket if it doesn&#39;t already exist.<br>
-   Throws an error if the bucket name is blank, or if the bucket name is too long.</p>
+  <p class="var-docstr">Creates bucket name when needed and returns nil.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Does nothing when the bucket already exists. Throws Error if name is<br>
+  blank or too long, if context is read-only, or if the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="delete">delete</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(delete db bucket key)</code></div>
+  <pre class="var-usage"><div><code>(delete context bucket key)</code><code class="hide">(delete ^BoltContext context ^String bucket ^String key)</code></div>
 </pre>
-  <p class="var-docstr">Removes a key from the bucket if it exists.</p>
+  <p class="var-docstr">Removes key from bucket and returns nil.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Missing keys are ignored. Throws Error when bucket does not exist,<br>
+  context is read-only, or the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="delete-bucket">delete-bucket</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(delete-bucket db name)</code></div>
+  <pre class="var-usage"><div><code>(delete-bucket context name)</code><code class="hide">(delete-bucket ^BoltContext context ^String name)</code></div>
 </pre>
-  <p class="var-docstr">Deletes a bucket. Throws an error if the bucket doesn&#39;t exist.</p>
+  <p class="var-docstr">Deletes bucket name and returns nil.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Throws Error when the bucket does not exist, context is read-only, or<br>
+  the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="get">get</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(get db bucket key)</code></div>
+  <pre class="var-usage"><div><code>(get context bucket key)</code><code class="hide">(get ^BoltContext context ^String bucket ^String key)</code></div>
 </pre>
-  <p class="var-docstr">Retrieves the value for a key in the bucket.<br>
-  Returns nil if the key does not exist.</p>
+  <p class="var-docstr">Returns the string value stored at key in bucket.<br>
+<br>
+  context may be a BoltDB, which uses a new read transaction, or an active<br>
+  BoltTx. Returns nil when key does not exist. Throws Error when bucket does not<br>
+  exist or the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="next-sequence">next-sequence</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(next-sequence db bucket)</code></div>
+  <pre class="var-usage"><div><code>(next-sequence context bucket)</code><code class="hide">(next-sequence ^BoltContext context ^String bucket)</code></div>
 </pre>
-  <p class="var-docstr">Returns an autoincrementing integer for the bucket.</p>
+  <p class="var-docstr">Returns the next auto-incrementing integer for bucket.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Each call advances the bucket sequence counter. Throws Error when the<br>
+  bucket does not exist, context is read-only, or the transaction fails.</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="open">open</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(open filename mode)</code></div>
+  <pre class="var-usage"><div><code>(open filename mode)</code><code class="hide">(open ^String filename ^Int mode)</code></div>
 </pre>
-  <p class="var-docstr">Creates and opens a database at the given path.<br>
-  If the file does not exist then it will be created automatically<br>
-  with mode perm (before umask).<br>
-  mode is normally passed as an octal literal, e.g. 0600</p>
+  <p class="var-docstr">Opens the database file at filename and returns a BoltDB handle.<br>
+<br>
+  If the file does not exist, it is created with mode before the process umask<br>
+  is applied. mode is normally written as an octal literal such as 0600.<br>
+  Throws Error when the database cannot be opened.<br>
+<br>
+  The underlying database uses an exclusive file lock; because this wrapper uses<br>
+  Bolt&#39;s default options, open may wait indefinitely for another process to<br>
+  release the same database file.<br>
+<br>
+  Example:<br>
+    (def db (joker.bolt/open &#34;app.db&#34; 0600))</p>
   
-  
+  <a href="#" class="types">show types</a>
 </li>
 <li>
   <h3 class="Function" id="put">put</h3>
   <span class="var-kind Function">Function</span>
   <span class="var-added">v1.0</span>
-  <pre class="var-usage"><div><code>(put db bucket key value)</code></div>
+  <pre class="var-usage"><div><code>(put context bucket key value)</code><code class="hide">(put ^BoltContext context ^String bucket ^String key ^String value)</code></div>
 </pre>
-  <p class="var-docstr">Sets the value for a key in the bucket.<br>
-  If the key exist then its previous value will be overwritten.<br>
-  Throws an error if the key is blank, if the key is too large, or if the value is too large.</p>
+  <p class="var-docstr">Stores value at key in bucket and returns nil.<br>
+<br>
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from<br>
+  update. Keys and values are strings stored as raw bytes. Replaces any previous<br>
+  value for key. Throws Error when bucket does not exist, context is read-only,<br>
+  key is blank or too large, value is too large, or the transaction fails.</p>
   
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="update">update</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(update db f)</code><code class="hide">(update ^BoltDB db ^Callable f)</code></div>
+</pre>
+  <p class="var-docstr">Executes f in a managed read/write transaction and returns the result of f.<br>
+<br>
+  f is called with a BoltTx that is valid only for the duration of the call.<br>
+  Database operations in f must use that transaction rather than db. A normal<br>
+  return commits the transaction, including when f returns nil or false. If f<br>
+  throws, the entire transaction is rolled back and the exception is rethrown.<br>
+  Throws Error if the transaction cannot be opened or committed.<br>
+<br>
+  Example:<br>
+    (joker.bolt/update db<br>
+      (fn [tx]<br>
+        (joker.bolt/put tx &#34;users&#34; &#34;1&#34; &#34;Joe&#34;)<br>
+        (joker.bolt/put tx &#34;users&#34; &#34;2&#34; &#34;Jane&#34;)<br>
+        :saved))</p>
   
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="view">view</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.0</span>
+  <pre class="var-usage"><div><code>(view db f)</code><code class="hide">(view ^BoltDB db ^Callable f)</code></div>
+</pre>
+  <p class="var-docstr">Executes f in a managed read-only transaction and returns the result of f.<br>
+<br>
+  f is called with a BoltTx that is valid only for the duration of the call.<br>
+  Database operations in f must use that transaction rather than db. The<br>
+  transaction is rolled back when f returns, or when f throws. Throws Error if<br>
+  the transaction cannot be opened or closed, and rethrows exceptions from f.<br>
+<br>
+  Example:<br>
+    (joker.bolt/view db<br>
+      (fn [tx] (joker.bolt/get tx &#34;users&#34; &#34;1&#34;)))</p>
+  
+  <a href="#" class="types">show types</a>
 </li>
 
     </ul>

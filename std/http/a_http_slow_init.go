@@ -12,34 +12,140 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of http.InternsOrThunks().")
 	}
-	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client and server implementations.`, "1.0"))
+	httpNamespace.ResetMeta(MakeMeta(nil, `Provides HTTP client requests, blocking servers, static file serving, and Server-Sent Events (SSE).`, "1.0"))
 
 	httpNamespace.InternVar("send", send_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("request"))),
-			`Sends an HTTP request and returns an HTTP response.
+			NewListFrom(NewVectorFrom(MakeSymbol("request").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("request").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
+			`Sends an HTTP request and returns an HTTP response map.
+
   request is a map with the following keys:
-  - url (string)
+  - url (string, required)
   - method (string, keyword or symbol, defaults to :get)
   - body (string)
-  - host (string, overrides Host header if provided)
-  - headers (map).
-  All keys except for url are optional.
-  response is a map with the following keys:
+  - host (string, overrides the Host header if provided)
+  - headers (map from string header names to string values)
+
+  opts may contain:
+  - timeout-ms (int): positive timeout in milliseconds for the complete
+    operation, including connecting, TLS negotiation, redirects, waiting for
+    response headers, and reading the response body. The timeout is cumulative
+    across redirects. If omitted, no overall timeout is configured.
+  - connect-timeout-ms (int): positive timeout in milliseconds for each DNS/TCP
+    connection attempt. It does not include TLS negotiation.
+  - response-header-timeout-ms (int): positive timeout in milliseconds for
+    receiving response headers after writing the request. It applies separately
+    to each redirect response.
+  - follow-redirects? (boolean): whether to follow redirects; defaults to true.
+    When false, the first redirect response is returned normally.
+  - max-redirects (int): positive maximum number of redirects to follow.
+    Exceeding it throws Error. It cannot be used when follow-redirects? is false.
+  - max-response-bytes (int): positive maximum number of bytes to read from the
+    final response body, after any transparent decompression. Exceeding it
+    throws Error.
+
+  timeout-ms is an overall limit and caps operations that also have a
+  phase-specific timeout.
+
+  The response map contains:
   - status (int)
   - body (string)
-  - headers (map)
-  - content-length (int)`, "1.0"))
+  - headers (map from string header names to vectors of string values)
+  - content-length (int; -1 when unknown)
+
+  HTTP status codes such as 404 or 500 are returned normally in :status.
+  Throws Error when the request cannot be built or completed, such as for a
+  malformed URL, DNS/connect/TLS failure, redirect failure, or response-body
+  read failure.
+
+  By default, redirects are followed using the default HTTP client policy,
+  which stops after 10 consecutive requests. Without any applicable timeout,
+  send may block indefinitely while waiting for the network or response body.
+  The whole response body is read before send returns; streaming responses
+  therefore return only after the stream ends.
+
+  Example:
+    (let [res (joker.http/send {:url "https://example.com/api"
+                                :method :post
+                                :headers {"Content-Type" "text/plain"}
+                                :body "hello"}
+                               {:timeout-ms 5000
+                                :max-response-bytes 1048576})]
+      [(:status res) (:body res)])`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	httpNamespace.InternVar("start-file-server", start_file_server_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("root"))),
-			`Starts HTTP server on the TCP network address addr that
-  serves HTTP requests with the contents of the file system rooted at root.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("addr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("root").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Starts an HTTP file server on TCP network address addr and blocks while it
+  runs.
+
+  Files are served from the filesystem rooted at root using the standard HTTP
+  file-server behavior. Routing details such as redirects, directory handling,
+  MIME detection, and missing-file responses are delegated to the underlying
+  HTTP server. Throws Error if the server cannot listen or later stops with an
+  error. There is currently no server handle or shutdown API; run
+  start-file-server in go when the caller must keep doing other work.
+
+  Example:
+    (go (joker.http/start-file-server "127.0.0.1:8080" "public"))`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	httpNamespace.InternVar("start-server", start_server_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("addr"), MakeSymbol("handler"))),
-			`Starts HTTP server on the TCP network address addr.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("addr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("handler").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Callable"}).(Map)).(Symbol))),
+			`Starts an HTTP server on TCP network address addr and blocks while it runs.
+
+  Typical addr values are "127.0.0.1:8080" or ":8080". Throws Error if the
+  server cannot listen or later stops with an error. There is currently no
+  server handle or shutdown API; run start-server in go when the caller must
+  keep doing other work.
+
+  handler is called with a request map containing:
+  - request-method (keyword, lower-case)
+  - body (string)
+  - uri (string)
+  - query-string (string)
+  - server-name (string)
+  - server-port (string)
+  - remote-addr (string)
+  - protocol (string)
+  - scheme (keyword; currently always :http)
+  - host (string)
+  - headers (map from lower-case string names to comma-joined string values)
+
+  The full request body is read before handler is called. handler must return a
+  response map. For an ordinary response, supported keys are:
+  - status (int, optional; omitted uses the HTTP server default)
+  - body (string, optional; defaults to "")
+  - headers (map, optional; values may be strings or seqs of strings)
+
+  If handler or response processing throws, the server writes a 500 response
+  with body "Internal server error" and prints the error to stderr.
+
+  A response map containing :sse starts a Server-Sent Events stream instead of
+  an ordinary body response. :sse must be a channel. Values read from it may be
+  strings, which are sent as data events, or maps with one or more of:
+  - data (string)
+  - event (string)
+  - id (string)
+  - retry (int)
+  - comment (string)
+  Invalid SSE values throw Error. Optional status and headers keys are applied
+  before streaming; body is ignored for SSE responses. The stream ends when the
+  channel closes, the client disconnects, a write fails, or an error is raised.
+  If the response contains an on-close fn, it is called with a map whose reason
+  key is one of :channel-closed, :client-closed, :write-error or :error. For
+  :write-error and :error, the map also contains an error key with an Error
+  object. SSE responses default to Content-Type text/event-stream,
+  Cache-Control no-cache and Connection keep-alive unless those headers are
+  provided.
+
+  Example:
+    (go
+      (joker.http/start-server
+        "127.0.0.1:8080"
+        (fn [req]
+          {:status 200
+           :headers {"Content-Type" "text/plain"}
+           :body (str "hello " (:uri req))})))`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 }

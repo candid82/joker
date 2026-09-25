@@ -1,15 +1,29 @@
 (ns ^{:go-imports ["html"]
-      :doc "Provides functions for escaping and unescaping HTML text."}
+      :doc "Escapes and unescapes HTML text entities."}
   html)
 
 (defn ^String escape
-  "Escapes special characters like < to become &lt;. It escapes only five such characters: <, >, &, ' and \"."
+  "Escapes HTML-sensitive characters in s.
+
+  Replaces only <, >, &, ', and \" with their HTML entity forms, matching Go's
+  html.EscapeString behavior.
+
+  Example:
+    (joker.html/escape \"<a href='x'>&\")
+    ;; => \"&lt;a href=&#39;x&#39;&gt;&amp;\""
   {:added "1.0"
    :go "html.EscapeString(s)"}
   [^String s])
 
 (defn ^String unescape
-  "Unescapes entities like &lt; to become <."
+  "Unescapes HTML entities in s.
+
+  Recognizes named and numeric entities using Go's html.UnescapeString rules.
+  Text that is not part of a valid entity is preserved.
+
+  Example:
+    (joker.html/unescape \"Tom &amp; Jerry\")
+    ;; => \"Tom & Jerry\""
   {:added "1.0"
    :go "html.UnescapeString(s)"}
   [^String s])

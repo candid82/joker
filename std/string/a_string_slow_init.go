@@ -15,27 +15,27 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of string.InternsOrThunks().")
 	}
-	stringNamespace.ResetMeta(MakeMeta(nil, `Implements simple functions to manipulate strings.`, "1.0"))
+	stringNamespace.ResetMeta(MakeMeta(nil, `Provides Unicode-aware string predicates, transforms, searches, and splitting helpers.`, "1.0"))
 
 	stringNamespace.InternVar("blank?", isblank_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol))),
 			`True if s is nil, empty, or contains only whitespace.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("capitalize", capitalize_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`Converts first character of the string to upper-case, all other
   characters to lower-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("ends-with?", isends_with_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("substr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`True if s ends with substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("escape", escape_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("cmap"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("cmap").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Callable"}).(Map)).(Symbol))),
 			`Return a new string, using cmap to escape each character ch
   from s as follows:
 
@@ -44,49 +44,61 @@ func InternsOrThunks() {
 
 	stringNamespace.InternVar("includes?", isincludes_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("substr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`True if s includes substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("index-of", index_of_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("value")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("value"), MakeSymbol("from"))),
-			`Return index of value (string or char) in s, optionally searching
-  forward from from or nil if not found.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("from").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Returns the Unicode-character index of value in s, or nil when absent.
+
+  value must be a string or char. The optional from argument is a
+  Unicode-character index from which to begin the forward search.`, "1.0"))
 
 	stringNamespace.InternVar("join", join_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("coll")), NewVectorFrom(MakeSymbol("separator"), MakeSymbol("coll"))),
-			`Returns a string of all elements in coll, as returned by (seq coll), separated by an optional separator.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("coll").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("separator").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol), MakeSymbol("coll").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol))),
+			`Returns the elements of coll joined by an optional separator.
+
+  Elements are converted with their ordinary string form before joining.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("last-index-of", last_index_of_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("value")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("value"), MakeSymbol("from"))),
-			`Return last index of value (string or char) in s, optionally
-  searching backward from from or nil if not found.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("from").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Returns the last Unicode-character index of value in s, or nil when absent.
+
+  value must be a string or char. With from, only the prefix ending at that
+  Unicode-character index is searched.`, "1.0"))
 
 	stringNamespace.InternVar("lower-case", lower_case_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`Converts string to all lower-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("pad-left", pad_left_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the beginning to length n.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("pad").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol), MakeSymbol("n").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Returns s padded with pad at the beginning to n Unicode characters.
+
+  Returns s unchanged when it is already at least n characters long. pad must
+  be non-empty when padding is required.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("pad-right", pad_right_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("pad"), MakeSymbol("n"))),
-			`Returns s padded with pad at the end to length n.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("pad").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol), MakeSymbol("n").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Returns s padded with pad at the end to n Unicode characters.
+
+  Returns s unchanged when it is already at least n characters long. pad must
+  be non-empty when padding is required.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("re-quote", re_quote_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Returns an instance of Regex that matches the string exactly`, "1.0").Plus(MakeKeyword("tag"), String{S: "Regex"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Returns a Regex that matches s literally rather than treating it as a pattern.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Regex"}))
 
 	stringNamespace.InternVar("replace", replace_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("match").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("repl").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`Replaces all instances of match (String or Regex) with string repl in string s.
 
   If match is Regex, $1, $2, etc. in the replacement string repl are
@@ -96,71 +108,69 @@ func InternsOrThunks() {
 
 	stringNamespace.InternVar("replace-first", replace_first_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("match"), MakeSymbol("repl"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("match").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("repl").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`Replaces the first instance of match (String or Regex) with string repl in string s.
 
-  If match is Regex, $1, $2, etc. in the replacement string repl are
-  substituted with the string that matched the corresponding
-  parenthesized group in the pattern.
-  `, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+  If match is Regex, $1, $2, etc. in repl are expanded from the corresponding
+  parenthesized groups, as in replace.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("reverse", reverse_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns s with its characters reversed.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("split", split_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep")), NewVectorFrom(MakeSymbol("s"), MakeSymbol("sep"), MakeSymbol("n"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("sep").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("sep").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Object"}).(Map)).(Symbol), MakeSymbol("n").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Splits string on a string or regular expression. Returns vector of the splits.
 
   No more than n elements will be returned in the vector; the last element will
   be the unsplit remainder. If n is <= 0, no limit is in effect (all substrings
-  are returned in the vector).`, "1.0"))
+  are returned in the vector).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	stringNamespace.InternVar("split-lines", split_lines_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
-			`Splits string on \n or \r\n. Returns vector of the splits.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Splits string on \n or \r\n. Returns vector of the splits.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	stringNamespace.InternVar("starts-with?", isstarts_with_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"), MakeSymbol("substr"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("substr").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`True if s starts with substr.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	stringNamespace.InternVar("trim", trim_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes whitespace from both ends of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-left", trim_left_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes whitespace from the left side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-newline", trim_newline_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes all trailing newline \n or return \r characters from string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trim-right", trim_right_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes whitespace from the right side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("triml", triml_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes whitespace from the left side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("trimr", trimr_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes whitespace from the right side of string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	stringNamespace.InternVar("upper-case", upper_case_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Stringable"}).(Map)).(Symbol))),
 			`Converts string to all upper-case.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

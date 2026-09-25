@@ -1,8 +1,11 @@
-(ns ^{:doc "Generates UUIDs."}
+(ns ^{:doc "Generates random UUID version 4 strings."}
   uuid)
 
 (defn ^String new
-  "Creates a new random UUID."
+  "Returns a newly generated random UUID version 4 string.
+
+  Uses cryptographic randomness and the canonical 8-4-4-4-12 hexadecimal form.
+  Throws Error if secure randomness cannot be read."
   {:added "1.0"
    :go "new()"}
   [])

@@ -1,8 +1,69 @@
 (ns joker.test-joker.os
   (:require [joker.os :as os]
+            [joker.filepath :as filepath]
+            [joker.time :as time]
             [joker.test :refer [deftest is]]))
+
+(defn- wait-watch-event
+  [ch pred cancel]
+  (let [done (atom false)]
+    (go
+      (time/sleep (* 2 time/second))
+      (when-not @done
+        (cancel)))
+    (loop []
+      (let [event (<! ch)]
+        (cond
+          (nil? event) nil
+          (pred event) (do
+                         (reset! done true)
+                         event)
+          :else (recur))))))
+
+(defn- watch-event-for-path?
+  [path event]
+  (and (= (:type event) :event)
+       (= (:path event) path)
+       (seq (:ops event))))
 
 (deftest exec-pipe
   (if (= (get (os/env) "TTY_TESTS") "1")
     (is (= 0 (:exit (os/exec "stty" {:args ["echo"] :stdin *in*}))))
     (println "Skipping tty tests (STDIN is not a tty)")))
+
+(deftest watch-directory
+  (let [root (os/mkdir-temp "" "joker-watch-")
+        path (filepath/join root "app.joke")
+        events (chan 20)
+        cancel (os/watch [root] events)]
+    (try
+      (is (callable? cancel))
+      (spit path "ok")
+      (is (some? (wait-watch-event events #(watch-event-for-path? path %) cancel)))
+      (finally
+        (cancel)
+        (os/remove-all root)))))
+
+(deftest watch-recursive-directory
+  (let [root (os/mkdir-temp "" "joker-watch-recursive-")
+        nested (filepath/join root "nested")
+        path (filepath/join nested "app.joke")
+        events (chan 20)]
+    (os/mkdir nested 493)
+    (let [cancel (os/watch [root] events {:recursive? true})]
+      (try
+        (spit path "ok")
+        (is (some? (wait-watch-event events #(watch-event-for-path? path %) cancel)))
+        (finally
+          (cancel)
+          (os/remove-all root))))))
+
+(deftest watch-cancel-closes-channel
+  (let [root (os/mkdir-temp "" "joker-watch-cancel-")
+        events (chan 1)
+        cancel (os/watch [root] events)]
+    (try
+      (cancel)
+      (is (nil? (<! events)))
+      (finally
+        (os/remove-all root)))))

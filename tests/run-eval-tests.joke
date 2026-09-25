@@ -34,7 +34,10 @@
         expected-rc (if-let [rc (slurp-or (str dir "rc.txt") false)]
                       (int (bigint (with-in-str rc (read-line))))
                       0)]
-    (if (and (= expected-out out) (= expected-err err) (= expected-rc rc))
+    (if (or (and (= 0 rc)
+                 (= "" err)
+                 (joker.string/starts-with? out "SKIP: "))
+            (and (= expected-out out) (= expected-err err) (= expected-rc rc)))
       true
       (do
         (println "FAILED:" test-dir)

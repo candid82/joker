@@ -1,0 +1,4 @@
+input.joke:76:11: Eval error: SSE event must be a string or map, got Int
+Stacktrace:
+  global <file>:0:0
+  fn input.joke:76:11

@@ -1,0 +1,11 @@
+(ns infer-value-narrowing
+  (:require [joker.time :as time]))
+
+(defn- debounced-watch-event?
+  [last-restart-at]
+  (if-let [restart-at last-restart-at]
+    (< (time/since restart-at) 1234)
+    false))
+
+(debounced-watch-event? nil)
+

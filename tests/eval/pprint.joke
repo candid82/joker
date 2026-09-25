@@ -1,0 +1,29 @@
+(ns joker.test-joker.pprint
+  (:require [joker.pprint :refer [print-table]]
+            [joker.test :refer [deftest is]]))
+
+(defn- osc8-bel
+  [url label]
+  (str "\u001b]8;;" url "\u0007" label "\u001b]8;;\u0007"))
+
+(defn- osc8-st
+  [url label]
+  (str "\u001b]8;;" url "\u001b\\" label "\u001b]8;;\u001b\\"))
+
+(deftest print-table-with-osc8-bel-hyperlink
+  (let [link (osc8-bel "https://example.com" "X")]
+    (is (= (str "\n"
+                "| :link |\n"
+                "|-------|\n"
+                "|     " link " |\n")
+           (with-out-str
+             (print-table [:link] [{:link link}]))))))
+
+(deftest print-table-with-osc8-st-hyperlink
+  (let [link (osc8-st "https://example.com" "YZ")]
+    (is (= (str "\n"
+                "| :link |\n"
+                "|-------|\n"
+                "|    " link " |\n")
+           (with-out-str
+             (print-table [:link] [{:link link}]))))))

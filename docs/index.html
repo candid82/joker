@@ -83,13 +83,22 @@
   <a href="#joker.json">joker.json</a>
 </li>
 <li>
+  <a href="#joker.mail">joker.mail</a>
+</li>
+<li>
   <a href="#joker.markdown">joker.markdown</a>
 </li>
 <li>
   <a href="#joker.math">joker.math</a>
 </li>
 <li>
+  <a href="#joker.mime">joker.mime</a>
+</li>
+<li>
   <a href="#joker.os">joker.os</a>
+</li>
+<li>
+  <a href="#joker.pop3">joker.pop3</a>
 </li>
 <li>
   <a href="#joker.pprint">joker.pprint</a>
@@ -102,6 +111,9 @@
 </li>
 <li>
   <a href="#joker.set">joker.set</a>
+</li>
+<li>
+  <a href="#joker.smtp">joker.smtp</a>
 </li>
 <li>
   <a href="#joker.strconv">joker.strconv</a>
@@ -165,7 +177,13 @@
   <a href="#BigInt">BigInt</a>
 </li>
 <li>
+  <a href="#BoltContext">BoltContext</a>
+</li>
+<li>
   <a href="#BoltDB">BoltDB</a>
+</li>
+<li>
+  <a href="#BoltTx">BoltTx</a>
 </li>
 <li>
   <a href="#Boolean">Boolean</a>
@@ -288,6 +306,9 @@
   <a href="#Number">Number</a>
 </li>
 <li>
+  <a href="#POP3Client">POP3Client</a>
+</li>
+<li>
   <a href="#ParseError">ParseError</a>
 </li>
 <li>
@@ -331,6 +352,9 @@
 </li>
 <li>
   <a href="#String">String</a>
+</li>
+<li>
+  <a href="#StringSeq">StringSeq</a>
 </li>
 <li>
   <a href="#Symbol">Symbol</a>
@@ -430,7 +454,7 @@
       <li>
   <h3 class="ns" id="joker.base64">joker.base64</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements base64 encoding as specified by RFC 4648.</p>
+  <p class="var-docstr">Encodes and decodes strings with standard padded Base64 as specified by RFC 4648.</p>
   <a href="joker.base64.html">details</a>
 </li>
 <li>
@@ -442,7 +466,7 @@
 <li>
   <h3 class="ns" id="joker.bolt">joker.bolt</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.</p>
+  <p class="var-docstr">Provides a small string-oriented API for the Bolt embedded key/value database.</p>
   <a href="joker.bolt.html">details</a>
 </li>
 <li>
@@ -454,31 +478,31 @@
 <li>
   <h3 class="ns" id="joker.crypto">joker.crypto</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements common cryptographic and hash functions.</p>
+  <p class="var-docstr">Computes HMACs and common message digests, returning raw digest bytes as strings.</p>
   <a href="joker.crypto.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.csv">joker.csv</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Reads and writes comma-separated values (CSV) files as defined in RFC 4180.</p>
+  <p class="var-docstr">Reads and writes comma-separated values (CSV) using RFC 4180-style parsing and formatting.</p>
   <a href="joker.csv.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.filepath">joker.filepath</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements utility routines for manipulating filename paths.</p>
+  <p class="var-docstr">Manipulates platform-specific filesystem paths and exposes a few path-aware filesystem queries.</p>
   <a href="joker.filepath.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.git">joker.git</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides API for accessing and manipulating git repositories.</p>
+  <p class="var-docstr">Reads and mutates local Git repositories through go-git-backed map-oriented wrappers.</p>
   <a href="joker.git.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.hex">joker.hex</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements hexadecimal encoding and decoding.</p>
+  <p class="var-docstr">Encodes and decodes strings with lower-case hexadecimal text.</p>
   <a href="joker.hex.html">details</a>
 </li>
 <li>
@@ -490,44 +514,62 @@
 <li>
   <h3 class="ns" id="joker.html">joker.html</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides functions for escaping and unescaping HTML text.</p>
+  <p class="var-docstr">Escapes and unescapes HTML text entities.</p>
   <a href="joker.html.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.http">joker.http</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides HTTP client and server implementations.</p>
+  <p class="var-docstr">Provides HTTP client requests, blocking servers, static file serving, and Server-Sent Events (SSE).</p>
   <a href="joker.http.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.io">joker.io</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides basic interfaces to I/O primitives.</p>
+  <p class="var-docstr">Provides small helpers for copying, piping, reading, and closing Joker I/O objects.</p>
   <a href="joker.io.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.json">joker.json</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements encoding and decoding of JSON as defined in RFC 4627.</p>
+  <p class="var-docstr">Encodes Joker values to JSON and decodes JSON strings or streams into Joker values.</p>
   <a href="joker.json.html">details</a>
+</li>
+<li>
+  <h3 class="ns" id="joker.mail">joker.mail</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Parses raw RFC 5322 email messages, address fields, mail dates, and MIME email content.</p>
+  <a href="joker.mail.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.markdown">joker.markdown</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements GitHub Flavored Markdown rendering.</p>
+  <p class="var-docstr">Renders GitHub Flavored Markdown to HTML.</p>
   <a href="joker.markdown.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.math">joker.math</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides basic constants and mathematical functions.</p>
+  <p class="var-docstr">Provides floating-point mathematical functions, IEEE-754 helpers, and numeric constants.</p>
   <a href="joker.math.html">details</a>
+</li>
+<li>
+  <h3 class="ns" id="joker.mime">joker.mime</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Parses MIME media types, entities, message bodies, and attachments.</p>
+  <a href="joker.mime.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.os">joker.os</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides a platform-independent interface to operating system functionality.</p>
+  <p class="var-docstr">Provides filesystem, process, environment, and watcher helpers backed by the host operating system.</p>
   <a href="joker.os.html">details</a>
+</li>
+<li>
+  <h3 class="ns" id="joker.pop3">joker.pop3</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Retrieves raw email messages from POP3 mailboxes using explicit client sessions.</p>
+  <a href="joker.pop3.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.pprint">joker.pprint</h3>
@@ -544,7 +586,7 @@
 <li>
   <h3 class="ns" id="joker.runtime">joker.runtime</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides access to Go and Joker runtime information.</p>
+  <p class="var-docstr">Reports build-time Go and Joker runtime metadata.</p>
   <a href="joker.runtime.html">details</a>
 </li>
 <li>
@@ -554,15 +596,21 @@
   <a href="joker.set.html">details</a>
 </li>
 <li>
+  <h3 class="ns" id="joker.smtp">joker.smtp</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">Sends email through SMTP using raw RFC 5322 messages.</p>
+  <a href="joker.smtp.html">details</a>
+</li>
+<li>
   <h3 class="ns" id="joker.strconv">joker.strconv</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements conversions to and from string representations of basic data types.</p>
+  <p class="var-docstr">Converts booleans, numbers, chars, and quoted literals to and from strings.</p>
   <a href="joker.strconv.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.string">joker.string</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements simple functions to manipulate strings.</p>
+  <p class="var-docstr">Provides Unicode-aware string predicates, transforms, searches, and splitting helpers.</p>
   <a href="joker.string.html">details</a>
 </li>
 <li>
@@ -580,7 +628,7 @@
 <li>
   <h3 class="ns" id="joker.time">joker.time</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Provides functionality for measuring and displaying time.</p>
+  <p class="var-docstr">Creates, parses, formats, compares, and converts times and nanosecond durations.</p>
   <a href="joker.time.html">details</a>
 </li>
 <li>
@@ -592,13 +640,13 @@
 <li>
   <h3 class="ns" id="joker.url">joker.url</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Parses URLs and implements query escaping.</p>
+  <p class="var-docstr">Escapes URL path/query components and parses URL-encoded query strings.</p>
   <a href="joker.url.html">details</a>
 </li>
 <li>
   <h3 class="ns" id="joker.uuid">joker.uuid</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Generates UUIDs.</p>
+  <p class="var-docstr">Generates random UUID version 4 strings.</p>
   <a href="joker.uuid.html">details</a>
 </li>
 <li>
@@ -610,7 +658,7 @@
 <li>
   <h3 class="ns" id="joker.yaml">joker.yaml</h3>
   <span class="var-added">v1.0</span>
-  <p class="var-docstr">Implements encoding and decoding of YAML.</p>
+  <p class="var-docstr">Encodes Joker values to YAML and decodes YAML strings into Joker values.</p>
   <a href="joker.yaml.html">details</a>
 </li>
 
@@ -666,10 +714,22 @@
   Wraps the Go &#39;math/big.Int&#39; type</p>
 </li>
 <li>
+  <h3 class="type" id="BoltContext">BoltContext</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Interface type)<br>
+  Implemented by BoltDB and BoltTx</p>
+</li>
+<li>
   <h3 class="type" id="BoltDB">BoltDB</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps Bolt DB type</p>
+</li>
+<li>
+  <h3 class="type" id="BoltTx">BoltTx</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps a transaction-scoped Bolt Tx type</p>
 </li>
 <li>
   <h3 class="type" id="Boolean">Boolean</h3>
@@ -880,6 +940,12 @@
   <p class="var-docstr">(Interface type)</p>
 </li>
 <li>
+  <h3 class="type" id="POP3Client">POP3Client</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Concrete type)<br>
+  Wraps an authenticated POP3 client session</p>
+</li>
+<li>
   <h3 class="type" id="ParseError">ParseError</h3>
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete reference type)</p>
@@ -957,6 +1023,11 @@
   <span class="var-added">v1.0</span>
   <p class="var-docstr">(Concrete type)<br>
   Wraps the Go &#39;string&#39; type</p>
+</li>
+<li>
+  <h3 class="type" id="StringSeq">StringSeq</h3>
+  <span class="var-added">v1.0</span>
+  <p class="var-docstr">(Concrete reference type)</p>
 </li>
 <li>
   <h3 class="type" id="Symbol">Symbol</h3>

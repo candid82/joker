@@ -1,5 +1,5 @@
 (ns ^{:go-imports []
-      :doc "Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
+      :doc "Provides a small string-oriented API for the Bolt embedded key/value database.
 
          Example:
 
@@ -18,74 +18,160 @@
   bolt)
 
 (defn ^BoltDB open
-  "Creates and opens a database at the given path.
-  If the file does not exist then it will be created automatically
-  with mode perm (before umask).
-  mode is normally passed as an octal literal, e.g. 0600"
+  "Opens the database file at filename and returns a BoltDB handle.
+
+  If the file does not exist, it is created with mode before the process umask
+  is applied. mode is normally written as an octal literal such as 0600.
+  Throws Error when the database cannot be opened.
+
+  The underlying database uses an exclusive file lock; because this wrapper uses
+  Bolt's default options, open may wait indefinitely for another process to
+  release the same database file.
+
+  Example:
+    (def db (joker.bolt/open \"app.db\" 0600))"
   {:added "1.0"
    :go "open(filename, mode)"}
   [^String filename ^Int mode])
 
-(defn close
-  "Releases all database resources.
-  It will block waiting for any open transactions to finish
-  before closing the database and returning."
+(defn ^Nil close
+  "Closes db and releases its database resources.
+
+  Blocks until open transactions finish, then releases the file lock. Throws
+  Error if closing fails."
   {:added "1.0"
    :go "close(db)"}
   [^BoltDB db])
 
-(defn create-bucket
-  "Creates a new bucket. Throws an error if the bucket already exists,
-  if the bucket name is blank, or if the bucket name is too long."
-  {:added "1.0"
-   :go "createBucket(db, name)"}
-  [^BoltDB db ^String name])
+(defn view
+  "Executes f in a managed read-only transaction and returns the result of f.
 
-(defn create-bucket-if-not-exists
-  "Creates a new bucket if it doesn't already exist.
-   Throws an error if the bucket name is blank, or if the bucket name is too long."
-  {:added "1.0"
-   :go "createBucketIfNotExists(db, name)"}
-  [^BoltDB db ^String name])
+  f is called with a BoltTx that is valid only for the duration of the call.
+  Database operations in f must use that transaction rather than db. The
+  transaction is rolled back when f returns, or when f throws. Throws Error if
+  the transaction cannot be opened or closed, and rethrows exceptions from f.
 
-(defn delete-bucket
-  "Deletes a bucket. Throws an error if the bucket doesn't exist."
+  Example:
+    (joker.bolt/view db
+      (fn [tx] (joker.bolt/get tx \"users\" \"1\")))"
   {:added "1.0"
-   :go "deleteBucket(db, name)"}
-  [^BoltDB db ^String name])
+   :go "view(db, f)"}
+  [^BoltDB db ^Callable f])
 
-(defn next-sequence
-  "Returns an autoincrementing integer for the bucket."
-  {:added "1.0"
-   :go "nextSequence(db, bucket)"}
-  [^BoltDB db ^String bucket])
+(defn update
+  "Executes f in a managed read/write transaction and returns the result of f.
 
-(defn put
-  "Sets the value for a key in the bucket.
-  If the key exist then its previous value will be overwritten.
-  Throws an error if the key is blank, if the key is too large, or if the value is too large."
-  {:added "1.0"
-   :go "put(db, bucket, key, value)"}
-  [^BoltDB db ^String bucket ^String key ^String value])
+  f is called with a BoltTx that is valid only for the duration of the call.
+  Database operations in f must use that transaction rather than db. A normal
+  return commits the transaction, including when f returns nil or false. If f
+  throws, the entire transaction is rolled back and the exception is rethrown.
+  Throws Error if the transaction cannot be opened or committed.
 
-(defn delete
-  "Removes a key from the bucket if it exists."
+  Example:
+    (joker.bolt/update db
+      (fn [tx]
+        (joker.bolt/put tx \"users\" \"1\" \"Joe\")
+        (joker.bolt/put tx \"users\" \"2\" \"Jane\")
+        :saved))"
   {:added "1.0"
-   :go "delete(db, bucket, key)"}
-  [^BoltDB db ^String bucket ^String key])
+   :go "update(db, f)"}
+  [^BoltDB db ^Callable f])
+
+(defn ^Nil create-bucket
+  "Creates bucket name and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Throws Error if the bucket already exists, if name is blank or too
+  long, if context is read-only, or if the transaction fails."
+  {:added "1.0"
+   :go "createBucket(context, name)"}
+  [^BoltContext context ^String name])
+
+(defn ^Nil create-bucket-if-not-exists
+  "Creates bucket name when needed and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Does nothing when the bucket already exists. Throws Error if name is
+  blank or too long, if context is read-only, or if the transaction fails."
+  {:added "1.0"
+   :go "createBucketIfNotExists(context, name)"}
+  [^BoltContext context ^String name])
+
+(defn ^Nil delete-bucket
+  "Deletes bucket name and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Throws Error when the bucket does not exist, context is read-only, or
+  the transaction fails."
+  {:added "1.0"
+   :go "deleteBucket(context, name)"}
+  [^BoltContext context ^String name])
+
+(defn ^Int next-sequence
+  "Returns the next auto-incrementing integer for bucket.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Each call advances the bucket sequence counter. Throws Error when the
+  bucket does not exist, context is read-only, or the transaction fails."
+  {:added "1.0"
+   :go "nextSequence(context, bucket)"}
+  [^BoltContext context ^String bucket])
+
+(defn ^Nil put
+  "Stores value at key in bucket and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Keys and values are strings stored as raw bytes. Replaces any previous
+  value for key. Throws Error when bucket does not exist, context is read-only,
+  key is blank or too large, value is too large, or the transaction fails."
+  {:added "1.0"
+   :go "put(context, bucket, key, value)"}
+  [^BoltContext context ^String bucket ^String key ^String value])
+
+(defn ^Nil delete
+  "Removes key from bucket and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Missing keys are ignored. Throws Error when bucket does not exist,
+  context is read-only, or the transaction fails."
+  {:added "1.0"
+   :go "delete(context, bucket, key)"}
+  [^BoltContext context ^String bucket ^String key])
 
 (defn get
-  "Retrieves the value for a key in the bucket.
-  Returns nil if the key does not exist."
-  {:added "1.0"
-   :go "get(db, bucket, key)"}
-  [^BoltDB db ^String bucket ^String key])
+  "Returns the string value stored at key in bucket.
 
-(defn by-prefix
-  "Retrives key/value pairs for all keys in bucket
-  that start with prefix.
-  Returns a vector of [key value] tuples. Passing empty prefix
-  will return all key/values in bucket."
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Returns nil when key does not exist. Throws Error when bucket does not
+  exist or the transaction fails."
   {:added "1.0"
-   :go "byPrefix(db, bucket, prefix)"}
-  [^BoltDB db ^String bucket ^String prefix])
+   :go "get(context, bucket, key)"}
+  [^BoltContext context ^String bucket ^String key])
+
+(defn ^Int count-by-prefix
+  "Returns the number of keys in bucket that start with prefix.
+
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Passing the empty string counts all keys in the bucket. Throws Error
+  when bucket does not exist or the transaction fails."
+  {:added "1.0"
+   :go "countByPrefix(context, bucket, prefix)"}
+  [^BoltContext context ^String bucket ^String prefix])
+
+(defn ^Vec by-prefix
+  "Returns key/value pairs from bucket whose keys start with prefix.
+
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Results are returned as a vector of [key value] vectors in Bolt key
+  order. Passing the empty string returns all key/value pairs in the bucket.
+
+  opts may contain:
+  - limit - maximum number of key/value pairs to return; must be non-negative
+
+  Throws Error when bucket does not exist, limit is invalid, or the transaction
+  fails."
+  {:added "1.0"
+   :go {3 "byPrefix(context, bucket, prefix, EmptyArrayMap())"
+        4 "byPrefix(context, bucket, prefix, opts)"}}
+  ([^BoltContext context ^String bucket ^String prefix])
+  ([^BoltContext context ^String bucket ^String prefix ^Map opts]))

@@ -348,17 +348,8 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		v := chunk.Constants[varIdx].(*Var)
 		userMeta := vm.Pop().(Map)
 		v.meta = v.meta.Merge(userMeta)
-		// Extract taggedType from merged metadata (matches parseDef's updateVar behavior)
-		if ok, typeName := v.meta.Get(KEYWORDS.tag); ok {
-			switch t := typeName.(type) {
-			case Symbol:
-				if tp := TYPES[t.name]; tp != nil {
-					v.taggedType = tp
-				}
-			case *Type:
-				v.taggedType = t
-			}
-		}
+		// Extract declared types from merged metadata, as updateVar does.
+		v.taggedTypes = getTaggedTypes(v)
 
 	case OP_ADD:
 		b := EnsureObjectIsNumber(vm.Pop(), "")

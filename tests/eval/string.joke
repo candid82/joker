@@ -23,3 +23,10 @@
 
 (deftest split-N-of-string
   (is (= ["a" "b/c/d"] (str/split "a/b/c/d" "/" 2))))
+
+(deftest replace-first-of-regex
+  (is (= "b-a c-d" (str/replace-first "a-b c-d" #"(.)-(.)" "$2-$1"))))
+
+(deftest pad-empty
+  (is (thrown? Error (str/pad-left "x" "" 2)))
+  (is (thrown? Error (str/pad-right "x" "" 2))))

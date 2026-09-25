@@ -1,0 +1,166 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div class="main">
+    <h1>Namespace: joker.mime</h1>
+    <span class="var-added">v1.0</span>
+    <h2>Contents</h2>
+    <ul>
+      <li>
+        <a href="#_summary">Summary</a>
+      </li>
+      <li>
+        <a href="#_index">Index</a>
+      </li>
+      <li>
+        <a href="#_constants">Constants</a>
+      </li>
+      <li>
+        <a href="#_variables">Variables</a>
+      </li>
+      <li>
+        <a href="#_functions">Functions, Macros, and Special Forms</a>
+      </li>
+    </ul>
+    <h2 id="_summary">Summary</h2>
+    <p class="var-docstr">Parses MIME media types, entities, message bodies, and attachments.</p>
+    <h2 id="_index">Index</h2>
+    <ul class="index">
+      <li>
+  <a href="#attachments">attachments</a>
+</li>
+<li>
+  <a href="#body">body</a>
+</li>
+<li>
+  <a href="#decode-transfer-encoding">decode-transfer-encoding</a>
+</li>
+<li>
+  <a href="#parse-media-type">parse-media-type</a>
+</li>
+<li>
+  <a href="#read-entity">read-entity</a>
+</li>
+
+    </ul>
+    <h2 id="_constants">Constants</h2>
+    Constants are variables with <tt>:const true</tt> in their metadata. Joker currently does not recognize them as special; as such, it allows redefining them or their values.
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_variables">Variables</h2>
+    <ul>
+      (None.)
+    </ul>
+    <h2 id="_functions">Functions, Macros, and Special Forms</h2>
+    <ul>
+      <li>
+  <h3 class="Function" id="attachments">attachments</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(attachments entity)</code><code class="hide">(attachments ^Map entity)</code></div>
+<div><code>(attachments entity opts)</code><code class="hide">(attachments ^Map entity ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Returns attachment-like leaf entities from a MIME entity tree.<br>
+<br>
+  A part is included when Content-Disposition is attachment. By default inline<br>
+  parts with a filename are also included, which covers common inline images.<br>
+<br>
+  opts may contain:<br>
+  - include-inline? - false to exclude inline/file-name parts; defaults to true</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="body">body</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(body entity)</code><code class="hide">(body ^Map entity)</code></div>
+<div><code>(body entity opts)</code><code class="hide">(body ^Map entity ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Extracts human-readable body content from a MIME entity tree.<br>
+<br>
+  Returns {:text text-or-nil :html html-or-nil}. Attachment-like parts are<br>
+  ignored. The function handles both multipart and non-multipart entities;<br>
+  text/plain leaves become :text and text/html leaves become :html. If multiple<br>
+  matching leaves exist, the first value of each type is returned.</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="decode-transfer-encoding">decode-transfer-encoding</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(decode-transfer-encoding encoding content)</code><code class="hide">(decode-transfer-encoding ^Object encoding ^String content)</code></div>
+</pre>
+  <p class="var-docstr">Decodes content according to a MIME Content-Transfer-Encoding value.<br>
+<br>
+  Supported encodings are nil/empty, 7bit, 8bit, binary, base64, and<br>
+  quoted-printable. The returned string contains raw decoded bytes and may be<br>
+  binary data. Throws Error for invalid encoded data or unsupported encodings.</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="parse-media-type">parse-media-type</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(parse-media-type s)</code><code class="hide">(parse-media-type ^String s)</code></div>
+</pre>
+  <p class="var-docstr">Parses a MIME media type or disposition value and returns<br>
+  {:type type :params {name value ...}}.<br>
+<br>
+  The input may be a Content-Type value such as<br>
+  &#34;text/plain; charset=utf-8&#34; or a Content-Disposition value such as<br>
+  &#34;attachment; filename=report.pdf&#34;. Parameter names are lower-case as<br>
+  returned by Go&#39;s mime.ParseMediaType. Throws Error when s is invalid.</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+<li>
+  <h3 class="Function" id="read-entity">read-entity</h3>
+  <span class="var-kind Function">Function</span>
+  <span class="var-added">v1.9.0</span>
+  <pre class="var-usage"><div><code>(read-entity headers body)</code><code class="hide">(read-entity ^Map headers ^String body)</code></div>
+<div><code>(read-entity headers body opts)</code><code class="hide">(read-entity ^Map headers ^String body ^Map opts)</code></div>
+</pre>
+  <p class="var-docstr">Parses a MIME entity from headers and body and returns a recursive map.<br>
+<br>
+  headers must be a map like {&#34;Header-Name&#34; [&#34;value&#34; ...]}; body is the<br>
+  raw entity body. Non-multipart entities contain decoded :content and :size.<br>
+  Multipart entities contain :parts. Content-Transfer-Encoding is decoded for<br>
+  leaf entities.<br>
+<br>
+  Entity maps contain keys such as:<br>
+  - :headers<br>
+  - :content-type<br>
+  - :content-type-params<br>
+  - :disposition<br>
+  - :disposition-params<br>
+  - :filename<br>
+  - :safe-filename<br>
+  - :content-transfer-encoding<br>
+  - :content<br>
+  - :size<br>
+  - :path<br>
+  - :parts<br>
+<br>
+  Missing Content-Type defaults to text/plain. Binary content is represented as<br>
+  a Joker string containing raw bytes.<br>
+<br>
+  opts may contain:<br>
+  - include-content? - false to omit :content from leaf entities<br>
+  - max-depth - maximum multipart nesting depth; defaults to 32<br>
+  - max-part-bytes - maximum bytes to buffer for any MIME part; nil/unset means<br>
+    unlimited</p>
+  
+  <a href="#" class="types">show types</a>
+</li>
+
+    </ul>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>

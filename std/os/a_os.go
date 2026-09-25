@@ -982,6 +982,31 @@ func __user_home_dir_(_args []Object) Object {
 	return NIL
 }
 
+var __watch__P ProcFn = __watch_
+var watch_ Proc = Proc{Fn: __watch__P, Name: "watch_", Package: "std/os"}
+
+func __watch_(_args []Object) Object {
+	_c := len(_args)
+	switch {
+	case _c == 2:
+		paths := ExtractSeqable(_args, 0)
+		ch := ExtractChannel(_args, 1)
+		_res := watch(paths, ch, EmptyArrayMap())
+		return _res
+
+	case _c == 3:
+		paths := ExtractSeqable(_args, 0)
+		ch := ExtractChannel(_args, 1)
+		opts := ExtractMap(_args, 2)
+		_res := watch(paths, ch, opts)
+		return _res
+
+	default:
+		PanicArity(_c)
+	}
+	return NIL
+}
+
 func Init() {
 	SIGABRT_ = MakeInt(0x6)
 	SIGALRM_ = MakeInt(0xe)

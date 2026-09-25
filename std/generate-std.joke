@@ -104,6 +104,8 @@
     (str (first tag) "Vector")
     (str tag)))
 
+(def ^:private unmakable-types #{Map Nil Proc Seq Seqable Vec})
+
 (defn generate-arity
   [args go tag]
   (let [handle-args (handle-varargs args)
@@ -126,15 +128,24 @@
                         (extract-args handle-args)))
         (rpl "{goExpr}" (rpl go-res "; " "\n\t\t"))
         (rpl "{return}"
-             (if tag
+             (if (and tag
+                      (not (unmakable-types tag)))
                (str "return Make" (type-name tag) "(_res)")
                "return _res")))))
+
+(defn generate-arg
+  [arg]
+  (let [res (str "MakeSymbol(" (q (str arg)) ")")
+        tag (:tag (meta arg))]
+    (if tag
+      (str res ".WithMeta(EmptyArrayMap().Assoc(MakeKeyword(\"tag\"), String{S: " (q (str tag)) "}).(Map)).(Symbol)")
+      res)))
 
 (defn generate-arglist
   [args]
   (str "NewVectorFrom("
        (s/join ", " (for [arg args]
-                      (str "MakeSymbol(" (q (str arg)) ")")))
+                      (generate-arg arg)))
        ")"))
 
 (defn make-value

@@ -12,11 +12,14 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of uuid.InternsOrThunks().")
 	}
-	uuidNamespace.ResetMeta(MakeMeta(nil, `Generates UUIDs.`, "1.0"))
+	uuidNamespace.ResetMeta(MakeMeta(nil, `Generates random UUID version 4 strings.`, "1.0"))
 
 	uuidNamespace.InternVar("new", new_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Creates a new random UUID.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+			`Returns a newly generated random UUID version 4 string.
+
+  Uses cryptographic randomness and the canonical 8-4-4-4-12 hexadecimal form.
+  Throws Error if secure randomness cannot be read.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 }

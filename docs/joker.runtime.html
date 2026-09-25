@@ -25,7 +25,7 @@
       </li>
     </ul>
     <h2 id="_summary">Summary</h2>
-    <p class="var-docstr">Provides access to Go and Joker runtime information.</p>
+    <p class="var-docstr">Reports build-time Go and Joker runtime metadata.</p>
     <h2 id="_index">Index</h2>
     <ul class="index">
       <li>
@@ -56,7 +56,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(go-root)</code></div>
 </pre>
-  <p class="var-docstr">Returns the GOROOT string (as returned by runtime/GOROOT()).</p>
+  <p class="var-docstr">Returns the GOROOT path embedded in the Go toolchain.</p>
   
   
 </li>
@@ -66,7 +66,7 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(go-version)</code></div>
 </pre>
-  <p class="var-docstr">Returns the Go version string (as returned by runtime/Version()).</p>
+  <p class="var-docstr">Returns the Go version string used to build Joker.</p>
   
   
 </li>
@@ -76,8 +76,9 @@
   <span class="var-added">v1.0</span>
   <pre class="var-usage"><div><code>(joker-version)</code></div>
 </pre>
-  <p class="var-docstr">Returns the raw Joker version string (including the leading &#39;v&#39;,<br>
-  which joker.core/joker-version omits).</p>
+  <p class="var-docstr">Returns Joker&#39;s raw version string.<br>
+<br>
+  Unlike joker.core/joker-version, this includes the leading &#34;v&#34;.</p>
   
   
 </li>

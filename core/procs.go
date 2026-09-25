@@ -39,7 +39,7 @@ const (
 	PRINT_IF_NOT_NIL
 )
 
-const VERSION = "v1.6.0"
+const VERSION = "v1.10.0"
 
 const (
 	CLJ Dialect = iota
@@ -638,6 +638,41 @@ var procIsInstance = func(args []Object) Object {
 
 var procAssoc = func(args []Object) Object {
 	return EnsureArgIsAssociative(args, 0).Assoc(args[1], args[2])
+}
+
+var procTransient = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsEditable(args, 0).AsTransient()
+}
+
+var procPersistentBang = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsTransientCollection(args, 0).Persistent()
+}
+
+var procConjBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientCollection(args, 0).ConjBang(args[1])
+}
+
+var procAssocBang = func(args []Object) Object {
+	CheckArity(args, 3, 3)
+	return EnsureArgIsTransientAssociative(args, 0).AssocBang(args[1], args[2])
+}
+
+var procDissocBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientMapCollection(args, 0).WithoutBang(args[1])
+}
+
+var procDisjBang = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	return EnsureArgIsTransientSetCollection(args, 0).DisjoinBang(args[1])
+}
+
+var procPopBang = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	return EnsureArgIsTransientVector(args, 0).PopBang()
 }
 
 var procEquals = func(args []Object) Object {
@@ -1785,7 +1820,10 @@ var procParseLong = func(args []Object) Object {
 func PackReader(reader *Reader, filename string) ([]byte, error) {
 	var p []byte
 	packEnv := NewPackEnv()
-	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	parseContext := &ParseContext{
+		GlobalEnv:    GLOBAL_ENV,
+		isLinterFile: strings.HasPrefix(filepath.Base(filename), "linter_") && strings.HasSuffix(filename, ".joke"),
+	}
 	if filename != "" {
 		currentFilename := parseContext.GlobalEnv.file.Value
 		defer func() {
@@ -2007,12 +2045,9 @@ var procIsNamespaceInitialized = func(args []Object) Object {
 	return MakeBoolean(found && ns.Lazy == nil)
 }
 
-func findConfigFile(filename string, workingDir string, findDir bool) string {
+func findConfigFile(filename string, workingDir string) string {
 	var err error
 	configName := ".joker"
-	if findDir {
-		configName = ".jokerd"
-	}
 	if filename != "" {
 		filename, err = filepath.Abs(filename)
 		if err != nil {
@@ -2038,18 +2073,14 @@ func findConfigFile(filename string, workingDir string, findDir bool) string {
 				return ""
 			}
 			p := filepath.Join(home, configName)
-			if info, err := os.Stat(p); err == nil {
-				if !findDir || info.IsDir() {
-					return p
-				}
+			if _, err := os.Stat(p); err == nil {
+				return p
 			}
 			return ""
 		}
 		p := filepath.Join(filename, configName)
-		if info, err := os.Stat(p); err == nil {
-			if !findDir || info.IsDir() {
-				return p
-			}
+		if _, err := os.Stat(p); err == nil {
+			return p
 		}
 	}
 }
@@ -2082,7 +2113,7 @@ func knownMacrosToMap(km Object) (Map, error) {
 func ReadConfig(filename string, workingDir string) {
 	LINTER_CONFIG = GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol("*linter-config*"))
 	LINTER_CONFIG.Value = EmptyArrayMap()
-	configFileName := findConfigFile(filename, workingDir, false)
+	configFileName := findConfigFile(filename, workingDir)
 	if configFileName == "" {
 		return
 	}
@@ -2263,8 +2294,11 @@ func ProcessLinterFiles(dialect Dialect, filename string, workingDir string) {
 	if dialect == EDN {
 		return
 	}
-	configDir := findConfigFile(filename, workingDir, true)
+	configDir := HomeJokerdDir()
 	if configDir == "" {
+		return
+	}
+	if info, err := os.Stat(configDir); err != nil || !info.IsDir() {
 		return
 	}
 	if dialect == JOKER {

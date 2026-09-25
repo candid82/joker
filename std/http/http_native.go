@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	. "github.com/candid82/joker/core"
 )
@@ -81,11 +84,26 @@ func reqToMap(host String, port String, req *http.Request) Map {
 	return res
 }
 
-func respToMap(resp *http.Response) Map {
+func readResponseBody(resp *http.Response, opts requestOptions) []byte {
+	if !opts.hasMaxResponseBytes {
+		body, err := ioutil.ReadAll(resp.Body)
+		PanicOnErr(err)
+		return body
+	}
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, opts.maxResponseBytes))
+	PanicOnErr(err)
+	extra, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1))
+	PanicOnErr(err)
+	if len(extra) != 0 {
+		panic(RT.NewError(fmt.Sprintf("HTTP response body exceeds :max-response-bytes limit of %d", opts.maxResponseBytes)))
+	}
+	return body
+}
+
+func respToMap(resp *http.Response, opts requestOptions) Map {
 	defer resp.Body.Close()
 	res := EmptyArrayMap()
-	body, err := ioutil.ReadAll(resp.Body)
-	PanicOnErr(err)
+	body := readResponseBody(resp, opts)
 	res.Add(MakeKeyword("body"), MakeString(string(body)))
 	res.Add(MakeKeyword("status"), MakeInt(resp.StatusCode))
 	respHeaders := EmptyArrayMap()
@@ -98,34 +116,182 @@ func respToMap(resp *http.Response) Map {
 	return res
 }
 
-func mapToResp(response Map, w http.ResponseWriter) {
+func addHeaders(headers Object, w http.ResponseWriter) {
+	header := w.Header()
+	h := EnsureObjectIsMap(headers, "HTTP response headers: %s")
+	for iter := h.Iter(); iter.HasNext(); {
+		p := iter.Next()
+		hname := EnsureObjectIsString(p.Key, "HTTP response header name %s").S
+		switch pvalue := p.Value.(type) {
+		case String:
+			header.Add(hname, pvalue.S)
+		case Seqable:
+			s := pvalue.Seq()
+			for !s.IsEmpty() {
+				header.Add(hname, EnsureObjectIsString(s.First(), "HTTP response header value: %s").S)
+				s = s.Rest()
+			}
+		default:
+			panic(RT.NewError("HTTP response header value must be a string or a seq of strings"))
+		}
+	}
+}
+
+func responseStatus(response Map) int {
 	status := 0
 	if ok, s := response.Get(MakeKeyword("status")); ok {
 		status = EnsureObjectIsInt(s, "HTTP response status: %s").I
 	}
+	return status
+}
+
+func appendSSEField(sb *strings.Builder, field string, value string) {
+	for _, line := range strings.Split(value, "\n") {
+		if field == "" {
+			sb.WriteString(": ")
+		} else {
+			sb.WriteString(field)
+			sb.WriteString(": ")
+		}
+		sb.WriteString(line)
+		sb.WriteByte('\n')
+	}
+}
+
+func formatSSEEvent(event Object) string {
+	var sb strings.Builder
+	wrote := false
+	switch event := event.(type) {
+	case String:
+		appendSSEField(&sb, "data", event.S)
+		wrote = true
+	case Map:
+		if ok, value := event.Get(MakeKeyword("comment")); ok {
+			appendSSEField(&sb, "", EnsureObjectIsString(value, "SSE event comment: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("event")); ok {
+			appendSSEField(&sb, "event", EnsureObjectIsString(value, "SSE event type: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("id")); ok {
+			appendSSEField(&sb, "id", EnsureObjectIsString(value, "SSE event id: %s").S)
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("retry")); ok {
+			appendSSEField(&sb, "retry", strconv.Itoa(EnsureObjectIsInt(value, "SSE event retry: %s").I))
+			wrote = true
+		}
+		if ok, value := event.Get(MakeKeyword("data")); ok {
+			appendSSEField(&sb, "data", EnsureObjectIsString(value, "SSE event data: %s").S)
+			wrote = true
+		}
+		if !wrote {
+			panic(RT.NewError("SSE event map must contain at least one of :data, :event, :id, :retry or :comment"))
+		}
+	default:
+		panic(RT.NewError(fmt.Sprintf("SSE event must be a string or map, got %s", event.GetType().ToString(false))))
+	}
+	sb.WriteByte('\n')
+	return sb.String()
+}
+
+func sseCloseInfo(reason string, err Error) Map {
+	res := EmptyArrayMap()
+	res.Add(MakeKeyword("reason"), MakeKeyword(reason))
+	if err != nil {
+		res.Add(MakeKeyword("error"), err)
+	}
+	return res
+}
+
+func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
+	ch := EnsureObjectIsChannel(getOrPanic(response, MakeKeyword("sse"), ":sse key must be present in SSE response map"), "SSE channel: %s")
+	var onClose Callable
+	if ok, value := response.Get(MakeKeyword("on-close")); ok {
+		onClose = EnsureObjectIsCallable(value, "SSE on-close callback: %s")
+	}
+	var closeInfo Map
+	defer func() {
+		if r := recover(); r != nil {
+			if closeInfo == nil {
+				if err, ok := r.(Error); ok {
+					closeInfo = sseCloseInfo("error", err)
+				} else {
+					closeInfo = sseCloseInfo("error", RT.NewError(fmt.Sprint(r)))
+				}
+			}
+			if onClose != nil {
+				onClose.Call([]Object{closeInfo})
+			}
+			panic(r)
+		}
+		if onClose != nil {
+			onClose.Call([]Object{closeInfo})
+		}
+	}()
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		panic(RT.NewError("HTTP response writer does not support streaming"))
+	}
+	header := w.Header()
+	if ok, headers := response.Get(MakeKeyword("headers")); ok {
+		addHeaders(headers, w)
+	}
+	if header.Get("Content-Type") == "" {
+		header.Set("Content-Type", "text/event-stream")
+	}
+	if header.Get("Cache-Control") == "" {
+		header.Set("Cache-Control", "no-cache")
+	}
+	if header.Get("Connection") == "" {
+		header.Set("Connection", "keep-alive")
+	}
+	if status := responseStatus(response); status != 0 {
+		w.WriteHeader(status)
+	}
+	for {
+		RT.GIL.Unlock()
+		event, status, err := ch.Receive(done)
+		RT.GIL.Lock()
+		if err != nil {
+			closeInfo = sseCloseInfo("error", err)
+			panic(err)
+		}
+		if status == ChannelReceiveClosed {
+			closeInfo = sseCloseInfo("channel-closed", nil)
+			return
+		}
+		if status == ChannelReceiveDone {
+			closeInfo = sseCloseInfo("client-closed", nil)
+			return
+		}
+		msg := formatSSEEvent(event)
+		RT.GIL.Unlock()
+		_, writeErr := io.WriteString(w, msg)
+		if writeErr == nil {
+			flusher.Flush()
+		}
+		RT.GIL.Lock()
+		if writeErr != nil {
+			closeInfo = sseCloseInfo("write-error", RT.NewError(writeErr.Error()))
+			return
+		}
+	}
+}
+
+func mapToResp(response Map, w http.ResponseWriter, done <-chan struct{}) {
+	if ok, _ := response.Get(MakeKeyword("sse")); ok {
+		streamSSE(response, w, done)
+		return
+	}
+	status := responseStatus(response)
 	body := ""
 	if ok, b := response.Get(MakeKeyword("body")); ok {
 		body = EnsureObjectIsString(b, "HTTP response body: %s").S
 	}
 	if ok, headers := response.Get(MakeKeyword("headers")); ok {
-		header := w.Header()
-		h := EnsureObjectIsMap(headers, "HTTP response headers: %s")
-		for iter := h.Iter(); iter.HasNext(); {
-			p := iter.Next()
-			hname := EnsureObjectIsString(p.Key, "HTTP response header name %s").S
-			switch pvalue := p.Value.(type) {
-			case String:
-				header.Add(hname, pvalue.S)
-			case Seqable:
-				s := pvalue.Seq()
-				for !s.IsEmpty() {
-					header.Add(hname, EnsureObjectIsString(s.First(), "HTTP response header value: %s").S)
-					s = s.Rest()
-				}
-			default:
-				panic(RT.NewError("HTTP response header value must be a string or a seq of strings"))
-			}
-		}
+		addHeaders(headers, w)
 	}
 	if status != 0 {
 		w.WriteHeader(status)
@@ -133,13 +299,129 @@ func mapToResp(response Map, w http.ResponseWriter) {
 	io.WriteString(w, body)
 }
 
-func sendRequest(request Map) Map {
+type requestOptions struct {
+	timeout               time.Duration
+	connectTimeout        time.Duration
+	responseHeaderTimeout time.Duration
+	followRedirects       bool
+	maxRedirects          int
+	hasMaxRedirects       bool
+	maxResponseBytes      int64
+	hasMaxResponseBytes   bool
+}
+
+func positiveIntOption(opts Map, name string) (int, bool) {
+	ok, value := opts.Get(MakeKeyword(name))
+	if !ok {
+		return 0, false
+	}
+	result := EnsureObjectIsInt(value, name+": %s").I
+	if result <= 0 {
+		panic(RT.NewError(":" + name + " must be positive"))
+	}
+	return result, true
+}
+
+func durationOption(opts Map, name string) time.Duration {
+	milliseconds, ok := positiveIntOption(opts, name)
+	if !ok {
+		return 0
+	}
+	if int64(milliseconds) > int64((time.Duration(1<<63-1))/time.Millisecond) {
+		panic(RT.NewError(":" + name + " is too large"))
+	}
+	return time.Duration(milliseconds) * time.Millisecond
+}
+
+func parseRequestOptions(opts Map) requestOptions {
+	result := requestOptions{followRedirects: true}
+	if opts == nil {
+		return result
+	}
+	result.timeout = durationOption(opts, "timeout-ms")
+	result.connectTimeout = durationOption(opts, "connect-timeout-ms")
+	result.responseHeaderTimeout = durationOption(opts, "response-header-timeout-ms")
+	if ok, value := opts.Get(MakeKeyword("follow-redirects?")); ok {
+		result.followRedirects = EnsureObjectIsBoolean(value, "follow-redirects?: %s").B
+	}
+	result.maxRedirects, result.hasMaxRedirects = positiveIntOption(opts, "max-redirects")
+	if result.hasMaxRedirects && !result.followRedirects {
+		panic(RT.NewError(":max-redirects cannot be used when :follow-redirects? is false"))
+	}
+	if max, ok := positiveIntOption(opts, "max-response-bytes"); ok {
+		result.maxResponseBytes = int64(max)
+		result.hasMaxResponseBytes = true
+	}
+	return result
+}
+
+func transportForRequest(opts requestOptions) *http.Transport {
+	if opts.connectTimeout == 0 && opts.responseHeaderTimeout == 0 {
+		return nil
+	}
+	var base *http.Transport
+	if client.Transport == nil {
+		base = http.DefaultTransport.(*http.Transport)
+	} else {
+		var ok bool
+		base, ok = client.Transport.(*http.Transport)
+		if !ok {
+			panic(RT.NewError("HTTP client transport does not support transport timeout options"))
+		}
+	}
+	transport := base.Clone()
+	if opts.connectTimeout != 0 {
+		dialer := &net.Dialer{
+			Timeout:   opts.connectTimeout,
+			KeepAlive: 30 * time.Second,
+		}
+		transport.DialContext = dialer.DialContext
+	}
+	if opts.responseHeaderTimeout != 0 {
+		transport.ResponseHeaderTimeout = opts.responseHeaderTimeout
+	}
+	return transport
+}
+
+func clientForRequest(opts requestOptions) (*http.Client, *http.Transport) {
+	transport := transportForRequest(opts)
+	if opts.timeout == 0 && transport == nil && opts.followRedirects && !opts.hasMaxRedirects {
+		return client, nil
+	}
+	requestClient := *client
+	if opts.timeout != 0 {
+		requestClient.Timeout = opts.timeout
+	}
+	if transport != nil {
+		requestClient.Transport = transport
+	}
+	if !opts.followRedirects {
+		requestClient.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	} else if opts.hasMaxRedirects {
+		requestClient.CheckRedirect = func(_ *http.Request, via []*http.Request) error {
+			if len(via) > opts.maxRedirects {
+				return fmt.Errorf("stopped after %d redirects", opts.maxRedirects)
+			}
+			return nil
+		}
+	}
+	return &requestClient, transport
+}
+
+func sendRequest(request Map, optsMap Map) Map {
 	req := mapToReq(request)
+	opts := parseRequestOptions(optsMap)
+	requestClient, transport := clientForRequest(opts)
+	if transport != nil {
+		defer transport.CloseIdleConnections()
+	}
 	RT.GIL.Unlock()
-	resp, err := client.Do(req)
+	resp, err := requestClient.Do(req)
 	RT.GIL.Lock()
 	PanicOnErr(err)
-	return respToMap(resp)
+	return respToMap(resp, opts)
 }
 
 func startServer(addr string, handler Callable) Object {
@@ -162,7 +444,7 @@ func startServer(addr string, handler Callable) Object {
 			}
 		}()
 		response := handler.Call([]Object{reqToMap(host, port, req)})
-		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w)
+		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w, req.Context().Done())
 	}))
 	PanicOnErr(err)
 	return NIL

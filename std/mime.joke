@@ -1,0 +1,88 @@
+(ns ^{:go-imports []
+      :doc "Parses MIME media types, entities, message bodies, and attachments."}
+  mime)
+
+(defn ^Map parse-media-type
+  "Parses a MIME media type or disposition value and returns
+  {:type type :params {name value ...}}.
+
+  The input may be a Content-Type value such as
+  \"text/plain; charset=utf-8\" or a Content-Disposition value such as
+  \"attachment; filename=report.pdf\". Parameter names are lower-case as
+  returned by Go's mime.ParseMediaType. Throws Error when s is invalid."
+  {:added "1.9.0"
+   :go "parseMediaType(s)"}
+  [^String s])
+
+(defn ^String decode-transfer-encoding
+  "Decodes content according to a MIME Content-Transfer-Encoding value.
+
+  Supported encodings are nil/empty, 7bit, 8bit, binary, base64, and
+  quoted-printable. The returned string contains raw decoded bytes and may be
+  binary data. Throws Error for invalid encoded data or unsupported encodings."
+  {:added "1.9.0"
+   :go "decodeTransferEncoding(encoding, content)"}
+  [^Object encoding ^String content])
+
+(defn ^Map read-entity
+  "Parses a MIME entity from headers and body and returns a recursive map.
+
+  headers must be a map like {\"Header-Name\" [\"value\" ...]}; body is the
+  raw entity body. Non-multipart entities contain decoded :content and :size.
+  Multipart entities contain :parts. Content-Transfer-Encoding is decoded for
+  leaf entities.
+
+  Entity maps contain keys such as:
+  - :headers
+  - :content-type
+  - :content-type-params
+  - :disposition
+  - :disposition-params
+  - :filename
+  - :safe-filename
+  - :content-transfer-encoding
+  - :content
+  - :size
+  - :path
+  - :parts
+
+  Missing Content-Type defaults to text/plain. Binary content is represented as
+  a Joker string containing raw bytes.
+
+  opts may contain:
+  - include-content? - false to omit :content from leaf entities
+  - max-depth - maximum multipart nesting depth; defaults to 32
+  - max-part-bytes - maximum bytes to buffer for any MIME part; nil/unset means
+    unlimited"
+  {:added "1.9.0"
+   :go {2 "readEntity(headers, body, EmptyArrayMap())"
+        3 "readEntity(headers, body, opts)"}}
+  ([^Map headers ^String body])
+  ([^Map headers ^String body ^Map opts]))
+
+(defn ^Map body
+  "Extracts human-readable body content from a MIME entity tree.
+
+  Returns {:text text-or-nil :html html-or-nil}. Attachment-like parts are
+  ignored. The function handles both multipart and non-multipart entities;
+  text/plain leaves become :text and text/html leaves become :html. If multiple
+  matching leaves exist, the first value of each type is returned."
+  {:added "1.9.0"
+   :go {1 "body(entity, EmptyArrayMap())"
+        2 "body(entity, opts)"}}
+  ([^Map entity])
+  ([^Map entity ^Map opts]))
+
+(defn ^Vec attachments
+  "Returns attachment-like leaf entities from a MIME entity tree.
+
+  A part is included when Content-Disposition is attachment. By default inline
+  parts with a filename are also included, which covers common inline images.
+
+  opts may contain:
+  - include-inline? - false to exclude inline/file-name parts; defaults to true"
+  {:added "1.9.0"
+   :go {1 "attachments(entity, EmptyArrayMap())"
+        2 "attachments(entity, opts)"}}
+  ([^Map entity])
+  ([^Map entity ^Map opts]))

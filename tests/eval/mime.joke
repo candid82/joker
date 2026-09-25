@@ -1,0 +1,68 @@
+(ns joker.test-joker.mime
+  (:require [joker.mime :as mime]
+            [joker.test :refer [deftest is]]))
+
+(deftest parse-media-type
+  (is (= {:type "text/plain" :params {"charset" "utf-8"}}
+         (mime/parse-media-type "Text/Plain; charset=utf-8")))
+  (is (= {:type "attachment" :params {"filename" "report.pdf"}}
+         (mime/parse-media-type "attachment; filename=report.pdf"))))
+
+(deftest decode-transfer-encoding
+  (is (= "hello" (mime/decode-transfer-encoding nil "hello")))
+  (is (= "hello\n" (mime/decode-transfer-encoding "base64" "aGVsbG8K")))
+  (is (= "hello\nworld!" (mime/decode-transfer-encoding "quoted-printable" "hello=0Aworld=21"))))
+
+(deftest read-non-multipart-entity
+  (let [entity (mime/read-entity {"Content-Type" ["text/html; charset=utf-8"]
+                                  "Content-Transfer-Encoding" ["quoted-printable"]}
+                                 "<p>Hello=21</p>")]
+    (is (= "text/html" (:content-type entity)))
+    (is (= {"charset" "utf-8"} (:content-type-params entity)))
+    (is (= "<p>Hello!</p>" (:content entity)))
+    (is (= {:text nil :html "<p>Hello!</p>"} (mime/body entity)))
+    (is (= [] (mime/attachments entity)))))
+
+(deftest read-multipart-entity
+  (let [raw (str "--mix\r\n"
+                 "Content-Type: text/plain\r\n"
+                 "Content-Transfer-Encoding: quoted-printable\r\n"
+                 "\r\n"
+                 "Plain=20body\r\n"
+                 "--mix\r\n"
+                 "Content-Type: application/pdf; name=invoice.pdf\r\n"
+                 "Content-Disposition: attachment; filename=invoice.pdf\r\n"
+                 "Content-Transfer-Encoding: base64\r\n"
+                 "\r\n"
+                 "JVBERi0xLjQK\r\n"
+                 "--mix--\r\n")
+        entity (mime/read-entity {"Content-Type" ["multipart/mixed; boundary=mix"]} raw)
+        body-part (first (:parts entity))
+        attachments (mime/attachments entity)
+        attachment (first attachments)]
+    (is (= {:text "Plain body" :html nil} (mime/body entity)))
+    (is (= "quoted-printable" (:content-transfer-encoding body-part)))
+    (is (= 1 (count attachments)))
+    (is (= "invoice.pdf" (:filename attachment)))
+    (is (= "invoice.pdf" (:safe-filename attachment)))
+    (is (= "application/pdf" (:content-type attachment)))
+    (is (= "%PDF-1.4\n" (:content attachment)))
+    (is (= [1] (:path attachment)))))
+
+(deftest attachment-options
+  (let [raw (str "--mix\r\n"
+                 "Content-Type: image/png; name=inline.png\r\n"
+                 "Content-Disposition: inline; filename=inline.png\r\n"
+                 "Content-Transfer-Encoding: base64\r\n"
+                 "\r\n"
+                 "aW1hZ2U=\r\n"
+                 "--mix--\r\n")
+        entity (mime/read-entity {"Content-Type" ["multipart/mixed; boundary=mix"]} raw)]
+    (is (= 1 (count (mime/attachments entity))))
+    (is (= [] (mime/attachments entity {:include-inline? false})))))
+
+(deftest invalid-input
+  (is (thrown? Error (mime/parse-media-type "text/plain; bad")))
+  (is (thrown? Error (mime/decode-transfer-encoding "x-custom" "abc")))
+  (is (thrown? Error (mime/decode-transfer-encoding "base64" "not base64!")))
+  (is (thrown? Error (mime/read-entity {"Content-Type" ["multipart/mixed"]} "body"))))

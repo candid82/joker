@@ -1,0 +1,96 @@
+(ns joker.test-joker.mail
+  (:require [joker.mail :as mail]
+            [joker.test :refer [deftest is]]
+            [joker.time :as time]))
+
+(deftest read-message
+  (let [raw (str "From: Alice <alice@example.com>\r\n"
+                 "Subject: Hello\r\n"
+                 "Received: first\r\n"
+                 "Received: second\r\n"
+                 "\r\n"
+                 "raw body\r\n")
+        message (mail/read-message raw)]
+    (is (= ["Alice <alice@example.com>"] (get-in message [:headers "From"])))
+    (is (= ["Hello"] (get-in message [:headers "Subject"])))
+    (is (= ["first" "second"] (get-in message [:headers "Received"])))
+    (is (= "raw body\r\n" (:body message)))))
+
+(deftest read-mime-message
+  (let [raw (str "From: Alice <alice@example.com>\r\n"
+                 "Content-Type: text/plain; charset=utf-8\r\n"
+                 "Content-Transfer-Encoding: quoted-printable\r\n"
+                 "\r\n"
+                 "Hello=21")
+        message (mail/read-mime-message raw)]
+    (is (= "text/plain" (:content-type message)))
+    (is (= "Hello!" (:content message)))))
+
+(deftest read-email
+  (let [raw (str "From: Alice <alice@example.com>\r\n"
+                 "Subject: Invoice\r\n"
+                 "Content-Type: multipart/mixed; boundary=mix\r\n"
+                 "\r\n"
+                 "--mix\r\n"
+                 "Content-Type: multipart/alternative; boundary=alt\r\n"
+                 "\r\n"
+                 "--alt\r\n"
+                 "Content-Type: text/plain\r\n"
+                 "\r\n"
+                 "Plain body\r\n"
+                 "--alt\r\n"
+                 "Content-Type: text/html\r\n"
+                 "Content-Transfer-Encoding: quoted-printable\r\n"
+                 "\r\n"
+                 "<p>HTML=21</p>\r\n"
+                 "--alt--\r\n"
+                 "--mix\r\n"
+                 "Content-Type: application/pdf; name=invoice.pdf\r\n"
+                 "Content-Disposition: attachment; filename=invoice.pdf\r\n"
+                 "Content-Transfer-Encoding: base64\r\n"
+                 "\r\n"
+                 "JVBERi0xLjQK\r\n"
+                 "--mix\r\n"
+                 "Content-Type: image/png; name=image.png\r\n"
+                 "Content-Disposition: inline; filename=image.png\r\n"
+                 "Content-Transfer-Encoding: base64\r\n"
+                 "\r\n"
+                 "aW1hZ2U=\r\n"
+                 "--mix--\r\n")
+        email (mail/read-email raw)
+        attachments (:attachments email)]
+    (is (= ["Invoice"] (get-in email [:headers "Subject"])))
+    (is (= "Plain body" (get-in email [:body :text])))
+    (is (= "<p>HTML!</p>" (get-in email [:body :html])))
+    (is (= 2 (count attachments)))
+    (is (= ["invoice.pdf" "image.png"] (map :filename attachments)))
+    (is (= "%PDF-1.4\n" (:content (first attachments))))
+    (is (= ["invoice.pdf"] (map :filename (mail/read-attachments raw {:include-inline? false}))))))
+
+(deftest read-email-non-multipart
+  (let [raw (str "From: Alice <alice@example.com>\r\n"
+                 "Content-Type: text/html\r\n"
+                 "Content-Transfer-Encoding: quoted-printable\r\n"
+                 "\r\n"
+                 "<p>Hello=21</p>")
+        email (mail/read-email raw)]
+    (is (= {:text nil :html "<p>Hello!</p>"} (:body email)))
+    (is (= [] (:attachments email)))))
+
+(deftest parse-addresses
+  (is (= {:name "Alice" :address "alice@example.com"}
+         (mail/parse-address "Alice <alice@example.com>")))
+  (is (= [{:name "Alice" :address "alice@example.com"}
+          {:name "" :address "bob@example.com"}]
+         (mail/parse-address-list "Alice <alice@example.com>, bob@example.com"))))
+
+(deftest parse-date
+  (is (= "2026-05-27T10:15:00-04:00"
+         (time/format (mail/parse-date "Wed, 27 May 2026 10:15:00 -0400")
+                      time/rfc3339))))
+
+(deftest invalid-input
+  (is (thrown? Error (mail/read-message "Invalid header\r\n\r\nBody")))
+  (is (thrown? Error (mail/parse-address "Alice <")))
+  (is (thrown? Error (mail/parse-address-list "Alice <")))
+  (is (thrown? Error (mail/parse-date "not a date"))))

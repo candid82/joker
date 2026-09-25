@@ -1,0 +1,8 @@
+(ns infer-value-inline
+  (:require [joker.string :as string]))
+
+(let [f (fn [x]
+          (string/trim x))
+      g (fn []
+          (f {}))]
+  (g))

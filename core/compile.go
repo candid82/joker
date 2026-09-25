@@ -571,7 +571,7 @@ func (c *Compiler) compileDef(e *DefExpr) error {
 		c.emitOp(OP_SET_VAR)
 		c.emitShort(uint16(idx))
 		c.emitOp(OP_POP) // Pop the value, leaving just the var on stack
-		c.stackSize--     // compile pushed +1, POP removes it
+		c.stackSize--    // compile pushed +1, POP removes it
 	}
 
 	// Set var metadata (matching AST evaluation behavior)
@@ -1179,8 +1179,10 @@ func isLiteralVMCompatible(obj Object) bool {
 
 // extractArgTypes extracts type tag info from FnArityExpr args and stores them in the ArityProto.
 func extractArgTypes(arity FnArityExpr, ap *ArityProto) {
-	// Always extract return type tag from arity
-	ap.TaggedType = arity.taggedType
+	// Preserve the first declared return type for the legacy VM metadata format.
+	if len(arity.taggedTypes) > 0 {
+		ap.TaggedType = arity.taggedTypes[0]
+	}
 
 	// Check if any args have type tags
 	hasTypes := false

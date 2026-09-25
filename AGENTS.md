@@ -198,7 +198,7 @@ go generate ./...                    # Regenerate core
 
 ## Important Notes
 
-- Joker requires Go 1.24.0+
+- Joker requires Go 1.25.0+
 - Build artifacts (`a_*.go`) are committed to the repo due to circular dependencies
 - The `run.sh` script handles the full build cycle including code generation
 - Use `--build-only` flag to skip running Joker after building

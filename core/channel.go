@@ -5,6 +5,8 @@ import (
 )
 
 type (
+	ChannelReceiveStatus int
+
 	FutureResult struct {
 		value Object
 		err   Error
@@ -14,6 +16,12 @@ type (
 		isClosed bool
 		hash     uint32
 	}
+)
+
+const (
+	ChannelReceiveValue ChannelReceiveStatus = iota
+	ChannelReceiveClosed
+	ChannelReceiveDone
 )
 
 func MakeFutureResult(value Object, err Error) FutureResult {
@@ -58,5 +66,38 @@ func (ch *Channel) Close() {
 	if !ch.isClosed {
 		close(ch.ch)
 		ch.isClosed = true
+	}
+}
+
+func (ch *Channel) Send(value Object) (ok bool) {
+	if ch.isClosed {
+		return false
+	}
+	ok = true
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+	ch.ch <- MakeFutureResult(value, nil)
+	return
+}
+
+func (ch *Channel) Receive(done <-chan struct{}) (Object, ChannelReceiveStatus, Error) {
+	if done == nil {
+		res, ok := <-ch.ch
+		if !ok {
+			return NIL, ChannelReceiveClosed, nil
+		}
+		return res.value, ChannelReceiveValue, res.err
+	}
+	select {
+	case res, ok := <-ch.ch:
+		if !ok {
+			return NIL, ChannelReceiveClosed, nil
+		}
+		return res.value, ChannelReceiveValue, res.err
+	case <-done:
+		return NIL, ChannelReceiveDone, nil
 	}
 }

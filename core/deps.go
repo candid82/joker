@@ -11,8 +11,7 @@ import (
 )
 
 func externalHttpSourceToPath(lib string, url string) (path string) {
-	home := HomeDir()
-	localBase := filepath.Join(home, ".jokerd", "deps", strings.SplitN(url, "//", 2)[1])
+	localBase := filepath.Join(HomeJokerdDir(), "deps", strings.SplitN(url, "//", 2)[1])
 	libBase := filepath.Join(strings.Split(lib, ".")...) + ".joke"
 	libPath := filepath.Join(localBase, libBase)
 	libPathDir := filepath.Dir(libPath)

@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of os.InternsOrThunks().")
 	}
-	osNamespace.ResetMeta(MakeMeta(nil, `Provides a platform-independent interface to operating system functionality.`, "1.0"))
+	osNamespace.ResetMeta(MakeMeta(nil, `Provides filesystem, process, environment, and watcher helpers backed by the host operating system.`, "1.0"))
 
 	osNamespace.InternVar("SIGABRT", SIGABRT_,
 		MakeMeta(
@@ -77,47 +77,47 @@ func InternsOrThunks() {
 	osNamespace.InternVar("args", args_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0"))
+			`Returns a sequence of the command line arguments, starting with the program name (normally, joker).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	osNamespace.InternVar("chdir", chdir_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
-			`Changes the current working directory to the named directory.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("dirname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Changes the current working directory to the named directory.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chmod", chmod_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("mode"))),
-			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("mode").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Changes the mode of the named file to mode. If the file is a symbolic link, it changes the mode of the link's target.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chown", chown_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("uid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("gid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
-  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value.`, "1.0"))
+  it changes the uid and gid of the link's target. A uid or gid of -1 means to not change that value.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("chtimes", chtimes_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("atime"), MakeSymbol("mtime"))),
-			`Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("atime").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol), MakeSymbol("mtime").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Time"}).(Map)).(Symbol))),
+			`Changes the access and modification times of the named file, similar to the Unix utime() or utimes() functions.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("clearenv", clearenv_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Deletes all environment variables.`, "1.0"))
+			`Deletes all environment variables.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("close", close_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("f"))),
-			`Closes the file, rendering it unusable for I/O.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "File"}).(Map)).(Symbol))),
+			`Closes the file, rendering it unusable for I/O.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("create", create_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Creates the named file with mode 0666 (before umask), truncating it if it already exists.`, "1.0").Plus(MakeKeyword("tag"), String{S: "File"}))
 
 	osNamespace.InternVar("create-temp", create_temp_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("pattern"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("dir").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("pattern").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Creates a new temporary file in the directory dir, opens the file for reading and writing,
   and returns the resulting File. The filename is generated by taking pattern and adding a
   random string to the end. If pattern includes a "*", the random string replaces the last "*".
@@ -140,7 +140,7 @@ func InternsOrThunks() {
 	osNamespace.InternVar("env", env_,
 		MakeMeta(
 			NewListFrom(NewVectorFrom()),
-			`Returns a map representing the environment.`, "1.0"))
+			`Returns a map representing the environment.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("euid", euid_,
 		MakeMeta(
@@ -149,8 +149,13 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("exec", exec_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
-			`Executes the named program with the given arguments. opts is a map with the following keys (all optional):
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
+			`Executes name according to opts and waits for it to finish.
+
+  A non-zero program exit is returned as data rather than thrown. Failure to
+  start the process throws Error.
+
+  opts may contain:
   :args - vector of arguments (all arguments must be strings),
   :dir - if specified, working directory will be set to this value before executing the program,
   :stdin - if specified, provides stdin for the program. Can be either a string or an IOReader.
@@ -159,12 +164,12 @@ func InternsOrThunks() {
   :stdout - if specified, must be an IOWriter. It can be, for example, *out* (in which case the program's stdout will be redirected
   to Joker's stdout) or the value returned by (joker.os/create).
   :stderr - the same as :stdout, but for stderr.
-  Returns a map with the following keys:
+  Returns a map with:
   :success - whether or not the execution was successful,
-  :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+  :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
   :exit - exit code of program (or attempt to execute it),
   :out - string capturing stdout of the program (unless :stdout option was passed)
-  :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0"))
+  :err - string capturing stderr of the program (unless :stderr option was passed).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("executable", executable_,
 		MakeMeta(
@@ -173,23 +178,23 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("exists?", isexists_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("path").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns true if file or directory with the given path exists. Otherwise returns false.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	osNamespace.InternVar("exit", exit_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("code")), NewVectorFrom()),
-			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("code").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol)), NewVectorFrom()),
+			`Causes the current program to exit with the given status code (defaults to 0).`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("expand-env", expand_env_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("s"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("s").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Replaces ${var} or $var in the string according to the values of the current environment variables.
   References to undefined variables are replaced by the empty string.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	osNamespace.InternVar("get-env", get_env_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the value of the environment variable named by the key or nil if the variable is not present in the environment.`, "1.0"))
 
 	osNamespace.InternVar("gid", gid_,
@@ -209,52 +214,52 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("kill", kill_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("pid"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("pid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Causes the process with the given PID to exit immediately.
-  Only kills the process itself, not any other processes it may have started.`, "1.0.1"))
+  Only kills the process itself, not any other processes it may have started.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("lchown", lchown_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("uid"), MakeSymbol("gid"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("uid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("gid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Changes the numeric uid and gid of the named file. If the file is a symbolic link,
-  it changes the uid and gid of the link itself.`, "1.0"))
+  it changes the uid and gid of the link itself.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("link", link_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
-			`Creates newname as a hard link to the oldname file.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("oldname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("newname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Creates newname as a hard link to the oldname file.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("ls", ls_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dirname"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("dirname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Reads the directory named by dirname and returns a list of directory entries sorted by filename.
   Each entry is a map with the following keys:
   :name - name (String)
   :size - size in bytes (Int)
   :mode - mode (Int)
   :dir? - true if the file is a directory (Boolean)
-  :modtime - modification time (unix timestamp) (Int)`, "1.0"))
+  :modtime - modification time as Unix seconds (Int)`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	osNamespace.InternVar("lstat", lstat_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
-			`Like stat, but if the file is a symbolic link, the result describes the symbolic link.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("filename").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Like stat, but if the file is a symbolic link, the result describes the symbolic link.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("mkdir", mkdir_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
-			`Creates a new directory with the specified name and permission bits.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("perm").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Creates a new directory with the specified name and permission bits.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("mkdir-all", mkdir_all_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("perm"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("perm").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
 			`Creates a directory named path, along with any necessary parents, and returns nil, or else throws an error.
   The permission bits perm (before umask) are used for all directories that mkdir-all creates.
-  If path is already a directory, mkdir-all does nothing and returns nil.`, "1.0"))
+  If path is already a directory, mkdir-all does nothing and returns nil.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("mkdir-temp", mkdir_temp_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("pattern"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("dir").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("pattern").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Creates a new temporary directory in the directory dir.
   The directory name is generated by taking pattern and applying a random string to the end.
   If pattern includes a "*", the random string replaces the last "*".
@@ -265,7 +270,7 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("open", open_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Opens the named file for reading. If successful, the file can be used for reading;
   the associated file descriptor has mode O_RDONLY.`, "1.0").Plus(MakeKeyword("tag"), String{S: "File"}))
 
@@ -276,7 +281,7 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("path-separator?", ispath_separator_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("c"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("c").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Char"}).(Map)).(Symbol))),
 			`Reports whether c is a directory separator character.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Boolean"}))
 
 	osNamespace.InternVar("pid", pid_,
@@ -291,80 +296,85 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("read-link", read_link_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns the destination of the named symbolic link.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
 
 	osNamespace.InternVar("remove", remove_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"))),
-			`Removes the named file or (empty) directory.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Removes the named file or (empty) directory.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("remove-all", remove_all_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("path"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("path").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Removes path and any children it contains.
 
   It removes everything it can, then panics with the first error (if
-  any) it encountered.`, "1.0"))
+  any) it encountered.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("rename", rename_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("oldpath"), MakeSymbol("newpath"))),
-			`Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("oldpath").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("newpath").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Renames (moves) oldpath to newpath. If newpath already exists and is not a directory, rename replaces it.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("set-env", set_env_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the value of the environment variable named by the key.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Sets the value of the environment variable named by the key.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("sh", sh_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments. Returns a map with the following keys:
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("&"), MakeSymbol("arguments").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Executes name with arguments and waits for it to finish.
+
+  A non-zero program exit is returned as data rather than thrown. Failure to
+  start the process throws Error. Returns a map with:
       :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
+      :err - string capturing stderr of the program.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("sh-from", sh_from_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("dir"), MakeSymbol("name"), MakeSymbol("&"), MakeSymbol("arguments"))),
-			`Executes the named program with the given arguments and working directory set to dir.
-  Returns a map with the following keys:
+			NewListFrom(NewVectorFrom(MakeSymbol("dir").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("&"), MakeSymbol("arguments").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Executes name with arguments from working directory dir and waits for it to finish.
+
+  Behaves like joker.os/sh except for the working directory. A non-zero program
+  exit is returned as data; failure to start the process throws Error. Returns:
       :success - whether or not the execution was successful,
-      :err-msg (present iff :success if false) - string capturing error object returned by Go runtime
+      :err-msg (present iff :success is false) - string capturing error object returned by Go runtime
       :exit - exit code of program (or attempt to execute it),
       :out - string capturing stdout of the program,
-      :err - string capturing stderr of the program.`, "1.0"))
+      :err - string capturing stderr of the program.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("signal", signal_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("pid"), MakeSymbol("signal"))),
-			`Sends signal to the process with the given PID.`, "1.0.1"))
+			NewListFrom(NewVectorFrom(MakeSymbol("pid").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol), MakeSymbol("signal").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Sends signal to the process with the given PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("start", start_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("opts"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
 			`Starts a new process with the program specified by name.
   opts is a map with the same keys as in exec.
-  Doesn't wait for the process to finish.
-  Returns the process's PID.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
+  Does not wait for the process to finish and returns its PID. Throws Error if
+  the process cannot be started.`, "1.0.1").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	osNamespace.InternVar("stat", stat_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"))),
+			NewListFrom(NewVectorFrom(MakeSymbol("filename").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
 			`Returns a map describing the named file. The info map has the following attributes:
   :name - base name of the file
   :size - length in bytes for regular files; system-dependent for others
   :mode - file mode bits
   :modtime - modification time
-  :dir? - true if file is a directory`, "1.0"))
+  :dir? - true if file is a directory`, "1.0").Plus(MakeKeyword("tag"), String{S: "Map"}))
 
 	osNamespace.InternVar("symlink", symlink_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("oldname"), MakeSymbol("newname"))),
-			`Creates newname as a symbolic link to oldname.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("oldname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("newname").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Creates newname as a symbolic link to oldname.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("temp-dir", temp_dir_,
 		MakeMeta(
@@ -377,8 +387,8 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("truncate", truncate_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("name"), MakeSymbol("size"))),
-			`Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("size").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Changes the size of the named file. If the file is a symbolic link, it changes the size of the link's target.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("uid", uid_,
 		MakeMeta(
@@ -387,8 +397,8 @@ func InternsOrThunks() {
 
 	osNamespace.InternVar("unset-env", unset_env_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("key"))),
-			`Unsets a single environment variable.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Unsets a single environment variable.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	osNamespace.InternVar("user-cache-dir", user_cache_dir_,
 		MakeMeta(
@@ -421,5 +431,21 @@ func InternsOrThunks() {
 
   On Unix, including macOS, it returns the $HOME environment variable. On Windows, it returns %USERPROFILE%.
   On Plan 9, it returns the $home environment variable.`, "1.0").Plus(MakeKeyword("tag"), String{S: "String"}))
+
+	osNamespace.InternVar("watch", watch_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("paths").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol), MakeSymbol("ch").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Channel"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("paths").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Seqable"}).(Map)).(Symbol), MakeSymbol("ch").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Channel"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
+			`Watches paths for file system changes, sends event maps to ch, and returns a
+  zero-argument cancel function. paths must be Seqable and each path must be a
+  string. opts may contain :recursive? to watch child directories recursively.
+
+  Event maps have {:type :event :path path :ops ops}, where ops is a set
+  containing one or more of :create, :write, :remove, :rename, and :chmod.
+  Runtime watcher errors are sent as {:type :error :error error}.
+
+  When :recursive? is true, existing child directories are watched and newly
+  created child directories are added automatically. Calling the returned
+  cancel function stops the watcher and closes ch. If ch is closed by the
+  caller, the watcher stops sending and shuts itself down.`, "1.7.2").Plus(MakeKeyword("tag"), String{S: "Proc"}))
 
 }

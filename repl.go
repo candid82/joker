@@ -87,8 +87,7 @@ func repl(phase Phase) {
 	if noReadline {
 		runeReader = bufio.NewReader(Stdin)
 	} else {
-		home := HomeDir()
-		jokerd := filepath.Join(home, ".jokerd")
+		jokerd := HomeJokerdDir()
 		if _, err := os.Stat(jokerd); os.IsNotExist(err) {
 			if err := os.MkdirAll(jokerd, 0777); err != nil {
 				fmt.Fprintf(Stderr, "WARNING: could not create %s \n", jokerd)

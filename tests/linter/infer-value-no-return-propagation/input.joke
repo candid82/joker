@@ -1,0 +1,10 @@
+(ns infer-value-no-return-propagation)
+
+(defn- valid-name?
+  [name]
+  (and name
+       (<= (count name) 120)))
+
+(defn check
+  []
+  (valid-name? "ok"))

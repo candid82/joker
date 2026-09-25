@@ -12,7 +12,7 @@ func InternsOrThunks() {
 	if VerbosityLevel > 0 {
 		fmt.Fprintln(os.Stderr, "Lazily running slow version of bolt.InternsOrThunks().")
 	}
-	boltNamespace.ResetMeta(MakeMeta(nil, `Provide API for Bolt embedded database https://github.com/etcd-io/bbolt.
+	boltNamespace.ResetMeta(MakeMeta(nil, `Provides a small string-oriented API for the Bolt embedded key/value database.
 
          Example:
 
@@ -31,65 +31,146 @@ func InternsOrThunks() {
 
 	boltNamespace.InternVar("by-prefix", by_prefix_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("prefix"))),
-			`Retrives key/value pairs for all keys in bucket
-  that start with prefix.
-  Returns a vector of [key value] tuples. Passing empty prefix
-  will return all key/values in bucket.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("prefix").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol)), NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("prefix").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("opts").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Map"}).(Map)).(Symbol))),
+			`Returns key/value pairs from bucket whose keys start with prefix.
+
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Results are returned as a vector of [key value] vectors in Bolt key
+  order. Passing the empty string returns all key/value pairs in the bucket.
+
+  opts may contain:
+  - limit - maximum number of key/value pairs to return; must be non-negative
+
+  Throws Error when bucket does not exist, limit is invalid, or the transaction
+  fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Vec"}))
 
 	boltNamespace.InternVar("close", close_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"))),
-			`Releases all database resources.
-  It will block waiting for any open transactions to finish
-  before closing the database and returning.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol))),
+			`Closes db and releases its database resources.
+
+  Blocks until open transactions finish, then releases the file lock. Throws
+  Error if closing fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
+
+	boltNamespace.InternVar("count-by-prefix", count_by_prefix_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("prefix").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Returns the number of keys in bucket that start with prefix.
+
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Passing the empty string counts all keys in the bucket. Throws Error
+  when bucket does not exist or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	boltNamespace.InternVar("create-bucket", create_bucket_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Creates a new bucket. Throws an error if the bucket already exists,
-  if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Creates bucket name and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Throws Error if the bucket already exists, if name is blank or too
+  long, if context is read-only, or if the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	boltNamespace.InternVar("create-bucket-if-not-exists", create_bucket_if_not_exists_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Creates a new bucket if it doesn't already exist.
-   Throws an error if the bucket name is blank, or if the bucket name is too long.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Creates bucket name when needed and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Does nothing when the bucket already exists. Throws Error if name is
+  blank or too long, if context is read-only, or if the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	boltNamespace.InternVar("delete", delete_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
-			`Removes a key from the bucket if it exists.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Removes key from bucket and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Missing keys are ignored. Throws Error when bucket does not exist,
+  context is read-only, or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	boltNamespace.InternVar("delete-bucket", delete_bucket_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("name"))),
-			`Deletes a bucket. Throws an error if the bucket doesn't exist.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("name").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Deletes bucket name and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Throws Error when the bucket does not exist, context is read-only, or
+  the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
 
 	boltNamespace.InternVar("get", get_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"))),
-			`Retrieves the value for a key in the bucket.
-  Returns nil if the key does not exist.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Returns the string value stored at key in bucket.
+
+  context may be a BoltDB, which uses a new read transaction, or an active
+  BoltTx. Returns nil when key does not exist. Throws Error when bucket does not
+  exist or the transaction fails.`, "1.0"))
 
 	boltNamespace.InternVar("next-sequence", next_sequence_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"))),
-			`Returns an autoincrementing integer for the bucket.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Returns the next auto-incrementing integer for bucket.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Each call advances the bucket sequence counter. Throws Error when the
+  bucket does not exist, context is read-only, or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Int"}))
 
 	boltNamespace.InternVar("open", open_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("filename"), MakeSymbol("mode"))),
-			`Creates and opens a database at the given path.
-  If the file does not exist then it will be created automatically
-  with mode perm (before umask).
-  mode is normally passed as an octal literal, e.g. 0600`, "1.0").Plus(MakeKeyword("tag"), String{S: "BoltDB"}))
+			NewListFrom(NewVectorFrom(MakeSymbol("filename").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("mode").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Int"}).(Map)).(Symbol))),
+			`Opens the database file at filename and returns a BoltDB handle.
+
+  If the file does not exist, it is created with mode before the process umask
+  is applied. mode is normally written as an octal literal such as 0600.
+  Throws Error when the database cannot be opened.
+
+  The underlying database uses an exclusive file lock; because this wrapper uses
+  Bolt's default options, open may wait indefinitely for another process to
+  release the same database file.
+
+  Example:
+    (def db (joker.bolt/open "app.db" 0600))`, "1.0").Plus(MakeKeyword("tag"), String{S: "BoltDB"}))
 
 	boltNamespace.InternVar("put", put_,
 		MakeMeta(
-			NewListFrom(NewVectorFrom(MakeSymbol("db"), MakeSymbol("bucket"), MakeSymbol("key"), MakeSymbol("value"))),
-			`Sets the value for a key in the bucket.
-  If the key exist then its previous value will be overwritten.
-  Throws an error if the key is blank, if the key is too large, or if the value is too large.`, "1.0"))
+			NewListFrom(NewVectorFrom(MakeSymbol("context").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltContext"}).(Map)).(Symbol), MakeSymbol("bucket").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("key").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol), MakeSymbol("value").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "String"}).(Map)).(Symbol))),
+			`Stores value at key in bucket and returns nil.
+
+  context may be a BoltDB, which uses a new write transaction, or a BoltTx from
+  update. Keys and values are strings stored as raw bytes. Replaces any previous
+  value for key. Throws Error when bucket does not exist, context is read-only,
+  key is blank or too large, value is too large, or the transaction fails.`, "1.0").Plus(MakeKeyword("tag"), String{S: "Nil"}))
+
+	boltNamespace.InternVar("update", update_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Callable"}).(Map)).(Symbol))),
+			`Executes f in a managed read/write transaction and returns the result of f.
+
+  f is called with a BoltTx that is valid only for the duration of the call.
+  Database operations in f must use that transaction rather than db. A normal
+  return commits the transaction, including when f returns nil or false. If f
+  throws, the entire transaction is rolled back and the exception is rethrown.
+  Throws Error if the transaction cannot be opened or committed.
+
+  Example:
+    (joker.bolt/update db
+      (fn [tx]
+        (joker.bolt/put tx "users" "1" "Joe")
+        (joker.bolt/put tx "users" "2" "Jane")
+        :saved))`, "1.0"))
+
+	boltNamespace.InternVar("view", view_,
+		MakeMeta(
+			NewListFrom(NewVectorFrom(MakeSymbol("db").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "BoltDB"}).(Map)).(Symbol), MakeSymbol("f").WithMeta(EmptyArrayMap().Assoc(MakeKeyword("tag"), String{S: "Callable"}).(Map)).(Symbol))),
+			`Executes f in a managed read-only transaction and returns the result of f.
+
+  f is called with a BoltTx that is valid only for the duration of the call.
+  Database operations in f must use that transaction rather than db. The
+  transaction is rolled back when f returns, or when f throws. Throws Error if
+  the transaction cannot be opened or closed, and rethrows exceptions from f.
+
+  Example:
+    (joker.bolt/view db
+      (fn [tx] (joker.bolt/get tx "users" "1")))`, "1.0"))
 
 }

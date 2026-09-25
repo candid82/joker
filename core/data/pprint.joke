@@ -2,6 +2,26 @@
   "Pretty printing utilities. Based on Clojure implementation."
   {:added "1.0"})
 
+(def ^:private osc8-seq-re
+  #"\x1b\]8;[^\x07\x1b]*(\x07|\x1b\\)")
+
+(defn- visible-width
+  [s]
+  (let [s (str s)]
+    (if (re-find osc8-seq-re s)
+      (- (count s)
+         (apply +
+                (map (fn [m]
+                       (count (if (vector? m) (first m) m)))
+                     (re-seq osc8-seq-re s))))
+      (count s))))
+
+(defn- pad-cell
+  [width col]
+  (let [s (str col)]
+    (str (apply str (repeat (max 0 (- width (visible-width s))) " "))
+         s)))
+
 (defn print-table
   "Prints a collection of maps in a textual table. Prints table headings
    ks, and then a line of output for each row, corresponding to the keys
@@ -11,15 +31,15 @@
      (when (seq rows)
        (let [widths (map
                      (fn [k]
-                       (apply max (count (str k)) (map #(count (str (get % k))) rows)))
+                       (apply max (visible-width (str k))
+                              (map #(visible-width (str (get % k))) rows)))
                      ks)
              spacers (map #(apply str (repeat % "-")) widths)
-             fmts (map #(str "%" % "s") widths)
              fmt-row (fn [leader divider trailer row]
                        (str leader
                             (apply str (interpose divider
-                                                  (for [[col fmt] (map vector (map #(get row %) ks) fmts)]
-                                                    (format fmt (str col)))))
+                                                  (for [[col width] (map vector (map #(get row %) ks) widths)]
+                                                    (pad-cell width col))))
                             trailer))]
          (println)
          (println (fmt-row "| " " | " " |" (zipmap ks ks)))

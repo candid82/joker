@@ -81,10 +81,10 @@ func readString(s string) Object {
 	return toObject(v)
 }
 
-func writeString(obj Object) String {
+func writeString(obj Object) string {
 	res, err := yaml.Marshal(fromObject(obj))
 	if err != nil {
 		panic(RT.NewError("Cannot encode value to yaml: " + err.Error()))
 	}
-	return String{S: string(res)}
+	return string(res)
 }
