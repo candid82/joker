@@ -247,31 +247,33 @@ func (c *Compiler) compileVector(e *VectorExpr) error {
 }
 
 func (c *Compiler) compileMap(e *MapExpr) error {
+	c.emitOp(OP_MAP_NEW)
+	c.emitShort(uint16(len(e.keys)))
+	c.stackSize++
 	for i := range e.keys {
 		if err := c.compile(e.keys[i]); err != nil {
 			return err
 		}
+		c.emitOp(OP_MAP_CHECK)
 		if err := c.compile(e.values[i]); err != nil {
 			return err
 		}
+		c.emitOp(OP_MAP_ADD)
+		c.stackSize -= 2 // Leave the map on the stack.
 	}
-	c.emitOp(OP_MAP)
-	c.emitShort(uint16(len(e.keys)))
-	// OP_MAP pops 2N elements, pushes 1 map.
-	c.stackSize += 1 - 2*len(e.keys)
 	return nil
 }
 
 func (c *Compiler) compileSet(e *SetExpr) error {
+	c.emitOp(OP_SET_NEW)
+	c.stackSize++
 	for _, elem := range e.elements {
 		if err := c.compile(elem); err != nil {
 			return err
 		}
+		c.emitOp(OP_SET_ADD)
+		c.stackSize-- // Leave the set on the stack.
 	}
-	c.emitOp(OP_SET)
-	c.emitShort(uint16(len(e.elements)))
-	// OP_SET pops N elements, pushes 1 set.
-	c.stackSize += 1 - len(e.elements)
 	return nil
 }
 
@@ -1266,7 +1268,7 @@ func disassembleInstruction(chunk *Chunk, offset int) string {
 		result += " " + strconv.Itoa(int(chunk.Code[offset+1]))
 	case OP_RECUR:
 		result += " argCount=" + strconv.Itoa(int(chunk.Code[offset+1])) + " slotStart=" + strconv.Itoa(int(chunk.Code[offset+2]))
-	case OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET, OP_TRY_BEGIN:
+	case OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_MAP_NEW, OP_SET, OP_TRY_BEGIN:
 		val := uint16(chunk.Code[offset+1])<<8 | uint16(chunk.Code[offset+2])
 		result += " " + strconv.Itoa(int(val))
 	}
@@ -1277,7 +1279,7 @@ func disassembleInstruction(chunk *Chunk, offset int) string {
 func nextInstructionOffset(chunk *Chunk, offset int) int {
 	op := Opcode(chunk.Code[offset])
 	switch op {
-	case OP_CONST, OP_GET_VAR, OP_SET_VAR, OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_SET, OP_TRY_BEGIN, OP_SET_MACRO:
+	case OP_CONST, OP_GET_VAR, OP_SET_VAR, OP_JUMP, OP_JUMP_IF_FALSE, OP_LOOP, OP_VECTOR, OP_MAP, OP_MAP_NEW, OP_SET, OP_TRY_BEGIN, OP_SET_MACRO:
 		return offset + 3
 	case OP_CLOSURE:
 		// CLOSURE has variable length due to upvalue info

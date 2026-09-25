@@ -230,4 +230,12 @@ After that guard, compiling all eligible closed generated core functions (257 fu
 
 Relative to the fresh 29.45 s VM baseline before the generated-core and argument-slice work, the final VM is roughly 17% faster on Day 11. Against AST on the same build it is about 25% faster in wall time. No algorithm or state representation in the workload changed. The new Go tests, eval tests (190 tests/1175 assertions), linter, formatter and flag tests, and `go vet` pass.
 
-Before/after profiles: `/tmp/vmcore-all.mem`, `/tmp/vmcore-final.mem`, `/tmp/vmcore-all.cpu`. Future work: implement complete VM `try/finally` handling, investigate remaining AST fallbacks, and verify map/set literal parity before enabling any additional construct in `IsVMCompatible`.
+Before/after profiles: `/tmp/vmcore-all.mem`, `/tmp/vmcore-final.mem`, `/tmp/vmcore-all.cpu`. Future work: implement complete VM `try/finally` handling and investigate remaining AST fallbacks.
+
+## VM-to-AST fallback attribution and literal parity
+
+`./joker --vm-fallbacks <file>` enables sampled attribution of VM `OP_CALL` invocations that enter an AST function. The report goes to stderr at exit, with the **exact total** call count and approximate per-site counts (one sample per 256 calls). Sites identify the calling compiled function (source line when available) and the callee function definition. The flag does not count calls originating entirely within AST code or native procedures. Normal execution does not collect samples. VM bytecode currently does not preserve source lines, so many caller sites appear as `<anonymous>` without a line number.
+
+For Day 11, the report counted 20,234,917 VM-to-AST calls; its largest estimated sites were `core/assoc` (8.49 million), `core/conj` (7.31 million), `core/reduce` (3.01 million), and the workload's `next-states` function (1.00 million). The complete report is in `/tmp/vm-attribution-final.err`. These are the next candidates for investigating *why* a function is not compiled; this flag itself does not change compilation.
+
+Parity tests now cover empty maps/sets, map type selection at both sides of `HASHMAP_THRESHOLD`, key/value and set-element evaluation order, and duplicate detection including the timing of side effects. The VM previously built map/set literals only after evaluating all operands, reversed array-map insertion order, silently discarded duplicate entries, and used `Assoc` (which copied intermediate maps). New incremental literal opcodes mirror `MapExpr.Eval` and `SetExpr.Eval`; legacy `OP_MAP`/`OP_SET` remain for packed bytecode. Day 11 still returns `31`; an uninstrumented run after this change took 23.80 seconds (previous 24.30–24.67 seconds, within run-to-run variation).

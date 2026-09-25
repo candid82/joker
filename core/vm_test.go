@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 )
@@ -109,6 +110,100 @@ func TestVMVectors(t *testing.T) {
 		}
 	} else {
 		t.Errorf("expected ArrayVector (like AST literals), got %T", result)
+	}
+}
+
+func TestVMMapSetLiteralParity(t *testing.T) {
+	cases := []struct {
+		name      string
+		code      string
+		threshold int64
+		expected  string
+	}{
+		{"empty map", "{}", 16, "{}"},
+		{"empty set", "#{}", 16, "#{}"},
+		{"array map order", `(let [t (atom []) m {(do (swap! t conj :k1) :a) (do (swap! t conj :v1) 1)
+			(do (swap! t conj :k2) :b) (do (swap! t conj :v2) 2)}] [m @t])`, 16, "[{:a 1, :b 2} [:k1 :v1 :k2 :v2]]"},
+		{"hash map order", `(let [t (atom []) m {(do (swap! t conj :k1) :a) (do (swap! t conj :v1) 1)
+			(do (swap! t conj :k2) :b) (do (swap! t conj :v2) 2)}] [(type m) @t])`, 2, "[HashMap [:k1 :v1 :k2 :v2]]"},
+		{"array map duplicate", `(let [t (atom [])] (try
+			{(do (swap! t conj :k1) :a) (do (swap! t conj :v1) 1)
+			 (do (swap! t conj :k2) :a) (do (swap! t conj :v2) 2)
+			 (do (swap! t conj :k3) :b) (do (swap! t conj :v3) 3)}
+			(catch Error e [@t (ex-message e)])))`, 16, "[[:k1 :v1 :k2 :v2] \"Duplicate key: :a\"]"},
+		{"hash map duplicate", `(let [t (atom [])] (try
+			{(do (swap! t conj :k1) :a) (do (swap! t conj :v1) 1)
+			 (do (swap! t conj :k2) :a) (do (swap! t conj :v2) 2)}
+			(catch Error e [@t (ex-message e)])))`, 2, "[[:k1 :v1 :k2] \"Duplicate key: :a\"]"},
+		{"set order", `(let [t (atom []) s #{(do (swap! t conj 1) 1) (do (swap! t conj 2) 2)}] [s @t])`, 16, "[#{1 2} [1 2]]"},
+		{"set duplicate", `(let [t (atom [])] (try
+			#{(do (swap! t conj 1) 1) (do (swap! t conj 2) 1) (do (swap! t conj 3) 3)}
+			(catch Error e [@t (ex-message e)])))`, 16, "[[1 2] \"Duplicate set element: 1\"]"},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			reader := NewReader(strings.NewReader(tt.code), "<test>")
+			form, err := TryRead(reader)
+			if err != nil {
+				t.Fatal(err)
+			}
+			oldThreshold := HASHMAP_THRESHOLD
+			defer func() { HASHMAP_THRESHOLD = oldThreshold }()
+			// Read with the default threshold; change it only for evaluation.
+			HASHMAP_THRESHOLD = tt.threshold
+			ctx := &ParseContext{GlobalEnv: GLOBAL_ENV}
+			expr, err := TryParse(form, ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ast, err := TryEval(expr)
+			if err != nil {
+				t.Fatalf("AST evaluation: %v", err)
+			}
+			if !IsVMCompatible(expr) {
+				t.Fatal("literal should be VM-compatible")
+			}
+			proto, err := Compile(expr, "<test>")
+			if err != nil {
+				t.Fatal(err)
+			}
+			vmResult := NewVM().Execute(&Fn{proto: proto, isCompiled: true}, nil)
+			if got := ast.ToString(true); got != tt.expected {
+				t.Errorf("AST result: got %s, want %s", got, tt.expected)
+			}
+			if got := vmResult.ToString(true); got != ast.ToString(true) || vmResult.GetType() != ast.GetType() {
+				t.Errorf("VM result %s (%v), AST result %s (%v)", got, vmResult.GetType(), ast.ToString(true), ast.GetType())
+			}
+		})
+	}
+}
+
+func TestVMFallbackAttribution(t *testing.T) {
+	reader := NewReader(strings.NewReader("(fn target [x] x)"), "<fallback-test>")
+	form, err := TryRead(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stats := &vmFallbackStats{sites: make(map[vmFallbackSite]uint64)}
+	vm := NewVM()
+	vm.frameCount = 1
+	vm.frames[0] = CallFrame{
+		closure:    &Fn{proto: &FunctionProto{Name: "caller"}},
+		arityProto: &ArityProto{Chunk: &Chunk{Lines: []int{9, 9}}}, ip: 2,
+	}
+	for i := 0; i < 2*vmFallbackSampleRate; i++ {
+		stats.record(&Fn{fnExpr: expr.(*FnExpr)}, vm)
+	}
+	previous := vmFallbackAttribution.Swap(stats)
+	defer vmFallbackAttribution.Store(previous)
+	var out bytes.Buffer
+	WriteVMFallbackAttribution(&out)
+	if !strings.Contains(out.String(), "fallback calls: 512") || !strings.Contains(out.String(), "512  caller:9 -> target <fallback-test>:1") {
+		t.Fatalf("unexpected fallback report: %s", out.String())
 	}
 }
 

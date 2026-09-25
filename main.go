@@ -442,6 +442,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Write memory profile to specified file.")
 	fmt.Fprintln(out, "  --memprofile-rate <rate>")
 	fmt.Fprintln(out, "    Specify rate (one sample per <rate>) for the memory profiler to use.")
+	fmt.Fprintln(out, "  --vm-fallbacks")
+	fmt.Fprintln(out, "    Report sampled VM-to-AST function calls by caller and callee (to stderr).")
 }
 
 var (
@@ -464,6 +466,7 @@ var (
 	cpuProfileRate           int
 	cpuProfileRateFlag       bool
 	memProfileName           string
+	vmFallbacksFlag          bool
 	noReadline               bool
 	noReplHistory            bool
 	exitToRepl               bool
@@ -622,6 +625,8 @@ func parseArgs(args []string) {
 			noReplHistory = true
 		case "--no-vm":
 			DISABLE_VM = true
+		case "--vm-fallbacks":
+			vmFallbacksFlag = true
 		case "--exit-to-repl":
 			exitToRepl = true
 			if i < length-1 && notOption(args[i+1]) {
@@ -725,10 +730,14 @@ var runningProfile interface {
 
 func main() {
 	OnExit(finish)
+	defer finish()
 
 	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 
 	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
+	if vmFallbacksFlag && !DISABLE_VM {
+		StartVMFallbackAttribution()
+	}
 
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
 
@@ -789,7 +798,6 @@ func main() {
 		switch profilerType {
 		case "pkg/profile":
 			runningProfile = profile.Start(profile.ProfilePath(cpuProfileName))
-			defer finish()
 		case "runtime/pprof":
 			f, err := os.Create(cpuProfileName)
 			if err != nil {
@@ -804,15 +812,12 @@ func main() {
 			pprof.StartCPUProfile(f)
 			fmt.Fprintf(Stderr, "Profiling started at rate=%d. See file `%s'.\n",
 				cpuProfileRate, cpuProfileName)
-			defer finish()
 		default:
 			fmt.Fprintf(Stderr,
 				"Unrecognized profiler: %s\n  Use 'pkg/profile' or 'runtime/pprof'.\n",
 				profilerType)
 			ExitJoker(96)
 		}
-	} else if memProfileName != "" {
-		defer finish()
 	}
 
 	if eval != "" {
@@ -908,6 +913,7 @@ func main() {
 }
 
 func finish() {
+	WriteVMFallbackAttribution(Stderr)
 	if runningProfile != nil {
 		runningProfile.Stop()
 		runningProfile = nil

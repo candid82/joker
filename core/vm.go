@@ -534,6 +534,41 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		}
 		vm.Push(NewSetFromSeq(NewListFrom(elements...)))
 
+	case OP_MAP_NEW:
+		count := int(vm.readShort(frame, chunk))
+		if int64(count) > HASHMAP_THRESHOLD/2 {
+			vm.Push(EmptyHashMap)
+		} else {
+			vm.Push(EmptyArrayMap())
+		}
+
+	case OP_MAP_CHECK:
+		key := vm.Peek(0)
+		if m, ok := vm.Peek(1).(*HashMap); ok && m.containsKey(key) {
+			panic(RT.NewError("Duplicate key: " + key.ToString(false)))
+		}
+
+	case OP_MAP_ADD:
+		val := vm.Pop()
+		key := vm.Pop()
+		switch m := vm.Peek(0).(type) {
+		case *HashMap:
+			vm.stack[vm.stackTop-1] = m.Assoc(key, val)
+		case *ArrayMap:
+			if !m.Add(key, val) {
+				panic(RT.NewError("Duplicate key: " + key.ToString(false)))
+			}
+		}
+
+	case OP_SET_NEW:
+		vm.Push(EmptySet())
+
+	case OP_SET_ADD:
+		elem := vm.Pop()
+		if !vm.Peek(0).(*MapSet).Add(elem) {
+			panic(RT.NewError("Duplicate set element: " + elem.ToString(false)))
+		}
+
 	case OP_CLOSE_UPVALUE:
 		vm.closeUpvalues(vm.stackTop - 1)
 		vm.Pop()
@@ -628,7 +663,10 @@ func (vm *VM) callValue(callee Object, argCount int) bool {
 			vm.callFn(fn, argCount)
 			return true
 		}
-		// Fall back to AST evaluation for uncompiled/multi-arity functions
+		// Fall back to AST evaluation for uncompiled functions.
+		if stats := vmFallbackAttribution.Load(); stats != nil && fn.fnExpr != nil {
+			stats.record(fn, vm)
+		}
 		args := make([]Object, argCount)
 		for i := argCount - 1; i >= 0; i-- {
 			args[i] = vm.Pop()

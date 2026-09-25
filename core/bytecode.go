@@ -77,6 +77,14 @@ const (
 
 	// Macro support
 	OP_SET_MACRO // Set var as macro (2-byte constant pool index -> Var)
+
+	// Incremental literal construction preserves AST evaluation order and
+	// duplicate-key/element errors. Keep older OP_MAP/OP_SET for packed code.
+	OP_MAP_NEW   // Create map (2-byte pair count, selects array/hash map)
+	OP_MAP_CHECK // Check duplicate key before its value for hash maps
+	OP_MAP_ADD   // Add key/value to map on stack
+	OP_SET_NEW   // Create empty set
+	OP_SET_ADD   // Add element to set on stack
 )
 
 // CatchInfo describes one catch clause for exception handling.
@@ -235,6 +243,11 @@ var opcodeNames = [...]string{
 	OP_TRY_BEGIN:     "TRY_BEGIN",
 	OP_TRY_END:       "TRY_END",
 	OP_SET_MACRO:     "SET_MACRO",
+	OP_MAP_NEW:       "MAP_NEW",
+	OP_MAP_CHECK:     "MAP_CHECK",
+	OP_MAP_ADD:       "MAP_ADD",
+	OP_SET_NEW:       "SET_NEW",
+	OP_SET_ADD:       "SET_ADD",
 }
 
 // OpcodeName returns the name of an opcode.
