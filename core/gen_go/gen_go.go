@@ -194,6 +194,8 @@ func (g *GenGo) slice(target string, v reflect.Value) string {
 				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 				reflect.Float32, reflect.Float64:
 				el = append(el, "\t0,")
+			case reflect.Struct, reflect.Array:
+				el = append(el, "\t"+g.valueTypeToStringFn(v.Index(i))+"{},")
 			default:
 				el = append(el, "\tnil,")
 			}

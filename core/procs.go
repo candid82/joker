@@ -2067,34 +2067,22 @@ func processData(data []byte) {
 	}
 }
 
-// Named generated functions have a single environment frame containing only
-// their own Fn value. Slot 0 in the VM represents that self binding.
-func isClosedGeneratedFn(fn *Fn) bool {
-	if fn.env == nil {
-		return true
-	}
-	return fn.fnExpr.self.name != nil && fn.env.parent == nil && len(fn.env.bindings) == 1 && fn.env.bindings[0] == fn
-}
-
 func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
 	ns.MaybeLazy("joker.core")
 
 	// Generated core functions are installed as AST-backed values, so
 	// CompileAST never visits them. Compile the closed, compatible functions
-	// after --no-vm has been parsed. Unsupported constructs (including
-	// try/finally) retain their AST implementations.
+	// after --no-vm has been parsed. Any unsupported forms or unresolved
+	// captured bindings retain their AST implementations.
 	if !DISABLE_VM && !LINTER_MODE {
 		compiled := 0
 		for _, vr := range ns.mappings {
 			fn, ok := vr.Value.(*Fn)
-			if !ok || fn.fnExpr == nil || !isClosedGeneratedFn(fn) || fn.isMacro || fn.isCompiled || !isVMCompatibleFn(fn.fnExpr, vr.name.Name() == "reduce") {
+			if !ok || fn.fnExpr == nil || fn.isMacro || fn.isCompiled || !IsVMCompatibleFn(fn.fnExpr) {
 				continue
 			}
-			if fn.fnExpr.self.name != nil && vr.name.Name() != "conj" && vr.name.Name() != "assoc" {
-				continue
-			}
-			if proto, err := CompileFnExpr(fn.fnExpr, nil); err == nil {
+			if proto, err := CompileFnExpr(fn.fnExpr, fn.env); err == nil {
 				fn.proto = proto
 				fn.isCompiled = true
 				compiled++

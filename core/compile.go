@@ -23,6 +23,8 @@ type Compiler struct {
 	loopStart     int            // Bytecode offset of loop start (for recur)
 	loopDepth     int            // Scope depth at loop start
 	loopSlotStart int            // Local slot index where loop variables start
+	currentPos    Position       // Source position for emitted instructions
+	closedEnv     *LocalEnv      // Closed environment of an existing AST-backed function
 }
 
 // NewCompiler creates a new compiler for a function.
@@ -46,6 +48,7 @@ func Compile(expr Expr, name string) (*FunctionProto, error) {
 	if err := c.compile(expr); err != nil {
 		return nil, err
 	}
+	c.currentPos = expr.Pos()
 	c.emitReturn()
 	return c.function, nil
 }
@@ -70,7 +73,7 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 	// Compile each fixed arity
 	for _, arity := range fnExpr.arities {
-		arityProto, _, err := compileArityProtoWithCompiler(arity, name, false, fnExpr.self)
+		arityProto, _, err := compileArityProtoWithCompiler(arity, name, false, fnExpr.self, env)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +82,7 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 	// Compile variadic arity
 	if fnExpr.variadic != nil {
-		varProto, _, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true, fnExpr.self)
+		varProto, _, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true, fnExpr.self, env)
 		if err != nil {
 			return nil, err
 		}
@@ -105,8 +108,9 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 // compileArityProtoWithCompiler compiles a single function arity and returns both the ArityProto and the compiler.
 // The compiler is returned so callers can access SubFunctions if needed.
-func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bool, self Symbol) (*ArityProto, *Compiler, error) {
+func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bool, self Symbol, env *LocalEnv) (*ArityProto, *Compiler, error) {
 	c := NewCompiler(nil, name)
+	c.closedEnv = env
 	if self.name != nil {
 		c.locals[0].name = self // Slot 0 holds the function itself.
 	}
@@ -144,6 +148,7 @@ func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bo
 		c.stackSize++
 	}
 
+	c.currentPos = arity.Position
 	c.emitReturn()
 
 	ap := &ArityProto{
@@ -159,7 +164,7 @@ func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bo
 
 // CompileArityProto compiles a single function arity to an ArityProto.
 func CompileArityProto(arity FnArityExpr, name string, isVariadic bool) (*ArityProto, error) {
-	arityProto, _, err := compileArityProtoWithCompiler(arity, name, isVariadic, Symbol{})
+	arityProto, _, err := compileArityProtoWithCompiler(arity, name, isVariadic, Symbol{}, nil)
 	return arityProto, err
 }
 
@@ -180,6 +185,9 @@ func CompileFnArity(arity FnArityExpr, name string) (*FunctionProto, error) {
 
 // compile compiles a single expression.
 func (c *Compiler) compile(expr Expr) error {
+	previous := c.currentPos
+	c.currentPos = expr.Pos()
+	defer func() { c.currentPos = previous }()
 	switch e := expr.(type) {
 	case *LiteralExpr:
 		return c.compileLiteral(e)
@@ -477,6 +485,24 @@ func (c *Compiler) compileBinding(e *BindingExpr) error {
 		return nil
 	}
 
+	// A generated function may already close over immutable startup values.
+	// Embed those values only after local and upvalue resolution has failed.
+	root := c
+	for root.enclosing != nil {
+		root = root.enclosing
+	}
+	if env := root.closedEnv; env != nil && env.frame >= e.binding.frame {
+		for env != nil && env.frame > e.binding.frame {
+			env = env.parent
+		}
+		if env != nil && e.binding.index >= 0 && e.binding.index < len(env.bindings) {
+			if value := env.bindings[e.binding.index]; value != nil {
+				c.emitConstant(value)
+				c.stackSize++
+				return nil
+			}
+		}
+	}
 	return RT.NewError("Cannot resolve binding: " + e.binding.name.ToString(false))
 }
 
@@ -686,6 +712,7 @@ func (c *Compiler) compileFn(e *FnExpr) error {
 			inner.stackSize++
 		}
 
+		inner.currentPos = arity.Position
 		inner.emitReturn()
 
 		ap := &ArityProto{
@@ -816,32 +843,29 @@ func (c *Compiler) compileTry(e *TryExpr) error {
 		c.stackSize++
 	}
 
-	// Normal exit from try - pop handler and jump to after finally
+	// Normal and caught exits both run finally with their result on the stack.
 	c.emitOp(OP_TRY_END)
-	exitJump := c.emitJump(OP_JUMP)
+	exitJumps := []int{c.emitJump(OP_JUMP)}
+	var catchGuards []int
 
-	// Compile each catch clause
 	for i, catch := range e.catches {
 		catchIP := len(c.function.Chunk.Code)
-
-		// Reset stack to base for catch entry (try body's stack is unwound)
-		c.stackSize = baseStack
-
-		// Begin scope for catch binding
+		c.stackSize = baseStack // The original try frame is unwound on error.
 		c.beginScope()
-
-		// The exception is pushed by the VM's exception handler
-		c.stackSize++ // VM pushes exception
+		c.stackSize++ // dispatchException pushes the exception binding.
 		c.addLocal(catch.excSymbol)
-
-		// Record catch info
 		c.function.Chunk.Handlers[handlerIdx].Catches[i] = CatchInfo{
-			ExcType:   catch.excType,
-			HandlerIP: catchIP,
+			ExcType: catch.excType, HandlerIP: catchIP,
 			LocalSlot: c.locals[c.localCount-1].slot,
 		}
 
-		// Compile catch body
+		// An error in a catch must run finally, but must not match its own catch.
+		if e.finallyExpr != nil {
+			guard := c.function.Chunk.AddHandler(HandlerInfo{FinallyIP: -1, EndIP: -1, TryLocalCount: baseStack})
+			catchGuards = append(catchGuards, guard)
+			c.emitOp(OP_TRY_BEGIN)
+			c.emitShort(uint16(guard))
+		}
 		for j, bodyExpr := range catch.body {
 			if err := c.compile(bodyExpr); err != nil {
 				return err
@@ -855,9 +879,11 @@ func (c *Compiler) compileTry(e *TryExpr) error {
 			c.emitOp(OP_NIL)
 			c.stackSize++
 		}
+		if e.finallyExpr != nil {
+			c.emitOp(OP_TRY_END)
+		}
 
-		// Custom scope cleanup for catch - use OP_POP_SLOT to remove the exception
-		// binding at its specific slot, preserving any operands above it
+		// Remove the exception binding while preserving the catch result.
 		c.scopeDepth--
 		catchSlot := c.function.Chunk.Handlers[handlerIdx].TryLocalCount
 		if c.localCount > 0 && c.locals[c.localCount-1].depth > c.scopeDepth {
@@ -866,19 +892,19 @@ func (c *Compiler) compileTry(e *TryExpr) error {
 			c.localCount--
 			c.stackSize--
 		}
-
-		// Jump to after finally (unless this is the last catch and there's no finally)
-		if i < len(e.catches)-1 || e.finallyExpr != nil {
-			c.patchJump(exitJump)
-			exitJump = c.emitJump(OP_JUMP)
-		}
+		exitJumps = append(exitJumps, c.emitJump(OP_JUMP))
 	}
 
-	// Compile finally block if present
+	finallyIP := len(c.function.Chunk.Code)
+	for _, jump := range exitJumps {
+		c.patchJump(jump)
+	}
+	c.stackSize = baseStack + 1 // Original result, catch result, or pending exception placeholder.
 	if e.finallyExpr != nil {
-		c.function.Chunk.Handlers[handlerIdx].FinallyIP = len(c.function.Chunk.Code)
-
-		// Finally body - result is discarded
+		c.function.Chunk.Handlers[handlerIdx].FinallyIP = finallyIP
+		for _, guard := range catchGuards {
+			c.function.Chunk.Handlers[guard].FinallyIP = finallyIP
+		}
 		for _, bodyExpr := range e.finallyExpr {
 			if err := c.compile(bodyExpr); err != nil {
 				return err
@@ -886,13 +912,13 @@ func (c *Compiler) compileTry(e *TryExpr) error {
 			c.emitOp(OP_POP)
 			c.stackSize--
 		}
+		c.emitOp(OP_FINALLY_END)
 	}
-
-	// Patch the exit jump to come here
-	c.patchJump(exitJump)
-	c.function.Chunk.Handlers[handlerIdx].EndIP = len(c.function.Chunk.Code)
-
-	// Net effect: +1 (try body result or catch body result)
+	endIP := len(c.function.Chunk.Code)
+	c.function.Chunk.Handlers[handlerIdx].EndIP = endIP
+	for _, guard := range catchGuards {
+		c.function.Chunk.Handlers[guard].EndIP = endIP
+	}
 	return nil
 }
 
@@ -1008,15 +1034,23 @@ func (c *Compiler) addUpvalue(index uint8, isLocal bool) int {
 // Bytecode emission
 
 func (c *Compiler) emitByte(b byte) {
-	c.function.Chunk.AppendByte(b, 0) // TODO: proper line numbers
+	c.function.Chunk.appendAt(b, c.currentPos)
 }
 
 func (c *Compiler) emitOp(op Opcode) {
-	c.function.Chunk.WriteOp(op, 0)
+	if op == OP_CALL && c.currentPos.startLine > 0 {
+		chunk := c.function.Chunk
+		if chunk.callSites == nil {
+			chunk.callSites = make(map[int]*CallExpr)
+		}
+		chunk.callSites[len(chunk.Code)] = &CallExpr{Position: c.currentPos}
+	}
+	c.emitByte(byte(op))
 }
 
 func (c *Compiler) emitShort(value uint16) {
-	c.function.Chunk.WriteShort(value, 0)
+	c.emitByte(byte(value >> 8))
+	c.emitByte(byte(value))
 }
 
 func (c *Compiler) emitConstant(value Object) {
@@ -1050,19 +1084,13 @@ func (c *Compiler) emitReturn() {
 
 // IsVMCompatible checks if an expression can be compiled to bytecode.
 func IsVMCompatible(expr Expr) bool {
-	return isVMCompatible(expr, false)
+	return isVMCompatible(expr)
 }
 
-// Type literals are supported by the compiler, but existing VM stack traces
-// differ from AST stack traces for some type-using functions. Permit them only
-// when explicitly checking a known-safe generated core function (reduce).
-func isVMCompatible(expr Expr, allowTypes bool) bool {
-	compatible := func(expr Expr) bool { return isVMCompatible(expr, allowTypes) }
+func isVMCompatible(expr Expr) bool {
+	compatible := isVMCompatible
 	switch e := expr.(type) {
 	case *LiteralExpr:
-		if _, ok := e.obj.(*Type); ok {
-			return allowTypes
-		}
 		return isLiteralVMCompatible(e.obj)
 	case *VectorExpr:
 		for _, elem := range e.v {
@@ -1163,10 +1191,6 @@ func isVMCompatible(expr Expr, allowTypes bool) bool {
 	case *ThrowExpr:
 		return compatible(e.e)
 	case *TryExpr:
-		// Exception dispatch does not yet run finally on all exit paths.
-		if e.finallyExpr != nil {
-			return false
-		}
 		for _, bodyExpr := range e.body {
 			if !compatible(bodyExpr) {
 				return false
@@ -1190,7 +1214,7 @@ func isVMCompatible(expr Expr, allowTypes bool) bool {
 func isLiteralVMCompatible(obj Object) bool {
 	switch obj.(type) {
 	case Nil, Boolean, Int, Double, String, Char, Keyword, Symbol,
-		*Ratio, *BigInt, *BigFloat, *Regex:
+		*Ratio, *BigInt, *BigFloat, *Regex, *Type:
 		return true
 	default:
 		return false
@@ -1319,21 +1343,17 @@ func padLeft(s string, length int, pad string) string {
 
 // IsVMCompatibleFn checks if a function expression can be compiled to bytecode.
 func IsVMCompatibleFn(e *FnExpr) bool {
-	return isVMCompatibleFn(e, false)
-}
-
-func isVMCompatibleFn(e *FnExpr, allowTypes bool) bool {
 	// Check all arities
 	for _, arity := range e.arities {
 		for _, bodyExpr := range arity.body {
-			if !isVMCompatible(bodyExpr, allowTypes) {
+			if !isVMCompatible(bodyExpr) {
 				return false
 			}
 		}
 	}
 	if e.variadic != nil {
 		for _, bodyExpr := range e.variadic.body {
-			if !isVMCompatible(bodyExpr, allowTypes) {
+			if !isVMCompatible(bodyExpr) {
 				return false
 			}
 		}

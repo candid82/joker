@@ -80,11 +80,12 @@ const (
 
 	// Incremental literal construction preserves AST evaluation order and
 	// duplicate-key/element errors. Keep older OP_MAP/OP_SET for packed code.
-	OP_MAP_NEW   // Create map (2-byte pair count, selects array/hash map)
-	OP_MAP_CHECK // Check duplicate key before its value for hash maps
-	OP_MAP_ADD   // Add key/value to map on stack
-	OP_SET_NEW   // Create empty set
-	OP_SET_ADD   // Add element to set on stack
+	OP_MAP_NEW     // Create map (2-byte pair count, selects array/hash map)
+	OP_MAP_CHECK   // Check duplicate key before its value for hash maps
+	OP_MAP_ADD     // Add key/value to map on stack
+	OP_SET_NEW     // Create empty set
+	OP_SET_ADD     // Add element to set on stack
+	OP_FINALLY_END // Re-throw a pending exception after executing finally
 )
 
 // CatchInfo describes one catch clause for exception handling.
@@ -104,10 +105,12 @@ type HandlerInfo struct {
 
 // Chunk holds compiled bytecode and associated data.
 type Chunk struct {
-	Code      []byte        // Bytecode instructions
-	Constants []Object      // Constant pool
-	Lines     []int         // Line number for each byte (for error reporting)
-	Handlers  []HandlerInfo // Exception handler info (indexed by OP_TRY_BEGIN operand)
+	Code      []byte            // Bytecode instructions
+	Constants []Object          // Constant pool
+	Lines     []int             // Line number for each byte (for error reporting)
+	Positions []Position        // Source position for each byte
+	callSites map[int]*CallExpr // Immutable AST call-site descriptors for native calls
+	Handlers  []HandlerInfo     // Exception handler info (indexed by OP_TRY_BEGIN operand)
 }
 
 // NewChunk creates a new empty chunk.
@@ -116,6 +119,7 @@ func NewChunk() *Chunk {
 		Code:      make([]byte, 0, 256),
 		Constants: make([]Object, 0, 16),
 		Lines:     make([]int, 0, 256),
+		Positions: make([]Position, 0, 256),
 		Handlers:  make([]HandlerInfo, 0, 4),
 	}
 }
@@ -130,6 +134,20 @@ func (c *Chunk) AddHandler(handler HandlerInfo) int {
 func (c *Chunk) AppendByte(b byte, line int) {
 	c.Code = append(c.Code, b)
 	c.Lines = append(c.Lines, line)
+	c.Positions = append(c.Positions, Position{startLine: line})
+}
+
+func (c *Chunk) appendAt(b byte, pos Position) {
+	c.Code = append(c.Code, b)
+	c.Lines = append(c.Lines, pos.startLine)
+	c.Positions = append(c.Positions, pos)
+}
+
+func (c *Chunk) positionAt(ip int) Position {
+	if ip >= 0 && ip < len(c.Positions) {
+		return c.Positions[ip]
+	}
+	return Position{}
 }
 
 // WriteOp appends an opcode to the chunk.
@@ -242,6 +260,7 @@ var opcodeNames = [...]string{
 	OP_THROW:         "THROW",
 	OP_TRY_BEGIN:     "TRY_BEGIN",
 	OP_TRY_END:       "TRY_END",
+	OP_FINALLY_END:   "FINALLY_END",
 	OP_SET_MACRO:     "SET_MACRO",
 	OP_MAP_NEW:       "MAP_NEW",
 	OP_MAP_CHECK:     "MAP_CHECK",

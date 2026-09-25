@@ -244,6 +244,38 @@ func TestVMNamedFunctionAndArityRecur(t *testing.T) {
 	}
 }
 
+func TestVMClosedEnvironmentParity(t *testing.T) {
+	codes := []string{
+		`(let [x 5] (fn [y] (+ x y)))`,
+		`(let [x 5] (fn [y] ((fn [] (+ x y)))))`,
+		`(let [x 5] (fn [x] x))`,
+	}
+	for _, code := range codes {
+		t.Run(code, func(t *testing.T) {
+			reader := NewReader(strings.NewReader(code), "<test>")
+			form, err := TryRead(reader)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+			if err != nil {
+				t.Fatal(err)
+			}
+			fn := expr.Eval(nil).(*Fn)
+			proto, err := CompileFnExpr(fn.fnExpr, fn.env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			args := []Object{Int{I: 2}}
+			vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
+			ast := fn.Call(args)
+			if !vm.Equals(ast) {
+				t.Errorf("VM %s, AST %s", vm, ast)
+			}
+		})
+	}
+}
+
 func TestVMTypeLiteralInClosedFunction(t *testing.T) {
 	reader := NewReader(strings.NewReader(`(fn [coll] (instance? Reduce coll))`), "<test>")
 	form, err := TryRead(reader)
@@ -255,8 +287,8 @@ func TestVMTypeLiteralInClosedFunction(t *testing.T) {
 		t.Fatal(err)
 	}
 	fnExpr := expr.(*FnExpr)
-	if IsVMCompatibleFn(fnExpr) || !isVMCompatibleFn(fnExpr, true) {
-		t.Fatal("type literals must remain gated outside explicitly validated functions")
+	if !IsVMCompatibleFn(fnExpr) {
+		t.Fatal("type literals should be VM-compatible")
 	}
 	proto, err := CompileFnExpr(fnExpr, nil)
 	if err != nil {
@@ -272,8 +304,27 @@ func TestVMTypeLiteralInClosedFunction(t *testing.T) {
 	}
 }
 
-func TestVMFinallyFallsBackToAST(t *testing.T) {
-	reader := NewReader(strings.NewReader("(fn [] (try 1 (finally 2)))"), "<test>")
+func TestVMPackedSourcePositions(t *testing.T) {
+	filename := "packed.joke"
+	pos := Position{filename: &filename, startLine: 7, startColumn: 3}
+	chunk := NewChunk()
+	chunk.appendAt(byte(OP_CALL), pos)
+	chunk.appendAt(0, pos)
+	chunk.callSites = map[int]*CallExpr{0: {Position: pos}}
+	env := NewPackEnv()
+	packed := chunk.Pack(nil, env)
+	header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
+	unpacked, remaining := unpackChunk(packed, header)
+	if len(remaining) != 0 || len(unpacked.Positions) != 2 || unpacked.positionAt(0).Filename() != filename ||
+		unpacked.positionAt(0).startLine != 7 || unpacked.positionAt(1).startColumn != 3 ||
+		unpacked.callSites[0] == nil || unpacked.callSites[0].Pos().Filename() != filename {
+		t.Fatalf("lost bytecode source positions or native call site during packing")
+	}
+}
+
+func TestVMSourcePositions(t *testing.T) {
+	code := "(let [f (fn []\n  (nth [] 4))] (f))"
+	reader := NewReader(strings.NewReader(code), "<vm-position>")
 	form, err := TryRead(reader)
 	if err != nil {
 		t.Fatal(err)
@@ -282,12 +333,72 @@ func TestVMFinallyFallsBackToAST(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn, ok := expr.(*FnExpr)
-	if !ok {
-		t.Fatalf("expected FnExpr, got %T", expr)
+	_, astErr := TryEval(expr)
+	if astErr == nil {
+		t.Fatal("expected AST error")
 	}
-	if IsVMCompatibleFn(fn) || isVMCompatibleFn(fn, true) {
-		t.Fatal("try/finally is not yet safe to compile, even when type literals are allowed")
+	proto, err := Compile(expr, "<vm-position>")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var vmErr Error
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				vmErr = r.(Error)
+			}
+		}()
+		VMExecute(&Fn{proto: proto, isCompiled: true}, nil)
+	}()
+	if vmErr == nil {
+		t.Fatal("expected VM error")
+	}
+	if got := vmErr.Error(); !strings.Contains(got, "<vm-position>:2:3") || strings.Contains(got, "<file>:0:0") {
+		t.Errorf("VM error lacks the failing source location: %s", got)
+	}
+}
+
+func TestVMFinallyParity(t *testing.T) {
+	cases := []struct{ name, code string }{
+		{"normal", `(let [events (atom [])] [(try (swap! events conj :body) :value (finally (swap! events conj :finally))) @events])`},
+		{"caught", `(let [events (atom [])] [(try (throw (ex-info "body" {})) (catch Error e (swap! events conj :caught) :value) (finally (swap! events conj :finally))) @events])`},
+		{"uncaught", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
+		{"catch throws", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (catch Error e (swap! events conj :caught) (throw e)) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
+		{"finally throws", `(try (try (throw (ex-info "body" {})) (finally (throw (ex-info "finally" {})))) (catch Error e (ex-message e)))`},
+		{"nested caught in finally", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (try (throw (ex-info "inner" {})) (catch Error e (swap! events conj :inner))))) (catch Error e [@events (ex-message e)])))`},
+		{"nested finally", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (try (throw (ex-info "inner" {})) (finally (swap! events conj :inner))))) (catch Error e [@events (ex-message e)])))`},
+		{"finally returns normally", `(let [events (atom [])] [(try (try :value (finally (swap! events conj :inner))) (finally (swap! events conj :outer))) @events])`},
+		{"throw across frames", `(let [events (atom []) f (fn [] (throw (ex-info "cross" {})))] (try (try (f) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
+		{"finally in called function", `(let [events (atom []) f (fn [] (try (throw (ex-info "cross" {})) (finally (swap! events conj :inner))))] (try (try (f) (finally (swap! events conj :outer))) (catch Error e [@events (ex-message e)])))`},
+		{"caught error overridden", `(let [events (atom [])] (try (try (throw (ex-info "original" {})) (catch Error e (swap! events conj :caught) :ok) (finally (swap! events conj :finally) (throw (ex-info "override" {})))) (catch Error e [@events (ex-message e)])))`},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			reader := NewReader(strings.NewReader(tt.code), "<test>")
+			form, err := TryRead(reader)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !IsVMCompatible(expr) {
+				t.Fatal("try/finally should compile")
+			}
+			ast, err := TryEval(expr)
+			if err != nil {
+				t.Fatal(err)
+			}
+			proto, err := Compile(expr, "<test>")
+			if err != nil {
+				t.Fatal(err)
+			}
+			vm := VMExecute(&Fn{proto: proto, isCompiled: true}, nil)
+			if !ast.Equals(vm) || ast.ToString(true) != vm.ToString(true) {
+				t.Errorf("AST: %s; VM: %s", ast.ToString(true), vm.ToString(true))
+			}
+		})
 	}
 }
 

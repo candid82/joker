@@ -23,6 +23,7 @@ type CallFrame struct {
 	closure    *Fn         // The function being executed
 	arityProto *ArityProto // The specific arity being executed
 	ip         int         // Instruction pointer into chunk.Code
+	lastOp     int         // Instruction that most recently executed (for errors)
 	slots      int         // Base index in VM stack for this frame's locals
 }
 
@@ -31,6 +32,13 @@ type ExceptionHandler struct {
 	handlerIdx int // Index into chunk.Handlers
 	frameIndex int // Frame index when installed
 	stackTop   int // Stack top when try began
+}
+
+type pendingFinally struct {
+	err          Error
+	frameIndex   int
+	finishIP     int
+	handlerDepth int
 }
 
 // VM is the bytecode virtual machine.
@@ -42,6 +50,8 @@ type VM struct {
 	openUpvals   *Upvalue           // Linked list of open upvalues (sorted by stack index)
 	handlers     []ExceptionHandler // Exception handler stack
 	handlerCount int                // Number of active handlers
+	pending      [vmHandlersMax]pendingFinally
+	pendingCount int
 }
 
 // NewVM creates a new VM instance.
@@ -59,6 +69,10 @@ func (vm *VM) Reset() {
 	vm.frameCount = 0
 	vm.openUpvals = nil
 	vm.handlerCount = 0
+	for i := 0; i < vm.pendingCount; i++ {
+		vm.pending[i] = pendingFinally{}
+	}
+	vm.pendingCount = 0
 }
 
 // Push pushes a value onto the stack.
@@ -176,6 +190,10 @@ func (vm *VM) ExecuteTopLevel(proto *FunctionProto) Object {
 	vm.frameCount = 0
 	vm.openUpvals = nil
 	vm.handlerCount = 0
+	for i := 0; i < vm.pendingCount; i++ {
+		vm.pending[i] = pendingFinally{}
+	}
+	vm.pendingCount = 0
 
 	// Create a temporary Fn wrapper for the compiled expression
 	fn := &Fn{proto: proto, isCompiled: true}
@@ -249,6 +267,7 @@ runLoop:
 			}
 			// Try to dispatch to an exception handler
 			if err, ok := panicValue.(Error); ok {
+				vm.attachSourcePosition(err, frame)
 				if vm.dispatchException(err, &frame, &chunk) {
 					continue runLoop // Handler found, continue execution
 				}
@@ -264,6 +283,7 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 	frame := *framePtr
 	chunk := *chunkPtr
 
+	frame.lastOp = frame.ip
 	op := Opcode(chunk.Code[frame.ip])
 	frame.ip++
 
@@ -428,6 +448,13 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		argCount := int(chunk.Code[frame.ip])
 		frame.ip++
 		callee := vm.Peek(argCount)
+		if site := chunk.callSites[frame.lastOp]; site != nil {
+			// Native code (including asynchronous callbacks) uses currentExpr to
+			// construct errors. The descriptor is immutable and outlives this call.
+			previous := RT.currentExpr
+			RT.currentExpr = site
+			defer func() { RT.currentExpr = previous }()
+		}
 		if vm.callValue(callee, argCount) {
 			// New frame was pushed, switch to it
 			*framePtr = &vm.frames[vm.frameCount-1]
@@ -609,9 +636,19 @@ func (vm *VM) executeOneOp(framePtr **CallFrame, chunkPtr **Chunk) Object {
 		vm.handlerCount++
 
 	case OP_TRY_END:
-		// Normal exit from try block - pop the handler
+		// Normal exit from try block - pop the handler.
 		if vm.handlerCount > 0 {
 			vm.handlerCount--
+		}
+
+	case OP_FINALLY_END:
+		if vm.pendingCount > 0 {
+			pending := vm.pending[vm.pendingCount-1]
+			if pending.frameIndex == vm.frameCount-1 && pending.finishIP == frame.lastOp {
+				vm.pendingCount--
+				vm.pending[vm.pendingCount] = pendingFinally{}
+				panic(pending.err)
+			}
 		}
 
 	case OP_SET_MACRO:
@@ -841,6 +878,7 @@ func (vm *VM) callFn(fn *Fn, argCount int) {
 	frame.closure = fn
 	frame.arityProto = arityProto
 	frame.ip = 0
+	frame.lastOp = 0
 	frame.slots = vm.stackTop - argCount - 1
 }
 
@@ -858,6 +896,42 @@ func (vm *VM) closeUpvalues(lastIndex int) {
 	}
 }
 
+type vmTraceable struct {
+	position Position
+	name     string
+}
+
+func (tr vmTraceable) Pos() Position { return tr.position }
+func (tr vmTraceable) Name() string  { return tr.name }
+
+// Preserve explicit positions set by AST code or native procedures. When a VM
+// instruction creates an error without one, attach its source position and
+// compiled call frames instead of reporting <file>:0:0.
+func (vm *VM) attachSourcePosition(exc Error, frame *CallFrame) {
+	err, ok := exc.(*EvalError)
+	if !ok || err.pos.startLine != 0 {
+		return
+	}
+	pos := frame.arityProto.Chunk.positionAt(frame.lastOp)
+	if pos.startLine == 0 {
+		return
+	}
+	err.pos = pos
+	err.rt.currentExpr = &CallExpr{Position: pos}
+	for i := range err.rt.callstack.frames {
+		if err.rt.callstack.frames[i].traceable == unknownCallExpr {
+			err.rt.callstack.frames[i].traceable = vmTraceable{position: pos, name: frame.closure.proto.Name}
+		}
+	}
+	for i := 0; i < vm.frameCount; i++ {
+		call := &vm.frames[i]
+		callPos := call.arityProto.Chunk.positionAt(call.lastOp)
+		if callPos.startLine != 0 {
+			err.rt.callstack.pushFrame(Frame{traceable: vmTraceable{position: callPos, name: call.closure.proto.Name}})
+		}
+	}
+}
+
 // dispatchException tries to find a matching catch handler for the exception.
 // Returns true if a handler was found and execution should continue,
 // false if no handler was found and the exception should propagate.
@@ -865,6 +939,17 @@ func (vm *VM) dispatchException(exc Error, framePtr **CallFrame, chunkPtr **Chun
 	for vm.handlerCount > 0 {
 		vm.handlerCount--
 		handler := vm.handlers[vm.handlerCount]
+		// A new error escaping a finally replaces any exception that was
+		// already pending there. Inner try handlers can still catch it.
+		for vm.pendingCount > 0 {
+			pending := vm.pending[vm.pendingCount-1]
+			if handler.frameIndex > pending.frameIndex ||
+				(handler.frameIndex == pending.frameIndex && vm.handlerCount >= pending.handlerDepth) {
+				break
+			}
+			vm.pendingCount--
+			vm.pending[vm.pendingCount] = pendingFinally{}
+		}
 
 		// Get the frame where the handler was installed
 		if handler.frameIndex >= vm.frameCount {
@@ -908,16 +993,29 @@ func (vm *VM) dispatchException(exc Error, framePtr **CallFrame, chunkPtr **Chun
 			}
 		}
 
-		// No matching catch - check for finally
+		// An unmatched exception runs finally and is rethrown by OP_FINALLY_END.
 		if handlerInfo.FinallyIP >= 0 {
-			// Execute finally by jumping to it
-			// The exception will be re-thrown after finally completes
-			// For now, we'll re-panic (finally execution is complex)
-			// TODO: Implement proper finally execution with pending exception
+			if vm.pendingCount >= vmHandlersMax {
+				panic(RT.NewError("VM finally stack overflow"))
+			}
+			vm.pending[vm.pendingCount] = pendingFinally{
+				err: exc, frameIndex: handler.frameIndex,
+				finishIP: handlerInfo.EndIP - 1, handlerDepth: vm.handlerCount,
+			}
+			vm.pendingCount++
+			vm.stackTop = frame.slots + handlerInfo.TryLocalCount
+			vm.Push(NIL) // The finally body expects a result below its temporaries.
+			frame.ip = handlerInfo.FinallyIP
+			*framePtr = frame
+			*chunkPtr = chunk
+			return true
 		}
 	}
 
-	// No handler found
+	for i := 0; i < vm.pendingCount; i++ {
+		vm.pending[i] = pendingFinally{}
+	}
+	vm.pendingCount = 0
 	return false
 }
 

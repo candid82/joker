@@ -385,6 +385,24 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 	for _, line := range c.Lines {
 		p = appendInt(p, line)
 	}
+	// Source positions: adjacent opcode/operand bytes usually share one position.
+	p = appendInt(p, len(c.Positions))
+	for i := 0; i < len(c.Positions); {
+		j := i + 1
+		for j < len(c.Positions) && c.Positions[j] == c.Positions[i] {
+			j++
+		}
+		p = appendInt(p, j-i)
+		p = c.Positions[i].Pack(p, env)
+		i = j
+	}
+	// Native call sites remain immutable across VM executions.
+	p = appendInt(p, len(c.callSites))
+	for ip := range c.Code {
+		if c.callSites[ip] != nil {
+			p = appendInt(p, ip)
+		}
+	}
 	// Handlers
 	p = appendInt(p, len(c.Handlers))
 	for _, h := range c.Handlers {
@@ -411,6 +429,29 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 		lines[i], p = extractInt(p)
 	}
 
+	positionCount, p := extractInt(p)
+	positions := make([]Position, positionCount)
+	for i := 0; i < positionCount; {
+		var count int
+		count, p = extractInt(p)
+		var pos Position
+		pos, p = unpackPosition(p, header)
+		for j := 0; j < count; j++ {
+			positions[i+j] = pos
+		}
+		i += count
+	}
+	callCount, p := extractInt(p)
+	var callSites map[int]*CallExpr
+	if callCount > 0 {
+		callSites = make(map[int]*CallExpr, callCount)
+	}
+	for i := 0; i < callCount; i++ {
+		var ip int
+		ip, p = extractInt(p)
+		callSites[ip] = &CallExpr{Position: positions[ip]}
+	}
+
 	handlerCount, p := extractInt(p)
 	handlers := make([]HandlerInfo, handlerCount)
 	for i := 0; i < handlerCount; i++ {
@@ -421,6 +462,8 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 		Code:      code,
 		Constants: constants,
 		Lines:     lines,
+		Positions: positions,
+		callSites: callSites,
 		Handlers:  handlers,
 	}, p
 }
