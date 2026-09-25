@@ -728,6 +728,7 @@ func shouldCheckInferredSummary(expr Expr) bool {
 func checkInferredCall(call *CallExpr) bool {
 	_, arity := callableFnSummary(call.callable, len(call.args))
 	res := false
+	warned := make(map[string]bool)
 	checkExpected := func(expected [][]*Type) {
 		for i, expectedTypes := range expected {
 			if len(expectedTypes) == 0 || i >= len(call.args) {
@@ -735,8 +736,13 @@ func checkInferredCall(call *CallExpr) bool {
 			}
 			passedValue := call.args[i].InferValue(newInferEnv())
 			if !passedValue.unknown && len(passedValue.types) != 0 && !inferredTypesCompatible(expectedTypes, passedValue.types) {
-				printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), inferredTypesString(expectedTypes), inferredTypesString(passedValue.types)))
-				res = true
+				expectedString := inferredTypesString(expectedTypes)
+				key := fmt.Sprintf("%d:%s", i, expectedString)
+				if !warned[key] {
+					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), expectedString, inferredTypesString(passedValue.types)))
+					warned[key] = true
+					res = true
+				}
 			}
 		}
 	}
