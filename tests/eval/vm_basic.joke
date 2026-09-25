@@ -3,8 +3,7 @@
 (ns joker.test.vm-basic
   (:require [joker.test :refer [deftest is testing]]))
 
-;; Note: These tests will initially run via the AST evaluator.
-;; Once VM integration is complete, they will serve as regression tests.
+;; Run with and without --no-vm to verify both execution paths.
 
 (deftest test-arithmetic
   (testing "basic arithmetic"
@@ -93,6 +92,19 @@
       (is (= 3 (h 1 2)))
       (is (= 6 (h 1 2 3)))
       (is (= 10 (h 1 2 3 4))))))
+
+(deftest test-compiled-core-assoc-conj-reduce
+  (is (= [1 2 3] (conj [1] 2 3)))
+  (is (= '(3 2 1) (conj '(1) 2 3)))
+  (is (= {:a 1} (conj {} [:a 1])))
+  (is (= {:a 1 :b 2} (assoc {:a 0} :a 1 :b 2)))
+  (is (= [1 9 3] (assoc [1 2 3] 1 9)))
+  (is (= 0 (reduce + [])))
+  (is (= 7 (reduce + [7])))
+  (is (= 10 (reduce + [1 2 3 4])))
+  (is (= 10 (reduce + 0 [1 2 3 4])))
+  (is (= 5 (reduce + 5 [])))
+  (is (= [1 2 3] (reduce conj [] (list 1 2 3)))))
 
 (deftest test-finally-restores-bindings
   (let [original *assert*]

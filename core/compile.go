@@ -70,7 +70,7 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 	// Compile each fixed arity
 	for _, arity := range fnExpr.arities {
-		arityProto, _, err := compileArityProtoWithCompiler(arity, name, false)
+		arityProto, _, err := compileArityProtoWithCompiler(arity, name, false, fnExpr.self)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +79,7 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 	// Compile variadic arity
 	if fnExpr.variadic != nil {
-		varProto, _, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true)
+		varProto, _, err := compileArityProtoWithCompiler(*fnExpr.variadic, name, true, fnExpr.self)
 		if err != nil {
 			return nil, err
 		}
@@ -105,8 +105,11 @@ func CompileFnExpr(fnExpr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 // compileArityProtoWithCompiler compiles a single function arity and returns both the ArityProto and the compiler.
 // The compiler is returned so callers can access SubFunctions if needed.
-func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bool) (*ArityProto, *Compiler, error) {
+func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bool, self Symbol) (*ArityProto, *Compiler, error) {
 	c := NewCompiler(nil, name)
+	if self.name != nil {
+		c.locals[0].name = self // Slot 0 holds the function itself.
+	}
 
 	// For variadic, Arity is fixed params count (excluding rest)
 	fixedArgCount := len(arity.args)
@@ -120,6 +123,10 @@ func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bo
 		c.stackSize++ // VM pushes this arg
 		c.addLocal(arg)
 	}
+
+	// Function arities are recursion points too, independently of `loop`.
+	c.loopStart = len(c.function.Chunk.Code)
+	c.loopSlotStart = 1 // Parameters begin immediately after the function slot.
 
 	// Compile the body
 	for i, bodyExpr := range arity.body {
@@ -152,7 +159,7 @@ func compileArityProtoWithCompiler(arity FnArityExpr, name string, isVariadic bo
 
 // CompileArityProto compiles a single function arity to an ArityProto.
 func CompileArityProto(arity FnArityExpr, name string, isVariadic bool) (*ArityProto, error) {
-	arityProto, _, err := compileArityProtoWithCompiler(arity, name, isVariadic)
+	arityProto, _, err := compileArityProtoWithCompiler(arity, name, isVariadic, Symbol{})
 	return arityProto, err
 }
 
@@ -660,6 +667,10 @@ func (c *Compiler) compileFn(e *FnExpr) error {
 			inner.addLocal(arg)
 		}
 
+		// Each arity is a recursion point; nested loops temporarily override it.
+		inner.loopStart = len(inner.function.Chunk.Code)
+		inner.loopSlotStart = 1
+
 		// Compile the body
 		for i, bodyExpr := range arity.body {
 			if err := inner.compile(bodyExpr); err != nil {
@@ -1039,66 +1050,77 @@ func (c *Compiler) emitReturn() {
 
 // IsVMCompatible checks if an expression can be compiled to bytecode.
 func IsVMCompatible(expr Expr) bool {
+	return isVMCompatible(expr, false)
+}
+
+// Type literals are supported by the compiler, but existing VM stack traces
+// differ from AST stack traces for some type-using functions. Permit them only
+// when explicitly checking a known-safe generated core function (reduce).
+func isVMCompatible(expr Expr, allowTypes bool) bool {
+	compatible := func(expr Expr) bool { return isVMCompatible(expr, allowTypes) }
 	switch e := expr.(type) {
 	case *LiteralExpr:
+		if _, ok := e.obj.(*Type); ok {
+			return allowTypes
+		}
 		return isLiteralVMCompatible(e.obj)
 	case *VectorExpr:
 		for _, elem := range e.v {
-			if !IsVMCompatible(elem) {
+			if !compatible(elem) {
 				return false
 			}
 		}
 		return true
 	case *MapExpr:
 		for i := range e.keys {
-			if !IsVMCompatible(e.keys[i]) || !IsVMCompatible(e.values[i]) {
+			if !compatible(e.keys[i]) || !compatible(e.values[i]) {
 				return false
 			}
 		}
 		return true
 	case *SetExpr:
 		for _, elem := range e.elements {
-			if !IsVMCompatible(elem) {
+			if !compatible(elem) {
 				return false
 			}
 		}
 		return true
 	case *IfExpr:
-		return IsVMCompatible(e.cond) && IsVMCompatible(e.positive) && IsVMCompatible(e.negative)
+		return compatible(e.cond) && compatible(e.positive) && compatible(e.negative)
 	case *DoExpr:
 		for _, bodyExpr := range e.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !compatible(bodyExpr) {
 				return false
 			}
 		}
 		return true
 	case *LetExpr:
 		for _, v := range e.values {
-			if !IsVMCompatible(v) {
+			if !compatible(v) {
 				return false
 			}
 		}
 		for _, bodyExpr := range e.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !compatible(bodyExpr) {
 				return false
 			}
 		}
 		return true
 	case *LoopExpr:
 		for _, v := range e.values {
-			if !IsVMCompatible(v) {
+			if !compatible(v) {
 				return false
 			}
 		}
 		for _, bodyExpr := range e.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !compatible(bodyExpr) {
 				return false
 			}
 		}
 		return true
 	case *RecurExpr:
 		for _, arg := range e.args {
-			if !IsVMCompatible(arg) {
+			if !compatible(arg) {
 				return false
 			}
 		}
@@ -1106,62 +1128,53 @@ func IsVMCompatible(expr Expr) bool {
 	case *VarRefExpr, *BindingExpr, *SetMacroExpr:
 		return true
 	case *CallExpr:
-		if !IsVMCompatible(e.callable) {
+		if !compatible(e.callable) {
 			return false
 		}
 		for _, arg := range e.args {
-			if !IsVMCompatible(arg) {
+			if !compatible(arg) {
 				return false
 			}
 		}
 		return true
 	case *DefExpr:
-		if e.meta != nil && !IsVMCompatible(e.meta) {
+		if e.meta != nil && !compatible(e.meta) {
 			return false
 		}
-		return e.value == nil || IsVMCompatible(e.value)
+		return e.value == nil || compatible(e.value)
 	case *FnExpr:
-		// Check all arities
 		for _, arity := range e.arities {
 			for _, bodyExpr := range arity.body {
-				if !IsVMCompatible(bodyExpr) {
+				if !compatible(bodyExpr) {
 					return false
 				}
 			}
 		}
 		if e.variadic != nil {
 			for _, bodyExpr := range e.variadic.body {
-				if !IsVMCompatible(bodyExpr) {
+				if !compatible(bodyExpr) {
 					return false
 				}
 			}
 		}
 		return true
 	case *MetaExpr:
-		return IsVMCompatible(e.expr)
+		return compatible(e.expr)
 	case *ThrowExpr:
-		return IsVMCompatible(e.e)
+		return compatible(e.e)
 	case *TryExpr:
 		// Exception dispatch does not yet run finally on all exit paths.
-		// Do not precompile functions containing finally (notably core/with-bindings*).
 		if e.finallyExpr != nil {
 			return false
 		}
 		for _, bodyExpr := range e.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !compatible(bodyExpr) {
 				return false
 			}
 		}
 		for _, catch := range e.catches {
 			for _, bodyExpr := range catch.body {
-				if !IsVMCompatible(bodyExpr) {
-					return false
-				}
-			}
-		}
-		if e.finallyExpr != nil {
-			for _, bodyExpr := range e.finallyExpr {
-				if !IsVMCompatible(bodyExpr) {
+				if !compatible(bodyExpr) {
 					return false
 				}
 			}
@@ -1306,17 +1319,21 @@ func padLeft(s string, length int, pad string) string {
 
 // IsVMCompatibleFn checks if a function expression can be compiled to bytecode.
 func IsVMCompatibleFn(e *FnExpr) bool {
+	return isVMCompatibleFn(e, false)
+}
+
+func isVMCompatibleFn(e *FnExpr, allowTypes bool) bool {
 	// Check all arities
 	for _, arity := range e.arities {
 		for _, bodyExpr := range arity.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !isVMCompatible(bodyExpr, allowTypes) {
 				return false
 			}
 		}
 	}
 	if e.variadic != nil {
 		for _, bodyExpr := range e.variadic.body {
-			if !IsVMCompatible(bodyExpr) {
+			if !isVMCompatible(bodyExpr, allowTypes) {
 				return false
 			}
 		}

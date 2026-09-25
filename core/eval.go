@@ -86,6 +86,9 @@ func (rt *Runtime) stacktrace() string {
 	return b.String()
 }
 
+// Used only as an immutable placeholder when VM calls have no AST call site.
+var unknownCallExpr = &CallExpr{}
+
 func (rt *Runtime) pushFrame() {
 	// TODO: this is all wrong. We cannot rely on
 	// currentExpr for stacktraces. Instead, each Callable
@@ -94,7 +97,7 @@ func (rt *Runtime) pushFrame() {
 	if rt.currentExpr != nil {
 		tr = rt.currentExpr.(Traceable)
 	} else {
-		tr = &CallExpr{}
+		tr = unknownCallExpr
 	}
 	rt.callstack.pushFrame(Frame{traceable: tr})
 }

@@ -207,6 +207,71 @@ func TestVMFallbackAttribution(t *testing.T) {
 	}
 }
 
+func TestVMNamedFunctionAndArityRecur(t *testing.T) {
+	cases := []struct {
+		code string
+		args []Object
+		want int
+	}{
+		{`(fn step [n] (if (= n 0) 0 (step (- n 1))))`, []Object{Int{I: 7}}, 0},
+		{`(fn step ([n] (step n 0)) ([n acc] (if (= n 0) acc (recur (- n 1) (+ acc n)))))`, []Object{Int{I: 1000}}, 500500},
+		{`(fn step [n] (if (= n 0) 0 ((fn [] (step (- n 1))))))`, []Object{Int{I: 4}}, 0},
+		{`(fn step [n & xs] (if (seq xs) (recur (+ n (first xs)) (next xs)) n))`, []Object{Int{I: 1}, Int{I: 2}, Int{I: 3}}, 6},
+		{`(fn step [n] (loop [i n] (if (= i 0) n (recur (- i 1)))))`, []Object{Int{I: 4}}, 4},
+	}
+	for _, tt := range cases {
+		t.Run(tt.code, func(t *testing.T) {
+			reader := NewReader(strings.NewReader(tt.code), "<test>")
+			form, err := TryRead(reader)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+			if err != nil {
+				t.Fatal(err)
+			}
+			fnExpr := expr.(*FnExpr)
+			proto, err := CompileFnExpr(fnExpr, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			actual := VMExecute(&Fn{proto: proto, isCompiled: true}, tt.args)
+			ast := fnExpr.Eval(nil).(*Fn).Call(tt.args)
+			if !actual.Equals(ast) || !actual.Equals(Int{I: tt.want}) {
+				t.Errorf("VM %s, AST %s, want %d", actual, ast, tt.want)
+			}
+		})
+	}
+}
+
+func TestVMTypeLiteralInClosedFunction(t *testing.T) {
+	reader := NewReader(strings.NewReader(`(fn [coll] (instance? Reduce coll))`), "<test>")
+	form, err := TryRead(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fnExpr := expr.(*FnExpr)
+	if IsVMCompatibleFn(fnExpr) || !isVMCompatibleFn(fnExpr, true) {
+		t.Fatal("type literals must remain gated outside explicitly validated functions")
+	}
+	proto, err := CompileFnExpr(fnExpr, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, coll := range []Object{NewListFrom(Int{I: 1}), EmptyArrayVector(), NIL} {
+		args := []Object{coll}
+		vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
+		ast := fnExpr.Eval(nil).(*Fn).Call(args)
+		if !vm.Equals(ast) {
+			t.Errorf("instance? Reduce %s: VM %s, AST %s", coll, vm, ast)
+		}
+	}
+}
+
 func TestVMFinallyFallsBackToAST(t *testing.T) {
 	reader := NewReader(strings.NewReader("(fn [] (try 1 (finally 2)))"), "<test>")
 	form, err := TryRead(reader)
@@ -221,8 +286,8 @@ func TestVMFinallyFallsBackToAST(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected FnExpr, got %T", expr)
 	}
-	if IsVMCompatibleFn(fn) {
-		t.Fatal("try/finally is not yet safe to compile")
+	if IsVMCompatibleFn(fn) || isVMCompatibleFn(fn, true) {
+		t.Fatal("try/finally is not yet safe to compile, even when type literals are allowed")
 	}
 }
 

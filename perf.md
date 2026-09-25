@@ -239,3 +239,20 @@ Before/after profiles: `/tmp/vmcore-all.mem`, `/tmp/vmcore-final.mem`, `/tmp/vmc
 For Day 11, the report counted 20,234,917 VM-to-AST calls; its largest estimated sites were `core/assoc` (8.49 million), `core/conj` (7.31 million), `core/reduce` (3.01 million), and the workload's `next-states` function (1.00 million). The complete report is in `/tmp/vm-attribution-final.err`. These are the next candidates for investigating *why* a function is not compiled; this flag itself does not change compilation.
 
 Parity tests now cover empty maps/sets, map type selection at both sides of `HASHMAP_THRESHOLD`, key/value and set-element evaluation order, and duplicate detection including the timing of side effects. The VM previously built map/set literals only after evaluating all operands, reversed array-map insertion order, silently discarded duplicate entries, and used `Assoc` (which copied intermediate maps). New incremental literal opcodes mirror `MapExpr.Eval` and `SetExpr.Eval`; legacy `OP_MAP`/`OP_SET` remain for packed bytecode. Day 11 still returns `31`; an uninstrumented run after this change took 23.80 seconds (previous 24.30–24.67 seconds, within run-to-run variation).
+
+## Compiling the hottest core fallbacks
+
+Compiled named generated `conj` and `assoc` using their existing closed, self-only environments: the VM's slot 0 supplies the self binding. The compiler now treats function arities as `recur` targets, including variadic arities and nested loops. The generated `reduce` function requires a `Reduce` type literal, so that literal is permitted **only when checking `reduce` for core precompilation**; widening it globally changed error-position behavior in the HTTP SSE forked test. Unsupported constructs such as `try/finally` still fall back.
+
+Day 11 (all runs returned `31`; times are single runs or small ranges, not statistically significant):
+
+| Variant | VM→AST fallbacks | Wall time | User CPU | Peak RSS | Allocated (sampled) |
+|---|---:|---:|---:|---:|---:|
+| Before | 20.23M | 23.94s | 54.86s | 320MB | ~17.9GB (earlier profile) |
+| `conj` compiled | 12.50M | 23.42s | 50.63s | 321MB | — |
+| `assoc` also compiled | 3.97M | 21.97–22.46s | 46.22–46.40s | ~318MB | 14.02GB |
+| `reduce` also compiled, **before** frame fix | 0.99M | 21.82–22.93s | 48.26–49.50s | ~317MB | 15.32GB |
+| `reduce` compiled, **after** frame fix | 0.99M | 21.00–21.48s | 44.05–44.24s | ~317MB | 13.44GB |
+| `--no-vm` | N/A | 31.72s | 85.13s | 327MB | — |
+
+`reduce` alone initially increased allocations: callbacks from native reducers call compiled functions outside the running VM, and every `Fn.callVM` frame created a new empty `CallExpr` when no AST call site was available (around 1.96GB attributed to `Runtime.pushFrame`). Reusing one immutable empty call-site placeholder removed that allocation, and lowered both user CPU and wall time. Profiles: `/tmp/vm-assoc-only.mem`, `/tmp/vm-self-final.mem`, `/tmp/vm-reduce-shared.mem`. `recur` support also made 16 other previously excluded core functions eligible; compiled-core counts progressed from 257 before these changes to 274 with `conj`, 275 with `assoc`, and 276 with `reduce`. The remaining sampled fallback is predominantly the workload's `next-states` at `/Users/candid/personal/advent/advent2016/day11/main.joke:27` (~0.99M calls).
