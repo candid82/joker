@@ -515,23 +515,11 @@
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   {:added "1.0"}
-  (^Seq [] (lazy-seq nil))
-  (^Seq [^Seqable x] (lazy-seq x))
-  (^Seq [^Seqable x ^Seqable y]
-   (lazy-seq
-    (let [s (seq x)]
-      (if s
-        (cons (first s) (concat (rest s) y))
-        y))))
+  (^Seq [] (concat-seq__))
+  (^Seq [^Seqable x] (concat-seq__ x))
+  (^Seq [^Seqable x ^Seqable y] (concat-seq__ x y))
   (^Seq [^Seqable x ^Seqable y & zs]
-   (let [cat (fn cat [xys zs]
-               (lazy-seq
-                (let [xys (seq xys)]
-                  (if xys
-                    (cons (first xys) (cat (rest xys) zs))
-                    (when zs
-                      (cat (first zs) (next zs)))))))]
-     (cat (concat x y) zs))))
+   (apply concat-seq__ x y zs)))
 
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
@@ -1617,10 +1605,7 @@
   false."
   {:added "1.0"}
   ^Boolean [^Callable pred ^Seqable coll]
-  (cond
-    (nil? (seq coll)) true
-    (pred (first coll)) (recur pred (next coll))
-    :else false))
+  (every-seq__ pred coll))
 
 (def ^{:tag Boolean
        :doc "Returns false if (pred x) is logical true for every x in
@@ -1636,8 +1621,7 @@
   (some #{:fred} coll)"
   {:added "1.0"}
   [^Callable pred ^Seqable coll]
-  (when (seq coll)
-    (or (pred (first coll)) (recur pred (next coll)))))
+  (some-seq__ pred coll))
 
 (def ^{:tag Boolean
        :doc "Returns false if (pred x) is logical true for any x in coll,
@@ -1654,9 +1638,7 @@
   f should accept number-of-colls arguments."
   {:added "1.0"}
   (^Seq [^Callable f ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (cons (f (first s)) (map f (rest s))))))
+   (map-seq__ f coll))
   (^Seq [^Callable f ^Seqable c1 ^Seqable c2]
    (lazy-seq
     (let [s1 (seq c1) s2 (seq c2)]
@@ -1682,26 +1664,23 @@
   to f and colls.  Thus function f should return a collection."
   {:added "1.0"}
   ^Seq [^Callable f & colls]
-  (apply concat (apply map f colls)))
+  (if (= 1 (count colls))
+    (mapcat-seq__ f (first colls))
+    (apply concat (apply map f colls))))
 
 (defn filter
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
   (^Seq [^Callable pred ^Seqable coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
-      (let [f (first s) r (rest s)]
-        (if (pred f)
-          (cons f (filter pred r))
-          (filter pred r)))))))
+   (filter-seq__ pred coll true)))
 
 (defn remove
   "Returns a lazy sequence of the items in coll for which
   (pred item) returns false. pred must be free of side-effects."
   {:added "1.0"}
   ^Seq [^Callable pred ^Seqable coll]
-  (filter (complement pred) coll))
+  (filter-seq__ pred coll false))
 
 (defn take
   "Returns a lazy sequence of the first n items in coll, or all items if

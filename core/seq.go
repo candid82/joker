@@ -31,6 +31,7 @@ type (
 		MetaHolder
 		arr   []Object
 		index int
+		step  int
 	}
 	LazySeq struct {
 		InfoHolder
@@ -44,7 +45,192 @@ type (
 		seq Seq
 		fn  func(obj Object) Object
 	}
+	TransformSeq struct {
+		InfoHolder
+		MetaHolder
+		kind   transformSeqKind
+		fn     Callable
+		source Seqable
+		inner  Seq
+		seq    Seq
+		arg    [1]Object
+		keep   bool
+	}
+	transformSeqKind uint8
 )
+
+const (
+	transformMap transformSeqKind = iota + 1
+	transformFilter
+	transformMapcat
+	transformConcat
+)
+
+func NewMapSeq(fn Callable, source Seqable) Seq {
+	return &TransformSeq{kind: transformMap, fn: fn, source: source}
+}
+
+func NewFilterSeq(fn Callable, source Seqable, keep bool) Seq {
+	return &TransformSeq{kind: transformFilter, fn: fn, source: source, keep: keep}
+}
+
+func NewMapcatSeq(fn Callable, source Seqable) Seq {
+	return &TransformSeq{kind: transformMapcat, fn: fn, source: source}
+}
+
+func NewConcatSeq(sources []Object) Seq {
+	arr := append([]Object(nil), sources...)
+	return &TransformSeq{kind: transformConcat, source: &ArraySeq{arr: arr}}
+}
+
+func (seq *TransformSeq) call(obj Object) Object {
+	seq.arg[0] = obj
+	return seq.fn.Call(seq.arg[:])
+}
+
+func (seq *TransformSeq) finish(realized Seq) {
+	seq.seq = realized
+	seq.fn = nil
+	seq.source = nil
+	seq.inner = nil
+	seq.arg[0] = nil
+}
+
+func (seq *TransformSeq) realize() {
+	if seq.seq != nil {
+		return
+	}
+	source := seq.source.Seq()
+	switch seq.kind {
+	case transformMap:
+		if source.IsEmpty() {
+			seq.finish(EmptyList)
+			return
+		}
+		first := seq.call(source.First())
+		rest := NewMapSeq(seq.fn, source.Rest())
+		seq.finish(&ConsSeq{first: first, rest: rest})
+	case transformFilter:
+		for !source.IsEmpty() {
+			first := source.First()
+			rest := source.Rest()
+			if ToBool(seq.call(first)) == seq.keep {
+				restSeq := NewFilterSeq(seq.fn, rest, seq.keep)
+				seq.finish(&ConsSeq{first: first, rest: restSeq})
+				return
+			}
+			source = rest
+		}
+		seq.finish(EmptyList)
+	case transformMapcat, transformConcat:
+		inner := seq.inner
+		for inner == nil || inner.IsEmpty() {
+			if source.IsEmpty() {
+				seq.finish(EmptyList)
+				return
+			}
+			var next Object
+			if seq.kind == transformMapcat {
+				next = seq.call(source.First())
+			} else {
+				next = source.First()
+			}
+			inner = EnsureObjectIsSeqable(next, "").Seq()
+			source = source.Rest()
+		}
+		first := inner.First()
+		rest := &TransformSeq{
+			kind:   seq.kind,
+			fn:     seq.fn,
+			source: source,
+			inner:  inner.Rest(),
+		}
+		seq.finish(&ConsSeq{first: first, rest: rest})
+	default:
+		panic(RT.NewError("Unknown transforming sequence operation"))
+	}
+}
+
+func (seq *TransformSeq) GetInfo() *ObjectInfo {
+	return seq.info
+}
+
+func (seq *TransformSeq) WithInfo(info *ObjectInfo) Object {
+	res := *seq
+	res.info = info
+	return &res
+}
+
+func (seq *TransformSeq) WithMeta(meta Map) Object {
+	res := *seq
+	res.meta = SafeMerge(res.meta, meta)
+	return &res
+}
+
+func (seq *TransformSeq) GetMeta() Map {
+	return seq.meta
+}
+
+func (seq *TransformSeq) GetType() *Type {
+	return TYPE.LazySeq
+}
+
+func (seq *TransformSeq) Seq() Seq {
+	return seq
+}
+
+func (seq *TransformSeq) Equals(other interface{}) bool {
+	return IsSeqEqual(seq, other)
+}
+
+func (seq *TransformSeq) ToString(escape bool) string {
+	return SeqToString(seq, escape)
+}
+
+func (seq *TransformSeq) Pprint(w io.Writer, indent int) int {
+	return pprintSeq(seq, w, indent)
+}
+
+func (seq *TransformSeq) Format(w io.Writer, indent int) int {
+	return formatSeq(seq, w, indent)
+}
+
+func (seq *TransformSeq) Hash() uint32 {
+	return hashOrdered(seq)
+}
+
+func (seq *TransformSeq) First() Object {
+	seq.realize()
+	return seq.seq.First()
+}
+
+func (seq *TransformSeq) Rest() Seq {
+	seq.realize()
+	return seq.seq.Rest()
+}
+
+func (seq *TransformSeq) IsEmpty() bool {
+	seq.realize()
+	return seq.seq.IsEmpty()
+}
+
+func (seq *TransformSeq) IsRealized() bool {
+	return seq.seq != nil
+}
+
+func (seq *TransformSeq) Cons(obj Object) Seq {
+	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *TransformSeq) reduce(c Callable) Object {
+	return seqReduce(seq, c)
+}
+
+func (seq *TransformSeq) reduceInit(c Callable, init Object) Object {
+	return seqReduceInit(seq, c, init)
+}
+
+func (seq *TransformSeq) sequential() {}
 
 func SeqsEqual(seq1, seq2 Seq) bool {
 	iter2 := iter(seq2)
@@ -123,6 +309,14 @@ func (seq *MappingSeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
 
+func (seq *MappingSeq) reduce(c Callable) Object {
+	return seqReduce(seq, c)
+}
+
+func (seq *MappingSeq) reduceInit(c Callable, init Object) Object {
+	return seqReduceInit(seq, c, init)
+}
+
 func (seq *MappingSeq) sequential() {}
 
 func (seq *LazySeq) Seq() Seq {
@@ -132,6 +326,7 @@ func (seq *LazySeq) Seq() Seq {
 func (seq *LazySeq) realize() {
 	if seq.seq == nil {
 		seq.seq = EnsureObjectIsSeqable(seq.fn.Call([]Object{}), "").Seq()
+		seq.fn = nil
 	}
 }
 
@@ -188,6 +383,16 @@ func (seq *LazySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
 
+func (seq *LazySeq) reduce(c Callable) Object {
+	seq.realize()
+	return seqReduce(seq.seq, c)
+}
+
+func (seq *LazySeq) reduceInit(c Callable, init Object) Object {
+	seq.realize()
+	return seqReduceInit(seq.seq, c, init)
+}
+
 func (seq *LazySeq) sequential() {}
 
 func NewLazySeq(c Callable) *LazySeq {
@@ -235,9 +440,17 @@ func (seq *ArraySeq) First() Object {
 	return seq.arr[seq.index]
 }
 
+func (seq *ArraySeq) stride() int {
+	if seq.step == 0 {
+		return 1
+	}
+	return seq.step
+}
+
 func (seq *ArraySeq) Rest() Seq {
-	if seq.index+1 < len(seq.arr) {
-		return &ArraySeq{index: seq.index + 1, arr: seq.arr}
+	next := seq.index + seq.stride()
+	if next < len(seq.arr) {
+		return &ArraySeq{index: next, step: seq.step, arr: seq.arr}
 	}
 	return EmptyList
 }
@@ -248,14 +461,42 @@ func (seq *ArraySeq) IsEmpty() bool {
 
 func (seq *ArraySeq) Count() int {
 	n := len(seq.arr) - seq.index
-	if n < 0 {
+	if n <= 0 {
 		return 0
 	}
-	return n
+	step := seq.stride()
+	return (n + step - 1) / step
 }
 
 func (seq *ArraySeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
+}
+
+func (seq *ArraySeq) reduce(c Callable) Object {
+	if seq.IsEmpty() {
+		return c.Call(nil)
+	}
+	step := seq.stride()
+	res := seq.arr[seq.index]
+	args := []Object{res, NIL}
+	for i := seq.index + step; i < len(seq.arr); i += step {
+		args[1] = seq.arr[i]
+		res = c.Call(args)
+		args[0] = res
+	}
+	return res
+}
+
+func (seq *ArraySeq) reduceInit(c Callable, init Object) Object {
+	res := init
+	args := []Object{res, NIL}
+	step := seq.stride()
+	for i := seq.index; i < len(seq.arr); i += step {
+		args[1] = seq.arr[i]
+		res = c.Call(args)
+		args[0] = res
+	}
+	return res
 }
 
 func (seq *ArraySeq) sequential() {}
@@ -324,6 +565,14 @@ func (seq *ConsSeq) Cons(obj Object) Seq {
 	return &ConsSeq{first: obj, rest: seq}
 }
 
+func (seq *ConsSeq) reduce(c Callable) Object {
+	return seqReduce(seq, c)
+}
+
+func (seq *ConsSeq) reduceInit(c Callable, init Object) Object {
+	return seqReduceInit(seq, c, init)
+}
+
 func (seq *ConsSeq) sequential() {}
 
 func NewConsSeq(first Object, rest Seq) *ConsSeq {
@@ -331,6 +580,26 @@ func NewConsSeq(first Object, rest Seq) *ConsSeq {
 		first: first,
 		rest:  rest,
 	}
+}
+
+func seqReduce(seq Seq, c Callable) Object {
+	if seq.IsEmpty() {
+		return c.Call(nil)
+	}
+	res := seq.First()
+	return seqReduceInit(seq.Rest(), c, res)
+}
+
+func seqReduceInit(seq Seq, c Callable, init Object) Object {
+	res := init
+	args := []Object{res, NIL}
+	for !seq.IsEmpty() {
+		args[1] = seq.First()
+		res = c.Call(args)
+		args[0] = res
+		seq = seq.Rest()
+	}
+	return res
 }
 
 func iter(seq Seq) *SeqIterator {

@@ -259,21 +259,11 @@ func (m *ArrayMap) Merge(other Map) Map {
 }
 
 func (m *ArrayMap) Keys() Seq {
-	mlen := len(m.arr) / 2
-	res := make([]Object, mlen)
-	for i := 0; i < mlen; i++ {
-		res[i] = m.arr[i*2]
-	}
-	return &ArraySeq{arr: res}
+	return &ArraySeq{arr: m.arr, step: 2}
 }
 
 func (m *ArrayMap) Vals() Seq {
-	mlen := len(m.arr) / 2
-	res := make([]Object, mlen)
-	for i := 0; i < mlen; i++ {
-		res[i] = m.arr[i*2+1]
-	}
-	return &ArraySeq{arr: res}
+	return &ArraySeq{arr: m.arr, index: 1, step: 2}
 }
 
 func (m *ArrayMap) Iter() MapIterator {
