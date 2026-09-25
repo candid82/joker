@@ -151,6 +151,35 @@ func evalAndCompile(t *testing.T, code string) Object {
 	return vm.Execute(fn, nil)
 }
 
+func TestVMNativeCallArguments(t *testing.T) {
+	vm := NewVM()
+	coreProc := Proc{Fn: procConcatSeq, Name: "procConcatSeq"}
+	vm.Push(coreProc)
+	vm.Push(NewVectorFrom(Int{I: 1}, Int{I: 2}))
+	vm.Push(NewVectorFrom(Int{I: 3}))
+	if vm.callValue(coreProc, 2) {
+		t.Fatal("native call pushed a frame")
+	}
+	result := vm.Pop().(Seq)
+	vm.Push(Int{I: 99}) // Reuse the call's stack slot after returning.
+	if got := SeqToString(result, false); got != "(1 2 3)" {
+		t.Fatalf("lazy native result changed after stack reuse: %s", got)
+	}
+
+	// Non-core procs can retain their arguments; they must receive an
+	// independently owned slice rather than the VM stack view.
+	retainingProc := Proc{Fn: func(args []Object) Object { return &ArraySeq{arr: args} }, Name: "retain", Package: "test"}
+	vm.Reset()
+	vm.Push(retainingProc)
+	vm.Push(Int{I: 7})
+	vm.callValue(retainingProc, 1)
+	retained := vm.Pop().(Seq)
+	vm.Push(Int{I: 8})
+	if got := retained.First().(Int).I; got != 7 {
+		t.Fatalf("retained argument changed after stack reuse: %d", got)
+	}
+}
+
 func TestDisassemble(t *testing.T) {
 	code := "(+ 1 2)"
 

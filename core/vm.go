@@ -641,28 +641,50 @@ func (vm *VM) callValue(callee Object, argCount int) bool {
 		}
 		vm.Push(result)
 		return false
-	case Callable:
-		// Native function or other callable
-		args := make([]Object, argCount)
-		for i := argCount - 1; i >= 0; i-- {
-			args[i] = vm.Pop()
-		}
-		vm.Pop() // Pop the callable
-		result := fn.Call(args)
-		if result == nil {
-			if obj, ok := fn.(Object); ok {
-				panic(RT.NewError("VM BUG: Callable returned Go nil: " + obj.ToString(false)))
+	case Proc:
+		if fn.Package == "" {
+			// Core procedures consume their arguments during Call. Borrow the VM
+			// stack rather than allocating a slice for every native call. Restrict
+			// the capacity so append cannot overwrite subsequent stack slots.
+			base := vm.stackTop - argCount - 1
+			args := vm.stack[base+1 : vm.stackTop : vm.stackTop]
+			vm.stackTop = base
+			result := fn.Call(args)
+			if result == nil {
+				panic(RT.NewError("VM BUG: Callable returned Go nil: " + fn.ToString(false)))
 			}
-			panic(RT.NewError("VM BUG: Callable returned Go nil"))
+			clear(vm.stack[base+1 : base+argCount+1])
+			vm.Push(result)
+			return false
 		}
-		vm.Push(result)
-		return false
+		return vm.callOtherCallable(fn, argCount)
+	case Callable:
+		return vm.callOtherCallable(fn, argCount)
 	default:
 		if callee == nil {
 			panic(RT.NewError("Cannot call Go nil (var not initialized?)"))
 		}
 		panic(RT.NewError("Cannot call " + callee.GetType().ToString(false)))
 	}
+}
+
+// callOtherCallable retains an owning argument slice for callables that may
+// capture their arguments (including AST functions and third-party procs).
+func (vm *VM) callOtherCallable(fn Callable, argCount int) bool {
+	args := make([]Object, argCount)
+	for i := argCount - 1; i >= 0; i-- {
+		args[i] = vm.Pop()
+	}
+	vm.Pop() // Pop the callable
+	result := fn.Call(args)
+	if result == nil {
+		if obj, ok := fn.(Object); ok {
+			panic(RT.NewError("VM BUG: Callable returned Go nil: " + obj.ToString(false)))
+		}
+		panic(RT.NewError("VM BUG: Callable returned Go nil"))
+	}
+	vm.Push(result)
+	return false
 }
 
 // selectArityProto selects the appropriate arity for the given argument count.

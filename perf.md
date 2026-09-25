@@ -197,3 +197,20 @@ Final VM profiles:
 
 - `/tmp/day11-vm-seq.cpu`
 - `/tmp/day11-vm-seq.mem`
+
+## VM generated-core and native-call follow-up
+
+The VM branch now compiles the generated, closed `joker.core/into` function at startup (only with VM enabled) and calls built-in core `Proc` values with a borrowed VM-stack argument slice. AST functions and third-party procedures still receive owned argument slices because their arguments can escape.
+
+Compiling **all** eligible generated core functions was not safe: 258 of 274 candidates compiled, but eval and linter tests failed (notably namespace loading). A tested allowlist of eight sequence functions passed the suites but increased Day 11's user CPU from about 72 to 85 seconds. Individually, compiling `group-by` was similarly slow. Compiling only `into` reliably reduced retired instructions by roughly 2.3% and peak RSS from about 442 to 342 MB; other individually tested helpers brought no clear benefit. Broad generated-core compilation needs semantic fixes and better VM-to-AST transitions before expanding the allowlist.
+
+| VM configuration | Wall time | User CPU | Peak RSS | Instructions |
+|---|---:|---:|---:|---:|
+| Before both changes (fresh run) | 29.45 s | 72.60 s | 436 MB | — |
+| Borrowed core-proc arguments, without generated-core compilation | 30.09 s | 72.68 s | 442 MB | 0.669 T |
+| Plus compiled generated `into` (two runs) | 29.32–29.38 s | 72.47–72.59 s | 342 MB | 0.653 T |
+| `--no-vm` after both changes | 33.04 s | 86.34 s | 327 MB | 0.755 T |
+
+These runs are noisy: the combined wall-time difference from the initial run is within ~1%, though instruction count and RSS improve consistently. A memory profile after both changes reports 24,802 MB and 682.3 million allocated objects, versus 25,203 MB and 707.8 million before them. `VM.callValue` flat allocations fall from about 1,240 MB to 887 MB. The remaining allocations are largely AST-fallback calls, whose arguments cannot be borrowed from the reusable VM stack without copying escaping frames.
+
+Follow-up profile: `/tmp/vm-final.mem`.

@@ -2071,6 +2071,21 @@ func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
 	ns.MaybeLazy("joker.core")
 
+	// Generated core functions are installed as AST-backed values, so
+	// CompileAST never visits them. Compile the closed `into` helper at
+	// startup, after --no-vm has been parsed. Compiling the entire generated
+	// core is not safe yet, and several other helpers regress on this workload.
+	if !DISABLE_VM && !LINTER_MODE {
+		if vr := ns.Resolve("into"); vr != nil {
+			if fn, ok := vr.Value.(*Fn); ok && fn.fnExpr != nil && fn.env == nil && !fn.isMacro && fn.fnExpr.self.name == nil && !fn.isCompiled && IsVMCompatibleFn(fn.fnExpr) {
+				if proto, err := CompileFnExpr(fn.fnExpr, nil); err == nil {
+					fn.proto = proto
+					fn.isCompiled = true
+				}
+			}
+		}
+	}
+
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)
 	for _, ns := range coreNamespaces {
