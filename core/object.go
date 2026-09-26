@@ -754,6 +754,11 @@ func (fn *Fn) Call(args []Object) Object {
 		return fn.callAST(args)
 	}
 	fn.ensureCompiled()
+	// A native call into a running VM can execute a callback on the same VM.
+	// Entries without an active native caller retain the separate VM path.
+	if ctx := RT.vm; ctx != nil && ctx.vm != nil && ctx.vm.context == ctx && ctx.vm.nativeDepth > 0 {
+		return ctx.vm.callCallback(fn, args)
+	}
 	return fn.callVM(args)
 }
 

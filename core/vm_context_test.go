@@ -40,6 +40,88 @@ func TestVMExecutionContextExpiry(t *testing.T) {
 	}
 }
 
+func TestVMNativeCallbackReusesActiveVM(t *testing.T) {
+	var caller *vmContext
+	inner := Proc{Fn: func([]Object) Object {
+		if RT.vm != caller || caller == nil || caller.vm == nil || caller.vm.frameCount < 2 {
+			t.Fatal("callback did not execute on the native caller's VM")
+		}
+		return Int{I: 42}
+	}}
+	proto, err := CompileTopLevel(&CallExpr{callable: &LiteralExpr{obj: inner}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fn := &Fn{proto: proto, isCompiled: true}
+	marker := Int{I: 99}
+	outer := Proc{Fn: func(args []Object) Object {
+		caller = RT.vm
+		result := args[0].(*Fn).Call(nil)
+		if RT.vm != caller || args[1] != marker {
+			t.Fatal("native caller lost its context or borrowed arguments")
+		}
+		return result
+	}}
+	outerProto, err := CompileTopLevel(&CallExpr{callable: &LiteralExpr{obj: outer}, args: []Expr{
+		&LiteralExpr{obj: fn}, &LiteralExpr{obj: marker},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := NewVM().ExecuteTopLevel(outerProto)
+	if result != (Int{I: 42}) || caller == nil || caller.vm != nil {
+		t.Fatal("callback result or context expiry is incorrect")
+	}
+}
+
+func TestVMNativeCallbackHostPanicCleanup(t *testing.T) {
+	failure := Proc{Fn: func([]Object) Object { panic("callback failure") }}
+	inner, err := CompileTopLevel(&CallExpr{callable: &LiteralExpr{obj: failure}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fn := &Fn{proto: inner, isCompiled: true}
+	outer := Proc{Fn: func([]Object) Object { return fn.Call(nil) }}
+	proto, err := CompileTopLevel(&CallExpr{callable: &LiteralExpr{obj: outer}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	vm := NewVM()
+	func() {
+		defer func() {
+			if got := recover(); got != "callback failure" {
+				t.Fatalf("unexpected panic: %v", got)
+			}
+		}()
+		vm.ExecuteTopLevel(proto)
+	}()
+	if vm.nativeDepth != 0 || vm.frameCount > 1 || vm.handlerCount != 0 || vm.pendingCount != 0 || vm.context.vm != nil {
+		t.Fatal("callback panic retained active VM state")
+	}
+	vm.Reset()
+	for _, obj := range vm.stack {
+		if obj != nil {
+			t.Fatal("callback panic retained stack values")
+		}
+	}
+}
+
+func TestVMNativeCallbackFrameGrowthAndExceptions(t *testing.T) {
+	for _, tt := range []struct{ code, want string }{
+		{`(let [f (fn f [n] (if (zero? n) 0 (inc (f (dec n)))))] (apply f [130]))`, `130`},
+		{`(try (apply (fn [] (throw (ex-info "callback" {}))) []) (catch Error e :caught))`, `:caught`},
+		{`(let [a (atom [])] (try (apply (fn [] (try (throw (ex-info "callback" {})) (finally (swap! a conj :finally)))) []) (catch Error e (swap! a conj :caught))) @a)`, `[:finally :caught]`},
+	} {
+		result, err := TryEvaluate(parseVMTest(t, tt.code))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := result.ToString(true); got != tt.want {
+			t.Fatalf("got %s, want %s", got, tt.want)
+		}
+	}
+}
+
 func TestVMNativeCallbackTrace(t *testing.T) {
 	code := `(let [f (fn [] (nth [] 9))] (apply f []))`
 	_, err := TryEvaluate(parseVMTest(t, code))

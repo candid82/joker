@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
+	"unicode/utf8"
 )
 
 type (
@@ -114,15 +115,15 @@ func (seq *TransformSeq) realize() {
 		rest := NewMapSeq(seq.fn, source.Rest())
 		seq.finish(first, rest)
 	case transformFilter:
-		for !source.IsEmpty() {
-			first := source.First()
-			rest := source.Rest()
+		cursor := newSeqCursor(source)
+		for cursor.hasNext() {
+			first := cursor.first()
+			cursor.advance()
 			if ToBool(seq.call(first)) == seq.keep {
-				restSeq := NewFilterSeq(seq.fn, rest, seq.keep)
+				restSeq := NewFilterSeq(seq.fn, cursor.rest(), seq.keep)
 				seq.finish(first, restSeq)
 				return
 			}
-			source = rest
 		}
 		seq.finish(nil, EmptyList)
 	case transformMapcat, transformConcat:
@@ -588,6 +589,89 @@ func NewConsSeq(first Object, rest Seq) *ConsSeq {
 	}
 }
 
+// seqCursor traverses indexed sequences without allocating a new Rest node on
+// every step. It never mutates the supplied Seq, which may be retained elsewhere.
+// Other sequences retain their normal First/Rest behavior (including laziness).
+type seqCursor struct {
+	seq   Seq
+	index int
+}
+
+func newSeqCursor(seq Seq) seqCursor {
+	cursor := seqCursor{seq: seq}
+	switch s := seq.(type) {
+	case *ArraySeq:
+		cursor.index = s.index
+	case *VectorSeq:
+		cursor.index = s.index
+	case *stringSeq:
+		cursor.index = s.off
+	}
+	return cursor
+}
+
+func (cursor *seqCursor) hasNext() bool {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		return cursor.index < len(s.arr)
+	case *VectorSeq:
+		return cursor.index < s.vector.Count()
+	case *stringSeq:
+		return cursor.index < len(s.s)
+	default:
+		return !cursor.seq.IsEmpty()
+	}
+}
+
+func (cursor *seqCursor) first() Object {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		return s.arr[cursor.index]
+	case *VectorSeq:
+		return s.vector.At(cursor.index)
+	case *stringSeq:
+		r, _ := utf8.DecodeRuneInString(s.s[cursor.index:])
+		return boxChar(r)
+	default:
+		return cursor.seq.First()
+	}
+}
+
+func (cursor *seqCursor) advance() {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		cursor.index += s.stride()
+	case *VectorSeq:
+		cursor.index++
+	case *stringSeq:
+		_, size := utf8.DecodeRuneInString(s.s[cursor.index:])
+		cursor.index += size
+	default:
+		*cursor = newSeqCursor(cursor.seq.Rest())
+	}
+}
+
+// rest returns an independent, persistent tail when a lazy transform needs to
+// retain the remainder of its input. Skipped indexed elements need no tails.
+func (cursor *seqCursor) rest() Seq {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		if cursor.hasNext() {
+			return &ArraySeq{arr: s.arr, index: cursor.index, step: s.step}
+		}
+		return EmptyList
+	case *VectorSeq:
+		if cursor.hasNext() {
+			return &VectorSeq{vector: s.vector, index: cursor.index}
+		}
+		return EmptyList
+	case *stringSeq:
+		return &stringSeq{s: s.s, off: cursor.index}
+	default:
+		return cursor.seq
+	}
+}
+
 func seqReduce(seq Seq, c Callable) Object {
 	if seq.IsEmpty() {
 		return c.Call(nil)
@@ -599,11 +683,12 @@ func seqReduce(seq Seq, c Callable) Object {
 func seqReduceInit(seq Seq, c Callable, init Object) Object {
 	res := init
 	args := []Object{res, NIL}
-	for !seq.IsEmpty() {
-		args[1] = seq.First()
+	cursor := newSeqCursor(seq)
+	for cursor.hasNext() {
+		args[1] = cursor.first()
 		res = c.Call(args)
 		args[0] = res
-		seq = seq.Rest()
+		cursor.advance()
 	}
 	return res
 }
@@ -636,9 +721,10 @@ func Fourth(seq Seq) Object {
 
 func ToSlice(seq Seq) []Object {
 	res := make([]Object, 0)
-	for !seq.IsEmpty() {
-		res = append(res, seq.First())
-		seq = seq.Rest()
+	cursor := newSeqCursor(seq)
+	for cursor.hasNext() {
+		res = append(res, cursor.first())
+		cursor.advance()
 	}
 	return res
 }

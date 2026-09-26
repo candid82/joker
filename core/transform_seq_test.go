@@ -42,6 +42,47 @@ func TestTransformSeqMemoization(t *testing.T) {
 	}
 }
 
+func TestFilterCursorRetainsIndexedTails(t *testing.T) {
+	values := []Object{Int{I: 0}, Int{I: 1}, Int{I: 2}, Int{I: 3}, Int{I: 4}}
+	for _, input := range []Seq{
+		&ArraySeq{arr: values, index: 1, step: 2},
+		&VectorSeq{vector: NewArrayVectorFrom(values...), index: 1},
+		MakeString("aλβ").Seq(),
+	} {
+		var expected []Object
+		for s := input; !s.IsEmpty(); s = s.Rest() {
+			expected = append(expected, s.First())
+		}
+		calls := 0
+		seq := NewFilterSeq(Proc{Fn: func(args []Object) Object {
+			calls++
+			return Boolean{B: calls%2 == 0}
+		}}, input, true)
+		if seq.IsEmpty() || !seq.First().Equals(expected[1]) || calls != 2 {
+			t.Fatalf("incorrect first match for %T", input)
+		}
+		firstRest := seq.Rest()
+		var want []Object
+		for i := 1; i < len(expected); i += 2 {
+			want = append(want, expected[i])
+		}
+		for pass := 0; pass < 2; pass++ {
+			got := ToSlice(seq)
+			if len(got) != len(want) {
+				t.Fatalf("wrong result length for %T", input)
+			}
+			for i := range want {
+				if !got[i].Equals(want[i]) {
+					t.Fatalf("wrong result for %T at %d", input, i)
+				}
+			}
+		}
+		if seq.Rest() != firstRest || calls != len(expected) || !input.First().Equals(expected[0]) {
+			t.Fatalf("source or cached tail changed for %T", input)
+		}
+	}
+}
+
 func TestTransformSeqFilterEmptyAndRetry(t *testing.T) {
 	calls := 0
 	seq := NewFilterSeq(Proc{Fn: func(args []Object) Object {

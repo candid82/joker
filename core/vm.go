@@ -52,6 +52,7 @@ type VM struct {
 	stackHighWater int
 	frames         []CallFrame
 	frameCount     int
+	nativeDepth    int
 	handlers       []ExceptionHandler
 	handlerCount   int
 	pending        []pendingFinally
@@ -67,7 +68,7 @@ func (vm *VM) Reset() {
 	clear(vm.handlers[:vm.handlerCount])
 	clear(vm.pending[:vm.pendingCount])
 	vm.stackHighWater = 0
-	vm.stackTop, vm.frameCount, vm.handlerCount, vm.pendingCount = 0, 0, 0, 0
+	vm.stackTop, vm.frameCount, vm.nativeDepth, vm.handlerCount, vm.pendingCount = 0, 0, 0, 0, 0
 	vm.context = nil
 }
 func (vm *VM) ensureStack(n int) {
@@ -130,19 +131,23 @@ func (vm *VM) ExecuteTopLevel(proto *FunctionProto) Object {
 
 // A single recovery boundary covers a stretch of bytecode. Normal returns do
 // not panic. Host panics unwind finally too, but never match Joker catches.
-func (vm *VM) run() Object {
+func (vm *VM) run() Object { return vm.runUntil(0) }
+
+// runUntil returns when the callback frame unwinds to its native caller.
+// Exceptions in the caller's frames must propagate through the native call.
+func (vm *VM) runUntil(stopFrames int) Object {
 	frame := &vm.frames[vm.frameCount-1]
 	chunk := frame.arityProto.Chunk
 	for {
 		var failure interface{}
 		result := func() Object {
 			defer func() { failure = recover() }()
-			return vm.executeLoop(&frame, &chunk)
+			return vm.executeLoop(&frame, &chunk, stopFrames)
 		}()
 		if failure == nil {
 			return result
 		}
-		if vm.dispatchException(failure, &frame, &chunk) {
+		if vm.dispatchException(failure, &frame, &chunk, stopFrames) {
 			continue
 		}
 		panic(failure)
@@ -153,7 +158,7 @@ func (vm *VM) readOperand(f *CallFrame, c *Chunk) int {
 	f.ip += 4
 	return n
 }
-func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk) Object {
+func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 	RT.vm = vm.context
 	for {
 		f, c := *fp, *cp
@@ -224,7 +229,9 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk) Object {
 		case OP_CALL:
 			argc := vm.readOperand(f, c)
 			callee := vm.Peek(argc)
-			if vm.callAtSite(callee, argc, c.callSiteAt(f.lastOp)) {
+			calledFn := vm.callAtSite(callee, argc, c.callSiteAt(f.lastOp))
+			// A native callback may have grown the frame slice.
+			if calledFn || f != &vm.frames[vm.frameCount-1] {
 				*fp = &vm.frames[vm.frameCount-1]
 				*cp = (*fp).arityProto.Chunk
 			}
@@ -250,7 +257,7 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk) Object {
 			vm.frameCount--
 			vm.frames[vm.frameCount] = CallFrame{}
 			vm.truncate(slots)
-			if vm.frameCount == 0 {
+			if vm.frameCount == stopFrames {
 				return result
 			}
 			vm.Push(result)
@@ -341,11 +348,13 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk) Object {
 // do not enter a function with a deferred context restoration.
 func (vm *VM) callAtSite(callee Object, argc int, site *CallExpr) bool {
 	previous := RT.currentExpr
+	previousDepth := vm.nativeDepth
 	if site != nil {
 		RT.currentExpr = site
 	}
 	defer func() {
 		RT.currentExpr = previous
+		vm.nativeDepth = previousDepth
 		// A native call can release the GIL and interleave another execution.
 		RT.vm = vm.context
 	}()
@@ -371,9 +380,10 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 		if fn.Package == "" {
 			base := vm.stackTop - argc - 1
 			args := vm.stack[base+1 : vm.stackTop : vm.stackTop]
-			vm.stackTop = base
+			vm.nativeDepth++
 			result := fn.Call(args)
-			clear(vm.stack[base+1 : base+argc+1])
+			vm.nativeDepth--
+			vm.truncate(base)
 			vm.Push(result)
 			return false
 		}
@@ -384,6 +394,31 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 		panic(RT.NewError("Cannot call " + callee.ToString(false)))
 	}
 }
+
+// callCallback borrows the native caller's VM without resetting its stack or
+// published context. All callback frames are discarded on either return or panic.
+func (vm *VM) callCallback(fn *Fn, args []Object) Object {
+	baseStack, baseFrames := vm.stackTop, vm.frameCount
+	baseHandlers, basePending := vm.handlerCount, vm.pendingCount
+	defer func() {
+		for vm.frameCount > baseFrames {
+			vm.frameCount--
+			vm.frames[vm.frameCount] = CallFrame{}
+		}
+		clear(vm.handlers[baseHandlers:vm.handlerCount])
+		vm.handlerCount = baseHandlers
+		clear(vm.pending[basePending:vm.pendingCount])
+		vm.pendingCount = basePending
+		vm.truncate(baseStack)
+	}()
+	vm.Push(fn)
+	for _, arg := range args {
+		vm.Push(arg)
+	}
+	vm.callFn(fn, len(args))
+	return vm.runUntil(baseFrames)
+}
+
 func (vm *VM) callOtherCallable(fn Callable, argc int) bool {
 	args := vm.PopN(argc)
 	vm.Pop()
@@ -461,8 +496,8 @@ func (context *vmContext) appendTrace(stack *Callstack) {
 		}
 	}
 }
-func (vm *VM) dispatchException(exc interface{}, fp **CallFrame, cp **Chunk) bool {
-	for vm.handlerCount > 0 {
+func (vm *VM) dispatchException(exc interface{}, fp **CallFrame, cp **Chunk, stopFrames int) bool {
+	for vm.handlerCount > 0 && vm.handlers[vm.handlerCount-1].frameIndex >= stopFrames {
 		vm.handlerCount--
 		h := vm.handlers[vm.handlerCount]
 		vm.handlers[vm.handlerCount] = ExceptionHandler{}
@@ -505,8 +540,10 @@ func (vm *VM) dispatchException(exc interface{}, fp **CallFrame, cp **Chunk) boo
 			return true
 		}
 	}
-	clear(vm.pending)
-	vm.pendingCount = 0
+	if stopFrames == 0 {
+		clear(vm.pending)
+		vm.pendingCount = 0
+	}
 	return false
 }
 

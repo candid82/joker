@@ -868,14 +868,14 @@ var procConcatSeq = func(args []Object) Object {
 var procEverySeq = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	pred := EnsureArgIsCallable(args, 0)
-	seq := EnsureArgIsSeqable(args, 1).Seq()
+	cursor := newSeqCursor(EnsureArgIsSeqable(args, 1).Seq())
 	predArgs := []Object{NIL}
-	for !seq.IsEmpty() {
-		predArgs[0] = seq.First()
+	for cursor.hasNext() {
+		predArgs[0] = cursor.first()
 		if !ToBool(pred.Call(predArgs)) {
 			return boxBoolean(false)
 		}
-		seq = seq.Rest()
+		cursor.advance()
 	}
 	return boxBoolean(true)
 }
@@ -883,14 +883,14 @@ var procEverySeq = func(args []Object) Object {
 var procSomeSeq = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	pred := EnsureArgIsCallable(args, 0)
-	seq := EnsureArgIsSeqable(args, 1).Seq()
+	cursor := newSeqCursor(EnsureArgIsSeqable(args, 1).Seq())
 	predArgs := []Object{NIL}
-	for !seq.IsEmpty() {
-		predArgs[0] = seq.First()
+	for cursor.hasNext() {
+		predArgs[0] = cursor.first()
 		if res := pred.Call(predArgs); ToBool(res) {
 			return res
 		}
-		seq = seq.Rest()
+		cursor.advance()
 	}
 	return NIL
 }
