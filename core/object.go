@@ -200,7 +200,7 @@ type (
 		env     *LocalEnv
 		// Bytecode VM fields
 		proto      *FunctionProto
-		upvalues   []*Upvalue
+		upvalues   []Object
 		isCompiled bool
 	}
 	ExInfo struct {
@@ -395,6 +395,15 @@ func uint32ToBytes(i uint32) []byte {
 
 func getHash() hash.Hash32 {
 	return fnv.New32a()
+}
+
+// hashUint32 is FNV-1a over the same little-endian bytes as uint32ToBytes.
+// Collection hashes can use it without allocating traversal objects.
+func hashUint32(h, value uint32) uint32 {
+	for shift := uint(0); shift < 32; shift += 8 {
+		h = (h ^ uint32(byte(value>>shift))) * 16777619
+	}
+	return h
 }
 
 func hashSymbol(ns, name *string) uint32 {
@@ -1360,6 +1369,9 @@ func MakeIntWithOriginal(orig string, i int) Int {
 }
 
 func (i Int) Equals(other interface{}) bool {
+	if other, ok := other.(Int); ok {
+		return i.I == other.I
+	}
 	return equalsNumbers(i, other)
 }
 
@@ -1670,7 +1682,7 @@ func (seq *stringSeq) First() Object {
 		return NIL
 	}
 	r, _ := utf8.DecodeRuneInString(seq.s[seq.off:])
-	return Char{Ch: r}
+	return boxChar(r)
 }
 
 func (seq *stringSeq) Rest() Seq {
@@ -1715,7 +1727,7 @@ func (s String) Nth(i int) Object {
 	j, r := 0, 't'
 	for j, r = range s.S {
 		if i == j {
-			return Char{Ch: r}
+			return boxChar(r)
 		}
 	}
 	panic(RT.NewError(fmt.Sprintf("Index %d exceeds string's length %d", i, j+1)))
@@ -1727,7 +1739,7 @@ func (s String) TryNth(i int, d Object) Object {
 	}
 	for j, r := range s.S {
 		if i == j {
-			return Char{Ch: r}
+			return boxChar(r)
 		}
 	}
 	return d

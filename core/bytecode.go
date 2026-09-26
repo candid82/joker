@@ -60,7 +60,7 @@ type Chunk struct {
 	Code      []byte
 	Constants []Object
 	Positions []Position
-	callSites map[int]*CallExpr // immutable native-call descriptors
+	callSites []*CallExpr // immutable native-call descriptors indexed by byte offset
 	Handlers  []HandlerInfo
 }
 
@@ -74,6 +74,13 @@ func (c *Chunk) AddHandler(h HandlerInfo) int {
 func (c *Chunk) appendAt(b byte, pos Position) {
 	c.Code = append(c.Code, b)
 	c.Positions = append(c.Positions, pos)
+	c.callSites = append(c.callSites, nil)
+}
+func (c *Chunk) callSiteAt(ip int) *CallExpr {
+	if ip >= 0 && ip < len(c.callSites) {
+		return c.callSites[ip]
+	}
+	return nil
 }
 func (c *Chunk) positionAt(ip int) Position {
 	if ip >= 0 && ip < len(c.Positions) {

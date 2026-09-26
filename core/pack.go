@@ -396,11 +396,17 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 		i = j
 	}
 	// Native call sites remain immutable across VM executions.
-	p = appendInt(p, len(c.callSites))
-	for ip := range c.Code {
-		if c.callSites[ip] != nil {
+	callCount := 0
+	for _, site := range c.callSites {
+		if site != nil {
+			callCount++
+		}
+	}
+	p = appendInt(p, callCount)
+	for ip, site := range c.callSites {
+		if site != nil {
 			p = appendInt(p, ip)
-			p = packBytes(p, []byte(c.callSites[ip].callName))
+			p = packBytes(p, []byte(site.callName))
 		}
 	}
 	// Handlers
@@ -442,9 +448,9 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 		i += count
 	}
 	callCount, p := extractCount(p)
-	var callSites map[int]*CallExpr
+	var callSites []*CallExpr
 	if callCount > 0 {
-		callSites = make(map[int]*CallExpr, callCount)
+		callSites = make([]*CallExpr, codeLen)
 	}
 	for i := 0; i < callCount; i++ {
 		var ip int

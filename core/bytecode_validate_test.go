@@ -80,6 +80,19 @@ func TestVMRejectsInvalidBytecode(t *testing.T) {
 	}
 }
 
+func TestVMRejectsInvalidCallSites(t *testing.T) {
+	for _, ip := range []int{0, 1, 2} {
+		p := NewFunctionProto("invalid-call-site")
+		p.Chunk.appendAt(byte(OP_NIL), Position{})
+		p.Chunk.appendAt(byte(OP_RETURN), Position{})
+		p.Chunk.callSites = make([]*CallExpr, 3)
+		p.Chunk.callSites[ip] = &CallExpr{}
+		if err := ValidateFunctionProto(p); err == nil {
+			t.Fatalf("accepted call site at non-call offset %d", ip)
+		}
+	}
+}
+
 func TestVMPackedObjectGraph(t *testing.T) {
 	shared := NewListFrom(Int{I: 7})
 	meta := EmptyArrayMap()

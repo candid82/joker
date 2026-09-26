@@ -54,3 +54,41 @@ func TestVMNativeCallbackTrace(t *testing.T) {
 		t.Fatal("error snapshot retained a live VM")
 	}
 }
+
+func TestVMNativeContextInterleaving(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		var saved *vmContext
+		checked := false
+		interleave := Proc{Fn: func([]Object) Object {
+			saved = RT.vm
+			RT.vm = &vmContext{}
+			if fail {
+				panic("interleaved failure")
+			}
+			return NIL
+		}}
+		check := Proc{Fn: func([]Object) Object {
+			if saved == nil || RT.vm != saved {
+				t.Fatal("native call lost its caller's execution context")
+			}
+			checked = true
+			return NIL
+		}}
+		expr := &TryExpr{
+			body:        []Expr{&CallExpr{callable: &LiteralExpr{obj: interleave}}},
+			finallyExpr: []Expr{&CallExpr{callable: &LiteralExpr{obj: check}}},
+		}
+		func() {
+			defer func() {
+				r := recover()
+				if (fail && r != "interleaved failure") || (!fail && r != nil) {
+					t.Fatalf("unexpected failure: %v", r)
+				}
+			}()
+			Evaluate(expr)
+		}()
+		if !checked {
+			t.Fatal("finally did not execute after the native call")
+		}
+	}
+}

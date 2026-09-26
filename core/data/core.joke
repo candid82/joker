@@ -3966,11 +3966,7 @@
   corresponding elements, in the order they appeared in coll."
   {:added "1.0"}
   ^Map [^Callable f coll]
-  (reduce
-   (fn [ret x]
-     (let [k (f x)]
-       (assoc ret k (conj (get ret k []) x))))
-   {} coll))
+  (group-by__ f coll))
 
 (defn partition-by
   "Applies f to each value in coll, splitting it each time f returns a

@@ -48,13 +48,13 @@ type (
 	TransformSeq struct {
 		InfoHolder
 		MetaHolder
-		kind   transformSeqKind
-		fn     Callable
-		source Seqable
-		inner  Seq
-		seq    Seq
-		arg    [1]Object
-		keep   bool
+		kind     transformSeqKind
+		keep     bool
+		realized bool
+		fn       Callable
+		source   Seqable
+		inner    Seq
+		arg      [1]Object
 	}
 	transformSeqKind uint8
 )
@@ -88,45 +88,48 @@ func (seq *TransformSeq) call(obj Object) Object {
 	return seq.fn.Call(seq.arg[:])
 }
 
-func (seq *TransformSeq) finish(realized Seq) {
-	seq.seq = realized
+// Once realized, reuse the callback argument and inner cursor as the cached
+// first/rest pair. This avoids allocating a separate ConsSeq for every node.
+// A nil first marks an empty sequence; Joker nil is the non-nil NIL object.
+func (seq *TransformSeq) finish(first Object, rest Seq) {
 	seq.fn = nil
 	seq.source = nil
-	seq.inner = nil
-	seq.arg[0] = nil
+	seq.inner = rest
+	seq.arg[0] = first
+	seq.realized = true
 }
 
 func (seq *TransformSeq) realize() {
-	if seq.seq != nil {
+	if seq.realized {
 		return
 	}
 	source := seq.source.Seq()
 	switch seq.kind {
 	case transformMap:
 		if source.IsEmpty() {
-			seq.finish(EmptyList)
+			seq.finish(nil, EmptyList)
 			return
 		}
 		first := seq.call(source.First())
 		rest := NewMapSeq(seq.fn, source.Rest())
-		seq.finish(&ConsSeq{first: first, rest: rest})
+		seq.finish(first, rest)
 	case transformFilter:
 		for !source.IsEmpty() {
 			first := source.First()
 			rest := source.Rest()
 			if ToBool(seq.call(first)) == seq.keep {
 				restSeq := NewFilterSeq(seq.fn, rest, seq.keep)
-				seq.finish(&ConsSeq{first: first, rest: restSeq})
+				seq.finish(first, restSeq)
 				return
 			}
 			source = rest
 		}
-		seq.finish(EmptyList)
+		seq.finish(nil, EmptyList)
 	case transformMapcat, transformConcat:
 		inner := seq.inner
 		for inner == nil || inner.IsEmpty() {
 			if source.IsEmpty() {
-				seq.finish(EmptyList)
+				seq.finish(nil, EmptyList)
 				return
 			}
 			var next Object
@@ -145,7 +148,7 @@ func (seq *TransformSeq) realize() {
 			source: source,
 			inner:  inner.Rest(),
 		}
-		seq.finish(&ConsSeq{first: first, rest: rest})
+		seq.finish(first, rest)
 	default:
 		panic(RT.NewError("Unknown transforming sequence operation"))
 	}
@@ -201,21 +204,24 @@ func (seq *TransformSeq) Hash() uint32 {
 
 func (seq *TransformSeq) First() Object {
 	seq.realize()
-	return seq.seq.First()
+	if seq.arg[0] == nil {
+		return NIL
+	}
+	return seq.arg[0]
 }
 
 func (seq *TransformSeq) Rest() Seq {
 	seq.realize()
-	return seq.seq.Rest()
+	return seq.inner
 }
 
 func (seq *TransformSeq) IsEmpty() bool {
 	seq.realize()
-	return seq.seq.IsEmpty()
+	return seq.arg[0] == nil
 }
 
 func (seq *TransformSeq) IsRealized() bool {
-	return seq.seq != nil
+	return seq.realized
 }
 
 func (seq *TransformSeq) Cons(obj Object) Seq {

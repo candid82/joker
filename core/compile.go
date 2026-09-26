@@ -489,13 +489,10 @@ func (c *Compiler) emitCall(argc int, name string) {
 
 func (c *Compiler) emitOp(op Opcode) {
 	chunk := c.function.Chunk
-	if op == OP_CALL {
-		if chunk.callSites == nil {
-			chunk.callSites = make(map[int]*CallExpr)
-		}
-		chunk.callSites[len(chunk.Code)] = &CallExpr{Position: c.currentPos}
-	}
 	chunk.appendAt(byte(op), c.currentPos)
+	if op == OP_CALL {
+		chunk.callSites[len(chunk.Code)-1] = &CallExpr{Position: c.currentPos}
+	}
 }
 
 // Every numeric instruction operand uses an unsigned 32-bit encoding. Reject

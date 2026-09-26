@@ -8,7 +8,6 @@ import (
 
 // Captures never point into VM storage. Ordinary bindings are snapshots;
 // letfn initialization shares heap cells between the mutually recursive closures.
-type Upvalue struct{ closed Object }
 type bindingCell struct{ Object }
 
 func capturedValue(v Object) Object {
@@ -138,11 +137,7 @@ func (vm *VM) run() Object {
 		var failure interface{}
 		result := func() Object {
 			defer func() { failure = recover() }()
-			for {
-				if result := vm.executeOneOp(&frame, &chunk); result != nil {
-					return result
-				}
-			}
+			return vm.executeLoop(&frame, &chunk)
 		}()
 		if failure == nil {
 			return result
@@ -158,192 +153,203 @@ func (vm *VM) readOperand(f *CallFrame, c *Chunk) int {
 	f.ip += 4
 	return n
 }
-func (vm *VM) executeOneOp(fp **CallFrame, cp **Chunk) Object {
+func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk) Object {
 	RT.vm = vm.context
-	f, c := *fp, *cp
-	f.lastOp = f.ip
-	op := Opcode(c.Code[f.ip])
-	f.ip++
-	switch op {
-	case OP_CONST:
-		vm.Push(c.Constants[vm.readOperand(f, c)])
-	case OP_NIL:
-		vm.Push(NIL)
-	case OP_TRUE:
-		vm.Push(Boolean{B: true})
-	case OP_FALSE:
-		vm.Push(Boolean{B: false})
-	case OP_POP:
-		vm.Pop()
-	case OP_DUP:
-		vm.Push(vm.Peek(0))
-	case OP_GET_LOCAL:
-		vm.Push(capturedValue(vm.stack[f.slots+vm.readOperand(f, c)]))
-	case OP_SET_LOCAL:
-		slot := f.slots + vm.readOperand(f, c)
-		if cell, ok := vm.stack[slot].(*bindingCell); ok {
-			cell.Object = vm.Peek(0)
-		} else {
-			vm.stack[slot] = vm.Peek(0)
-		}
-	case OP_GET_UPVALUE:
-		vm.Push(capturedValue(f.closure.upvalues[vm.readOperand(f, c)].closed))
-	case OP_BIND_CELL:
-		vm.stack[vm.stackTop-1] = &bindingCell{Object: vm.Peek(0)}
-	case OP_GET_VAR:
-		vm.Push(c.Constants[vm.readOperand(f, c)].(*Var).Resolve())
-	case OP_SET_VAR:
-		c.Constants[vm.readOperand(f, c)].(*Var).Value = vm.Peek(0)
-	case OP_SET_VAR_META:
-		vr := c.Constants[vm.readOperand(f, c)].(*Var)
-		vr.meta = c.Constants[vm.readOperand(f, c)].(Map)
-	case OP_MERGE_VAR_META:
-		vr := c.Constants[vm.readOperand(f, c)].(*Var)
-		vr.meta = vr.meta.Merge(vm.Pop().(Map))
-	case OP_FINISH_DEF:
-		vr := c.Constants[vm.readOperand(f, c)].(*Var)
-		if vr.isMacro {
-			vr.meta = vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
-		}
-		vm.Push(vr)
-	case OP_WITH_META:
-		obj := vm.Pop().(Meta)
-		meta := vm.Pop().(Map)
-		vm.Push(obj.WithMeta(meta))
-	case OP_CHECK_CALLABLE:
-		if _, ok := vm.Peek(0).(Callable); !ok {
-			panic(RT.NewErrorWithPos(vm.Peek(0).ToString(false)+" is not a Fn", c.positionAt(f.lastOp)))
-		}
-	case OP_JUMP:
-		offset := vm.readOperand(f, c)
-		f.ip += offset
-	case OP_JUMP_IF_FALSE:
-		offset := vm.readOperand(f, c)
-		if !ToBool(vm.Pop()) {
+	for {
+		f, c := *fp, *cp
+		f.lastOp = f.ip
+		op := Opcode(c.Code[f.ip])
+		f.ip++
+		switch op {
+		case OP_CONST:
+			vm.Push(c.Constants[vm.readOperand(f, c)])
+		case OP_NIL:
+			vm.Push(NIL)
+		case OP_TRUE:
+			vm.Push(boxBoolean(true))
+		case OP_FALSE:
+			vm.Push(boxBoolean(false))
+		case OP_POP:
+			vm.Pop()
+		case OP_DUP:
+			vm.Push(vm.Peek(0))
+		case OP_GET_LOCAL:
+			vm.Push(capturedValue(vm.stack[f.slots+vm.readOperand(f, c)]))
+		case OP_SET_LOCAL:
+			slot := f.slots + vm.readOperand(f, c)
+			if cell, ok := vm.stack[slot].(*bindingCell); ok {
+				cell.Object = vm.Peek(0)
+			} else {
+				vm.stack[slot] = vm.Peek(0)
+			}
+		case OP_GET_UPVALUE:
+			vm.Push(capturedValue(f.closure.upvalues[vm.readOperand(f, c)]))
+		case OP_BIND_CELL:
+			vm.stack[vm.stackTop-1] = &bindingCell{Object: vm.Peek(0)}
+		case OP_GET_VAR:
+			vm.Push(c.Constants[vm.readOperand(f, c)].(*Var).Resolve())
+		case OP_SET_VAR:
+			c.Constants[vm.readOperand(f, c)].(*Var).Value = vm.Peek(0)
+		case OP_SET_VAR_META:
+			vr := c.Constants[vm.readOperand(f, c)].(*Var)
+			vr.meta = c.Constants[vm.readOperand(f, c)].(Map)
+		case OP_MERGE_VAR_META:
+			vr := c.Constants[vm.readOperand(f, c)].(*Var)
+			vr.meta = vr.meta.Merge(vm.Pop().(Map))
+		case OP_FINISH_DEF:
+			vr := c.Constants[vm.readOperand(f, c)].(*Var)
+			if vr.isMacro {
+				vr.meta = vr.meta.Assoc(KEYWORDS.macro, Boolean{B: true}).(Map)
+			}
+			vm.Push(vr)
+		case OP_WITH_META:
+			obj := vm.Pop().(Meta)
+			meta := vm.Pop().(Map)
+			vm.Push(obj.WithMeta(meta))
+		case OP_CHECK_CALLABLE:
+			if _, ok := vm.Peek(0).(Callable); !ok {
+				panic(RT.NewErrorWithPos(vm.Peek(0).ToString(false)+" is not a Fn", c.positionAt(f.lastOp)))
+			}
+		case OP_JUMP:
+			offset := vm.readOperand(f, c)
 			f.ip += offset
-		}
-	case OP_LOOP:
-		offset := vm.readOperand(f, c)
-		f.ip -= offset
-	case OP_CALL:
-		argc := vm.readOperand(f, c)
-		callee := vm.Peek(argc)
-		if site := c.callSites[f.lastOp]; site != nil {
-			previous := RT.currentExpr
-			RT.currentExpr = site
-			defer func() { RT.currentExpr = previous }()
-		}
-		if vm.callValue(callee, argc) {
+		case OP_JUMP_IF_FALSE:
+			offset := vm.readOperand(f, c)
+			if !ToBool(vm.Pop()) {
+				f.ip += offset
+			}
+		case OP_LOOP:
+			offset := vm.readOperand(f, c)
+			f.ip -= offset
+		case OP_CALL:
+			argc := vm.readOperand(f, c)
+			callee := vm.Peek(argc)
+			if vm.callAtSite(callee, argc, c.callSiteAt(f.lastOp)) {
+				*fp = &vm.frames[vm.frameCount-1]
+				*cp = (*fp).arityProto.Chunk
+			}
+		case OP_CLOSURE:
+			proto := f.arityProto.SubFunctions[vm.readOperand(f, c)]
+			fn := &Fn{proto: proto, isCompiled: true, upvalues: make([]Object, len(proto.Upvalues))}
+			for i, u := range proto.Upvalues {
+				var v Object
+				if u.IsLocal {
+					v = vm.stack[f.slots+u.Index]
+				} else {
+					v = f.closure.upvalues[u.Index]
+				}
+				if v == nil {
+					panic(RT.NewError("VM invariant: uninitialized capture"))
+				}
+				fn.upvalues[i] = v
+			}
+			vm.Push(fn)
+		case OP_RETURN:
+			result := vm.Pop()
+			slots := f.slots
+			vm.frameCount--
+			vm.frames[vm.frameCount] = CallFrame{}
+			vm.truncate(slots)
+			if vm.frameCount == 0 {
+				return result
+			}
+			vm.Push(result)
 			*fp = &vm.frames[vm.frameCount-1]
 			*cp = (*fp).arityProto.Chunk
-		}
-	case OP_CLOSURE:
-		proto := f.arityProto.SubFunctions[vm.readOperand(f, c)]
-		fn := &Fn{proto: proto, isCompiled: true, upvalues: make([]*Upvalue, len(proto.Upvalues))}
-		for i, u := range proto.Upvalues {
-			var v Object
-			if u.IsLocal {
-				v = vm.stack[f.slots+u.Index]
+		case OP_RECUR:
+			argc := vm.readOperand(f, c)
+			start := f.slots + vm.readOperand(f, c)
+			copy(vm.stack[start:start+argc], vm.stack[vm.stackTop-argc:vm.stackTop])
+			vm.truncate(start + argc)
+		case OP_VECTOR:
+			n := vm.readOperand(f, c)
+			vm.Push(&ArrayVector{arr: vm.PopN(n)})
+		case OP_MAP_NEW:
+			n := vm.readOperand(f, c)
+			if int64(n) > HASHMAP_THRESHOLD/2 {
+				vm.Push(EmptyHashMap)
 			} else {
-				v = f.closure.upvalues[u.Index].closed
+				vm.Push(EmptyArrayMap())
 			}
-			if v == nil {
-				panic(RT.NewError("VM invariant: uninitialized capture"))
+		case OP_MAP_CHECK:
+			if m, ok := vm.Peek(1).(*HashMap); ok && m.containsKey(vm.Peek(0)) {
+				panic(RT.NewError("Duplicate key: " + vm.Peek(0).ToString(false)))
 			}
-			fn.upvalues[i] = &Upvalue{closed: v}
-		}
-		vm.Push(fn)
-	case OP_RETURN:
-		result := vm.Pop()
-		slots := f.slots
-		vm.frameCount--
-		vm.frames[vm.frameCount] = CallFrame{}
-		vm.truncate(slots)
-		if vm.frameCount == 0 {
-			return result
-		}
-		vm.Push(result)
-		*fp = &vm.frames[vm.frameCount-1]
-		*cp = (*fp).arityProto.Chunk
-	case OP_RECUR:
-		argc := vm.readOperand(f, c)
-		start := f.slots + vm.readOperand(f, c)
-		copy(vm.stack[start:start+argc], vm.stack[vm.stackTop-argc:vm.stackTop])
-		vm.truncate(start + argc)
-	case OP_VECTOR:
-		n := vm.readOperand(f, c)
-		vm.Push(&ArrayVector{arr: vm.PopN(n)})
-	case OP_MAP_NEW:
-		n := vm.readOperand(f, c)
-		if int64(n) > HASHMAP_THRESHOLD/2 {
-			vm.Push(EmptyHashMap)
-		} else {
-			vm.Push(EmptyArrayMap())
-		}
-	case OP_MAP_CHECK:
-		if m, ok := vm.Peek(1).(*HashMap); ok && m.containsKey(vm.Peek(0)) {
-			panic(RT.NewError("Duplicate key: " + vm.Peek(0).ToString(false)))
-		}
-	case OP_MAP_ADD:
-		v, k := vm.Pop(), vm.Pop()
-		switch m := vm.Peek(0).(type) {
-		case *HashMap:
-			vm.stack[vm.stackTop-1] = m.Assoc(k, v)
-		case *ArrayMap:
-			if !m.Add(k, v) {
-				panic(RT.NewError("Duplicate key: " + k.ToString(false)))
+		case OP_MAP_ADD:
+			v, k := vm.Pop(), vm.Pop()
+			switch m := vm.Peek(0).(type) {
+			case *HashMap:
+				vm.stack[vm.stackTop-1] = m.Assoc(k, v)
+			case *ArrayMap:
+				if !m.Add(k, v) {
+					panic(RT.NewError("Duplicate key: " + k.ToString(false)))
+				}
 			}
-		}
-	case OP_SET_NEW:
-		vm.Push(EmptySet())
-	case OP_SET_ADD:
-		v := vm.Pop()
-		if !vm.Peek(0).(*MapSet).Add(v) {
-			panic(RT.NewError("Duplicate set element: " + v.ToString(false)))
-		}
-	case OP_POPN:
-		n := vm.readOperand(f, c)
-		result := vm.Pop()
-		vm.truncate(vm.stackTop - n)
-		vm.Push(result)
-	case OP_THROW:
-		v := vm.Pop()
-		if err, ok := v.(Error); ok {
-			panic(err)
-		}
-		panic(RT.NewError("Cannot throw " + v.ToString(false)))
-	case OP_TRY_BEGIN:
-		idx := vm.readOperand(f, c)
-		if vm.handlerCount == len(vm.handlers) {
-			vm.handlers = append(vm.handlers, make([]ExceptionHandler, len(vm.handlers))...)
-		}
-		vm.handlers[vm.handlerCount] = ExceptionHandler{handlerIdx: idx, frameIndex: vm.frameCount - 1, stackTop: vm.stackTop}
-		vm.handlerCount++
-	case OP_TRY_END:
-		vm.handlerCount--
-		vm.handlers[vm.handlerCount] = ExceptionHandler{}
-	case OP_FINALLY_END:
-		if vm.pendingCount > 0 {
-			p := vm.pending[vm.pendingCount-1]
-			if p.frameIndex == vm.frameCount-1 && p.finishIP == f.lastOp {
-				vm.pendingCount--
-				vm.pending[vm.pendingCount] = pendingFinally{}
-				panic(p.err)
+		case OP_SET_NEW:
+			vm.Push(EmptySet())
+		case OP_SET_ADD:
+			v := vm.Pop()
+			if !vm.Peek(0).(*MapSet).Add(v) {
+				panic(RT.NewError("Duplicate set element: " + v.ToString(false)))
 			}
+		case OP_POPN:
+			n := vm.readOperand(f, c)
+			result := vm.Pop()
+			vm.truncate(vm.stackTop - n)
+			vm.Push(result)
+		case OP_THROW:
+			v := vm.Pop()
+			if err, ok := v.(Error); ok {
+				panic(err)
+			}
+			panic(RT.NewError("Cannot throw " + v.ToString(false)))
+		case OP_TRY_BEGIN:
+			idx := vm.readOperand(f, c)
+			if vm.handlerCount == len(vm.handlers) {
+				vm.handlers = append(vm.handlers, make([]ExceptionHandler, len(vm.handlers))...)
+			}
+			vm.handlers[vm.handlerCount] = ExceptionHandler{handlerIdx: idx, frameIndex: vm.frameCount - 1, stackTop: vm.stackTop}
+			vm.handlerCount++
+		case OP_TRY_END:
+			vm.handlerCount--
+			vm.handlers[vm.handlerCount] = ExceptionHandler{}
+		case OP_FINALLY_END:
+			if vm.pendingCount > 0 {
+				p := vm.pending[vm.pendingCount-1]
+				if p.frameIndex == vm.frameCount-1 && p.finishIP == f.lastOp {
+					vm.pendingCount--
+					vm.pending[vm.pendingCount] = pendingFinally{}
+					panic(p.err)
+				}
+			}
+		case OP_SET_MACRO:
+			vr := c.Constants[vm.readOperand(f, c)].(*Var)
+			vr.isMacro = true
+			vr.isUsed = false
+			if fn, ok := vr.Value.(*Fn); ok {
+				fn.isMacro = true
+			}
+			setMacroMeta(vr)
+			vm.Push(vr)
+		default:
+			panic(RT.NewError("Invalid opcode: " + strconv.Itoa(int(op))))
 		}
-	case OP_SET_MACRO:
-		vr := c.Constants[vm.readOperand(f, c)].(*Var)
-		vr.isMacro = true
-		vr.isUsed = false
-		if fn, ok := vr.Value.(*Fn); ok {
-			fn.isMacro = true
-		}
-		setMacroMeta(vr)
-		vm.Push(vr)
-	default:
-		panic(RT.NewError("Invalid opcode: " + strconv.Itoa(int(op))))
 	}
-	return nil
+}
+
+// Keep native-call cleanup outside the instruction loop so ordinary opcodes
+// do not enter a function with a deferred context restoration.
+func (vm *VM) callAtSite(callee Object, argc int, site *CallExpr) bool {
+	previous := RT.currentExpr
+	if site != nil {
+		RT.currentExpr = site
+	}
+	defer func() {
+		RT.currentExpr = previous
+		// A native call can release the GIL and interleave another execution.
+		RT.vm = vm.context
+	}()
+	return vm.callValue(callee, argc)
 }
 
 func (vm *VM) callValue(callee Object, argc int) bool {
@@ -450,7 +456,7 @@ func (context *vmContext) appendTrace(stack *Callstack) {
 	}
 	for i := 0; i+1 < vm.frameCount; i++ {
 		f := &vm.frames[i]
-		if site := f.arityProto.Chunk.callSites[f.lastOp]; site != nil {
+		if site := f.arityProto.Chunk.callSiteAt(f.lastOp); site != nil {
 			stack.pushFrame(Frame{traceable: site})
 		}
 	}

@@ -53,6 +53,7 @@ func init() {
 	intern("concat-seq__", procConcatSeq, "procConcatSeq")
 	intern("every-seq__", procEverySeq, "procEverySeq")
 	intern("some-seq__", procSomeSeq, "procSomeSeq")
+	intern("group-by__", procGroupBy, "procGroupBy")
 	intern("delay__", procDelay, "procDelay")
 	intern("force__", procForce, "procForce")
 	intern("identical__", procIdentical, "procIdentical")

@@ -179,19 +179,19 @@ var procWithMeta = func(args []Object) Object {
 var procIsZero = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.IsZero(n)}
+	return boxBoolean(ops.IsZero(n))
 }
 
 var procIsPos = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.Gt(n, Int{I: 0})}
+	return boxBoolean(ops.Gt(n, Int{I: 0}))
 }
 
 var procIsNeg = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.Lt(n, Int{I: 0})}
+	return boxBoolean(ops.Lt(n, Int{I: 0}))
 }
 
 var procAdd = func(args []Object) Object {
@@ -317,7 +317,7 @@ var procBitFlip = func(args []Object) Object {
 
 var procBitTest = func(args []Object) Object {
 	x, y := EnsureObjectIsInts(args)
-	return Boolean{B: x.I&(1<<uint(y.I)) != 0}
+	return boxBoolean(x.I&(1<<uint(y.I)) != 0)
 }
 
 var procBitShiftLeft = func(args []Object) Object {
@@ -423,7 +423,7 @@ var procRand = func(args []Object) Object {
 }
 
 var procIsSpecialSymbol = func(args []Object) Object {
-	return Boolean{B: IsSpecialSymbol(args[0])}
+	return boxBoolean(IsSpecialSymbol(args[0]))
 }
 
 var procSubs = func(args []Object) Object {
@@ -530,7 +530,7 @@ var procEmpty = func(args []Object) Object {
 
 var procIsBound = func(args []Object) Object {
 	vr := EnsureArgIsVar(args, 0)
-	return Boolean{B: vr.Value != nil}
+	return boxBoolean(vr.Value != nil)
 }
 
 // Convert Joker object to native Go object. For those satisfying the
@@ -633,7 +633,7 @@ var procSeq = func(args []Object) Object {
 var procIsInstance = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	t := EnsureArgIsType(args, 0)
-	return Boolean{B: IsInstance(t, args[1])}
+	return boxBoolean(IsInstance(t, args[1]))
 }
 
 var procAssoc = func(args []Object) Object {
@@ -676,16 +676,16 @@ var procPopBang = func(args []Object) Object {
 }
 
 var procEquals = func(args []Object) Object {
-	return Boolean{B: args[0].Equals(args[1])}
+	return boxBoolean(args[0].Equals(args[1]))
 }
 
 var procCount = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Counted:
-		return Int{I: obj.Count()}
+		return boxInt(obj.Count())
 	default:
 		s := EnsureObjectIsSeqable(obj, "count not supported on this type: %s")
-		return Int{I: SeqCount(s.Seq())}
+		return boxInt(SeqCount(s.Seq()))
 	}
 }
 
@@ -806,6 +806,40 @@ var procApply = func(args []Object) Object {
 	return f.Call(ToSlice(EnsureArgIsSeqable(args, 1).Seq()))
 }
 
+var procGroupBy = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	var f Callable
+	groups := EmptyArrayMap().AsTransient().(TransientMapCollection)
+	step := Proc{Fn: func(pair []Object) Object {
+		if f == nil {
+			f = EnsureArgIsCallable(args, 0)
+		}
+		item := pair[1]
+		key := f.Call([]Object{item})
+		var group Object
+		if ok, value := groups.Get(key); ok {
+			// These vectors are private to this builder until it returns. Small
+			// groups can grow in place; retain normal promotion to tree vectors.
+			if v, ok := value.(*ArrayVector); ok && v.Count() < VECTOR_THRESHOLD {
+				v.Append(item)
+				group = v
+			} else {
+				group = value.(Conjable).Conj(item)
+			}
+		} else {
+			group = NewArrayVectorFrom(item)
+		}
+		groups = groups.AssocBang(key, group).(TransientMapCollection)
+		return NIL
+	}}
+	if coll, ok := args[1].(Reduce); ok {
+		coll.reduceInit(step, NIL)
+	} else {
+		seqReduceInit(EnsureArgIsSeqable(args, 1).Seq(), step, NIL)
+	}
+	return groups.Persistent()
+}
+
 var procLazySeq = func(args []Object) Object {
 	return &LazySeq{
 		fn: args[0].(*Fn),
@@ -839,11 +873,11 @@ var procEverySeq = func(args []Object) Object {
 	for !seq.IsEmpty() {
 		predArgs[0] = seq.First()
 		if !ToBool(pred.Call(predArgs)) {
-			return Boolean{B: false}
+			return boxBoolean(false)
 		}
 		seq = seq.Rest()
 	}
-	return Boolean{B: true}
+	return boxBoolean(true)
 }
 
 var procSomeSeq = func(args []Object) Object {
@@ -877,7 +911,7 @@ var procForce = func(args []Object) Object {
 }
 
 var procIdentical = func(args []Object) Object {
-	return Boolean{B: args[0] == args[1]}
+	return boxBoolean(args[0] == args[1])
 }
 
 var procCompare = func(args []Object) Object {
@@ -934,7 +968,7 @@ var procChar = func(args []Object) Object {
 }
 
 var procBoolean = func(args []Object) Object {
-	return Boolean{B: ToBool(args[0])}
+	return boxBoolean(ToBool(args[0]))
 }
 
 var procNumerator = func(args []Object) Object {
@@ -1002,25 +1036,25 @@ var procNth = func(args []Object) Object {
 var procLt = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Lt(a, b))
 }
 
 var procLte = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Lte(a, b))
 }
 
 var procGt = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Gt(a, b))
 }
 
 var procGte = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Gte(a, b))
 }
 
 var procEq = func(args []Object) Object {
@@ -1080,9 +1114,9 @@ var procContains = func(args []Object) Object {
 	case Gettable:
 		ok, _ := c.Get(args[1])
 		if ok {
-			return Boolean{B: true}
+			return boxBoolean(true)
 		}
-		return Boolean{B: false}
+		return boxBoolean(false)
 	}
 	panic(RT.NewError("contains? not supported on type " + args[0].GetType().ToString(false)))
 }
@@ -1539,7 +1573,7 @@ var procShuffle = func(args []Object) Object {
 }
 
 var procIsRealized = func(args []Object) Object {
-	return Boolean{B: EnsureArgIsPending(args, 0).IsRealized()}
+	return boxBoolean(EnsureArgIsPending(args, 0).IsRealized())
 }
 
 var procDeriveInfo = func(args []Object) Object {
@@ -1815,7 +1849,7 @@ var procExit = func(args []Object) Object {
 
 var procIsNaN = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
-	return Boolean{B: math.IsNaN(n.Double().D)}
+	return boxBoolean(math.IsNaN(n.Double().D))
 }
 
 var procAbs = func(args []Object) Object {
@@ -1844,7 +1878,7 @@ var procAbs = func(args []Object) Object {
 
 var procIsInfinite = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
-	return Boolean{B: math.IsInf(n.Double().D, 0)}
+	return boxBoolean(math.IsInf(n.Double().D, 0))
 }
 
 var procParseDouble = func(args []Object) Object {

@@ -287,7 +287,12 @@ func (m *ArrayMap) GetType() *Type {
 }
 
 func (m *ArrayMap) Hash() uint32 {
-	return hashUnordered(m.Seq(), 1)
+	seed := uint32(1)
+	for i := 0; i < len(m.arr); i += 2 {
+		entry := hashUint32(2166136261, m.arr[i].Hash())
+		seed += hashUint32(entry, m.arr[i+1].Hash())
+	}
+	return hashUint32(2166136261, seed)
 }
 
 func (m *ArrayMap) Seq() Seq {

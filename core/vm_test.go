@@ -423,15 +423,26 @@ func TestVMPackedSourcePositions(t *testing.T) {
 	chunk := NewChunk()
 	chunk.appendAt(byte(OP_CALL), pos)
 	chunk.appendAt(0, pos)
-	chunk.callSites = map[int]*CallExpr{0: {Position: pos}}
+	chunk.callSites[0] = &CallExpr{Position: pos, callName: "packed-call"}
 	env := NewPackEnv()
 	packed := chunk.Pack(nil, env)
 	header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
 	unpacked, remaining := unpackChunk(packed, header)
 	if len(remaining) != 0 || len(unpacked.Positions) != 2 || unpacked.positionAt(0).Filename() != filename ||
 		unpacked.positionAt(0).startLine != 7 || unpacked.positionAt(1).startColumn != 3 ||
-		unpacked.callSites[0] == nil || unpacked.callSites[0].Pos().Filename() != filename {
+		unpacked.callSites[0] == nil || unpacked.callSites[0].Pos().Filename() != filename ||
+		unpacked.callSites[0].callName != "packed-call" || unpacked.callSiteAt(1) != nil {
 		t.Fatalf("lost bytecode source positions or native call site during packing")
+	}
+}
+
+func TestVMCallSiteAbsent(t *testing.T) {
+	for _, chunk := range []*Chunk{NewChunk(), {Code: []byte{byte(OP_RETURN)}}} {
+		for _, ip := range []int{-1, 0, 1} {
+			if chunk.callSiteAt(ip) != nil {
+				t.Fatal("unexpected call descriptor")
+			}
+		}
 	}
 }
 
