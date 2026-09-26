@@ -126,7 +126,7 @@ The bounded differential fuzzer compares reference AST, direct VM, and packed VM
 results. It generates only safe, finite programs, not arbitrary source with access
 to filesystem/network procedures. A 10-second run completed about 89,000 cases
 without a mismatch. Existing eval suites pass in both modes (193 tests, 1196
-assertions, plus forked cases). Performance measurements are in [perf.md](perf.md).
+assertions, plus forked cases).
 
 ## Deliberately retained development infrastructure
 
