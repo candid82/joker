@@ -190,7 +190,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 		return false
 	}
 
-	res := Eval(expr, nil)
+	res := Evaluate(expr)
 	replContext.PushValue(res)
 	PrintObject(res, Stdout)
 	fmt.Fprintln(Stdout, "")
@@ -442,8 +442,8 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Write memory profile to specified file.")
 	fmt.Fprintln(out, "  --memprofile-rate <rate>")
 	fmt.Fprintln(out, "    Specify rate (one sample per <rate>) for the memory profiler to use.")
-	fmt.Fprintln(out, "  --vm-fallbacks")
-	fmt.Fprintln(out, "    Report sampled VM-to-AST function calls by caller and callee (to stderr).")
+	fmt.Fprintln(out, "  --no-vm")
+	fmt.Fprintln(out, "    Use the reference AST evaluator (development/testing only).")
 }
 
 var (
@@ -466,7 +466,6 @@ var (
 	cpuProfileRate           int
 	cpuProfileRateFlag       bool
 	memProfileName           string
-	vmFallbacksFlag          bool
 	noReadline               bool
 	noReplHistory            bool
 	exitToRepl               bool
@@ -625,8 +624,6 @@ func parseArgs(args []string) {
 			noReplHistory = true
 		case "--no-vm":
 			DISABLE_VM = true
-		case "--vm-fallbacks":
-			vmFallbacksFlag = true
 		case "--exit-to-repl":
 			exitToRepl = true
 			if i < length-1 && notOption(args[i+1]) {
@@ -735,9 +732,6 @@ func main() {
 	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 
 	parseArgs(os.Args) // Do this early enough so --verbose can show joker.core being processed.
-	if vmFallbacksFlag && !DISABLE_VM {
-		StartVMFallbackAttribution()
-	}
 
 	saveForRepl = saveForRepl && (exitToRepl || errorToRepl) // don't bother saving stuff if no repl
 
@@ -913,7 +907,6 @@ func main() {
 }
 
 func finish() {
-	WriteVMFallbackAttribution(Stderr)
 	if runningProfile != nil {
 		runningProfile.Stop()
 		runningProfile = nil

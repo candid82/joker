@@ -1,7 +1,7 @@
 (ns benchmarks.base
   (:require [joker.benchmark :refer [defbenchmark]]))
 
-;; VM-compatible helper functions (single-arity, non-variadic)
+;; Helper functions shared by both evaluator benchmarks.
 (defn fib [n]
   (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))
 

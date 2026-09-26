@@ -741,68 +741,68 @@ func (fn *Fn) Hash() uint32 {
 }
 
 func (fn *Fn) Call(args []Object) Object {
-	// Try bytecode VM path for pre-compiled functions
-	if fn.isCompiled && fn.proto != nil {
-		// Check if this closure has any open upvalues
-		// Open upvalues point to a VM stack that may no longer be valid
-		for _, upval := range fn.upvalues {
-			if upval != nil && upval.index >= 0 {
-				// Closure has open upvalues that reference a (possibly invalid) VM stack
-				// This should not happen - upvalues should be closed before closure escapes
-				panic(RT.NewError("VM BUG: closure called with open upvalues (upvalue not closed before escape)"))
-			}
-		}
-		return fn.callVM(args)
+	if DISABLE_VM && fn.fnExpr != nil {
+		return fn.callAST(args)
 	}
-
-	// Fall back to AST evaluation
-	// Note: Lazy compilation is disabled for now due to complex interactions
-	// with macro expansion. Functions created via the VM's OP_CLOSURE will
-	// have isCompiled=true and use the VM path above.
-	return fn.callAST(args)
+	fn.ensureCompiled()
+	return fn.callVM(args)
 }
 
-// callVM executes the function using the bytecode VM.
-func (fn *Fn) callVM(args []Object) Object {
-	// For macros, pre-check arity with adjusted counts to match AST error messages.
-	if fn.isMacro && fn.proto != nil {
-		argCount := len(args)
-		if selectArityProto(fn.proto, argCount) == nil {
-			// Compute min/max from proto arities, adjusted for &form/&env
-			min := math.MaxInt32
-			max := -1
-			for _, a := range fn.proto.Arities {
-				if a.Arity < min {
-					min = a.Arity
-				}
-				if a.Arity > max {
-					max = a.Arity
-				}
-			}
-			if fn.proto.VariadicArity != nil {
-				// +1 because ArityProto.Arity excludes rest param, but error message
-				// should count it (matching AST path which uses len(v.args))
-				a := fn.proto.VariadicArity.Arity + 1
-				if a < min {
-					min = a
-				}
-				max = math.MaxInt32
-			}
-			c := argCount - 2
-			min -= 2
-			if max != math.MaxInt32 {
-				max -= 2
-			}
-			PanicArityMinMax(c, min, max)
+// Generated functions are compiled on first invocation, regardless of namespace
+// or how they are reached (macro, callback, multimethod, lazy sequence). Failure
+// is an error, never a request to switch evaluators.
+func (fn *Fn) ensureCompiled() {
+	if fn.proto != nil {
+		return
+	}
+	if fn.fnExpr == nil {
+		panic(RT.NewError("Function has no implementation"))
+	}
+	proto, err := CompileFnExpr(fn.fnExpr, fn.env)
+	PanicOnErr(err)
+	fn.proto = proto
+	fn.isCompiled = true
+}
+
+func (fn *Fn) panicMacroArity(argCount int) {
+	// Compute min/max from proto arities, adjusted for &form/&env
+	min := math.MaxInt32
+	max := -1
+	for _, a := range fn.proto.Arities {
+		if a.Arity < min {
+			min = a.Arity
+		}
+		if a.Arity > max {
+			max = a.Arity
 		}
 	}
-	RT.pushFrame()
-	defer RT.popFrame()
+	if fn.proto.VariadicArity != nil {
+		// +1 because ArityProto.Arity excludes rest param, but error message
+		// should count it (matching AST path which uses len(v.args))
+		a := fn.proto.VariadicArity.Arity + 1
+		if a < min {
+			min = a
+		}
+		max = math.MaxInt32
+	}
+	c := argCount - 2
+	min -= 2
+	if max != math.MaxInt32 {
+		max -= 2
+	}
+	PanicArityMinMax(c, min, max)
+}
+
+// Native callbacks enter a separate pooled VM; captures are independent of VM storage.
+func (fn *Fn) callVM(args []Object) Object {
 	return VMExecute(fn, args)
 }
 
 // callAST executes the function using the AST evaluator.
 func (fn *Fn) callAST(args []Object) Object {
+	if !DISABLE_VM {
+		panic(RT.NewError("Runtime AST execution is disabled"))
+	}
 	min := math.MaxInt32
 	max := -1
 	for _, arity := range fn.fnExpr.arities {

@@ -11,7 +11,7 @@
   (:require [joker.time :as t]
             [joker.json :as json]))
 
-;; Timing helper - multi-arity to prevent VM compilation of harness
+;; Timing helper. The harness runs in the same evaluator as the benchmark.
 (defn benchmark
   "Run f iterations times and return elapsed time in milliseconds."
   ([iterations f]

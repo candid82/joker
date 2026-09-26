@@ -1166,7 +1166,7 @@ var procSort = func(args []Object) Object {
 var procEval = func(args []Object) Object {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	expr := Parse(args[0], parseContext)
-	return Eval(expr, nil)
+	return Evaluate(expr)
 }
 
 var procType = func(args []Object) Object {
@@ -1309,8 +1309,7 @@ func loadReader(reader *Reader) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		CompileAST(expr)
-		lastObj, err = TryEval(expr)
+		lastObj, err = TryEvaluate(expr)
 		if err != nil {
 			return nil, err
 		}
@@ -1932,12 +1931,6 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
 
-	// Create a VM instance for executing top-level expressions
-	var vm *VM
-	if !DISABLE_VM && phase >= EVAL {
-		vm = NewVM()
-	}
-
 	var prevObj Object
 	for {
 		obj, err := TryRead(reader)
@@ -1979,23 +1972,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 			return err
 		}
 
-		// Try VM execution for compatible expressions
-		if vm != nil && IsVMCompatible(expr) {
-			if proto, compileErr := CompileTopLevel(expr); compileErr == nil {
-				obj = vm.ExecuteTopLevel(proto)
-				if phase == EVAL {
-					continue
-				}
-				if _, ok := obj.(Nil); !ok {
-					fmt.Fprintln(Stdout, obj.ToString(true))
-				}
-				continue
-			}
-		}
-
-		// Fall back to AST evaluation
-		CompileAST(expr)
-		obj, err = TryEval(expr)
+		obj, err = TryEvaluate(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
 			return err
@@ -2021,12 +1998,6 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
 
-	// Create a VM instance for executing top-level expressions
-	var vm *VM
-	if !DISABLE_VM {
-		vm = NewVM()
-	}
-
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
@@ -2036,17 +2007,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		expr, err := TryParse(obj, parseContext)
 		PanicOnErr(err)
 
-		// Try VM execution for compatible expressions
-		if vm != nil && IsVMCompatible(expr) {
-			if proto, compileErr := CompileTopLevel(expr); compileErr == nil {
-				vm.ExecuteTopLevel(proto)
-				continue
-			}
-		}
-
-		// Fall back to AST evaluation
-		CompileAST(expr)
-		obj, err = TryEval(expr)
+		obj, err = TryEvaluate(expr)
 		PanicOnErr(err)
 	}
 }
@@ -2071,27 +2032,8 @@ func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
 	ns.MaybeLazy("joker.core")
 
-	// Generated core functions are installed as AST-backed values, so
-	// CompileAST never visits them. Compile the closed, compatible functions
-	// after --no-vm has been parsed. Any unsupported forms or unresolved
-	// captured bindings retain their AST implementations.
-	if !DISABLE_VM && !LINTER_MODE {
-		compiled := 0
-		for _, vr := range ns.mappings {
-			fn, ok := vr.Value.(*Fn)
-			if !ok || fn.fnExpr == nil || fn.isMacro || fn.isCompiled || !IsVMCompatibleFn(fn.fnExpr) {
-				continue
-			}
-			if proto, err := CompileFnExpr(fn.fnExpr, fn.env); err == nil {
-				fn.proto = proto
-				fn.isCompiled = true
-				compiled++
-			}
-		}
-		if VerbosityLevel > 0 {
-			fmt.Fprintf(Stderr, "Compiled %d generated core functions for the VM\n", compiled)
-		}
-	}
+	// All generated functions, including macros and lazily loaded namespaces,
+	// compile on first invocation in Fn.ensureCompiled.
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)

@@ -50,6 +50,7 @@ type (
 	}
 	CallExpr struct {
 		Position
+		callName string // immutable name on bytecode native-call descriptors
 		callable Expr
 		args     []Expr
 	}
@@ -93,18 +94,19 @@ type (
 	}
 	FnExpr struct {
 		Position
-		arities  []FnArityExpr
-		variadic *FnArityExpr
-		self     Symbol
-		compiled *FunctionProto // Pre-compiled bytecode (set by CompileAST)
-		summary  *FnSummary
+		arities     []FnArityExpr
+		variadic    *FnArityExpr
+		self        Symbol
+		selfBinding *Binding
+		summary     *FnSummary
 	}
 	LetExpr struct {
 		Position
-		names    []Symbol
-		bindings []*Binding
-		values   []Expr
-		body     []Expr
+		recursive bool // letfn: allocate all bindings before evaluating initializers
+		names     []Symbol
+		bindings  []*Binding
+		values    []Expr
+		body      []Expr
 	}
 	LoopExpr  LetExpr
 	ThrowExpr struct {
@@ -115,6 +117,7 @@ type (
 		Position
 		excType   *Type
 		excSymbol Symbol
+		binding   *Binding
 		body      []Expr
 	}
 	TryExpr struct {
@@ -986,7 +989,7 @@ func parseFn(obj Object, ctx *ParseContext) Expr {
 		res.self = p.(Symbol)
 		bodies = bodies.Rest()
 		p = bodies.First()
-		ctx.PushLocalFrame([]Symbol{res.self})
+		res.selfBinding = ctx.PushLocalFrame([]Symbol{res.self})[0]
 		defer ctx.PopLocalFrame()
 	}
 	if IsVector(p) { // single arity
@@ -1047,12 +1050,13 @@ func parseCatch(obj Object, ctx *ParseContext) *CatchExpr {
 	if !IsSymbol(excSymbol) {
 		panic(&ParseError{obj: excSymbol, msg: "Bad binding form, expected symbol, got: " + excSymbol.ToString(false)})
 	}
-	ctx.PushLocalFrame([]Symbol{excSymbol.(Symbol)})
+	bindings := ctx.PushLocalFrame([]Symbol{excSymbol.(Symbol)})
 	defer ctx.PopLocalFrame()
 	return &CatchExpr{
 		Position:  GetPosition(obj),
 		excType:   excType,
 		excSymbol: excSymbol.(Symbol),
+		binding:   bindings[0],
 		body:      parseBody(seq.Rest().Rest(), ctx),
 	}
 }
@@ -1116,8 +1120,8 @@ func parseLoop(obj Object, ctx *ParseContext) *LoopExpr {
 	return (*LoopExpr)(parseLetLoop(obj, "loop", ctx))
 }
 
-func parseLetfn(obj Object, ctx *ParseContext) *LoopExpr {
-	return (*LoopExpr)(parseLetLoop(obj, "letfn", ctx))
+func parseLetfn(obj Object, ctx *ParseContext) *LetExpr {
+	return parseLetLoop(obj, "letfn", ctx)
 }
 
 func isSkipUnused(obj Meta) bool {
@@ -1131,7 +1135,8 @@ func isSkipUnused(obj Meta) bool {
 
 func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 	res := &LetExpr{
-		Position: GetPosition(obj),
+		Position:  GetPosition(obj),
+		recursive: formName == "letfn",
 	}
 	bindings := Second(obj.(Seq))
 	switch b := bindings.(type) {
@@ -1331,7 +1336,7 @@ func macroexpand1(seq Seq, ctx *ParseContext) Object {
 			args:     ToSlice(seq.Rest().Cons(ctx.localBindings.ToMap()).Cons(seq)),
 			name:     varCallableString(vr),
 		}
-		return fixInfo(Eval(expr, nil), seq.GetInfo())
+		return fixInfo(Evaluate(expr), seq.GetInfo())
 	} else {
 		return seq
 	}
@@ -1437,7 +1442,13 @@ func parseSetMacro(obj Object, ctx *ParseContext) Expr {
 			res := &SetMacroExpr{
 				vr: vr,
 			}
-			res.Eval(nil)
+			// This is parser bookkeeping, not execution of a user expression.
+			res.vr.isMacro = true
+			res.vr.isUsed = false
+			if fn, ok := res.vr.Value.(*Fn); ok {
+				fn.isMacro = true
+			}
+			setMacroMeta(res.vr)
 			return res
 		}
 	}
@@ -1632,7 +1643,7 @@ func checkLinterCall(call *CallExpr, ctx *ParseContext, pos Position) {
 		}
 		typeMismatch := checkInferredCall(call)
 		if !typeMismatch && shouldEvalLiteralLinterCall(vr, call, ctx) {
-			Eval(call, nil)
+			Evaluate(call)
 		}
 	case Callable:
 		checkCallableArglist(vr, call, pos)

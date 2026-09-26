@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -178,35 +177,6 @@ func TestVMMapSetLiteralParity(t *testing.T) {
 	}
 }
 
-func TestVMFallbackAttribution(t *testing.T) {
-	reader := NewReader(strings.NewReader("(fn target [x] x)"), "<fallback-test>")
-	form, err := TryRead(reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
-	if err != nil {
-		t.Fatal(err)
-	}
-	stats := &vmFallbackStats{sites: make(map[vmFallbackSite]uint64)}
-	vm := NewVM()
-	vm.frameCount = 1
-	vm.frames[0] = CallFrame{
-		closure:    &Fn{proto: &FunctionProto{Name: "caller"}},
-		arityProto: &ArityProto{Chunk: &Chunk{Lines: []int{9, 9}}}, ip: 2,
-	}
-	for i := 0; i < 2*vmFallbackSampleRate; i++ {
-		stats.record(&Fn{fnExpr: expr.(*FnExpr)}, vm)
-	}
-	previous := vmFallbackAttribution.Swap(stats)
-	defer vmFallbackAttribution.Store(previous)
-	var out bytes.Buffer
-	WriteVMFallbackAttribution(&out)
-	if !strings.Contains(out.String(), "fallback calls: 512") || !strings.Contains(out.String(), "512  caller:9 -> target <fallback-test>:1") {
-		t.Fatalf("unexpected fallback report: %s", out.String())
-	}
-}
-
 func TestVMPackedCollectionLiteralParity(t *testing.T) {
 	cases := []struct {
 		name, code string
@@ -238,7 +208,7 @@ func TestVMPackedCollectionLiteralParity(t *testing.T) {
 				t.Fatal(err)
 			}
 			compiled := &Fn{proto: proto, isCompiled: true}
-			astA, astB := astFn.Call(nil), astFn.Call(nil)
+			astA, astB := callASTForTest(astFn, nil), callASTForTest(astFn, nil)
 			vmA, vmB := VMExecute(compiled, nil), VMExecute(compiled, nil)
 			if astA != astB || vmA != vmB || astA.GetType() != vmA.GetType() || !astA.Equals(vmA) {
 				t.Errorf("AST %s (%T), VM %s (%T): constant identity, type, or value differs", astA, astA, vmA, vmA)
@@ -266,8 +236,20 @@ func TestVMPackedCollectionLiteralParity(t *testing.T) {
 		NewListFrom(TYPE.Fn), // Type objects need the packer's special encoding.
 		EmptySet().Conj(EmptyArrayVector()).(Object),
 	} {
-		if isLiteralVMCompatible(obj) {
-			t.Errorf("unsupported quoted collection should fall back to AST: %s", obj)
+		proto, err := Compile(&LiteralExpr{obj: obj}, "constant")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result := NewVM().ExecuteTopLevel(proto); result != obj {
+			t.Fatal("runtime constant identity changed")
+		}
+		env := NewPackEnv()
+		packed := proto.Pack(nil, env)
+		header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
+		unpacked, _ := UnpackFunctionProto(packed, header)
+		result := NewVM().ExecuteTopLevel(unpacked)
+		if !result.Equals(obj) || result.GetType() != obj.GetType() {
+			t.Fatalf("packed constant changed: %s", obj)
 		}
 	}
 }
@@ -286,7 +268,7 @@ func TestVMVarLiteralParity(t *testing.T) {
 	if !IsVMCompatibleFn(fnExpr) {
 		t.Fatal("Var literals should be VM compatible")
 	}
-	ast := fnExpr.Eval(nil).(*Fn).Call(nil)
+	ast := callASTForTest(fnExpr.Eval(nil).(*Fn), nil)
 	proto, err := CompileFnExpr(fnExpr, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -326,7 +308,7 @@ func TestVMCaseExpansionParity(t *testing.T) {
 	compiled := &Fn{proto: proto, isCompiled: true}
 	for floor := 0; floor < 4; floor++ {
 		args := []Object{Int{I: floor}}
-		astResult := ast.Call(args)
+		astResult := callASTForTest(ast, args)
 		vmResult := VMExecute(compiled, args)
 		if !astResult.Equals(vmResult) || astResult.GetType() != vmResult.GetType() {
 			t.Errorf("floor %d: AST %s, VM %s", floor, astResult, vmResult)
@@ -363,7 +345,7 @@ func TestVMNamedFunctionAndArityRecur(t *testing.T) {
 				t.Fatal(err)
 			}
 			actual := VMExecute(&Fn{proto: proto, isCompiled: true}, tt.args)
-			ast := fnExpr.Eval(nil).(*Fn).Call(tt.args)
+			ast := callASTForTest(fnExpr.Eval(nil).(*Fn), tt.args)
 			if !actual.Equals(ast) || !actual.Equals(Int{I: tt.want}) {
 				t.Errorf("VM %s, AST %s, want %d", actual, ast, tt.want)
 			}
@@ -388,14 +370,18 @@ func TestVMClosedEnvironmentParity(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			fn := expr.Eval(nil).(*Fn)
+			obj, err := TryEval(expr)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fn := obj.(*Fn)
 			proto, err := CompileFnExpr(fn.fnExpr, fn.env)
 			if err != nil {
 				t.Fatal(err)
 			}
 			args := []Object{Int{I: 2}}
 			vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
-			ast := fn.Call(args)
+			ast := callASTForTest(fn, args)
 			if !vm.Equals(ast) {
 				t.Errorf("VM %s, AST %s", vm, ast)
 			}
@@ -424,7 +410,7 @@ func TestVMTypeLiteralInClosedFunction(t *testing.T) {
 	for _, coll := range []Object{NewListFrom(Int{I: 1}), EmptyArrayVector(), NIL} {
 		args := []Object{coll}
 		vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
-		ast := fnExpr.Eval(nil).(*Fn).Call(args)
+		ast := callASTForTest(fnExpr.Eval(nil).(*Fn), args)
 		if !vm.Equals(ast) {
 			t.Errorf("instance? Reduce %s: VM %s, AST %s", coll, vm, ast)
 		}
@@ -549,7 +535,7 @@ func evalAndCompile(t *testing.T, code string) Object {
 
 	// Check if VM compatible
 	if !IsVMCompatible(expr) {
-		t.Skipf("expression not VM compatible: %s", code)
+		t.Fatalf("expression not VM compatible: %s", code)
 	}
 
 	// Compile to bytecode

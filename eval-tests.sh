@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-./joker tests/run-eval-tests.joke "$@"
+if [[ "$1" == "--no-vm" ]]; then
+  exec ./tests/joker-ast.sh tests/run-eval-tests.joke "$@"
+fi
+exec ./joker tests/run-eval-tests.joke "$@"

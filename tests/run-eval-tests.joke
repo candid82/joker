@@ -30,14 +30,20 @@
         err (:err res)
         rc (:exit res)
         expected-out (slurp-or (str dir "stdout.txt") "")
-        expected-err (slurp-or (str dir "stderr.txt") "")
+        expected-err (slurp-or (str dir "stderr-prefix.txt")
+                               (slurp-or (str dir "stderr.txt") ""))
+        ;; Asynchronous native errors have timing-dependent caller stacks.
+        ;; Such tests still require the exact error and source-location prefix.
+        err-matches? (if (slurp-or (str dir "stderr-prefix.txt") false)
+                       (joker.string/starts-with? err expected-err)
+                       (= expected-err err))
         expected-rc (if-let [rc (slurp-or (str dir "rc.txt") false)]
                       (int (bigint (with-in-str rc (read-line))))
                       0)]
     (if (or (and (= 0 rc)
                  (= "" err)
                  (joker.string/starts-with? out "SKIP: "))
-            (and (= expected-out out) (= expected-err err) (= expected-rc rc)))
+            (and (= expected-out out) err-matches? (= expected-rc rc)))
       true
       (do
         (println "FAILED:" test-dir)
@@ -51,7 +57,7 @@
           (println "----------------")
           (println out)
           (println "----------------"))
-        (when-not (= expected-err err)
+        (when-not err-matches?
           (println "EXPECTED STDERR:")
           (println "----------------")
           (println expected-err)
@@ -79,7 +85,7 @@
                        (map :name)
                        (remove #(joker.string/starts-with? % ".")))
         pwd (get (joker.os/env) "PWD")
-        exe (str pwd "/joker")
+        exe (str pwd (if (have-option "--no-vm") "/tests/joker-ast.sh" "/joker"))
         failures (->> test-dirs
                       (remove #(run-forked-test exe % verbose?))
                       (count))]

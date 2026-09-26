@@ -264,6 +264,10 @@ func init() {
 }
 
 func main() {
+	// Bootstrap source graphs with the reference evaluator. Generated functions
+	// compile lazily in the executable; the generator does not execute runtime
+	// bytecode or embed process-specific closure constants.
+	DISABLE_VM = true
 	parseArgs(os.Args)
 
 	coreSourceFilename := map[string]string{}

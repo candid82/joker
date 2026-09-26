@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"maps"
@@ -10,22 +9,22 @@ import (
 )
 
 const (
-	NULL       = 100
-	NOT_NULL   = 101
-	SYMBOL_OBJ = 102
-	VAR_OBJ    = 103
-	TYPE_OBJ   = 104
+	NULL     = 100
+	NOT_NULL = 101
 )
 
 type (
 	PackEnv struct {
 		Strings         map[*string]uint16
 		nextStringIndex uint16
+		objects         map[Object]int
+		packing         map[Object]bool
 	}
 
 	PackHeader struct {
 		GlobalEnv *Env
 		Strings   []*string
+		objects   []Object
 	}
 )
 
@@ -49,7 +48,11 @@ func (a ByString) Less(i, j int) bool {
 	return *a[i] < *a[j]
 }
 
+// Packed data is an internal, rebuildable format. Reject stale blobs explicitly.
+const packedVersion = "JOKER-VM\x04"
+
 func (env *PackEnv) Pack(p []byte) []byte {
+	p = append(p, packedVersion...)
 	p = appendInt(p, len(env.Strings))
 	stringKeys := slices.Collect(maps.Keys(env.Strings))
 	sort.Sort(ByString(stringKeys))
@@ -66,16 +69,27 @@ func (env *PackEnv) Pack(p []byte) []byte {
 }
 
 func UnpackHeader(p []byte, env *Env) (*PackHeader, []byte) {
-	stringCount, p := extractInt(p)
+	defer packedRecovery()
+	if len(p) < len(packedVersion) || string(p[:len(packedVersion)]) != packedVersion {
+		panic(RT.NewError("Incompatible packed bytecode; regenerate embedded data"))
+	}
+	p = p[len(packedVersion):]
+	stringCount, p := extractCount(p)
 	strs := make([]*string, stringCount)
 	for i := 0; i < stringCount; i++ {
 		var index uint16
 		var length int
 		index, p = extractUInt16(p)
 		length, p = extractInt(p)
+		if int(index) >= len(strs) {
+			panic(RT.NewError("Invalid packed string index"))
+		}
 		if length == -1 {
 			strs[index] = nil
 		} else {
+			if length < 0 || length > len(p) {
+				panic(RT.NewError("Invalid packed string length"))
+			}
 			strs[index] = STRINGS.Intern(string(p[:length]))
 			p = p[length:]
 		}
@@ -92,6 +106,9 @@ func (env *PackEnv) stringIndex(s *string) uint16 {
 	if ok {
 		return index
 	}
+	if len(env.Strings) >= 65536 {
+		panic(RT.NewError("Too many strings in packed data"))
+	}
 	env.Strings[s] = env.nextStringIndex
 	env.nextStringIndex++
 	return env.nextStringIndex - 1
@@ -106,6 +123,9 @@ func appendBool(p []byte, b bool) []byte {
 }
 
 func extractBool(p []byte) (bool, []byte) {
+	if len(p) == 0 || p[0] > 1 {
+		panic(RT.NewError("Invalid packed boolean"))
+	}
 	var b bool
 	if p[0] == 1 {
 		b = true
@@ -143,7 +163,30 @@ func appendInt(p []byte, i int) []byte {
 }
 
 func extractInt(p []byte) (int, []byte) {
+	if len(p) < 8 {
+		panic(RT.NewError("Truncated packed integer"))
+	}
 	return int(binary.BigEndian.Uint64(p[0:8])), p[8:]
+}
+
+// Counts are bounded by the remaining input before allocating. Every encoded
+// element consumes at least one byte. Compressed position tables are checked
+// against code length separately.
+func extractCount(p []byte) (int, []byte) {
+	n, rest := extractInt(p)
+	if n < 0 || n > len(rest) {
+		panic(RT.NewError("Invalid packed element count"))
+	}
+	return n, rest
+}
+
+func packedRecovery() {
+	if r := recover(); r != nil {
+		if _, ok := r.(Error); ok {
+			panic(r)
+		}
+		panic(RT.NewError(fmt.Sprintf("Malformed packed bytecode: %v", r)))
+	}
 }
 
 func (pos Position) Pack(p []byte, env *PackEnv) []byte {
@@ -231,49 +274,11 @@ func (t *Type) Pack(p []byte, env *PackEnv) []byte {
 
 func unpackType(p []byte, header *PackHeader) (*Type, []byte) {
 	s, p := unpackSymbol(p, header)
-	return TYPES[s.name], p
-}
-
-func packObject(obj Object, p []byte, env *PackEnv) []byte {
-	switch obj := obj.(type) {
-	case Symbol:
-		p = append(p, SYMBOL_OBJ)
-		return obj.Pack(p, env)
-	case *Var:
-		p = append(p, VAR_OBJ)
-		p = obj.Pack(p, env)
-		return p
-	case *Type:
-		p = append(p, TYPE_OBJ)
-		p = obj.Pack(p, env)
-		return p
-	default:
-		p = append(p, NULL)
-		var buf bytes.Buffer
-		PrintObject(obj, &buf)
-		bb := buf.Bytes()
-		p = appendInt(p, len(bb))
-		p = append(p, bb...)
-		return p
+	t := TYPES[s.name]
+	if t == nil {
+		panic(RT.NewError("Unknown type in packed data: " + s.ToString(false)))
 	}
-}
-
-func unpackObject(p []byte, header *PackHeader) (Object, []byte) {
-	switch p[0] {
-	case SYMBOL_OBJ:
-		return unpackSymbol(p[1:], header)
-	case VAR_OBJ:
-		return unpackVar(p[1:], header)
-	case TYPE_OBJ:
-		return unpackType(p[1:], header)
-	case NULL:
-		var size int
-		size, p = extractInt(p[1:])
-		obj := readFromReader(bytes.NewReader(p[:size]))
-		return obj, p[size:]
-	default:
-		panic(RT.NewError(fmt.Sprintf("Unknown object tag: %d", p[0])))
-	}
+	return t, p
 }
 
 func (vr *Var) Pack(p []byte, env *PackEnv) []byte {
@@ -285,7 +290,7 @@ func (vr *Var) Pack(p []byte, env *PackEnv) []byte {
 func unpackVar(p []byte, header *PackHeader) (*Var, []byte) {
 	nsName, p := unpackSymbol(p, header)
 	name, p := unpackSymbol(p, header)
-	ns := GLOBAL_ENV.FindNamespace(nsName)
+	ns := header.GlobalEnv.FindNamespace(nsName)
 	if ns == nil {
 		panic(RT.NewError("Error unpacking var: cannot find namespace " + *nsName.name))
 	}
@@ -302,14 +307,13 @@ func unpackVar(p []byte, header *PackHeader) (*Var, []byte) {
 // --- FunctionProto serialization ---
 
 func packUpvalueInfo(p []byte, u UpvalueInfo) []byte {
-	p = append(p, u.Index)
+	p = appendInt(p, u.Index)
 	p = appendBool(p, u.IsLocal)
 	return p
 }
 
 func unpackUpvalueInfo(p []byte) (UpvalueInfo, []byte) {
-	index := p[0]
-	p = p[1:]
+	index, p := extractInt(p)
 	isLocal, p := extractBool(p)
 	return UpvalueInfo{Index: index, IsLocal: isLocal}, p
 }
@@ -355,7 +359,7 @@ func packHandlerInfo(p []byte, h HandlerInfo, env *PackEnv) []byte {
 }
 
 func unpackHandlerInfo(p []byte, header *PackHeader) (HandlerInfo, []byte) {
-	catchCount, p := extractInt(p)
+	catchCount, p := extractCount(p)
 	catches := make([]CatchInfo, catchCount)
 	for i := 0; i < catchCount; i++ {
 		catches[i], p = unpackCatchInfo(p, header)
@@ -380,11 +384,6 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 	for _, obj := range c.Constants {
 		p = packObject(obj, p, env)
 	}
-	// Lines
-	p = appendInt(p, len(c.Lines))
-	for _, line := range c.Lines {
-		p = appendInt(p, line)
-	}
 	// Source positions: adjacent opcode/operand bytes usually share one position.
 	p = appendInt(p, len(c.Positions))
 	for i := 0; i < len(c.Positions); {
@@ -401,6 +400,7 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 	for ip := range c.Code {
 		if c.callSites[ip] != nil {
 			p = appendInt(p, ip)
+			p = packBytes(p, []byte(c.callSites[ip].callName))
 		}
 	}
 	// Handlers
@@ -412,28 +412,28 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 }
 
 func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
-	codeLen, p := extractInt(p)
+	codeLen, p := extractCount(p)
 	code := make([]byte, codeLen)
 	copy(code, p[:codeLen])
 	p = p[codeLen:]
 
-	constCount, p := extractInt(p)
+	constCount, p := extractCount(p)
 	constants := make([]Object, constCount)
 	for i := 0; i < constCount; i++ {
 		constants[i], p = unpackObject(p, header)
 	}
 
-	lineCount, p := extractInt(p)
-	lines := make([]int, lineCount)
-	for i := 0; i < lineCount; i++ {
-		lines[i], p = extractInt(p)
-	}
-
 	positionCount, p := extractInt(p)
+	if positionCount != codeLen {
+		panic(RT.NewError("Invalid packed position count"))
+	}
 	positions := make([]Position, positionCount)
 	for i := 0; i < positionCount; {
 		var count int
 		count, p = extractInt(p)
+		if count <= 0 || count > positionCount-i {
+			panic(RT.NewError("Invalid packed position run"))
+		}
 		var pos Position
 		pos, p = unpackPosition(p, header)
 		for j := 0; j < count; j++ {
@@ -441,7 +441,7 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 		}
 		i += count
 	}
-	callCount, p := extractInt(p)
+	callCount, p := extractCount(p)
 	var callSites map[int]*CallExpr
 	if callCount > 0 {
 		callSites = make(map[int]*CallExpr, callCount)
@@ -449,10 +449,12 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 	for i := 0; i < callCount; i++ {
 		var ip int
 		ip, p = extractInt(p)
-		callSites[ip] = &CallExpr{Position: positions[ip]}
+		var name []byte
+		name, p = unpackBytes(p)
+		callSites[ip] = &CallExpr{Position: positions[ip], callName: string(name)}
 	}
 
-	handlerCount, p := extractInt(p)
+	handlerCount, p := extractCount(p)
 	handlers := make([]HandlerInfo, handlerCount)
 	for i := 0; i < handlerCount; i++ {
 		handlers[i], p = unpackHandlerInfo(p, header)
@@ -461,7 +463,6 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 	return &Chunk{
 		Code:      code,
 		Constants: constants,
-		Lines:     lines,
 		Positions: positions,
 		callSites: callSites,
 		Handlers:  handlers,
@@ -501,13 +502,13 @@ func packArgTypes(p []byte, argTypes [][]*Type, env *PackEnv) []byte {
 }
 
 func unpackArgTypes(p []byte, header *PackHeader) ([][]*Type, []byte) {
-	count, p := extractInt(p)
+	count, p := extractCount(p)
 	if count == 0 {
 		return nil, p
 	}
 	argTypes := make([][]*Type, count)
 	for i := 0; i < count; i++ {
-		typeCount, pp := extractInt(p)
+		typeCount, pp := extractCount(p)
 		p = pp
 		if typeCount > 0 {
 			argTypes[i] = make([]*Type, typeCount)
@@ -523,11 +524,6 @@ func (a *ArityProto) Pack(p []byte, env *PackEnv) []byte {
 	p = appendInt(p, a.Arity)
 	p = appendBool(p, a.IsVariadic)
 	p = a.Chunk.Pack(p, env)
-	// Upvalues
-	p = appendInt(p, len(a.Upvalues))
-	for _, u := range a.Upvalues {
-		p = packUpvalueInfo(p, u)
-	}
 	// SubFunctions
 	p = appendInt(p, len(a.SubFunctions))
 	for _, sub := range a.SubFunctions {
@@ -545,16 +541,10 @@ func unpackArityProto(p []byte, header *PackHeader) (*ArityProto, []byte) {
 	isVariadic, p := extractBool(p)
 	chunk, p := unpackChunk(p, header)
 
-	upvalueCount, p := extractInt(p)
-	upvalues := make([]UpvalueInfo, upvalueCount)
-	for i := 0; i < upvalueCount; i++ {
-		upvalues[i], p = unpackUpvalueInfo(p)
-	}
-
-	subCount, p := extractInt(p)
+	subCount, p := extractCount(p)
 	subFunctions := make([]*FunctionProto, subCount)
 	for i := 0; i < subCount; i++ {
-		subFunctions[i], p = UnpackFunctionProto(p, header)
+		subFunctions[i], p = unpackFunctionProto(p, header)
 	}
 
 	// ArgTypes
@@ -566,7 +556,6 @@ func unpackArityProto(p []byte, header *PackHeader) (*ArityProto, []byte) {
 		Arity:        arity,
 		IsVariadic:   isVariadic,
 		Chunk:        chunk,
-		Upvalues:     upvalues,
 		SubFunctions: subFunctions,
 		ArgTypes:     argTypes,
 		TaggedType:   taggedType,
@@ -589,9 +578,7 @@ func (proto *FunctionProto) Pack(p []byte, env *PackEnv) []byte {
 	} else {
 		p = append(p, NULL)
 	}
-	// Legacy fields for single-arity case
-	p = appendInt(p, proto.Arity)
-	p = appendBool(p, proto.Variadic)
+	// Optional top-level body (functions use arities instead).
 	if proto.Chunk != nil {
 		p = append(p, NOT_NULL)
 		p = proto.Chunk.Pack(p, env)
@@ -610,13 +597,22 @@ func (proto *FunctionProto) Pack(p []byte, env *PackEnv) []byte {
 }
 
 func UnpackFunctionProto(p []byte, header *PackHeader) (*FunctionProto, []byte) {
+	defer packedRecovery()
+	proto, rest := unpackFunctionProto(p, header)
+	if err := ValidateFunctionProto(proto); err != nil {
+		panic(RT.NewError("Invalid packed bytecode: " + err.Error()))
+	}
+	return proto, rest
+}
+
+func unpackFunctionProto(p []byte, header *PackHeader) (*FunctionProto, []byte) {
 	nameIdx, p := extractUInt16(p)
 	name := ""
 	if int(nameIdx) < len(header.Strings) && header.Strings[nameIdx] != nil {
 		name = *header.Strings[nameIdx]
 	}
 
-	arityCount, p := extractInt(p)
+	arityCount, p := extractCount(p)
 	arities := make([]*ArityProto, arityCount)
 	for i := 0; i < arityCount; i++ {
 		arities[i], p = unpackArityProto(p, header)
@@ -630,34 +626,29 @@ func UnpackFunctionProto(p []byte, header *PackHeader) (*FunctionProto, []byte) 
 		p = p[1:]
 	}
 
-	// Legacy fields
-	legacyArity, p := extractInt(p)
-	legacyVariadic, p := extractBool(p)
-	var legacyChunk *Chunk
+	var topLevelChunk *Chunk
 	if p[0] == NOT_NULL {
 		p = p[1:]
-		legacyChunk, p = unpackChunk(p, header)
+		topLevelChunk, p = unpackChunk(p, header)
 	} else {
 		p = p[1:]
 	}
-	upvalueCount, p := extractInt(p)
+	upvalueCount, p := extractCount(p)
 	upvalues := make([]UpvalueInfo, upvalueCount)
 	for i := 0; i < upvalueCount; i++ {
 		upvalues[i], p = unpackUpvalueInfo(p)
 	}
-	subCount, p := extractInt(p)
+	subCount, p := extractCount(p)
 	subFunctions := make([]*FunctionProto, subCount)
 	for i := 0; i < subCount; i++ {
-		subFunctions[i], p = UnpackFunctionProto(p, header)
+		subFunctions[i], p = unpackFunctionProto(p, header)
 	}
 
 	return &FunctionProto{
 		Name:          name,
 		Arities:       arities,
 		VariadicArity: variadicArity,
-		Arity:         legacyArity,
-		Variadic:      legacyVariadic,
-		Chunk:         legacyChunk,
+		Chunk:         topLevelChunk,
 		Upvalues:      upvalues,
 		SubFunctions:  subFunctions,
 	}, p

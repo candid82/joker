@@ -270,3 +270,40 @@ Day 11 still returns `31`: VM **22.06–22.55s**, ~**13.53GB** sampled allocatio
 `case` macro expansion puts quoted sets in `LiteralExpr`, and `reverse` uses an empty-list literal. `IsVMCompatible` previously rejected both even though `compileLiteral` emits `OP_CONST` and AST `LiteralExpr.Eval` returns the same constant on each call. It now admits lists and sets containing printable scalar elements or similarly safe nested lists/sets, while retaining AST fallback for collection metadata and elements whose types cannot safely round-trip through the packer's print/read format. Direct `*Var` literals are also accepted: the packer has a dedicated Var encoding that resolves to the same namespace binding, preserving identity. Quoted collections *containing* Vars remain excluded because printing a collection does not use that dedicated encoding.
 
 Go parity tests check VM and AST values, types, repeated-call identity, packed-bytecode round trips, `case` dispatch, and exclusion of unsafe collection literals. All **352** generated non-macro core functions now compile (up from 331); 52 macros are intentionally left for parse-time expansion. Day 11 returns `31` in both modes: VM **21.39s**, **337MB** RSS; `--no-vm` **32.49s**, **326MB** RSS. Opt-in fallback attribution counted **zero** VM→AST calls on this run (previously ~0.99M). Other unsupported expression or literal types still retain AST fallback.
+
+## Complete VM runtime (including macros)
+
+The subsequent correctness/integration work removes runtime AST fallback entirely.
+Generated functions compile on first invocation in every namespace, including
+macros and native callbacks. Files, REPL, `eval`, and loading all use the VM.
+The old eligibility gates, sampled-fallback flag, name-based arithmetic
+substitution, fixed stack limits, and panic-based normal returns are no longer
+part of runtime execution. See [VM.md](VM.md) for the implementation contract.
+
+A fresh same-binary comparison, using `/usr/bin/time -l`, returned `31` in both modes:
+
+| Mode | Wall time | User CPU | Peak RSS |
+|---|---:|---:|---:|
+| VM | 21.60 s | 44.02 s | 309 MiB |
+| Reference AST (`--no-vm`) | 32.05 s | 85.58 s | 312 MiB |
+
+These are single runs, not statistically significant comparisons with the earlier
+21.39 s measurement. The VM is about 33% faster in wall time than the reference
+on this run; completeness and semantic fixes did not sacrifice the previous
+Day 11 advantage. No allocation profile was collected for this revision.
+
+`./joker benchmarks/compare-vm.joke` also completed all 30 repository benchmarks.
+Single-run VM wall times were 11–39% lower than the reference evaluator, including:
+
+| Benchmark | AST | VM |
+|---|---:|---:|
+| `nested-let(5) x10000` | 1912 ms | 1294 ms |
+| `fib(20)` | 1084 ms | 698 ms |
+| `closure-test x10000` | 840 ms | 510 ms |
+| `reduce(fn) x1000` | 157 ms | 117 ms |
+| `arithmetic(42) x10000` | 1869 ms | 1365 ms |
+| `sum-loop(10000)` | 5160 ms | 3435 ms |
+
+The benchmark harness now executes in the selected evaluator as well; old comments
+about deliberately preventing its VM compilation were removed. The reference
+flag remains for development comparisons and generator bootstrap, not fallback.

@@ -27,6 +27,7 @@ type (
 	Runtime struct {
 		callstack   *Callstack
 		currentExpr Expr
+		vm          *vmContext // execution handle; snapshots never retain VM storage
 		GIL         sync.Mutex
 	}
 )
@@ -36,10 +37,18 @@ var RT *Runtime = &Runtime{
 }
 
 func (rt *Runtime) clone() *Runtime {
-	return &Runtime{
-		callstack:   rt.callstack.clone(),
-		currentExpr: rt.currentExpr,
+	res := &Runtime{callstack: rt.callstack.clone(), currentExpr: rt.currentExpr}
+	if rt.vm != nil {
+		rt.vm.appendTrace(res.callstack)
+		if vm := rt.vm.vm; vm != nil && vm.frameCount > 0 {
+			frame := &vm.frames[vm.frameCount-1]
+			pos := frame.arityProto.Chunk.positionAt(frame.lastOp)
+			if pos.startLine > 0 {
+				res.currentExpr = &CallExpr{Position: pos}
+			}
+		}
 	}
+	return res
 }
 
 func (rt *Runtime) NewError(msg string) *EvalError {
@@ -47,8 +56,8 @@ func (rt *Runtime) NewError(msg string) *EvalError {
 		msg: msg,
 		rt:  rt.clone(),
 	}
-	if rt.currentExpr != nil {
-		res.pos = rt.currentExpr.Pos()
+	if res.rt.currentExpr != nil {
+		res.pos = res.rt.currentExpr.Pos()
 	}
 	return res
 }
@@ -107,6 +116,9 @@ func (rt *Runtime) popFrame() {
 }
 
 func Eval(expr Expr, env *LocalEnv) Object {
+	if !DISABLE_VM {
+		panic(RT.NewError("Runtime AST execution is disabled"))
+	}
 	parentExpr := RT.currentExpr
 	RT.currentExpr = expr
 	defer (func() { RT.currentExpr = parentExpr })()
@@ -310,6 +322,9 @@ func varCallableString(v *Var) string {
 }
 
 func (expr *CallExpr) Name() string {
+	if expr.callName != "" {
+		return expr.callName
+	}
 	switch c := expr.callable.(type) {
 	case *VarRefExpr:
 		return varCallableString(c.vr)
@@ -401,11 +416,6 @@ func (expr *FnExpr) Eval(env *LocalEnv) Object {
 		env = env.addFrame([]Object{res})
 	}
 	res.env = env
-	// Use pre-compiled bytecode if available
-	if expr.compiled != nil {
-		res.proto = expr.compiled
-		res.isCompiled = true
-	}
 	return res
 }
 
@@ -441,7 +451,12 @@ func (expr *MacroCallExpr) Name() string {
 	return expr.name
 }
 
+// TryEval is the reference evaluator used by differential tests. Production
+// callers use TryEvaluate; runtime functions cannot silently enter this path.
 func TryEval(expr Expr) (obj Object, err error) {
+	previous := DISABLE_VM
+	DISABLE_VM = true
+	defer func() { DISABLE_VM = previous }()
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
