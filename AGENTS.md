@@ -168,8 +168,8 @@ num := EnsureArgIsNumber(args, 0)
 ### Generated Files
 
 Files prefixed with `a_` are auto-generated. Do not edit them directly:
-- `core/a_*.go` - Generated from core/data/*.joke
-- `std/*/a_*.go` - Generated from std/*.joke
+- `core/a_*.go` - Generated from core/data/*.joke (ignored by Git)
+- `std/*/a_*.go` - Generated from std/*.joke (tracked for bootstrapping)
 
 To regenerate:
 ```bash
@@ -196,10 +196,18 @@ go generate ./...                    # Regenerate core
 6. Add tests in `tests/eval/`
 7. Rebuild and test
 
+## VM Execution and GIL Boundaries
+
+- One `Execution` owns each active VM. Synchronous Joker callbacks from native code re-enter that VM; independent `go` bodies and host callbacks use a new execution. `vmPool` caches VMs for independent roots, not for each callback.
+- While holding the GIL, `RT.vm` is the *ambient current context*, not a persistent owner. Native code that releases the GIL must use `suspended := RT.Suspend()` and `suspended.Resume()` after I/O, **before** calling Joker code or creating errors. The token restores `RT.vm`, `RT.currentExpr`, and the call stack, and rejects expired contexts. Never replace this pair with bare `RT.GIL.Unlock()` / `RT.GIL.Lock()`.
+- A fresh Go goroutine/host event must use `RT.LockIndependent()` before touching Joker values or errors, then `CallIndependent` for its callback. Do not borrow a suspended execution's context or store a creator's execution on a lazy value: its consumer may be different.
+- Native source-location reporting without a live parent VM can use `RT.NativeSite()` while the server is active and `RT.SetNativeSite(site)` after independent entry (see `std/http/http_native.go`). Keep the source location, **not** the parent VM.
+- If a `std/*.joke` `:go` body changes, regenerate the corresponding tracked `std/*/a_*.go` output; avoid unrelated generated-file churn.
+
 ## Important Notes
 
 - Joker requires Go 1.25.0+
-- Build artifacts (`a_*.go`) are committed to the repo due to circular dependencies
+- Std build artifacts (`std/*/a_*.go`) are committed to the repo due to circular dependencies; core generated artifacts are ignored
 - The `run.sh` script handles the full build cycle including code generation
 - Use `--build-only` flag to skip running Joker after building
 - Core namespaces are listed in `joker.core/*core-namespaces*`

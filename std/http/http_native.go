@@ -222,12 +222,12 @@ func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 				}
 			}
 			if onClose != nil {
-				onClose.Call([]Object{closeInfo})
+				CallIndependent(onClose, []Object{closeInfo})
 			}
 			panic(r)
 		}
 		if onClose != nil {
-			onClose.Call([]Object{closeInfo})
+			CallIndependent(onClose, []Object{closeInfo})
 		}
 	}()
 	flusher, ok := w.(http.Flusher)
@@ -251,9 +251,9 @@ func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 		w.WriteHeader(status)
 	}
 	for {
-		RT.GIL.Unlock()
+		suspended := RT.Suspend()
 		event, status, err := ch.Receive(done)
-		RT.GIL.Lock()
+		suspended.Resume()
 		if err != nil {
 			closeInfo = sseCloseInfo("error", err)
 			panic(err)
@@ -267,12 +267,12 @@ func streamSSE(response Map, w http.ResponseWriter, done <-chan struct{}) {
 			return
 		}
 		msg := formatSSEEvent(event)
-		RT.GIL.Unlock()
+		suspended = RT.Suspend()
 		_, writeErr := io.WriteString(w, msg)
 		if writeErr == nil {
 			flusher.Flush()
 		}
-		RT.GIL.Lock()
+		suspended.Resume()
 		if writeErr != nil {
 			closeInfo = sseCloseInfo("write-error", RT.NewError(writeErr.Error()))
 			return
@@ -417,9 +417,9 @@ func sendRequest(request Map, optsMap Map) Map {
 	if transport != nil {
 		defer transport.CloseIdleConnections()
 	}
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	resp, err := requestClient.Do(req)
-	RT.GIL.Lock()
+	suspended.Resume()
 	PanicOnErr(err)
 	return respToMap(resp, opts)
 }
@@ -431,10 +431,12 @@ func startServer(addr string, handler Callable) Object {
 		host = MakeString(addr[:i])
 		port = MakeString(addr[i+1:])
 	}
-	RT.GIL.Unlock()
-	defer RT.GIL.Lock()
+	serverSite := RT.NativeSite()
+	suspended := RT.Suspend()
+	defer suspended.Resume()
 	err := http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		RT.GIL.Lock()
+		RT.LockIndependent()
+		RT.SetNativeSite(serverSite) // Attribute native response errors to this server.
 		defer func() {
 			RT.GIL.Unlock()
 			if r := recover(); r != nil {
@@ -443,7 +445,7 @@ func startServer(addr string, handler Callable) Object {
 				fmt.Fprintln(os.Stderr, r)
 			}
 		}()
-		response := handler.Call([]Object{reqToMap(host, port, req)})
+		response := CallIndependent(handler, []Object{reqToMap(host, port, req)})
 		mapToResp(EnsureObjectIsMap(response, "HTTP response: %s"), w, req.Context().Done())
 	}))
 	PanicOnErr(err)

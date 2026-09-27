@@ -81,7 +81,7 @@ There is [Sublime Text plugin](https://github.com/candid82/sublime-pretty-edn) t
 
 ## Project Non-goals
 
-- Performance. If you need it, use Clojure. Joker is a naive implementation of an interpreter that evaluates unoptimized AST directly. I may be interested in doing some basic optimizations but this is definitely not a priority.
+- Performance. If you need it, use Clojure. Joker executes bytecode by default, but high-performance execution is not a primary goal. The AST evaluator remains available for development and testing; see [VM implementation status](VM.md).
 - Have all Clojure features. Some features are impossible to implement due to a different host language (Go vs Java), others I don't find that important for the use cases I have in mind for Joker. But generally Clojure is a pretty large language at this point and it is simply unfeasible to reach feature parity with it, even with naive implementation.
 
 ## Differences with Clojure

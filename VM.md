@@ -13,7 +13,11 @@ Files, command-line expressions, the REPL/socket REPL, `eval`, `load-string`, an
 library loading use this path. Top-level forms are still processed sequentially:
 one form can establish macros or namespace bindings needed to parse the next.
 Native procedures and callable collections retain their existing Go interfaces.
-Callbacks from native procedures execute compiled functions on a pooled VM.
+Each independent `Execution` owns one VM for its active lifetime; `vmPool`
+caches VMs between independent roots. A synchronous callback from a native
+call re-enters its paused caller's VM rather than taking another VM from the
+pool. Independent `go` bodies and HTTP callbacks start new executions. Core
+`apply` and `eval` also have optional execution-aware native entries.
 
 Generated Go data contains parsed functions and their initialized environments.
 On first invocation, **every** such function compiles and caches its prototype,
@@ -63,11 +67,21 @@ snapshots collect logical VM frames on demand, including native callback entries
 without per-call stacktrace allocation. Execution-context handles are invalidated
 before a VM can be reused, so retained native contexts cannot access pooled storage.
 
-The runtime still uses Joker's existing GIL/global diagnostic context. Exact
-caller stacks in asynchronous native errors can depend on scheduling. The HTTP
-SSE forked test requires the exact error/source-location prefix rather than an
-incidental stack from another suspended computation. Synchronous caller stacks,
-macro names, linter error locations, and packed source information have tests.
+The GIL serializes Joker work, but acquiring its mutex alone does not bind an
+execution: another VM may have run while the current native call was doing I/O.
+Native calls use `RT.Suspend()` before releasing the GIL and the token's
+`Resume()` after reacquiring it, before invoking Joker or creating errors. This
+restores the owning `RT.vm`, `RT.currentExpr`, and call stack, and rejects an
+expired context. Independent Go events use `RT.LockIndependent()` to clear the
+ambient state, then `CallIndependent()` for their Joker callback. These are
+distinct boundaries; ordinary lazy-sequence realization can use the ambient
+context of its *consumer* while holding the GIL, not its creator's VM.
+
+`RT.vm` remains a GIL-protected ambient context, not the owner of a VM. The
+HTTP SSE forked test checks that an asynchronous native error names the server
+site rather than an unrelated concurrently running request. Synchronous caller
+stacks, macro names, linter error locations, and packed source information also
+have tests.
 
 Core native procedures may borrow argument slices for the duration of their call;
 other native callables receive owned slices. A core procedure that retains its

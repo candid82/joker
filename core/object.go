@@ -188,9 +188,10 @@ type (
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {
-		Fn      ProcFn
-		Name    string
-		Package string // "" for core (this package), else e.g. "std/string"
+		Fn          ProcFn
+		InExecution func(*Execution, []Object) Object // Optional VM-aware native entry
+		Name        string
+		Package     string // "" for core (this package), else e.g. "std/string"
 	}
 	Fn struct {
 		InfoHolder
@@ -754,11 +755,6 @@ func (fn *Fn) Call(args []Object) Object {
 		return fn.callAST(args)
 	}
 	fn.ensureCompiled()
-	// A native call into a running VM can execute a callback on the same VM.
-	// Entries without an active native caller retain the separate VM path.
-	if ctx := RT.vm; ctx != nil && ctx.vm != nil && ctx.vm.context == ctx && ctx.vm.nativeDepth > 0 {
-		return ctx.vm.callCallback(fn, args)
-	}
 	return fn.callVM(args)
 }
 
@@ -807,7 +803,8 @@ func (fn *Fn) panicMacroArity(argCount int) {
 	PanicArityMinMax(c, min, max)
 }
 
-// Native callbacks enter a separate pooled VM; captures are independent of VM storage.
+// Fn.Call uses the active VM when it has a native caller; otherwise it
+// starts an independent execution. Captures are independent of VM storage.
 func (fn *Fn) callVM(args []Object) Object {
 	return VMExecute(fn, args)
 }

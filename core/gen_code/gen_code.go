@@ -620,6 +620,10 @@ func stdPackageName(pkg string) string {
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	fnName := StringAsGoName(p.Name)
 	newPackage := ""
+	inExecution := ""
+	if p.Package == "" && (fnName == "procApply" || fnName == "procEval") {
+		inExecution = fmt.Sprintf("\n\tInExecution: %sInExecution,", fnName)
+	}
 	if p.Package != "" {
 		pkgName := stdPackageName(p.Package)
 		thunkName := fmt.Sprintf("STD_thunk_%s_%s", StringAsGoName(pkgName), fnName)
@@ -638,10 +642,10 @@ func %s(a []Object) Object {
 	}
 	return fmt.Sprintf(`
 Proc{
-	Fn: %s,
+	Fn: %s,%s
 	Name: %s,
 %s}`[1:],
-		fnName, strconv.Quote(fnName), newPackage)
+		fnName, inExecution, strconv.Quote(fnName), newPackage)
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {

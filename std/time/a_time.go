@@ -304,9 +304,9 @@ func __sleep_(_args []Object) Object {
 	switch {
 	case _c == 1:
 		d := ExtractInteger(_args, 0)
-		RT.GIL.Unlock()
+		suspended := RT.Suspend()
 		time.Sleep(time.Duration(d))
-		RT.GIL.Lock()
+		suspended.Resume()
 		_res := NIL
 		return _res
 

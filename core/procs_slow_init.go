@@ -7,7 +7,14 @@ var privateMeta Map = EmptyArrayMap().Assoc(KEYWORDS.private, Boolean{B: true}).
 
 func intern(name string, proc ProcFn, procName string) {
 	vr := GLOBAL_ENV.CoreNamespace.Intern(MakeSymbol(name))
-	vr.Value = Proc{Fn: proc, Name: procName}
+	p := Proc{Fn: proc, Name: procName}
+	switch procName {
+	case "procApply":
+		p.InExecution = procApplyInExecution
+	case "procEval":
+		p.InExecution = procEvalInExecution
+	}
+	vr.Value = p
 	vr.isPrivate = true
 	vr.meta = privateMeta
 }

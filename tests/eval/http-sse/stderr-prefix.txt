@@ -1,1 +1,1 @@
-input.joke:76:11: Eval error: SSE event must be a string or map, got Int
+input.joke:45:17: Eval error: SSE event must be a string or map, got Int

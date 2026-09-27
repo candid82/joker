@@ -47,6 +47,7 @@ type vmContext struct {
 
 type VM struct {
 	context        *vmContext
+	execution      *Execution
 	stack          []Object
 	stackTop       int
 	stackHighWater int
@@ -70,6 +71,7 @@ func (vm *VM) Reset() {
 	vm.stackHighWater = 0
 	vm.stackTop, vm.frameCount, vm.nativeDepth, vm.handlerCount, vm.pendingCount = 0, 0, 0, 0, 0
 	vm.context = nil
+	vm.execution = nil
 }
 func (vm *VM) ensureStack(n int) {
 	vm.stackHighWater = max(vm.stackHighWater, n)
@@ -112,12 +114,30 @@ func (vm *VM) truncate(n int) {
 	vm.stackTop = n
 }
 func (vm *VM) Execute(fn *Fn, args []Object) Object {
+	return vm.execute(fn, args, nil)
+}
+
+func (vm *VM) execute(fn *Fn, args []Object, owner *Execution) Object {
 	vm.Reset()
+	transientOwner := owner == nil
+	if transientOwner {
+		owner = &Execution{vm: vm}
+	}
+	vm.execution = owner
 	previous := RT.vm
 	context := &vmContext{vm: vm, parent: previous, entry: RT.currentExpr}
 	vm.context = context
 	RT.vm = context
-	defer func() { context.vm = nil; context.parent = nil; context.entry = nil; RT.vm = previous }()
+	defer func() {
+		context.vm = nil
+		context.parent = nil
+		context.entry = nil
+		vm.execution = nil
+		if transientOwner {
+			owner.vm = nil
+		}
+		RT.vm = previous
+	}()
 	vm.Push(fn)
 	for _, arg := range args {
 		vm.Push(arg)
@@ -365,7 +385,12 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 	switch fn := callee.(type) {
 	case *Fn:
 		if !DISABLE_VM {
-			fn.ensureCompiled()
+			if fn.proto == nil {
+				// Compilation can evaluate macros while this VM is paused.
+				vm.nativeDepth++
+				fn.ensureCompiled()
+				vm.nativeDepth--
+			}
 		}
 		if fn.isCompiled && fn.proto != nil {
 			vm.callFn(fn, argc)
@@ -381,7 +406,12 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 			base := vm.stackTop - argc - 1
 			args := vm.stack[base+1 : vm.stackTop : vm.stackTop]
 			vm.nativeDepth++
-			result := fn.Call(args)
+			var result Object
+			if fn.InExecution != nil {
+				result = fn.InExecution(vm.execution, args)
+			} else {
+				result = fn.Call(args)
+			}
 			vm.nativeDepth--
 			vm.truncate(base)
 			vm.Push(result)
@@ -422,7 +452,9 @@ func (vm *VM) callCallback(fn *Fn, args []Object) Object {
 func (vm *VM) callOtherCallable(fn Callable, argc int) bool {
 	args := vm.PopN(argc)
 	vm.Pop()
+	vm.nativeDepth++
 	result := fn.Call(args)
+	vm.nativeDepth--
 	vm.Push(result)
 	return false
 }
@@ -549,8 +581,15 @@ func (vm *VM) dispatchException(exc interface{}, fp **CallFrame, cp **Chunk, sto
 
 var vmPool = sync.Pool{New: func() interface{} { return NewVM() }}
 
+// VMExecute is the legacy entry point for call sites that do not yet carry an
+// Execution. New native integrations should pass an explicit Execution instead.
 func VMExecute(fn *Fn, args []Object) Object {
-	vm := vmPool.Get().(*VM)
-	defer func() { vm.Reset(); vmPool.Put(vm) }()
-	return vm.Execute(fn, args)
+	// A native call can start another evaluation (including eval or a macro)
+	// while its VM is paused. Independent roots still acquire their own VM.
+	if ctx := RT.vm; ctx != nil && ctx.vm != nil && ctx.vm.context == ctx && ctx.vm.nativeDepth > 0 {
+		return ctx.vm.callCallback(fn, args)
+	}
+	exec := NewExecution()
+	defer exec.Close()
+	return exec.Call(fn, args)
 }

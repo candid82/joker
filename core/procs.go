@@ -806,6 +806,32 @@ var procApply = func(args []Object) Object {
 	return f.Call(ToSlice(EnsureArgIsSeqable(args, 1).Seq()))
 }
 
+func callInExecution(exec *Execution, f Callable, args []Object) Object {
+	switch fn := f.(type) {
+	case *Fn:
+		return exec.Call(fn, args)
+	case *Var:
+		value := fn.Resolve()
+		return callInExecution(exec, EnsureObjectIsCallable(value,
+			"Var "+fn.ToString(false)+" resolves to "+value.ToString(false)+", which is not a Fn"), args)
+	default:
+		return f.Call(args)
+	}
+}
+
+func procApplyInExecution(exec *Execution, args []Object) Object {
+	f := EnsureArgIsCallable(args, 0)
+	applied := ToSlice(EnsureArgIsSeqable(args, 1).Seq())
+	switch fn := f.(type) {
+	case *Fn:
+		return exec.Call(fn, applied)
+	case *Var:
+		return callInExecution(exec, fn, applied)
+	default:
+		return f.Call(applied)
+	}
+}
+
 var procGroupBy = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	var f Callable
@@ -1201,6 +1227,12 @@ var procEval = func(args []Object) Object {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	expr := Parse(args[0], parseContext)
 	return Evaluate(expr)
+}
+
+func procEvalInExecution(exec *Execution, args []Object) Object {
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	expr := Parse(args[0], parseContext)
+	return exec.Evaluate(expr)
 }
 
 var procType = func(args []Object) Object {
@@ -1782,24 +1814,29 @@ var procSend = func(args []Object) (obj Object) {
 		return MakeBoolean(false)
 	}
 	obj = MakeBoolean(true)
+	suspended := RT.Suspend()
+	resuming := false
 	defer func() {
 		if r := recover(); r != nil {
-			RT.GIL.Lock()
+			if resuming {
+				panic(r)
+			}
+			suspended.Resume()
 			obj = MakeBoolean(false)
 		}
 	}()
-	RT.GIL.Unlock()
 	ch.ch <- MakeFutureResult(v, nil)
-	RT.GIL.Lock()
+	resuming = true
+	suspended.Resume()
 	return
 }
 
 var procReceive = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	ch := EnsureArgIsChannel(args, 0)
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	res, ok := <-ch.ch
-	RT.GIL.Lock()
+	suspended.Resume()
 	if !ok {
 		return NIL
 	}
@@ -1829,8 +1866,8 @@ var procGo = func(args []Object) Object {
 			RT.GIL.Unlock()
 		}()
 
-		RT.GIL.Lock()
-		res := f.Call([]Object{})
+		RT.LockIndependent()
+		res := CallIndependent(f, nil)
 		ch.ch <- MakeFutureResult(res, nil)
 		ch.Close()
 	}()

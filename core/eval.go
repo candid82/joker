@@ -36,6 +36,48 @@ var RT *Runtime = &Runtime{
 	callstack: &Callstack{frames: make([]Frame, 0, 50)},
 }
 
+// SuspendedExecution retains the ambient context of a native call while it
+// releases the GIL. The context remains live until that call returns; it must
+// be restored before the native code invokes Joker again after reacquiring it.
+type SuspendedExecution struct {
+	rt        *Runtime
+	context   *vmContext
+	expr      Expr
+	callstack *Callstack
+}
+
+func (rt *Runtime) Suspend() SuspendedExecution {
+	s := SuspendedExecution{rt: rt, context: rt.vm, expr: rt.currentExpr, callstack: rt.callstack}
+	rt.GIL.Unlock()
+	return s
+}
+
+func (s SuspendedExecution) Resume() {
+	s.rt.GIL.Lock()
+	if ctx := s.context; ctx != nil && (ctx.vm == nil || ctx.vm.context != ctx) {
+		s.rt.vm, s.rt.currentExpr = nil, nil
+		s.rt.callstack = &Callstack{}
+		panic(s.rt.NewError("Cannot resume an expired execution"))
+	}
+	s.rt.vm, s.rt.currentExpr, s.rt.callstack = s.context, s.expr, s.callstack
+}
+
+// LockIndependent starts a host callback without borrowing the paused
+// execution that last held the GIL. Its VM is established by CallIndependent.
+func (rt *Runtime) LockIndependent() {
+	rt.GIL.Lock()
+	rt.vm, rt.currentExpr = nil, nil
+	rt.callstack = &Callstack{}
+}
+
+// NativeSite is an immutable source location that a host callback may retain
+// without retaining its creator's VM. The caller must hold the GIL.
+func (rt *Runtime) NativeSite() Expr { return rt.currentExpr }
+
+// SetNativeSite attributes errors from independent native work to its origin.
+// The caller must hold the GIL and must not attach the origin's VM context.
+func (rt *Runtime) SetNativeSite(site Expr) { rt.currentExpr = site }
+
 func (rt *Runtime) clone() *Runtime {
 	res := &Runtime{callstack: rt.callstack.clone(), currentExpr: rt.currentExpr}
 	if rt.vm != nil {
