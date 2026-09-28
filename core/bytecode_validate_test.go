@@ -124,15 +124,13 @@ func TestVMPackedObjectGraph(t *testing.T) {
 
 func TestVMStrictRuntime(t *testing.T) {
 	expr := parseVMTest(t, `(fn [] 42)`)
-	expectJokerPanic(t, func() { Eval(expr, nil) })
-	fn := expr.(*FnExpr).Eval(nil).(*Fn)
-	expectJokerPanic(t, func() { fn.callAST(nil) })
+	fn := &Fn{fnExpr: expr.(*FnExpr)}
 	// First invocation must compile even when a native caller, not OP_CALL,
-	// encounters a generated/AST-backed function.
+	// encounters a source-backed function.
 	if result := fn.Call(nil); !result.Equals(Int{I: 42}) || fn.proto == nil {
 		t.Fatal("native call did not compile")
 	}
-	// Compiler failure cannot invoke the AST body.
+	// Compiler failure cannot execute the function body.
 	bad := &Fn{fnExpr: &FnExpr{arities: []FnArityExpr{{body: []Expr{&CatchExpr{}}}}}}
 	expectJokerPanic(t, func() { bad.Call(nil) })
 }

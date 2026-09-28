@@ -3,7 +3,6 @@
 (ns joker.test.vm-basic
   (:require [joker.test :refer [deftest is testing]]))
 
-;; Run with and without --no-vm to verify both execution paths.
 
 (deftest test-arithmetic
   (testing "basic arithmetic"

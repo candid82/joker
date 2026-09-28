@@ -46,14 +46,10 @@ func (e *Execution) Call(fn *Fn, args []Object) Object {
 	return e.vm.execute(fn, args, e)
 }
 
-// Evaluate compiles and executes a form on this execution. Macro evaluation
-// during compilation still uses the legacy callable API until it is migrated.
+// Evaluate compiles and executes a form on this execution.
 func (e *Execution) Evaluate(expr Expr) Object {
 	if e == nil || e.vm == nil {
 		panic(RT.NewError("Execution is closed"))
-	}
-	if DISABLE_VM {
-		return Eval(expr, nil)
 	}
 	previousVM, previousStack := RT.vm, RT.callstack
 	if ctx := e.vm.context; ctx != nil && ctx.vm == e.vm {
@@ -68,12 +64,8 @@ func (e *Execution) Evaluate(expr Expr) Object {
 	return e.Call(&Fn{proto: proto, isCompiled: true}, nil)
 }
 
-// Evaluate is the legacy entry point for executing parsed code without an
-// explicit Execution. Compilation errors are never hidden by AST fallback.
+// Evaluate executes parsed code without an explicit Execution.
 func Evaluate(expr Expr) Object {
-	if DISABLE_VM {
-		return Eval(expr, nil)
-	}
 	proto, err := CompileTopLevel(expr)
 	PanicOnErr(err)
 	return VMExecute(&Fn{proto: proto, isCompiled: true}, nil)
@@ -86,7 +78,7 @@ func CallIndependent(fn Callable, args []Object) Object {
 	previousVM, previousExpr, previousStack := RT.vm, RT.currentExpr, RT.callstack
 	RT.vm, RT.currentExpr, RT.callstack = nil, nil, &Callstack{}
 	defer func() { RT.vm, RT.currentExpr, RT.callstack = previousVM, previousExpr, previousStack }()
-	if f, ok := fn.(*Fn); ok && !DISABLE_VM {
+	if f, ok := fn.(*Fn); ok {
 		exec := NewExecution()
 		defer exec.Close()
 		return exec.Call(f, args)

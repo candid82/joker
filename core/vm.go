@@ -394,23 +394,17 @@ func (vm *VM) callAtSite(callee Object, argc int, site *CallExpr) bool {
 func (vm *VM) callValue(callee Object, argc int) bool {
 	switch fn := callee.(type) {
 	case *Fn:
-		if !DISABLE_VM {
-			if fn.proto == nil {
-				// Compilation can evaluate macros while this VM is paused.
-				vm.nativeDepth++
-				fn.ensureCompiled()
-				vm.nativeDepth--
-			}
+		if fn.proto == nil {
+			// Compilation can evaluate macros while this VM is paused.
+			vm.nativeDepth++
+			fn.ensureCompiled()
+			vm.nativeDepth--
 		}
-		if fn.isCompiled && fn.proto != nil {
-			vm.callFn(fn, argc)
-			return true
-		}
-		// This branch exists only for the explicitly selected AST test oracle.
-		if !DISABLE_VM {
+		if !fn.isCompiled || fn.proto == nil {
 			panic(RT.NewError("VM invariant: uncompiled function"))
 		}
-		return vm.callOtherCallable(fn, argc)
+		vm.callFn(fn, argc)
+		return true
 	case Proc:
 		if fn.Package == "" {
 			base := vm.stackTop - argc - 1

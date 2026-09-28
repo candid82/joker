@@ -504,17 +504,22 @@ func declaredReturnTypes(callable Expr, passedArgsCount int) []*Type {
 				if arity := selectActualArity(fn.fnExpr, passedArgsCount); arity != nil && len(arity.taggedTypes) != 0 {
 					return arity.taggedTypes
 				}
-			} else if fn.proto != nil {
-				if arity := selectArityProto(fn.proto, passedArgsCount); arity != nil && arity.TaggedType != nil {
-					return []*Type{arity.TaggedType}
-				}
 			}
 		}
 		if len(callable.vr.taggedTypes) != 0 {
 			return callable.vr.taggedTypes
 		}
+		// Preserve multi-type annotations from the parsed definition: a
+		// compiled prototype stores only the first tagged return type.
 		if callable.vr.expr != nil {
-			return declaredReturnTypes(callable.vr.expr, passedArgsCount)
+			if types := declaredReturnTypes(callable.vr.expr, passedArgsCount); len(types) != 0 {
+				return types
+			}
+		}
+		if fn, ok := callable.vr.Value.(*Fn); ok && fn.proto != nil {
+			if arity := selectArityProto(fn.proto, passedArgsCount); arity != nil && arity.TaggedType != nil {
+				return []*Type{arity.TaggedType}
+			}
 		}
 	case *FnExpr:
 		if arity := selectActualArity(callable, passedArgsCount); arity != nil && len(arity.taggedTypes) != 0 {

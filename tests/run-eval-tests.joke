@@ -85,7 +85,7 @@
                        (map :name)
                        (remove #(joker.string/starts-with? % ".")))
         pwd (get (joker.os/env) "PWD")
-        exe (str pwd (if (have-option "--no-vm") "/tests/joker-ast.sh" "/joker"))
+        exe (str pwd "/joker")
         failures (->> test-dirs
                       (remove #(run-forked-test exe % verbose?))
                       (count))]

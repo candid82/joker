@@ -19,22 +19,15 @@ call re-enters its paused caller's VM rather than taking another VM from the
 pool. Independent `go` bodies and HTTP callbacks start new executions. Core
 `apply` and `eval` also have optional execution-aware native entries.
 
-Generated Go data contains parsed functions and their initialized environments.
-On first invocation, **every** such function compiles and caches its prototype,
-regardless of namespace, whether it is a macro, or how it is reached (including
-multimethods, lazy sequences, and native callbacks). A compiler error is surfaced;
-there is no runtime AST fallback or per-namespace compilation allowlist.
-Functions created by bytecode are already compiled closures.
+Generated Go data contains compiled functions and parsed forms used for linter
+inference. Functions created by bytecode are compiled closures. Any function
+holding a parsed source expression compiles and caches its prototype on first
+invocation, regardless of namespace or how it is reached; compilation errors
+are surfaced rather than falling back to AST execution.
 
-`--no-vm` remains a development/test oracle, not a fallback mechanism. `Eval` and
-`Fn.callAST` reject calls unless that mode was explicitly selected. The build-time
-code generator also deliberately uses the reference evaluator to bootstrap the
-generated object graphs. Parsing and linter inference still use ASTs; replacing
-runtime evaluation does not require removing those representations. Packed linter
-initialization remains bytecode even when the reference mode is selected.
-
-The obsolete `--vm-fallbacks` flag and opportunistic `CompileAST` pass were removed.
-Default-mode tests cannot silently fall back to AST evaluation.
+The build-time code generator also executes bytecode when bootstrapping generated
+object graphs. Parsing and linter inference still use ASTs, but there is no AST
+runtime evaluator or fallback.
 
 ## Semantics and representation
 
@@ -45,11 +38,10 @@ Default-mode tests cannot silently fall back to AST evaluation.
   initializer runs, supporting forward references, shadowing, and escaped mutual
   recursion. No capture points into a VM's stack.
 - Metadata is evaluated before its expression and applied to the result.
-- Calls check callability before evaluating arguments, as the reference evaluator
-  does. Mutable Vars are looked up at runtime; name-based arithmetic substitution
+- Calls check callability before evaluating arguments. Mutable Vars are looked up at runtime; name-based arithmetic substitution
   was removed, so `with-redefs` and Var rebinding work normally.
-- Vectors, maps, and sets preserve reference-evaluator representation, construction
-  order, and duplicate detection. Runtime literal pools can hold arbitrary Joker
+- Vectors, maps, and sets preserve representation, construction order, and duplicate
+  detection. Runtime literal pools can hold arbitrary Joker
   objects, including objects passed through `eval`, without serialization.
 - `try`/`catch`/`finally` handles normal results, Joker exceptions, catch failures,
   nested finally blocks, and native Go panics. Host panics execute finally but do
@@ -119,34 +111,22 @@ After changing bytecode or packing, regenerate embedded data:
 go test -count=1 ./...
 go vet ./...
 ./eval-tests.sh
-./eval-tests.sh --no-vm
 ./linter-tests.sh
 ./formatter-tests.sh
 ./flag-tests.sh
-go test ./core -run '^$' -fuzz FuzzVMExpressionParity -fuzztime=10s -parallel=2
+go test ./core -run '^$' -fuzz FuzzVMPackedExpression -fuzztime=10s -parallel=2
 ```
-
-The AST eval-test command uses `tests/joker-ast.sh` for forked tests and passes that
-wrapper to tests which launch further interpreter subprocesses, so engine
-selection propagates beyond the driver process.
 
 Regression tests cover metadata and evaluation order, multi-arity captures,
 recursive/shadowed bindings, callback reentry, Var rebinding, dynamic evaluation,
 opaque constants, large operands/stacks/jumps, exceptions and host panics,
 source traces, expired execution contexts, packed object sharing and metadata,
-malformed/truncated packed data, and rejection of runtime AST entry.
+malformed/truncated packed data, and compilation of generated functions.
 
-The bounded differential fuzzer compares reference AST, direct VM, and packed VM
-results. It generates only safe, finite programs, not arbitrary source with access
-to filesystem/network procedures. A 10-second run completed about 89,000 cases
-without a mismatch. Existing eval suites pass in both modes (193 tests, 1196
-assertions, plus forked cases).
+The bounded fuzzer compares direct and packed VM results. It generates only safe,
+finite programs, not arbitrary source with access to filesystem/network procedures.
 
-## Deliberately retained development infrastructure
-
-The AST evaluator and `--no-vm` are retained for differential testing and generator
-bootstrap. Removing them is a separate simplification, not necessary for complete
-VM runtime coverage. Future optimization should preserve the strict execution
-boundary and semantic tests; particularly, any arithmetic specialization must
-respect mutable Vars. Startup compilation, source-position storage, closure
-allocation, and native callback costs remain useful profiling targets.
+Future optimization should preserve the strict execution boundary and semantic
+tests; particularly, any arithmetic specialization must respect mutable Vars.
+Startup compilation, source-position storage, closure allocation, and native
+callback costs remain useful profiling targets.

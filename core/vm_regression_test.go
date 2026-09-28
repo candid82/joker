@@ -6,13 +6,6 @@ import (
 	"testing"
 )
 
-func callASTForTest(fn *Fn, args []Object) Object {
-	old := DISABLE_VM
-	DISABLE_VM = true
-	defer func() { DISABLE_VM = old }()
-	return fn.callAST(args)
-}
-
 func parseVMTest(t *testing.T, code string) Expr {
 	t.Helper()
 	obj, err := TryRead(NewReader(strings.NewReader(code), "<vm-regression>"))
@@ -54,16 +47,12 @@ func TestVMRegressionParity(t *testing.T) {
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			expr := parseVMTest(t, tt.code)
-			ast, err := TryEval(expr)
-			if err != nil {
-				t.Fatal(err)
-			}
 			vm, err := TryEvaluate(expr)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got := vm.ToString(true); got != tt.want || !ast.Equals(vm) {
-				t.Fatalf("AST %s, VM %s; want %s", ast.ToString(true), got, tt.want)
+			if got := vm.ToString(true); got != tt.want {
+				t.Fatalf("got %s; want %s", got, tt.want)
 			}
 		})
 	}
@@ -102,24 +91,15 @@ func TestVMHostPanicFinally(t *testing.T) {
 	panicProc := Proc{Fn: func([]Object) Object { panic("host failure") }}
 	record := Proc{Fn: func([]Object) Object { events.Append(MakeKeyword("finally")); return NIL }}
 	expr := &TryExpr{body: []Expr{&CallExpr{callable: &LiteralExpr{obj: panicProc}}}, finallyExpr: []Expr{&CallExpr{callable: &LiteralExpr{obj: record}}}}
-	for _, ast := range []bool{true, false} {
-		events.arr = nil
-		func() {
-			defer func() {
-				if r := recover(); r != "host failure" {
-					t.Errorf("panic: %v", r)
-				}
-			}()
-			if ast {
-				_, _ = TryEval(expr)
-			} else {
-				Evaluate(expr)
-			}
-		}()
-		if events.Count() != 1 {
-			t.Fatalf("finally did not run (AST=%v)", ast)
+	defer func() {
+		if r := recover(); r != "host failure" {
+			t.Errorf("panic: %v", r)
 		}
-	}
+		if events.Count() != 1 {
+			t.Fatal("finally did not run")
+		}
+	}()
+	Evaluate(expr)
 }
 
 func TestVMMacroExecution(t *testing.T) {

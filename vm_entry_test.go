@@ -22,7 +22,7 @@ func TestReplUsesVMAndRecovers(t *testing.T) {
 	if out.String() != "{:a 1}\n3\n" {
 		t.Fatalf("REPL results: %q", out.String())
 	}
-	if strings.Contains(errors.String(), "Runtime AST execution") || !strings.Contains(errors.String(), "out of bounds") {
+	if !strings.Contains(errors.String(), "out of bounds") {
 		t.Fatalf("REPL error: %s", errors.String())
 	}
 	if !repl.first.Value.Equals(core.Int{I: 3}) {

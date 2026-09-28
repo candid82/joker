@@ -32,7 +32,6 @@ const EOF = -1
 var (
 	LINTER_MODE   bool = false
 	FORMAT_MODE   bool = false
-	DISABLE_VM    bool = false
 	PROBLEM_COUNT      = 0
 	DIALECT       Dialect
 	LINTER_CONFIG *Var

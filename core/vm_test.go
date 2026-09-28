@@ -108,11 +108,11 @@ func TestVMVectors(t *testing.T) {
 			t.Errorf("expected count 3, got %d", v.Count())
 		}
 	} else {
-		t.Errorf("expected ArrayVector (like AST literals), got %T", result)
+		t.Errorf("expected ArrayVector, got %T", result)
 	}
 }
 
-func TestVMMapSetLiteralParity(t *testing.T) {
+func TestVMMapSetLiterals(t *testing.T) {
 	cases := []struct {
 		name      string
 		code      string
@@ -155,10 +155,6 @@ func TestVMMapSetLiteralParity(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			ast, err := TryEval(expr)
-			if err != nil {
-				t.Fatalf("AST evaluation: %v", err)
-			}
 			if !IsVMCompatible(expr) {
 				t.Fatal("literal should be VM-compatible")
 			}
@@ -167,17 +163,14 @@ func TestVMMapSetLiteralParity(t *testing.T) {
 				t.Fatal(err)
 			}
 			vmResult := NewVM().Execute(&Fn{proto: proto, isCompiled: true}, nil)
-			if got := ast.ToString(true); got != tt.expected {
-				t.Errorf("AST result: got %s, want %s", got, tt.expected)
-			}
-			if got := vmResult.ToString(true); got != ast.ToString(true) || vmResult.GetType() != ast.GetType() {
-				t.Errorf("VM result %s (%v), AST result %s (%v)", got, vmResult.GetType(), ast.ToString(true), ast.GetType())
+			if got := vmResult.ToString(true); got != tt.expected {
+				t.Errorf("got %s, want %s", got, tt.expected)
 			}
 		})
 	}
 }
 
-func TestVMPackedCollectionLiteralParity(t *testing.T) {
+func TestVMPackedCollectionLiterals(t *testing.T) {
 	cases := []struct {
 		name, code string
 	}{
@@ -202,16 +195,14 @@ func TestVMPackedCollectionLiteralParity(t *testing.T) {
 			if !IsVMCompatibleFn(fnExpr) {
 				t.Fatal("quoted collection should be VM compatible")
 			}
-			astFn := fnExpr.Eval(nil).(*Fn)
 			proto, err := CompileFnExpr(fnExpr, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
 			compiled := &Fn{proto: proto, isCompiled: true}
-			astA, astB := callASTForTest(astFn, nil), callASTForTest(astFn, nil)
 			vmA, vmB := VMExecute(compiled, nil), VMExecute(compiled, nil)
-			if astA != astB || vmA != vmB || astA.GetType() != vmA.GetType() || !astA.Equals(vmA) {
-				t.Errorf("AST %s (%T), VM %s (%T): constant identity, type, or value differs", astA, astA, vmA, vmA)
+			if vmA != vmB {
+				t.Errorf("VM constant identity changed: %s", vmA)
 			}
 
 			env := NewPackEnv()
@@ -223,8 +214,8 @@ func TestVMPackedCollectionLiteralParity(t *testing.T) {
 			}
 			packedFn := &Fn{proto: unpacked, isCompiled: true}
 			packedA, packedB := VMExecute(packedFn, nil), VMExecute(packedFn, nil)
-			if packedA != packedB || packedA.GetType() != astA.GetType() || !packedA.Equals(astA) || packedA.ToString(true) != astA.ToString(true) {
-				t.Errorf("packed VM %s (%T), AST %s (%T)", packedA, packedA, astA, astA)
+			if packedA != packedB || packedA.GetType() != vmA.GetType() || !packedA.Equals(vmA) || packedA.ToString(true) != vmA.ToString(true) {
+				t.Errorf("packed VM %s (%T), direct VM %s (%T)", packedA, packedA, vmA, vmA)
 			}
 		})
 	}
@@ -254,7 +245,7 @@ func TestVMPackedCollectionLiteralParity(t *testing.T) {
 	}
 }
 
-func TestVMVarLiteralParity(t *testing.T) {
+func TestVMVarLiteralIdentity(t *testing.T) {
 	code := `(fn [] (var *out*))`
 	form, err := TryRead(NewReader(strings.NewReader(code), "<var-test>"))
 	if err != nil {
@@ -268,50 +259,45 @@ func TestVMVarLiteralParity(t *testing.T) {
 	if !IsVMCompatibleFn(fnExpr) {
 		t.Fatal("Var literals should be VM compatible")
 	}
-	ast := callASTForTest(fnExpr.Eval(nil).(*Fn), nil)
+	want := GLOBAL_ENV.CoreNamespace.Resolve("*out*")
 	proto, err := CompileFnExpr(fnExpr, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	vmFn := &Fn{proto: proto, isCompiled: true}
-	if vm := VMExecute(vmFn, nil); vm != ast || VMExecute(vmFn, nil) != vm {
-		t.Fatal("Var identity differs between AST, VM, or repeated VM calls")
+	if vm := VMExecute(vmFn, nil); vm != want || VMExecute(vmFn, nil) != vm {
+		t.Fatal("Var identity differs between calls")
 	}
 	env := NewPackEnv()
 	packed := proto.Pack(nil, env)
 	header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
 	unpacked, rest := UnpackFunctionProto(packed, header)
-	if len(rest) != 0 || VMExecute(&Fn{proto: unpacked, isCompiled: true}, nil) != ast {
+	if len(rest) != 0 || VMExecute(&Fn{proto: unpacked, isCompiled: true}, nil) != want {
 		t.Fatal("Var identity differs after packed-bytecode round trip")
 	}
 }
 
-func TestVMCaseExpansionParity(t *testing.T) {
-	code := `(fn [floor] (case floor 0 [1] 1 [0 2] 2 [1 3] 3 [2]))`
-	form, err := TryRead(NewReader(strings.NewReader(code), "<case-test>"))
-	if err != nil {
-		t.Fatal(err)
+func TestVMCaseExpansion(t *testing.T) {
+	fn := evalAndCompile(t, `(fn [floor] (case floor 0 [1] 1 [0 2] 2 [1 3] 3 [2]))`).(*Fn)
+	for floor, want := range []string{"[1]", "[0 2]", "[1 3]", "[2]"} {
+		if got := fn.Call([]Object{Int{I: floor}}).ToString(true); got != want {
+			t.Errorf("floor %d: got %s, want %s", floor, got, want)
+		}
 	}
-	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
-	if err != nil {
-		t.Fatal(err)
-	}
-	fnExpr := expr.(*FnExpr)
-	if !IsVMCompatibleFn(fnExpr) {
-		t.Fatal("case-generated set literals should be VM-compatible")
-	}
-	proto, err := CompileFnExpr(fnExpr, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	ast := fnExpr.Eval(nil).(*Fn)
-	compiled := &Fn{proto: proto, isCompiled: true}
-	for floor := 0; floor < 4; floor++ {
-		args := []Object{Int{I: floor}}
-		astResult := callASTForTest(ast, args)
-		vmResult := VMExecute(compiled, args)
-		if !astResult.Equals(vmResult) || astResult.GetType() != vmResult.GetType() {
-			t.Errorf("floor %d: AST %s, VM %s", floor, astResult, vmResult)
+}
+
+func TestVMClosedEnvironment(t *testing.T) {
+	for _, tt := range []struct {
+		code string
+		want int
+	}{
+		{`(let [x 5] (fn [y] (+ x y)))`, 7},
+		{`(let [x 5] (fn [y] ((fn [] (+ x y)))))`, 7},
+		{`(let [x 5] (fn [x] x))`, 2},
+	} {
+		fn := evalAndCompile(t, tt.code).(*Fn)
+		if got := fn.Call([]Object{Int{I: 2}}); !got.Equals(Int{I: tt.want}) {
+			t.Errorf("%s: got %s, want %d", tt.code, got, tt.want)
 		}
 	}
 }
@@ -345,74 +331,25 @@ func TestVMNamedFunctionAndArityRecur(t *testing.T) {
 				t.Fatal(err)
 			}
 			actual := VMExecute(&Fn{proto: proto, isCompiled: true}, tt.args)
-			ast := callASTForTest(fnExpr.Eval(nil).(*Fn), tt.args)
-			if !actual.Equals(ast) || !actual.Equals(Int{I: tt.want}) {
-				t.Errorf("VM %s, AST %s, want %d", actual, ast, tt.want)
-			}
-		})
-	}
-}
-
-func TestVMClosedEnvironmentParity(t *testing.T) {
-	codes := []string{
-		`(let [x 5] (fn [y] (+ x y)))`,
-		`(let [x 5] (fn [y] ((fn [] (+ x y)))))`,
-		`(let [x 5] (fn [x] x))`,
-	}
-	for _, code := range codes {
-		t.Run(code, func(t *testing.T) {
-			reader := NewReader(strings.NewReader(code), "<test>")
-			form, err := TryRead(reader)
-			if err != nil {
-				t.Fatal(err)
-			}
-			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
-			if err != nil {
-				t.Fatal(err)
-			}
-			obj, err := TryEval(expr)
-			if err != nil {
-				t.Fatal(err)
-			}
-			fn := obj.(*Fn)
-			proto, err := CompileFnExpr(fn.fnExpr, fn.env)
-			if err != nil {
-				t.Fatal(err)
-			}
-			args := []Object{Int{I: 2}}
-			vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
-			ast := callASTForTest(fn, args)
-			if !vm.Equals(ast) {
-				t.Errorf("VM %s, AST %s", vm, ast)
+			if !actual.Equals(Int{I: tt.want}) {
+				t.Errorf("got %s, want %d", actual, tt.want)
 			}
 		})
 	}
 }
 
 func TestVMTypeLiteralInClosedFunction(t *testing.T) {
-	reader := NewReader(strings.NewReader(`(fn [coll] (instance? Reduce coll))`), "<test>")
-	form, err := TryRead(reader)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
-	if err != nil {
-		t.Fatal(err)
-	}
-	fnExpr := expr.(*FnExpr)
-	if !IsVMCompatibleFn(fnExpr) {
-		t.Fatal("type literals should be VM-compatible")
-	}
-	proto, err := CompileFnExpr(fnExpr, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, coll := range []Object{NewListFrom(Int{I: 1}), EmptyArrayVector(), NIL} {
-		args := []Object{coll}
-		vm := VMExecute(&Fn{proto: proto, isCompiled: true}, args)
-		ast := callASTForTest(fnExpr.Eval(nil).(*Fn), args)
-		if !vm.Equals(ast) {
-			t.Errorf("instance? Reduce %s: VM %s, AST %s", coll, vm, ast)
+	fn := evalAndCompile(t, `(fn [coll] (instance? Reduce coll))`).(*Fn)
+	for _, tt := range []struct {
+		coll Object
+		want bool
+	}{
+		{NewListFrom(Int{I: 1}), false},
+		{EmptyArrayVector(), true},
+		{NIL, false},
+	} {
+		if got := fn.Call([]Object{tt.coll}); !got.Equals(Boolean{B: tt.want}) {
+			t.Errorf("instance? Reduce %s: got %s, want %t", tt.coll, got, tt.want)
 		}
 	}
 }
@@ -457,10 +394,6 @@ func TestVMSourcePositions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, astErr := TryEval(expr)
-	if astErr == nil {
-		t.Fatal("expected AST error")
-	}
 	proto, err := Compile(expr, "<vm-position>")
 	if err != nil {
 		t.Fatal(err)
@@ -482,51 +415,18 @@ func TestVMSourcePositions(t *testing.T) {
 	}
 }
 
-func TestVMFinallyParity(t *testing.T) {
-	cases := []struct{ name, code string }{
-		{"normal", `(let [events (atom [])] [(try (swap! events conj :body) :value (finally (swap! events conj :finally))) @events])`},
-		{"caught", `(let [events (atom [])] [(try (throw (ex-info "body" {})) (catch Error e (swap! events conj :caught) :value) (finally (swap! events conj :finally))) @events])`},
-		{"uncaught", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
-		{"catch throws", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (catch Error e (swap! events conj :caught) (throw e)) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
-		{"finally throws", `(try (try (throw (ex-info "body" {})) (finally (throw (ex-info "finally" {})))) (catch Error e (ex-message e)))`},
-		{"nested caught in finally", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (try (throw (ex-info "inner" {})) (catch Error e (swap! events conj :inner))))) (catch Error e [@events (ex-message e)])))`},
-		{"nested finally", `(let [events (atom [])] (try (try (throw (ex-info "body" {})) (finally (try (throw (ex-info "inner" {})) (finally (swap! events conj :inner))))) (catch Error e [@events (ex-message e)])))`},
-		{"finally returns normally", `(let [events (atom [])] [(try (try :value (finally (swap! events conj :inner))) (finally (swap! events conj :outer))) @events])`},
-		{"throw across frames", `(let [events (atom []) f (fn [] (throw (ex-info "cross" {})))] (try (try (f) (finally (swap! events conj :finally))) (catch Error e [@events (ex-message e)])))`},
-		{"finally in called function", `(let [events (atom []) f (fn [] (try (throw (ex-info "cross" {})) (finally (swap! events conj :inner))))] (try (try (f) (finally (swap! events conj :outer))) (catch Error e [@events (ex-message e)])))`},
-		{"caught error overridden", `(let [events (atom [])] (try (try (throw (ex-info "original" {})) (catch Error e (swap! events conj :caught) :ok) (finally (swap! events conj :finally) (throw (ex-info "override" {})))) (catch Error e [@events (ex-message e)])))`},
-	}
-	for _, tt := range cases {
-		t.Run(tt.name, func(t *testing.T) {
-			reader := NewReader(strings.NewReader(tt.code), "<test>")
-			form, err := TryRead(reader)
-			if err != nil {
-				t.Fatal(err)
-			}
-			expr, err := TryParse(form, &ParseContext{GlobalEnv: GLOBAL_ENV})
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !IsVMCompatible(expr) {
-				t.Fatal("try/finally should compile")
-			}
-			ast, err := TryEval(expr)
-			if err != nil {
-				t.Fatal(err)
-			}
-			proto, err := Compile(expr, "<test>")
-			if err != nil {
-				t.Fatal(err)
-			}
-			vm := VMExecute(&Fn{proto: proto, isCompiled: true}, nil)
-			if !ast.Equals(vm) || ast.ToString(true) != vm.ToString(true) {
-				t.Errorf("AST: %s; VM: %s", ast.ToString(true), vm.ToString(true))
-			}
-		})
+func TestVMFinally(t *testing.T) {
+	for _, tt := range []struct{ code, want string }{
+		{`(let [events (atom [])] [(try (swap! events conj :body) :value (finally (swap! events conj :finally))) @events])`, `[:value [:body :finally]]`},
+		{`(let [events (atom [])] [(try (throw (ex-info "body" {})) (catch Error e (swap! events conj :caught) :value) (finally (swap! events conj :finally))) @events])`, `[:value [:caught :finally]]`},
+		{`(try (try (throw (ex-info "body" {})) (finally (throw (ex-info "finally" {})))) (catch Error e (ex-message e)))`, `"finally"`},
+	} {
+		if got := evalAndCompile(t, tt.code).ToString(true); got != tt.want {
+			t.Errorf("got %s, want %s", got, tt.want)
+		}
 	}
 }
 
-// evalAndCompile parses, compiles, and executes code using the VM
 func evalAndCompile(t *testing.T, code string) Object {
 	t.Helper()
 

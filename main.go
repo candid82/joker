@@ -442,8 +442,6 @@ func usage(out io.Writer) {
 	fmt.Fprintln(out, "    Write memory profile to specified file.")
 	fmt.Fprintln(out, "  --memprofile-rate <rate>")
 	fmt.Fprintln(out, "    Specify rate (one sample per <rate>) for the memory profiler to use.")
-	fmt.Fprintln(out, "  --no-vm")
-	fmt.Fprintln(out, "    Use the reference AST evaluator (development/testing only).")
 }
 
 var (
@@ -622,8 +620,6 @@ func parseArgs(args []string) {
 			noReadline = true
 		case "--no-repl-history":
 			noReplHistory = true
-		case "--no-vm":
-			DISABLE_VM = true
 		case "--exit-to-repl":
 			exitToRepl = true
 			if i < length-1 && notOption(args[i+1]) {

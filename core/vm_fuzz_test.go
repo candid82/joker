@@ -7,7 +7,7 @@ import (
 
 // Generate only bounded, side-effect-free programs. Arbitrary Joker source is
 // unsuitable for fuzzing an interpreter with filesystem/network procedures.
-func FuzzVMExpressionParity(f *testing.F) {
+func FuzzVMPackedExpression(f *testing.F) {
 	f.Add([]byte{1, 2, 3, 4, 5, 6, 7, 8})
 	f.Add([]byte{9, 9, 2, 3, 4, 0, 8, 2, 2})
 	f.Fuzz(func(t *testing.T, data []byte) {
@@ -50,10 +50,6 @@ func FuzzVMExpressionParity(f *testing.F) {
 		}
 		code := expr(3)
 		parsed := parseVMTest(t, code)
-		ast, err := TryEval(parsed)
-		if err != nil {
-			t.Fatal(err)
-		}
 		proto, err := CompileTopLevel(parsed)
 		if err != nil {
 			t.Fatal(err)
@@ -62,16 +58,13 @@ func FuzzVMExpressionParity(f *testing.F) {
 			t.Fatalf("%s: %v", code, err)
 		}
 		vm := NewVM().ExecuteTopLevel(proto)
-		if !ast.Equals(vm) {
-			t.Fatalf("%s: AST %s, VM %s", code, ast.ToString(true), vm.ToString(true))
-		}
 		env := NewPackEnv()
 		packed := proto.Pack(nil, env)
 		h, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
 		unpacked, _ := UnpackFunctionProto(packed, h)
 		result := NewVM().ExecuteTopLevel(unpacked)
-		if !ast.Equals(result) {
-			t.Fatalf("%s: packed result differs", code)
+		if !vm.Equals(result) {
+			t.Fatalf("%s: direct %s, packed %s", code, vm.ToString(true), result.ToString(true))
 		}
 	})
 }

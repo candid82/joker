@@ -208,8 +208,7 @@ type (
 		ArrayMap
 		rt *Runtime
 	}
-	RecurBindings []Object
-	Delay         struct {
+	Delay struct {
 		fn    Callable
 		value Object
 	}
@@ -356,7 +355,6 @@ type (
 		Proc                   *Type
 		ProcFn                 *Type
 		Ratio                  *Type
-		RecurBindings          *Type
 		Regex                  *Type
 		String                 *Type
 		Symbol                 *Type
@@ -659,26 +657,6 @@ func (t *Type) Hash() uint32 {
 	return HashPtr(uintptr(unsafe.Pointer(t)))
 }
 
-func (rb RecurBindings) ToString(escape bool) string {
-	return "#object[RecurBindings]"
-}
-
-func (rb RecurBindings) Equals(other interface{}) bool {
-	return false
-}
-
-func (rb RecurBindings) GetInfo() *ObjectInfo {
-	return nil
-}
-
-func (rb RecurBindings) GetType() *Type {
-	return TYPE.RecurBindings
-}
-
-func (rb RecurBindings) Hash() uint32 {
-	return 0
-}
-
 func (exInfo *ExInfo) ToString(escape bool) string {
 	return exInfo.Error()
 }
@@ -751,15 +729,12 @@ func (fn *Fn) Hash() uint32 {
 }
 
 func (fn *Fn) Call(args []Object) Object {
-	if DISABLE_VM && fn.fnExpr != nil {
-		return fn.callAST(args)
-	}
 	fn.ensureCompiled()
 	return fn.callVM(args)
 }
 
-// Generated functions are compiled on first invocation, regardless of namespace
-// or how they are reached (macro, callback, multimethod, lazy sequence). Failure
+// Functions backed by parsed source compile on first invocation, regardless of
+// how they are reached (macro, callback, multimethod, lazy sequence). Failure
 // is an error, never a request to switch evaluators.
 func (fn *Fn) ensureCompiled() {
 	if fn.proto != nil {
@@ -788,7 +763,7 @@ func (fn *Fn) panicMacroArity(argCount int) {
 	}
 	if fn.proto.VariadicArity != nil {
 		// +1 because ArityProto.Arity excludes rest param, but error message
-		// should count it (matching AST path which uses len(v.args))
+		// should count it (including the rest parameter)
 		a := fn.proto.VariadicArity.Arity + 1
 		if a < min {
 			min = a
@@ -807,57 +782,6 @@ func (fn *Fn) panicMacroArity(argCount int) {
 // starts an independent execution. Captures are independent of VM storage.
 func (fn *Fn) callVM(args []Object) Object {
 	return VMExecute(fn, args)
-}
-
-// callAST executes the function using the AST evaluator.
-func (fn *Fn) callAST(args []Object) Object {
-	if !DISABLE_VM {
-		panic(RT.NewError("Runtime AST execution is disabled"))
-	}
-	min := math.MaxInt32
-	max := -1
-	for _, arity := range fn.fnExpr.arities {
-		a := len(arity.args)
-		if a == len(args) {
-			RT.pushFrame()
-			defer RT.popFrame()
-			return evalLoop(arity.body, fn.env.addFrame(args))
-		}
-		if min > a {
-			min = a
-		}
-		if max < a {
-			max = a
-		}
-	}
-	v := fn.fnExpr.variadic
-	if v == nil || len(args) < len(v.args)-1 {
-		if v != nil {
-			min = len(v.args)
-			max = math.MaxInt32
-		}
-		c := len(args)
-		if fn.isMacro {
-			c -= 2
-			min -= 2
-			if max != math.MaxInt32 {
-				max -= 2
-			}
-		}
-		PanicArityMinMax(c, min, max)
-	}
-	var restArgs Object = NIL
-	if len(v.args)-1 < len(args) {
-		restArgs = &ArraySeq{arr: args, index: len(v.args) - 1}
-	}
-	vargs := make([]Object, len(v.args))
-	for i := 0; i < len(vargs)-1; i++ {
-		vargs[i] = args[i]
-	}
-	vargs[len(vargs)-1] = restArgs
-	RT.pushFrame()
-	defer RT.popFrame()
-	return evalLoop(v.body, fn.env.addFrame(vargs))
 }
 
 func compare(c Callable, a, b Object) int {
@@ -1785,10 +1709,6 @@ func IsSeq(obj Object) bool {
 }
 
 func (x *Type) WithInfo(info *ObjectInfo) Object {
-	return x
-}
-
-func (x RecurBindings) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 

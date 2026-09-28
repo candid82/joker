@@ -11,7 +11,6 @@ import (
 
 type (
 	Expr interface {
-		Eval(env *LocalEnv) Object
 		InferValue(env *InferEnv) InferredValue
 		Pos() Position
 		Dump(includePosition bool) Map
@@ -311,41 +310,6 @@ func (b *Bindings) ToMap() Map {
 		b = b.parent
 	}
 	return res
-}
-
-func (localEnv *LocalEnv) addEmptyFrame(capacity int) *LocalEnv {
-	res := LocalEnv{
-		bindings: make([]Object, 0, capacity),
-		parent:   localEnv,
-	}
-	if localEnv != nil {
-		res.frame = localEnv.frame + 1
-	}
-	return &res
-}
-
-func (localEnv *LocalEnv) addBinding(obj Object) {
-	localEnv.bindings = append(localEnv.bindings, obj)
-}
-
-func (localEnv *LocalEnv) addFrame(values []Object) *LocalEnv {
-	res := LocalEnv{
-		bindings: values,
-		parent:   localEnv,
-	}
-	if localEnv != nil {
-		res.frame = localEnv.frame + 1
-	}
-	return &res
-}
-
-func (localEnv *LocalEnv) replaceFrame(values []Object) *LocalEnv {
-	res := LocalEnv{
-		bindings: values,
-		parent:   localEnv.parent,
-		frame:    localEnv.frame,
-	}
-	return &res
 }
 
 func (ctx *ParseContext) PushLoopBindings(bindings []Symbol) {
