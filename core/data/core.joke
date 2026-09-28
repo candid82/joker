@@ -868,6 +868,11 @@
   {:added "1.0"}
   ^Int [^Int x] (bit-not__ x))
 
+(defn bit-count
+  "Returns the number of one bits in the 64-bit two's-complement representation of x."
+  {:added "1.0"}
+  ^Int [^Int x] (bit-count__ x))
+
 (defn bit-and
   "Bitwise and"
   {:added "1.0"}

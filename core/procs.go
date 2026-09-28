@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math"
 	"math/big"
+	"math/bits"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -272,6 +273,11 @@ var procRem = func(args []Object) Object {
 var procBitNot = func(args []Object) Object {
 	x := EnsureObjectIsInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
 	return Int{I: ^x.I}
+}
+
+var procBitCount = func(args []Object) Object {
+	x := EnsureObjectIsInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
+	return Int{I: bits.OnesCount64(uint64(int64(x.I)))}
 }
 
 func EnsureObjectIsInts(args []Object) (Int, Int) {

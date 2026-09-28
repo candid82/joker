@@ -91,6 +91,7 @@ func init() {
 	intern("quot__", procQuot, "procQuot")
 	intern("rem__", procRem, "procRem")
 	intern("bit-not__", procBitNot, "procBitNot")
+	intern("bit-count__", procBitCount, "procBitCount")
 	intern("bit-and__", procBitAnd, "procBitAnd")
 	intern("bit-or__", procBitOr, "procBitOr")
 	intern("bit-xor_", procBitXor, "procBitXor")
