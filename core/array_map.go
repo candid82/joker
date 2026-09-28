@@ -209,10 +209,12 @@ func (m *ArrayMap) Assoc(key Object, value Object) Associative {
 	if int64(len(m.arr)) >= HASHMAP_THRESHOLD {
 		return NewHashMap(m.arr...).Assoc(key, value)
 	}
-	res := m.Clone()
-	res.arr = append(res.arr, key)
-	res.arr = append(res.arr, value)
-	return res
+	// A persistent assoc needs exactly one new backing array. Cloning first
+	// can grow it again when the clone has no spare capacity.
+	arr := make([]Object, len(m.arr)+2)
+	copy(arr, m.arr)
+	arr[len(m.arr)], arr[len(m.arr)+1] = key, value
+	return &ArrayMap{MetaHolder: m.MetaHolder, arr: arr}
 }
 
 func (m *ArrayMap) EntryAt(key Object) *ArrayVector {
@@ -224,20 +226,16 @@ func (m *ArrayMap) EntryAt(key Object) *ArrayVector {
 }
 
 func (m *ArrayMap) Without(key Object) Map {
-	result := ArrayMap{arr: make([]Object, len(m.arr), cap(m.arr))}
-	var i, j int
-	for i, j = 0, 0; i < len(m.arr); i += 2 {
-		if m.arr[i].Equals(key) {
-			continue
-		}
-		result.arr[j] = m.arr[i]
-		result.arr[j+1] = m.arr[i+1]
-		j += 2
+	i := m.indexOf(key)
+	if i < 0 {
+		// Preserve the existing independent-result semantics for mutable
+		// ArrayMap builders, even when the key is absent.
+		return m.Clone()
 	}
-	if i != j {
-		result.arr = result.arr[:j]
-	}
-	return &result
+	arr := make([]Object, len(m.arr)-2)
+	copy(arr, m.arr[:i])
+	copy(arr[i:], m.arr[i+2:])
+	return &ArrayMap{arr: arr}
 }
 
 func (m *ArrayMap) Merge(other Map) Map {

@@ -1801,7 +1801,9 @@ func IsEqualOrImplements(abstractType *Type, concreteType *Type) bool {
 }
 
 func IsInstance(t *Type, obj Object) bool {
-	if obj.Equals(NIL) {
+	// A general equality check can allocate (notably Int.Equals(NIL)) and
+	// needlessly traverse sequential values. Only Nil has nil's type.
+	if _, isNil := obj.(Nil); isNil {
 		return false
 	}
 	return IsEqualOrImplements(t, obj.GetType())

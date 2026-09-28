@@ -249,6 +249,16 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 		case OP_CALL:
 			argc := vm.readOperand(f, c)
 			callee := vm.Peek(argc)
+			// Enter an already compiled function directly: no native callback
+			// runs until the next instruction, so no native context needs
+			// saving/restoring. Preserve the slow path for arity errors and
+			// calls that may execute Go code here.
+			if fn, ok := callee.(*Fn); ok && fn.isCompiled && fn.proto != nil && selectArityProto(fn.proto, argc) != nil {
+				vm.callFn(fn, argc)
+				*fp = &vm.frames[vm.frameCount-1]
+				*cp = (*fp).arityProto.Chunk
+				break
+			}
 			calledFn := vm.callAtSite(callee, argc, c.callSiteAt(f.lastOp))
 			// A native callback may have grown the frame slice.
 			if calledFn || f != &vm.frames[vm.frameCount-1] {
