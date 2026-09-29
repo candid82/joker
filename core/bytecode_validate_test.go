@@ -83,6 +83,23 @@ func TestVMRejectsInvalidBytecode(t *testing.T) {
 	}
 }
 
+func TestCompactChunkInitialization(t *testing.T) {
+	first := Position{startLine: 1, startColumn: 2}
+	second := Position{startLine: 3, startColumn: 4}
+	positions := expandPositionRuns([]int{2, 1}, []Position{first, second})
+	if len(positions) != 3 || positions[0] != first || positions[1] != first || positions[2] != second {
+		t.Fatalf("expanded positions = %#v", positions)
+	}
+
+	sites := expandCallSites(positions, []callSiteSpec{{ip: 0, name: "first"}, {ip: 2, name: "second"}})
+	if len(sites) != 3 || sites[0].name != "first" || sites[1] != nil || sites[2].name != "second" || sites[2].Position != second {
+		t.Fatalf("expanded call sites = %#v", sites)
+	}
+	if sites := expandCallSites(positions, nil); sites != nil {
+		t.Fatalf("empty call sites = %#v", sites)
+	}
+}
+
 func TestVMRejectsInvalidCallSites(t *testing.T) {
 	for _, ip := range []int{0, 1, 2} {
 		p := NewFunctionProto("invalid-call-site")

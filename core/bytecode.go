@@ -64,6 +64,41 @@ type CallSite struct {
 func (s *CallSite) Name() string  { return s.name }
 func (s *CallSite) Pos() Position { return s.Position }
 
+// Compact initialization helpers used by generated core data.
+type callSiteSpec struct {
+	ip   int
+	name string
+}
+
+func expandPositionRuns(counts []int, positions []Position) []Position {
+	if len(counts) != len(positions) {
+		panic("position run counts and values differ")
+	}
+	total := 0
+	for _, count := range counts {
+		total += count
+	}
+	res := make([]Position, total)
+	offset := 0
+	for i, count := range counts {
+		for end := offset + count; offset < end; offset++ {
+			res[offset] = positions[i]
+		}
+	}
+	return res
+}
+
+func expandCallSites(positions []Position, specs []callSiteSpec) []*CallSite {
+	if len(specs) == 0 {
+		return nil
+	}
+	res := make([]*CallSite, specs[len(specs)-1].ip+1)
+	for _, spec := range specs {
+		res[spec.ip] = &CallSite{Position: positions[spec.ip], name: spec.name}
+	}
+	return res
+}
+
 type Chunk struct {
 	Code      []byte
 	Constants []Object

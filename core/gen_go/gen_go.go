@@ -55,7 +55,12 @@ var %s %s = %s`[1:],
 	g.Generated[name] = obj // Generation is complete.
 }
 
-// Generate code specifying the value as it would be assigned to a given target with a given declared type.
+// Value generates code specifying v as it would be assigned to target with declared type t.
+// It is exported for generator-specific hooks that compact selected subvalues.
+func (g *GenGo) Value(target string, t reflect.Type, v reflect.Value) string {
+	return g.value(target, t, v)
+}
+
 func (g *GenGo) value(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() && t == v.Type() {

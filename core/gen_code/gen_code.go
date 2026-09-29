@@ -840,9 +840,58 @@ func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, 
 	return
 }
 
+func (genEnv *GenEnv) emitPositionRuns(target string, v reflect.Value) string {
+	positions := v.Interface().([]Position)
+	counts := make([]string, 0)
+	values := make([]string, 0)
+	for i := 0; i < len(positions); {
+		j := i + 1
+		for j < len(positions) && positions[j] == positions[i] {
+			j++
+		}
+		counts = append(counts, strconv.Itoa(j-i))
+		value := genEnv.GenGo.Value(fmt.Sprintf("%s[%d]", target, len(values)), reflect.TypeOf(Position{}), reflect.ValueOf(positions[i]))
+		if value == "" {
+			value = "Position{}"
+		}
+		values = append(values, "\t"+value+",")
+		i = j
+	}
+	return fmt.Sprintf("expandPositionRuns([]int{%s}, []Position{\n%s\n})", strings.Join(counts, ", "), strings.Join(values, "\n"))
+}
+
+func (genEnv *GenEnv) emitSparseCallSites(target string, v reflect.Value) string {
+	specs := make([]string, 0)
+	for i := 0; i < v.Len(); i++ {
+		if site := v.Index(i); !site.IsNil() {
+			name := site.Elem().FieldByName("name")
+			name = gen_go.UnsafeReflectValue(name)
+			specs = append(specs, fmt.Sprintf("\t{ip: %d, name: %s},", i, strconv.Quote(name.String())))
+		}
+	}
+	if len(specs) == 0 {
+		return "nil"
+	}
+	chunk := strings.TrimSuffix(target, ".callSites")
+	*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
+	%s = expandCallSites(%s.Positions, []callSiteSpec{
+%s
+	})`[1:], target, chunk, strings.Join(specs, "\n")))
+	return "nil /* initialized sparsely at runtime */"
+}
+
 func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value) string {
 	if _, isExpr := v.Interface().(Expr); isExpr {
 		panic(fmt.Sprintf("parsed expression reached generated output at %s", target))
+	}
+	if strings.HasSuffix(target, ".Code") && v.Type() == reflect.TypeOf([]byte(nil)) {
+		return "[]byte(" + strconv.Quote(string(v.Bytes())) + ")"
+	}
+	if strings.HasSuffix(target, ".Positions") && v.Type() == reflect.TypeOf([]Position(nil)) {
+		return genEnv.emitPositionRuns(target, v)
+	}
+	if strings.HasSuffix(target, ".callSites") && v.Type() == reflect.TypeOf([]*CallSite(nil)) {
+		return genEnv.emitSparseCallSites(target, v)
 	}
 	switch pkg := v.Type().PkgPath(); pkg {
 	case "reflect":
