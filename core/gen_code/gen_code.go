@@ -133,18 +133,6 @@ const codeFilenamePattern = "a_%s_code.go"
 const masterDataFilename = "a_data.go"
 const dataFilenamePattern = "a_%s_data.go"
 
-func packContent(content []byte) []byte {
-	const hextable = "0123456789abcdef"
-	dst := make([]byte, len(content)*4)
-	for i, v := range content {
-		dst[i*4] = '\\'
-		dst[i*4+1] = 'x'
-		dst[i*4+2] = hextable[v>>4]
-		dst[i*4+3] = hextable[v&0x0f]
-	}
-	return dst
-}
-
 type GenEnv struct {
 	GenGo            *gen_go.GenGo
 	StaticImport     *Imports
@@ -217,7 +205,7 @@ package core
 var {name}Data []byte
 
 func init() {
-	{name}Data = []byte("{content}")
+	{name}Data = []byte({content})
 }
 `
 
@@ -233,11 +221,9 @@ func init() {
 	PanicOnErr(err)
 	file.Close()
 
-	dst := packContent(content)
-
 	name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
 	fileContent := strings.ReplaceAll(dataTemplate, "{name}", name)
-	fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
+	fileContent = strings.Replace(fileContent, "{content}", strconv.Quote(string(content)), 1)
 	ioutil.WriteFile(fmt.Sprintf(dataFilenamePattern, name), []byte(fileContent), 0666)
 }
 
