@@ -19,15 +19,17 @@ call re-enters its paused caller's VM rather than taking another VM from the
 pool. Independent `go` bodies and HTTP callbacks start new executions. Core
 `apply` and `eval` also have optional execution-aware native entries.
 
-Generated Go data contains compiled functions and parsed forms used for linter
-inference. Functions created by bytecode are compiled closures. Any function
-holding a parsed source expression compiles and caches its prototype on first
-invocation, regardless of namespace or how it is reached; compilation errors
-are surfaced rather than falling back to AST execution.
+Generated Go data contains compiled functions and compact summaries used for
+linter inference; parsed forms are removed before the object graph is emitted.
+Functions created by bytecode are compiled closures. A dynamically created
+function that still holds a parsed source expression compiles and caches its
+prototype on first invocation; compilation errors are surfaced rather than
+falling back to AST execution.
 
 The build-time code generator also executes bytecode when bootstrapping generated
-object graphs. Parsing and linter inference still use ASTs, but there is no AST
-runtime evaluator or fallback.
+object graphs. Parsing and build-time linter analysis use ASTs, but generated
+core namespaces retain only bytecode and compact analysis results. There is no
+AST runtime evaluator or fallback.
 
 ## Semantics and representation
 

@@ -17,13 +17,15 @@ type FnSummary struct {
 }
 
 type FnAritySummary struct {
-	arity            *FnArityExpr
-	variadic         bool
-	returnUnknown    bool
-	returnTypes      []*Type
-	returnArgDeps    []bool
-	inferredArgTypes [][]*Type
-	declaredArgTypes [][]*Type
+	arity               *FnArityExpr
+	argCount            int
+	variadic            bool
+	returnUnknown       bool
+	returnTypes         []*Type
+	returnArgDeps       []bool
+	inferredArgTypes    [][]*Type
+	declaredArgTypes    [][]*Type
+	declaredReturnTypes []*Type
 }
 
 type InferEnv struct {
@@ -316,6 +318,9 @@ func (expr *VarRefExpr) InferValue(env *InferEnv) InferredValue {
 	if expr.vr.expr != nil {
 		return expr.vr.expr.InferValue(env)
 	}
+	if expr.vr.hasInferredValue {
+		return InferredValue{unknown: expr.vr.inferredUnknown, types: expr.vr.inferredTypes}
+	}
 	if len(expr.vr.taggedTypes) != 0 {
 		return typesInferredValue(expr.vr.taggedTypes)
 	}
@@ -400,6 +405,9 @@ func callableFnSummary(callable Expr, passedArgsCount int) (*FnSummary, *FnArity
 		if fn, ok := callable.vr.Value.(*Fn); ok && fn.fnExpr != nil {
 			summary := getFnSummary(fn.fnExpr)
 			return summary, summary.selectArity(passedArgsCount)
+		}
+		if callable.vr.fnSummary != nil {
+			return callable.vr.fnSummary, callable.vr.fnSummary.selectArity(passedArgsCount)
 		}
 		if callable.vr.expr != nil {
 			return callableFnSummary(callable.vr.expr, passedArgsCount)
@@ -509,6 +517,11 @@ func declaredReturnTypes(callable Expr, passedArgsCount int) []*Type {
 		if len(callable.vr.taggedTypes) != 0 {
 			return callable.vr.taggedTypes
 		}
+		if callable.vr.fnSummary != nil {
+			if arity := callable.vr.fnSummary.selectArity(passedArgsCount); arity != nil && len(arity.declaredReturnTypes) != 0 {
+				return arity.declaredReturnTypes
+			}
+		}
 		if callable.vr.expr != nil {
 			if types := declaredReturnTypes(callable.vr.expr, passedArgsCount); len(types) != 0 {
 				return types
@@ -587,11 +600,11 @@ func getFnSummary(fn *FnExpr) *FnSummary {
 
 func (summary *FnSummary) selectArity(passedArgsCount int) *FnAritySummary {
 	for _, arity := range summary.arities {
-		if len(arity.arity.args) == passedArgsCount {
+		if arity.argCount == passedArgsCount {
 			return arity
 		}
 	}
-	if summary.variadic != nil && passedArgsCount >= len(summary.variadic.arity.args)-1 {
+	if summary.variadic != nil && passedArgsCount >= summary.variadic.argCount-1 {
 		return summary.variadic
 	}
 	return nil
@@ -627,13 +640,15 @@ func inferFnArity(arity *FnArityExpr, variadic bool) *FnAritySummary {
 		value = unknownInferredValue()
 	}
 	res := &FnAritySummary{
-		arity:            arity,
-		variadic:         variadic,
-		returnUnknown:    value.unknown,
-		returnTypes:      value.types,
-		returnArgDeps:    returnArgDeps(arity.body, arity.bindings),
-		inferredArgTypes: make([][]*Type, len(arity.args)),
-		declaredArgTypes: make([][]*Type, len(arity.args)),
+		arity:               arity,
+		argCount:            len(arity.args),
+		variadic:            variadic,
+		returnUnknown:       value.unknown,
+		returnTypes:         value.types,
+		returnArgDeps:       returnArgDeps(arity.body, arity.bindings),
+		inferredArgTypes:    make([][]*Type, len(arity.args)),
+		declaredArgTypes:    make([][]*Type, len(arity.args)),
+		declaredReturnTypes: arity.taggedTypes,
 	}
 	for _, taggedType := range arity.taggedTypes {
 		res.returnTypes = addType(res.returnTypes, taggedType)
@@ -648,6 +663,31 @@ func inferFnArity(arity *FnArityExpr, variadic bool) *FnAritySummary {
 		res.inferredArgTypes[len(arity.args)-1] = nil
 		res.declaredArgTypes[len(arity.args)-1] = nil
 	}
+	return res
+}
+
+func compactFnSummary(fn *FnExpr) *FnSummary {
+	summary := getFnSummary(fn)
+	compactArity := func(src *FnAritySummary) *FnAritySummary {
+		if src == nil {
+			return nil
+		}
+		return &FnAritySummary{
+			argCount:            src.argCount,
+			variadic:            src.variadic,
+			returnUnknown:       src.returnUnknown,
+			returnTypes:         src.returnTypes,
+			returnArgDeps:       src.returnArgDeps,
+			inferredArgTypes:    src.inferredArgTypes,
+			declaredArgTypes:    src.declaredArgTypes,
+			declaredReturnTypes: src.declaredReturnTypes,
+		}
+	}
+	res := &FnSummary{analyzed: true, arities: make([]*FnAritySummary, len(summary.arities))}
+	for i, arity := range summary.arities {
+		res.arities[i] = compactArity(arity)
+	}
+	res.variadic = compactArity(summary.variadic)
 	return res
 }
 

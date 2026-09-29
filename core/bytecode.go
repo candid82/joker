@@ -56,11 +56,19 @@ type HandlerInfo struct {
 	EndIP         int
 	TryLocalCount int // stack depth when the handler is installed
 }
+type CallSite struct {
+	Position
+	name string
+}
+
+func (s *CallSite) Name() string  { return s.name }
+func (s *CallSite) Pos() Position { return s.Position }
+
 type Chunk struct {
 	Code      []byte
 	Constants []Object
 	Positions []Position
-	callSites []*CallExpr // immutable native-call descriptors indexed by byte offset
+	callSites []*CallSite // immutable native-call descriptors indexed by byte offset
 	Handlers  []HandlerInfo
 }
 
@@ -76,7 +84,7 @@ func (c *Chunk) appendAt(b byte, pos Position) {
 	c.Positions = append(c.Positions, pos)
 	c.callSites = append(c.callSites, nil)
 }
-func (c *Chunk) callSiteAt(ip int) *CallExpr {
+func (c *Chunk) callSiteAt(ip int) *CallSite {
 	if ip >= 0 && ip < len(c.callSites) {
 		return c.callSites[ip]
 	}

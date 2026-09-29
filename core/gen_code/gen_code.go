@@ -156,6 +156,7 @@ type GenEnv struct {
 	Namespaces       map[string]int                          // Set of the known namespaces (core, user, required stds)
 	NamespaceIndices map[string]int                          // Order of "discovery" for known namespaces
 	Requireds        map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInits        map[*Var]*Var                           // Runtime copies of invocation-specific Vars
 	LateInit         bool                                    // Whether emitting a namespace other than joker.core
 }
 
@@ -338,6 +339,7 @@ func main() {
 		Runtimes:         map[*Namespace]*[]string{},
 		Imports:          map[*Namespace]*Imports{},
 		Requireds:        map[*Namespace]*map[*Namespace]struct{}{},
+		LateInits:        map[*Var]*Var{},
 		Namespaces:       namespaces,
 		NamespaceIndices: map[string]int{},
 		LateInit:         false,
@@ -373,6 +375,40 @@ func main() {
 			return genEnv.ptrToValueFn(ptr, v)
 		}
 	}(genEnv)
+
+	// Extract everything needed by generated code and the linter before
+	// removing parsed definitions from the object graph.
+	vars := make(map[*Var]struct{})
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		for _, vr := range ns.Mappings() {
+			vars[vr] = struct{}{}
+		}
+	}
+	for vr := range vars {
+		analysis := AnalyzeCodegenVar(vr)
+		owner := vr.Namespace()
+		if owner != nil {
+			required, found := genEnv.Requireds[owner]
+			if !found {
+				refs := map[*Namespace]struct{}{}
+				required = &refs
+				genEnv.Requireds[owner] = required
+			}
+			for _, ns := range analysis.Required {
+				if ns != owner && ns != GLOBAL_ENV.CoreNamespace {
+					(*required)[ns] = struct{}{}
+				}
+			}
+			if owner != GLOBAL_ENV.CoreNamespace && analysis.DirectSource != nil {
+				if _, found := knownLateInits[analysis.DirectSource.Name()]; found {
+					genEnv.LateInits[vr] = analysis.DirectSource
+				}
+			}
+		}
+	}
+	for vr := range vars {
+		StripCodegenVarExpr(vr)
+	}
 
 	// Order namespaces by when "discovered" for stability
 	// compiling and outputting.  Put the non-core namespaces
@@ -800,19 +836,14 @@ func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, 
 				fmt.Printf("FINISHED %s\n", nsName)
 			}
 		}
-	case VarRefExpr:
-		if curRequired := genEnv.Required; curRequired != nil {
-			if vr := obj.Var(); vr != nil {
-				if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
-					(*curRequired)[ns] = struct{}{}
-				}
-			}
-		}
 	}
 	return
 }
 
 func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value) string {
+	if _, isExpr := v.Interface().(Expr); isExpr {
+		panic(fmt.Sprintf("parsed expression reached generated output at %s", target))
+	}
 	switch pkg := v.Type().PkgPath(); pkg {
 	case "reflect":
 		t := coreTypeString(fmt.Sprintf("%s", v))
@@ -861,14 +892,11 @@ func (genEnv *GenEnv) ptrToValueFn(ptr, v reflect.Value) string {
 	name := uniqueId(ptrToObj)
 	if genEnv.LateInit {
 		if destVar, yes := ptrToObj.(*Var); yes {
-			if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
-				sourceVarName := e.Var().Name()
-				if _, found := knownLateInits[sourceVarName]; found {
-					destVarId := uniqueId(destVar)
-					*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
+			if sourceVar := genEnv.LateInits[destVar]; sourceVar != nil {
+				destVarId := uniqueId(destVar)
+				*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
 	%s.Value = %s.Value`[1:],
-						destVarId, uniqueId(e.Var())))
-				}
+					destVarId, uniqueId(sourceVar)))
 			}
 		}
 	}

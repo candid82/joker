@@ -482,7 +482,7 @@ func (c *Compiler) emitCall(argc int, name string) {
 	ip := len(c.function.Chunk.Code)
 	c.emitOp(OP_CALL)
 	if site := c.function.Chunk.callSites[ip]; site != nil {
-		site.callName = name
+		site.name = name
 	}
 	c.emitOperand(argc)
 }
@@ -491,7 +491,7 @@ func (c *Compiler) emitOp(op Opcode) {
 	chunk := c.function.Chunk
 	chunk.appendAt(byte(op), c.currentPos)
 	if op == OP_CALL {
-		chunk.callSites[len(chunk.Code)-1] = &CallExpr{Position: c.currentPos}
+		chunk.callSites[len(chunk.Code)-1] = &CallSite{Position: c.currentPos}
 	}
 }
 

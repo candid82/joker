@@ -406,7 +406,7 @@ func (c *Chunk) Pack(p []byte, env *PackEnv) []byte {
 	for ip, site := range c.callSites {
 		if site != nil {
 			p = appendInt(p, ip)
-			p = packBytes(p, []byte(site.callName))
+			p = packBytes(p, []byte(site.name))
 		}
 	}
 	// Handlers
@@ -448,16 +448,16 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 		i += count
 	}
 	callCount, p := extractCount(p)
-	var callSites []*CallExpr
+	var callSites []*CallSite
 	if callCount > 0 {
-		callSites = make([]*CallExpr, codeLen)
+		callSites = make([]*CallSite, codeLen)
 	}
 	for i := 0; i < callCount; i++ {
 		var ip int
 		ip, p = extractInt(p)
 		var name []byte
 		name, p = unpackBytes(p)
-		callSites[ip] = &CallExpr{Position: positions[ip], callName: string(name)}
+		callSites[ip] = &CallSite{Position: positions[ip], name: string(name)}
 	}
 
 	handlerCount, p := extractCount(p)

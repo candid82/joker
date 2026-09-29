@@ -42,7 +42,7 @@ type pendingFinally struct {
 type vmContext struct {
 	vm     *VM
 	parent *vmContext
-	entry  Expr
+	entry  Traceable
 }
 
 type VM struct {
@@ -376,7 +376,7 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 
 // Keep native-call cleanup outside the instruction loop so ordinary opcodes
 // do not enter a function with a deferred context restoration.
-func (vm *VM) callAtSite(callee Object, argc int, site *CallExpr) bool {
+func (vm *VM) callAtSite(callee Object, argc int, site *CallSite) bool {
 	previous := RT.currentExpr
 	previousDepth := vm.nativeDepth
 	if site != nil {

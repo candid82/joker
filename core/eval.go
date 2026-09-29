@@ -26,7 +26,7 @@ type (
 	}
 	Runtime struct {
 		callstack   *Callstack
-		currentExpr Expr
+		currentExpr Traceable
 		vm          *vmContext // execution handle; snapshots never retain VM storage
 		GIL         sync.Mutex
 	}
@@ -42,7 +42,7 @@ var RT *Runtime = &Runtime{
 type SuspendedExecution struct {
 	rt        *Runtime
 	context   *vmContext
-	expr      Expr
+	expr      Traceable
 	callstack *Callstack
 }
 
@@ -72,11 +72,11 @@ func (rt *Runtime) LockIndependent() {
 
 // NativeSite is an immutable source location that a host callback may retain
 // without retaining its creator's VM. The caller must hold the GIL.
-func (rt *Runtime) NativeSite() Expr { return rt.currentExpr }
+func (rt *Runtime) NativeSite() Traceable { return rt.currentExpr }
 
 // SetNativeSite attributes errors from independent native work to its origin.
 // The caller must hold the GIL and must not attach the origin's VM context.
-func (rt *Runtime) SetNativeSite(site Expr) { rt.currentExpr = site }
+func (rt *Runtime) SetNativeSite(site Traceable) { rt.currentExpr = site }
 
 func (rt *Runtime) clone() *Runtime {
 	res := &Runtime{callstack: rt.callstack.clone(), currentExpr: rt.currentExpr}
@@ -86,7 +86,7 @@ func (rt *Runtime) clone() *Runtime {
 			frame := &vm.frames[vm.frameCount-1]
 			pos := frame.arityProto.Chunk.positionAt(frame.lastOp)
 			if pos.startLine > 0 {
-				res.currentExpr = &CallExpr{Position: pos}
+				res.currentExpr = &CallSite{Position: pos}
 			}
 		}
 	}
@@ -214,9 +214,6 @@ func varCallableString(v *Var) string {
 }
 
 func (expr *CallExpr) Name() string {
-	if expr.callName != "" {
-		return expr.callName
-	}
 	switch c := expr.callable.(type) {
 	case *VarRefExpr:
 		return varCallableString(c.vr)

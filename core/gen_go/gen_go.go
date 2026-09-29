@@ -190,6 +190,8 @@ func (g *GenGo) slice(target string, v reflect.Value) string {
 		if res == "" {
 			// For numeric types, empty string means zero value - output 0 not nil
 			switch elemType.Kind() {
+			case reflect.Bool:
+				el = append(el, "\tfalse,")
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 				reflect.Float32, reflect.Float64:

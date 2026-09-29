@@ -5,7 +5,7 @@ import "testing"
 func TestVMContextAfterGILReacquisition(t *testing.T) {
 	var aContext, bContext, afterResume, callbackContext *vmContext
 	var aStack, bStack, afterResumeStack *Callstack
-	var aExpr, afterResumeExpr Expr
+	var aExpr, afterResumeExpr Traceable
 	var resumedError *EvalError
 	callback := Proc{Fn: func([]Object) Object {
 		callbackContext = RT.vm

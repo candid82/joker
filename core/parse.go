@@ -49,7 +49,6 @@ type (
 	}
 	CallExpr struct {
 		Position
-		callName string // immutable name on bytecode native-call descriptors
 		callable Expr
 		args     []Expr
 	}
@@ -680,6 +679,11 @@ func GetPosition(obj Object) Position {
 func updateVar(vr *Var, info *ObjectInfo, valueExpr Expr, sym Symbol) {
 	vr.WithInfo(info)
 	vr.expr = valueExpr
+	vr.hasDefinition = valueExpr != nil
+	vr.fnSummary = nil
+	vr.inferredTypes = nil
+	vr.inferredUnknown = false
+	vr.hasInferredValue = false
 	meta := sym.GetMeta()
 	if meta != nil {
 		if ok, p := meta.Get(KEYWORDS.private); ok {
@@ -1376,6 +1380,18 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	return true
 }
 
+func reportWrongSummaryArity(summary *FnSummary, isMacro bool, call *CallExpr, pos Position) bool {
+	passedArgsCount := len(call.args)
+	if isMacro {
+		passedArgsCount += 2
+	}
+	if summary.selectArity(passedArgsCount) != nil {
+		return false
+	}
+	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+	return true
+}
+
 func checkArglist(arglist Seq, passedArgsCount int) bool {
 	for !arglist.IsEmpty() {
 		if v, ok := arglist.First().(Vec); ok {
@@ -1459,7 +1475,7 @@ func isUnknownCallable(expr Expr) (bool, Seq) {
 		if b {
 			return b, s
 		}
-		if c.vr.expr != nil {
+		if c.vr.expr != nil || c.vr.hasDefinition {
 			return false, nil
 		}
 		if sym.ns == nil && c.vr.isFake && c.vr.ns != GLOBAL_ENV.CoreNamespace {
@@ -1585,7 +1601,11 @@ func checkLinterCall(call *CallExpr, ctx *ParseContext, pos Position) {
 	}
 	vr := vrExpr.vr
 	if vr.Value == nil {
-		checkCall(vr.expr, vr.isMacro, call, pos)
+		if vr.fnSummary != nil {
+			reportWrongSummaryArity(vr.fnSummary, vr.isMacro, call, pos)
+		} else {
+			checkCall(vr.expr, vr.isMacro, call, pos)
+		}
 		checkInferredCall(call)
 		return
 	}

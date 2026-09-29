@@ -174,17 +174,22 @@ type (
 	Var struct {
 		InfoHolder
 		MetaHolder
-		ns             *Namespace
-		name           Symbol
-		Value          Object
-		expr           Expr
-		isMacro        bool
-		isPrivate      bool
-		isDynamic      bool
-		isUsed         bool
-		isGloballyUsed bool
-		isFake         bool
-		taggedTypes    []*Type
+		ns               *Namespace
+		name             Symbol
+		Value            Object
+		expr             Expr
+		fnSummary        *FnSummary
+		inferredTypes    []*Type
+		inferredUnknown  bool
+		hasInferredValue bool
+		hasDefinition    bool
+		isMacro          bool
+		isPrivate        bool
+		isDynamic        bool
+		isUsed           bool
+		isGloballyUsed   bool
+		isFake           bool
+		taggedTypes      []*Type
 	}
 	ProcFn func([]Object) Object
 	Proc   struct {

@@ -248,10 +248,10 @@ func TestVMPackedCollectionLiterals(t *testing.T) {
 
 func TestVMReturnTypeAnnotations(t *testing.T) {
 	cases := []struct {
-		name  string
-		code  string
-		argc  int
-		want  []*Type
+		name string
+		code string
+		argc int
+		want []*Type
 	}{
 		{"multiple", `(fn ^"Vec|Nil" [x] x)`, 1, []*Type{TYPE.Vec, TYPE.Nil}},
 		{"single", `(fn ^Int [x] x)`, 1, []*Type{TYPE.Int}},
@@ -398,7 +398,7 @@ func TestVMPackedSourcePositions(t *testing.T) {
 	chunk := NewChunk()
 	chunk.appendAt(byte(OP_CALL), pos)
 	chunk.appendAt(0, pos)
-	chunk.callSites[0] = &CallExpr{Position: pos, callName: "packed-call"}
+	chunk.callSites[0] = &CallSite{Position: pos, name: "packed-call"}
 	env := NewPackEnv()
 	packed := chunk.Pack(nil, env)
 	header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
@@ -406,7 +406,7 @@ func TestVMPackedSourcePositions(t *testing.T) {
 	if len(remaining) != 0 || len(unpacked.Positions) != 2 || unpacked.positionAt(0).Filename() != filename ||
 		unpacked.positionAt(0).startLine != 7 || unpacked.positionAt(1).startColumn != 3 ||
 		unpacked.callSites[0] == nil || unpacked.callSites[0].Pos().Filename() != filename ||
-		unpacked.callSites[0].callName != "packed-call" || unpacked.callSiteAt(1) != nil {
+		unpacked.callSites[0].name != "packed-call" || unpacked.callSiteAt(1) != nil {
 		t.Fatalf("lost bytecode source positions or native call site during packing")
 	}
 }

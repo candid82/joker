@@ -88,8 +88,8 @@ func TestVMRejectsInvalidCallSites(t *testing.T) {
 		p := NewFunctionProto("invalid-call-site")
 		p.Chunk.appendAt(byte(OP_NIL), Position{})
 		p.Chunk.appendAt(byte(OP_RETURN), Position{})
-		p.Chunk.callSites = make([]*CallExpr, 3)
-		p.Chunk.callSites[ip] = &CallExpr{}
+		p.Chunk.callSites = make([]*CallSite, 3)
+		p.Chunk.callSites[ip] = &CallSite{}
 		if err := ValidateFunctionProto(p); err == nil {
 			t.Fatalf("accepted call site at non-call offset %d", ip)
 		}
