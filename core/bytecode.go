@@ -103,7 +103,7 @@ type ArityProto struct {
 	Chunk        *Chunk
 	SubFunctions []*FunctionProto
 	ArgTypes     [][]*Type
-	TaggedType   *Type
+	TaggedTypes  []*Type
 }
 type FunctionProto struct {
 	Name          string

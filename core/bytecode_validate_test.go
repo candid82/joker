@@ -46,6 +46,9 @@ func TestVMPackedValidation(t *testing.T) {
 		t.Fatal("packed captures changed")
 	}
 	expectJokerPanic(t, func() { UnpackHeader([]byte("old-format"), GLOBAL_ENV) })
+	oldHeader := append([]byte(nil), headerData...)
+	oldHeader[len(packedVersion)-1]--
+	expectJokerPanic(t, func() { UnpackHeader(oldHeader, GLOBAL_ENV) })
 }
 
 func TestVMRejectsInvalidBytecode(t *testing.T) {

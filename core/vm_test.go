@@ -1,6 +1,7 @@
 package core
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -242,6 +243,43 @@ func TestVMPackedCollectionLiterals(t *testing.T) {
 		if !result.Equals(obj) || result.GetType() != obj.GetType() {
 			t.Fatalf("packed constant changed: %s", obj)
 		}
+	}
+}
+
+func TestVMReturnTypeAnnotations(t *testing.T) {
+	cases := []struct {
+		name  string
+		code  string
+		argc  int
+		want  []*Type
+	}{
+		{"multiple", `(fn ^"Vec|Nil" [x] x)`, 1, []*Type{TYPE.Vec, TYPE.Nil}},
+		{"single", `(fn ^Int [x] x)`, 1, []*Type{TYPE.Int}},
+		{"untagged", `(fn [x] x)`, 1, nil},
+		{"variadic", `(fn ^"Vec|Nil" [x & xs] x)`, 2, []*Type{TYPE.Vec, TYPE.Nil}},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			proto, err := CompileFnExpr(parseVMTest(t, tt.code).(*FnExpr), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			env := NewPackEnv()
+			packed := proto.Pack(nil, env)
+			header, _ := UnpackHeader(env.Pack(nil), GLOBAL_ENV)
+			unpacked, rest := UnpackFunctionProto(packed, header)
+			if len(rest) != 0 {
+				t.Fatalf("%d bytes remained after unpacking", len(rest))
+			}
+			for _, p := range []*FunctionProto{proto, unpacked} {
+				// The var has no retained expression: the linter must use the prototype.
+				vr := &Var{Value: &Fn{proto: p, isCompiled: true}}
+				got := declaredReturnTypes(&VarRefExpr{vr: vr}, tt.argc)
+				if !slices.Equal(got, tt.want) {
+					t.Errorf("return types: got %v, want %v", got, tt.want)
+				}
+			}
+		})
 	}
 }
 

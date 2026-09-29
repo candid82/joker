@@ -531,9 +531,7 @@ func IsVMCompatible(e Expr) bool      { _, err := CompileTopLevel(e); return err
 func IsVMCompatibleFn(e *FnExpr) bool { _, err := CompileFnExpr(e, nil); return err == nil }
 
 func extractArgTypes(a FnArityExpr, ap *ArityProto) {
-	if len(a.taggedTypes) > 0 {
-		ap.TaggedType = a.taggedTypes[0]
-	}
+	ap.TaggedTypes = a.taggedTypes
 	ap.ArgTypes = make([][]*Type, len(a.args))
 	for i, arg := range a.args {
 		if m := arg.GetMeta(); m != nil {

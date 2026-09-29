@@ -49,7 +49,7 @@ func (a ByString) Less(i, j int) bool {
 }
 
 // Packed data is an internal, rebuildable format. Reject stale blobs explicitly.
-const packedVersion = "JOKER-VM\x04"
+const packedVersion = "JOKER-VM\x05"
 
 func (env *PackEnv) Pack(p []byte) []byte {
 	p = append(p, packedVersion...)
@@ -475,23 +475,6 @@ func unpackChunk(p []byte, header *PackHeader) (*Chunk, []byte) {
 	}, p
 }
 
-func packTypePtr(p []byte, t *Type, env *PackEnv) []byte {
-	if t == nil {
-		return append(p, NULL)
-	}
-	p = append(p, NOT_NULL)
-	return t.Pack(p, env)
-}
-
-func unpackTypePtr(p []byte, header *PackHeader) (*Type, []byte) {
-	if p[0] == NULL {
-		return nil, p[1:]
-	}
-	p = p[1:]
-	t, p := unpackType(p, header)
-	return t, p
-}
-
 func packArgTypes(p []byte, argTypes [][]*Type, env *PackEnv) []byte {
 	if argTypes == nil {
 		p = appendInt(p, 0)
@@ -537,8 +520,11 @@ func (a *ArityProto) Pack(p []byte, env *PackEnv) []byte {
 	}
 	// ArgTypes
 	p = packArgTypes(p, a.ArgTypes, env)
-	// TaggedType
-	p = packTypePtr(p, a.TaggedType, env)
+	// TaggedTypes
+	p = appendInt(p, len(a.TaggedTypes))
+	for _, t := range a.TaggedTypes {
+		p = t.Pack(p, env)
+	}
 	return p
 }
 
@@ -555,8 +541,15 @@ func unpackArityProto(p []byte, header *PackHeader) (*ArityProto, []byte) {
 
 	// ArgTypes
 	argTypes, p := unpackArgTypes(p, header)
-	// TaggedType
-	taggedType, p := unpackTypePtr(p, header)
+	// TaggedTypes
+	typeCount, p := extractCount(p)
+	var taggedTypes []*Type
+	if typeCount > 0 {
+		taggedTypes = make([]*Type, typeCount)
+		for i := range taggedTypes {
+			taggedTypes[i], p = unpackType(p, header)
+		}
+	}
 
 	return &ArityProto{
 		Arity:        arity,
@@ -564,7 +557,7 @@ func unpackArityProto(p []byte, header *PackHeader) (*ArityProto, []byte) {
 		Chunk:        chunk,
 		SubFunctions: subFunctions,
 		ArgTypes:     argTypes,
-		TaggedType:   taggedType,
+		TaggedTypes:  taggedTypes,
 	}, p
 }
 
