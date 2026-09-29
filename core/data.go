@@ -1,5 +1,5 @@
-//go:build !gen_code
-// +build !gen_code
+//go:build !gen_code && !packed_core
+// +build !gen_code,!packed_core
 
 package core
 
