@@ -54,6 +54,7 @@ func init() {
 	intern("keyword__", procKeyword, "procKeyword")
 	intern("apply__", procApply, "procApply")
 	intern("lazy-seq__", procLazySeq, "procLazySeq")
+	intern("take-seq__", procTakeSeq, "procTakeSeq")
 	intern("map-seq__", procMapSeq, "procMapSeq")
 	intern("filter-seq__", procFilterSeq, "procFilterSeq")
 	intern("mapcat-seq__", procMapcatSeq, "procMapcatSeq")

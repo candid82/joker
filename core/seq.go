@@ -65,6 +65,7 @@ const (
 	transformFilter
 	transformMapcat
 	transformConcat
+	transformTake
 )
 
 func NewMapSeq(fn Callable, source Seqable) Seq {
@@ -82,6 +83,12 @@ func NewMapcatSeq(fn Callable, source Seqable) Seq {
 func NewConcatSeq(sources []Object) Seq {
 	arr := append([]Object(nil), sources...)
 	return &TransformSeq{kind: transformConcat, source: &ArraySeq{arr: arr}}
+}
+
+// Until realization, the cached-first slot holds the remaining take count.
+// Reusing it avoids enlarging every map/filter/concat node for this operation.
+func NewTakeSeq(n Number, source Seqable) Seq {
+	return &TransformSeq{kind: transformTake, source: source, arg: [1]Object{n}}
 }
 
 func (seq *TransformSeq) call(obj Object) Object {
@@ -104,8 +111,27 @@ func (seq *TransformSeq) realize() {
 	if seq.realized {
 		return
 	}
+	// Test the bound before touching the source: taking zero elements must
+	// not realize the next input node, even to check whether it is empty.
+	if seq.kind == transformTake {
+		n := seq.arg[0].(Number)
+		if !GetOps(n).Gt(n, Int{I: 0}) {
+			seq.finish(nil, EmptyList)
+			return
+		}
+	}
 	source := seq.source.Seq()
 	switch seq.kind {
+	case transformTake:
+		if source.IsEmpty() {
+			seq.finish(nil, EmptyList)
+			return
+		}
+		first := source.First()
+		n := seq.arg[0].(Number)
+		next := GetOps(n).Combine(INT_OPS).Subtract(n, Int{I: 1})
+		rest := NewTakeSeq(next, source.Rest())
+		seq.finish(first, rest)
 	case transformMap:
 		if source.IsEmpty() {
 			seq.finish(nil, EmptyList)

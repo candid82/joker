@@ -878,6 +878,15 @@ var procLazySeq = func(args []Object) Object {
 	}
 }
 
+var procTakeSeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	seq := NewTakeSeq(EnsureArgIsNumber(args, 0), EnsureArgIsSeqable(args, 1))
+	// Called inside take's outer lazy-seq. Realize the first node before
+	// returning so a source failure does not mark that wrapper realized.
+	seq.IsEmpty()
+	return seq
+}
+
 var procMapSeq = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	return NewMapSeq(EnsureArgIsCallable(args, 0), EnsureArgIsSeqable(args, 1))

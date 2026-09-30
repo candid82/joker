@@ -1694,8 +1694,7 @@
   ^Seq [^Number n ^Seqable coll]
   (lazy-seq
    (when (pos? n)
-     (when-let [s (seq coll)]
-       (cons (first s) (take (dec n) (rest s)))))))
+     (take-seq__ n coll))))
 
 (defn take-while
   "Returns a lazy sequence of successive items from coll while

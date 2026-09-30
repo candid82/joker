@@ -406,22 +406,27 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 		vm.callFn(fn, argc)
 		return true
 	case Proc:
+		base := vm.stackTop - argc - 1
+		var args []Object
 		if fn.Package == "" {
-			base := vm.stackTop - argc - 1
-			args := vm.stack[base+1 : vm.stackTop : vm.stackTop]
-			vm.nativeDepth++
-			var result Object
-			if fn.InExecution != nil {
-				result = fn.InExecution(vm.execution, args)
-			} else {
-				result = fn.Call(args)
-			}
-			vm.nativeDepth--
-			vm.truncate(base)
-			vm.Push(result)
-			return false
+			args = vm.stack[base+1 : vm.stackTop : vm.stackTop]
+		} else {
+			// Std procedures may retain arguments. Preserve the owned slice,
+			// but avoid boxing this Proc into the generic Callable interface.
+			args = vm.PopN(argc)
+			vm.Pop()
 		}
-		return vm.callOtherCallable(fn, argc)
+		vm.nativeDepth++
+		var result Object
+		if fn.Package == "" && fn.InExecution != nil {
+			result = fn.InExecution(vm.execution, args)
+		} else {
+			result = fn.Call(args)
+		}
+		vm.nativeDepth--
+		vm.truncate(base)
+		vm.Push(result)
+		return false
 	case Callable:
 		return vm.callOtherCallable(fn, argc)
 	default:
