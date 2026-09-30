@@ -129,3 +129,70 @@ The profiling/reproduction commands in the part-one section now exercise part tw
 `core/vm_proc_dispatch_test.go` adds a red-capable allocation test: before the dispatch change, std calls allocate two objects and fail its one-allocation budget; afterward they allocate only the owned argument slice. It also checks retained arguments survive VM stack reuse, and core calls retain their zero-allocation dispatch path. Existing host ownership, callback/reentry, native error/context, and arity tests pass.
 
 The final build passes `go test -count=1 ./...`, `go vet ./...`, `git diff --check`, and `./all-tests.sh` (195 eval tests, 1,219 assertions, plus flag/formatter/linter suites). The updated day 14 output is byte-identical to the baseline.
+
+## Day 14 follow-up: cached integer arithmetic results
+
+Baseline is `ee8a4f71`, including native `take` and direct `Proc` dispatch. The intervening hex-wrapper experiment was reverted by the user because it did not demonstrate an end-to-end improvement. This pass leaves the external part-two program unchanged and does not alter bytecode, instruction dispatch, or std wrappers.
+
+### Implementation
+
+- `core/boxed.go`: expand the bounded integer cache from **0–255 to 0–2047**. Store its already-boxed values as `Number` interfaces and return `Number` from `boxInt`, allowing numeric operations to return a shared box directly. Existing `Object` callers still receive the same concrete `Int` values.
+- `core/numbers.go`: `IntOps.Add` and `IntOps.Subtract` now return `boxInt(result)`. This covers integer `inc`, `dec`, `+`, and `-` without changing their dispatch. Unlike the previously rejected arithmetic fast paths, these results do not allocate a new box when cached.
+- Negative and out-of-range results still allocate normal `Int` objects. Overflow, mixed numeric types, arbitrary-precision operations, equality/hash/identity, mutable Var rebinding, and reader/source information retain their prior behavior. Only fresh runtime results use the cache.
+- The larger cache adds approximately **84 KiB of persistent storage on 64-bit systems** (interface entries plus integer boxes). The representation conversion makes an already-cached `count` microbenchmark approximately **0.8 ns slower**; this tradeoff is included in the full-program measurements below.
+- Rebuilt/regenerated with `./run.sh --build-only`. No tracked std generated files changed.
+
+### Allocation evidence and isolated arithmetic benchmarks
+
+The new native-arithmetic allocation tests failed before the change: a result of 2016 allocated **one 32-byte object** for `inc`, `+`, `dec`, and `-`. They now allocate **zero**. Addition was implemented and measured before enabling subtraction.
+
+Three-run means of `BenchmarkIntegerCacheArithmetic`, with operands preboxed and results escaped:
+
+| Native operation | Before ns/op | After ns/op | Before → after B/op | Before → after allocs/op |
+| --- | ---: | ---: | ---: | ---: |
+| `inc`, result 2016 | 20.5 | 7.7 | 32 → 0 | 1 → 0 |
+| `dec`, result 2016 | 20.5 | 7.7 | 32 → 0 | 1 → 0 |
+| `+`, result 2016 | 22.4 | 9.7 | 32 → 0 | 1 → 0 |
+| `-`, result 2016 | 21.0 | 8.0 | 32 → 0 | 1 → 0 |
+| `inc`, result 4096 | 20.8 | 21.0 | 32 → 32 | 1 → 1 |
+| `+`, result 4112 | 22.6 | 22.9 | 32 → 32 | 1 → 1 |
+| `count`, result 1 | 2.39 | 3.19 | 0 → 0 | 0 → 0 |
+
+Day-14 sampled allocation profiles confirm the intended mechanism:
+
+| Profile | Total sampled allocations | Integer addition result allocations | Integer subtraction result allocations |
+| --- | ---: | ---: | ---: |
+| Baseline | 7,608 MiB (7.43 GiB) | 1,443 MiB | 78.5 MiB |
+| Addition cache only | 6,193 MiB (6.05 GiB) | ~1 MiB | 74 MiB |
+| Addition + subtraction cache | 6,118 MiB (5.97 GiB) | ~1 MiB | No samples attributed to `IntOps.Subtract` |
+
+Combined total allocation reduction: approximately **19.6%**. Remaining uncached addition results include stream indices above the cache range. Totals are sampled and unrelated allocation sites vary between profiles; the per-operation zero-allocation tests provide the deterministic evidence.
+
+### End-to-end impact
+
+Five **reordered, unprofiled runs per version** compared saved baseline, addition-only, and combined binaries. Every completed run produced byte-identical stdout, with final key index **22045**. Collection resumed after a harness timeout; the incomplete run is not included.
+
+| Version | Mean | Median | Individual runs |
+| --- | ---: | ---: | --- |
+| Baseline | **19.198s** | 19.257s | 18.944, 19.257, 19.299, 19.193, 19.297s |
+| Addition cache only | **18.008s** | 18.189s | 18.189, 18.264, 17.300, 17.996, 18.293s |
+| Addition + subtraction cache | **18.141s** | 18.149s | 18.155, 18.149, 18.271, 18.024, 18.107s |
+
+The final combined version uses **5.5% less mean wall time**, a **1.058× speedup**. Its slowest run (18.271s) was faster than the fastest baseline run (18.944s). Unlike the reverted hex-wrapper attempt, this is a demonstrated full-workload improvement.
+
+Addition caching provides the main benefit. The subtraction cache improves its isolated operations and eliminates another allocation source, but these full-workload measurements do **not** establish an additional wall-time improvement over addition alone; the addition-only mean also includes a faster 17.300s run.
+
+### Validation and reproduction
+
+`core/integer_cache_test.go` covers cache bounds and out-of-range allocation behavior, source-info/original-spelling isolation, signed integer overflow, mixed/precision-promoting numeric operations, public VM counter loops, equality/hash/identity, and Var rebinding. `core/boxed_test.go` extends primitive source-info isolation checks through the new cache range and its upper edge.
+
+```sh
+./run.sh --build-only
+go test ./core -run '^Test(IntegerArithmeticCache|BoxedPrimitiveInfoIsolation)' -count=1
+go test ./core -run '^$' -bench '^BenchmarkIntegerCacheArithmetic' -benchmem -count=3
+./joker --cpuprofile /tmp/day14.cpu --memprofile /tmp/day14.mem \
+  /Users/candid/personal/advent/advent2016/day14/main.joke > /tmp/day14.out
+# Compare saved binaries without profiling; reorder runs and check stdout.
+```
+
+`go test -count=1 ./...`, `go vet ./...`, `go test -race ./core -count=1`, `git diff --check`, and `./all-tests.sh` passed (195 eval tests, 1,219 assertions, plus flag/formatter/linter suites). Artifacts are under `/tmp/joker-integer-cache-perf/`: saved `joker-{before,add,both}` binaries, workload snapshot, stdout snapshots, CPU/allocation profiles, three benchmark reports, `times.json`, and the suite log.

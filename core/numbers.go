@@ -255,7 +255,7 @@ func (r *Ratio) Ratio() *big.Rat {
 // Add
 
 func (ops IntOps) Add(x, y Number) Number {
-	return Int{I: x.Int().I + y.Int().I}
+	return boxInt(x.Int().I + y.Int().I)
 }
 
 func (ops DoubleOps) Add(x, y Number) Number {
@@ -285,7 +285,7 @@ func (ops RatioOps) Add(x, y Number) Number {
 // Subtract
 
 func (ops IntOps) Subtract(x, y Number) Number {
-	return Int{I: x.Int().I - y.Int().I}
+	return boxInt(x.Int().I - y.Int().I)
 }
 
 func (ops DoubleOps) Subtract(x, y Number) Number {

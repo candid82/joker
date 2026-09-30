@@ -1,12 +1,15 @@
 package core
 
-// These values already have an Object interface box. Use them only for fresh
+// These values are already interface-boxed. Use them only for fresh
 // runtime results with no source information; reader values retain their info.
 var (
 	trueObject  Object = Boolean{B: true}
 	falseObject Object = Boolean{B: false}
-	smallInts          = func() [256]Object {
-		var values [256]Object
+	// Number entries let arithmetic return the existing box directly. The
+	// bounded cache adds about 84 KiB on 64-bit systems over the former
+	// 0..255 cache.
+	smallInts = func() [2048]Number {
+		var values [2048]Number
 		for i := range values {
 			values[i] = Int{I: i}
 		}
@@ -28,7 +31,7 @@ func boxBoolean(value bool) Object {
 	return falseObject
 }
 
-func boxInt(value int) Object {
+func boxInt(value int) Number {
 	if uint(value) < uint(len(smallInts)) {
 		return smallInts[value]
 	}

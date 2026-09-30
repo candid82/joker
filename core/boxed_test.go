@@ -6,7 +6,7 @@ import (
 )
 
 func TestBoxedPrimitiveInfoIsolation(t *testing.T) {
-	for _, original := range []Object{boxBoolean(false), boxBoolean(true), boxInt(0), boxInt(255), boxInt(256), boxInt(-1), boxChar('a'), boxChar('λ')} {
+	for _, original := range []Object{boxBoolean(false), boxBoolean(true), boxInt(0), boxInt(255), boxInt(256), boxInt(2016), boxInt(2047), boxInt(2048), boxInt(-1), boxChar('a'), boxChar('λ')} {
 		info := &ObjectInfo{}
 		located := original.WithInfo(info)
 		if located.GetInfo() != info || original.GetInfo() != nil || !located.Equals(original) {
