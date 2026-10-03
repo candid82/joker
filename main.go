@@ -803,6 +803,30 @@ func main() {
 		return
 	}
 
+	// Validate task modes before evaluation or linting can execute and return.
+	if taskFlag || listTasksFlag {
+		option := "--task"
+		if listTasksFlag {
+			option = "--list-tasks"
+		}
+		if lintFlag {
+			fmt.Fprintf(Stderr, "Error: Cannot combine %s and --lint.\n", option)
+			ExitJoker(18)
+		}
+		if eval != "" {
+			fmt.Fprintf(Stderr, "Error: Cannot combine %s and --eval/-e.\n", option)
+			ExitJoker(19)
+		}
+		if replFlag {
+			fmt.Fprintf(Stderr, "Error: Cannot combine %s and --repl.\n", option)
+			ExitJoker(20)
+		}
+		if filename != "" {
+			fmt.Fprintf(Stderr, "Error: Cannot combine %s and a <filename> argument.\n", option)
+			ExitJoker(21)
+		}
+	}
+
 	if len(remainingArgs) > 0 {
 		if lintFlag {
 			fmt.Fprintf(Stderr, "Error: Cannot provide arguments to code while linting it.\n")
@@ -913,43 +937,11 @@ func main() {
 	}
 
 	if listTasksFlag {
-		if lintFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --list-tasks and --lint.\n")
-			ExitJoker(18)
-		}
-		if eval != "" {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --list-tasks and --eval/-e.\n")
-			ExitJoker(19)
-		}
-		if replFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --list-tasks and --repl.\n")
-			ExitJoker(20)
-		}
-		if filename != "" {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --list-tasks and a <filename> argument.\n")
-			ExitJoker(21)
-		}
 		listTasks(tasksFile)
 		return
 	}
 
 	if taskFlag {
-		if lintFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --task and --lint.\n")
-			ExitJoker(18)
-		}
-		if eval != "" {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --task and --eval/-e.\n")
-			ExitJoker(19)
-		}
-		if replFlag {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --task and --repl.\n")
-			ExitJoker(20)
-		}
-		if filename != "" {
-			fmt.Fprintf(Stderr, "Error: Cannot combine --task and a <filename> argument.\n")
-			ExitJoker(21)
-		}
 		if err := runTask(tasksFile, taskName, remainingArgs); err != nil {
 			if !errorToRepl {
 				ExitJoker(1)

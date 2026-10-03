@@ -1,0 +1,10 @@
+(ns tasks)
+
+(defn file-context
+  []
+  (println (= *file* (joker.filepath/abs "tests/flags/tasks_context/tasks.joke"))))
+
+(defn delayed-require
+  []
+  (require 'task-helper)
+  (println ((ns-resolve 'task-helper 'message))))

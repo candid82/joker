@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -166,6 +167,17 @@ func runTask(tasksFile string, taskName string, taskArgs []string) error {
 		return err
 	}
 
+	filename, err := filepath.Abs(tasksFile)
+	if err != nil {
+		fmt.Fprintln(Stderr, "Error:", err)
+		return err
+	}
+	fileVar, _ := GLOBAL_ENV.Resolve(MakeSymbol("joker.core/*file*"))
+	currentFilename := fileVar.Value
+	GLOBAL_ENV.SetFilename(MakeString(filename))
+	defer func() { GLOBAL_ENV.SetFilename(currentFilename) }()
+
+	// Keep *file* bound after processFile returns, including during the task call.
 	if err := processFile(tasksFile, EVAL); err != nil {
 		return err
 	}
@@ -188,8 +200,15 @@ func runTask(tasksFile string, taskName string, taskArgs []string) error {
 		return err
 	}
 
-	if intVal, ok := res.(Int); ok && intVal.I != 0 {
-		ExitJoker(int(intVal.I))
+	exitCode := 0
+	switch intVal := res.(type) {
+	case Int:
+		exitCode = intVal.I
+	case *BigInt:
+		exitCode = intVal.Int().I
+	}
+	if exitCode != 0 {
+		ExitJoker(exitCode)
 	}
 	return nil
 }
