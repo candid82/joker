@@ -1,0 +1,9 @@
+(defn default
+  "Default task without namespace"
+  []
+  (println "running default from no-ns"))
+
+(defn build
+  "Build project"
+  []
+  (println "running build"))

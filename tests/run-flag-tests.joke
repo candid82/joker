@@ -134,4 +134,36 @@
          "--hashmap-threshold -1 tests/flags/input.joke"
          "")
 
+(testing :out "task runner functionality"
+  "--task-file tests/flags/tasks.joke --list-tasks"
+  "clean-all  Clean everything\ndefault    Run default task\nfail       Failing task\ngreet      Greet people\nhello      Say hello"
+
+  "--task-file tests/flags/tasks.joke --tasks"
+  "clean-all  Clean everything\ndefault    Run default task\nfail       Failing task\ngreet      Greet people\nhello      Say hello"
+
+  "--task-file tests/flags/tasks.joke --task"
+  "running default task"
+
+  "--task-file tests/flags/tasks.joke --task hello"
+  "hello from task"
+
+  "--task-file tests/flags/tasks.joke --task greet Alice Bob"
+  "greetings: Alice, Bob"
+
+  "--task-file tests/flags/tasks.joke --task clean_all"
+  "cleaning all"
+
+  "--task-file tests/flags/tasks_no_ns.joke --list-tasks"
+  "build    Build project\ndefault  Default task without namespace"
+
+  "--task-file tests/flags/tasks_no_ns.joke --task build"
+  "running build")
+
+(testing :err "task runner error handling"
+  "--task-file tests/flags/tasks.joke --task nonexistent"
+  "Error: Task 'nonexistent' not found in tests/flags/tasks.joke"
+
+  "--task-file nonexistent.joke --task foo"
+  "Error: Tasks file not found: nonexistent.joke")
+
 (joker.os/exit exit-code)
