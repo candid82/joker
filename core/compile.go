@@ -14,20 +14,22 @@ type Local struct {
 }
 
 type Compiler struct {
-	enclosing     *Compiler
-	function      *FunctionProto
-	captures      *[]UpvalueInfo // shared by every arity of a function
-	locals        []Local
-	stackSize     int
-	scopeDepth    int
-	loopStart     int
-	loopSlotStart int
-	currentPos    Position
-	closedEnv     *LocalEnv
+	enclosing           *Compiler
+	function            *FunctionProto
+	captures            *[]UpvalueInfo // shared by every arity of a function
+	locals              []Local
+	stackSize           int
+	scopeDepth          int
+	loopStart           int
+	loopSlotStart       int
+	currentPos          Position
+	closedEnv           *LocalEnv
+	integerBindings     map[*Binding]bool
+	integerOptimization bool // private generic reference path for differential tests
 }
 
 func NewCompiler(enclosing *Compiler, name string) *Compiler {
-	c := &Compiler{enclosing: enclosing, function: NewFunctionProto(name), stackSize: 1, loopStart: -1}
+	c := &Compiler{enclosing: enclosing, function: NewFunctionProto(name), stackSize: 1, loopStart: -1, integerBindings: make(map[*Binding]bool), integerOptimization: true}
 	c.captures = &c.function.Upvalues
 	return c
 }
@@ -57,6 +59,9 @@ func compileFunction(expr *FnExpr, parent *Compiler, env *LocalEnv) (*FunctionPr
 	proto := &FunctionProto{Name: name}
 	compileArity := func(a FnArityExpr, variadic bool) (*ArityProto, error) {
 		c := NewCompiler(parent, name)
+		if parent != nil {
+			c.integerOptimization = parent.integerOptimization
+		}
 		c.captures = &proto.Upvalues
 		c.closedEnv = env
 		if expr.selfBinding != nil {
@@ -234,7 +239,7 @@ func (c *Compiler) compile(expr Expr) error {
 		c.emitOperand(c.function.Chunk.AddConstant(e.vr))
 		c.stackSize++
 	case *CallExpr:
-		// Vars are mutable. Do not substitute name-based arithmetic intrinsics.
+		// Capture/check the callable before arguments, including guarded calls.
 		if err := c.compile(e.callable); err != nil {
 			return err
 		}
@@ -247,7 +252,7 @@ func (c *Compiler) compile(expr Expr) error {
 				return err
 			}
 		}
-		c.emitCall(len(e.args), e.Name())
+		c.emitIntegerCall(c.integerCall(e), len(e.args), e.Name())
 		c.stackSize -= len(e.args)
 	case *FnExpr:
 		proto, err := compileFunction(e, c, nil)
@@ -345,6 +350,7 @@ func (c *Compiler) compileLet(e *LetExpr, loop bool) error {
 		}
 	}
 	for i, v := range e.values {
+		c.integerBindings[e.bindings[i]] = !e.recursive && integerExpr(v, c.integerBindings)
 		if err := c.compile(v); err != nil {
 			return err
 		}
@@ -359,6 +365,7 @@ func (c *Compiler) compileLet(e *LetExpr, loop bool) error {
 	}
 	prevStart, prevSlot := c.loopStart, c.loopSlotStart
 	if loop {
+		c.inferIntegerLoop(e)
 		c.loopStart = len(c.function.Chunk.Code)
 		c.loopSlotStart = c.stackSize - len(e.names)
 	}
@@ -479,18 +486,24 @@ func (c *Compiler) resolveUpvalue(b *Binding) int {
 }
 
 func (c *Compiler) emitCall(argc int, name string) {
+	c.emitIntegerCall(OP_CALL, argc, name)
+}
+
+func (c *Compiler) emitIntegerCall(op Opcode, argc int, name string) {
 	ip := len(c.function.Chunk.Code)
-	c.emitOp(OP_CALL)
+	c.emitOp(op)
 	if site := c.function.Chunk.callSites[ip]; site != nil {
 		site.name = name
 	}
-	c.emitOperand(argc)
+	if op == OP_CALL {
+		c.emitOperand(argc)
+	}
 }
 
 func (c *Compiler) emitOp(op Opcode) {
 	chunk := c.function.Chunk
 	chunk.appendAt(byte(op), c.currentPos)
-	if op == OP_CALL {
+	if isCallOpcode(op) {
 		chunk.callSites[len(chunk.Code)-1] = &CallSite{Position: c.currentPos}
 	}
 }

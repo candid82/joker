@@ -72,7 +72,7 @@ func validateChunk(p *FunctionProto, a *ArityProto) error {
 		ip += 1 + 4*n
 	}
 	for ip, site := range c.callSites {
-		if site != nil && (!boundaries[ip] || Opcode(c.Code[ip]) != OP_CALL) {
+		if site != nil && (!boundaries[ip] || !isCallOpcode(Opcode(c.Code[ip]))) {
 			return fmt.Errorf("invalid call site %d", ip)
 		}
 	}
@@ -199,6 +199,10 @@ func validateChunk(p *FunctionProto, a *ArityProto) error {
 			need, delta = 1, -1
 		case OP_CALL:
 			need, delta = v+1, -v
+		case OP_CALL_INT_INC:
+			need, delta = 2, -1
+		case OP_CALL_INT_EQ:
+			need, delta = 3, -2
 		case OP_VECTOR:
 			need, delta = v, 1-v
 		case OP_MAP_CHECK:

@@ -196,3 +196,55 @@ go test ./core -run '^$' -bench '^BenchmarkIntegerCacheArithmetic' -benchmem -co
 ```
 
 `go test -count=1 ./...`, `go vet ./...`, `go test -race ./core -count=1`, `git diff --check`, and `./all-tests.sh` passed (195 eval tests, 1,219 assertions, plus flag/formatter/linter suites). Artifacts are under `/tmp/joker-integer-cache-perf/`: saved `joker-{before,add,both}` binaries, workload snapshot, stdout snapshots, CPU/allocation profiles, three benchmark reports, `times.json`, and the suite log.
+
+## Guarded integer loops (branch `perf/typed-integer-loops`)
+
+### Implementation
+
+Baseline: `897db2a7` (`Expand int cache.`), including the preceding cache optimization. The Advent program is unchanged.
+
+- A compiler pass tracks machine-integer initializers and joins all loop backedges to a fixed point, using parser `Binding` identity. Ordinary lexical `let` facts propagate; nested loop/function backedges are separate. Existing linter hints are not used as optimization proofs.
+- New zero-operand `CALL_INT_INC` / `CALL_INT_EQ` instructions retain normal callee capture, callability checking, and argument evaluation. They check actual operand types, an exact pure wrapper shape, and the private helper's current Go implementation. Rebinding either function/helper or producing a different numeric type takes the normal call path with the already-evaluated values. Effects are never replayed.
+- Fresh integer results stay unboxed through locals, temporaries, `recur`, and compiled returns. A private marker in `[]Object` identifies a payload in a parallel `[]int`; constants/annotated objects are not rewritten. Escape points box values, including captures, collections, native arguments, and root returns. Native argument ownership and execution/GIL boundaries are unchanged.
+- Payload storage adds one machine word per allocated VM stack slot (2 KiB for the initial 256 slots on this machine). Raw payloads are copied/grown/reset with the object stack. This is a limited machine-integer specialization, not a general tagged stack, floating-point optimizer, or native JIT.
+- Packed bytecode advances to internal version 6. Wrapper-shape caches are derived metadata, not serialized packed state. See `VM.md` for the execution contract.
+
+### Isolated counter benchmark
+
+Compiled zero-argument function, 10,000 increments, final integer returned; three runs each on macOS/arm64, Go 1.26.0, Apple M3 Pro:
+
+| Version | Mean ns/op | B/op | Allocs/op |
+| --- | ---: | ---: | ---: |
+| Cached integer baseline | 1,392,194 | 254,608 | 7,956 |
+| Guarded raw integer path | 708,112 | 96 | 4 |
+
+Approximately **1.97× faster / 49.1% less time**. Allocations no longer scale with the counter's range: the remaining four are call/result overhead, not per-increment allocations. Unlike bounded caching, this also avoids allocating fresh results above 2,047.
+
+### Full unchanged day-14 workload
+
+Five unprofiled runs per saved binary, interleaved with reversed pair order on alternating rounds. Every stdout was byte-identical; final key index remains **22045**.
+
+| Version | Mean | Median | Range |
+| --- | ---: | ---: | ---: |
+| Cached integer baseline | 17.698s | 17.746s | 17.284–17.960s |
+| Guarded raw integer path | 15.398s | 15.476s | 15.132–15.602s |
+
+**13.0% less mean wall time**, a **1.149× speedup** over the already-cached baseline. These are fresh paired measurements; absolute times should not be compared directly with earlier sessions.
+
+Sampled allocation space was **5.98 GiB before / 5.99 GiB after**, effectively unchanged (sampling variation). This workload's stretching counter already fits the integer cache; its gain is primarily avoiding wrapper frames, native arithmetic/equality dispatch, and bytecode interpretation, not additional allocation savings. MD5, hex strings, and owned native argument slices remain dominant allocation sources.
+
+Separate CPU-profiled runs showed `executeLoop` flat samples falling **2.10s → 1.26s**, `Push` **0.90s → 0.45s**, and operand decoding **0.53s → 0.27s**. The new implementation guard cost **0.51s cumulative**. Profiled times were not included in the wall-time table.
+
+### Validation and artifacts
+
+Tests cover fixed-point joins, mixed/BigInt/Double loops, integer overflow, simultaneous `recur` assignments, closure snapshots, source-info/original-spelling isolation, cached and uncached results, public/helper rebinding, mutation during argument evaluation, non-callable evaluation order, spoofed procedure names, execution-aware overrides, exception/finally paths, packed round trips, and native reentry/stack growth/suspend-resume. A bounded differential fuzzer compares optimized and generic compilation (89,189 executions in a five-second run).
+
+`./run.sh --build-only`, `go test -count=1 ./...`, `go vet ./...`, `go test -race ./core -count=1`, `./all-tests.sh` (195 tests / 1,219 assertions plus flag/formatter/linter suites), and `git diff --check` passed.
+
+```sh
+go test ./core -run '^TestTypedInteger' -count=1
+go test ./core -run '^$' -bench '^BenchmarkTypedIntegerLoop$' -benchmem -count=3
+go test ./core -run '^$' -fuzz '^FuzzTypedIntegerLoop$' -fuzztime=5s -parallel=2
+```
+
+Artifacts: `/tmp/joker-typed-int-perf/` contains baseline/optimized binaries, the workload/stdout snapshots, CPU/allocation profiles, benchmark reports, `times.json`, and suite logs. No std wrapper code or Advent source was changed.

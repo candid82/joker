@@ -49,6 +49,7 @@ type VM struct {
 	context        *vmContext
 	execution      *Execution
 	stack          []Object
+	integers       []int // payloads for private raw-integer markers
 	stackTop       int
 	stackHighWater int
 	frames         []CallFrame
@@ -61,10 +62,11 @@ type VM struct {
 }
 
 func NewVM() *VM {
-	return &VM{stack: make([]Object, 256), frames: make([]CallFrame, 64), handlers: make([]ExceptionHandler, 16), pending: make([]pendingFinally, 16)}
+	return &VM{stack: make([]Object, 256), integers: make([]int, 256), frames: make([]CallFrame, 64), handlers: make([]ExceptionHandler, 16), pending: make([]pendingFinally, 16)}
 }
 func (vm *VM) Reset() {
 	clear(vm.stack[:vm.stackHighWater])
+	clear(vm.integers[:vm.stackHighWater])
 	clear(vm.frames[:vm.frameCount])
 	clear(vm.handlers[:vm.handlerCount])
 	clear(vm.pending[:vm.pendingCount])
@@ -77,6 +79,7 @@ func (vm *VM) ensureStack(n int) {
 	vm.stackHighWater = max(vm.stackHighWater, n)
 	if n > len(vm.stack) {
 		vm.stack = append(vm.stack, make([]Object, max(n-len(vm.stack), len(vm.stack)))...)
+		vm.integers = append(vm.integers, make([]int, len(vm.stack)-len(vm.integers))...)
 	}
 }
 func (vm *VM) Push(v Object) {
@@ -85,21 +88,14 @@ func (vm *VM) Push(v Object) {
 	}
 	vm.ensureStack(vm.stackTop + 1)
 	vm.stack[vm.stackTop] = v
+	vm.integers[vm.stackTop] = 0
 	vm.stackTop++
 }
 func (vm *VM) Pop() Object {
-	if vm.stackTop == 0 {
-		panic(RT.NewError("VM stack underflow"))
-	}
-	vm.stackTop--
-	v := vm.stack[vm.stackTop]
-	vm.stack[vm.stackTop] = nil
-	if v == nil {
-		panic(RT.NewError("VM invariant: nil stack slot"))
-	}
-	return v
+	value, integer := vm.popValue()
+	return integerObject(value, integer)
 }
-func (vm *VM) Peek(distance int) Object { return vm.stack[vm.stackTop-1-distance] }
+func (vm *VM) Peek(distance int) Object { return vm.slotObject(vm.stackTop - 1 - distance) }
 func (vm *VM) PopN(n int) []Object {
 	args := make([]Object, n)
 	for i := n - 1; i >= 0; i-- {
@@ -110,6 +106,7 @@ func (vm *VM) PopN(n int) []Object {
 func (vm *VM) truncate(n int) {
 	if n < vm.stackTop {
 		clear(vm.stack[n:vm.stackTop])
+		clear(vm.integers[n:vm.stackTop])
 	}
 	vm.stackTop = n
 }
@@ -195,17 +192,18 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 		case OP_FALSE:
 			vm.Push(boxBoolean(false))
 		case OP_POP:
-			vm.Pop()
+			vm.popValue()
 		case OP_DUP:
-			vm.Push(vm.Peek(0))
+			vm.pushValue(vm.stack[vm.stackTop-1], vm.integers[vm.stackTop-1])
 		case OP_GET_LOCAL:
-			vm.Push(capturedValue(vm.stack[f.slots+vm.readOperand(f, c)]))
+			vm.pushSlot(f.slots + vm.readOperand(f, c))
 		case OP_SET_LOCAL:
 			slot := f.slots + vm.readOperand(f, c)
 			if cell, ok := vm.stack[slot].(*bindingCell); ok {
 				cell.Object = vm.Peek(0)
 			} else {
-				vm.stack[slot] = vm.Peek(0)
+				vm.stack[slot] = vm.stack[vm.stackTop-1]
+				vm.integers[slot] = vm.integers[vm.stackTop-1]
 			}
 		case OP_GET_UPVALUE:
 			vm.Push(capturedValue(f.closure.upvalues[vm.readOperand(f, c)]))
@@ -246,9 +244,17 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 		case OP_LOOP:
 			offset := vm.readOperand(f, c)
 			f.ip -= offset
-		case OP_CALL:
-			argc := vm.readOperand(f, c)
+		case OP_CALL, OP_CALL_INT_INC, OP_CALL_INT_EQ:
+			argc := 1
+			if op == OP_CALL {
+				argc = vm.readOperand(f, c)
+			} else if op == OP_CALL_INT_EQ {
+				argc = 2
+			}
 			callee := vm.Peek(argc)
+			if op != OP_CALL && vm.integerCall(callee, argc, op) {
+				break
+			}
 			// Enter an already compiled function directly: no native callback
 			// runs until the next instruction, so no native context needs
 			// saving/restoring. Preserve the slow path for arity errors and
@@ -271,7 +277,7 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 			for i, u := range proto.Upvalues {
 				var v Object
 				if u.IsLocal {
-					v = vm.stack[f.slots+u.Index]
+					v = vm.slotObject(f.slots + u.Index)
 				} else {
 					v = f.closure.upvalues[u.Index]
 				}
@@ -282,21 +288,22 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 			}
 			vm.Push(fn)
 		case OP_RETURN:
-			result := vm.Pop()
+			result, integer := vm.popValue()
 			slots := f.slots
 			vm.frameCount--
 			vm.frames[vm.frameCount] = CallFrame{}
 			vm.truncate(slots)
 			if vm.frameCount == stopFrames {
-				return result
+				return integerObject(result, integer)
 			}
-			vm.Push(result)
+			vm.pushValue(result, integer)
 			*fp = &vm.frames[vm.frameCount-1]
 			*cp = (*fp).arityProto.Chunk
 		case OP_RECUR:
 			argc := vm.readOperand(f, c)
 			start := f.slots + vm.readOperand(f, c)
 			copy(vm.stack[start:start+argc], vm.stack[vm.stackTop-argc:vm.stackTop])
+			copy(vm.integers[start:start+argc], vm.integers[vm.stackTop-argc:vm.stackTop])
 			vm.truncate(start + argc)
 		case OP_VECTOR:
 			n := vm.readOperand(f, c)
@@ -331,9 +338,9 @@ func (vm *VM) executeLoop(fp **CallFrame, cp **Chunk, stopFrames int) Object {
 			}
 		case OP_POPN:
 			n := vm.readOperand(f, c)
-			result := vm.Pop()
+			result, integer := vm.popValue()
 			vm.truncate(vm.stackTop - n)
-			vm.Push(result)
+			vm.pushValue(result, integer)
 		case OP_THROW:
 			v := vm.Pop()
 			if err, ok := v.(Error); ok {
@@ -409,6 +416,9 @@ func (vm *VM) callValue(callee Object, argc int) bool {
 		base := vm.stackTop - argc - 1
 		var args []Object
 		if fn.Package == "" {
+			for slot := base + 1; slot < vm.stackTop; slot++ {
+				vm.slotObject(slot)
+			}
 			args = vm.stack[base+1 : vm.stackTop : vm.stackTop]
 		} else {
 			// Std procedures may retain arguments. Preserve the owned slice,

@@ -42,7 +42,9 @@ const (
 	OP_TRY_BEGIN // handler index
 	OP_TRY_END
 	OP_FINALLY_END
-	OP_SET_MACRO // Var constant index
+	OP_SET_MACRO    // Var constant index
+	OP_CALL_INT_INC // guarded unary call, implicit arity 1
+	OP_CALL_INT_EQ  // guarded binary call, implicit arity 2
 )
 
 type CatchInfo struct {
@@ -141,12 +143,14 @@ type UpvalueInfo struct {
 	IsLocal bool
 }
 type ArityProto struct {
-	Arity        int
-	IsVariadic   bool
-	Chunk        *Chunk
-	SubFunctions []*FunctionProto
-	ArgTypes     [][]*Type
-	TaggedTypes  []*Type
+	Arity                 int
+	IsVariadic            bool
+	Chunk                 *Chunk
+	SubFunctions          []*FunctionProto
+	ArgTypes              [][]*Type
+	TaggedTypes           []*Type
+	integerWrapperChecked bool // derived from immutable bytecode, not packed
+	integerWrapperHelper  *Var
 }
 type FunctionProto struct {
 	Name          string
@@ -174,6 +178,7 @@ var opcodeNames = [...]string{
 	OP_CALL: "CALL", OP_CLOSURE: "CLOSURE", OP_RETURN: "RETURN", OP_RECUR: "RECUR", OP_VECTOR: "VECTOR", OP_MAP_NEW: "MAP_NEW",
 	OP_MAP_CHECK: "MAP_CHECK", OP_MAP_ADD: "MAP_ADD", OP_SET_NEW: "SET_NEW", OP_SET_ADD: "SET_ADD", OP_POPN: "POPN",
 	OP_THROW: "THROW", OP_TRY_BEGIN: "TRY_BEGIN", OP_TRY_END: "TRY_END", OP_FINALLY_END: "FINALLY_END", OP_SET_MACRO: "SET_MACRO",
+	OP_CALL_INT_INC: "CALL_INT_INC", OP_CALL_INT_EQ: "CALL_INT_EQ",
 }
 
 func operandAt(code []byte, offset int) int {

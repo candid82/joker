@@ -49,7 +49,7 @@ func (a ByString) Less(i, j int) bool {
 }
 
 // Packed data is an internal, rebuildable format. Reject stale blobs explicitly.
-const packedVersion = "JOKER-VM\x05"
+const packedVersion = "JOKER-VM\x06"
 
 func (env *PackEnv) Pack(p []byte) []byte {
 	p = append(p, packedVersion...)

@@ -40,8 +40,9 @@ AST runtime evaluator or fallback.
   initializer runs, supporting forward references, shadowing, and escaped mutual
   recursion. No capture points into a VM's stack.
 - Metadata is evaluated before its expression and applied to the result.
-- Calls check callability before evaluating arguments. Mutable Vars are looked up at runtime; name-based arithmetic substitution
-  was removed, so `with-redefs` and Var rebinding work normally.
+- Calls capture/check the callable before evaluating arguments. Mutable Vars are
+  looked up at runtime. Guarded integer calls verify the captured implementation
+  and its helper's current binding; `with-redefs` and Var rebinding work normally.
 - Vectors, maps, and sets preserve representation, construction order, and duplicate
   detection. Runtime literal pools can hold arbitrary Joker
   objects, including objects passed through `eval`, without serialization.
@@ -53,6 +54,32 @@ AST runtime evaluator or fallback.
   local slots, captures, call counts, collection sizes, and jump distances.
 - Normal VM returns no longer use panic/recover. Pooled VMs are cleaned up on both
   successful and exceptional exits; discarded values and frames are released.
+
+## Guarded integer execution
+
+`core/int_compile.go` joins machine-integer initializers and every `recur` backedge
+by `Binding` identity, iterating to a fixed point. Lexical `let` facts propagate;
+nested loop/function bodies have their own backedges. These are conditional facts
+for an optimized path, not unchecked linter inference or promises about Vars.
+
+The first specialization covers unary `inc` and binary `=`. Both instructions
+check concrete operand types and recognize an exact compiled leaf wrapper. Its
+private helper must still be the original pure Go procedure, with no
+execution-aware override. Wrapper shape is cached from immutable bytecode; helper
+bindings are checked after argument evaluation on every call. A failed guard uses
+the ordinary captured-callee call without replaying effects. Non-integer values
+from a rebound implementation can flow through the same loop and trigger further
+generic calls; no separate loop clone or execution-context fallback is needed.
+
+Fresh integer results use a private object-stack marker and parallel pointer-free
+`[]int` payload storage (one additional machine word per allocated stack slot).
+Local copies, temporaries, `recur`, and compiled returns preserve raw payloads.
+Constants and preexisting objects retain their source info and original spelling.
+Closures snapshot boxed values; native/unknown calls, collections, pending finally
+results, public `Peek`/`Pop`, and root returns materialize ordinary `Int` objects.
+Core native arguments are materialized before borrowing the slice. Both stack
+arrays grow/reset together, including across callback reentry and GIL suspension.
+This is not a replacement of the whole Object stack or a general numeric JIT.
 
 ## Diagnostics and native boundaries
 
@@ -129,6 +156,7 @@ The bounded fuzzer compares direct and packed VM results. It generates only safe
 finite programs, not arbitrary source with access to filesystem/network procedures.
 
 Future optimization should preserve the strict execution boundary and semantic
-tests; particularly, any arithmetic specialization must respect mutable Vars.
+tests; extending arithmetic specialization must retain the implementation/type
+guards, argument evaluation order, and boxing at escape boundaries.
 Startup compilation, source-position storage, closure allocation, and native
 callback costs remain useful profiling targets.
