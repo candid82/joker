@@ -48,6 +48,10 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 `joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
 
+`joker --task [<name>] [<args>...]` - run task from tasks file (default `tasks.joke`).
+
+`joker --list-tasks` (or `--tasks`) - list available tasks with descriptions from tasks file.
+
 ## Documentation
 
 [Standard library reference](https://candid82.github.io/joker/)
