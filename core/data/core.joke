@@ -1123,15 +1123,15 @@
   "Returns a map containing only those entries in map whose key is in keys"
   {:added "1.0"}
   ^Map [^Associative map ^Seqable keyseq]
-  (loop [ret {} keys (seq keyseq)]
+  (loop [ret (transient__ {}) keys (seq keyseq)]
     (if keys
       (let [entry (find__ map (first keys))]
         (recur
          (if entry
-           (conj ret entry)
+           (conj!__ ret entry)
            ret)
          (next keys)))
-      (with-meta ret (meta map)))))
+      (with-meta (persistent!__ ret) (meta map)))))
 
 (defn keys
   "Returns a sequence of the map's keys, in the same order as (seq map)."
@@ -1383,12 +1383,13 @@
 
 (defn ^:private replace-bindings
   [binding-map]
-  (reduce-kv (fn [res k v]
-               (let [c (var-get k)]
-                 (var-set k v)
-                 (assoc res k c)))
-             {}
-             binding-map))
+  (persistent!__
+    (reduce-kv (fn [res k v]
+                 (let [c (var-get k)]
+                   (var-set k v)
+                   (assoc!__ res k c)))
+               (transient__ {})
+               binding-map)))
 
 (defn with-bindings*
   "Takes a map of Var/value pairs. Sets the vars to the corresponding values.
@@ -1575,11 +1576,11 @@
   (^Fn [^Callable f ^Callable g ^Callable h & fs]
    (let [fs (list* f g h fs)]
      (fn
-       ([] (reduce #(conj %1 (%2)) [] fs))
-       ([x] (reduce #(conj %1 (%2 x)) [] fs))
-       ([x y] (reduce #(conj %1 (%2 x y)) [] fs))
-       ([x y z] (reduce #(conj %1 (%2 x y z)) [] fs))
-       ([x y z & args] (reduce #(conj %1 (apply %2 x y z args)) [] fs))))))
+       ([] (persistent!__ (reduce #(conj!__ %1 (%2)) (transient__ []) fs)))
+       ([x] (persistent!__ (reduce #(conj!__ %1 (%2 x)) (transient__ []) fs)))
+       ([x y] (persistent!__ (reduce #(conj!__ %1 (%2 x y)) (transient__ []) fs)))
+       ([x y z] (persistent!__ (reduce #(conj!__ %1 (%2 x y z)) (transient__ []) fs)))
+       ([x y z & args] (persistent!__ (reduce #(conj!__ %1 (apply %2 x y z args)) (transient__ []) fs)))))))
 
 (defn partial
   "Takes a function f and fewer than the normal arguments to f, and
@@ -1825,14 +1826,14 @@
   "Returns a map with the keys mapped to the corresponding vals."
   {:added "1.0"}
   ^Map [^Seqable keys ^Seqable vals]
-  (loop [map {}
+  (loop [map (transient__ {})
          ks (seq keys)
          vs (seq vals)]
     (if (and ks vs)
-      (recur (assoc map (first ks) (first vs))
+      (recur (assoc!__ map (first ks) (first vs))
              (next ks)
              (next vs))
-      map)))
+      (persistent!__ map))))
 
 (defn ^:private line-seq*
   ^"Seq|Nil" [^BufferedReader rdr]
@@ -2239,16 +2240,16 @@
   ^MapSet [^Seqable coll]
   (if (set? coll)
     (with-meta coll nil)
-    (reduce conj #{} coll)))
+    (persistent!__ (reduce conj!__ (transient__ #{}) coll))))
 
 (defn ^:private filter-key
   [keyfn pred amap]
-  (loop [ret {} es (seq amap)]
+  (loop [ret (transient__ {}) es (seq amap)]
     (if es
       (if (pred (keyfn (first es)))
-        (recur (assoc ret (key (first es)) (val (first es))) (next es))
+        (recur (assoc!__ ret (key (first es)) (val (first es))) (next es))
         (recur ret (next es)))
-      ret)))
+      (persistent!__ ret))))
 
 (defn find-ns
   "Returns the namespace named by the symbol or nil if it doesn't exist."
@@ -3993,9 +3994,10 @@
   they appear."
   {:added "1.0"}
   ^Map [coll]
-  (reduce (fn [counts x]
-            (assoc counts x (inc (get counts x 0))))
-          {} coll))
+  (persistent!__
+    (reduce (fn [counts x]
+              (assoc!__ counts x (inc (get counts x 0))))
+            (transient__ {}) coll)))
 
 (defn reductions
   "Returns a lazy seq of the intermediate values of the reduction (as
@@ -4307,7 +4309,8 @@
   {:added "1.1"}
   ^Map [m ^Callable f]
   (with-meta
-    (reduce-kv (fn [acc k v] (assoc acc (f k) v)) {} m)
+    (persistent!__
+      (reduce-kv (fn [acc k v] (assoc!__ acc (f k) v)) (transient__ {}) m))
     (meta m)))
 
 (defn update-vals
@@ -4317,7 +4320,8 @@
   {:added "1.1"}
   ^Map [m ^Callable f]
   (with-meta
-    (reduce-kv (fn [acc k v] (assoc acc k (f v))) {} m)
+    (persistent!__
+      (reduce-kv (fn [acc k v] (assoc!__ acc k (f v))) (transient__ {}) m))
     (meta m)))
 
 (defn joker-version
