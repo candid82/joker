@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 
 	. "github.com/candid82/joker/core"
@@ -83,10 +82,6 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 	{
 		Name:     "<joker.core>",
 		Filename: "linter_cljs.joke",
-	},
-	{
-		Name:     "<joker.hiccup>",
-		Filename: "hiccup.joke",
 	},
 	{
 		Name:     "<joker.pprint>",

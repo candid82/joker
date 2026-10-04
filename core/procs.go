@@ -58,6 +58,10 @@ func ExtractObject(args []Object, index int) Object {
 	return args[index]
 }
 
+func ExtractObjects(args []Object, index int) []Object {
+	return args[index:]
+}
+
 func ExtractString(args []Object, index int) string {
 	return EnsureArgIsString(args, index).S
 }

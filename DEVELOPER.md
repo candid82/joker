@@ -47,6 +47,10 @@ But the namespace itself hasn't yet necessarily been initialized. Only when that
 
 When actually needed, via a `:require` clause in an `(ns ...)` specification, due to `(require ...)`, or (for an already-mapped namespace) directly as a symbol qualifier via e.g. `joker.some.namespace/somevar`, a namespace is _loaded_, meaning its internal code and data structures are fully initialized.
 
+The following historical transcript uses Joker v0.14.2. In current builds,
+`joker.hiccup` is a native _std_ namespace implemented in `std/hiccup/`, not a
+core namespace. Loading it no longer loads `joker.html` as a dependency.
+
 For example, running Joker with the `--verbose` option to observe some of the pertinent transitions (and with a two-line Joker script in `a/b/c.joke` that does `(ns a.b.c)` and `(println "here i am!")`):
 
 ```console
@@ -169,7 +173,7 @@ The packed format is internal and versioned. Changes to its bytecode or metadata
 
 As native-Go-code compilation (for core namespaces and linter files) occurs before the `go build` step performed by `run.sh`, the result is that that step includes those `core/a_*.go` source files. The binary data contained in the `core/a_*_data.go` (linter-data) files is, when needed, unpacked and the results used to modify the environment as appropriate for the linter mode involved.
 
-The resulting Joker executable thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy initialization (such as compiled regular expressions in `joker.hiccup`) when the respective namespaces are actually referenced for the first time during that invocation.
+The resulting Joker executable thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy namespace initialization when the respective namespaces are actually referenced for the first time during that invocation.
 
 When in linter mode, the forms encoded (as a `[]byte` array) in the pertinent `core/a_linter_*_data.go` files are unpacked and evaluated upon startup, after `joker.core` has been fully loaded.
 

@@ -189,7 +189,6 @@ func __join_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
-		CheckArity(_args, 0, 999)
 		elems := ExtractStrings(_args, 0)
 		_res := filepath.Join(elems...)
 		return MakeString(_res)

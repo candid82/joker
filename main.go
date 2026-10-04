@@ -22,6 +22,7 @@ import (
 	_ "github.com/candid82/joker/std/filepath"
 	_ "github.com/candid82/joker/std/git"
 	_ "github.com/candid82/joker/std/hex"
+	_ "github.com/candid82/joker/std/hiccup"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/http"
 	_ "github.com/candid82/joker/std/io"
