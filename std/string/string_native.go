@@ -55,13 +55,13 @@ func padLeft(s, pad string, n int) string {
 func split(s string, r *regexp.Regexp, n int) Object {
 	indexes := r.FindAllStringIndex(s, n-1)
 	lastStart := 0
-	result := EmptyVector()
-	for _, el := range indexes {
-		result = result.Conjoin(String{S: s[lastStart:el[0]]})
+	result := make([]Object, len(indexes)+1)
+	for i, el := range indexes {
+		result[i] = String{S: s[lastStart:el[0]]}
 		lastStart = el[1]
 	}
-	result = result.Conjoin(String{S: s[lastStart:]})
-	return result
+	result[len(indexes)] = String{S: s[lastStart:]}
+	return NewVectorFrom(result...)
 }
 
 func splitOnStringOrRegex(s string, sep Object, n int) Object {
@@ -71,11 +71,11 @@ func splitOnStringOrRegex(s string, sep Object, n int) Object {
 			n = -1
 		}
 		v := strings.SplitN(s, sep.S, n)
-		result := EmptyVector()
-		for _, el := range v {
-			result = result.Conjoin(String{S: el})
+		result := make([]Object, len(v))
+		for i, el := range v {
+			result[i] = String{S: el}
 		}
-		return result
+		return NewVectorFrom(result...)
 	case *Regex:
 		return split(s, sep.R, n)
 	default:

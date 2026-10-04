@@ -390,15 +390,16 @@ func reGroups(s string, indexes []int) Object {
 			return String{S: s[indexes[0]:indexes[1]]}
 		}
 	} else {
-		v := EmptyVector()
-		for i := 0; i < len(indexes); i += 2 {
-			if indexes[i] == -1 {
-				v = v.Conjoin(NIL)
+		groups := make([]Object, len(indexes)/2)
+		for j := range groups {
+			start, end := indexes[2*j], indexes[2*j+1]
+			if start == -1 {
+				groups[j] = NIL
 			} else {
-				v = v.Conjoin(String{S: s[indexes[i]:indexes[i+1]]})
+				groups[j] = String{S: s[start:end]}
 			}
 		}
-		return v
+		return NewVectorFrom(groups...)
 	}
 }
 

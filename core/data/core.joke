@@ -3875,7 +3875,11 @@
   from-coll conjoined."
   {:added "1.0"}
   [to from]
-  (reduce conj to from))
+  ;; Use native transient operations: Clojure/CLJS linting replaces the public
+  ;; transient functions with stubs, but macros still execute these builders.
+  (if (instance? Editable to)
+    (with-meta (persistent!__ (reduce conj!__ (transient__ to) from)) (meta to))
+    (reduce conj to from)))
 
 (defmacro case
   "Takes an expression, and a set of clauses.
@@ -3921,7 +3925,7 @@
   f should accept number-of-colls arguments."
   {:added "1.0"}
   (^Vec [^Callable f coll]
-   (reduce (fn [v o] (conj v (f o))) [] coll))
+   (persistent!__ (reduce (fn [v o] (conj!__ v (f o))) (transient__ []) coll)))
   (^Vec [^Callable f c1 c2]
    (into [] (map f c1 c2)))
   (^Vec [^Callable f c1 c2 c3]
@@ -3934,9 +3938,9 @@
   (pred item) returns true. pred must be free of side-effects."
   {:added "1.0"}
   ^Vec [^Callable pred coll]
-  (reduce (fn [v o] (if (pred o) (conj v o) v))
-          []
-          coll))
+  (persistent!__ (reduce (fn [v o] (if (pred o) (conj!__ v o) v))
+                         (transient__ [])
+                         coll)))
 
 (defn slurp
   "Opens file f and reads all its contents, returning a string.

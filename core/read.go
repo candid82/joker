@@ -972,7 +972,7 @@ func fillInMissingArgs(args map[int]Symbol) {
 
 func makeFnForm(args map[int]Symbol, body Object) Object {
 	fillInMissingArgs(args)
-	a := make([]Symbol, len(args))
+	a := make([]Object, len(args))
 	for key, value := range args {
 		if key != -1 {
 			a[key-1] = value
@@ -982,10 +982,7 @@ func makeFnForm(args map[int]Symbol, body Object) Object {
 		a[len(args)-1] = SYMBOLS.amp
 		a = append(a, v)
 	}
-	argVector := EmptyVector()
-	for _, v := range a {
-		argVector = argVector.Conjoin(v)
-	}
+	argVector := NewVectorFrom(a...)
 	if LINTER_MODE {
 		if meta, ok := body.(Meta); ok {
 			m := EmptyArrayMap().Plus(MakeKeyword("skip-redundant-do"), Boolean{B: true})

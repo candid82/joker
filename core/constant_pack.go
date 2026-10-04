@@ -295,16 +295,16 @@ func unpackObject(p []byte, h *PackHeader) (Object, []byte) {
 	case constantArrayVector, constantVector:
 		n, rest := extractCount(p)
 		p = rest
-		var v Vec = EmptyArrayVector()
-		if tag == constantVector {
-			v = EmptyVector()
+		objects := make([]Object, n)
+		for i := range objects {
+			objects[i], p = unpackObject(p, h)
 		}
-		for i := 0; i < n; i++ {
-			var el Object
-			el, p = unpackObject(p, h)
-			v = v.Conj(el).(Vec)
+		// Retain the old ArrayVector-to-Vector promotion threshold.
+		if tag == constantArrayVector && (n == 0 || n <= VECTOR_THRESHOLD) {
+			obj = NewArrayVectorFrom(objects...)
+		} else {
+			obj = NewVectorFrom(objects...)
 		}
-		obj = v
 	case constantArrayMap, constantHashMap:
 		n, rest := extractCount(p)
 		p = rest

@@ -10,10 +10,7 @@ import (
 
 func modf(x float64) Object {
 	i, f := math.Modf(x)
-	res := EmptyVector()
-	res = res.Conjoin(MakeDouble(i))
-	res = res.Conjoin(MakeDouble(f))
-	return res
+	return NewVectorFrom(MakeDouble(i), MakeDouble(f))
 }
 
 func precision(x Number) *big.Int {

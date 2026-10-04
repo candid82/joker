@@ -189,11 +189,11 @@ func makeCommit(cmt *object.Commit) Map {
 	res.Add(MakeKeyword("pgp-signature"), MakeString(cmt.PGPSignature))
 	res.Add(MakeKeyword("message"), MakeString(cmt.Message))
 	res.Add(MakeKeyword("tree-hash"), MakeString(cmt.TreeHash.String()))
-	parentHashes := EmptyVector()
-	for _, v := range cmt.ParentHashes {
-		parentHashes = parentHashes.Conjoin(MakeString(v.String()))
+	parentHashes := make([]Object, len(cmt.ParentHashes))
+	for i, v := range cmt.ParentHashes {
+		parentHashes[i] = MakeString(v.String())
 	}
-	res.Add(MakeKeyword("parent-hashes"), parentHashes)
+	res.Add(MakeKeyword("parent-hashes"), NewVectorFrom(parentHashes...))
 	return res
 }
 

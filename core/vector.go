@@ -468,16 +468,39 @@ func NewVectorFrom(objs ...Object) *Vector {
 		}
 		return &Vector{count: n, shift: 5, root: empty_node, tail: tail}
 	}
-	// First 32 in one tail, then Conjoin the rest.
-	tail := make([]interface{}, 32)
-	for i := 0; i < 32; i++ {
-		tail[i] = objs[i]
+	// The last block belongs to the tail, including when n is a multiple of 32.
+	// Build each trie node once instead of copying a path on every Conjoin.
+	tailStart := ((n - 1) >> 5) << 5
+	shift := uint(5)
+	for tailStart>>5 > 1<<shift {
+		shift += 5
 	}
-	res := &Vector{count: 32, shift: 5, root: empty_node, tail: tail}
-	for i := 32; i < n; i++ {
-		res = res.Conjoin(objs[i])
+	tail := make([]interface{}, n-tailStart)
+	for i, o := range objs[tailStart:] {
+		tail[i] = o
 	}
-	return res
+	return &Vector{count: n, shift: shift, root: vectorNodeFrom(objs[:tailStart], shift), tail: tail}
+}
+
+// objs contains complete 32-element blocks and fits within this node's level.
+// Every backing slice is private to the new vector; none aliases the input.
+func vectorNodeFrom(objs []Object, level uint) []interface{} {
+	node := make([]interface{}, 32)
+	if level == 0 {
+		for i, o := range objs {
+			node[i] = o
+		}
+		return node
+	}
+	block := 1 << level
+	for i, start := 0, 0; start < len(objs); i, start = i+1, start+block {
+		end := start + block
+		if end > len(objs) {
+			end = len(objs)
+		}
+		node[i] = vectorNodeFrom(objs[start:end], level-5)
+	}
+	return node
 }
 
 func NewVectorFromSeq(seq Seq) *Vector {
@@ -493,12 +516,7 @@ func NewVectorFromSeq(seq Seq) *Vector {
 		}
 		return NewVectorFrom(objs...)
 	}
-	res := EmptyVector()
-	for !seq.IsEmpty() {
-		res = res.Conjoin(seq.First())
-		seq = seq.Rest()
-	}
-	return res
+	return NewVectorFrom(ToSlice(seq)...)
 }
 
 func (v *Vector) Empty() Collection {

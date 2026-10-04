@@ -1,0 +1,112 @@
+(ns joker.vector-builders-test
+  (:require [joker.io :as io]
+            [joker.json :as json]
+            [joker.mail :as mail]
+            [joker.math :as math]
+            [joker.mime :as mime]
+            [joker.os :as os]
+            [joker.string :as s]
+            [joker.yaml :as yaml]
+            [joker.test :refer [deftest is]]))
+
+(deftest eager-vector-builders
+  (doseq [n [0 1 16 17 32 33 64 1057]
+          :let [expected (vec (range n))]
+          source [expected (map identity (range n))]]
+    (is (= expected (mapv identity source)))
+    (is (= expected (filterv (constantly true) source)))
+    (is (= (vec (filter even? source)) (filterv even? source)))
+    (is (= expected (into [] source)))
+    (is (= (if (<= n 16) ArrayVector Vector) (type (mapv identity source)))))
+  (is (= [] (mapv identity nil)))
+  (is (= [] (filterv identity nil)))
+  (is (= [11 22] (mapv + [1 2 3] [10 20])))
+  (is (= [111] (mapv + [1 2] [10 20] [100])))
+  (is (= [1111] (mapv + [1 2] [10 20] [100 200] [1000])))
+  (let [calls (atom [])]
+    (is (= [6 4 2] (mapv (fn [x] (swap! calls conj x) (* x 2)) [3 2 1])))
+    (is (= [3 2 1] @calls))
+    (reset! calls [])
+    (is (= [2] (filterv (fn [x] (swap! calls conj x) (even? x)) [3 2 1])))
+    (is (= [3 2 1] @calls)))
+  (is (= [[0 1] [0 1 2]] (mapv #(into [] (range %)) [2 3]))))
+
+(deftest into-target-semantics
+  (doseq [target [(with-meta [1] {:tag :vector})
+                  (with-meta (vec [1]) {:tag :tree-vector})
+                  (with-meta {:a 1} {:tag :map})
+                  (with-meta #{1} {:tag :set})]
+          source [nil [] (if (map? target) [[:b 2] [:a 3]] [2 3])]
+          :let [before (pr-str target) result (into target source)]]
+    (is (= (reduce conj target source) result))
+    (is (= (meta target) (meta result)))
+    (is (= before (pr-str target))))
+  (is (= '(3 2 1) (into nil [1 2 3])))
+  (is (= '(3 2 1 0) (into '(0) [1 2 3])))
+  (is (= {:a 3 :b 2} (into {:a 1} {:b 2 :a 3})))
+  (let [source (with-meta (vec (range 1057)) {:source true})
+        result (into source (range 1057 1100))]
+    (is (= (vec (range 1100)) result))
+    (is (= (vec (range 1057)) source))
+    (is (= {:source true} (meta result)))))
+
+(deftest native-array-conversions
+  (doseq [n [0 1 16 32 33 64 1057]
+          :let [expected (vec (range n))
+                from-json (json/read-string (json/write-string expected))
+                from-yaml (yaml/read-string (yaml/write-string expected))]]
+    (is (= expected from-json))
+    (is (= expected from-yaml))
+    (is (= Vector (type from-json)))
+    (is (= Vector (type from-yaml))))
+  (is (= [nil false [1 2] {:a 3} "text"]
+         (json/read-string "[null,false,[1,2],{\"a\":3},\"text\"]" {:keywords? true})))
+  (is (= [nil false [1 2] {"a" 3} "text"]
+         (yaml/read-string "[null, false, [1, 2], {a: 3}, text]"))))
+
+(deftest native-string-vectors
+  (doseq [sep ["," #","]]
+    (is (= ["a" "" "b" ""] (s/split "a,,b," sep)))
+    (is (= ["a,,b,"] (s/split "a,,b," sep 1)))
+    (is (= ["a" ",b,"] (s/split "a,,b," sep 2)))
+    (is (= [""] (s/split "" sep)))
+    (is (= Vector (type (s/split "" sep))))
+    (let [words (map str (range 64))]
+      (is (= (vec words) (s/split (s/join "," words) sep)))))
+  (is (= ["a" "b" ""] (s/split-lines "a\nb\n"))))
+
+(deftest native-small-vectors
+  (is (= [-12.0 -0.25] (math/modf -12.25)))
+  (is (= Vector (type (math/modf 0.0))))
+  (let [pipe (io/pipe)]
+    (try
+      (is (= 2 (count pipe)))
+      (is (= Vector (type pipe)))
+      (finally
+        (io/close (first pipe))
+        (io/close (second pipe)))))
+  (let [args (os/args)]
+    (is (every? string? args))
+    (is (= Vector (type args))))
+  (let [addresses (mail/parse-address-list
+                   (s/join "," (map #(str "user" % "@example.com") (range 33))))]
+    (is (= 33 (count addresses)))
+    (is (= "user32@example.com" (:address (last addresses))))
+    (is (= Vector (type addresses)))))
+
+(deftest multipart-vector-builders
+  (let [raw (str (s/join ""
+                        (for [i (range 33)]
+                          (str "--mix\r\nContent-Type: text/plain\r\n"
+                               "Content-Disposition: attachment; filename=part" i ".txt\r\n"
+                               "\r\nPart " i "\r\n")))
+                 "--mix--\r\n")
+        entity (mime/read-entity {"Content-Type" ["multipart/mixed; boundary=mix"]} raw)
+        parts (:parts entity)
+        attachments (mime/attachments entity)]
+    (is (= 33 (count parts)))
+    (is (= Vector (type parts)))
+    (is (= parts attachments))
+    (is (= Vector (type attachments)))
+    (is (= [32] (:path (last parts))))
+    (is (= Vector (type (:path (last parts)))))))
