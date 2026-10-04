@@ -1,0 +1,204 @@
+(ns joker.test-joker.walk-native
+  (:require [joker.walk :as walk]
+            [joker.test :refer [deftest is]]
+            [joker.time :as time]))
+
+(defn- corpus []
+  (let [small (array-map :a [1 2] :b '(3 4))
+        large (zipmap (range 40) (map #(vector % (list %)) (range 40)))
+        forms [nil false true 42 1/3 "abc" \x :a 'a #"abc"
+               (with-meta 'leaf {:leaf true})
+               [] [1 2] (vec (range 100))
+               '() '(1 2) (cons 1 '(2 3))
+               (seq [1 2 3]) (rseq (vec (range 100)))
+               (map identity [1 [2 3] '(4 5)]) (map identity [])
+               {} small large #{} #{1 2 3} (set (range 40))
+               (keys small) (vals small) (seq large) (seq (set (range 40)))
+               [small large #{nil false} '([1 2] {:a 3})]]]
+    (concat forms
+            (map #(with-meta % {:source true})
+                 [[] [1 2] '() '(1 2) small large #{} #{1 2}
+                  (seq [1 2]) (map identity [1 2])]))))
+
+(defn- increment-numbers [x] (if (number? x) (inc x) x))
+
+(deftest native-identity-traversal
+  (doseq [walker [walk/walk walk/prewalk walk/postwalk]
+          form (corpus)]
+    (let [result (if (= walker walk/walk)
+                   (walker identity identity form)
+                   (walker identity form))
+          expected-type (cond
+                          (list? form) (type '())
+                          (seq? form) (type (map identity []))
+                          (coll? form) (type (empty form))
+                          :else (type form))]
+      (is (= form result))
+      ;; Equality alone hides changed collection types and metadata.
+      (is (= expected-type (type result)))
+      (is (= (if (or (coll? form) (seq? form)) nil (meta form)) (meta result)))
+      (when (and (seq? result) (not (list? result)))
+        (is (realized? result)))))
+  (doseq [walker [walk/prewalk walk/postwalk]]
+    (let [leaf (with-meta 'leaf {:leaf true})
+          form (with-meta {:a (with-meta [leaf] {:vector true})} {:map true})
+          result (walker identity form)]
+      (is (nil? (meta result)))
+      (is (nil? (meta (:a result))))
+      (is (= {:leaf true} (meta (first (:a result)))))
+      (is (vector? (first result))))))
+
+(deftest native-transformations
+  (doseq [walker [walk/prewalk walk/postwalk]]
+    (is (= [2 {:a [3 '(4)]} #{5 6}]
+           (walker increment-numbers [1 {:a [2 '(3)]} #{4 5}]))))
+  (is (= '([1] [2]) (walk/walk vector identity '(1 2))))
+  (is (= [[2 [2 3]]]
+         (walk/walk increment-numbers vector [1 [2 3]])))
+  (is (= {:a 2 :b 3}
+         (walk/walk (fn [[k v]] [k (inc v)]) identity {:a 1 :b 2})))
+  (let [calls (atom [])]
+    (is (thrown? Error
+                 (walk/walk (fn [x] (swap! calls conj x) [x]) identity
+                            (array-map :a 1 :b 2))))
+    (is (= [[:a 1]] @calls))))
+
+(deftest native-callback-order
+  (let [form (array-map :a [1 2] :b '(3 4))]
+    (doseq [[walker expected]
+            [[walk/prewalk [form [:a [1 2]] :a [1 2] 1 2 [:b '(3 4)] :b '(3 4) 3 4]]
+             [walk/postwalk [:a 1 2 [1 2] [:a [1 2]] :b 3 4 '(3 4) [:b '(3 4)] form]]]]
+      (let [calls (atom [])]
+        (is (= form (walker (fn [x] (swap! calls conj x) x) form)))
+        (is (= expected @calls)))))
+  ;; Replacement root is not visited again, but its children are.
+  (is (= [:a :b 1]
+         (let [calls (atom [])]
+           (walk/prewalk (fn [x]
+                           (swap! calls conj x)
+                           (if (= x :a) [:b 1] x)) :a)
+           @calls))))
+
+(deftest native-replacement-order
+  (let [replacements {:a [:b 1] :b :c 1 2}]
+    (is (= [:c 2] (walk/prewalk-replace replacements :a)))
+    (is (= [:b 1] (walk/postwalk-replace replacements :a))))
+  (doseq [walker [walk/prewalk walk/postwalk]]
+    (is (= '([:b 1]) (walker (fn [x] (if (= x :a) [:b 1] x)) '(:a))))))
+
+(deftest native-collisions-and-map-entries
+  (let [zero-numbers (fn [x] (if (number? x) 0 x))]
+    (is (= {:a 0 :b 0} (walk/postwalk zero-numbers (array-map :a 1 :b 2))))
+    (is (= {0 0} (walk/postwalk zero-numbers (zipmap (range 40) (range 40)))))
+    (is (= #{0} (walk/postwalk zero-numbers #{1 2 3}))))
+  (doseq [form [(array-map :a 1 :b 2) (zipmap (range 40) (range 40))]]
+    (is (= {nil (last (vals form))}
+           (walk/postwalk (fn [x]
+                            (if (and (vector? x) (= 2 (count x)))
+                              [nil (last x)] x)) form)))))
+
+(def ^:dynamic *value* :outside)
+
+(deftest native-lazy-realization
+  (let [children [[:source 1 :inside] [:visit 1 :inside]
+                  [:source 2 :inside] [:visit 2 :inside]
+                  [:source 3 :inside] [:visit 3 :inside]]]
+    (doseq [[walker expected]
+            [[walk/walk children]
+             [walk/prewalk (into [[:visit :seq :inside]] children)]
+             [walk/postwalk (conj children [:visit :seq :inside])]]]
+      (let [calls (atom [])
+            source (map (fn [x] (swap! calls conj [:source x *value*]) x) [1 2 3])
+            f (fn [x]
+                (swap! calls conj [:visit (if (seq? x) :seq x) *value*])
+                (if (number? x) (inc x) x))
+            result (binding [*value* :inside]
+                     (if (= walker walk/walk)
+                       (walker f identity source)
+                       (walker f source)))]
+        (is (= expected @calls))
+        ;; Fully realized, even after the caller's binding ends.
+        (is (realized? result))
+        (is (= '(2 3 4) result))
+        (is (= expected @calls)))))
+  (doseq [walker [walk/prewalk walk/postwalk]]
+    (is (= [2 [3 4]]
+           (walker (fn [x]
+                     (if (number? x)
+                       (first (walk/postwalk increment-numbers [x]))
+                       x))
+                   [1 [2 3]])))))
+
+(deftest native-exception-order-and-recovery
+  (doseq [walker [walk/prewalk walk/postwalk]
+          lazy-failure? [false true]]
+    (let [calls (atom [])
+          source (map (fn [x]
+                        (swap! calls conj [:source x])
+                        (if (and lazy-failure? (= x 2))
+                          (throw (ex-info "source" {:x x})) x)) [1 2 3])
+          f (fn [x]
+              (when (number? x)
+                (swap! calls conj [:visit x])
+                (when (= x 2) (throw (ex-info "callback" {:x x}))))
+              x)
+          outcome (try (walker f source) :unexpected
+                       (catch ExInfo e [(ex-message e) (ex-data e)]))]
+      (is (= [(if lazy-failure? "source" "callback") {:x 2}] outcome))
+      (is (= (if lazy-failure?
+               [[:source 1] [:visit 1] [:source 2]]
+               [[:source 1] [:visit 1] [:source 2] [:visit 2]])
+             @calls))))
+  (is (= [2 3] (walk/postwalk increment-numbers [1 2]))))
+
+(deftest native-callable-and-empty-behavior
+  (doseq [form [nil false 1 :leaf "abc"]]
+    (is (= form (walk/walk nil identity form))))
+  (doseq [form [[] '() {} #{} (map identity [])]]
+    (is (thrown? Error (walk/walk nil identity form))))
+  (is (= '(10 nil) (walk/walk {:a 10} identity '(:a :b))))
+  (is (= '(false nil) (walk/walk {:a false} identity '(:a :b))))
+  (is (= '(:a nil) (walk/walk #{:a} identity '(:a :b))))
+  (is (= '(1 nil) (walk/walk :a identity '({:a 1} {}))))
+  (is (= [1 2] (walk/postwalk #'identity [1 2])))
+  (is (thrown? Error (walk/walk nil identity [1])))
+  (is (thrown? Error (walk/postwalk nil [])))
+  (is (thrown? Error (walk/prewalk nil []))))
+
+(deftest native-derived-helpers
+  (is (= {:ns/a {:b 1} :c [{:d 2}]}
+         (walk/keywordize-keys {"ns/a" {"b" 1} :c [{"d" 2}]})))
+  (is (= {:a 2} (walk/keywordize-keys (array-map "a" 1 :a 2))))
+  (is (= {"a" {"b" 1} "c" [{"d" 2}]}
+         (walk/stringify-keys {:ns/a {:ns/b 1} :c [{:d 2}]})))
+  (doseq [helper [walk/keywordize-keys walk/stringify-keys]]
+    (is (= [nil #{:a} '("a")] (helper [nil #{:a} '("a")]))))
+  (doseq [walker [walk/prewalk-replace walk/postwalk-replace]]
+    (is (= [nil false] (walker {:a nil :b false} [:a :b])))
+    (is (= '(nil false) (walker {:a nil :b false} '(:a :b))))
+    (is (= {:a :pair} (walker {[1 2] :pair} {:a [1 2]})))
+    (is (nil? (walker {:a nil :b false} nil))))
+  (is (= '(if true (inc 1) nil)
+         (walk/macroexpand-all '(when true (-> 1 inc))))))
+
+(deftest native-suspended-callbacks
+  (doseq [walker [walk/prewalk walk/postwalk]]
+    ;; Lexical tags distinguish executions across Suspend/Resume; dynamic
+    ;; bindings are process-global in Joker, not goroutine-local.
+    (let [run (fn [tag]
+                (walker (fn [x]
+                          (time/sleep 1000000)
+                          (if (number? x) (keyword (str (name tag) x)) x))
+                        '(1 2)))
+          first-result (go (run :first))
+          second-result (go (run :second))]
+      (is (= '(:first1 :first2) (<! first-result)))
+      (is (= '(:second1 :second2) (<! second-result)))))
+  (let [source (<! (go (map (fn [x] [*value* x]) [1 2])))]
+    (is (= '([:consumer 1] [:consumer 2])
+           (binding [*value* :consumer] (walk/postwalk identity source))))))
+
+(deftest native-deep-tree
+  (let [form (nth (iterate vector :leaf) 1000)]
+    (doseq [walker [walk/prewalk walk/postwalk]]
+      (is (= form (walker identity form))))))

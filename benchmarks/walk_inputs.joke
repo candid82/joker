@@ -1,0 +1,15 @@
+(ns joker.benchmark-walk-inputs)
+
+;; Reused immutable inputs: construction is outside the timed traversal.
+(def wide-vector (vec (range 1024)))
+(def wide-list (apply list (range 1024)))
+(def deep-tree (nth (iterate vector :leaf) 100))
+(def mixed-tree
+  (mapv (fn [i]
+          {"id" i "name" "sample" "tags" [:a :b]
+           "nested" {"value" i "items" (list i (inc i))}})
+        (range 64)))
+(def replacements {:a :renamed :b nil 1 false})
+
+;; A fresh lazy source per operation measures traversal and source realization.
+(defn lazy-input [] (map identity (range 256)))

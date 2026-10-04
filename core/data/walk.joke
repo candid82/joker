@@ -41,17 +41,7 @@
 
   {:added "1.0"}
   [inner outer form]
-  (cond
-    (list? form) (outer (apply list (map inner form)))
-    ;; Joker uses simple vectors for map entries (e.g. try `(type (first {:a 1 :b 2}))`):
-    ;;   (instance? clojure.lang.IMapEntry form)
-    ;;   (outer (clojure.lang.MapEntry/create (inner (key form)) (inner (val form))))
-    (seq? form) (outer (doall (map inner form)))
-    ;; Joker does not yet support records:
-    ;;   (instance? clojure.lang.IRecord form)
-    ;;     (outer (reduce (fn [r x] (conj r (inner x))) form form))
-    (coll? form) (outer (into (empty form) (map inner form)))
-    :else (outer form)))
+  (joker.core/walk__ inner outer form))
 
 (defn postwalk
   "Performs a depth-first, post-order traversal of form.  Calls f on
@@ -59,25 +49,13 @@
   Recognizes all Clojure data structures. Consumes seqs as with doall."
   {:added "1.0"}
   [f form]
-  (walk (partial postwalk f) f form))
+  (joker.core/postwalk__ f form))
 
 (defn prewalk
   "Like postwalk, but does pre-order traversal."
   {:added "1.0"}
   [f form]
-  (walk (partial prewalk f) identity (f form)))
-
-
-;; Note: I wanted to write:
-;;
-;; (defn walk
-;;   [f form]
-;;   (let [pf (partial walk f)]
-;;     (if (coll? form)
-;;       (f (into (empty form) (map pf form)))
-;;       (f form))))
-;;
-;; but this throws a ClassCastException when applied to a map.
+  (joker.core/prewalk__ f form))
 
 
 (defn postwalk-demo
