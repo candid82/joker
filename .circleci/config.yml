@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/go:1.25
+      - image: cimg/go:1.27
     working_directory: /home/circleci/go/src/github.com/candid82/joker
     steps:
       - checkout

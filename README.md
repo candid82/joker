@@ -329,7 +329,7 @@ You might also want to try [cljf](https://github.com/candid82/cljf). Its formatt
 
 ## Building
 
-Joker requires Go v1.25.0 or later.
+Joker requires Go v1.27.0 or later.
 Below commands should get you up and running.
 
 ```
