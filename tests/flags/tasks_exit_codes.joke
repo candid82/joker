@@ -1,0 +1,5 @@
+(ns tasks)
+
+(defn int-success [] 0)
+(defn bigint-success [] 0N)
+(defn bigint-fail [] 5N)

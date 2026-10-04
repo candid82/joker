@@ -1,0 +1,5 @@
+(ns task-helper)
+
+(defn message
+  []
+  "helper loaded")

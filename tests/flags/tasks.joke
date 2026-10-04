@@ -1,0 +1,31 @@
+(ns tasks)
+
+(defn default
+  "Run default task"
+  []
+  (println "running default task"))
+
+(defn hello
+  "Say hello"
+  []
+  (println "hello from task"))
+
+(defn greet
+  "Greet people"
+  [& names]
+  (println (str "greetings: " (joker.string/join ", " names))))
+
+(defn- internal-helper
+  "Private helper"
+  []
+  (println "internal helper"))
+
+(defn fail
+  "Failing task"
+  []
+  5)
+
+(defn clean-all
+  "Clean everything"
+  []
+  (println "cleaning all"))

@@ -18,7 +18,7 @@
         output (if stdin?
                  (out (joker.os/sh "sh" "-c" (str cmd " " flags)))
                  (out (apply (partial joker.os/sh cmd) flag-parts)))
-        output (clean output)]
+        output (if (string? output) (clean output) output)]
     (when-not (= output expected)
       (println "FAILED: testing" description "(" flags ")")
       (println "EXPECTED")
@@ -137,5 +137,83 @@
 (testing :err "negative numbers parsed correctly"
          "--hashmap-threshold -1 tests/flags/input.joke"
          "")
+
+(testing :out "task runner functionality"
+  "--task-file tests/flags/tasks.joke --list-tasks"
+  "clean-all  Clean everything\ndefault    Run default task\nfail       Failing task\ngreet      Greet people\nhello      Say hello"
+
+  "--task-file tests/flags/tasks.joke --tasks"
+  "clean-all  Clean everything\ndefault    Run default task\nfail       Failing task\ngreet      Greet people\nhello      Say hello"
+
+  "--task-file tests/flags/tasks.joke --task"
+  "running default task"
+
+  "--task-file tests/flags/tasks.joke --task hello"
+  "hello from task"
+
+  "--task-file tests/flags/tasks.joke --task greet Alice Bob"
+  "greetings: Alice, Bob"
+
+  "--task-file tests/flags/tasks.joke --task clean_all"
+  "cleaning all"
+
+  "--task-file tests/flags/tasks_no_ns.joke --list-tasks"
+  "build    Build project\ndefault  Default task without namespace"
+
+  "--task-file tests/flags/tasks_no_ns.joke --task build"
+  "running build")
+
+(testing :err "task runner error handling"
+  "--task-file tests/flags/tasks.joke --task nonexistent"
+  "Error: Task 'nonexistent' not found in tests/flags/tasks.joke"
+
+  "--task-file nonexistent.joke --task foo"
+  "Error: Tasks file not found: nonexistent.joke")
+
+(testing :out "task file context"
+  "--task-file tests/flags/tasks_context/tasks.joke --task file-context"
+  "true"
+
+  "--task-file tests/flags/tasks_context/tasks.joke --task delayed-require"
+  "helper loaded")
+
+(testing :exit "task exit codes"
+  "--task-file tests/flags/tasks.joke --task fail"
+  5
+
+  "--task-file tests/flags/tasks_exit_codes.joke --task int-success"
+  0
+
+  "--task-file tests/flags/tasks_exit_codes.joke --task bigint-success"
+  0
+
+  "--task-file tests/flags/tasks_exit_codes.joke --task bigint-fail"
+  5)
+
+(testing #(vector (:exit %) (clean (:out %)) (clean (:err %)))
+  "conflicting task modes are rejected before execution"
+  "--lint --file tests/flags/input.joke --task-file tests/flags/tasks.joke --task hello"
+  [18 "" "Error: Cannot combine --task and --lint."]
+
+  "-e (println,:unexpected) --task-file tests/flags/tasks.joke --task hello"
+  [19 "" "Error: Cannot combine --task and --eval/-e."]
+
+  "--repl --task-file tests/flags/tasks.joke --task hello"
+  [20 "" "Error: Cannot combine --task and --repl."]
+
+  "--file tests/flags/input.joke --task-file tests/flags/tasks.joke --task hello"
+  [21 "" "Error: Cannot combine --task and a <filename> argument."]
+
+  "--lint --file tests/flags/input.joke --task-file tests/flags/tasks.joke --list-tasks"
+  [18 "" "Error: Cannot combine --list-tasks and --lint."]
+
+  "-e (println,:unexpected) --task-file tests/flags/tasks.joke --list-tasks"
+  [19 "" "Error: Cannot combine --list-tasks and --eval/-e."]
+
+  "--repl --task-file tests/flags/tasks.joke --list-tasks"
+  [20 "" "Error: Cannot combine --list-tasks and --repl."]
+
+  "--file tests/flags/input.joke --task-file tests/flags/tasks.joke --list-tasks"
+  [21 "" "Error: Cannot combine --list-tasks and a <filename> argument."])
 
 (joker.os/exit exit-code)

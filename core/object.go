@@ -927,6 +927,22 @@ func (v *Var) Deref() Object {
 	return v.Resolve()
 }
 
+func (v *Var) IsPrivate() bool {
+	return v.isPrivate
+}
+
+func (v *Var) IsMacro() bool {
+	return v.isMacro
+}
+
+func (v *Var) Symbol() Symbol {
+	return v.name
+}
+
+func (v *Var) GetNamespace() *Namespace {
+	return v.ns
+}
+
 func (n Nil) ToString(escape bool) string {
 	return "nil"
 }
