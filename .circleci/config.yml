@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.25
     working_directory: /home/circleci/go/src/github.com/candid82/joker
     steps:
       - checkout
@@ -21,6 +21,12 @@ jobs:
       - run:
           name: go build
           command: go build -v github.com/candid82/joker
+      - run:
+          name: Go tests
+          command: go test -count=1 ./...
+      - run:
+          name: Go race tests
+          command: go test -race -count=1 ./...
       - run:
           name: linter tests
           command: ./linter-tests.sh
