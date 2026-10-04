@@ -104,8 +104,15 @@ func (rt *Runtime) NewError(msg string) *EvalError {
 	return res
 }
 
+func (rt *Runtime) callableName() string {
+	if rt.currentExpr != nil {
+		return rt.currentExpr.Name()
+	}
+	return "<native>"
+}
+
 func (rt *Runtime) NewArgTypeError(index int, obj Object, expectedType string) *EvalError {
-	name := rt.currentExpr.(Traceable).Name()
+	name := rt.callableName()
 	return rt.NewError(fmt.Sprintf("Arg[%d] of %s must have type %s, got %s", index, name, expectedType, obj.GetType().ToString(false)))
 }
 

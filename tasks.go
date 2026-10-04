@@ -43,7 +43,7 @@ func getTaskDoc(vr *Var) string {
 	return ""
 }
 
-func tryCall(c Callable, args []Object) (res Object, err error) {
+func tryCallTask(vr *Var, taskName string, args []Object) (res Object, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch e := r.(type) {
@@ -56,9 +56,39 @@ func tryCall(c Callable, args []Object) (res Object, err error) {
 			default:
 				err = fmt.Errorf("%v", r)
 			}
+			err = fmt.Errorf("Task '%s' failed: %w", taskName, err)
 		}
 	}()
-	return c.Call(args), nil
+	// Only reject the task's own arity here. Errors raised by its body retain
+	// their original diagnostic, even when they are also arity errors.
+	if fn, ok := vr.Resolve().(*Fn); ok {
+		if arity := fn.CheckArity(len(args)); arity != nil {
+			return nil, taskArityError(taskName, arity)
+		}
+	}
+	return vr.Call(args), nil
+}
+
+func taskArityError(taskName string, arity *ArityError) error {
+	minArgs, maxArgs := arity.VariadicMin, -1
+	for _, n := range arity.Fixed {
+		if minArgs < 0 || n < minArgs {
+			minArgs = n
+		}
+		if n > maxArgs {
+			maxArgs = n
+		}
+	}
+	if maxArgs == 0 && arity.VariadicMin < 0 {
+		return fmt.Errorf("Task '%s' takes no arguments; got %d.", taskName, arity.Actual)
+	}
+	problem := "Wrong number of arguments to"
+	if arity.Actual < minArgs {
+		problem = "Too few arguments to"
+	} else if arity.VariadicMin < 0 && arity.Actual > maxArgs {
+		problem = "Too many arguments to"
+	}
+	return fmt.Errorf("%s task '%s'; expected %s, got %d.", problem, taskName, arity.ExpectedString(), arity.Actual)
 }
 
 func resolveTask(taskName string) *Var {
@@ -194,9 +224,9 @@ func runTask(tasksFile string, taskName string, taskArgs []string) error {
 		args[i] = MakeString(arg)
 	}
 
-	res, err := tryCall(vr, args)
+	res, err := tryCallTask(vr, taskName, args)
 	if err != nil {
-		fmt.Fprintln(Stderr, err)
+		fmt.Fprintf(Stderr, "Error: %s\n", err)
 		return err
 	}
 

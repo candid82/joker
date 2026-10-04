@@ -170,6 +170,90 @@
   "--task-file nonexistent.joke --task foo"
   "Error: Tasks file not found: nonexistent.joke")
 
+(testing #(vector (:exit %) (clean (:out %)) (clean (:err %)))
+  "task argument validation"
+  "--task-file tests/flags/tasks_exit_codes.joke --task bigint-fail 2"
+  [1 "" "Error: Task 'bigint-fail' takes no arguments; got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task zero extra"
+  [1 "" "Error: Task 'zero' takes no arguments; got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task one"
+  [1 "" "Error: Too few arguments to task 'one'; expected 1, got 0."]
+
+  "--task-file tests/flags/tasks_arity.joke --task one a b"
+  [1 "" "Error: Too many arguments to task 'one'; expected 1, got 2."]
+
+  "--task-file tests/flags/tasks_arity.joke --task multi a"
+  [1 "" "Error: Wrong number of arguments to task 'multi'; expected 0 or 3, got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task multi a b c d"
+  [1 "" "Error: Too many arguments to task 'multi'; expected 0 or 3, got 4."]
+
+  "--task-file tests/flags/tasks_arity.joke --task variadic"
+  [1 "" "Error: Too few arguments to task 'variadic'; expected 1+, got 0."]
+
+  "--task-file tests/flags/tasks_arity.joke --task mixed a"
+  [1 "" "Error: Wrong number of arguments to task 'mixed'; expected 0 or 2+, got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task zero-alias extra"
+  [1 "" "Error: Task 'zero-alias' takes no arguments; got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task metadata-free"
+  [1 "" "Error: Too few arguments to task 'metadata-free'; expected 1, got 0."]
+
+  "--task-file tests/flags/tasks_arity.joke --task tasks/zero extra"
+  [1 "" "Error: Task 'tasks/zero' takes no arguments; got 1."]
+
+  "--task-file tests/flags/tasks_arity.joke --task metadata_free"
+  [1 "" "Error: Too few arguments to task 'metadata_free'; expected 1, got 0."]
+
+  "--task-file tests/flags/tasks_arity.joke --task zero"
+  [0 "zero" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task one a"
+  [0 "a" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task multi"
+  [0 "multi zero" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task multi a b c"
+  [0 "a b c" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task variadic a"
+  [0 "a 0" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task variadic a b c"
+  [0 "a 2" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task mixed"
+  [0 "mixed zero" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task mixed a b c"
+  [0 "a b 1" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task native a"
+  [0 "" ""]
+
+  "--task-file tests/flags/tasks_arity.joke --task lookup key"
+  [0 "" ""])
+
+(testing #(vector (:exit %) (clean (:out %))
+                 (second (re-find #"Eval error: ([^\n]+)" (:err %)))
+                 (boolean (re-find #"Error: Task '[^']+' failed:" (:err %))))
+  "native and internal task failures retain evaluation diagnostics"
+  "--task-file tests/flags/tasks_arity.joke --task native a b"
+  [1 "" "Wrong number of args (2) passed to <native>" true]
+
+  "--task-file tests/flags/tasks_arity.joke --task joker.string/trim"
+  [1 "" "Wrong number of args (0) passed to <native>" true]
+
+  "--task-file tests/flags/tasks_arity.joke --task lookup a b c"
+  [1 "" "Wrong number of args (3) passed to <native>; expects 1 or 2" true]
+
+  "--task-file tests/flags/tasks_arity.joke --task internal-failure"
+  [1 "body entered" "Wrong number of args (0) passed to inner, expected: 1" true])
+
 (testing :out "task file context"
   "--task-file tests/flags/tasks_context/tasks.joke --task file-context"
   "true"

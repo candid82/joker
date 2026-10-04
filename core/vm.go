@@ -2,7 +2,6 @@ package core
 
 import (
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -476,29 +475,19 @@ func selectArityProto(proto *FunctionProto, argc int) *ArityProto {
 	if a := proto.VariadicArity; a != nil && argc >= a.Arity {
 		return a
 	}
+	if len(proto.Arities) == 0 && proto.VariadicArity == nil && proto.Chunk != nil && argc == 0 {
+		return &ArityProto{Chunk: proto.Chunk, SubFunctions: proto.SubFunctions}
+	}
 	return nil
-}
-func buildArityErrorMessage(proto *FunctionProto, argc int) string {
-	var expected []string
-	for _, a := range proto.Arities {
-		expected = append(expected, strconv.Itoa(a.Arity))
-	}
-	if a := proto.VariadicArity; a != nil {
-		expected = append(expected, strconv.Itoa(a.Arity)+"+")
-	}
-	return "Wrong number of args (" + strconv.Itoa(argc) + ") passed to " + proto.Name + ", expected: " + strings.Join(expected, " or ")
 }
 func (vm *VM) callFn(fn *Fn, argc int) {
 	proto := fn.proto
 	a := selectArityProto(proto, argc)
-	if len(proto.Arities) == 0 && proto.VariadicArity == nil && proto.Chunk != nil && argc == 0 {
-		a = &ArityProto{Chunk: proto.Chunk, SubFunctions: proto.SubFunctions}
-	}
 	if a == nil {
 		if fn.isMacro {
 			fn.panicMacroArity(argc)
 		}
-		panic(RT.NewError(buildArityErrorMessage(proto, argc)))
+		panic(RT.NewError(newArityError(proto, argc).Error()))
 	}
 	if a.IsVariadic {
 		n := argc - a.Arity

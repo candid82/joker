@@ -1,0 +1,23 @@
+(ns tasks)
+
+(defn zero [] (println "zero"))
+(defn one [x] (println x))
+(defn multi
+  ([] (println "multi zero"))
+  ([a b c] (println a b c)))
+(defn variadic [x & more] (println x (count more)))
+(defn mixed
+  ([] (println "mixed zero"))
+  ([a b & more] (println a b (count more))))
+
+;; Task validation must use the implementation, not :arglists metadata.
+(def zero-alias zero)
+(alter-meta! #'zero-alias assoc :arglists '([x]))
+(def metadata-free (fn [x] (println x)))
+
+(def native joker.string/trim)
+(def lookup {"key" "value"})
+(def internal-failure
+  (fn []
+    (println "body entered")
+    ((fn inner [x] x))))
