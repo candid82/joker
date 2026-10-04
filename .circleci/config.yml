@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
@@ -39,3 +39,8 @@ jobs:
       - run:
           name: formatter tests
           command: ./formatter-tests.sh
+
+workflows:
+  build:
+    jobs:
+      - build
