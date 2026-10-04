@@ -297,6 +297,15 @@ func (m *ArrayMap) Seq() Seq {
 	return &ArrayMapSeq{m: m, index: 0}
 }
 
+// Match sequence order without constructing [key value] entry vectors.
+func (m *ArrayMap) kvreduce(c Callable, init Object) Object {
+	res := init
+	for i := 0; i < len(m.arr); i += 2 {
+		res = c.Call([]Object{res, m.arr[i], m.arr[i+1]})
+	}
+	return res
+}
+
 func (m *ArrayMap) Call(args []Object) Object {
 	return callMap(m, args)
 }

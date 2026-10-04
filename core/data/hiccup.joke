@@ -64,11 +64,22 @@
 
 (defn ^:private render-attr-map
   [mode attrs]
-  (->> attrs
-       (map (fn [[name value]]
-              (render-attribute mode name value)))
-       sort
-       str/join))
+  (if (zero? (count attrs))
+    ""
+    (let [attributes
+          (joker.core/persistent!__
+            (reduce-kv
+              (fn [result name value]
+                (if value
+                  (joker.core/conj!__ result (render-attribute mode name value))
+                  result))
+              (joker.core/transient__ []) attrs))]
+      ;; Keep sorting rendered strings, not keys: distinct keys can render to
+      ;; the same name, and values then determine the original output order.
+      (case (count attributes)
+        0 ""
+        1 (first attributes)
+        (str/join (sort attributes))))))
 
 (def ^:private void-tags
   "HTML Elements that must be rendered without a closing tag."
@@ -94,11 +105,13 @@
   (when (not (named? tag))
     (throw (ex-info (str tag " is not a valid element name") {:tag tag})))
   (let [[_ tag id class] (re-matches re-tag (as-str tag))
-        tag-attrs        {:id id
-                          :class (when class (str/replace  class "." " "))}
+        tag-attrs        (when (or id class)
+                           {:id id
+                            :class (when class (str/replace class "." " "))})
         map-attrs        (first content)]
     (if (map? map-attrs)
-      [tag (merge-attributes tag-attrs map-attrs) (next content)]
+      [tag (if tag-attrs (merge-attributes tag-attrs map-attrs) map-attrs)
+       (next content)]
       [tag tag-attrs content])))
 
 (def ^:private render-element)

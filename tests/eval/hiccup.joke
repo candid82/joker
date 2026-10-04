@@ -1,7 +1,9 @@
 (ns joker.test-joker.hiccup
   (:require
    [joker.test :refer [deftest is testing]]
-   [joker.hiccup :refer [html raw-string]]))
+   [joker.hiccup :refer [html raw-string]]
+   [joker.html :refer [escape]]
+   [joker.string :as str]))
 
 ;; These tests are largely copied from the Hiccup source
 
@@ -108,3 +110,63 @@
            "<div>The &lt;blink&gt; tag should not be used</div>"))
     (is (= (html [:div (raw-string text)])
            "<div>The <blink> tag should not be used</div>"))))
+
+(defn- original-as-str [v]
+  (cond
+    (or (keyword? v) (string? v) (symbol? v)) (name v)
+    (nil? v) ""
+    :else (str v)))
+
+;; Reference the original map -> render -> sort -> join pipeline, including
+;; empty strings for omitted attributes and sorting values for duplicate names.
+(defn- original-attributes [mode attrs]
+  (->> attrs
+       (map (fn [[k v]]
+              (cond
+                (true? v)
+                (if (#{:xml :xhtml} mode)
+                  (str " " (original-as-str k) "=\"" (escape (original-as-str k)) "\"")
+                  (str " " (original-as-str k)))
+                (not v) ""
+                :else
+                (str " " (original-as-str k) "=\"" (escape (original-as-str v)) "\""))))
+       sort
+       str/join))
+
+(deftest attribute-builder-regressions
+  (doseq [mode [:html :xhtml :xml :sgml]
+          attrs [{} {:a nil :b false} {:a ""} {:a 0} {:a true}
+                 {:a "<&>\"'" :b :keyword :c 'symbol}
+                 {:x "z" "x" "a" 'x "m" :other/x "b"}
+                 (zipmap (range 8) (range 8))
+                 (zipmap (range 9) (repeat false))
+                 (zipmap (range 40) (cycle [nil false 0 "" true :value]))]
+          :let [before (pr-str attrs)
+                expected (str "<div" (original-attributes mode attrs) ">body</div>")]]
+    (is (= expected (html {:mode mode} [:div attrs "body"])))
+    (is (= before (pr-str attrs))))
+  (doseq [mode [:html :xhtml :xml :sgml]
+          attrs [{} {:id nil :class nil} {:id false :class false}]]
+    (is (= (html {:mode mode} [:div]) (html {:mode mode} [:div attrs]))))
+  (testing "empty attributes do not change empty content and void-tag modes"
+    (doseq [mode [:html :xhtml :xml :sgml]]
+      (is (= (html {:mode mode} [:br]) (html {:mode mode} [:br {}])))
+      (is (= (html {:mode mode} [:div nil]) (html {:mode mode} [:div {} nil])))))
+  (testing "shorthand merges retain absent, false, and nil override behavior"
+    (is (= "<div class=\"a b\" id=\"tag\"></div>" (html [:div#tag.a.b {}])))
+    (is (= "<div class=\"a \" id=\"tag\"></div>" (html [:div#tag.a {:class ""}])))
+    (is (= "<div class=\"a false\"></div>" (html [:div#tag.a {:id nil :class false}])))
+    (is (= "<div class=\"a \" id=\"tag\"></div>" (html [:div#tag.a {:class nil}]))))
+  (testing "attribute failures still propagate"
+    (is (thrown? Error (html [(vector :invalid)])))))
+
+(deftest small-map-key-value-reduction
+  (doseq [n [0 1 8 9 40]
+          :let [m (with-meta (zipmap (range n) (range n)) {:source n})
+                calls (atom [])
+                result (reduce-kv (fn [r k v] (swap! calls conj [k v]) (conj r [k v])) [] m)]]
+    (is (= (vec m) result))
+    (is (= result @calls))
+    (is (= {:source n} (meta m))))
+  (is (= :empty (reduce-kv (fn [& _] (throw (ex-info "must not run" {}))) :empty {})))
+  (is (thrown? Error (reduce-kv (fn [& _] (throw (ex-info "callback" {}))) nil {:a 1}))))

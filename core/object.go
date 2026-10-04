@@ -19,6 +19,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 	"unsafe"
@@ -1717,12 +1718,29 @@ func (x *Type) WithInfo(info *ObjectInfo) Object {
 	return x
 }
 
+type typeCompatibilityKey struct {
+	abstract reflect.Type
+	concrete reflect.Type
+}
+
+// Go reflection types are immutable. Key by reflection type, not Joker type
+// identity or metadata, and cache negative results as well as positive ones.
+// This helper is also called outside VM execution, so the GIL is not a lock
+// for this cache.
+var typeCompatibilityCache sync.Map
+
 func IsEqualOrImplements(abstractType *Type, concreteType *Type) bool {
-	if abstractType.reflectType.Kind() == reflect.Interface {
-		return concreteType.reflectType.Implements(abstractType.reflectType)
-	} else {
-		return concreteType.reflectType == abstractType.reflectType
+	abstract, concrete := abstractType.reflectType, concreteType.reflectType
+	if abstract.Kind() != reflect.Interface {
+		return concrete == abstract
 	}
+	key := typeCompatibilityKey{abstract: abstract, concrete: concrete}
+	if result, ok := typeCompatibilityCache.Load(key); ok {
+		return result.(bool)
+	}
+	result := concrete.Implements(abstract)
+	typeCompatibilityCache.LoadOrStore(key, result)
+	return result
 }
 
 func IsInstance(t *Type, obj Object) bool {
