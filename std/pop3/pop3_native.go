@@ -366,9 +366,9 @@ func connectNative(opts connectOptions) (*pop3Client, error) {
 }
 
 func runOperation(client *pop3Client, operation string, fn func() (interface{}, error)) interface{} {
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	result, err := client.execute(fn)
-	RT.GIL.Lock()
+	suspended.Resume()
 	if err != nil {
 		panic(RT.NewError(fmt.Sprintf("POP3 %s: %s", operation, err)))
 	}
@@ -377,9 +377,9 @@ func runOperation(client *pop3Client, operation string, fn func() (interface{}, 
 
 func connect(opts Map) *pop3Client {
 	options := parseConnectOptions(opts)
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	client, err := connectNative(options)
-	RT.GIL.Lock()
+	suspended.Resume()
 	if err != nil {
 		panic(RT.NewError("POP3 connect: " + err.Error()))
 	}
@@ -577,7 +577,7 @@ func noop(client *pop3Client) Nil {
 }
 
 func quit(client *pop3Client) Nil {
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	client.mu.Lock()
 	var err error
 	if client.closed {
@@ -595,7 +595,7 @@ func quit(client *pop3Client) Nil {
 		}
 	}
 	client.mu.Unlock()
-	RT.GIL.Lock()
+	suspended.Resume()
 	if err != nil {
 		panic(RT.NewError("POP3 QUIT: " + err.Error()))
 	}
@@ -603,11 +603,11 @@ func quit(client *pop3Client) Nil {
 }
 
 func close(client *pop3Client) Nil {
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	client.mu.Lock()
 	err := client.closeLocked()
 	client.mu.Unlock()
-	RT.GIL.Lock()
+	suspended.Resume()
 	if err != nil {
 		panic(RT.NewError("POP3 close: " + err.Error()))
 	}

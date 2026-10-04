@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
+	"unicode/utf8"
 )
 
 type (
@@ -48,13 +49,13 @@ type (
 	TransformSeq struct {
 		InfoHolder
 		MetaHolder
-		kind   transformSeqKind
-		fn     Callable
-		source Seqable
-		inner  Seq
-		seq    Seq
-		arg    [1]Object
-		keep   bool
+		kind     transformSeqKind
+		keep     bool
+		realized bool
+		fn       Callable
+		source   Seqable
+		inner    Seq
+		arg      [1]Object
 	}
 	transformSeqKind uint8
 )
@@ -64,6 +65,7 @@ const (
 	transformFilter
 	transformMapcat
 	transformConcat
+	transformTake
 )
 
 func NewMapSeq(fn Callable, source Seqable) Seq {
@@ -83,50 +85,78 @@ func NewConcatSeq(sources []Object) Seq {
 	return &TransformSeq{kind: transformConcat, source: &ArraySeq{arr: arr}}
 }
 
+// Until realization, the cached-first slot holds the remaining take count.
+// Reusing it avoids enlarging every map/filter/concat node for this operation.
+func NewTakeSeq(n Number, source Seqable) Seq {
+	return &TransformSeq{kind: transformTake, source: source, arg: [1]Object{n}}
+}
+
 func (seq *TransformSeq) call(obj Object) Object {
 	seq.arg[0] = obj
 	return seq.fn.Call(seq.arg[:])
 }
 
-func (seq *TransformSeq) finish(realized Seq) {
-	seq.seq = realized
+// Once realized, reuse the callback argument and inner cursor as the cached
+// first/rest pair. This avoids allocating a separate ConsSeq for every node.
+// A nil first marks an empty sequence; Joker nil is the non-nil NIL object.
+func (seq *TransformSeq) finish(first Object, rest Seq) {
 	seq.fn = nil
 	seq.source = nil
-	seq.inner = nil
-	seq.arg[0] = nil
+	seq.inner = rest
+	seq.arg[0] = first
+	seq.realized = true
 }
 
 func (seq *TransformSeq) realize() {
-	if seq.seq != nil {
+	if seq.realized {
 		return
+	}
+	// Test the bound before touching the source: taking zero elements must
+	// not realize the next input node, even to check whether it is empty.
+	if seq.kind == transformTake {
+		n := seq.arg[0].(Number)
+		if !GetOps(n).Gt(n, Int{I: 0}) {
+			seq.finish(nil, EmptyList)
+			return
+		}
 	}
 	source := seq.source.Seq()
 	switch seq.kind {
+	case transformTake:
+		if source.IsEmpty() {
+			seq.finish(nil, EmptyList)
+			return
+		}
+		first := source.First()
+		n := seq.arg[0].(Number)
+		next := GetOps(n).Combine(INT_OPS).Subtract(n, Int{I: 1})
+		rest := NewTakeSeq(next, source.Rest())
+		seq.finish(first, rest)
 	case transformMap:
 		if source.IsEmpty() {
-			seq.finish(EmptyList)
+			seq.finish(nil, EmptyList)
 			return
 		}
 		first := seq.call(source.First())
 		rest := NewMapSeq(seq.fn, source.Rest())
-		seq.finish(&ConsSeq{first: first, rest: rest})
+		seq.finish(first, rest)
 	case transformFilter:
-		for !source.IsEmpty() {
-			first := source.First()
-			rest := source.Rest()
+		cursor := newSeqCursor(source)
+		for cursor.hasNext() {
+			first := cursor.first()
+			cursor.advance()
 			if ToBool(seq.call(first)) == seq.keep {
-				restSeq := NewFilterSeq(seq.fn, rest, seq.keep)
-				seq.finish(&ConsSeq{first: first, rest: restSeq})
+				restSeq := NewFilterSeq(seq.fn, cursor.rest(), seq.keep)
+				seq.finish(first, restSeq)
 				return
 			}
-			source = rest
 		}
-		seq.finish(EmptyList)
+		seq.finish(nil, EmptyList)
 	case transformMapcat, transformConcat:
 		inner := seq.inner
 		for inner == nil || inner.IsEmpty() {
 			if source.IsEmpty() {
-				seq.finish(EmptyList)
+				seq.finish(nil, EmptyList)
 				return
 			}
 			var next Object
@@ -145,7 +175,7 @@ func (seq *TransformSeq) realize() {
 			source: source,
 			inner:  inner.Rest(),
 		}
-		seq.finish(&ConsSeq{first: first, rest: rest})
+		seq.finish(first, rest)
 	default:
 		panic(RT.NewError("Unknown transforming sequence operation"))
 	}
@@ -201,21 +231,24 @@ func (seq *TransformSeq) Hash() uint32 {
 
 func (seq *TransformSeq) First() Object {
 	seq.realize()
-	return seq.seq.First()
+	if seq.arg[0] == nil {
+		return NIL
+	}
+	return seq.arg[0]
 }
 
 func (seq *TransformSeq) Rest() Seq {
 	seq.realize()
-	return seq.seq.Rest()
+	return seq.inner
 }
 
 func (seq *TransformSeq) IsEmpty() bool {
 	seq.realize()
-	return seq.seq.IsEmpty()
+	return seq.arg[0] == nil
 }
 
 func (seq *TransformSeq) IsRealized() bool {
-	return seq.seq != nil
+	return seq.realized
 }
 
 func (seq *TransformSeq) Cons(obj Object) Seq {
@@ -582,6 +615,89 @@ func NewConsSeq(first Object, rest Seq) *ConsSeq {
 	}
 }
 
+// seqCursor traverses indexed sequences without allocating a new Rest node on
+// every step. It never mutates the supplied Seq, which may be retained elsewhere.
+// Other sequences retain their normal First/Rest behavior (including laziness).
+type seqCursor struct {
+	seq   Seq
+	index int
+}
+
+func newSeqCursor(seq Seq) seqCursor {
+	cursor := seqCursor{seq: seq}
+	switch s := seq.(type) {
+	case *ArraySeq:
+		cursor.index = s.index
+	case *VectorSeq:
+		cursor.index = s.index
+	case *stringSeq:
+		cursor.index = s.off
+	}
+	return cursor
+}
+
+func (cursor *seqCursor) hasNext() bool {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		return cursor.index < len(s.arr)
+	case *VectorSeq:
+		return cursor.index < s.vector.Count()
+	case *stringSeq:
+		return cursor.index < len(s.s)
+	default:
+		return !cursor.seq.IsEmpty()
+	}
+}
+
+func (cursor *seqCursor) first() Object {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		return s.arr[cursor.index]
+	case *VectorSeq:
+		return s.vector.At(cursor.index)
+	case *stringSeq:
+		r, _ := utf8.DecodeRuneInString(s.s[cursor.index:])
+		return boxChar(r)
+	default:
+		return cursor.seq.First()
+	}
+}
+
+func (cursor *seqCursor) advance() {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		cursor.index += s.stride()
+	case *VectorSeq:
+		cursor.index++
+	case *stringSeq:
+		_, size := utf8.DecodeRuneInString(s.s[cursor.index:])
+		cursor.index += size
+	default:
+		*cursor = newSeqCursor(cursor.seq.Rest())
+	}
+}
+
+// rest returns an independent, persistent tail when a lazy transform needs to
+// retain the remainder of its input. Skipped indexed elements need no tails.
+func (cursor *seqCursor) rest() Seq {
+	switch s := cursor.seq.(type) {
+	case *ArraySeq:
+		if cursor.hasNext() {
+			return &ArraySeq{arr: s.arr, index: cursor.index, step: s.step}
+		}
+		return EmptyList
+	case *VectorSeq:
+		if cursor.hasNext() {
+			return &VectorSeq{vector: s.vector, index: cursor.index}
+		}
+		return EmptyList
+	case *stringSeq:
+		return &stringSeq{s: s.s, off: cursor.index}
+	default:
+		return cursor.seq
+	}
+}
+
 func seqReduce(seq Seq, c Callable) Object {
 	if seq.IsEmpty() {
 		return c.Call(nil)
@@ -593,11 +709,12 @@ func seqReduce(seq Seq, c Callable) Object {
 func seqReduceInit(seq Seq, c Callable, init Object) Object {
 	res := init
 	args := []Object{res, NIL}
-	for !seq.IsEmpty() {
-		args[1] = seq.First()
+	cursor := newSeqCursor(seq)
+	for cursor.hasNext() {
+		args[1] = cursor.first()
 		res = c.Call(args)
 		args[0] = res
-		seq = seq.Rest()
+		cursor.advance()
 	}
 	return res
 }
@@ -630,9 +747,10 @@ func Fourth(seq Seq) Object {
 
 func ToSlice(seq Seq) []Object {
 	res := make([]Object, 0)
-	for !seq.IsEmpty() {
-		res = append(res, seq.First())
-		seq = seq.Rest()
+	cursor := newSeqCursor(seq)
+	for cursor.hasNext() {
+		res = append(res, cursor.first())
+		cursor.advance()
 	}
 	return res
 }

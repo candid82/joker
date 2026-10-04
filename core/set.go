@@ -86,6 +86,13 @@ func (seq *MapSet) GetType() *Type {
 }
 
 func (set *MapSet) Hash() uint32 {
+	if m, ok := set.m.(*ArrayMap); ok {
+		seed := uint32(2)
+		for i := 0; i < len(m.arr); i += 2 {
+			seed += m.arr[i].Hash()
+		}
+		return hashUint32(2166136261, seed)
+	}
 	return hashUnordered(set.Seq(), 2)
 }
 

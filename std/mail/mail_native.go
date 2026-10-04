@@ -80,11 +80,11 @@ func parseAddress(s string) Map {
 func parseAddressList(s string) Object {
 	addresses, err := netmail.ParseAddressList(s)
 	PanicOnErr(err)
-	res := EmptyVector()
-	for _, address := range addresses {
-		res = res.Conjoin(addressMap(address))
+	res := make([]Object, len(addresses))
+	for i, address := range addresses {
+		res[i] = addressMap(address)
 	}
-	return res
+	return NewVectorFrom(res...)
 }
 
 func parseDate(s string) time.Time {

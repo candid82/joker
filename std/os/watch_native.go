@@ -56,8 +56,8 @@ func watch(paths Seqable, ch *Channel, opts Map) Object {
 }
 
 func (fw *fileWatcher) cancel() {
-	RT.GIL.Unlock()
-	defer RT.GIL.Lock()
+	suspended := RT.Suspend()
+	defer suspended.Resume()
 
 	fw.cancelOnce.Do(func() {
 		fw.closeWatcher()
@@ -156,7 +156,7 @@ func (fw *fileWatcher) send(obj Object) bool {
 }
 
 func watchEvent(event fsnotify.Event) Object {
-	RT.GIL.Lock()
+	RT.LockIndependent()
 	defer RT.GIL.Unlock()
 
 	m := EmptyArrayMap()
@@ -167,7 +167,7 @@ func watchEvent(event fsnotify.Event) Object {
 }
 
 func watchError(err error) Object {
-	RT.GIL.Lock()
+	RT.LockIndependent()
 	defer RT.GIL.Unlock()
 
 	m := EmptyArrayMap()

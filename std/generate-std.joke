@@ -120,8 +120,9 @@
                  (str "_res := " go-expr))]
     (-> arity-template
         (rpl "{arity}" (if varargs? "true" (str "_c == " (count args))))
-        (rpl "{arityCheck}" (if varargs?
-                              (str "CheckArity(_args, " (dec cnt) ", " 999 ")")
+        ;; Variadic functions have a minimum arity, not a 999-arg limit.
+        (rpl "{arityCheck}" (if (and varargs? (> cnt 1))
+                              (str "if _c < " (dec cnt) " { PanicArityMinMax(_c, " (dec cnt) ", 999) }")
                               "{blank}"))
         (rpl "{args}" (if (empty? args)
                         "{blank}"

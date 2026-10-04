@@ -1,0 +1,106 @@
+(ns joker.test-joker.hiccup-native
+  (:require [joker.hiccup :as hiccup]
+            [joker.test :refer [deftest is testing]]))
+
+;; Frozen outputs from the interpreted renderer, not a second implementation.
+(def ^:private golden (read-string (slurp "tests/eval/hiccup_golden.edn")))
+
+(defn- render-outcome [& content]
+  (try
+    [:ok (apply hiccup/html content)]
+    (catch ExInfo e [:error (ex-message e) (ex-data e)])))
+
+(deftest native-rendering-corpus
+  (let [tags [:div :div#tag.a.b 'span.c "img#icon.green" :ns/div "" "div invalid" "div#"]
+        maps [{} {:a nil :b false} {:id nil :class nil} {:id false :class false}
+              {:id "override" :class ""} {:id 0 :class :keyword}
+              {:x "z" "x" "a" 'x "m" :other/x "b"}
+              {:a "<&>\"'" :b :keyword :c 'symbol :d true :e 0}
+              (zipmap (range 40) (cycle [nil false 0 "" true :value]))]
+        cases (for [mode [:html :xhtml :xml :sgml nil]
+                    tag tags
+                    attrs maps
+                    content [[] [nil] ["body"] [[:span "nested"]]]]
+                [{:mode mode} (into [tag attrs] content)])
+        expected (:corpus golden)]
+    (is (= 1440 (count cases) (count expected)))
+    (doseq [[output args] (map vector expected cases)]
+      (is (= output (apply hiccup/html args))))))
+
+(deftest native-content-types
+  (let [cases (for [mode [:html :xml :xhtml :sgml :other nil false "xml" true 0 [] {} #{} (joker.core/transient__ [])]
+                   content [nil "<&>\"'" :ns/<name> 'ns/<symbol> 0 1.5 true false
+                            \newline #"a<b" #{"<&>" :x} {:a "<&>"}
+                            (list "one" [:br] :ns/two) [:br] [:div] [:div nil]
+                            [:div []] [:div #{}] [:div (list)] [:div {:class ""}]]]
+               [{:mode mode} content])
+        expected (:content-types golden)]
+    (is (= (count expected) (count cases)))
+    (doseq [[output args] (map vector expected cases)]
+      (is (= output (apply render-outcome args)))))
+  (is (= "" (hiccup/html)))
+  (is (= "" (hiccup/html {} nil)))
+  (is (= "<p /><br />" (hiccup/html {:mode :xml} [:p] [:br])))
+  (is (= (apply str (repeat 1200 "x")) (apply hiccup/html (repeat 1200 "x")))))
+
+(deftest native-raw-strings
+  (let [contents ["<b>raw</b>" nil false true :ns/keyword 'ns/symbol
+                  ["<quoted>" :x] (list "<&>" :x) 42]
+        expected (:raw-strings golden)]
+    (is (= (count contents) (count expected)))
+    (doseq [[content output] (map vector contents expected)
+            :let [wrapper (hiccup/raw-string content)]]
+      (is (= [:joker.hiccup/raw-string content] wrapper))
+      (is (= (type [:joker.hiccup/raw-string content]) (type wrapper)))
+      (is (= output (hiccup/html wrapper)))
+      (is (= (str "<div>" output "</div>") (hiccup/html [:div wrapper])))))
+  (is (= "nil" (hiccup/html [:joker.hiccup/raw-string]))))
+
+(deftest native-invalid-tags
+  (doseq [tag [nil false true 42 [:div] {} #{} (list :div)]]
+    (is (= [:error (str tag " is not a valid element name") {:tag tag}]
+           (render-outcome [tag]))))
+  (is (= [:error " is not a valid element name" {:tag nil}]
+         (render-outcome []))))
+
+(def ^:dynamic *child-value* :outer)
+
+(defn- lazy-page [calls]
+  [:div {:class "parent"}
+   (map (fn [i]
+          (swap! calls conj [i *child-value*])
+          [:span (str i *child-value*)])
+        (range 20))])
+
+(deftest native-lazy-callbacks
+  (let [calls (atom []) page (lazy-page calls)]
+    (is (= [] @calls))
+    (binding [*child-value* :inner]
+      (is (= (str "<div class=\"parent\">"
+                  (apply str (map #(str "<span>" % ":inner</span>") (range 20)))
+                  "</div>")
+             (hiccup/html page))))
+    (is (= (mapv #(vector % :inner) (range 20)) @calls)))
+  (testing "reentrant native rendering while realizing a lazy child"
+    (is (= "<div><span>nested</span></div>"
+           (hiccup/html [:div (map (fn [_] (hiccup/raw-string (hiccup/html [:span "nested"]))) [0])]))))
+  (testing "lazy failures propagate before later children are visited"
+    (let [calls (atom [])
+          children (map (fn [i]
+                          (swap! calls conj i)
+                          (if (= i 2) (throw (ex-info "child" {:i i})) [:span i]))
+                        (range 5))]
+      (is (thrown? ExInfo (hiccup/html [:div children])))
+      (is (= [0 1 2] @calls)))))
+
+(deftest native-lazy-attribute-order
+  (let [cases (for [tag [:div :div#id :div.class :div#id.class] n [4 10]] [tag n])
+        expected (:attribute-order golden)]
+    (is (= (count cases) (count expected)))
+    (doseq [[[tag n] [output order]] (map vector cases expected)]
+      (let [calls (atom [])
+            attrs (assoc (zipmap (range n)
+                                (map (fn [i] (map #(do (swap! calls conj i) %) [i])) (range n)))
+                         :class (map #(do (swap! calls conj :class) %) ["extra"]))]
+        (is (= output (hiccup/html [tag attrs])))
+        (is (= order @calls))))))

@@ -753,7 +753,9 @@ func __sh_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
-		CheckArity(_args, 1, 999)
+		if _c < 1 {
+			PanicArityMinMax(_c, 1, 999)
+		}
 		name := ExtractString(_args, 0)
 		arguments := ExtractStrings(_args, 1)
 		_res := sh("", nil, nil, nil, name, arguments)
@@ -772,7 +774,9 @@ func __sh_from_(_args []Object) Object {
 	_c := len(_args)
 	switch {
 	case true:
-		CheckArity(_args, 2, 999)
+		if _c < 2 {
+			PanicArityMinMax(_c, 2, 999)
+		}
 		dir := ExtractString(_args, 0)
 		name := ExtractString(_args, 1)
 		arguments := ExtractStrings(_args, 2)

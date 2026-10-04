@@ -7,10 +7,7 @@ import (
 
 func pipe() Object {
 	r, w := io.Pipe()
-	res := EmptyVector()
-	res = res.Conjoin(MakeIOReader(r))
-	res = res.Conjoin(MakeIOWriter(w))
-	return res
+	return NewVectorFrom(MakeIOReader(r), MakeIOWriter(w))
 }
 
 func close(f Object) Nil {

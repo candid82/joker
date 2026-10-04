@@ -55,7 +55,12 @@ var %s %s = %s`[1:],
 	g.Generated[name] = obj // Generation is complete.
 }
 
-// Generate code specifying the value as it would be assigned to a given target with a given declared type.
+// Value generates code specifying v as it would be assigned to target with declared type t.
+// It is exported for generator-specific hooks that compact selected subvalues.
+func (g *GenGo) Value(target string, t reflect.Type, v reflect.Value) string {
+	return g.value(target, t, v)
+}
+
 func (g *GenGo) value(target string, t reflect.Type, v reflect.Value) string {
 	v = UnsafeReflectValue(v)
 	if v.IsZero() && t == v.Type() {
@@ -188,7 +193,19 @@ func (g *GenGo) slice(target string, v reflect.Value) string {
 	for i := 0; i < numEntries; i++ {
 		res := g.value(fmt.Sprintf("%s[%d]", target, i), elemType, v.Index(i))
 		if res == "" {
-			el = append(el, "\tnil,")
+			// For numeric types, empty string means zero value - output 0 not nil
+			switch elemType.Kind() {
+			case reflect.Bool:
+				el = append(el, "\tfalse,")
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+				reflect.Float32, reflect.Float64:
+				el = append(el, "\t0,")
+			case reflect.Struct, reflect.Array:
+				el = append(el, "\t"+g.valueTypeToStringFn(v.Index(i))+"{},")
+			default:
+				el = append(el, "\tnil,")
+			}
 		} else {
 			el = append(el, "\t"+res+",")
 		}

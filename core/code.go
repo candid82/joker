@@ -324,14 +324,121 @@ func UniqueId(obj interface{}) (id string) {
 // Joker code needs.  (These could be put into object.go, parse.go,
 // ns.go, etc., as appropriate, if desired.)
 
-func (v *Var) Expr() Expr {
-	return v.expr
+type CodegenVarAnalysis struct {
+	Required     []*Namespace
+	DirectSource *Var
+}
+
+func AnalyzeCodegenVar(v *Var) CodegenVarAnalysis {
+	if v.expr == nil {
+		return CodegenVarAnalysis{}
+	}
+	v.hasDefinition = true
+	if fnExpr := codegenFnExpr(v.expr); fnExpr != nil {
+		v.fnSummary = compactFnSummary(fnExpr)
+	} else {
+		inferred := v.expr.InferValue(newInferEnv())
+		v.inferredTypes = inferred.types
+		v.inferredUnknown = inferred.unknown
+		v.hasInferredValue = true
+	}
+
+	required := make(map[*Namespace]struct{})
+	walkCodegenExpr(v.expr, func(ref *Var) {
+		if ref != nil && ref.ns != nil {
+			required[ref.ns] = struct{}{}
+		}
+	})
+	res := CodegenVarAnalysis{Required: make([]*Namespace, 0, len(required))}
+	for ns := range required {
+		res.Required = append(res.Required, ns)
+	}
+	if ref, ok := v.expr.(*VarRefExpr); ok {
+		res.DirectSource = ref.vr
+	}
+	return res
+}
+
+func StripCodegenVarExpr(v *Var) {
+	v.expr = nil
+}
+
+func codegenFnExpr(expr Expr) *FnExpr {
+	if meta, ok := expr.(*MetaExpr); ok {
+		expr = meta.expr
+	}
+	fn, _ := expr.(*FnExpr)
+	return fn
+}
+
+func walkCodegenExpr(expr Expr, visitVar func(*Var)) {
+	if expr == nil || reflect.ValueOf(expr).IsNil() {
+		return
+	}
+	walkBody := func(body []Expr) {
+		for _, child := range body {
+			walkCodegenExpr(child, visitVar)
+		}
+	}
+	switch expr := expr.(type) {
+	case *LiteralExpr, *MacroCallExpr:
+	case *VectorExpr:
+		walkBody(expr.v)
+	case *MapExpr:
+		walkBody(expr.keys)
+		walkBody(expr.values)
+	case *SetExpr:
+		walkBody(expr.elements)
+	case *IfExpr:
+		walkCodegenExpr(expr.cond, visitVar)
+		walkCodegenExpr(expr.positive, visitVar)
+		walkCodegenExpr(expr.negative, visitVar)
+	case *DefExpr:
+		walkCodegenExpr(expr.value, visitVar)
+		walkCodegenExpr(expr.meta, visitVar)
+	case *CallExpr:
+		walkCodegenExpr(expr.callable, visitVar)
+		walkBody(expr.args)
+	case *RecurExpr:
+		walkBody(expr.args)
+	case *VarRefExpr:
+		visitVar(expr.vr)
+	case *BindingExpr:
+	case *MetaExpr:
+		walkCodegenExpr(expr.meta, visitVar)
+		walkCodegenExpr(expr.expr, visitVar)
+	case *DoExpr:
+		walkBody(expr.body)
+	case *FnArityExpr:
+		walkBody(expr.body)
+	case *FnExpr:
+		for i := range expr.arities {
+			walkCodegenExpr(&expr.arities[i], visitVar)
+		}
+		walkCodegenExpr(expr.variadic, visitVar)
+	case *LetExpr:
+		walkBody(expr.values)
+		walkBody(expr.body)
+	case *LoopExpr:
+		let := (*LetExpr)(expr)
+		walkBody(let.values)
+		walkBody(let.body)
+	case *ThrowExpr:
+		walkCodegenExpr(expr.e, visitVar)
+	case *CatchExpr:
+		walkBody(expr.body)
+	case *TryExpr:
+		walkBody(expr.body)
+		for _, catch := range expr.catches {
+			walkCodegenExpr(catch, visitVar)
+		}
+		walkBody(expr.finallyExpr)
+	case *SetMacroExpr:
+	default:
+		panic(fmt.Sprintf("unhandled expression type %T", expr))
+	}
 }
 
 func (v Var) Namespace() *Namespace {
 	return v.ns
-}
-
-func (v *VarRefExpr) Var() *Var {
-	return v.vr
 }

@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/string"
 
 	. "github.com/candid82/joker/core"
@@ -85,10 +84,6 @@ var CoreSourceFiles []FileInfo = []FileInfo{
 		Filename: "linter_cljs.joke",
 	},
 	{
-		Name:     "<joker.hiccup>",
-		Filename: "hiccup.joke",
-	},
-	{
 		Name:     "<joker.pprint>",
 		Filename: "pprint.joke",
 	},
@@ -133,18 +128,6 @@ const codeFilenamePattern = "a_%s_code.go"
 const masterDataFilename = "a_data.go"
 const dataFilenamePattern = "a_%s_data.go"
 
-func packContent(content []byte) []byte {
-	const hextable = "0123456789abcdef"
-	dst := make([]byte, len(content)*4)
-	for i, v := range content {
-		dst[i*4] = '\\'
-		dst[i*4+1] = 'x'
-		dst[i*4+2] = hextable[v>>4]
-		dst[i*4+3] = hextable[v&0x0f]
-	}
-	return dst
-}
-
 type GenEnv struct {
 	GenGo            *gen_go.GenGo
 	StaticImport     *Imports
@@ -156,6 +139,7 @@ type GenEnv struct {
 	Namespaces       map[string]int                          // Set of the known namespaces (core, user, required stds)
 	NamespaceIndices map[string]int                          // Order of "discovery" for known namespaces
 	Requireds        map[*Namespace]*map[*Namespace]struct{} // Namespaces referenced by each namespace
+	LateInits        map[*Var]*Var                           // Runtime copies of invocation-specific Vars
 	LateInit         bool                                    // Whether emitting a namespace other than joker.core
 }
 
@@ -216,7 +200,7 @@ package core
 var {name}Data []byte
 
 func init() {
-	{name}Data = []byte("{content}")
+	{name}Data = []byte({content})
 }
 `
 
@@ -232,11 +216,9 @@ func init() {
 	PanicOnErr(err)
 	file.Close()
 
-	dst := packContent(content)
-
 	name := f.Filename[0 : len(f.Filename)-5] // assumes .joke extension
 	fileContent := strings.ReplaceAll(dataTemplate, "{name}", name)
-	fileContent = strings.Replace(fileContent, "{content}", string(dst), 1)
+	fileContent = strings.Replace(fileContent, "{content}", strconv.Quote(string(content)), 1)
 	ioutil.WriteFile(fmt.Sprintf(dataFilenamePattern, name), []byte(fileContent), 0666)
 }
 
@@ -338,6 +320,7 @@ func main() {
 		Runtimes:         map[*Namespace]*[]string{},
 		Imports:          map[*Namespace]*Imports{},
 		Requireds:        map[*Namespace]*map[*Namespace]struct{}{},
+		LateInits:        map[*Var]*Var{},
 		Namespaces:       namespaces,
 		NamespaceIndices: map[string]int{},
 		LateInit:         false,
@@ -373,6 +356,40 @@ func main() {
 			return genEnv.ptrToValueFn(ptr, v)
 		}
 	}(genEnv)
+
+	// Extract everything needed by generated code and the linter before
+	// removing parsed definitions from the object graph.
+	vars := make(map[*Var]struct{})
+	for _, ns := range GLOBAL_ENV.Namespaces {
+		for _, vr := range ns.Mappings() {
+			vars[vr] = struct{}{}
+		}
+	}
+	for vr := range vars {
+		analysis := AnalyzeCodegenVar(vr)
+		owner := vr.Namespace()
+		if owner != nil {
+			required, found := genEnv.Requireds[owner]
+			if !found {
+				refs := map[*Namespace]struct{}{}
+				required = &refs
+				genEnv.Requireds[owner] = required
+			}
+			for _, ns := range analysis.Required {
+				if ns != owner && ns != GLOBAL_ENV.CoreNamespace {
+					(*required)[ns] = struct{}{}
+				}
+			}
+			if owner != GLOBAL_ENV.CoreNamespace && analysis.DirectSource != nil {
+				if _, found := knownLateInits[analysis.DirectSource.Name()]; found {
+					genEnv.LateInits[vr] = analysis.DirectSource
+				}
+			}
+		}
+	}
+	for vr := range vars {
+		StripCodegenVarExpr(vr)
+	}
 
 	// Order namespaces by when "discovered" for stability
 	// compiling and outputting.  Put the non-core namespaces
@@ -616,6 +633,10 @@ func stdPackageName(pkg string) string {
 func (genEnv *GenEnv) emitProc(target string, p Proc) string {
 	fnName := StringAsGoName(p.Name)
 	newPackage := ""
+	inExecution := ""
+	if p.Package == "" && (fnName == "procApply" || fnName == "procEval") {
+		inExecution = fmt.Sprintf("\n\tInExecution: %sInExecution,", fnName)
+	}
 	if p.Package != "" {
 		pkgName := stdPackageName(p.Package)
 		thunkName := fmt.Sprintf("STD_thunk_%s_%s", StringAsGoName(pkgName), fnName)
@@ -634,10 +655,10 @@ func %s(a []Object) Object {
 	}
 	return fmt.Sprintf(`
 Proc{
-	Fn: %s,
+	Fn: %s,%s
 	Name: %s,
 %s}`[1:],
-		fnName, strconv.Quote(fnName), newPackage)
+		fnName, inExecution, strconv.Quote(fnName), newPackage)
 }
 
 func (genEnv *GenEnv) emitPtrToRegexp(target string, v reflect.Value) string {
@@ -796,19 +817,63 @@ func (genEnv *GenEnv) structHookFn(target string, obj interface{}) (res string, 
 				fmt.Printf("FINISHED %s\n", nsName)
 			}
 		}
-	case VarRefExpr:
-		if curRequired := genEnv.Required; curRequired != nil {
-			if vr := obj.Var(); vr != nil {
-				if ns := vr.Namespace(); ns != nil && ns != genEnv.Namespace && ns != GLOBAL_ENV.CoreNamespace {
-					(*curRequired)[ns] = struct{}{}
-				}
-			}
-		}
 	}
 	return
 }
 
+func (genEnv *GenEnv) emitPositionRuns(target string, v reflect.Value) string {
+	positions := v.Interface().([]Position)
+	counts := make([]string, 0)
+	values := make([]string, 0)
+	for i := 0; i < len(positions); {
+		j := i + 1
+		for j < len(positions) && positions[j] == positions[i] {
+			j++
+		}
+		counts = append(counts, strconv.Itoa(j-i))
+		value := genEnv.GenGo.Value(fmt.Sprintf("%s[%d]", target, len(values)), reflect.TypeOf(Position{}), reflect.ValueOf(positions[i]))
+		if value == "" {
+			value = "Position{}"
+		}
+		values = append(values, "\t"+value+",")
+		i = j
+	}
+	return fmt.Sprintf("expandPositionRuns([]int{%s}, []Position{\n%s\n})", strings.Join(counts, ", "), strings.Join(values, "\n"))
+}
+
+func (genEnv *GenEnv) emitSparseCallSites(target string, v reflect.Value) string {
+	specs := make([]string, 0)
+	for i := 0; i < v.Len(); i++ {
+		if site := v.Index(i); !site.IsNil() {
+			name := site.Elem().FieldByName("name")
+			name = gen_go.UnsafeReflectValue(name)
+			specs = append(specs, fmt.Sprintf("\t{ip: %d, name: %s},", i, strconv.Quote(name.String())))
+		}
+	}
+	if len(specs) == 0 {
+		return "nil"
+	}
+	chunk := strings.TrimSuffix(target, ".callSites")
+	*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
+	%s = expandCallSites(%s.Positions, []callSiteSpec{
+%s
+	})`[1:], target, chunk, strings.Join(specs, "\n")))
+	return "nil /* initialized sparsely at runtime */"
+}
+
 func (genEnv *GenEnv) valueHookFn(target string, t reflect.Type, v reflect.Value) string {
+	if _, isExpr := v.Interface().(Expr); isExpr {
+		panic(fmt.Sprintf("parsed expression reached generated output at %s", target))
+	}
+	if strings.HasSuffix(target, ".Code") && v.Type() == reflect.TypeOf([]byte(nil)) {
+		return "[]byte(" + strconv.Quote(string(v.Bytes())) + ")"
+	}
+	if strings.HasSuffix(target, ".Positions") && v.Type() == reflect.TypeOf([]Position(nil)) {
+		return genEnv.emitPositionRuns(target, v)
+	}
+	if strings.HasSuffix(target, ".callSites") && v.Type() == reflect.TypeOf([]*CallSite(nil)) {
+		return genEnv.emitSparseCallSites(target, v)
+	}
 	switch pkg := v.Type().PkgPath(); pkg {
 	case "reflect":
 		t := coreTypeString(fmt.Sprintf("%s", v))
@@ -857,14 +922,11 @@ func (genEnv *GenEnv) ptrToValueFn(ptr, v reflect.Value) string {
 	name := uniqueId(ptrToObj)
 	if genEnv.LateInit {
 		if destVar, yes := ptrToObj.(*Var); yes {
-			if e, isVarRefExpr := destVar.Expr().(*VarRefExpr); isVarRefExpr {
-				sourceVarName := e.Var().Name()
-				if _, found := knownLateInits[sourceVarName]; found {
-					destVarId := uniqueId(destVar)
-					*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
+			if sourceVar := genEnv.LateInits[destVar]; sourceVar != nil {
+				destVarId := uniqueId(destVar)
+				*genEnv.GenGo.Runtime = append(*genEnv.GenGo.Runtime, fmt.Sprintf(`
 	%s.Value = %s.Value`[1:],
-						destVarId, uniqueId(e.Var())))
-				}
+					destVarId, uniqueId(sourceVar)))
 			}
 		}
 	}

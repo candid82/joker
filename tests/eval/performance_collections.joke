@@ -1,0 +1,22 @@
+(ns joker.performance-collections-test
+  (:require [joker.test :refer [deftest is]]))
+
+(deftest group-by-builder-semantics
+  (is (= {} (group-by identity nil)))
+  (is (= {} (group-by nil [])))
+  (is (= {\a [\a \a] \b [\b]} (group-by identity "aba")))
+  (is (= {nil [nil nil] false [false] :a [:a]}
+         (group-by identity [nil false :a nil])))
+  (let [calls (atom [])
+        result (group-by (fn [x] (swap! calls conj x) (mod x 2)) [3 2 1 0])]
+    (is (= [3 2 1 0] @calls))
+    (is (= {1 [3 1] 0 [2 0]} result))
+    (is (= [3 1 :more] (conj (get result 1) :more)))
+    (is (= [3 1] (get result 1))))
+  (is (= (zipmap (range 40) (map vector (range 40)))
+         (group-by identity (range 40))))
+  (let [group (get (group-by (constantly :all) (range 80)) :all)]
+    (is (= (vec (range 80)) group))
+    (is (= Vector (type group))))
+  (is (= {:a [{:k :a :v 1} {:k :a :v 2}]}
+         (group-by :k [{:k :a :v 1} {:k :a :v 2}]))))

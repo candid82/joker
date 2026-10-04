@@ -34,6 +34,10 @@
     (doseq [[flags expected] tests]
       (test-flags out description flags expected))))
 
+(testing :err "removed evaluator flag"
+  "--no-vm"
+  "Error: Unrecognized option '--no-vm'")
+
 (testing :err "auto detect dialect from filename"
   "--lint tests/flags/input.clj"
   ""

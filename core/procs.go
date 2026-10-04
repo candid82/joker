@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math"
 	"math/big"
+	"math/bits"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -55,6 +56,10 @@ func ExtractCallable(args []Object, index int) Callable {
 
 func ExtractObject(args []Object, index int) Object {
 	return args[index]
+}
+
+func ExtractObjects(args []Object, index int) []Object {
+	return args[index:]
 }
 
 func ExtractString(args []Object, index int) string {
@@ -179,19 +184,19 @@ var procWithMeta = func(args []Object) Object {
 var procIsZero = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.IsZero(n)}
+	return boxBoolean(ops.IsZero(n))
 }
 
 var procIsPos = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.Gt(n, Int{I: 0})}
+	return boxBoolean(ops.Gt(n, Int{I: 0}))
 }
 
 var procIsNeg = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
 	ops := GetOps(n)
-	return Boolean{B: ops.Lt(n, Int{I: 0})}
+	return boxBoolean(ops.Lt(n, Int{I: 0}))
 }
 
 var procAdd = func(args []Object) Object {
@@ -274,6 +279,11 @@ var procBitNot = func(args []Object) Object {
 	return Int{I: ^x.I}
 }
 
+var procBitCount = func(args []Object) Object {
+	x := EnsureObjectIsInt(args[0], "Bit operation not supported for "+args[0].GetType().ToString(false))
+	return Int{I: bits.OnesCount64(uint64(int64(x.I)))}
+}
+
 func EnsureObjectIsInts(args []Object) (Int, Int) {
 	x := EnsureObjectIsInt(args[0], "Bit operation not supported: %s")
 	y := EnsureObjectIsInt(args[1], "Bit operation not supported: %s")
@@ -317,7 +327,7 @@ var procBitFlip = func(args []Object) Object {
 
 var procBitTest = func(args []Object) Object {
 	x, y := EnsureObjectIsInts(args)
-	return Boolean{B: x.I&(1<<uint(y.I)) != 0}
+	return boxBoolean(x.I&(1<<uint(y.I)) != 0)
 }
 
 var procBitShiftLeft = func(args []Object) Object {
@@ -384,15 +394,16 @@ func reGroups(s string, indexes []int) Object {
 			return String{S: s[indexes[0]:indexes[1]]}
 		}
 	} else {
-		v := EmptyVector()
-		for i := 0; i < len(indexes); i += 2 {
-			if indexes[i] == -1 {
-				v = v.Conjoin(NIL)
+		groups := make([]Object, len(indexes)/2)
+		for j := range groups {
+			start, end := indexes[2*j], indexes[2*j+1]
+			if start == -1 {
+				groups[j] = NIL
 			} else {
-				v = v.Conjoin(String{S: s[indexes[i]:indexes[i+1]]})
+				groups[j] = String{S: s[start:end]}
 			}
 		}
-		return v
+		return NewVectorFrom(groups...)
 	}
 }
 
@@ -423,7 +434,7 @@ var procRand = func(args []Object) Object {
 }
 
 var procIsSpecialSymbol = func(args []Object) Object {
-	return Boolean{B: IsSpecialSymbol(args[0])}
+	return boxBoolean(IsSpecialSymbol(args[0]))
 }
 
 var procSubs = func(args []Object) Object {
@@ -530,7 +541,7 @@ var procEmpty = func(args []Object) Object {
 
 var procIsBound = func(args []Object) Object {
 	vr := EnsureArgIsVar(args, 0)
-	return Boolean{B: vr.Value != nil}
+	return boxBoolean(vr.Value != nil)
 }
 
 // Convert Joker object to native Go object. For those satisfying the
@@ -633,7 +644,7 @@ var procSeq = func(args []Object) Object {
 var procIsInstance = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	t := EnsureArgIsType(args, 0)
-	return Boolean{B: IsInstance(t, args[1])}
+	return boxBoolean(IsInstance(t, args[1]))
 }
 
 var procAssoc = func(args []Object) Object {
@@ -676,16 +687,16 @@ var procPopBang = func(args []Object) Object {
 }
 
 var procEquals = func(args []Object) Object {
-	return Boolean{B: args[0].Equals(args[1])}
+	return boxBoolean(args[0].Equals(args[1]))
 }
 
 var procCount = func(args []Object) Object {
 	switch obj := args[0].(type) {
 	case Counted:
-		return Int{I: obj.Count()}
+		return boxInt(obj.Count())
 	default:
 		s := EnsureObjectIsSeqable(obj, "count not supported on this type: %s")
-		return Int{I: SeqCount(s.Seq())}
+		return boxInt(SeqCount(s.Seq()))
 	}
 }
 
@@ -806,10 +817,79 @@ var procApply = func(args []Object) Object {
 	return f.Call(ToSlice(EnsureArgIsSeqable(args, 1).Seq()))
 }
 
+func callInExecution(exec *Execution, f Callable, args []Object) Object {
+	switch fn := f.(type) {
+	case *Fn:
+		return exec.Call(fn, args)
+	case *Var:
+		value := fn.Resolve()
+		return callInExecution(exec, EnsureObjectIsCallable(value,
+			"Var "+fn.ToString(false)+" resolves to "+value.ToString(false)+", which is not a Fn"), args)
+	default:
+		return f.Call(args)
+	}
+}
+
+func procApplyInExecution(exec *Execution, args []Object) Object {
+	f := EnsureArgIsCallable(args, 0)
+	applied := ToSlice(EnsureArgIsSeqable(args, 1).Seq())
+	switch fn := f.(type) {
+	case *Fn:
+		return exec.Call(fn, applied)
+	case *Var:
+		return callInExecution(exec, fn, applied)
+	default:
+		return f.Call(applied)
+	}
+}
+
+var procGroupBy = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	var f Callable
+	groups := EmptyArrayMap().AsTransient().(TransientMapCollection)
+	step := Proc{Fn: func(pair []Object) Object {
+		if f == nil {
+			f = EnsureArgIsCallable(args, 0)
+		}
+		item := pair[1]
+		key := f.Call([]Object{item})
+		var group Object
+		if ok, value := groups.Get(key); ok {
+			// These vectors are private to this builder until it returns. Small
+			// groups can grow in place; retain normal promotion to tree vectors.
+			if v, ok := value.(*ArrayVector); ok && v.Count() < VECTOR_THRESHOLD {
+				v.Append(item)
+				group = v
+			} else {
+				group = value.(Conjable).Conj(item)
+			}
+		} else {
+			group = NewArrayVectorFrom(item)
+		}
+		groups = groups.AssocBang(key, group).(TransientMapCollection)
+		return NIL
+	}}
+	if coll, ok := args[1].(Reduce); ok {
+		coll.reduceInit(step, NIL)
+	} else {
+		seqReduceInit(EnsureArgIsSeqable(args, 1).Seq(), step, NIL)
+	}
+	return groups.Persistent()
+}
+
 var procLazySeq = func(args []Object) Object {
 	return &LazySeq{
 		fn: args[0].(*Fn),
 	}
+}
+
+var procTakeSeq = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	seq := NewTakeSeq(EnsureArgIsNumber(args, 0), EnsureArgIsSeqable(args, 1))
+	// Called inside take's outer lazy-seq. Realize the first node before
+	// returning so a source failure does not mark that wrapper realized.
+	seq.IsEmpty()
+	return seq
 }
 
 var procMapSeq = func(args []Object) Object {
@@ -834,29 +914,29 @@ var procConcatSeq = func(args []Object) Object {
 var procEverySeq = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	pred := EnsureArgIsCallable(args, 0)
-	seq := EnsureArgIsSeqable(args, 1).Seq()
+	cursor := newSeqCursor(EnsureArgIsSeqable(args, 1).Seq())
 	predArgs := []Object{NIL}
-	for !seq.IsEmpty() {
-		predArgs[0] = seq.First()
+	for cursor.hasNext() {
+		predArgs[0] = cursor.first()
 		if !ToBool(pred.Call(predArgs)) {
-			return Boolean{B: false}
+			return boxBoolean(false)
 		}
-		seq = seq.Rest()
+		cursor.advance()
 	}
-	return Boolean{B: true}
+	return boxBoolean(true)
 }
 
 var procSomeSeq = func(args []Object) Object {
 	CheckArity(args, 2, 2)
 	pred := EnsureArgIsCallable(args, 0)
-	seq := EnsureArgIsSeqable(args, 1).Seq()
+	cursor := newSeqCursor(EnsureArgIsSeqable(args, 1).Seq())
 	predArgs := []Object{NIL}
-	for !seq.IsEmpty() {
-		predArgs[0] = seq.First()
+	for cursor.hasNext() {
+		predArgs[0] = cursor.first()
 		if res := pred.Call(predArgs); ToBool(res) {
 			return res
 		}
-		seq = seq.Rest()
+		cursor.advance()
 	}
 	return NIL
 }
@@ -877,7 +957,7 @@ var procForce = func(args []Object) Object {
 }
 
 var procIdentical = func(args []Object) Object {
-	return Boolean{B: args[0] == args[1]}
+	return boxBoolean(args[0] == args[1])
 }
 
 var procCompare = func(args []Object) Object {
@@ -934,7 +1014,7 @@ var procChar = func(args []Object) Object {
 }
 
 var procBoolean = func(args []Object) Object {
-	return Boolean{B: ToBool(args[0])}
+	return boxBoolean(ToBool(args[0]))
 }
 
 var procNumerator = func(args []Object) Object {
@@ -1002,25 +1082,25 @@ var procNth = func(args []Object) Object {
 var procLt = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lt(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Lt(a, b))
 }
 
 var procLte = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Lte(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Lte(a, b))
 }
 
 var procGt = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gt(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Gt(a, b))
 }
 
 var procGte = func(args []Object) Object {
 	a := EnsureObjectIsNumber(args[0], "")
 	b := EnsureObjectIsNumber(args[1], "")
-	return Boolean{B: GetOps(a).Combine(GetOps(b)).Gte(a, b)}
+	return boxBoolean(GetOps(a).Combine(GetOps(b)).Gte(a, b))
 }
 
 var procEq = func(args []Object) Object {
@@ -1080,9 +1160,9 @@ var procContains = func(args []Object) Object {
 	case Gettable:
 		ok, _ := c.Get(args[1])
 		if ok {
-			return Boolean{B: true}
+			return boxBoolean(true)
 		}
-		return Boolean{B: false}
+		return boxBoolean(false)
 	}
 	panic(RT.NewError("contains? not supported on type " + args[0].GetType().ToString(false)))
 }
@@ -1166,7 +1246,13 @@ var procSort = func(args []Object) Object {
 var procEval = func(args []Object) Object {
 	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
 	expr := Parse(args[0], parseContext)
-	return Eval(expr, nil)
+	return Evaluate(expr)
+}
+
+func procEvalInExecution(exec *Execution, args []Object) Object {
+	parseContext := &ParseContext{GlobalEnv: GLOBAL_ENV}
+	expr := Parse(args[0], parseContext)
+	return exec.Evaluate(expr)
 }
 
 var procType = func(args []Object) Object {
@@ -1309,7 +1395,7 @@ func loadReader(reader *Reader) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		lastObj, err = TryEval(expr)
+		lastObj, err = TryEvaluate(expr)
 		if err != nil {
 			return nil, err
 		}
@@ -1539,7 +1625,7 @@ var procShuffle = func(args []Object) Object {
 }
 
 var procIsRealized = func(args []Object) Object {
-	return Boolean{B: EnsureArgIsPending(args, 0).IsRealized()}
+	return boxBoolean(EnsureArgIsPending(args, 0).IsRealized())
 }
 
 var procDeriveInfo = func(args []Object) Object {
@@ -1748,24 +1834,29 @@ var procSend = func(args []Object) (obj Object) {
 		return MakeBoolean(false)
 	}
 	obj = MakeBoolean(true)
+	suspended := RT.Suspend()
+	resuming := false
 	defer func() {
 		if r := recover(); r != nil {
-			RT.GIL.Lock()
+			if resuming {
+				panic(r)
+			}
+			suspended.Resume()
 			obj = MakeBoolean(false)
 		}
 	}()
-	RT.GIL.Unlock()
 	ch.ch <- MakeFutureResult(v, nil)
-	RT.GIL.Lock()
+	resuming = true
+	suspended.Resume()
 	return
 }
 
 var procReceive = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	ch := EnsureArgIsChannel(args, 0)
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	res, ok := <-ch.ch
-	RT.GIL.Lock()
+	suspended.Resume()
 	if !ok {
 		return NIL
 	}
@@ -1795,8 +1886,8 @@ var procGo = func(args []Object) Object {
 			RT.GIL.Unlock()
 		}()
 
-		RT.GIL.Lock()
-		res := f.Call([]Object{})
+		RT.LockIndependent()
+		res := CallIndependent(f, nil)
 		ch.ch <- MakeFutureResult(res, nil)
 		ch.Close()
 	}()
@@ -1815,7 +1906,7 @@ var procExit = func(args []Object) Object {
 
 var procIsNaN = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
-	return Boolean{B: math.IsNaN(n.Double().D)}
+	return boxBoolean(math.IsNaN(n.Double().D))
 }
 
 var procAbs = func(args []Object) Object {
@@ -1844,7 +1935,7 @@ var procAbs = func(args []Object) Object {
 
 var procIsInfinite = func(args []Object) Object {
 	n := EnsureArgIsNumber(args, 0)
-	return Boolean{B: math.IsInf(n.Double().D, 0)}
+	return boxBoolean(math.IsInf(n.Double().D, 0))
 }
 
 var procParseDouble = func(args []Object) Object {
@@ -1897,12 +1988,16 @@ func PackReader(reader *Reader, filename string) ([]byte, error) {
 			fmt.Fprintln(Stderr, err)
 			return nil, err
 		}
-		p = expr.Pack(p, packEnv)
-		_, err = TryEval(expr)
-		if err != nil {
-			fmt.Fprintln(Stderr, err)
-			return nil, err
+		// Compile to bytecode and serialize
+		proto, compileErr := CompileTopLevel(expr)
+		if compileErr != nil {
+			fmt.Fprintln(Stderr, compileErr)
+			return nil, compileErr
 		}
+		p = proto.Pack(p, packEnv)
+		// Execute to establish definitions for subsequent expressions
+		vm := NewVM()
+		vm.ExecuteTopLevel(proto)
 	}
 }
 
@@ -1926,6 +2021,7 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
+
 	var prevObj Object
 	for {
 		obj, err := TryRead(reader)
@@ -1966,7 +2062,8 @@ func ProcessReader(reader *Reader, filename string, phase Phase) error {
 		if err != nil {
 			return err
 		}
-		obj, err = TryEval(expr)
+
+		obj, err = TryEvaluate(expr)
 		if err != nil {
 			fmt.Fprintln(Stderr, err)
 			return err
@@ -1991,6 +2088,7 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		PanicOnErr(err)
 		parseContext.GlobalEnv.SetFilename(MakeString(s))
 	}
+
 	for {
 		obj, err := TryRead(reader)
 		if err == io.EOF {
@@ -1999,7 +2097,8 @@ func ProcessReaderFromEval(reader *Reader, filename string) {
 		PanicOnErr(err)
 		expr, err := TryParse(obj, parseContext)
 		PanicOnErr(err)
-		obj, err = TryEval(expr)
+
+		obj, err = TryEvaluate(expr)
 		PanicOnErr(err)
 	}
 }
@@ -2009,11 +2108,11 @@ func processData(data []byte) {
 	GLOBAL_ENV.SetCurrentNamespace(GLOBAL_ENV.CoreNamespace)
 	defer func() { GLOBAL_ENV.SetCurrentNamespace(ns) }()
 	header, p := UnpackHeader(data, GLOBAL_ENV)
+	vm := NewVM()
 	for len(p) > 0 {
-		var expr Expr
-		expr, p = UnpackExpr(p, header)
-		_, err := TryEval(expr)
-		PanicOnErr(err)
+		var proto *FunctionProto
+		proto, p = UnpackFunctionProto(p, header)
+		vm.ExecuteTopLevel(proto)
 	}
 	if VerbosityLevel > 0 {
 		fmt.Fprintf(Stderr, "processData: Evaluated code for %s\n", GLOBAL_ENV.CurrentNamespace().ToString(false))
@@ -2023,6 +2122,9 @@ func processData(data []byte) {
 func setCoreNamespaces() {
 	ns := GLOBAL_ENV.CoreNamespace
 	ns.MaybeLazy("joker.core")
+
+	// All generated functions, including macros and lazily loaded namespaces,
+	// compile on first invocation in Fn.ensureCompiled.
 
 	vr := ns.Resolve("*core-namespaces*")
 	set := vr.Value.(*MapSet)

@@ -1,0 +1,216 @@
+(ns joker.transient-builders-test
+  (:require [joker.set :as sets]
+            [joker.test :refer [deftest is]]))
+
+(defn- old-select-keys [m ks]
+  (with-meta
+    (reduce (fn [result k]
+              (if-let [entry (find m k)] (conj result entry) result))
+            {} ks)
+    (meta m)))
+
+(defn- old-frequencies [xs]
+  (reduce (fn [m x] (assoc m x (inc (get m x 0)))) {} xs))
+
+(defn- old-index [rows ks]
+  (reduce (fn [m row]
+            (let [k (old-select-keys row ks)]
+              (assoc m k (conj (get m k #{}) row))))
+          {} rows))
+
+(defn- old-rename-keys [m renames]
+  (reduce (fn [result [old new]]
+            (if (contains? m old) (assoc result new (get m old)) result))
+          (apply dissoc m (keys renames)) renames))
+
+(defn- old-union [a b]
+  (if (< (count a) (count b)) (reduce conj b a) (reduce conj a b)))
+
+(defn- old-intersection [a b]
+  (if (< (count b) (count a))
+    (recur b a)
+    (reduce (fn [s x] (if (contains? b x) s (disj s x))) a a)))
+
+(defn- old-difference [a b]
+  (if (< (count a) (count b))
+    (reduce (fn [s x] (if (contains? b x) (disj s x) s)) a a)
+    (reduce disj a b)))
+
+(defn- old-select [pred s]
+  (reduce (fn [result x] (if (pred x) result (disj result x))) s s))
+
+(deftest eager-map-and-set-builders
+  (doseq [n [0 1 8 9 16 17 40 100]
+          :let [m (with-meta (zipmap (range n) (range n)) {:source n})
+                before (pr-str m)
+                ks (concat (range n) [nil false :absent 0])]]
+    (is (= (reduce (fn [result i] (assoc result i i)) {} (range n)) m))
+    (is (= (old-select-keys m ks) (select-keys m ks)))
+    (is (= (type (old-select-keys m ks)) (type (select-keys m ks))))
+    (is (= (type (reduce (fn [result i] (assoc result i i)) {} (range n))) (type m)))
+    (is (= (meta m) (meta (select-keys m ks))))
+    (is (= (with-meta (reduce-kv (fn [r k v] (assoc r k (inc v))) {} m) (meta m))
+           (update-vals m inc)))
+    (is (= (with-meta (reduce-kv (fn [r k v] (assoc r (inc k) v)) {} m) (meta m))
+           (update-keys m inc)))
+    (is (= (meta m) (meta (update-vals m inc))))
+    (is (= (meta m) (meta (update-keys m inc))))
+    (is (= before (pr-str m)))
+    (let [xs (concat (range n) (range n) [nil nil false false])]
+      (is (= (old-frequencies xs) (frequencies xs)))
+      (is (= (type (old-frequencies xs)) (type (frequencies xs))))
+      (is (= (reduce conj #{} xs) (set xs)))))
+  (is (= {} (frequencies nil)))
+  (is (= {} (zipmap nil [1 2])))
+  (is (= {nil 1 false 2 :a 4} (zipmap [nil false :a :a :extra] [1 2 3 4])))
+  (is (= [nil false] (vals (select-keys {:nil nil :false false} [:nil :false]))))
+  (let [m (with-meta {} {:source :empty})]
+    (is (= {:source :empty} (meta (select-keys m [])))))
+  (let [s (with-meta #{nil false :x} {:source :set})]
+    (is (= #{nil false :x} (set s)))
+    (is (= (meta (with-meta s nil)) (meta (set s))))
+    (is (= {:source :set} (meta s)))))
+
+(deftest map-builder-callback-order
+  (let [source (zipmap (range 40) (range 40))
+        expected (reduce-kv (fn [xs k v] (conj xs [k v])) [] source)
+        calls (atom [])]
+    (update-keys source (fn [k] (swap! calls conj k) k))
+    (is (= (mapv first expected) @calls))
+    (reset! calls [])
+    (update-vals source (fn [v] (swap! calls conj v) v))
+    (is (= (mapv second expected) @calls))
+    (is (thrown? Error (update-vals source (fn [_] (throw (ex-info "callback" {}))))))))
+
+(deftest variadic-juxt-builder
+  (doseq [n [4 16 17 40]
+          argc (range 6)
+          :let [calls (atom [])
+                fs (mapv (fn [i]
+                           (fn [& args]
+                             (swap! calls conj i)
+                             [i (vec args)]))
+                         (range n))
+                f (apply juxt fs)
+                args (vec (range argc))
+                result (apply f args)]]
+    (is (= (mapv #(vector % args) (range n)) result))
+    (is (= (vec (range n)) @calls))
+    (is (= (if (<= n 16) ArrayVector Vector) (type result)))
+    (is (= result (conj (pop result) (peek result)))))
+  (let [calls (atom [])
+        f (juxt #(swap! calls conj :first)
+                #(throw (ex-info "juxt callback" {}))
+                #(swap! calls conj :third)
+                #(swap! calls conj :fourth))]
+    (is (thrown? Error (f)))
+    (is (= [:first] @calls)))
+  (is (= [[1 2] [1 2] [1 2] [1 2]]
+         ((juxt #(mapv identity %) #(into [] %) #(filterv identity %) #(vec %)) [1 2]))))
+
+(deftest namespace-filtering-and-binding-builders
+  (let [name (symbol "joker.transient-builder-fixture")
+        n (create-ns name)]
+    (try
+      (let [vars (mapv #(intern n (symbol (str "value" %)) %) (range 20))
+            bindings (zipmap vars (map #(+ 100 %) (range 20)))]
+        (alter-meta! (first vars) assoc :private true)
+        (is (= 20 (count (ns-interns n))))
+        (is (= 19 (count (ns-publics n))))
+        (is (= vars (mapv #(get (ns-interns n) (symbol (str "value" %))) (range 20))))
+        (with-bindings* bindings
+          (fn []
+            (is (= (vec (range 100 120)) (mapv var-get vars)))
+            (with-bindings* {(first vars) :nested}
+              #(is (= :nested (var-get (first vars)))))
+            (is (= 100 (var-get (first vars))))))
+        (is (= (vec (range 20)) (mapv var-get vars)))
+        (is (thrown? Error
+              (with-bindings* bindings
+                #(throw (ex-info "binding callback" {})))))
+        (is (= (vec (range 20)) (mapv var-get vars))))
+      (finally (remove-ns name)))))
+
+(deftest set-edit-builders
+  (doseq [n [0 1 8 9 40 100]
+          :let [a (with-meta (set (concat (range n) [nil false])) {:source :a})
+                b (with-meta (set (concat (range (quot n 2) (+ n 5)) [nil])) {:source :b})
+                before-a (pr-str a)
+                before-b (pr-str b)
+                union (sets/union a b)
+                intersection (sets/intersection a b)
+                difference (sets/difference a b)]]
+    (is (= (reduce conj a b) union))
+    (is (= (set (filter #(contains? b %) a)) intersection))
+    (is (= (set (remove #(contains? b %) a)) difference))
+    (is (= (meta (old-union a b)) (meta union)))
+    (is (= (meta (old-intersection a b)) (meta intersection)))
+    (is (= (meta (old-difference a b)) (meta difference)))
+    (is (= {:source :a} (meta a)))
+    (is (= {:source :b} (meta b)))
+    (is (= before-a (pr-str a)))
+    (is (= before-b (pr-str b)))
+    (let [calls (atom [])
+          selected (sets/select (fn [x] (swap! calls conj x) (or (nil? x) (= false x))) a)]
+      (is (= #{nil false} selected))
+      (is (= (vec a) @calls))
+      (is (= (meta (old-select #(or (nil? %) (= false %)) a)) (meta selected)))))
+  (let [a (with-meta #{1 2} {:source :a})]
+    (is (identical? a (sets/union a #{})))
+    (is (identical? a (sets/intersection a a)))
+    (is (identical? a (sets/difference a #{})))
+    (is (identical? a (sets/select (constantly true) a))))
+  (is (= #{1 2 3 4} (sets/union #{1} #{2} #{3} #{4})))
+  (is (= #{2} (sets/intersection #{1 2 3} #{2 3} #{2 4})))
+  (is (= #{1} (sets/difference #{1 2 3} #{2} #{3})))
+  (is (nil? (sets/union nil nil)))
+  (is (nil? (sets/intersection nil #{1})))
+  (is (nil? (sets/difference nil #{})))
+  (is (nil? (sets/select identity nil))))
+
+(deftest set-map-builders
+  (doseq [n [0 1 8 9 40]
+          :let [m (with-meta (zipmap (range n) (range n)) {:source n})
+                renames (zipmap (range n) (map inc (range n)))
+                expected (old-rename-keys m renames)
+                result (sets/rename-keys m renames)]]
+    (is (= expected result))
+    (is (= (meta expected) (meta result)))
+    (is (= (type expected) (type result)))
+    (is (= (reduce (fn [r [k v]] (assoc r v k)) {} m) (sets/map-invert m)))
+    (is (= (zipmap (range n) (range n)) m)))
+  (is (= {:a nil :b false} (sets/rename-keys {:a nil :b false} {})))
+  (is (= {:b 1 :a 2} (sets/rename-keys {:a 1 :b 2} {:a :b :b :a})))
+  (is (nil? (sets/rename-keys nil {:a :b})))
+  (is (= {} (sets/map-invert nil)))
+  (is (= (reduce (fn [r [k v]] (assoc r v k)) {} {:a 1 :b 1 :c nil :d false})
+         (sets/map-invert {:a 1 :b 1 :c nil :d false}))))
+
+(deftest relational-set-builders
+  (let [rows (mapv #(with-meta {:id (mod % 4) :value %} {:row %}) (range 80))
+        indexed (sets/index rows [:id])
+        expected (old-index rows [:id])]
+    (is (= expected indexed))
+    (is (= (mapv meta (keys expected)) (mapv meta (keys indexed))))
+    (is (every? set? (vals indexed)))
+    ;; Values must be persistent/hashable, not escaped transient groups.
+    (is (= (set (vals expected)) (set (vals indexed))))
+    (doseq [^Set group (vals indexed)]
+      (is (= 20 (count group)))
+      (is (= 21 (count (conj group :extra))))
+      (is (= 20 (count group))))
+    (is (= (vec (range 80)) (mapv :value rows))))
+  (is (= {} (sets/index nil [:id])))
+  (is (= {} (sets/index #{} [])))
+  (is (= {{} #{nil}} (sets/index [nil] [])))
+  (let [a #{{:id 1 :a :one} {:id 2 :a :two}}
+        b #{{:id 2 :b :match} {:id 3 :b :none}}]
+    (is (= #{{:id 2 :a :two :b :match}} (sets/join a b)))
+    (is (= #{{:id 2 :a :two :other-id 2 :b :match}}
+           (sets/join a #{{:other-id 2 :b :match}} {:id :other-id})))
+    (is (= #{} (sets/join #{} b)))
+    (is (= #{} (sets/join a #{} {:id :id})))
+    (is (= #{1 2} (set (map :id a))))
+    (is (= #{{:id 1} {:id 2}} (sets/project a [:id])))
+    (is (= #{{:other-id 1 :a :one} {:other-id 2 :a :two}}
+           (sets/rename a {:id :other-id})))))

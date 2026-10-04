@@ -57,11 +57,11 @@ func toObject(v interface{}) Object {
 	case nil:
 		return NIL
 	case []interface{}:
-		res := EmptyVector()
-		for _, v := range v {
-			res = res.Conjoin(toObject(v))
+		res := make([]Object, len(v))
+		for i, value := range v {
+			res[i] = toObject(value)
 		}
-		return res
+		return NewVectorFrom(res...)
 	case map[interface{}]interface{}:
 		res := EmptyArrayMap()
 		for k, v := range v {

@@ -93,9 +93,9 @@ func sendMessage(request Map) Object {
 		auth = authFromMap(addr, EnsureObjectIsMap(value, "auth: %s"))
 	}
 
-	RT.GIL.Unlock()
+	suspended := RT.Suspend()
 	err := netsmtp.SendMail(addr, auth, from, to, []byte(message))
-	RT.GIL.Lock()
+	suspended.Resume()
 	PanicOnErr(err)
 	return NIL
 }

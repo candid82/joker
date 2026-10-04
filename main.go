@@ -22,6 +22,7 @@ import (
 	_ "github.com/candid82/joker/std/filepath"
 	_ "github.com/candid82/joker/std/git"
 	_ "github.com/candid82/joker/std/hex"
+	_ "github.com/candid82/joker/std/hiccup"
 	_ "github.com/candid82/joker/std/html"
 	_ "github.com/candid82/joker/std/http"
 	_ "github.com/candid82/joker/std/io"
@@ -190,7 +191,7 @@ func processReplCommand(reader *Reader, phase Phase, parseContext *ParseContext,
 		return false
 	}
 
-	res := Eval(expr, nil)
+	res := Evaluate(expr)
 	replContext.PushValue(res)
 	PrintObject(res, Stdout)
 	fmt.Fprintln(Stdout, "")
@@ -756,6 +757,7 @@ var runningProfile interface {
 
 func main() {
 	OnExit(finish)
+	defer finish()
 
 	GLOBAL_ENV.InitEnv(Stdin, Stdout, Stderr, os.Args[1:])
 
@@ -844,7 +846,6 @@ func main() {
 		switch profilerType {
 		case "pkg/profile":
 			runningProfile = profile.Start(profile.ProfilePath(cpuProfileName))
-			defer finish()
 		case "runtime/pprof":
 			f, err := os.Create(cpuProfileName)
 			if err != nil {
@@ -859,15 +860,12 @@ func main() {
 			pprof.StartCPUProfile(f)
 			fmt.Fprintf(Stderr, "Profiling started at rate=%d. See file `%s'.\n",
 				cpuProfileRate, cpuProfileName)
-			defer finish()
 		default:
 			fmt.Fprintf(Stderr,
 				"Unrecognized profiler: %s\n  Use 'pkg/profile' or 'runtime/pprof'.\n",
 				profilerType)
 			ExitJoker(96)
 		}
-	} else if memProfileName != "" {
-		defer finish()
 	}
 
 	if eval != "" {

@@ -179,11 +179,11 @@ func addOptionalString(m *ArrayMap, key string, value string) {
 }
 
 func pathVector(path []int) *Vector {
-	res := EmptyVector()
-	for _, n := range path {
-		res = res.Conjoin(Int{I: n})
+	res := make([]Object, len(path))
+	for i, n := range path {
+		res[i] = Int{I: n}
 	}
-	return res
+	return NewVectorFrom(res...)
 }
 
 func safeFilename(filename string) string {
@@ -263,7 +263,7 @@ func readEntityAt(headers Map, body string, opts entityOptions, partPath []int, 
 			panic(RT.NewError("multipart Content-Type missing boundary"))
 		}
 		mr := multipart.NewReader(strings.NewReader(body), boundary)
-		parts := EmptyVector()
+		var parts []Object
 		for i := 0; ; i++ {
 			part, err := mr.NextRawPart()
 			if err == io.EOF {
@@ -272,9 +272,9 @@ func readEntityAt(headers Map, body string, opts entityOptions, partPath []int, 
 			PanicOnErr(err)
 			partBody := string(readAllWithLimit(part, opts))
 			childPath := append(append([]int{}, partPath...), i)
-			parts = parts.Conjoin(readEntityAt(headerMap(part.Header), partBody, opts, childPath, depth+1))
+			parts = append(parts, readEntityAt(headerMap(part.Header), partBody, opts, childPath, depth+1))
 		}
-		res.Add(MakeKeyword("parts"), parts)
+		res.Add(MakeKeyword("parts"), NewVectorFrom(parts...))
 		return res
 	}
 
@@ -388,7 +388,7 @@ func includeInline(opts Map) bool {
 
 func Attachments(entity Map, opts Map) Object {
 	includeInline := includeInline(opts)
-	res := EmptyVector()
+	var res []Object
 	var walk func(Map)
 	walk = func(e Map) {
 		if parts := mapParts(e); parts != nil {
@@ -398,11 +398,11 @@ func Attachments(entity Map, opts Map) Object {
 			return
 		}
 		if isAttachmentLike(e, includeInline) {
-			res = res.Conjoin(e)
+			res = append(res, e)
 		}
 	}
 	walk(entity)
-	return res
+	return NewVectorFrom(res...)
 }
 
 func attachments(entity Map, opts Map) Object {

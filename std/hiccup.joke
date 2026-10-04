@@ -1,0 +1,24 @@
+(ns ^{:go-imports []
+      :doc "Renders HTML, XML, or XHTML markup to a string, based on prior work in Hiccup.
+
+  https://github.com/weavejester/hiccup"
+      :added "1.0"}
+  hiccup)
+
+(defn ^String html
+  "Renders the Hiccup-style content as HTML markup, returning a string of
+  the markup.
+
+  The first parameter may be a map, which is options for the entire render.
+
+  The :mode option defaults to :xhtml but can also be :html, :xml, or :sgml."
+  {:added "1.0"
+   :go "renderHTML(content)"}
+  [& ^Object content])
+
+(defn ^Vec raw-string
+  "A raw string is pre-rendered content that is added directly to the output markup
+   without any interpretation or escaping."
+  {:added "1.0"
+   :go "rawString(content)"}
+  [^Object content])

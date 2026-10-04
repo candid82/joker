@@ -2,7 +2,7 @@
 
 # Developer Notes
 
-These notes are intended for developers working on the internals of Joker itself. They are not comprehensive.
+These notes are intended for developers working on the internals of Joker itself. They are not comprehensive. For the bytecode evaluator, see [VM implementation status](VM.md).
 
 ## Library Code (Namespaces)
 
@@ -46,6 +46,10 @@ But the namespace itself hasn't yet necessarily been initialized. Only when that
 ### Loaded Namespaces
 
 When actually needed, via a `:require` clause in an `(ns ...)` specification, due to `(require ...)`, or (for an already-mapped namespace) directly as a symbol qualifier via e.g. `joker.some.namespace/somevar`, a namespace is _loaded_, meaning its internal code and data structures are fully initialized.
+
+The following historical transcript uses Joker v0.14.2. In current builds,
+`joker.hiccup` is a native _std_ namespace implemented in `std/hiccup/`, not a
+core namespace. Loading it no longer loads `joker.html` as a dependency.
 
 For example, running Joker with the `--verbose` option to observe some of the pertinent transitions (and with a two-line Joker script in `a/b/c.joke` that does `(ns a.b.c)` and `(println "here i am!")`):
 
@@ -155,21 +159,21 @@ As explained in the block comment just above the `var CoreSourceFiles []...` def
 
 Processing a `.joke` file consists of reading and evaluating forms in the file via Joker's (Clojure-like) Reader. This is done for the core-library-defining (that is, not linter-specific) files, yielding fully populated data structures as if all core namespaces (and _std_ namespaces upon which they depend) have been fully loaded in a Joker invocation. (Keep in mind that this is done before a proper Joker executable is actually built.)
 
-Then, the data structures defining (among other things) the resulting namespaces are compiled into Go code that, when (in turn) compiled into a Joker executable, creates them _in toto_, mostly via static initialization of numerous package-scope variables.
+Then, the data structures defining (among other things) the resulting namespaces are compiled into Go code that, when (in turn) compiled into a Joker executable, creates them _in toto_, mostly via static initialization of numerous package-scope variables. Parsed expressions are analyzed for namespace dependencies, late initialization, and compact linter summaries, then removed from the object graph before Go is emitted; generated core functions retain bytecode rather than ASTs.
 
 #### Packing Linter-specific Joker Files as Native Go Data Structures
 
 Linter-specific files (named `core/data/linter_*.joke`) are treated differently. After all the core-library-defining files are compiled to Go code (as described above), these linter-specific files are read and evaluated, "packing" the resulting forms into a portable binary format, and encoding the resulting binary data as a `[]byte` array in Go source files named `core/a_*_data.go`, where `*` is the same as in `core/data/*.joke`.
 
-This approach does *not* involve the normal Read phase at Joker startup time (though the Evaluation phase remains largely the same). So, the overhead involved in parsing certain Clojure forms is avoided, in lieu of using (what one assumes would be) faster code paths that convert binary blobs directly to AST forms. But most of Joker's object types (corresponding generally to Clojure forms) are stringized into the binary-data stream, and parsed back out at load time; so not all parsing overhead is avoided.
+This approach does *not* involve the normal Read or compile phases at Joker startup time. The packed blobs contain compiled function prototypes, constants, source positions, and call-site information; startup unpacks and executes that bytecode.
 
-A disadvantage of this approach is that it requires changes to `core/pack.go` when changes are made to certain aspects of the AST.
+The packed format is internal and versioned. Changes to its bytecode or metadata representation require corresponding changes to `core/pack.go` and regeneration of the embedded data.
 
 #### Building Native Go Files Into the Joker Executable Itself
 
 As native-Go-code compilation (for core namespaces and linter files) occurs before the `go build` step performed by `run.sh`, the result is that that step includes those `core/a_*.go` source files. The binary data contained in the `core/a_*_data.go` (linter-data) files is, when needed, unpacked and the results used to modify the environment as appropriate for the linter mode involved.
 
-The resulting Joker executable thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy initialization (such as compiled regular expressions in `joker.hiccup`) when the respective namespaces are actually referenced for the first time during that invocation.
+The resulting Joker executable thus starts up with all the core-namespace-related data structures already nearly-fully populated, with remaining work done via a combination of initialization functions (`func init()`), dynamic-variable initialization (of `*out*`, `*command-line-args*`, etc.), and lazy namespace initialization when the respective namespaces are actually referenced for the first time during that invocation.
 
 When in linter mode, the forms encoded (as a `[]byte` array) in the pertinent `core/a_linter_*_data.go` files are unpacked and evaluated upon startup, after `joker.core` has been fully loaded.
 

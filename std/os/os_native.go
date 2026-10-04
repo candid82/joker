@@ -29,11 +29,11 @@ func getEnv(key string) Object {
 }
 
 func commandArgs() Object {
-	res := EmptyVector()
-	for _, arg := range os.Args {
-		res = res.Conjoin(String{S: arg})
+	res := make([]Object, len(os.Args))
+	for i, arg := range os.Args {
+		res[i] = String{S: arg}
 	}
-	return res
+	return NewVectorFrom(res...)
 }
 
 const defaultFailedCode = 127 // seen from 'sh no-such-file' on OS X and Ubuntu
@@ -146,22 +146,22 @@ func execute(name string, opts Map) Object {
 func readDir(dirname string) Object {
 	files, err := ioutil.ReadDir(dirname)
 	PanicOnErr(err)
-	res := EmptyVector()
+	res := make([]Object, len(files))
 	name := MakeKeyword("name")
 	size := MakeKeyword("size")
 	mode := MakeKeyword("mode")
 	isDir := MakeKeyword("dir?")
 	modTime := MakeKeyword("modtime")
-	for _, f := range files {
+	for i, f := range files {
 		m := EmptyArrayMap()
 		m.Add(name, MakeString(f.Name()))
 		m.Add(size, MakeInt(int(f.Size())))
 		m.Add(mode, MakeInt(int(f.Mode())))
 		m.Add(isDir, MakeBoolean(f.IsDir()))
 		m.Add(modTime, MakeInt(int(f.ModTime().Unix())))
-		res = res.Conjoin(m)
+		res[i] = m
 	}
-	return res
+	return NewVectorFrom(res...)
 }
 
 func exists(path string) bool {
