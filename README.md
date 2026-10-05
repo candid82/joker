@@ -48,9 +48,45 @@ in which case drops into the REPL after the expression is (successfully) execute
 
 `joker --format -` - read Clojure source code from standard input, format it and print the result to standard output.
 
-`joker --task [<name>] [<args>...]` - run task from tasks file (default `tasks.joke`).
+`joker --task [<name>] [<args>...]` - run task from tasks file (default `tasks.joke`). See [Task runner](#task-runner) for more details.
 
 `joker --list-tasks` (or `--tasks`) - list available tasks with descriptions from tasks file.
+
+### Task runner
+
+Joker can run project tasks defined as public functions in a `tasks.joke` file in the current directory. Put them in the `tasks` namespace; no special macro or registration is needed. Private functions (defined with `defn-`) can be used as helpers without appearing in the task list. For example:
+
+```clojure
+(ns tasks)
+
+(defn greet
+  "Greet one or more people"
+  [& names]
+  (println (str "Hello, " (joker.string/join ", " names) "!")))
+
+(defn default
+  "Run the default task"
+  []
+  (greet "world"))
+```
+
+Run `joker --task greet Alice Bob` to call `greet` with two string arguments, or `joker --task` to call the function named `default` with no arguments. Arguments after the task name are passed directly to the function as strings, not interpreted as Joker options. Use `joker --list-tasks` (or `joker --tasks`) to list public tasks with the first line of each function's docstring. The tasks file is evaluated before either running or listing tasks, so avoid putting task actions at the top level.
+
+To use another file, put `--task-file <filename>` (or `--tasks-file <filename>`) before `--task`, for example `joker --task-file build.joke --task greet Alice`. An integer return value from a task becomes Joker's exit code; other return values indicate success (exit code 0). An error causes a nonzero exit code.
+
+Task names can clash with functions automatically referred from `joker.core`. In particular, `test` is already a core function. To define a `test` task without a warning about replacing `joker.core/test`, exclude it in the namespace declaration:
+
+```clojure
+(ns tasks
+  (:refer-clojure :exclude [test]))
+
+(defn test
+  "Run tests"
+  []
+  (println "Running tests"))
+```
+
+This works both when running tasks and when linting `tasks.joke`. A top-level `(ns-unmap 'tasks 'test)` works at runtime, but does not suppress the linter warning because the linter does not execute ordinary top-level function calls.
 
 ## Documentation
 
