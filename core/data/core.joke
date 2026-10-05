@@ -4406,13 +4406,17 @@
   joker.os/sh*, joker.os/exec, and joker.time/sleep) release the GIL and allow other goroutines to run.
   So using goroutines only makes sense if you do I/O (specifically, calling the above functions)
   inside them. Also, note that a goroutine may never have a chance to run if the root goroutine
-  (or another goroutine) doesn't do any I/O or channel operations (<! or >!)."
+  (or another goroutine) doesn't do any I/O or blocking channel operations (<! or >!).
+  Nonblocking offer! and poll! do not release the GIL; busy polling can prevent
+  other Joker goroutines from running."
   {:added "1.0"}
   [& body]
   `(go__ (fn [] ~@body)))
 
 (defn chan
-  "Returns a new channel with an optional buffer of size n."
+  "Returns a new channel with an optional fixed-size FIFO buffer of size n.
+  n must be a non-negative integer. With no argument or n = 0, the channel
+  is unbuffered."
   {:added "1.0"}
   (^Channel [] (chan__ 0))
   (^Channel [^Int n] (chan__ n)))
@@ -4433,6 +4437,26 @@
   {:added "1.0"}
   ^Boolean [^Channel ch val]
   (>!__ ch val))
+
+(defn offer!
+  "Puts val into ch without blocking.
+  Returns true if the value is accepted, or false if ch is closed or the put
+  cannot complete immediately. On an unbuffered channel, a taker must be ready.
+  Throws an exception if val is nil, even if ch is closed.
+  Does not release the GIL or allow other Joker goroutines to run."
+  {:added "1.10"}
+  ^Boolean [^Channel ch val]
+  (offer!__ ch val))
+
+(defn poll!
+  "Takes an immediately available value from ch without blocking.
+  Returns nil if nothing is available, including when ch is closed and drained.
+  On an unbuffered channel, a put must be ready.
+  Rethrows exceptions delivered by a go result channel, like <!.
+  Does not release the GIL or allow other Joker goroutines to run."
+  {:added "1.10"}
+  [^Channel ch]
+  (poll!__ ch))
 
 (defn close!
   "Closes a channel. The channel will no longer accept any puts (they

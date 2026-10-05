@@ -83,6 +83,38 @@ func (ch *Channel) Send(value Object) (ok bool) {
 	return
 }
 
+// Offer attempts a send without waiting for buffer space or a receiver.
+// Like Send, it returns false if the channel has been closed.
+func (ch *Channel) Offer(value Object) (ok bool) {
+	if ch.isClosed {
+		return false
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+	select {
+	case ch.ch <- MakeFutureResult(value, nil):
+		return true
+	default:
+		return false
+	}
+}
+
+// Poll takes an immediately available result, or returns NIL if none is ready.
+func (ch *Channel) Poll() (Object, Error) {
+	select {
+	case res, ok := <-ch.ch:
+		if !ok {
+			return NIL, nil
+		}
+		return res.value, res.err
+	default:
+		return NIL, nil
+	}
+}
+
 func (ch *Channel) Receive(done <-chan struct{}) (Object, ChannelReceiveStatus, Error) {
 	if done == nil {
 		res, ok := <-ch.ch

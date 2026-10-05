@@ -1,0 +1,84 @@
+(ns joker.test-channels
+  (:require [joker.test :refer [deftest is testing]]))
+
+(deftest buffered-channels
+  (let [ch (chan 2)]
+    (is (nil? (poll! ch)))
+    (is (true? (offer! ch :first)))
+    (is (true? (offer! ch :second)))
+    (is (false? (offer! ch :rejected)))
+    (is (= :first (poll! ch)))
+    (is (true? (offer! ch :third)))
+    (is (= :second (poll! ch)))
+    (is (= :third (poll! ch)))
+    (is (nil? (poll! ch)))))
+
+(deftest channel-values
+  (let [ch (chan 1)]
+    (doseq [value [false 0 "" [] {} :value]]
+      (is (true? (offer! ch value)))
+      (is (= value (poll! ch)))
+      (is (nil? (poll! ch))))))
+
+(deftest unbuffered-channels-without-peers
+  (doseq [ch [(chan) (chan 0)]]
+    (is (false? (offer! ch :value)))
+    (is (nil? (poll! ch)))
+    (close! ch)
+    (is (false? (offer! ch :value)))
+    (is (nil? (poll! ch)))))
+
+(deftest closing-buffered-channels
+  (let [ch (chan 2)]
+    (is (true? (offer! ch :first)))
+    (is (true? (offer! ch false)))
+    (is (nil? (close! ch)))
+    (is (nil? (close! ch)))
+    (is (false? (offer! ch :rejected)))
+    (is (false? (>! ch :rejected)))
+    (is (= :first (poll! ch)))
+    (is (false? (poll! ch)))
+    (is (nil? (poll! ch)))
+    (is (nil? (<! ch)))))
+
+(deftest channel-argument-validation
+  (testing "buffer sizes"
+    (is (thrown-with-msg? Error #"buffer size must be non-negative" (chan -1)))
+    (is (thrown? Error (chan "1")))
+    (is (thrown? Error (chan 1.5)))
+    (is (thrown? Error (chan 1 2))))
+  (testing "arity and channel types"
+    (is (thrown? Error (offer!)))
+    (is (thrown? Error (offer! (chan))))
+    (is (thrown? Error (offer! (chan) :a :b)))
+    (is (thrown? Error (offer! nil :value)))
+    (is (thrown? Error (poll!)))
+    (is (thrown? Error (poll! (chan) :extra)))
+    (is (thrown? Error (poll! nil))))
+  (testing "nil is rejected before checking readiness or closure"
+    (doseq [ch [(chan) (chan 1)]]
+      (is (thrown-with-msg? Error #"Can't put nil on channel" (offer! ch nil)))
+      (close! ch)
+      (is (thrown-with-msg? Error #"Can't put nil on channel" (offer! ch nil))))
+    (let [ch (chan 1)]
+      (offer! ch :value)
+      (is (thrown-with-msg? Error #"Can't put nil on channel" (offer! ch nil)))
+      (is (= :value (poll! ch))))))
+
+(deftest channel-operation-interoperability
+  (let [ch (chan 1)]
+    (is (true? (>! ch :blocking-put)))
+    (is (= :blocking-put (poll! ch)))
+    (is (true? (offer! ch :nonblocking-put)))
+    (is (= :nonblocking-put (<! ch))))
+  (let [ch (chan 1)
+        task (go (offer! ch :from-go))]
+    ;; Taking the task result establishes that the offer has completed.
+    (is (true? (<! task)))
+    (is (= :from-go (poll! ch)))
+    (is (nil? (poll! task))))
+  (let [ch (chan 1)]
+    (offer! ch :for-go)
+    (is (= :for-go (<! (go (poll! ch)))))
+    (is (nil? (poll! ch))))
+  (is (thrown-with-msg? Error #"go failure" (<! (go (throw (ex-info "go failure" {})))))))

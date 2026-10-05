@@ -226,6 +226,8 @@ func init() {
 	intern("go__", procGo, "procGo")
 	intern("<!__", procReceive, "procReceive")
 	intern(">!__", procSend, "procSend")
+	intern("offer!__", procOffer, "procOffer")
+	intern("poll!__", procPoll, "procPoll")
 	intern("chan__", procCreateChan, "procCreateChan")
 	intern("close!__", procCloseChan, "procCloseChan")
 

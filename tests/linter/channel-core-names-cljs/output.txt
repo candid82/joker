@@ -1,0 +1,2 @@
+tests/linter/channel-core-names-cljs/input.cljs:2:2: Parse error: Unable to resolve symbol: offer!
+tests/linter/channel-core-names-cljs/input.cljs:3:2: Parse error: Unable to resolve symbol: poll!
