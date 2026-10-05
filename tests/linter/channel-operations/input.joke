@@ -1,0 +1,4 @@
+(let [ch (chan 1)]
+  (offer! ch false)
+  (poll! ch)
+  (close! ch))

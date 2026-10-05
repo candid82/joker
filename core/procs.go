@@ -1813,6 +1813,9 @@ var procTypes = func(args []Object) Object {
 var procCreateChan = func(args []Object) Object {
 	CheckArity(args, 1, 1)
 	n := EnsureArgIsInt(args, 0)
+	if n.I < 0 {
+		panic(RT.NewError("Channel buffer size must be non-negative"))
+	}
 	ch := make(chan FutureResult, n.I)
 	return MakeChannel(ch)
 }
@@ -1864,6 +1867,26 @@ var procReceive = func(args []Object) Object {
 		panic(res.err)
 	}
 	return res.value
+}
+
+var procOffer = func(args []Object) Object {
+	CheckArity(args, 2, 2)
+	ch := EnsureArgIsChannel(args, 0)
+	v := args[1]
+	if v.Equals(NIL) {
+		panic(RT.NewError("Can't put nil on channel"))
+	}
+	return MakeBoolean(ch.Offer(v))
+}
+
+var procPoll = func(args []Object) Object {
+	CheckArity(args, 1, 1)
+	ch := EnsureArgIsChannel(args, 0)
+	res, err := ch.Poll()
+	if err != nil {
+		panic(err)
+	}
+	return res
 }
 
 var procGo = func(args []Object) Object {
