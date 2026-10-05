@@ -191,10 +191,10 @@
   [1 "" "Error: Too many arguments to task 'multi'; expected 0 or 3, got 4."]
 
   "--task-file tests/flags/tasks_arity.joke --task variadic"
-  [1 "" "Error: Too few arguments to task 'variadic'; expected 1+, got 0."]
+  [1 "" "Error: Too few arguments to task 'variadic'; expected at least 1, got 0."]
 
   "--task-file tests/flags/tasks_arity.joke --task mixed a"
-  [1 "" "Error: Wrong number of arguments to task 'mixed'; expected 0 or 2+, got 1."]
+  [1 "" "Error: Wrong number of arguments to task 'mixed'; expected 0 or at least 2, got 1."]
 
   "--task-file tests/flags/tasks_arity.joke --task zero-alias extra"
   [1 "" "Error: Task 'zero-alias' takes no arguments; got 1."]

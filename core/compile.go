@@ -50,10 +50,7 @@ func CompileFnExpr(expr *FnExpr, env *LocalEnv) (*FunctionProto, error) {
 
 // All arities share one capture layout. Nested functions refer to that same layout.
 func compileFunction(expr *FnExpr, parent *Compiler, env *LocalEnv) (*FunctionProto, error) {
-	name := "<anonymous>"
-	if expr.self.name != nil {
-		name = expr.self.Name()
-	}
+	name := expr.functionName()
 	proto := &FunctionProto{Name: name}
 	compileArity := func(a FnArityExpr, variadic bool) (*ArityProto, error) {
 		c := NewCompiler(parent, name)

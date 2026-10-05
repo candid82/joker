@@ -9,11 +9,13 @@ type InferredValue struct {
 }
 
 type FnSummary struct {
-	fn        *FnExpr
-	analyzing bool
-	analyzed  bool
-	arities   []*FnAritySummary
-	variadic  *FnAritySummary
+	// Retained when compact summaries discard the function's AST.
+	diagnosticName string
+	fn             *FnExpr
+	analyzing      bool
+	analyzed       bool
+	arities        []*FnAritySummary
+	variadic       *FnAritySummary
 }
 
 type FnAritySummary struct {
@@ -598,6 +600,16 @@ func getFnSummary(fn *FnExpr) *FnSummary {
 	return fn.summary
 }
 
+func (summary *FnSummary) functionName() string {
+	if summary.fn != nil {
+		return summary.fn.functionName()
+	}
+	if summary.diagnosticName != "" {
+		return summary.diagnosticName
+	}
+	return "<anonymous>"
+}
+
 func (summary *FnSummary) selectArity(passedArgsCount int) *FnAritySummary {
 	for _, arity := range summary.arities {
 		if arity.argCount == passedArgsCount {
@@ -683,7 +695,7 @@ func compactFnSummary(fn *FnExpr) *FnSummary {
 			declaredReturnTypes: src.declaredReturnTypes,
 		}
 	}
-	res := &FnSummary{analyzed: true, arities: make([]*FnAritySummary, len(summary.arities))}
+	res := &FnSummary{diagnosticName: summary.functionName(), analyzed: true, arities: make([]*FnAritySummary, len(summary.arities))}
 	for i, arity := range summary.arities {
 		res.arities[i] = compactArity(arity)
 	}
@@ -768,8 +780,56 @@ func shouldCheckInferredSummary(expr Expr) bool {
 	return false
 }
 
+// Resolve function identity without changing CallExpr.Name, which describes the
+// call site used by native errors and stack traces. Unknown/native callables
+// retain that call-site name.
+func (call *CallExpr) diagnosticFunctionName() string {
+	if name := callableFunctionName(call.callable); name != "" {
+		return name
+	}
+	return call.Name()
+}
+
+func callableFunctionName(expr Expr) string {
+	seen := make(map[Expr]bool)
+	for expr != nil && !seen[expr] {
+		seen[expr] = true
+		switch e := expr.(type) {
+		case *FnExpr:
+			return e.functionName()
+		case *MetaExpr:
+			expr = e.expr
+			continue
+		case *BindingExpr:
+			if e.binding != nil {
+				expr = e.binding.valueExpr
+				continue
+			}
+		case *VarRefExpr:
+			if e.vr != nil {
+				if fn, ok := e.vr.Value.(*Fn); ok {
+					if fn.proto != nil {
+						return fn.proto.Name
+					}
+					if fn.fnExpr != nil {
+						return fn.fnExpr.functionName()
+					}
+				}
+				if e.vr.fnSummary != nil {
+					return e.vr.fnSummary.functionName()
+				}
+				expr = e.vr.expr
+				continue
+			}
+		}
+		return ""
+	}
+	return ""
+}
+
 func checkInferredCall(call *CallExpr) bool {
 	_, arity := callableFnSummary(call.callable, len(call.args))
+	name := call.diagnosticFunctionName()
 	res := false
 	warned := make(map[string]bool)
 	checkExpected := func(expected [][]*Type) {
@@ -782,7 +842,7 @@ func checkInferredCall(call *CallExpr) bool {
 				expectedString := inferredTypesString(expectedTypes)
 				key := fmt.Sprintf("%d:%s", i, expectedString)
 				if !warned[key] {
-					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, call.Name(), expectedString, inferredTypesString(passedValue.types)))
+					printParseWarning(call.args[i].Pos(), fmt.Sprintf("arg[%d] of %s must have type %s, got %s", i, name, expectedString, inferredTypesString(passedValue.types)))
 					warned[key] = true
 					res = true
 				}

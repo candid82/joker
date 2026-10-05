@@ -1,10 +1,10 @@
-tests/linter/macro-call/input.clj:1:1: Parse warning: Wrong number of args (0) passed to core/memfn
-tests/linter/macro-call/input.clj:2:1: Parse warning: Wrong number of args (0) passed to core/..
-tests/linter/macro-call/input.clj:3:1: Parse warning: Wrong number of args (0) passed to core/defstruct
-tests/linter/macro-call/input.clj:4:1: Parse warning: Wrong number of args (0) passed to core/with-local-vars
-tests/linter/macro-call/input.clj:5:1: Parse warning: Wrong number of args (0) passed to core/definline
-tests/linter/macro-call/input.clj:6:1: Parse warning: Wrong number of args (0) passed to core/definterface
-tests/linter/macro-call/input.clj:7:1: Parse warning: Wrong number of args (0) passed to core/proxy-super
-tests/linter/macro-call/input.clj:8:1: Parse warning: Wrong number of args (0) passed to core/with-open
+tests/linter/macro-call/input.clj:1:1: Parse warning: Wrong number of args (0) passed to joker.core/memfn, expected: at least 1
+tests/linter/macro-call/input.clj:2:1: Parse warning: Wrong number of args (0) passed to joker.core/.., expected: at least 2
+tests/linter/macro-call/input.clj:3:1: Parse warning: Wrong number of args (0) passed to joker.core/defstruct, expected: at least 1
+tests/linter/macro-call/input.clj:4:1: Parse warning: Wrong number of args (0) passed to joker.core/with-local-vars, expected: at least 1
+tests/linter/macro-call/input.clj:5:1: Parse warning: Wrong number of args (0) passed to joker.core/definline, expected: at least 1
+tests/linter/macro-call/input.clj:6:1: Parse warning: Wrong number of args (0) passed to joker.core/definterface, expected: at least 1
+tests/linter/macro-call/input.clj:7:1: Parse warning: Wrong number of args (0) passed to joker.core/proxy-super, expected: at least 1
+tests/linter/macro-call/input.clj:8:1: Parse warning: Wrong number of args (0) passed to joker.core/with-open, expected: at least 1
 tests/linter/macro-call/input.clj:9:1: Eval error: Wrong number of args (0) passed to core/deftype; expects at least 3
 tests/linter/macro-call/input.clj:10:1: Eval error: Wrong number of args (0) passed to core/defrecord; expects at least 3

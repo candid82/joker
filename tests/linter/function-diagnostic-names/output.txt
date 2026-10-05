@@ -1,0 +1,21 @@
+tests/linter/function-diagnostic-names/input.joke:3:1: Parse warning: Wrong number of args (1) passed to joker.core/map, expected: at least 2
+tests/linter/function-diagnostic-names/input.joke:4:1: Parse warning: Wrong number of args (1) passed to conj, expected: at least 2
+tests/linter/function-diagnostic-names/input.joke:6:1: Parse warning: Wrong number of args (0) passed to function-diagnostic-names/original, expected: 1
+tests/linter/function-diagnostic-names/input.joke:8:1: Parse warning: Wrong number of args (0) passed to function-diagnostic-names/original, expected: 1
+tests/linter/function-diagnostic-names/input.joke:9:25: Parse warning: Wrong number of args (0) passed to function-diagnostic-names/original, expected: 1
+tests/linter/function-diagnostic-names/input.joke:10:39: Parse warning: Wrong number of args (0) passed to local, expected: 1
+tests/linter/function-diagnostic-names/input.joke:11:39: Parse warning: Wrong number of args (0) passed to local, expected: 1
+tests/linter/function-diagnostic-names/input.joke:12:26: Parse warning: Wrong number of args (0) passed to local, expected: 1
+tests/linter/function-diagnostic-names/input.joke:13:24: Parse warning: Wrong number of args (0) passed to local, expected: 1
+tests/linter/function-diagnostic-names/input.joke:15:1: Parse warning: Wrong number of args (0) passed to self-name, expected: 1
+tests/linter/function-diagnostic-names/input.joke:16:35: Parse warning: Wrong number of args (0) passed to self-name, expected: 1
+tests/linter/function-diagnostic-names/input.joke:17:1: Parse warning: Wrong number of args (0) passed to <anonymous>, expected: 1
+tests/linter/function-diagnostic-names/input.joke:20:31: Parse warning: arg[0] of function-diagnostic-names/typed must have type String, got Int
+tests/linter/function-diagnostic-names/input.joke:22:14: Parse warning: arg[0] of function-diagnostic-names/typed must have type String, got Int
+tests/linter/function-diagnostic-names/input.joke:23:64: Parse warning: arg[0] of local must have type String, got Int
+tests/linter/function-diagnostic-names/input.joke:24:58: Parse warning: arg[0] of self-name must have type String, got Int
+tests/linter/function-diagnostic-names/input.joke:26:29: Parse warning: return value of function-diagnostic-names/bad-return must have type String, got Int
+tests/linter/function-diagnostic-names/input.joke:29:1: Parse warning: Wrong number of args (2) passed to function-diagnostic-names/multi, expected: 1 or 3
+tests/linter/function-diagnostic-names/input.joke:31:1: Parse warning: Wrong number of args (1) passed to function-diagnostic-names/variadic, expected: at least 2
+tests/linter/function-diagnostic-names/input.joke:33:1: Parse warning: Wrong number of args (1) passed to function-diagnostic-names/gap, expected: 0 or at least 2
+tests/linter/function-diagnostic-names/input.joke:34:1: Parse warning: Wrong number of args (1) passed to joker.core/get, expected: 2 or 3

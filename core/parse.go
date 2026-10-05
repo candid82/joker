@@ -97,6 +97,9 @@ type (
 		self        Symbol
 		selfBinding *Binding
 		summary     *FnSummary
+		// diagnosticName is inferred from a definition or local initializer.
+		// Unlike self, it never introduces a lexical binding.
+		diagnosticName string
 	}
 	LetExpr struct {
 		Position
@@ -714,7 +717,7 @@ func checkReturnType(vr *Var, valueExpr Expr) {
 		returnExpr := arity.body[len(arity.body)-1]
 		returnedValue := returnExpr.InferValue(newInferEnv())
 		if !returnedValue.unknown && len(returnedValue.types) != 0 && !inferredTypesCompatible(vr.taggedTypes, returnedValue.types) {
-			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", vr.name.ToString(false), inferredTypesString(vr.taggedTypes), inferredTypesString(returnedValue.types)))
+			printParseWarning(returnExpr.Pos(), fmt.Sprintf("return value of %s must have type %s, got %s", fnExpr.functionName(), inferredTypesString(vr.taggedTypes), inferredTypesString(returnedValue.types)))
 		}
 	}
 	for i := range fnExpr.arities {
@@ -772,6 +775,7 @@ func parseDef(obj Object, ctx *ParseContext, isForLinter bool) *DefExpr {
 				panic(&ParseError{obj: docstring, msg: "Docstring must be a string"})
 			}
 		}
+		inferFnDiagnosticName(res.value, vr.Name())
 		updateVar(vr, obj.GetInfo(), res.value, sym)
 		checkReturnType(vr, res.value)
 		if meta != nil {
@@ -928,6 +932,32 @@ func addArity(fn *FnExpr, sig Seq, ctx *ParseContext) {
 				printParseWarning(GetPosition(u), "unused parameter: "+u.ToString(false))
 			}
 		}
+	}
+}
+
+// functionName is shared by runtime prototypes and linter diagnostics.
+func (expr *FnExpr) functionName() string {
+	if expr.self.name != nil {
+		return expr.self.Name()
+	}
+	if expr.diagnosticName != "" {
+		return expr.diagnosticName
+	}
+	return "<anonymous>"
+}
+
+// Name only newly parsed function expressions, not aliases or functions returned
+// by calls. Metadata wrappers do not change the identity of the initializer.
+func inferFnDiagnosticName(expr Expr, name string) {
+	for {
+		meta, ok := expr.(*MetaExpr)
+		if !ok {
+			break
+		}
+		expr = meta.expr
+	}
+	if fn, ok := expr.(*FnExpr); ok && fn.diagnosticName == "" {
+		fn.diagnosticName = name
 	}
 }
 
@@ -1146,6 +1176,7 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 			}
 			if formName != "letfn" {
 				res.values[i] = Parse(b.At(i*2+1), ctx)
+				inferFnDiagnosticName(res.values[i], res.names[i].ToString(false))
 			}
 			res.bindings[i] = ctx.localBindings.AddBinding(res.names[i], i, skipUnused)
 			res.bindings[i].valueExpr = res.values[i]
@@ -1154,6 +1185,7 @@ func parseLetLoop(obj Object, formName string, ctx *ParseContext) *LetExpr {
 		if formName == "letfn" {
 			for i := 0; i < cnt/2; i++ {
 				res.values[i] = Parse(b.At(i*2+1), ctx)
+				inferFnDiagnosticName(res.values[i], res.names[i].ToString(false))
 				res.bindings[i].valueExpr = res.values[i]
 			}
 		}
@@ -1368,6 +1400,20 @@ func selectArity(expr *FnExpr, passedArgsCount int) *FnArityExpr {
 	return nil
 }
 
+func printArityWarning(pos Position, arity *ArityError, isMacro bool) {
+	if isMacro {
+		// Macro implementations accept implicit &form and &env arguments.
+		arity.Actual -= 2
+		for i := range arity.Fixed {
+			arity.Fixed[i] -= 2
+		}
+		if arity.VariadicMin >= 0 {
+			arity.VariadicMin -= 2
+		}
+	}
+	printParseWarning(pos, arity.Error())
+}
+
 func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) bool {
 	passedArgsCount := len(call.args)
 	if isMacro {
@@ -1376,7 +1422,7 @@ func reportWrongArity(expr *FnExpr, isMacro bool, call *CallExpr, pos Position) 
 	if v := selectArity(expr, passedArgsCount); v != nil {
 		return false
 	}
-	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+	printArityWarning(pos, newFnExprArityError(expr, passedArgsCount), isMacro)
 	return true
 }
 
@@ -1388,7 +1434,7 @@ func reportWrongSummaryArity(summary *FnSummary, isMacro bool, call *CallExpr, p
 	if summary.selectArity(passedArgsCount) != nil {
 		return false
 	}
-	printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+	printArityWarning(pos, newFnSummaryArityError(summary, passedArgsCount), isMacro)
 	return true
 }
 
@@ -1531,16 +1577,18 @@ func getInNsVar(ctx *ParseContext) *Var {
 
 func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 	argsCount := len(call.args)
+	if summary, _ := callableFnSummary(expr, argsCount); summary != nil {
+		reportWrongSummaryArity(summary, isMacro, call, pos)
+		return
+	}
 	switch expr := expr.(type) {
-	case *FnExpr:
-		reportWrongArity(expr, isMacro, call, pos)
 	case *MapExpr:
 		if argsCount == 0 || argsCount > 2 {
-			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a map", argsCount))
+			printArityWarning(pos, &ArityError{Actual: argsCount, Fixed: []int{1, 2}, VariadicMin: -1, name: "a map"}, false)
 		}
 	case *SetExpr:
 		if argsCount == 0 || argsCount > 1 {
-			printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to a set", argsCount))
+			printArityWarning(pos, &ArityError{Actual: argsCount, Fixed: []int{1}, VariadicMin: -1, name: "a set"}, false)
 		}
 	case *LiteralExpr:
 		if _, ok := expr.obj.(Callable); !ok && !expr.isSurrogate {
@@ -1550,7 +1598,7 @@ func checkCall(expr Expr, isMacro bool, call *CallExpr, pos Position) {
 		switch expr.obj.(type) {
 		case Keyword:
 			if argsCount == 0 || argsCount > 2 {
-				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", argsCount, call.Name()))
+				printArityWarning(pos, &ArityError{Actual: argsCount, Fixed: []int{1, 2}, VariadicMin: -1, name: call.Name()}, false)
 			}
 		}
 	case *RecurExpr:
@@ -1588,7 +1636,7 @@ func checkCallableArglist(vr *Var, call *CallExpr, pos Position) {
 		return
 	}
 	if !checkArglist(arglistSeq, len(call.args)) {
-		printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+		printArityWarning(pos, newArglistArityError(arglistSeq, len(call.args), call.diagnosticFunctionName()), false)
 	}
 }
 
@@ -1621,7 +1669,7 @@ func checkLinterCall(call *CallExpr, ctx *ParseContext, pos Position) {
 				passedArgsCount += 2
 			}
 			if selectArityProto(f.proto, passedArgsCount) == nil {
-				printParseWarning(pos, fmt.Sprintf("Wrong number of args (%d) passed to %s", len(call.args), call.Name()))
+				printArityWarning(pos, newArityError(f.proto, passedArgsCount), vr.isMacro)
 				return
 			}
 		}
