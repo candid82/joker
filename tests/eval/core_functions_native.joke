@@ -1,0 +1,130 @@
+(ns joker.test-core-functions-native
+  (:require [joker.test :refer [deftest is]]
+            [joker.time :as time]))
+
+(binding [*ns* *ns*]
+  (load-file "tests/support/core_functions_cases.joke"))
+(require '[joker.core-functions-cases :as cases])
+
+(deftest native-core-compatibility-corpus
+  (let [expected (read-string (slurp "tests/support/core_functions_golden.edn"))
+        actual (cases/cases)]
+    (is (= 417 (count expected) (count actual)))
+    (doseq [[i [a b]] (map-indexed vector (map vector expected actual))]
+      (is (= a b) (str "Compatibility case " i)))))
+
+(deftest native-eager-immutability-and-metadata
+  (doseq [n [0 1 16 17 32 33 64 1024]
+          :let [xs (with-meta (vec (range n)) {:source n})
+                before (pr-str xs)
+                mapped (mapv inc xs)
+                selected (filterv even? xs)
+                m (with-meta (zipmap xs xs) {:source n})
+                projected (select-keys m xs)]]
+    (is (= (vec (range 1 (inc n))) mapped))
+    (is (= (vec (range 0 n 2)) selected))
+    (is (nil? (meta mapped)))
+    (is (nil? (meta selected)))
+    (is (= before (pr-str xs)))
+    (is (= m projected))
+    (is (= {:source n} (meta projected)))
+    (is (= xs (mapv (fn [f] (f)) (mapv (fn [x] (fn [] x)) xs)))))
+  (is (= [1 nil] (mapv :a [{:a 1} {}])))
+  (is (= [nil false] (filterv (constantly 0) [nil false])))
+  (is (= [] (filterv (constantly nil) [nil false])))
+  (is (= {nil 2 false 2 :a 1} (frequencies [nil false nil false :a])))
+  (is (= [BigInt] (mapv type (keys (select-keys {1 :one} [1N]))))))
+
+(deftest native-multi-source-mapping
+  (doseq [arity [2 3 4 5 8]
+          size [0 1 16 17 40]
+          shortest (range arity)
+          :let [inputs (mapv (fn [i] (vec (range (+ size (if (= i shortest) 0 2)))))
+                             (range arity))
+                expected (mapv (fn [x] (vec (repeat arity x))) (range size))]]
+    (is (= expected (vec (apply map vector inputs))))
+    (is (= expected (apply mapv vector inputs))))
+  (let [calls (atom [])]
+    (is (thrown? ExInfo
+                 (mapv (fn [a b]
+                         (swap! calls conj [a b])
+                         (when (= a 1) (throw (ex-info "callback" {}))) a)
+                       [0 1 2] [0 1 2])))
+    (is (= [[0 0] [1 1]] @calls))))
+
+(deftest native-lazy-construction-and-consumption
+  (doseq [operation [(fn [f s] (keep f s))
+                    (fn [f s] (map-indexed (fn [_ x] (f x)) s))
+                    (fn [f s] (keep-indexed (fn [_ x] (f x)) s))
+                    (fn [f s] (take-while f s))
+                    (fn [f s] (drop-while f s))]]
+    (let [calls (atom [])
+          source (map (fn [x] (swap! calls conj [:source x]) x) [0 1 2])
+          result (operation (fn [x] (swap! calls conj [:callback x]) x) source)]
+      (is (= [] @calls))
+      (is (not (realized? result)))
+      (first result)
+      (is (realized? result))
+      (let [snapshot @calls]
+        (first result)
+        (is (= snapshot @calls)))))
+  (doseq [result [(range 5) (repeat 5 :x) (drop 0 [1 2]) (distinct [1 1 2])]]
+    (is (not (realized? result))))
+  (is (= [false false] (vec (keep identity [nil false nil false]))))
+  (is (= [false false] (vec (keep-indexed (fn [_ x] x) [nil false nil false]))))
+  (is (= [[0 :a] [1 :b]] (vec (map-indexed vector [:a :b]))))
+  (let [source (with-meta (seq [1 2]) {:source true})]
+    (is (not (identical? source (seq (drop 0 source)))))
+    (is (not (identical? source (seq (drop-while (constantly false) source)))))
+    (is (nil? (meta (seq (drop 0 source)))))
+    (is (= [1 2] (vec (drop 0 source))))))
+
+(deftest native-path-semantics
+  (is (= {nil :value} (assoc-in {} [] :value)))
+  (is (= {nil :value} (update-in {} nil (constantly :value))))
+  (is (= {:a {:b false}} (assoc-in nil [:a :b] false)))
+  (is (= false (get-in {:a {:b false}} [:a :b] :missing)))
+  (is (nil? (get-in {:a {:b nil}} [:a :b] :missing)))
+  (is (= :missing (get-in {:a nil} [:a :b] :missing)))
+  (is (= :unchanged (get-in :unchanged [] :missing)))
+  (is (= [0 {:a 2}] (update-in [0 {:a 1}] [1 :a] + 1)))
+  (let [calls (atom [])]
+    (is (thrown? Error
+                 (update-in :invalid [:a :b]
+                            (fn [x] (swap! calls conj x) :value))))
+    ;; A bad parent is rejected during reconstruction, after the callback.
+    (is (= [nil] @calls)))
+  (let [path (vec (range 1024))
+        original (assoc-in {} path 1)
+        updated (update-in original path + 1 2 3)]
+    (is (= 1 (get-in original path)))
+    (is (= 7 (get-in updated path)))))
+
+(def ^:dynamic *consumer* :outside)
+
+(deftest native-consumer-execution
+  (doseq [producer [(fn [] (keep (fn [x] [*consumer* x]) [1 2]))
+                    (fn [] (map-indexed (fn [i x] [*consumer* i x]) [1 2]))
+                    (fn [] (keep-indexed (fn [i x] [*consumer* i x]) [1 2]))
+                    (fn [] (map (fn [a b] [*consumer* a b]) [1 2] [3 4]))
+                    (fn [] (map (fn [& xs] (vec (cons *consumer* xs)))
+                                [1 2] [3 4] [5 6] [7 8]))]]
+    (let [source (<! (go (producer)))
+          result (binding [*consumer* :inside] (vec source))]
+      (is (= [:inside :inside] (mapv first result)))))
+  (doseq [operation [mapv filterv
+                    (fn [f s] (vec (keep f s)))
+                    (fn [f s] (vec (map-indexed (fn [_ x] (f x)) s)))
+                    (fn [f s] (vec (keep-indexed (fn [_ x] (f x)) s)))
+                    (fn [f s] (vec (take-while f s)))
+                    (fn [f s] (vec (drop-while f s)))]]
+    (let [run (fn [tag]
+                (let [calls (atom [])
+                      result (operation (fn [x]
+                                          (time/sleep 1000000)
+                                          (swap! calls conj [tag x])
+                                          (when (< x 2) [tag x])) [0 1 2])]
+                  [result @calls]))
+          a (go (run :a)) b (go (run :b))]
+      (is (= [:a :a :a] (mapv first (second (<! a)))))
+      (is (= [:b :b :b] (mapv first (second (<! b))))))))

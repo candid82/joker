@@ -1,0 +1,166 @@
+(ns joker.core-functions-cases)
+
+;; Describe both value and observable representation. Bound infinite outputs.
+(defn- sample [f]
+  (try
+    (let [x (f)
+          initial [(str (type x)) (meta x)
+                   (when (instance? Pending x) (realized? x))]
+          value (if (seq? x) (vec (take 20 x)) x)]
+      [:ok initial value])
+    (catch ExInfo e [:exception (ex-message e) (ex-data e)])
+    (catch Error e [:error (str (type e))])))
+
+(defn- traced-map [operation arity stop-at]
+  (let [calls (atom [])
+        source (fn [i]
+                 (map (fn [x]
+                        (swap! calls conj [:source i x])
+                        (when (and (= i stop-at) (= x 1))
+                          (throw (ex-info "source" {:i i :x x})))
+                        x) [0 1 2]))
+        inputs (mapv source (range arity))
+        f (fn [& xs] (swap! calls conj [:callback (vec xs)]) (vec xs))
+        result (sample #(apply operation f inputs))]
+    [result @calls]))
+
+(defn- empty-map [operation arity empty-at]
+  (let [calls (atom [])
+        inputs (mapv (fn [i]
+                       (map (fn [x] (swap! calls conj i) x)
+                            (if (= i empty-at) [] [0])))
+                     (range arity))
+        result (sample #(apply operation vector inputs))]
+    [result @calls]))
+
+(defn- traced-transform [operation failure skip?]
+  (let [calls (atom [])
+        source (map (fn [x]
+                      (swap! calls conj [:source x])
+                      (when (and (= failure :source) (= x 2))
+                        (throw (ex-info "source" {:x x})))
+                      x) [0 1 2 3])
+        f (fn [& args]
+            (let [x (last args)]
+              (swap! calls conj [:callback (vec args)])
+              (when (and (= failure :callback) (= x 2))
+                (throw (ex-info "callback" {:x x})))
+              (if skip? (when (odd? x) false) (< x 2))))
+        x (operation f source)
+        result (sample #(vec x))]
+    [result (realized? x) @calls]))
+
+(defn- traced-zipmap [nk nv]
+  (let [calls (atom [])
+        source (fn [tag n]
+                 (map (fn [x] (swap! calls conj [tag x]) x) (range n)))
+        result (sample #(zipmap (source :key nk) (source :value nv)))]
+    [result @calls]))
+
+(defn- traced-path [default?]
+  (let [calls (atom [])
+        ks (map (fn [k] (swap! calls conj k) k) [:a :b :c])
+        result (sample #(if default?
+                          (get-in {:a nil} ks :missing)
+                          (get-in {:a nil} ks)))]
+    [result @calls]))
+
+(defn- retry-transform [operation skip?]
+  (let [calls (atom [])
+        fail? (atom true)
+        f (fn [& args]
+            (let [x (last args)]
+              (swap! calls conj (vec args))
+              (when (and @fail? (= x 1))
+                (reset! fail? false)
+                (throw (ex-info "retry" {})))
+              (if skip? (when (odd? x) false) x)))
+        xs (operation f [0 1 2])
+        failure (sample #(vec xs))
+        realized (realized? xs)
+        retry (sample #(vec xs))]
+    [failure realized retry @calls]))
+
+(defn cases []
+  (vec
+    (concat
+      (for [coll [nil [] '(nil false :a) [0 1 2 3] (vec (range 40)) "ab" {:a 1 :b 2}]
+            f [identity (fn [_] nil) (fn [_] false) (fn [_] 0)]
+            operation [mapv filterv]]
+        (sample #(operation f coll)))
+      (for [operation [mapv filterv]
+            coll [nil [] [1]]]
+        (sample #(operation nil coll)))
+      (for [coll [nil [] '(nil false nil) [0 1 0 2] "aba" (vec (range 40))]]
+        (sample #(frequencies coll)))
+      (for [ks [nil [] [nil :a :a false] (vec (range 40)) "abc"]
+            vs [nil [] [1 nil false] (vec (range 40)) "abc"]]
+        (sample #(zipmap ks vs)))
+      (for [m [nil {:a nil :b false} [10 20] :invalid
+               (with-meta {:a 1 :b 2} {:source true})
+               (zipmap (range 40) (range 40))]
+            ks [nil [] [:a :b :c] [0 1 2] (vec (range 40))]]
+        (sample #(select-keys m ks)))
+      (for [operation [map mapv]
+            arity [2 3 4 5]
+            stop-at [-1 0 1]]
+        (traced-map operation arity stop-at))
+      (for [operation [map mapv]
+            arity [2 3 4 5]
+            empty-at (range arity)]
+        (empty-map operation arity empty-at))
+      (for [operation [map mapv]
+            arity [2 3 4 5]
+            coll [nil [] [1]]]
+        (sample #(apply operation nil (repeat arity coll))))
+      (map (fn [args] (sample #(apply range args)))
+           [[] [0] [4] [-1] [4 1 -1] [1 4 -1] [1 1 0] [1 2 0]
+            [1 5 3/2] [0.0 1.0 0.25] [1N 4N 1N] [0M 1M 0.25M]
+            [4 1 -1/2] [0 1 2] [0 1.0 0.5] [0.5 2 1] [:bad]
+            [:a :a 1] [1 1.0 0] [0 ##Inf 1] [##NaN 1 1] [1 1 ##NaN] [0 1 ##NaN]])
+      (for [n [0 -1 1 4 1/2 3/2 2.5 2N 2M]
+            operation [repeat drop]]
+        (sample #(if (= operation repeat) (repeat n :x) (drop n [0 1 2 3]))))
+      [(sample #(repeat :x))
+       (sample #(vec (drop :invalid [])))
+       (sample #(vec (repeat :invalid :x)))]
+      (for [operation [keep keep-indexed map-indexed take-while drop-while]
+            failure [:none :source :callback]
+            skip? [false true]]
+        (traced-transform operation failure skip?))
+      (for [operation [keep keep-indexed map-indexed take-while drop-while]
+            coll [nil [] [1]]]
+        (sample #(vec (operation nil coll))))
+      (for [coll [nil [] [nil false nil false 0 0 :a] "abaca"
+                  (vec (concat (range 40) (range 40)))]]
+        (sample #(distinct coll)))
+      (for [m [nil {:a {:b false}} {:a nil} :invalid [10 {:b 20}]]
+            path [nil [] [:a :b] [:a :missing :b] [1 :b]]
+            default? [false true]]
+        (sample #(if default? (get-in m path :missing) (get-in m path))))
+      (for [m [nil {} {:a {:b 1}} :invalid [10 {:b 20}]]
+            path [nil [] [:a] [:a :b] [1 :b]]
+            operation [assoc-in update-in]]
+        (let [calls (atom [])
+              result (sample #(if (= operation assoc-in)
+                                (assoc-in m path :value)
+                                (update-in m path
+                                           (fn [x & xs]
+                                             (swap! calls conj [x (vec xs)]) :value)
+                                           :extra 2)))]
+          [result @calls]))
+      (for [nk [0 1 3] nv [0 1 3]] (traced-zipmap nk nv))
+      (for [default? [false true]] (traced-path default?))
+      (for [operation [keep keep-indexed map-indexed] skip? [false true]]
+        (retry-transform operation skip?))
+      (for [operation [keep distinct map-indexed take-while drop-while]
+            :let [f (fn [& args] (last args))
+                  xs (if (= operation distinct)
+                       (operation [1 1 2 3]) (operation f [1 1 2 3]))
+                  copy (with-meta xs {:copy true})]]
+        [(sample #(vec copy)) (sample #(vec xs)) (meta copy) (meta xs)])
+      (for [operation [assoc-in update-in]
+            :let [m (with-meta {:a (with-meta {:b 1} {:child true})} {:root true})]]
+        (sample #(if (= operation assoc-in)
+                   (assoc-in m [:a :b] 2)
+                   (update-in m [:a :b] inc)))))))

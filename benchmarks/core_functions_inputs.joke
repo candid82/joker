@@ -1,0 +1,28 @@
+(ns joker.benchmark-core-functions)
+
+;; Shared immutable fixtures: exclude construction from per-function timings.
+(def small [0 1 2 3])
+(def items (vec (range 1024)))
+(def duplicates (vec (map #(mod % 64) (range 1024))))
+(def dictionary (zipmap items items))
+(def small-path [:a :b :c :d])
+(def small-tree {:a {:b {:c {:d 1}}}})
+(def deep-path (vec (range 64)))
+(def deep-tree (assoc-in {} deep-path 1))
+
+(defn add [x y] (+ x y))
+(defn add3 [x y z] (+ x y z))
+(defn add4 [a b c d] (+ a b c d))
+(defn keep-even [x] (when (even? x) x))
+(defn keep-even-index [i x] (when (even? i) x))
+(defn below-half [x] (< x 512))
+
+;; End-to-end workloads complement isolated operations.
+(defn pipeline []
+  (frequencies (map #(mod % 64) (keep keep-even (range 1024)))))
+(defn nested-hof []
+  (reduce (fn [acc xs] (+ acc (reduce + (map #(* % 2) xs))))
+          0 (partition 10 (range 1000))))
+(defn sum-loop []
+  (loop [i 0 acc 0]
+    (if (< i 1000) (recur (inc i) (+ acc i)) acc)))
